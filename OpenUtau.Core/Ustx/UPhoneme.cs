@@ -137,8 +137,6 @@ namespace OpenUtau.Core.Ustx {
                         if (autoPreutter - autoOverlap > prevDur * 0.5f) {
                             maxPreutter = prevDur * 0.5f / (autoPreutter - autoOverlap) * autoPreutter;
                         }
-                    } else { // Plosive consonants
-                        maxPreutter = Math.Min(maxPreutter, prevDur * 0.9);
                     }
                     maxPreutter = Math.Min(maxPreutter, prevDur);
                     if (Prev.preutter < 5) {
@@ -159,6 +157,10 @@ namespace OpenUtau.Core.Ustx {
             preutter = Math.Max(0, autoPreutter + (preutterDelta ?? 0));
             overlap = autoOverlap + (overlapDelta ?? 0);
             if (Prev != null) {
+                if (Prev.DurationMs - preutter < 5) {
+                    var minOverlap = 5 - (Prev.DurationMs - preutter);
+                    overlap = Math.Max(overlap, minOverlap);
+                }
                 Prev.tailIntrude = adjacent ? Math.Max(preutter, preutter - overlap) : 0;
                 Prev.tailOverlap = adjacent ? Math.Max(overlap, 0) : 0;
                 overlapped = adjacent && overlap > 0;
