@@ -278,6 +278,10 @@ namespace OpenUtau.Core {
                 .Where(tempo => start < tempo.tickEnd && tempo.tickPos < end)
                 .Select(tempo => new UTempo { position = tempo.tickPos, bpm = tempo.bpm })
                 .ToArray();
+            if (list.Length == 0) {
+                var segment = TempoSegmentAtTick(start);
+                list = new[] { new UTempo { position = start, bpm = segment.bpm } };
+            }
             return list;
         }
 
