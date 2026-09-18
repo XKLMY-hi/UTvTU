@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 
 namespace OpenUtau.Audio {
@@ -25,8 +25,21 @@ namespace OpenUtau.Audio {
             return new Leaver();
         }
 
+        /// <summary>
+        /// 消费段离开票据。**幂等**：重复 Dispose 只减一次计数——
+        /// `using var x = RenderGate.Enter()` 与显式 `x.Dispose()` 并存（或异常路径
+        /// 二次释放）时若重复自减，计数会跌到负数，`TryFlushAllPendingDispose`
+        /// 的 `InFlight != 0` 判定即被永久钉死为"拒绝释放"，VST 旧 handle 再也刷不掉。
+        /// </summary>
         private sealed class Leaver : IDisposable {
-            public void Dispose() => Interlocked.Decrement(ref inFlight);
+            private int disposed;
+
+            public void Dispose() {
+                // 首次释放才自减（原子交换保证只有一次生效，线程安全）。
+                if (Interlocked.Exchange(ref disposed, 1) == 0) {
+                    Interlocked.Decrement(ref inFlight);
+                }
+            }
         }
     }
 }
