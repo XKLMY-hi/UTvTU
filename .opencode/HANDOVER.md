@@ -1,90 +1,64 @@
-# 会话交接（2026-09-18）
+# 会话交接（2026-09-19 起）
 
-> 恢复会话：按顺序读 `.opencode/memory/MEMORY.md` → `.opencode/memory/metronome-piano-port.md` → `.opencode/memory/env-refresh-2026-09-g-drive.md` → `.opencode/plans/upstream-piano-metronome-port.md`，然后从下方"下一步"继续。
+> **恢复方式（新会话）**：工作目录设为 **`G:\xklmy文件夹\vibe coding\UTvTU`**（主战场），先
+> `git fetch origin && git merge --ff-only origin/plus-develop` 对齐，然后按顺序读：
+> `.opencode/memory/MEMORY.md` → `.opencode/memory/utvtu-migration.md` → `.opencode/HANDOVER.md`（本文）→ 需要时再看 `.opencode/plans/*.md`。
 
-## 状态一句话
+## 一句话状态
 
-环境重启后构建链已重建（G 盘、系统 SDK、离线 NuGet）；钢琴窗批次 A+B（A1-A10、B1/B2）全部完成；合成/渲染管线完成最小解耦（接缝显式化）；上游 A 类可移植修复全部落地；测试基线 284 → **310**；全部已推送 origin/plus-develop。
+项目已更名迁移为 **UTvTU**（仓库 `XKLMY-hi/UTvTU`，旧仓库 OpenUTAU-Plus 撤包归档）；上游定向移植（节拍器 + 钢琴窗 A1-A10/B1-B2）与上游 A 类修复全部完成；合成/渲染管线已做最小解耦（接缝显式化）。**测试基线 310 全绿**，构建在本机 0 错误。
 
-**⏸️ 音频后端工作已由用户叫停（2026-09-18「后端先停一下，能用就行」）**：接缝/A-B 比对/换上游渲染架构**不要主动继续**，除非用户明确要求（续接点见 `.opencode/plans/audio-pipeline-seam.md` 顶部状态说明）。
+当前提交：`2155207d`（两个工作区与两个仓库均已对齐）
 
-## 本次会话提交（均已推送）
+## 环境（别再用旧会话的命令）
 
-```
-f9a78d37 fix(classic): UST 选择器标记解析 + oto 写回固定写 0
-46cac57c fix(phonemizer): 音素化字典改同步加载 + 工厂线程安全 + 声库释放
-06e16a3b fix(audio): 缓存文件并发串行化 + 播放启动顺序 + 关闭前停播
-88944390 refactor(audio): 合成/渲染管线解耦 — RenderEngine 静态门面 + RenderGate 归位音频层
-d3afb1ed feat(pianoroll): 曲线编辑工具扩展 — 直线/伸缩/移动 + UCurve.ReplaceRange（B2）
-b0d001c0 feat(pianoroll): Alt 拖拽复制音符（B1）
-ff2836ec feat(pianoroll): 音轨区高亮钢琴窗当前显示范围（A10）
-bdcaf9b4 feat(pianoroll): 音符悬停光晕改进（A9）
-2954a723 feat(pianoroll): 播放音符弹跳（A8）
-c8532db6 test(vst): RenderGate 并发用例改为基线相对断言
-230d70ca / 41865f89 / 7379a170 / e1963ca2 / 7f9ef118 / c51522aa docs(handover): 交接与记忆更新
-```
-
-（A8-A10、B1/B2 待用户实机验收；接缝重构与三批修复行为零变化或纯修复，播放/导出建议抽空实机跑一次）
-
-## 环境能力（别再假设"无法验证合成"）
-
-- 装有 **1 个歌姬** → 真实合成链路可实测；**VST 可测**（扫本机目录）
-- 我**无法手操 OUP 界面**：交互行为需用户确认；数值/音频产物可"用户导出一次 + 我读文件核对"
-- 构建/测试命令见下方与 `.opencode/memory/env-refresh-2026-09-g-drive.md`
-
-## 接缝与后续路线（暂停，仅备查）
-
-详见 `.opencode/plans/audio-pipeline-seam.md`：
-- 合成层对外 = `RenderEngine` 六个静态门面；运输/导出层不得持有合成内部状态（14 条契约测试锁定）
-- 下一层耦合（真正换合成实现前必须处理）：`MasterAdapter.Waited` 搬到运输层、VST 延迟销毁安全点保留
-
-## 环境变更（重要，上一次会话的命令已失效）
-
-- `E:\tools\dotnet`（便携 SDK 9）与 `E:\home\.nuget\packages` **已不存在**；现在用系统 `C:\Program Files\dotnet`（SDK 8/9/10，默认 10.0.400）+ `C:\Users\XKLMY\.nuget\packages`
-- 仍然**无外网**：restore 必须 `--ignore-failed-sources`；SDK 10 直接编 net8.0 解决方案成功（无需 global.json、无需 DOTNET_ROOT）
-- 上一次会话遗留的 `obj/**` 全部只读（`Access to the path ... is denied`，ACL 正常）→ 已整体删除重建；以后遇到同类报错照此办理
-- 命令与坑详见记忆 [[env-refresh-2026-09-g-drive]]
+| 项 | 值 |
+|---|---|
+| 主工作区 | `G:\xklmy文件夹\vibe coding\UTvTU`（新）；`G:\xklmy文件夹\vibe coding\OpenUTAU Plus`（旧，保留为镜像） |
+| dotnet | 系统 `C:\Program Files\dotnet`（SDK 8/9/10，默认 10.0.400 编 net8.0 正常），**无需** DOTNET_ROOT |
+| NuGet | 离线，缓存 `C:\Users\XKLMY\.nuget\packages`；restore 必须 `--ignore-failed-sources` |
+| 真机能力 | **有 1 个歌姬**（真实合成可实测）、**VST 可测**（扫本机目录）；我**无法手操 OUP 界面** |
+| 构建/测试 | 见 `.opencode/memory/env-refresh-2026-09-g-drive.md`（含 obj 只读、BOM 等坑） |
 
 ```powershell
 dotnet restore OpenUtau.sln -m:1 -p:TreatWarningsAsErrors=false --ignore-failed-sources
-dotnet build OpenUtau.sln --no-restore -m:1 -p:RuntimeIdentifiers= -p:UsedAvaloniaProducts=
-dotnet test OpenUtau.Test\OpenUtau.Test.csproj --no-build
+dotnet build OpenUtau.sln --no-restore -m:1 -p:RuntimeIdentifiers= -p:UsedAvaloniaProducts=   # 先关掉运行中的 OpenUtau.exe，否则 dll 被锁
+dotnet test OpenUtau.Test\OpenUtau.Test.csproj --no-build                                      # 基线 310
 .\OpenUtau\bin\Debug\net8.0-windows\OpenUtau.exe
 ```
 
-## 下一步：定向移植已完成，等验收后再决策
+## git 约定（两工作区均已加固，勿破坏）
 
-1. 先等用户实机验收 A8/A9/A10/B1/B2（清单见下）
-2. 之后可选：(a) 继续盯上游新的钢琴窗/编辑类提交做定向移植；(b) 转入全量合并评估（upstream 已领先 130+ 提交，音频架构冲突需决策，见计划文档"后置"节）
-3. 每步：构建 0 错误 + 测试全绿 → 用户实机预览（UI 不可自动交互）
+- `origin` = `XKLMY-hi/UTvTU`（日常推送）；`upstream` = `openutau/OpenUtau`（**push URL 已禁**，只 fetch）；旧工作区另有 `old-origin` = OpenUTAU-Plus（归档，新工作区已移除）
+- `master` 的 upstream 跟踪**已解除**（防误推官方仓库）
+- 推送需 `git -c http.sslVerify=false push origin plus-develop`（本机证书链缺失）
+- 忘了 git 已改名时用 `git remote -v` 自查；`gh` **不带 `--repo` 默认认 upstream**，查本仓库必须显式指定
 
-## 待用户实机确认（A8 + A9 + A10 + B1 + B2）
+## 本阶段已完成（按时间倒序）
 
-A8 弹跳（「偏好设置 → 外观 → 播放时音符弹跳」，默认关）：
-- 播放头刚进入某音符时，该音符上跳 0.25 秒（半正弦弧，最大 12px 或轨道高 40%），随后落回原处
-- 与该音符的「播放时高亮」相互独立（可单独开关）；关闭弹跳后行为与之前完全一致
+1. **迁移 UTvTU**（`6c4f0207` 及之后）
+   - 新仓库全历史、旧仓库撤包（releases=0/tags=0）+ README 迁移横幅
+   - 撤下"生成 release / 生成安装包"的东西：`build.yml`、`packaging/{OpenUtauPlus.iss, build-installer.ps1, ChineseSimplified.isl}`
+   - 程序内 URL 改指 UTvTU；`UpdaterViewModel.UpdateCheckEnabled()` 暂返回 false（**新仓库首发后要改回 true**）
+   - 本地工作区复制到新路径，两个工作区对齐
+2. **上游 A 类修复 8 项**（`06e16a3b` / `46cac57c` / `f9a78d37`）：Worldline 缓存串行化、播放启动顺序、关闭前停播、音素化字典同步加载（+进度条）、工厂线程安全、父级表达式边界、ClassicSinger FreeMemory、KoreanCV 判空与 UST 标记解析、oto 固定写 0
+3. **合成/渲染管线接缝**（`88944390`）：`RenderEngine` 六个静态门面 + `RenderGate` 归位 `OpenUtau.Audio`；14 条契约测试锁定"运输/导出层不得持合成内部状态"
+4. **钢琴窗上游移植收官**：A1-A10（含 A8 弹跳/A9 光晕/A10 显示范围高亮）+ B1 Alt 拖拽复制 + B2 曲线编辑工具扩展（UCurve.ReplaceRange，新增 10 例测试）
 
-A9 悬停光晕改进：
-- 光标悬停在音符上时光晕颜色 = 该音符自身颜色（选中/错误音符各随其色），不再是固定主题色
-- 仅在光标/画笔/橡皮/刻刀工具或按住 Ctrl 时出光晕；音高类工具下不出
-- 按住左键拖拽时不再残留光晕
+## ⏸️ 已叫停 / 不要主动做
 
-A10 音轨区显示范围高亮：
-- 音轨区里「钢琴窗当前打开的那个片段」上，出现一个白色半透明圆角框，标示钢琴窗当前可见的横向区间
-- 在钢琴窗里横向滚动/缩放，该框实时跟随；切换到别的片段时框移动到新片段
-- 空片段（没有音符）也能显示框；浅色主题下白框对比度可能偏低，若看不清请告知（可改主题令牌）
+- **音频后端重构**（用户："后端先停一下，能用就行"）：接缝保留但不继续换合成实现、不做 A/B 比对。续接点见 `.opencode/plans/audio-pipeline-seam.md` 顶部状态说明
+- **更名范围**（用户强调"非常重要，和后面操作一起做"）：代码与文案**仍是 OpenUTAU Plus**。扫描结果与分期建议见 `utvtu-migration.md`；⛔ `runtimes/vst3sdk/**/plus.svg` 是 SDK 自带文件不可改名
 
-B1 Alt 拖拽复制音符：
-- 按住 Alt 拖动音符 = 复制一份并拖动（原音符留在原地）；撤销名显示「复制音符」
-- 多选后 Alt 拖拽 = 整组复制；普通拖拽（不按 Alt）仍是移动
+## 待用户决定 / 待办
 
-B2 曲线编辑工具扩展（钢琴窗左侧曲线工具栏，需先显示表情/曲线）：
-- 工具从 3 个扩展为 8 个：光标 / 画笔 / 直线 / 橡皮 / 垂直伸缩 / 水平伸缩 / 垂直移动 / 水平移动（悬停有中文提示）
-- 用光标工具框选一段曲线后，切到四种变换工具可拖动选区：伸缩以选区中心为基准，移动按刻度/数值平移；右键重置
-- 直线工具：左键拖动画直线；「偏好设置 → 高级 → 默认吸附曲线」默认开，关掉后曲线编辑不吸附网格
+1. **旧仓库是否在 GitHub 上 archive**（README 横幅已加，仓库仍可写）
+2. **更新检查闸门恢复**：等 UTvTU 首发 release → `UpdateCheckEnabled()` 改回 true
+3. **A8-A10 / B1 / B2 的实机验收**（用户口头说过"没啥问题"，未逐条过）；另 A1 的钢琴窗关闭按钮在**工具栏右端**（上游在右上角），用户尚未表态
+4. **前端待办池**（用户此前挂着未选）：右键菜单幽灵弹窗（`context-menu-debug.md`，根因线索 OverlayLayer 缺失）、`ui-redesign-phase.md` 里"遗留小 bug（用户说以后修）"待用户点名
 
-## 未决/风险
+## 用户口径备忘
 
-- VST 链路仍未实测（本机无可用 VST；用户已同意跳过，待重构）
-- A1 关闭按钮位置是 Plus 适配决策（工具栏右端而非上游右上角），用户尚未实机看，可能需调整
-- 构建异常后若报 `Key: /Assets/Icons.axaml` 重复 → 删 `OpenUtau/obj` 重建
+- 中文沟通；commit 用中文；原子化提交；每步构建 0 错误 + 测试全绿 → 实机预览闸门
+- 偏好直接推荐而非罗列选项；认可时会回"可以 / 没啥问题"
+- 只删东西时按明确口径执行（例如"只删生成 release 和生成安装包的东西"），**多删了要能一键找回**（用 `git checkout HEAD -- <path>`）
