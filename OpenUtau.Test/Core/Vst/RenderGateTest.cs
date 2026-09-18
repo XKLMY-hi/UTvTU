@@ -10,6 +10,8 @@ namespace OpenUtau.Core.Vst {
     /// 注意：VstPluginManager.Inst 是单例且依赖 PlaybackManager（DummyAudioOutput
     /// 默认 Stopped → OutputActive == false），测试间共享状态——每用例 ClearAll 兜底。
     /// 共享静态计数的测试方法必须串行（类内并行会互相干扰精确断言）。
+    /// EnterLeave_CountsInFlight 会重复 Dispose 同一张票据（using + 显式各一次），
+    /// 故 Leaver 必须幂等——否则计数跌成负数，后续 TryFlush_AllowedWhenIdle 全红。
     /// </summary>
     [Collection("VstShared")]
     public class RenderGateTest {
@@ -25,6 +27,20 @@ namespace OpenUtau.Core.Vst {
             b.Dispose();
             Assert.Equal(baseline + 1, RenderGate.InFlight);
             a.Dispose();
+            Assert.Equal(baseline, RenderGate.InFlight);
+        }
+
+        [Fact]
+        public void DoubleDispose_CountsOnce() {
+            // 票据幂等：using + 显式 Dispose 并存（或异常路径二次释放）时计数只减一次，
+            // 否则 InFlight 跌成负数，"空闲可刷"判定被永久钉死为拒绝。
+            int baseline = RenderGate.InFlight;
+            var gate = RenderGate.Enter();
+            Assert.Equal(baseline + 1, RenderGate.InFlight);
+            gate.Dispose();
+            Assert.Equal(baseline, RenderGate.InFlight);
+            gate.Dispose();
+            gate.Dispose();
             Assert.Equal(baseline, RenderGate.InFlight);
         }
 
