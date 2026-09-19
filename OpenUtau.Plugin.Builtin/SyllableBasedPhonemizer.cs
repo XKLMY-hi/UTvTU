@@ -9,6 +9,7 @@ using Serilog;
 using System.Threading.Tasks;
 using static OpenUtau.Api.Phonemizer;
 using System.Collections;
+using OpenUtau.Core;
 
 namespace OpenUtau.Plugin.Builtin {
     /// <summary>
@@ -161,10 +162,70 @@ namespace OpenUtau.Plugin.Builtin {
             }
         }
 
+        // YAML watcher
+        private static int globalSbpGeneration = 0;
+        private int localSbpGeneration = 0;
+        public static YamlWatcher singerYamlWatcher;
+        public static YamlWatcher pluginYamlWatcher;
+        public static string currentlyWatchedSingerDir;
+        public static string currentlyWatchedPluginDir;
+        private bool _singerLoaded = false;
+
+        private void SetupYamlWatchers(string singerDir, string pluginDir) {
+            if (!string.IsNullOrEmpty(singerDir) && currentlyWatchedSingerDir != singerDir) {
+                singerYamlWatcher?.Dispose();
+                singerYamlWatcher = null;
+                currentlyWatchedSingerDir = singerDir;
+
+                if (Directory.Exists(singerDir)) {
+                    singerYamlWatcher = new YamlWatcher(singerDir, () => {
+                        Log.Information($"[SyllableBasedPhonemizer] Singer YAML change detected in '{singerDir}'. Reloading...");
+                        System.Threading.Thread.Sleep(200);
+                        YamlCache.Clear();
+                        globalSbpGeneration++;
+                        _singerLoaded = false; // Reset loaded flag so SetSinger is forced to re-run
+
+                        if (this.singer != null) {
+                            OpenUtau.Core.SingerManager.Inst.ScheduleReload(this.singer);
+                            try {
+                                OpenUtau.Core.DocManager.Inst.ExecuteCmd(new OpenUtau.Core.VoiceColorRemappingNotification(-1, true));
+                            } catch { }
+                        }
+                    });
+                }
+            }
+
+            if (!string.IsNullOrEmpty(pluginDir) && currentlyWatchedPluginDir != pluginDir) {
+                pluginYamlWatcher?.Dispose();
+                pluginYamlWatcher = null;
+                currentlyWatchedPluginDir = pluginDir;
+
+                if (Directory.Exists(pluginDir)) {
+                    pluginYamlWatcher = new YamlWatcher(pluginDir, () => {
+                        Log.Information($"[SyllableBasedPhonemizer] Global Plugin YAML change detected in '{pluginDir}'. Reloading...");
+                        System.Threading.Thread.Sleep(200);
+                        YamlCache.Clear();
+                        globalSbpGeneration++;
+                        _singerLoaded = false; // Reset loaded flag
+
+                        if (this.singer != null) {
+                            OpenUtau.Core.SingerManager.Inst.ScheduleReload(this.singer);
+                            try {
+                                OpenUtau.Core.DocManager.Inst.ExecuteCmd(new OpenUtau.Core.VoiceColorRemappingNotification(-1, true));
+                            } catch { }
+                        }
+                    });
+                }
+            }
+        }
+
         public override Result Process(Note[] notes, Note? prev, Note? next, Note? prevNeighbour, Note? nextNeighbour, Note[] prevNeighbours) {
             error = "";
             if (singer == null || !singer.Loaded) {
                 return MakeSimpleResult("");
+            }
+            if (localSbpGeneration != globalSbpGeneration) {
+                SetSinger(this.singer);
             }
             var mainNote = notes[0];
             if (mainNote.lyric.StartsWith(FORCED_ALIAS_SYMBOL)) {
@@ -445,14 +506,21 @@ namespace OpenUtau.Plugin.Builtin {
         }
 
         public override void SetSinger(USinger singer) {
-            if (this.singer != singer) {
+            if (_singerLoaded && this.singer == singer && localSbpGeneration == globalSbpGeneration) {
+                return;
+            }
+
+                localSbpGeneration = globalSbpGeneration;
                 this.singer = singer;
                 dictionaries.Clear();
-                YamlCache.Clear();
 
                 if (this.singer == null || !this.singer.Loaded) {
+                    _singerLoaded = false;
                     return;
                 }
+
+                string singerFolder = (!string.IsNullOrEmpty(singer.Location)) ? singer.Location : null;
+                SetupYamlWatchers(singerFolder, PluginDir);
 
                 if (string.IsNullOrEmpty(YamlFileName)) {
                     if (backupVowels != null) this.vowels = backupVowels;
@@ -472,6 +540,7 @@ namespace OpenUtau.Plugin.Builtin {
                     } else {
                         Init();
                     }
+                    _singerLoaded = true;
                     return; 
                 }
 
@@ -593,6 +662,7 @@ namespace OpenUtau.Plugin.Builtin {
                 foreach (var file in filesToParse) {
                     try {
                         var data = LoadYamlCached(file);
+                        if (data == null) continue;
                         
                         if (data.symbols != null && data.symbols.Length > 0) {
                             var symbolLookup = data.symbols
@@ -726,12 +796,12 @@ namespace OpenUtau.Plugin.Builtin {
                     }
                 }
 
-                if (!hasDictionary) {
-                    ReadDictionaryAndInit();
-                } else {
-                    Init();
-                }
+            if (!hasDictionary) {
+                ReadDictionaryAndInit();
+            } else {
+                Init();
             }
+            _singerLoaded = true;
         }
 
         protected USinger singer;
