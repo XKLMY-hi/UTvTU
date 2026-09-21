@@ -8,9 +8,9 @@
 
 ## 一句话状态
 
-项目已更名迁移为 **UTvTU**（仓库 `XKLMY-hi/UTvTU`，旧仓库 OpenUTAU-Plus 撤包归档）；上游定向移植（节拍器 + 钢琴窗 A1-A10/B1-B2）与上游 A 类修复全部完成；合成/渲染管线已做最小解耦（接缝显式化）。**测试基线 310 全绿**，构建在本机 0 错误。
+项目已更名迁移为 **UTvTU**（仓库 `XKLMY-hi/UTvTU`，旧仓库 OpenUTAU-Plus 撤包归档）；上游定向移植（节拍器 + 钢琴窗 A1-A10/B1-B2）与上游 A 类修复全部完成；合成/渲染管线已做最小解耦（接缝显式化）。**测试基线 311 全绿**（原记录 310 有 1 条长期红灯，已修），构建在本机 0 错误。
 
-当前提交：`2155207d`（两个工作区与两个仓库均已对齐）
+当前提交：`20068fca` 起（UTvTU 工作区与 origin 已对齐；OUP 旧镜像已弃用、不再同步）
 
 ## 环境（别再用旧会话的命令）
 
@@ -25,7 +25,7 @@
 ```powershell
 dotnet restore OpenUtau.sln -m:1 -p:TreatWarningsAsErrors=false --ignore-failed-sources
 dotnet build OpenUtau.sln --no-restore -m:1 -p:RuntimeIdentifiers= -p:UsedAvaloniaProducts=   # 先关掉运行中的 OpenUtau.exe，否则 dll 被锁
-dotnet test OpenUtau.Test\OpenUtau.Test.csproj --no-build                                      # 基线 310
+dotnet test OpenUtau.Test\OpenUtau.Test.csproj --no-build                                      # 基线 311
 .\OpenUtau\bin\Debug\net8.0-windows\OpenUtau.exe
 ```
 
@@ -38,6 +38,10 @@ dotnet test OpenUtau.Test\OpenUtau.Test.csproj --no-build                       
 
 ## 本阶段已完成（按时间倒序）
 
+0. **测试基线红灯修复**（`96ebf246` / `ac0f8057`，2026-09-19 接管首件事）
+   - `RenderGateTest.EnterLeave_CountsInFlight` 用 `using var` 拿票据后又显式 `Dispose()`，同一 Leaver 释放两次 → `RenderGate.InFlight` 跌成 **−2** → 同集合的 `TryFlush_AllowedWhenIdle` 断言 `InFlight == 0` 必假，长期红灯（"310 全绿"记录是错的）
+   - 修法：`RenderGate.Leaver.Dispose()` 改原子交换、只减一次（**幂等**）；新增 `DoubleDispose_CountsOnce` 锁定语义 → 311 全绿
+   - 排查手段备忘：临时在 RenderGate 里写调用方+Leaver 编号+`Interlocked` 序列到日志（`File.AppendAllText` 并发写会损坏日志，须用 `StreamWriter` + `lock`）——一次就跑出"同一 Leaver 被释放两次"的结论，不必猜框架/JIT
 1. **迁移 UTvTU**（`6c4f0207` 及之后）
    - 新仓库全历史、旧仓库撤包（releases=0/tags=0）+ README 迁移横幅
    - 撤下"生成 release / 生成安装包"的东西：`build.yml`、`packaging/{OpenUtauPlus.iss, build-installer.ps1, ChineseSimplified.isl}`
