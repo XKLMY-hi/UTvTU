@@ -32,7 +32,7 @@ metadata:
 
 - `master` 分支的 upstream 跟踪**已解除**（原本跟踪 `upstream/master`，`git push` 会误推官方）
 - 两个工作区当前都在 `f30e119f`、工作树干净（仅未跟踪 `.dsh/`）
-- 旧工作区 `G:\xklmy文件夹\vibe coding\OpenUTAU Plus` 保留为**镜像**（沙箱仍以它为根，本会话继续用）；今后优先在新路径开发
+- 旧工作区 `G:\xklmy文件夹\vibe coding\OpenUTAU Plus` 保留为**镜像**（沙箱仍以它为根，本会话继续用）；今后优先在新路径开发。**2026-09-21 更新：旧镜像已弃用，只读、不再写入**
 
 ## 关键坑
 

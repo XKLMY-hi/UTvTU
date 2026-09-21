@@ -1,5 +1,6 @@
 # Memory Index
 
+- [移动硬盘盘符漂移](external-drive-workspace.md) — ⚠️ 工作区在移动硬盘，盘符随时变，开工前先确认实际路径
 - [项目概况](project-overview.md) — OpenUTAU Plus 增强分支背景与进展
 - [用户偏好](user-preferences.md) — 中文沟通、原子化 commit、注重 UI 细节
 - [VST Phase 1-2 准备](vst-phase-3-prep.md) — VST C# 侧基础设施就绪，待 C++ 桥接

@@ -1,6 +1,8 @@
 # 会话交接（2026-09-19 起）
 
-> **恢复方式（新会话）**：工作目录设为 **`G:\xklmy文件夹\vibe coding\UTvTU`**（主战场），先
+> ⚠️ **工作区在移动硬盘上，盘符随时会更改**——开工前先确认实际路径，不要照搬本文旧盘符。
+> ⚠️ **旧镜像 `OpenUTAU Plus` 已弃用（2026-09-21 起）：只读，不再写入**；所有开发只在 `UTvTU` 工作区进行。
+> **恢复方式（新会话）**：工作目录设为主战场 **`<当前盘符>:\xklmy文件夹\vibe coding\UTvTU`**（先确认该目录实际存在），先
 > `git fetch origin && git merge --ff-only origin/plus-develop` 对齐，然后按顺序读：
 > `.opencode/memory/MEMORY.md` → `.opencode/memory/utvtu-migration.md` → `.opencode/HANDOVER.md`（本文）→ 需要时再看 `.opencode/plans/*.md`。
 
@@ -14,7 +16,7 @@
 
 | 项 | 值 |
 |---|---|
-| 主工作区 | `G:\xklmy文件夹\vibe coding\UTvTU`（新）；`G:\xklmy文件夹\vibe coding\OpenUTAU Plus`（旧，保留为镜像） |
+| 主工作区 | `<当前盘符>:\xklmy文件夹\vibe coding\UTvTU`（唯一写入目标）；`OpenUTAU Plus`（旧镜像，**已弃用**：只读、不再写入） |
 | dotnet | 系统 `C:\Program Files\dotnet`（SDK 8/9/10，默认 10.0.400 编 net8.0 正常），**无需** DOTNET_ROOT |
 | NuGet | 离线，缓存 `C:\Users\XKLMY\.nuget\packages`；restore 必须 `--ignore-failed-sources` |
 | 真机能力 | **有 1 个歌姬**（真实合成可实测）、**VST 可测**（扫本机目录）；我**无法手操 OUP 界面** |
