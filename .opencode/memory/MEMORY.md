@@ -16,7 +16,7 @@
 - [Avalonia 12 升级](avalonia-12-upgrade.md) — 2026-08-01 完成 · WindowDrawnDecorations 踩坑 · Rx 6.x ObservableExtensions 坑
 - [音频管线重构](audio-pipeline-refactor.md) — 2026-08-04 四阶段完成 · B1 竞态/RenderGate/两批播放/ExportSession/VST 命令化 · 踩坑清单
 - [VST GUI 卡死重大修复](vst-gui-thread-fix.md) — 2026-08-04 VST 专用线程方案 · 四轮失败方案教训 · MsgWait 漏 SendMessage 坑 · VstTest 桥接测试工具
-- [git 推送 SSL](git-push-ssl.md) — 本机推送 GitHub 需 -c http.sslVerify=false
+- [git 推送 SSL](git-push-ssl.md) — 推送需 -c http.sslVerify=false · 凭据 CRLF/助手弹窗排查
 - [环境重启后构建链重建](env-refresh-2026-09-g-drive.md) — E 盘消失 · 系统 SDK 10 编 net8 成功 · 离线 NuGet 在用户目录 · 历史 obj 只读须删除重建
 - [节拍器&钢琴窗移植](metronome-piano-port.md) — 节拍器已验收 · 钢琴窗批次 A（A1-A10）+ B（B1/B2）全部完成 · 字体崩溃加固 · 构建/测试命令与坑
 - [上游音频/合成盘点](../plans/upstream-audio-synthesis-audit.md) — 上游领先 153 提交：frozen slot 重写、音素化器大改、DiffSinger 重构；可移植性分级
