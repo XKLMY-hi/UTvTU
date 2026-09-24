@@ -59,6 +59,13 @@ OpenUTAU Plus 使用以下第三方组件。本文件随安装包分发（安装
 
 字体经 Avalonia 资源嵌入应用（`OpenUtau/Assets/Fonts/`），系统未安装时仍完整呈现；许可文本随包分发。
 
+## 图标
+
+| 组件 | 许可证 | 用途 |
+|------|--------|------|
+| **Phosphor Icons**（实心圆润，256px 网格，55 个图标，`OpenUtau/Assets/Icons.axaml`） | MIT（https://phosphoricons.com） | 界面图标 |
+| *Lucide*（描边风格，ISC，https://lucide.dev） | ISC | **计划替换**：新 UI 重做时将整体换为 Lucide 并全量替换上述图标；届时本表与 `Icons.axaml` 头部署名同步更新（见 `.opencode/plans/ui-rework-decisions.md` 第 3.F 节） |
+
 ---
 
 *本清单依据各组件官方许可文件核对（2026-08）。NuGet 包内均含各自 LICENSE 文本。*

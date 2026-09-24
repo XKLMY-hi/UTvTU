@@ -94,7 +94,7 @@
 
   <system:String x:Key="errors.caption">错误</system:String>
   <system:String x:Key="errors.details">错误详情</system:String>
-  <!--<system:String x:Key="errors.diffsinger.downloadvocoder">Error loading vocoder "{0}". Please download vocoder from {1}</system:String>-->
+    <system:String x:Key="errors.diffsinger.downloadvocoder">载入声码器 "{0}" 时出错。请从以下位置下载声码器：{1}</system:String>
   <system:String x:Key="errors.diffsinger.downloadvocoder1">载入声码器时错误 </system:String>
   <system:String x:Key="errors.diffsinger.downloadvocoder2">. 请从以下位置下载声码器： </system:String>
   <system:String x:Key="errors.editing.autopitch.unsupported">当前声库不支持生成音高线。请使用 Diffsinger 或 Enunu 声库。</system:String>
@@ -122,8 +122,8 @@
   <system:String x:Key="errors.failed.save">保存失败</system:String>
   <system:String x:Key="errors.failed.savesingerconfig">保存歌手配置文件失败</system:String>
   <system:String x:Key="errors.failed.searchsinger">查找歌手失败</system:String>
-  <!--<system:String x:Key="errors.failed.synth.cutoffbeforeoffset">Oto error: cutoff before offset</system:String>-->
-  <!--<system:String x:Key="errors.failed.synth.cutoffexceedduration">Oto error: cutoff exceeds audio duration</system:String>-->
+    <system:String x:Key="errors.failed.synth.cutoffbeforeoffset">原音设定错误：右空白（cutoff）位于左空白（offset）之前</system:String>
+    <system:String x:Key="errors.failed.synth.cutoffexceedduration">原音设定错误：右空白（cutoff）超出音频时长</system:String>
   <system:String x:Key="errors.failed.transcribe.some">加载 SOME 模型失败。请从此处下载：{0}</system:String>
   <system:String x:Key="errors.install.cpp">请安装最新的 Visual C++ 运行环境。 https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170</system:String>
   <system:String x:Key="errors.lyrics.regex">正则表达式包含不支持的字符</system:String>
@@ -613,15 +613,15 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="singersetup.textfileencoding.prompt">请选择一种编码，使文件内容看起来是正确的。</system:String>
 
   <system:String x:Key="tip.aliasbox">手动选择别名</system:String>
-  <!--<system:String x:Key="tip.exps">Numerical,Options Type
-    Left Button Draw: Set expressions
-    Shift + Left Button Draw: Set uniform expressions
-    Right Button Draw: Reset expressions
-Curve Type
-    Left Button Draw: Draw
-    Shift + Ctrl + Left Button Draw: Line Draw
-    Shift + Left Button Draw: Horizontal Line Draw
-    Right Button Draw: Reset Line</system:String>-->
+    <system:String x:Key="tip.exps">数值、选项类型
+    鼠标左键绘制：设置表情
+    Shift + 鼠标左键绘制：设置统一表情
+    鼠标右键绘制：重置表情
+曲线类型
+    鼠标左键绘制：绘制
+    Shift + Ctrl + 鼠标左键绘制：直线绘制
+    Shift + 鼠标左键绘制：水平线绘制
+    鼠标右键绘制：重置线条</system:String>
   <system:String x:Key="tip.exps.notsupported">当前渲染器不支持此表情</system:String>
   <system:String x:Key="tip.lyricbox.next">Tab: 下一个</system:String>
   <system:String x:Key="tip.lyricbox.prev">Shift+Tab: 上一个</system:String>
