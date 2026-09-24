@@ -100,7 +100,29 @@
 | F3 | **渲染方式沿用填充路径**（`StreamGeometry` 键）：Pen 导出的 SVG 已把描边转成填充轮廓，可直接搬进 `Icons.axaml`；**不改成 Stroke 渲染**（会牵动所有消费点） |
 | F4 | **同步更新**：`Icons.axaml` 头部署名（Phosphor MIT → Lucide ISC）；`THIRD-PARTY-NOTICES.md` 目前未列图标集，可顺带加一行 |
 
----
+### G. 颜色池与颜色接口（**已落地** 2026-09-25）
+
+统一颜色池是"全量色阶"的落点：**所有控件的颜色都从这一个接口取**。
+
+| 层 | 位置 | 内容 |
+|---|---|---|
+| 算法（纯逻辑，无 UI 依赖） | `OpenUtau.Core/Theming/` | HCT/CAM16/求解器、色调色板、DynamicColor、49 个角色规格、`Md3SchemeColors` |
+| 颜色池与接口 | `OpenUtau/Theming/` | `IMd3ColorPool` / `Md3ColorPool` / `ColorPool` 静态门面 / `Md3ThemeResources` 资源桥 |
+| 代码生成 | `tools/md3-codegen/` | 从 Google 参考实现**内省**生成角色表与常数表（角色定义不是我手抄的） |
+
+- **接口**：`ColorPool.Current` → `Color(role)` / `Brush(role)` / `Pen(role, thickness)` / `Color(role, dark)`；`ColorPool.Key(role)` 给出 XAML 资源键。
+- **XAML 用法**（与旧键并存，替换一个控件就迁一个）：
+  `Background="{DynamicResource md3.surface-container}"` · `BorderBrush="{DynamicResource md3.outline-variant}"` · 渐变用颜色键 `md3.color.*`。
+- **覆盖**：**49 个角色** × 深浅 × 对比度档位；配色方案 **7 种**（TonalSpot / Vibrant / Expressive / Monochrome / Neutral / Rainbow / FruitSalad）。
+- **保真度**（对照 Google `material-color-utilities@0.3.0`）：
+  - 全矩阵 **132 用例 × 49 角色 = 6468 格逐位一致**（SHA-256 固定，见 `Md3ReferenceOracleTests`）；
+  - **675 例 HCT 求解**（hue/chroma/tone → sRGB）逐位一致；
+  - 三个金标准（TonalSpot 深/浅、Monochrome）+ 正文对比度语义护栏。
+- **接线**：`App.SetTheme()`（主题唯一入口）→ `ColorPool.SetDark(...)` 重建资源；种子/方案待设置项接入。
+- **与旧体系的关系**：旧键（Fluent/Suki/Plus*）**原样保留**；新控件用 `md3.*`；迁移完成的控件不再引用旧键。两端资源键并不互相映射——迁移是按控件逐个做的。
+- **待办**：① 壁纸种子 provider（含黑白兜底，见 D1）；② 偏好设置里的"种子 / 配色方案"选项；③ Content / Fidelity 两个方案（需移植 `TemperatureCache`）；④ 控件逐个迁移到 `md3.*`。
+
+
 
 ## 4. 设计基准：Pen 交付包 + 差异清单
 
@@ -263,3 +285,4 @@ pwsh -NoProfile -File .opencode\design\extract-spec.ps1 -Path <某屏>.html [-Ma
 |---|---|
 | 2026-09-25 | 五轮讨论定稿：A 单窗口 + 可分离、B 效果器统一与链面板、C 卷帘只换皮、D 莫奈动态取色、E 文案走项目现有键、F 图标**由"沿用 Phosphor"改为"全量换 Lucide"**（用户决定） |
 | 2026-09-25 | 执行三项收尾：设计交付包入库 `.opencode/design/`；本地化双向补齐（EN/zh 各 923 条、缺口 0，构建 0 错误）；`THIRD-PARTY-NOTICES` 增「图标」章节。图标署名**留待实际替换时**再改 |
+| 2026-09-25 | **统一颜色池落地**（第 3.G 节）：`OpenUtau.Core/Theming` + `OpenUtau/Theming`，49 角色 × 7 方案 × 对比度档位；对照 Google `material-color-utilities@0.3.0` **6468 格逐位一致**（哈希固定）+ 675 例 HCT 求解一致；角色表与常数表由 `tools/md3-codegen/` 内省生成；新增 13 个用例，全量 **324 通过** |
