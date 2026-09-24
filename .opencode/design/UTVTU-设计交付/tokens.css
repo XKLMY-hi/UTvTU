@@ -1,0 +1,149 @@
+/* UTVTU — design tokens (generated from untitled.pen) */
+/*
+ * Colors: hex. Numbers: px. Strings: font family names.
+ * Semantic (shadcn-style) tokens + Material 3 style tokens are both included.
+ * Font note: the UI is Simplified Chinese; the active triple is
+ *   --md3-font / --md3-font-display / --md3-font-mono = 'Noto Sans SC'.
+ */
+
+:root {
+  --sidebar: #E7E8E5;
+  --sidebar-foreground: #666666;
+  --sidebar-primary: #18181b;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-border: #CBCCC9;
+  --sidebar-accent: #CBCCC9;
+  --sidebar-accent-foreground: #18181b;
+  --sidebar-ring: #71717a;
+  --background: #F2F3F0;
+  --foreground: #111111;
+  --card: #FFFFFF;
+  --card-foreground: #111111;
+  --popover: #FFFFFF;
+  --popover-foreground: #111111;
+  --primary: #FF8400;
+  --primary-foreground: #111111;
+  --secondary: #E7E8E5;
+  --secondary-foreground: #111111;
+  --muted: #F2F3F0;
+  --muted-foreground: #666666;
+  --accent: #F2F3F0;
+  --accent-foreground: #111111;
+  --destructive: #D93C15;
+  --border: #CBCCC9;
+  --input: #CBCCC9;
+  --ring: #666666;
+  --white: #FFFFFF;
+  --black: #000000;
+  --color-success: #DFE6E1;
+  --color-success-foreground: #004D1A;
+  --color-warning: #E9E3D8;
+  --color-warning-foreground: #804200;
+  --color-error: #E5DCDA;
+  --color-error-foreground: #8C1C00;
+  --color-info: #DFDFE6;
+  --color-info-foreground: #000066;
+  --md3-primary: #6FDBCB;
+  --md3-on-primary: #00382F;
+  --md3-primary-container: #005046;
+  --md3-on-primary-container: #8CF8E7;
+  --md3-secondary: #B1CCC5;
+  --md3-on-secondary: #1C3530;
+  --md3-secondary-container: #334B46;
+  --md3-on-secondary-container: #CCE8E1;
+  --md3-tertiary: #A9CBE7;
+  --md3-on-tertiary: #0F3348;
+  --md3-tertiary-container: #284A5F;
+  --md3-on-tertiary-container: #C6E7FF;
+  --md3-error: #FFB4AB;
+  --md3-on-error: #690005;
+  --md3-error-container: #93000A;
+  --md3-on-error-container: #FFDAD6;
+  --md3-background: #0E1513;
+  --md3-on-background: #DDE4E1;
+  --md3-surface: #0E1513;
+  --md3-on-surface: #DDE4E1;
+  --md3-surface-variant: #3F4947;
+  --md3-on-surface-variant: #BEC9C5;
+  --md3-surface-dim: #0A100F;
+  --md3-surface-bright: #343B39;
+  --md3-surface-container-lowest: #090F0E;
+  --md3-surface-container-low: #161D1B;
+  --md3-surface-container: #1A211F;
+  --md3-surface-container-high: #252B2A;
+  --md3-surface-container-highest: #2F3634;
+  --md3-outline: #899390;
+  --md3-outline-variant: #3F4947;
+  --md3-inverse-surface: #DDE4E1;
+  --md3-inverse-on-surface: #2B3230;
+  --md3-inverse-primary: #006B5D;
+  --md3-scrim: #000000;
+  --md3-track-1: #6FDBCB;
+  --md3-track-2: #FFB4AB;
+  --md3-track-3: #A9CBE7;
+  --md3-track-4: #F3C97E;
+  --md3-track-5: #C9B8E8;
+  --md3-track-6: #9BE3A8;
+  --md3-transparent: #00000000;
+}
+
+:root[data-theme="dark"], .dark {
+  --sidebar: #18181b;
+  --sidebar-foreground: #fafafa;
+  --sidebar-primary: #18181b;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-border: #ffffff1a;
+  --sidebar-accent: #2a2a30;
+  --sidebar-accent-foreground: #fafafa;
+  --sidebar-ring: #71717a;
+  --background: #111111;
+  --foreground: #FFFFFF;
+  --card: #1A1A1A;
+  --card-foreground: #FFFFFF;
+  --popover: #1A1A1A;
+  --popover-foreground: #FFFFFF;
+  --primary: #FF8400;
+  --primary-foreground: #111111;
+  --secondary: #2E2E2E;
+  --secondary-foreground: #FFFFFF;
+  --muted: #2E2E2E;
+  --muted-foreground: #B8B9B6;
+  --accent: #111111;
+  --accent-foreground: #F2F3F0;
+  --destructive: #FF5C33;
+  --border: #2E2E2E;
+  --input: #2E2E2E;
+  --ring: #666666;
+  --color-success: #222924;
+  --color-success-foreground: #B6FFCE;
+  --color-warning: #291C0F;
+  --color-warning-foreground: #FF8400;
+  --color-error: #24100B;
+  --color-error-foreground: #FF5C33;
+  --color-info: #222229;
+  --color-info-foreground: #B2B2FF;
+}
+
+:root {
+  --font-primary: "JetBrains Mono"; /* font family */
+  --font-secondary: "Geist"; /* font family */
+  --radius-none: 0px;
+  --radius-pill: 999px;
+  --radius-m: 16px;
+  --md3-font: "Noto Sans SC"; /* font family */
+  --md3-font-display: "Noto Sans SC"; /* font family */
+  --md3-font-mono: "Noto Sans SC"; /* font family */
+  --md3-radius-xs: 4px;
+  --md3-radius-sm: 8px;
+  --md3-radius-md: 12px;
+  --md3-radius-lg: 16px;
+  --md3-radius-xl: 28px;
+  --md3-radius-full: 999px;
+  --md3-space-1: 4px;
+  --md3-space-2: 8px;
+  --md3-space-3: 12px;
+  --md3-space-4: 16px;
+  --md3-space-5: 24px;
+  --md3-space-6: 32px;
+  --md3-space-7: 48px;
+}

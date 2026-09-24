@@ -1,0 +1,246 @@
+# Welcome.html — 命名元素 188 个，最大嵌套深度 8
+          "tailwind = { config: { corePlugins: { preflight: false } } };"
+          "*, ::before, ::after { box-sizing: border-box; } body { margin: 0; }"
+        Welcome · 欢迎  ·  w-[1440px] h-[900px] flex flex-col gap-0 justify-start items-start overflow-hidden
+          Top App Bar  ·  w-full h-[56px] shrink-0 flex flex-row gap-[16px] p-[0px_16px] justify-between items-center
+            Left Cluster  ·  w-fit shrink-0 h-fit flex flex-row gap-[12px] justify-start items-center
+              App Mark  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[8px]
+                Icon · App {icon:music}  ·  w-[20px] shrink-0 h-[20px]
+            App Wordmark  ·  text-[15px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold tracking-[0.5px] [white-space:nowrap]
+              "UTVTU"
+            Header Divider  ·  w-[1px] shrink-0 h-[20px]
+            Screen Title  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+              "欢迎"
+          Window Controls  ·  w-fit shrink-0 h-fit flex flex-row gap-[4px] justify-start items-center
+            Minimize  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+              Icon · Minimize {icon:remove}  ·  w-[18px] shrink-0 h-[18px]
+          Maximize  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+            Icon · Maximize {icon:crop_square}  ·  w-[18px] shrink-0 h-[18px]
+        Close  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+          Icon · Close {icon:close}  ·  w-[18px] shrink-0 h-[18px]
+  Welcome Content  ·  w-full flex flex-row gap-0 justify-start items-start
+    Brand Panel  ·  w-[480px] shrink-0 h-full flex flex-col gap-[32px] p-[48px] justify-between items-start
+      Brand Top  ·  w-full h-fit shrink-0 flex flex-col gap-[32px] justify-start items-start
+        Brand Header  ·  w-full h-fit shrink-0 flex flex-row gap-[12px] justify-start items-center
+          Logo Mark  ·  w-[52px] shrink-0 h-[52px] flex flex-row gap-0 justify-center items-center rounded-[12px]
+            Icon · Brand {icon:mic}  ·  w-[26px] shrink-0 h-[26px]
+        Brand Wordmark  ·  h-fit flex flex-col gap-[4px] justify-start items-start
+          Brand Name · UTVTU  ·  text-[26px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+            "UTVTU"
+          Brand Tagline  ·  text-[13px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+            "UTAU · DiffSinger 工作台"
+      Waveform  ·  w-full h-[132px] shrink-0 flex flex-row gap-0 justify-between items-end
+        Waveform Bar 1  ·  w-[6px] shrink-0 h-[18px] opacity-[0.446] rounded-[999px]
+        Waveform Bar 2  ·  w-[6px] shrink-0 h-[70px] opacity-[0.723] rounded-[999px]
+        Waveform Bar 3  ·  w-[6px] shrink-0 h-[108px] opacity-[0.925] rounded-[999px]
+        Waveform Bar 4  ·  w-[6px] shrink-0 h-[122px] rounded-[999px]
+        Waveform Bar 5  ·  w-[6px] shrink-0 h-[109px] opacity-[0.931] rounded-[999px]
+        Waveform Bar 6  ·  w-[6px] shrink-0 h-[72px] opacity-[0.734] rounded-[999px]
+        Waveform Bar 7  ·  w-[6px] shrink-0 h-[20px] opacity-[0.457] rounded-[999px]
+        Waveform Bar 8  ·  w-[6px] shrink-0 h-[68px] opacity-[0.712] rounded-[999px]
+        Waveform Bar 9  ·  w-[6px] shrink-0 h-[107px] opacity-[0.92] rounded-[999px]
+        Waveform Bar 10  ·  w-[6px] shrink-0 h-[122px] rounded-[999px]
+        Waveform Bar 11  ·  w-[6px] shrink-0 h-[110px] opacity-[0.936] rounded-[999px]
+        Waveform Bar 12  ·  w-[6px] shrink-0 h-[74px] opacity-[0.744] rounded-[999px]
+        Waveform Bar 13  ·  w-[6px] shrink-0 h-[22px] opacity-[0.467] rounded-[999px]
+        Waveform Bar 14  ·  w-[6px] shrink-0 h-[66px] opacity-[0.702] rounded-[999px]
+        Waveform Bar 15  ·  w-[6px] shrink-0 h-[105px] opacity-[0.909] rounded-[999px]
+        Waveform Bar 16  ·  w-[6px] shrink-0 h-[122px] rounded-[999px]
+        Waveform Bar 17  ·  w-[6px] shrink-0 h-[111px] opacity-[0.941] rounded-[999px]
+        Waveform Bar 18  ·  w-[6px] shrink-0 h-[75px] opacity-[0.75] rounded-[999px]
+        Waveform Bar 19  ·  w-[6px] shrink-0 h-[25px] opacity-[0.483] rounded-[999px]
+        Waveform Bar 20  ·  w-[6px] shrink-0 h-[64px] opacity-[0.691] rounded-[999px]
+        Waveform Bar 21  ·  w-[6px] shrink-0 h-[104px] opacity-[0.904] rounded-[999px]
+        Waveform Bar 22  ·  w-[6px] shrink-0 h-[122px] rounded-[999px]
+        Waveform Bar 23  ·  w-[6px] shrink-0 h-[112px] opacity-[0.947] rounded-[999px]
+        Waveform Bar 24  ·  w-[6px] shrink-0 h-[77px] opacity-[0.76] rounded-[999px]
+        Waveform Bar 25  ·  w-[6px] shrink-0 h-[27px] opacity-[0.494] rounded-[999px]
+        Waveform Bar 26  ·  w-[6px] shrink-0 h-[62px] opacity-[0.68] rounded-[999px]
+      Tagline  ·  w-full h-fit shrink-0 flex flex-col gap-[12px] justify-start items-start
+        Tagline Headline  ·  text-[34px]/[41px] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+          "让每一首歌都有声音。"
+        Tagline Description  ·  text-[15px]/[23px] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+          "谱写旋律、填写歌词，用 UTAU 与 DiffSinger 音源塑造富有表现力的歌声。"
+      Features  ·  w-full h-fit shrink-0 flex flex-col gap-[12px] justify-start items-start
+        Feature · Voicebank Support  ·  w-full h-fit shrink-0 flex flex-row gap-[12px] justify-start items-center
+          Icon · Voicebank Support {icon:tune}  ·  w-[18px] shrink-0 h-[18px]
+        Feature Copy · Voicebank Support  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+          "支持 UTAU 与 DiffSinger 音源"
+      Feature · Lyric Editing  ·  w-full h-fit shrink-0 flex flex-row gap-[12px] justify-start items-center
+        Icon · Lyric Editing {icon:graphic_eq}  ·  w-[18px] shrink-0 h-[18px]
+      Feature Copy · Lyric Editing  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "音素级歌词与音高编辑"
+    Feature · Host Integration  ·  w-full h-fit shrink-0 flex flex-row gap-[12px] justify-start items-center
+      Icon · Host Integration {icon:piano}  ·  w-[18px] shrink-0 h-[18px]
+    Feature Copy · Host Integration  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+      "VST3 / ARA2 宿主集成"
+Brand Bottom  ·  w-full h-fit shrink-0 flex flex-col gap-[12px] justify-start items-start
+  Installed Library Heading  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "已安装音源"
+  Voicebank Row 1  ·  w-full h-fit shrink-0 flex flex-row gap-[8px] justify-start items-start
+    Hatsune Miku V6  ·  h-fit flex flex-row gap-[8px] p-[8px_12px] justify-start items-center rounded-[999px]
+      Status Dot · Hatsune Miku V6  ·  w-[6px] shrink-0 h-[6px] rounded-full
+      Voicebank Name · Kasane Teto  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "Kasane Teto · UTAU"
+    Kagamine Rin/Len V6  ·  h-fit flex flex-row gap-[8px] p-[8px_12px] justify-start items-center rounded-[999px]
+      Status Dot · Kagamine Rin/Len V6  ·  w-[6px] shrink-0 h-[6px] rounded-full
+      Voicebank Name · Momone Momo  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "Momone Momo · UTAU"
+  Voicebank Row 2  ·  w-full h-fit shrink-0 flex flex-row gap-[8px] justify-start items-start
+    Megurine Luka V4X  ·  h-fit flex flex-row gap-[8px] p-[8px_12px] justify-start items-center rounded-[999px]
+      Status Dot · Megurine Luka V4X  ·  w-[6px] shrink-0 h-[6px] rounded-full
+      Voicebank Name · Yowane Haku  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "Yowane Haku · UTAU"
+    GUMI V6  ·  h-fit flex flex-row gap-[8px] p-[8px_12px] justify-start items-center rounded-[999px]
+      Status Dot · GUMI V6  ·  w-[6px] shrink-0 h-[6px] rounded-full
+      Voicebank Name · Nova DS  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "Nova DS · DiffSinger"
+  Brand Panel Divider  ·  w-full h-[1px] shrink-0 opacity-[0.25]
+  Version Row  ·  w-full h-fit shrink-0 flex flex-row gap-0 justify-between items-center
+    App Version  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "版本 1.0.0 · 构建 20260114"
+    App Copyright  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "© 2026"
+Launcher  ·  h-full flex flex-col gap-[16px] p-[48px] justify-start items-start
+  Launcher Header  ·  w-full h-fit shrink-0 flex flex-col gap-[4px] justify-start items-start
+    Greeting  ·  text-[30px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+      "欢迎回来，制作人"
+    Greeting Subtitle  ·  text-[15px]/[21px] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+      "开始新的演唱工程，或继续上次的工作。"
+  Quick Actions  ·  w-full h-fit shrink-0 flex flex-row gap-[16px] justify-start items-start
+    New Project Action  ·  h-[104px] flex flex-row gap-[16px] p-[24px] justify-start items-center rounded-[16px]
+      New Project Icon  ·  w-[48px] shrink-0 h-[48px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+        Icon · Add {icon:add}  ·  w-[26px] shrink-0 h-[26px]
+    New Project Copy  ·  h-fit flex flex-col gap-[4px] justify-start items-start
+      New Project Title  ·  text-[18px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+        "新建工程"
+      New Project Description  ·  text-[13px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "创建空白演唱轨道"
+  Open Project Action  ·  h-[104px] flex flex-row gap-[16px] p-[24px] justify-start items-center rounded-[16px]
+    Open Project Icon  ·  w-[48px] shrink-0 h-[48px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+      Icon · Folder {icon:folder_open}  ·  w-[24px] shrink-0 h-[24px]
+  Open Project Copy  ·  h-fit flex flex-col gap-[4px] justify-start items-start
+    Open Project Title  ·  text-[18px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+      "打开工程"
+    Open Project Description  ·  text-[13px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+      "浏览 .ustx、.ust 与 .mid 文件"
+Recent Section  ·  w-full flex flex-col gap-[16px] justify-start items-start
+  Recent Header  ·  w-full h-fit shrink-0 flex flex-row gap-0 justify-between items-center
+    Recent Title  ·  text-[18px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium [white-space:nowrap]
+      "最近工程"
+    View All  ·  w-fit shrink-0 h-fit flex flex-row gap-[4px] justify-start items-center
+      View All Link  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium [white-space:nowrap]
+        "查看全部"
+      Icon · View All {icon:chevron_right}  ·  w-[18px] shrink-0 h-[18px]
+Project List  ·  w-full flex flex-col gap-[12px] justify-start items-start
+  Project · Neon Horizon  ·  w-full h-fit shrink-0 flex flex-row gap-[16px] p-[10px] justify-start items-center rounded-[12px]
+    Thumbnail · Neon Horizon  ·  w-[48px] shrink-0 h-[48px] flex flex-row gap-0 justify-center items-center rounded-[8px]
+      Icon · Thumbnail {icon:graphic_eq}  ·  w-[24px] shrink-0 h-[24px]
+  Project Details · Neon Horizon  ·  h-fit flex flex-col gap-[4px] justify-center items-start
+    Project Title · Neon Horizon  ·  text-[15px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+      "Neon Horizon"
+    Project Meta · Neon Horizon  ·  w-fit h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center
+      Project Meta · Voicebank · Neon Horizon  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "Kasane Teto"
+      Meta Separator 1 · Neon Horizon  ·  w-[3px] shrink-0 h-[3px] rounded-full
+      Project Meta · Tempo · Neon Horizon  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "128 BPM"
+      Meta Separator 2 · Neon Horizon  ·  w-[3px] shrink-0 h-[3px] rounded-full
+      Project Meta · Key · Neon Horizon  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "A♭ 大调"
+  Project Timestamp · Neon Horizon  ·  w-fit shrink-0 h-fit flex flex-row gap-[12px] justify-start items-center
+    Project Modified · Neon Horizon  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "2 小时前"
+    Icon · Open Project {icon:chevron_right}  ·  w-[20px] shrink-0 h-[20px]
+Project · Rin &amp; Len Duet  ·  w-full h-fit shrink-0 flex flex-row gap-[16px] p-[10px] justify-start items-center rounded-[12px]
+  Thumbnail · Rin &amp; Len Duet  ·  w-[48px] shrink-0 h-[48px] flex flex-row gap-0 justify-center items-center rounded-[8px]
+    Icon · Thumbnail {icon:piano}  ·  w-[24px] shrink-0 h-[24px]
+Project Details · Rin &amp; Len Duet  ·  h-fit flex flex-col gap-[4px] justify-center items-start
+  Project Title · Rin &amp; Len Duet  ·  text-[15px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+    "Momo &amp; Ritsu Duet"
+  Project Meta · Rin &amp; Len Duet  ·  w-fit h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center
+    Project Meta · Voicebank · Rin &amp; Len Duet  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "Momone Momo &amp; Namine Ritsu"
+    Meta Separator 1 · Rin &amp; Len Duet  ·  w-[3px] shrink-0 h-[3px] rounded-full
+    Project Meta · Tempo · Rin &amp; Len Duet  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "140 BPM"
+    Meta Separator 2 · Rin &amp; Len Duet  ·  w-[3px] shrink-0 h-[3px] rounded-full
+    Project Meta · Key · Rin &amp; Len Duet  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "D 小调"
+Project Timestamp · Rin &amp; Len Duet  ·  w-fit shrink-0 h-fit flex flex-row gap-[12px] justify-start items-center
+  Project Modified · Rin &amp; Len Duet  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "昨天"
+  Icon · Open Project {icon:chevron_right}  ·  w-[20px] shrink-0 h-[20px]
+Project · Stardust Echo  ·  w-full h-fit shrink-0 flex flex-row gap-[16px] p-[10px] justify-start items-center rounded-[12px]
+  Thumbnail · Stardust Echo  ·  w-[48px] shrink-0 h-[48px] flex flex-row gap-0 justify-center items-center rounded-[8px]
+    Icon · Thumbnail {icon:music_note}  ·  w-[24px] shrink-0 h-[24px]
+Project Details · Stardust Echo  ·  h-fit flex flex-col gap-[4px] justify-center items-start
+  Project Title · Stardust Echo  ·  text-[15px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+    "Stardust Echo"
+  Project Meta · Stardust Echo  ·  w-fit h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center
+    Project Meta · Voicebank · Stardust Echo  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "Yowane Haku"
+    Meta Separator 1 · Stardust Echo  ·  w-[3px] shrink-0 h-[3px] rounded-full
+    Project Meta · Tempo · Stardust Echo  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "96 BPM"
+    Meta Separator 2 · Stardust Echo  ·  w-[3px] shrink-0 h-[3px] rounded-full
+    Project Meta · Key · Stardust Echo  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "F 大调"
+Project Timestamp · Stardust Echo  ·  w-fit shrink-0 h-fit flex flex-row gap-[12px] justify-start items-center
+  Project Modified · Stardust Echo  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "3 天前"
+  Icon · Open Project {icon:chevron_right}  ·  w-[20px] shrink-0 h-[20px]
+Project · Paper Plane  ·  w-full h-fit shrink-0 flex flex-row gap-[16px] p-[10px] justify-start items-center rounded-[12px]
+  Thumbnail · Paper Plane  ·  w-[48px] shrink-0 h-[48px] flex flex-row gap-0 justify-center items-center rounded-[8px]
+    Icon · Thumbnail {icon:music_note}  ·  w-[24px] shrink-0 h-[24px]
+Project Details · Paper Plane  ·  h-fit flex flex-col gap-[4px] justify-center items-start
+  Project Title · Paper Plane  ·  text-[15px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+    "Paper Plane"
+  Project Meta · Paper Plane  ·  w-fit h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center
+    Project Meta · Voicebank · Paper Plane  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "Kasane Teto"
+    Meta Separator 1 · Paper Plane  ·  w-[3px] shrink-0 h-[3px] rounded-full
+    Project Meta · Tempo · Paper Plane  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "110 BPM"
+    Meta Separator 2 · Paper Plane  ·  w-[3px] shrink-0 h-[3px] rounded-full
+    Project Meta · Key · Paper Plane  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "C 大调"
+Project Timestamp · Paper Plane  ·  w-fit shrink-0 h-fit flex flex-row gap-[12px] justify-start items-center
+  Project Modified · Paper Plane  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "上周"
+  Icon · Open Project {icon:chevron_right}  ·  w-[20px] shrink-0 h-[20px]
+Project · Midnight Sonata  ·  w-full h-fit shrink-0 flex flex-row gap-[16px] p-[10px] justify-start items-center rounded-[12px]
+  Thumbnail · Midnight Sonata  ·  w-[48px] shrink-0 h-[48px] flex flex-row gap-0 justify-center items-center rounded-[8px]
+    Icon · Thumbnail {icon:graphic_eq}  ·  w-[24px] shrink-0 h-[24px]
+Project Details · Midnight Sonata  ·  h-fit flex flex-col gap-[4px] justify-center items-start
+  Project Title · Midnight Sonata  ·  text-[15px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+    "Midnight Sonata"
+  Project Meta · Midnight Sonata  ·  w-fit h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center
+    Project Meta · Voicebank · Midnight Sonata  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "Akita Neru"
+    Meta Separator 1 · Midnight Sonata  ·  w-[3px] shrink-0 h-[3px] rounded-full
+    Project Meta · Tempo · Midnight Sonata  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "128 BPM"
+    Meta Separator 2 · Midnight Sonata  ·  w-[3px] shrink-0 h-[3px] rounded-full
+    Project Meta · Key · Midnight Sonata  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "E 小调"
+Project Timestamp · Midnight Sonata  ·  w-fit shrink-0 h-fit flex flex-row gap-[12px] justify-start items-center
+  Project Modified · Midnight Sonata  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "上周"
+  Icon · Open Project {icon:chevron_right}  ·  w-[20px] shrink-0 h-[20px]
+Drop Hint  ·  w-full h-[56px] shrink-0 flex flex-row gap-[12px] p-[16px] justify-center items-center rounded-[12px]
+  Icon · Drop {icon:upload_file}  ·  w-[20px] shrink-0 h-[20px]
+Drop Hint Message  ·  text-[13px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "将 .ustx 或 .ust 工程文件拖到此处导入"
+Status Bar  ·  w-full h-[32px] shrink-0 flex flex-row gap-[20px] p-[0px_16px] justify-start items-center
+  Engine Status  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "引擎就绪"
+  Audio Format  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "48 kHz · 24 bit · 缓冲 256"
+  Status Bar Spacer  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+  Voice Count  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "声部 18/64"
+  CPU Usage  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "CPU 12%"
+  Disk Usage  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "磁盘 4%"

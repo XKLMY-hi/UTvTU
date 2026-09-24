@@ -1,0 +1,268 @@
+# Preferences.html — 命名元素 195 个，最大嵌套深度 8
+          "tailwind = { config: { corePlugins: { preflight: false } } };"
+          "*, ::before, ::after { box-sizing: border-box; } body { margin: 0; }"
+        Preferences · 偏好设置  ·  w-[1440px] h-[900px] flex flex-col gap-0 justify-start items-start overflow-hidden
+          Top App Bar  ·  w-full h-[56px] shrink-0 flex flex-row gap-[16px] p-[0px_16px] justify-between items-center
+            App Identity Cluster  ·  w-fit shrink-0 h-fit flex flex-row gap-[12px] justify-start items-center
+              App Mark  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[8px]
+                Icon · App Mark {icon:music}  ·  w-[20px] shrink-0 h-[20px]
+            App Wordmark  ·  text-[15px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold tracking-[0.5px] [white-space:nowrap]
+              "UTVTU"
+            App Bar Divider  ·  w-[1px] shrink-0 h-[20px]
+            App Bar Title  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+              "偏好设置"
+          Window Controls  ·  w-fit shrink-0 h-fit flex flex-row gap-[4px] justify-start items-center
+            Minimize Button  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+              Icon · Minimize {icon:remove}  ·  w-[18px] shrink-0 h-[18px]
+          Maximize Button  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+            Icon · Maximize {icon:crop_square}  ·  w-[18px] shrink-0 h-[18px]
+        Close Button  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+          Icon · Close {icon:close}  ·  w-[18px] shrink-0 h-[18px]
+  Preferences Body  ·  w-full flex flex-row gap-0 justify-start items-start
+    Settings Nav  ·  w-[304px] shrink-0 h-full flex flex-col gap-[24px] p-[24px] justify-start items-start
+      Nav Brand  ·  w-full h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center
+        Icon · Brand {icon:settings}  ·  w-[18px] shrink-0 h-[18px]
+      Brand Label  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium [white-space:nowrap]
+        "设置"
+    Nav Items  ·  w-full h-fit shrink-0 flex flex-col gap-[4px] justify-start items-start
+      Nav Item · Audio  ·  w-full h-[44px] shrink-0 flex flex-row gap-[12px] p-[0px_16px] justify-start items-center rounded-[999px]
+        Icon · Audio {icon:volume_up}  ·  w-[20px] shrink-0 h-[20px]
+      Nav Label · Audio  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium [white-space:nowrap]
+        "音频"
+    Nav Item · Voicebanks &amp; Libraries  ·  w-full h-[44px] shrink-0 flex flex-row gap-[12px] p-[0px_16px] justify-start items-center rounded-[999px]
+      Icon · Voicebanks &amp; Libraries {icon:library_music}  ·  w-[20px] shrink-0 h-[20px]
+    Nav Label · Voicebanks &amp; Libraries  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "音源与素材库"
+  Nav Item · Playback  ·  w-full h-[44px] shrink-0 flex flex-row gap-[12px] p-[0px_16px] justify-start items-center rounded-[999px]
+    Icon · Playback {icon:speed}  ·  w-[20px] shrink-0 h-[20px]
+  Nav Label · Playback  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "播放"
+Nav Item · Appearance  ·  w-full h-[44px] shrink-0 flex flex-row gap-[12px] p-[0px_16px] justify-start items-center rounded-[999px]
+  Icon · Appearance {icon:palette}  ·  w-[20px] shrink-0 h-[20px]
+Nav Label · Appearance  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "外观"
+Nav Item · Editor  ·  w-full h-[44px] shrink-0 flex flex-row gap-[12px] p-[0px_16px] justify-start items-center rounded-[999px]
+  Icon · Editor {icon:edit}  ·  w-[20px] shrink-0 h-[20px]
+Nav Label · Editor  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "编辑器"
+Nav Item · MIDI Devices  ·  w-full h-[44px] shrink-0 flex flex-row gap-[12px] p-[0px_16px] justify-start items-center rounded-[999px]
+  Icon · MIDI Devices {icon:piano}  ·  w-[20px] shrink-0 h-[20px]
+Nav Label · MIDI Devices  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "MIDI 设备"
+Nav Item · General  ·  w-full h-[44px] shrink-0 flex flex-row gap-[12px] p-[0px_16px] justify-start items-center rounded-[999px]
+  Icon · General {icon:tune}  ·  w-[20px] shrink-0 h-[20px]
+Nav Label · General  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "通用"
+Nav Spacer  ·  w-full flex flex-col gap-0 justify-start items-start
+Nav Divider  ·  w-full h-[1px] shrink-0
+Reset Button  ·  w-full h-[40px] shrink-0 flex flex-row gap-[12px] p-[0px_16px] justify-start items-center rounded-[999px]
+  Icon · Reset {icon:restart_alt}  ·  w-[20px] shrink-0 h-[20px]
+Button Label · Reset  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "恢复默认设置"
+Version Row  ·  w-full h-fit shrink-0 flex flex-row gap-0 p-[0px_16px] justify-start items-center
+  Version Text  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "版本 1.0.0 · 稳定版"
+Settings Content  ·  h-full flex flex-col gap-[24px] p-[32px] justify-start items-start
+  Page Header  ·  w-full h-fit shrink-0 flex flex-col gap-[4px] justify-start items-start
+    Page Title  ·  text-[28px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+      "偏好设置"
+    Page Sub  ·  text-[14px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+      "音频引擎、音源素材库与界面外观。"
+  Settings Columns  ·  w-full flex flex-row gap-[24px] justify-start items-start
+    Column · Playback Settings  ·  h-full flex flex-col gap-[12px] justify-start items-start
+      Audio Output Card  ·  w-full h-fit shrink-0 flex flex-col gap-[12px] p-[16px] justify-start items-start rounded-[16px]
+        Card Header · Audio Output  ·  w-full h-fit shrink-0 flex flex-col gap-[4px] justify-start items-start
+          Card Title · Audio Output  ·  text-[16px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+            "音频输出"
+          Card Subtitle · Audio Output  ·  text-[13px]/[18px] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+            "选择音频引擎的设备与格式。"
+        Device Group  ·  w-full h-fit shrink-0 flex flex-col gap-[8px] justify-start items-start
+          Field Label · Output Device  ·  text-[13px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+            "输出设备"
+          Select Field · Output Device  ·  w-full h-[44px] shrink-0 flex flex-row gap-[12px] p-[0px_16px] justify-between items-center rounded-[8px]
+            Select Value · Output Device  ·  w-fit shrink-0 h-fit flex flex-row gap-[12px] justify-start items-center
+              Icon · Output Device {icon:speaker}  ·  w-[20px] shrink-0 h-[20px]
+            Select Text · Output Device  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+              "Focusrite USB ASIO · 2 声道"
+          Icon · Select Chevron {icon:keyboard_arrow_down}  ·  w-[20px] shrink-0 h-[20px]
+    Rate Group  ·  w-full h-fit shrink-0 flex flex-col gap-[8px] justify-start items-start
+      Field Label · Sample Rate  ·  text-[13px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+        "采样率"
+      Segmented Control · Sample Rate  ·  w-full h-[40px] shrink-0 flex flex-row gap-[4px] p-[4px] justify-start items-start rounded-[999px]
+        Radio Chip · 44.1 kHz  ·  h-full flex flex-row gap-[4px] justify-center items-center rounded-[999px]
+          Chip Label · 44.1 kHz  ·  text-[13px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+            "44.1 kHz"
+        Radio Chip · 48 kHz  ·  h-full flex flex-row gap-[4px] justify-center items-center rounded-[999px]
+          Icon · Chip Check {icon:check}  ·  w-[16px] shrink-0 h-[16px]
+        Chip Label · 48 kHz  ·  text-[13px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium [white-space:nowrap]
+          "48 kHz"
+      Radio Chip · 88.2 kHz  ·  h-full flex flex-row gap-[4px] justify-center items-center rounded-[999px]
+        Chip Label · 88.2 kHz  ·  text-[13px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+          "88.2 kHz"
+      Radio Chip · 96 kHz  ·  h-full flex flex-row gap-[4px] justify-center items-center rounded-[999px]
+        Chip Label · 96 kHz  ·  text-[13px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+          "96 kHz"
+  Buffer Group  ·  w-full h-fit shrink-0 flex flex-col gap-[8px] justify-start items-start
+    Field Label · Buffer Size  ·  text-[13px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+      "缓冲区大小"
+    Segmented Control · Buffer Size  ·  w-full h-[40px] shrink-0 flex flex-row gap-[4px] p-[4px] justify-start items-start rounded-[999px]
+      Radio Chip · 128  ·  h-full flex flex-row gap-[4px] justify-center items-center rounded-[999px]
+        Chip Label · 128  ·  text-[13px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+          "128"
+      Radio Chip · 256  ·  h-full flex flex-row gap-[4px] justify-center items-center rounded-[999px]
+        Chip Label · 256  ·  text-[13px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+          "256"
+      Radio Chip · 512  ·  h-full flex flex-row gap-[4px] justify-center items-center rounded-[999px]
+        Icon · Chip Check {icon:check}  ·  w-[16px] shrink-0 h-[16px]
+      Chip Label · 512  ·  text-[13px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium [white-space:nowrap]
+        "512"
+    Radio Chip · 1024  ·  h-full flex flex-row gap-[4px] justify-center items-center rounded-[999px]
+      Chip Label · 1024  ·  text-[13px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "1024"
+  Buffer Help  ·  w-full h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center
+    Icon · Buffer Help {icon:info}  ·  w-[14px] shrink-0 h-[14px]
+  Help Text · Buffer  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "512 采样 · 48 kHz 下 10.7 ms 往返延迟"
+Playback Card  ·  w-full flex flex-col gap-[12px] p-[16px] justify-start items-start rounded-[16px]
+  Card Header · Playback  ·  w-full h-fit shrink-0 flex flex-col gap-[4px] justify-start items-start
+    Card Title · Playback  ·  text-[16px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+      "播放与延迟"
+    Card Subtitle · Playback  ·  text-[13px]/[18px] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+      "调整演唱预览的响应灵敏度。"
+  Latency Group  ·  w-full h-fit shrink-0 flex flex-col gap-[8px] justify-start items-start
+    Latency Head  ·  w-full h-fit shrink-0 flex flex-row gap-0 justify-between items-center
+      Field Label · Playback Latency  ·  text-[13px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium [white-space:nowrap]
+        "播放延迟"
+      Param Value · Playback Latency  ·  text-[13px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium [white-space:nowrap]
+        "9.6 ms"
+    Slider · Playback Latency  ·  w-full h-[16px] shrink-0 flex flex-row gap-0 justify-start items-center
+      Slider Fill · Playback Latency  ·  w-[284px] shrink-0 h-[4px] rounded-[999px]
+      Slider Thumb · Playback Latency  ·  w-[16px] shrink-0 h-[16px] rounded-full
+      Slider Track · Playback Latency  ·  h-[4px] rounded-[999px]
+    Slider Scale  ·  w-full h-fit shrink-0 flex flex-row gap-0 justify-between items-start
+      Scale Label · Stable  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "稳定"
+      Scale Label · Sensitive  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "灵敏"
+  Toggle Row · Low Latency Monitoring  ·  w-full h-fit shrink-0 flex flex-row gap-[16px] justify-between items-center
+    Toggle Text · Low Latency  ·  h-fit flex flex-col gap-[4px] justify-start items-start
+      Toggle Title · Low Latency  ·  text-[14px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "低延迟监听"
+      Toggle Desc · Low Latency  ·  text-[12px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "录制人声时静音轨道输出。"
+    Switch · Low Latency  ·  w-[52px] shrink-0 h-[32px] flex flex-row gap-0 p-[4px] justify-end items-center rounded-[999px]
+      Switch Thumb · Low Latency  ·  w-[24px] shrink-0 h-[24px] rounded-full
+  Toggle Row · Edit Preview  ·  w-full h-fit shrink-0 flex flex-row gap-[16px] justify-between items-center
+    Toggle Text · Edit Preview  ·  h-fit flex flex-col gap-[4px] justify-start items-start
+      Toggle Title · Edit Preview  ·  text-[14px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "编辑时预览音频"
+      Toggle Desc · Edit Preview  ·  text-[12px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "编辑音符时播放渲染后的人声。"
+    Switch · Edit Preview  ·  w-[52px] shrink-0 h-[32px] flex flex-row gap-0 p-[4px] justify-end items-center rounded-[999px]
+      Switch Thumb · Edit Preview  ·  w-[24px] shrink-0 h-[24px] rounded-full
+  Playback Info  ·  w-full h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center
+    Icon · Playback Info {icon:info}  ·  w-[14px] shrink-0 h-[14px]
+  Info Text · Playback  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+    "适用于屏幕预览与离线渲染。"
+Column · Voicebank Settings  ·  h-full flex flex-col gap-[24px] justify-start items-start
+  Voicebank Card  ·  w-full h-fit shrink-0 flex flex-col gap-[12px] p-[16px] justify-start items-start rounded-[16px]
+    Card Header · Voicebank  ·  w-full h-fit shrink-0 flex flex-col gap-[4px] justify-start items-start
+      Card Title · Voicebank  ·  text-[16px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+        "音源与素材库位置"
+      Card Subtitle · Voicebank  ·  text-[13px]/[18px] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "音源管理器扫描的文件夹。"
+    Folder Row · Voicebanks  ·  w-full h-fit shrink-0 flex flex-row gap-[12px] p-[12px] justify-start items-center rounded-[12px]
+      Folder Icon Wrap · Voicebanks  ·  w-[40px] shrink-0 h-[40px] flex flex-row gap-0 justify-center items-center rounded-[8px]
+        Icon · Folder {icon:folder}  ·  w-[20px] shrink-0 h-[20px]
+    Folder Text · Voicebanks  ·  h-fit flex flex-col gap-[4px] justify-start items-start
+      Field Label · Voicebank Folder  ·  text-[13px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+        "音源文件夹"
+      Path Value · Voicebank Folder  ·  text-[11px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "/Volumes/Samples/UTVTU/Voicebanks"
+    Change Button · Voicebanks  ·  w-fit shrink-0 h-[32px] flex flex-row gap-0 p-[0px_16px] justify-center items-center rounded-[999px]
+      Button Label · Change Voicebanks  ·  text-[13px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium [white-space:nowrap]
+        "更改"
+  Folder Row · Samples  ·  w-full h-fit shrink-0 flex flex-row gap-[12px] p-[12px] justify-start items-center rounded-[12px]
+    Folder Icon Wrap · Samples  ·  w-[40px] shrink-0 h-[40px] flex flex-row gap-0 justify-center items-center rounded-[8px]
+      Icon · Folder {icon:folder}  ·  w-[20px] shrink-0 h-[20px]
+  Folder Text · Samples  ·  h-fit flex flex-col gap-[4px] justify-start items-start
+    Field Label · Samples Folder  ·  text-[13px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+      "素材库（采样）文件夹"
+    Path Value · Samples Folder  ·  text-[11px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+      "/Volumes/Samples/UTVTU/Libraries"
+  Change Button · Samples  ·  w-fit shrink-0 h-[32px] flex flex-row gap-0 p-[0px_16px] justify-center items-center rounded-[999px]
+    Button Label · Change Samples  ·  text-[13px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium [white-space:nowrap]
+      "更改"
+Detected Voicebanks List  ·  w-full h-fit shrink-0 flex flex-col gap-[8px] justify-start items-start
+  List Label · Detected Voicebanks  ·  text-[13px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+    "检测到的音源"
+  Voicebank List Item · Kasane Teto  ·  w-full h-fit shrink-0 flex flex-row gap-[12px] justify-start items-center
+    Voicebank Status Dot · Kasane Teto  ·  w-[8px] shrink-0 h-[8px] rounded-full
+    Voicebank Info · Kasane Teto  ·  h-fit flex flex-col gap-0 justify-start items-start
+      Voicebank Name · Kasane Teto  ·  text-[13px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "Kasane Teto"
+      Voicebank Meta · Kasane Teto  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "4.2 GB · 日语"
+    Voicebank Status · Kasane Teto  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "已启用"
+  Voicebank List Item · Momone Momo / Namine Ritsu  ·  w-full h-fit shrink-0 flex flex-row gap-[12px] justify-start items-center
+    Voicebank Status Dot · Momone Momo  ·  w-[8px] shrink-0 h-[8px] rounded-full
+    Voicebank Info · Momone Momo / Namine Ritsu  ·  h-fit flex flex-col gap-0 justify-start items-start
+      Voicebank Name · Momone Momo / Namine Ritsu  ·  text-[13px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "Momone Momo/Namine Ritsu"
+      Voicebank Meta · Momone Momo / Namine Ritsu  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "3.8 GB · 日语"
+    Voicebank Status · Momone Momo / Namine Ritsu  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "已安装"
+  Voicebank List Item · Yowane Haku  ·  w-full h-fit shrink-0 flex flex-row gap-[12px] justify-start items-center
+    Voicebank Status Dot · Yowane Haku  ·  w-[8px] shrink-0 h-[8px] rounded-full
+    Voicebank Info · Yowane Haku  ·  h-fit flex flex-col gap-0 justify-start items-start
+      Voicebank Name · Yowane Haku  ·  text-[13px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "Yowane Haku"
+      Voicebank Meta · Yowane Haku  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "5.1 GB · 日语"
+    Voicebank Status · Yowane Haku  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "已安装"
+Appearance Card  ·  w-full flex flex-col gap-[12px] p-[16px] justify-start items-start rounded-[16px]
+  Card Header · Appearance  ·  w-full h-fit shrink-0 flex flex-col gap-[4px] justify-start items-start
+    Card Title · Appearance  ·  text-[16px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+      "外观"
+    Card Subtitle · Appearance  ·  text-[13px]/[18px] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+      "选择 UTVTU 在此显示器上的外观。"
+  Theme Group  ·  w-full h-fit shrink-0 flex flex-col gap-[8px] justify-start items-start
+    Field Label · Theme  ·  text-[13px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+      "主题"
+    Segmented Control · Theme  ·  w-full h-[40px] shrink-0 flex flex-row gap-[4px] p-[4px] justify-start items-start rounded-[999px]
+      Radio Chip · Light  ·  h-full flex flex-row gap-[4px] justify-center items-center rounded-[999px]
+        Chip Label · Light  ·  text-[13px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+          "浅色"
+      Radio Chip · Dark  ·  h-full flex flex-row gap-[4px] justify-center items-center rounded-[999px]
+        Icon · Chip Check {icon:check}  ·  w-[16px] shrink-0 h-[16px]
+      Chip Label · Dark  ·  text-[13px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium [white-space:nowrap]
+        "深色"
+    Radio Chip · System  ·  h-full flex flex-row gap-[4px] justify-center items-center rounded-[999px]
+      Chip Label · System  ·  text-[13px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "跟随系统"
+Accent Group  ·  w-full h-fit shrink-0 flex flex-col gap-[8px] justify-start items-start
+  Field Label · Accent Color  ·  text-[13px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-medium
+    "强调色"
+  Accent Swatches  ·  w-fit h-fit shrink-0 flex flex-row gap-[12px] justify-start items-center
+    Color Swatch 1  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+      Icon · Swatch Check {icon:check}  ·  w-[18px] shrink-0 h-[18px]
+  Color Swatch 2  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+  Color Swatch 3  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+  Color Swatch 4  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+  Color Swatch 5  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+  Color Swatch 6  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+Status Bar  ·  w-full h-[32px] shrink-0 flex flex-row gap-[20px] p-[0px_16px] justify-start items-center
+  Status Item · Engine  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "引擎就绪"
+  Status Item · Audio Driver  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "ASIO · 48 kHz · 缓冲区 512"
+  Status Bar Spacer  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+  Status Item · Latency  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "延迟 10.7 ms"
+  Status Item · Voices  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "复音 18/64"
+  Status Item · CPU  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "CPU 12%"

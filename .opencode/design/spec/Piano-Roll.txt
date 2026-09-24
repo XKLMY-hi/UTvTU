@@ -1,0 +1,477 @@
+# Piano-Roll.html — 命名元素 401 个，最大嵌套深度 7
+          "tailwind = { config: { corePlugins: { preflight: false } } };"
+          "*, ::before, ::after { box-sizing: border-box; } body { margin: 0; }"
+        Piano Roll · 钢琴窗  ·  w-[1440px] h-[900px] flex flex-col gap-0 justify-start items-start overflow-hidden
+          Top App Bar  ·  w-[1440px] h-[56px] shrink-0 flex flex-row gap-[16px] p-[0px_16px] justify-start items-center [border-width:0px_0px_1px_0px]
+            App Mark  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[8px]
+              Icon · App {icon:music}  ·  w-[20px] shrink-0 h-[20px]
+          Titles  ·  w-fit shrink-0 h-fit flex flex-row gap-[8px] justify-start items-center
+            App Wordmark  ·  text-[15px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold tracking-[0.5px] [white-space:nowrap]
+              "UTVTU"
+            Screen Label  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+              "钢琴卷帘"
+          Spacer · App Bar  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+          Transport  ·  w-fit shrink-0 h-fit flex flex-row gap-[4px] justify-start items-center
+            Skip Back  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+              Icon · Skip Back {icon:skip-back}  ·  w-[18px] shrink-0 h-[18px]
+          Play  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+            Icon · Play {icon:play}  ·  w-[18px] shrink-0 h-[18px]
+        Stop  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+          Icon · Stop {icon:square}  ·  w-[18px] shrink-0 h-[18px]
+      Record  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+        Record Dot  ·  w-[13px] shrink-0 h-[13px] rounded-full
+      Loop  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+        Icon · Loop {icon:repeat}  ·  w-[18px] shrink-0 h-[18px]
+  Time Display  ·  w-fit shrink-0 h-[40px] flex flex-col gap-0 p-[0px_14px] justify-center items-start rounded-[8px]
+    Time Value  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.5px] [white-space:nowrap]
+      "001 : 02 : 480"
+    Time Caption  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "小节·拍·拍分"
+  Session Info  ·  w-fit shrink-0 h-fit flex flex-row gap-[28px] justify-start items-center
+    TEMPO  ·  w-fit shrink-0 h-fit flex flex-col gap-[3px] justify-start items-start
+      TEMPO Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "速度"
+      TEMPO Value  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "120.00"
+    SIGNATURE  ·  w-fit shrink-0 h-fit flex flex-col gap-[3px] justify-start items-start
+      SIGNATURE Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "拍号"
+      SIGNATURE Value  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "4 / 4"
+    KEY  ·  w-fit shrink-0 h-fit flex flex-col gap-[3px] justify-start items-start
+      KEY Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "调性"
+      KEY Value  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "C 大调"
+  Session Controls  ·  w-fit shrink-0 h-fit flex flex-row gap-[8px] justify-start items-center
+    Metronome  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+      Icon · Metronome {icon:audio-lines}  ·  w-[18px] shrink-0 h-[18px]
+  MIDI Status  ·  w-fit shrink-0 h-fit flex flex-row gap-[6px] p-[6px_12px] justify-start items-center rounded-[999px]
+    MIDI Dot  ·  w-[8px] shrink-0 h-[8px] rounded-full
+    MIDI Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "MIDI 输入"
+  Master Volume  ·  w-fit shrink-0 h-fit flex flex-row gap-[8px] justify-start items-center
+    Icon · Volume {icon:volume-2}  ·  w-[18px] shrink-0 h-[18px]
+  Volume Track  ·  w-[84px] shrink-0 h-[4px] flex flex-row gap-0 justify-start items-start rounded-[999px]
+    Volume Fill  ·  w-[58px] shrink-0 h-[4px] rounded-[999px]
+  Volume Value  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "72%"
+Divider · Session Controls  ·  w-[1px] shrink-0 h-[24px]
+Minimize  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+  Icon · Minimize {icon:minus}  ·  w-[18px] shrink-0 h-[18px]
+Maximize  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+  Icon · Maximize {icon:square}  ·  w-[18px] shrink-0 h-[18px]
+Close  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+  Icon · Close {icon:x}  ·  w-[18px] shrink-0 h-[18px]
+Toolbar  ·  w-[1440px] h-[44px] shrink-0 flex flex-row gap-[12px] p-[0px_16px] justify-start items-center [border-width:0px_0px_1px_0px]
+  Tools  ·  w-fit shrink-0 h-fit flex flex-row gap-[2px] p-[2px] justify-start items-center rounded-[999px]
+    Select Tool  ·  w-[30px] shrink-0 h-[30px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+      Icon · Select Tool {icon:mouse-pointer-2}  ·  w-[16px] shrink-0 h-[16px]
+  Pencil Tool  ·  w-[30px] shrink-0 h-[30px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+    Icon · Pencil Tool {icon:pencil}  ·  w-[16px] shrink-0 h-[16px]
+Eraser Tool  ·  w-[30px] shrink-0 h-[30px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+  Icon · Eraser Tool {icon:eraser}  ·  w-[16px] shrink-0 h-[16px]
+Scissors Tool  ·  w-[30px] shrink-0 h-[30px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+  Icon · Scissors Tool {icon:scissors}  ·  w-[16px] shrink-0 h-[16px]
+Marquee Tool  ·  w-[30px] shrink-0 h-[30px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+  Icon · Marquee Tool {icon:scan}  ·  w-[16px] shrink-0 h-[16px]
+Divider 1 · Toolbar  ·  w-[1px] shrink-0 h-[24px]
+Snap  ·  w-fit shrink-0 h-fit flex flex-row gap-[6px] p-[6px_12px] justify-start items-center rounded-[999px]
+  Icon · Snap {icon:magnet}  ·  w-[15px] shrink-0 h-[15px]
+SNAP Chip  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "吸附 1/16"
+Grid Resolution  ·  w-fit shrink-0 h-fit flex flex-row gap-[6px] p-[6px_12px] justify-start items-center rounded-[999px]
+  Icon · Grid Resolution {icon:grid-3x3}  ·  w-[15px] shrink-0 h-[15px]
+Grid Resolution Chip  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "网格 1/16"
+Quantize  ·  w-fit shrink-0 h-fit flex flex-row gap-[6px] p-[6px_12px] justify-start items-center rounded-[999px]
+  Icon · Quantize {icon:equal}  ·  w-[15px] shrink-0 h-[15px]
+Quantize Chip  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "量化"
+Divider 2 · Toolbar  ·  w-[1px] shrink-0 h-[24px]
+Zoom  ·  w-fit shrink-0 h-fit flex flex-row gap-[4px] justify-start items-center
+  Zoom Out  ·  w-[30px] shrink-0 h-[30px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+    Icon · Zoom Out {icon:zoom-out}  ·  w-[16px] shrink-0 h-[16px]
+Zoom Value  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "100%"
+Zoom In  ·  w-[30px] shrink-0 h-[30px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+  Icon · Zoom In {icon:zoom-in}  ·  w-[16px] shrink-0 h-[16px]
+Spacer · Toolbar  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+Lyrics Toggle  ·  w-fit shrink-0 h-fit flex flex-row gap-[6px] p-[6px_12px] justify-start items-center rounded-[999px]
+  Icon · Lyrics Toggle {icon:music}  ·  w-[15px] shrink-0 h-[15px]
+Lyrics Toggle Chip  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "歌词"
+Phoneme Toggle  ·  w-fit shrink-0 h-fit flex flex-row gap-[6px] p-[6px_12px] justify-start items-center rounded-[999px]
+  Icon · Phoneme Toggle {icon:languages}  ·  w-[15px] shrink-0 h-[15px]
+Phoneme Toggle Chip  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "音素"
+More Options  ·  w-[30px] shrink-0 h-[30px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+  Icon · More Options {icon:menu}  ·  w-[16px] shrink-0 h-[16px]
+Piano Roll  ·  w-[1440px] flex flex-row gap-0 justify-start items-start
+  Keyboard Column  ·  w-[96px] shrink-0 h-full flex flex-col gap-0 justify-start items-start
+    Keys Header  ·  w-full h-[32px] shrink-0 flex flex-row gap-0 justify-center items-center [border-width:0px_0px_1px_0px]
+      Keys Range  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "C4 – B5"
+    Keys  ·  w-full h-[576px] shrink-0 relative
+      Piano Key · B5  ·  w-[96px] h-[24px] absolute left-0 top-0 [border-width:0px_0px_1px_0px]
+      Piano Key · A#5  ·  w-[96px] h-[24px] absolute left-0 top-[24px] [border-width:0px_0px_1px_0px]
+      Piano Key Black · A#5  ·  w-[60px] h-[22px] absolute left-0 top-[25px] rounded-[4px]
+      Piano Key · A5  ·  w-[96px] h-[24px] absolute left-0 top-[48px] [border-width:0px_0px_1px_0px]
+      Piano Key · G#5  ·  w-[96px] h-[24px] absolute left-0 top-[72px] [border-width:0px_0px_1px_0px]
+      Piano Key Black · G#5  ·  w-[60px] h-[22px] absolute left-0 top-[73px] rounded-[4px]
+      Piano Key · G5  ·  w-[96px] h-[24px] absolute left-0 top-[96px] [border-width:0px_0px_1px_0px]
+      Piano Key · F#5  ·  w-[96px] h-[24px] absolute left-0 top-[120px] [border-width:0px_0px_1px_0px]
+      Piano Key Black · F#5  ·  w-[60px] h-[22px] absolute left-0 top-[121px] rounded-[4px]
+      Piano Key · F5  ·  w-[96px] h-[24px] absolute left-0 top-[144px] [border-width:0px_0px_1px_0px]
+      Piano Key · E5  ·  w-[96px] h-[24px] absolute left-0 top-[168px] [border-width:0px_0px_1px_0px]
+      Piano Key · D#5  ·  w-[96px] h-[24px] absolute left-0 top-[192px] [border-width:0px_0px_1px_0px]
+      Piano Key Black · D#5  ·  w-[60px] h-[22px] absolute left-0 top-[193px] rounded-[4px]
+      Piano Key · D5  ·  w-[96px] h-[24px] absolute left-0 top-[216px] [border-width:0px_0px_1px_0px]
+      Piano Key · C#5  ·  w-[96px] h-[24px] absolute left-0 top-[240px] [border-width:0px_0px_1px_0px]
+      Piano Key Black · C#5  ·  w-[60px] h-[22px] absolute left-0 top-[241px] rounded-[4px]
+      Piano Key · C5  ·  w-[96px] h-[24px] absolute left-0 top-[264px] [border-width:0px_0px_1px_0px]
+      Piano Key Label · C5  ·  text-[10px]/[normal] absolute left-[58px] top-[270px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "C5"
+      Piano Key · B4  ·  w-[96px] h-[24px] absolute left-0 top-[288px] [border-width:0px_0px_1px_0px]
+      Piano Key · A#4  ·  w-[96px] h-[24px] absolute left-0 top-[312px] [border-width:0px_0px_1px_0px]
+      Piano Key Black · A#4  ·  w-[60px] h-[22px] absolute left-0 top-[313px] rounded-[4px]
+      Piano Key · A4  ·  w-[96px] h-[24px] absolute left-0 top-[336px] [border-width:0px_0px_1px_0px]
+      Piano Key · G#4  ·  w-[96px] h-[24px] absolute left-0 top-[360px] [border-width:0px_0px_1px_0px]
+      Piano Key Black · G#4  ·  w-[60px] h-[22px] absolute left-0 top-[361px] rounded-[4px]
+      Piano Key · G4  ·  w-[96px] h-[24px] absolute left-0 top-[384px] [border-width:0px_0px_1px_0px]
+      Piano Key · F#4  ·  w-[96px] h-[24px] absolute left-0 top-[408px] [border-width:0px_0px_1px_0px]
+      Piano Key Black · F#4  ·  w-[60px] h-[22px] absolute left-0 top-[409px] rounded-[4px]
+      Piano Key · F4  ·  w-[96px] h-[24px] absolute left-0 top-[432px] [border-width:0px_0px_1px_0px]
+      Piano Key · E4  ·  w-[96px] h-[24px] absolute left-0 top-[456px] [border-width:0px_0px_1px_0px]
+      Piano Key · D#4  ·  w-[96px] h-[24px] absolute left-0 top-[480px] [border-width:0px_0px_1px_0px]
+      Piano Key Black · D#4  ·  w-[60px] h-[22px] absolute left-0 top-[481px] rounded-[4px]
+      Piano Key · D4  ·  w-[96px] h-[24px] absolute left-0 top-[504px] [border-width:0px_0px_1px_0px]
+      Piano Key · C#4  ·  w-[96px] h-[24px] absolute left-0 top-[528px] [border-width:0px_0px_1px_0px]
+      Piano Key Black · C#4  ·  w-[60px] h-[22px] absolute left-0 top-[529px] rounded-[4px]
+      Piano Key · C4  ·  w-[96px] h-[24px] absolute left-0 top-[552px] [border-width:0px_0px_1px_0px]
+      Piano Key Label · C4  ·  text-[10px]/[normal] absolute left-[58px] top-[558px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "C4"
+  Timeline Column  ·  h-full flex flex-col gap-0 justify-start items-start
+    Time Ruler  ·  w-full h-[32px] shrink-0 relative
+      Loop Range  ·  w-[672px] h-[4px] absolute left-0 top-0
+      Loop Label  ·  text-[10px]/[normal] absolute left-[8px] top-[9px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "循环"
+      Bar Tick 1  ·  w-[1px] h-[28px] absolute left-0 top-[4px]
+      Bar Num 1  ·  text-[12px]/[normal] absolute left-[10px] top-[9px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "1"
+      Beat Tick 1.1  ·  w-[1px] h-[8px] absolute left-[84px] top-[24px]
+      Beat Tick 1.2  ·  w-[1px] h-[8px] absolute left-[168px] top-[24px]
+      Beat Tick 1.3  ·  w-[1px] h-[8px] absolute left-[252px] top-[24px]
+      Bar Tick 2  ·  w-[1px] h-[28px] absolute left-[336px] top-[4px]
+      Bar Num 2  ·  text-[12px]/[normal] absolute left-[346px] top-[9px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "2"
+      Beat Tick 2.1  ·  w-[1px] h-[8px] absolute left-[420px] top-[24px]
+      Beat Tick 2.2  ·  w-[1px] h-[8px] absolute left-[504px] top-[24px]
+      Beat Tick 2.3  ·  w-[1px] h-[8px] absolute left-[588px] top-[24px]
+      Bar Tick 3  ·  w-[1px] h-[28px] absolute left-[672px] top-[4px]
+      Bar Num 3  ·  text-[12px]/[normal] absolute left-[682px] top-[9px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "3"
+      Beat Tick 3.1  ·  w-[1px] h-[8px] absolute left-[756px] top-[24px]
+      Beat Tick 3.2  ·  w-[1px] h-[8px] absolute left-[840px] top-[24px]
+      Beat Tick 3.3  ·  w-[1px] h-[8px] absolute left-[924px] top-[24px]
+      Bar Tick 4  ·  w-[1px] h-[28px] absolute left-[1008px] top-[4px]
+      Bar Num 4  ·  text-[12px]/[normal] absolute left-[1018px] top-[9px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "4"
+      Beat Tick 4.1  ·  w-[1px] h-[8px] absolute left-[1092px] top-[24px]
+      Beat Tick 4.2  ·  w-[1px] h-[8px] absolute left-[1176px] top-[24px]
+      Beat Tick 4.3  ·  w-[1px] h-[8px] absolute left-[1260px] top-[24px]
+      Playhead Handle  ·  w-[16px] h-[9px] absolute left-[371px] top-0 rounded-[4px]
+      Playhead Line  ·  w-[2px] h-[32px] absolute left-[378px] top-0
+    Note Grid  ·  w-full h-[576px] shrink-0 overflow-hidden relative
+      Row Background 1  ·  w-[1344px] h-[24px] absolute left-0 top-0
+      Row Background 2  ·  w-[1344px] h-[24px] absolute left-0 top-[24px]
+      Row Background 3  ·  w-[1344px] h-[24px] absolute left-0 top-[48px]
+      Row Background 4  ·  w-[1344px] h-[24px] absolute left-0 top-[72px]
+      Row Background 5  ·  w-[1344px] h-[24px] absolute left-0 top-[96px]
+      Row Background 6  ·  w-[1344px] h-[24px] absolute left-0 top-[120px]
+      Row Background 7  ·  w-[1344px] h-[24px] absolute left-0 top-[144px]
+      Row Background 8  ·  w-[1344px] h-[24px] absolute left-0 top-[168px]
+      Row Background 9  ·  w-[1344px] h-[24px] absolute left-0 top-[192px]
+      Row Background 10  ·  w-[1344px] h-[24px] absolute left-0 top-[216px]
+      Row Background 11  ·  w-[1344px] h-[24px] absolute left-0 top-[240px]
+      Row Background 12  ·  w-[1344px] h-[24px] absolute left-0 top-[264px]
+      Row Background 13  ·  w-[1344px] h-[24px] absolute left-0 top-[288px]
+      Row Background 14  ·  w-[1344px] h-[24px] absolute left-0 top-[312px]
+      Row Background 15  ·  w-[1344px] h-[24px] absolute left-0 top-[336px]
+      Row Background 16  ·  w-[1344px] h-[24px] absolute left-0 top-[360px]
+      Row Background 17  ·  w-[1344px] h-[24px] absolute left-0 top-[384px]
+      Row Background 18  ·  w-[1344px] h-[24px] absolute left-0 top-[408px]
+      Row Background 19  ·  w-[1344px] h-[24px] absolute left-0 top-[432px]
+      Row Background 20  ·  w-[1344px] h-[24px] absolute left-0 top-[456px]
+      Row Background 21  ·  w-[1344px] h-[24px] absolute left-0 top-[480px]
+      Row Background 22  ·  w-[1344px] h-[24px] absolute left-0 top-[504px]
+      Row Background 23  ·  w-[1344px] h-[24px] absolute left-0 top-[528px]
+      Row Background 24  ·  w-[1344px] h-[24px] absolute left-0 top-[552px]
+      Octave Line 1  ·  w-[1344px] h-[1px] absolute left-0 top-0
+      Octave Line 2  ·  w-[1344px] h-[1px] absolute left-0 top-[288px]
+      Bar Line 1  ·  w-[2px] h-[576px] absolute left-0 top-0
+      Subdivision Line 1  ·  w-[1px] h-[576px] absolute left-[21px] top-0
+      Subdivision Line 2  ·  w-[1px] h-[576px] absolute left-[42px] top-0
+      Subdivision Line 3  ·  w-[1px] h-[576px] absolute left-[63px] top-0
+      Beat Line 1  ·  w-[1px] h-[576px] absolute left-[84px] top-0
+      Subdivision Line 4  ·  w-[1px] h-[576px] absolute left-[105px] top-0
+      Subdivision Line 5  ·  w-[1px] h-[576px] absolute left-[126px] top-0
+      Subdivision Line 6  ·  w-[1px] h-[576px] absolute left-[147px] top-0
+      Beat Line 2  ·  w-[1px] h-[576px] absolute left-[168px] top-0
+      Subdivision Line 7  ·  w-[1px] h-[576px] absolute left-[189px] top-0
+      Subdivision Line 8  ·  w-[1px] h-[576px] absolute left-[210px] top-0
+      Subdivision Line 9  ·  w-[1px] h-[576px] absolute left-[231px] top-0
+      Beat Line 3  ·  w-[1px] h-[576px] absolute left-[252px] top-0
+      Subdivision Line 10  ·  w-[1px] h-[576px] absolute left-[273px] top-0
+      Subdivision Line 11  ·  w-[1px] h-[576px] absolute left-[294px] top-0
+      Subdivision Line 12  ·  w-[1px] h-[576px] absolute left-[315px] top-0
+      Bar Line 2  ·  w-[2px] h-[576px] absolute left-[336px] top-0
+      Subdivision Line 13  ·  w-[1px] h-[576px] absolute left-[357px] top-0
+      Subdivision Line 14  ·  w-[1px] h-[576px] absolute left-[378px] top-0
+      Subdivision Line 15  ·  w-[1px] h-[576px] absolute left-[399px] top-0
+      Beat Line 4  ·  w-[1px] h-[576px] absolute left-[420px] top-0
+      Subdivision Line 16  ·  w-[1px] h-[576px] absolute left-[441px] top-0
+      Subdivision Line 17  ·  w-[1px] h-[576px] absolute left-[462px] top-0
+      Subdivision Line 18  ·  w-[1px] h-[576px] absolute left-[483px] top-0
+      Beat Line 5  ·  w-[1px] h-[576px] absolute left-[504px] top-0
+      Subdivision Line 19  ·  w-[1px] h-[576px] absolute left-[525px] top-0
+      Subdivision Line 20  ·  w-[1px] h-[576px] absolute left-[546px] top-0
+      Subdivision Line 21  ·  w-[1px] h-[576px] absolute left-[567px] top-0
+      Beat Line 6  ·  w-[1px] h-[576px] absolute left-[588px] top-0
+      Subdivision Line 22  ·  w-[1px] h-[576px] absolute left-[609px] top-0
+      Subdivision Line 23  ·  w-[1px] h-[576px] absolute left-[630px] top-0
+      Subdivision Line 24  ·  w-[1px] h-[576px] absolute left-[651px] top-0
+      Bar Line 3  ·  w-[2px] h-[576px] absolute left-[672px] top-0
+      Subdivision Line 25  ·  w-[1px] h-[576px] absolute left-[693px] top-0
+      Subdivision Line 26  ·  w-[1px] h-[576px] absolute left-[714px] top-0
+      Subdivision Line 27  ·  w-[1px] h-[576px] absolute left-[735px] top-0
+      Beat Line 7  ·  w-[1px] h-[576px] absolute left-[756px] top-0
+      Subdivision Line 28  ·  w-[1px] h-[576px] absolute left-[777px] top-0
+      Subdivision Line 29  ·  w-[1px] h-[576px] absolute left-[798px] top-0
+      Subdivision Line 30  ·  w-[1px] h-[576px] absolute left-[819px] top-0
+      Beat Line 8  ·  w-[1px] h-[576px] absolute left-[840px] top-0
+      Subdivision Line 31  ·  w-[1px] h-[576px] absolute left-[861px] top-0
+      Subdivision Line 32  ·  w-[1px] h-[576px] absolute left-[882px] top-0
+      Subdivision Line 33  ·  w-[1px] h-[576px] absolute left-[903px] top-0
+      Beat Line 9  ·  w-[1px] h-[576px] absolute left-[924px] top-0
+      Subdivision Line 34  ·  w-[1px] h-[576px] absolute left-[945px] top-0
+      Subdivision Line 35  ·  w-[1px] h-[576px] absolute left-[966px] top-0
+      Subdivision Line 36  ·  w-[1px] h-[576px] absolute left-[987px] top-0
+      Bar Line 4  ·  w-[2px] h-[576px] absolute left-[1008px] top-0
+      Subdivision Line 37  ·  w-[1px] h-[576px] absolute left-[1029px] top-0
+      Subdivision Line 38  ·  w-[1px] h-[576px] absolute left-[1050px] top-0
+      Subdivision Line 39  ·  w-[1px] h-[576px] absolute left-[1071px] top-0
+      Beat Line 10  ·  w-[1px] h-[576px] absolute left-[1092px] top-0
+      Subdivision Line 40  ·  w-[1px] h-[576px] absolute left-[1113px] top-0
+      Subdivision Line 41  ·  w-[1px] h-[576px] absolute left-[1134px] top-0
+      Subdivision Line 42  ·  w-[1px] h-[576px] absolute left-[1155px] top-0
+      Beat Line 11  ·  w-[1px] h-[576px] absolute left-[1176px] top-0
+      Subdivision Line 43  ·  w-[1px] h-[576px] absolute left-[1197px] top-0
+      Subdivision Line 44  ·  w-[1px] h-[576px] absolute left-[1218px] top-0
+      Subdivision Line 45  ·  w-[1px] h-[576px] absolute left-[1239px] top-0
+      Beat Line 12  ·  w-[1px] h-[576px] absolute left-[1260px] top-0
+      Subdivision Line 46  ·  w-[1px] h-[576px] absolute left-[1281px] top-0
+      Subdivision Line 47  ·  w-[1px] h-[576px] absolute left-[1302px] top-0
+      Subdivision Line 48  ·  w-[1px] h-[576px] absolute left-[1323px] top-0
+      Note 1 · き  ·  w-[39px] h-[20px] absolute left-[1.5px] top-[266px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · き  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "き"
+      Note 2 · ら  ·  w-[39px] h-[20px] absolute left-[43.5px] top-[218px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · ら  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "ら"
+      Note 3 · き  ·  w-[39px] h-[20px] absolute left-[85.5px] top-[170px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · き  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "き"
+      Note 4 · ら  ·  w-[39px] h-[20px] absolute left-[127.5px] top-[218px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · ら  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "ら"
+      Note 5 · ひ  ·  w-[39px] h-[20px] absolute left-[169.5px] top-[266px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · ひ  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "ひ"
+      Note 6 · か  ·  w-[39px] h-[20px] absolute left-[211.5px] top-[218px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · か  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "か"
+      Note 7 · る  ·  w-[81px] h-[20px] absolute left-[253.5px] top-[170px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · る  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "る"
+      Note 8 · ほ  ·  w-[39px] h-[20px] absolute left-[337.5px] top-[170px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · ほ  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "ほ"
+      Note 9 · し  ·  w-[39px] h-[20px] absolute left-[379.5px] top-[146px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · し  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "し"
+      Note 10 · よ  ·  w-[39px] h-[20px] absolute left-[421.5px] top-[98px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · よ  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "よ"
+      Note 11 · そ  ·  w-[39px] h-[20px] absolute left-[463.5px] top-[50px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · そ  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "そ"
+      Note 12 · ら  ·  w-[39px] h-[20px] absolute left-[505.5px] top-[98px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · ら  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "ら"
+      Note 13 · の  ·  w-[123px] h-[20px] absolute left-[547.5px] top-[146px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · の  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "の"
+      Note 14 · め  ·  w-[39px] h-[20px] absolute left-[673.5px] top-[98px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · め  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "め"
+      Note 15 · を  ·  w-[39px] h-[20px] absolute left-[715.5px] top-[146px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · を  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "を"
+      Note 16 · あ  ·  w-[39px] h-[20px] absolute left-[757.5px] top-[170px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · あ  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "あ"
+      Note 17 · け  ·  w-[39px] h-[20px] absolute left-[799.5px] top-[218px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · け  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "け"
+      Note 18 · て  ·  w-[39px] h-[20px] absolute left-[841.5px] top-[266px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · て  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "て"
+      Note 19 · ー  ·  w-[123px] h-[20px] absolute left-[883.5px] top-[218px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · ー  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "ー"
+      Note 20 · き  ·  w-[39px] h-[20px] absolute left-[1009.5px] top-[50px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · き  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "き"
+      Note 21 · み  ·  w-[39px] h-[20px] absolute left-[1051.5px] top-[98px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · み  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "み"
+      Note 22 · に  ·  w-[39px] h-[20px] absolute left-[1093.5px] top-[170px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · に  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "に"
+      Note 23 · の  ·  w-[39px] h-[20px] absolute left-[1135.5px] top-[218px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · の  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "の"
+      Note 24 · せ  ·  w-[39px] h-[20px] absolute left-[1177.5px] top-[266px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · せ  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "せ"
+      Note 25 · か  ·  w-[39px] h-[20px] absolute left-[1219.5px] top-[290px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · か  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "か"
+      Note 26 · い  ·  w-[81px] h-[20px] absolute left-[1261.5px] top-[338px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · い  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "い"
+      Note 27 · la  ·  w-[165px] h-[20px] absolute left-[673.5px] top-[386px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · la  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "la"
+      Note 28 · oo  ·  w-[165px] h-[20px] absolute left-[841.5px] top-[338px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · oo  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "oo"
+      Note 29 · mm  ·  w-[333px] h-[20px] absolute left-[1009.5px] top-[386px] flex flex-row gap-0 justify-center items-center rounded-[4px] overflow-hidden
+        Lyric Note · mm  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.2px] [white-space:nowrap]
+          "mm"
+      Playhead  ·  w-[2px] h-[576px] absolute left-[378px] top-0
+Parameter Header  ·  w-[1440px] h-[40px] shrink-0 flex flex-row gap-[12px] p-[0px_16px] justify-start items-center [border-width:0px_0px_1px_0px]
+  Icon · Parameter {icon:sliders-horizontal}  ·  w-[16px] shrink-0 h-[16px]
+Parameter Title  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+  "表情与参数轨"
+Header Divider  ·  w-[1px] shrink-0 h-[20px]
+Parameter Hint  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "绘制曲线 · 双击添加控制点"
+Spacer · Parameter Header  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+Pitch Chip  ·  w-fit shrink-0 h-fit flex flex-row gap-[6px] p-[5px_12px] justify-start items-center rounded-[999px]
+  Pitch Chip Dot  ·  w-[8px] shrink-0 h-[8px] rounded-full
+  Pitch Chip Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "弯音"
+Velocity Chip  ·  w-fit shrink-0 h-fit flex flex-row gap-[6px] p-[5px_12px] justify-start items-center rounded-[999px]
+  Velocity Chip Dot  ·  w-[8px] shrink-0 h-[8px] rounded-full
+  Velocity Chip Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "力度"
+Dynamics Chip  ·  w-fit shrink-0 h-fit flex flex-row gap-[6px] p-[5px_12px] justify-start items-center rounded-[999px]
+  Dynamics Chip Dot  ·  w-[8px] shrink-0 h-[8px] rounded-full
+  Dynamics Chip Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "动态"
+Parameter Body  ·  w-[1440px] h-[120px] shrink-0 flex flex-row gap-0 justify-start items-start
+  Parameter Gutter  ·  w-[96px] shrink-0 h-full flex flex-col gap-0 justify-start items-start [border-width:0px_1px_0px_0px]
+    Param Gutter · PITCH  ·  w-full h-[40px] shrink-0 flex flex-row gap-[6px] p-[0px_10px] justify-start items-center [border-width:0px_0px_1px_0px]
+      Icon · PITCH {icon:audio-waveform}  ·  w-[14px] shrink-0 h-[14px]
+    Param Label · PITCH  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "音高"
+  Param Gutter · VELOCITY  ·  w-full h-[40px] shrink-0 flex flex-row gap-[6px] p-[0px_10px] justify-start items-center [border-width:0px_0px_1px_0px]
+    Icon · VELOCITY {icon:signal}  ·  w-[14px] shrink-0 h-[14px]
+  Param Label · VELOCITY  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "力度"
+Param Gutter · DYNAMICS  ·  w-full h-[40px] shrink-0 flex flex-row gap-[6px] p-[0px_10px] justify-start items-center [border-width:0px_0px_1px_0px]
+  Icon · DYNAMICS {icon:activity}  ·  w-[14px] shrink-0 h-[14px]
+Param Label · DYNAMICS  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "动态"
+Parameter Canvas  ·  h-full flex flex-col gap-0 justify-start items-start
+  Param Lane · Pitch  ·  w-full h-[40px] shrink-0 [border-width:1px_0px_0px_0px] overflow-hidden relative
+    Pitch Lane Bar 1  ·  w-[1px] h-[40px] absolute left-[336px] top-0
+    Pitch Lane Bar 2  ·  w-[1px] h-[40px] absolute left-[672px] top-0
+    Pitch Lane Bar 3  ·  w-[1px] h-[40px] absolute left-[1008px] top-0
+    Pitch Center  ·  w-[1344px] h-[1px] absolute left-0 top-[20px]
+    Pitch Curve  ·  w-[1344px] h-[40px] absolute left-0 top-0 overflow-visible
+  Pitch Point  ·  w-[6px] h-[6px] absolute left-[375px] top-[22.293px] rounded-full
+  Param Playhead  ·  w-[1px] h-[40px] absolute left-[378px] top-0
+Param Lane · Velocity  ·  w-full h-[40px] shrink-0 [border-width:1px_0px_0px_0px] overflow-hidden relative
+  Velocity Lane Bar 1  ·  w-[1px] h-[40px] absolute left-[336px] top-0
+  Velocity Lane Bar 2  ·  w-[1px] h-[40px] absolute left-[672px] top-0
+  Velocity Lane Bar 3  ·  w-[1px] h-[40px] absolute left-[1008px] top-0
+  Velocity Bar 1  ·  w-[4px] h-[19px] absolute left-[9px] top-[21px] rounded-[4px]
+  Velocity Bar 2  ·  w-[4px] h-[26px] absolute left-[51px] top-[14px] rounded-[4px]
+  Velocity Bar 3  ·  w-[4px] h-[13px] absolute left-[93px] top-[27px] rounded-[4px]
+  Velocity Bar 4  ·  w-[4px] h-[20px] absolute left-[135px] top-[20px] rounded-[4px]
+  Velocity Bar 5  ·  w-[4px] h-[27px] absolute left-[177px] top-[13px] rounded-[4px]
+  Velocity Bar 6  ·  w-[4px] h-[14px] absolute left-[219px] top-[26px] rounded-[4px]
+  Velocity Bar 7  ·  w-[4px] h-[21px] absolute left-[261px] top-[19px] rounded-[4px]
+  Velocity Bar 8  ·  w-[4px] h-[28px] absolute left-[345px] top-[12px] rounded-[4px]
+  Velocity Bar 9  ·  w-[4px] h-[15px] absolute left-[387px] top-[25px] rounded-[4px]
+  Velocity Bar 10  ·  w-[4px] h-[22px] absolute left-[429px] top-[18px] rounded-[4px]
+  Velocity Bar 11  ·  w-[4px] h-[29px] absolute left-[471px] top-[11px] rounded-[4px]
+  Velocity Bar 12  ·  w-[4px] h-[16px] absolute left-[513px] top-[24px] rounded-[4px]
+  Velocity Bar 13  ·  w-[4px] h-[23px] absolute left-[555px] top-[17px] rounded-[4px]
+  Velocity Bar 14  ·  w-[4px] h-[30px] absolute left-[681px] top-[10px] rounded-[4px]
+  Velocity Bar 15  ·  w-[4px] h-[17px] absolute left-[723px] top-[23px] rounded-[4px]
+  Velocity Bar 16  ·  w-[4px] h-[24px] absolute left-[765px] top-[16px] rounded-[4px]
+  Velocity Bar 17  ·  w-[4px] h-[31px] absolute left-[807px] top-[9px] rounded-[4px]
+  Velocity Bar 18  ·  w-[4px] h-[18px] absolute left-[849px] top-[22px] rounded-[4px]
+  Velocity Bar 19  ·  w-[4px] h-[25px] absolute left-[891px] top-[15px] rounded-[4px]
+  Velocity Bar 20  ·  w-[4px] h-[12px] absolute left-[1017px] top-[28px] rounded-[4px]
+  Velocity Bar 21  ·  w-[4px] h-[19px] absolute left-[1059px] top-[21px] rounded-[4px]
+  Velocity Bar 22  ·  w-[4px] h-[26px] absolute left-[1101px] top-[14px] rounded-[4px]
+  Velocity Bar 23  ·  w-[4px] h-[13px] absolute left-[1143px] top-[27px] rounded-[4px]
+  Velocity Bar 24  ·  w-[4px] h-[20px] absolute left-[1185px] top-[20px] rounded-[4px]
+  Velocity Bar 25  ·  w-[4px] h-[27px] absolute left-[1227px] top-[13px] rounded-[4px]
+  Velocity Bar 26  ·  w-[4px] h-[14px] absolute left-[1269px] top-[26px] rounded-[4px]
+Param Lane · Dynamics  ·  w-full h-[40px] shrink-0 [border-width:1px_0px_0px_0px] overflow-hidden relative
+  Dynamics Lane Bar 1  ·  w-[1px] h-[40px] absolute left-[336px] top-0
+  Dynamics Lane Bar 2  ·  w-[1px] h-[40px] absolute left-[672px] top-0
+  Dynamics Lane Bar 3  ·  w-[1px] h-[40px] absolute left-[1008px] top-0
+  Dynamics Area  ·  w-[1344px] h-[40px] absolute left-0 top-0 overflow-visible
+Dyn Playhead  ·  w-[1px] h-[40px] absolute left-[378px] top-0
+Status Bar  ·  w-[1440px] h-[32px] shrink-0 flex flex-row gap-[20px] p-[0px_16px] justify-between items-center [border-width:1px_0px_0px_0px]
+  Status Left  ·  w-fit shrink-0 h-fit flex flex-row gap-[10px] justify-start items-center
+    Icon · Track {icon:music}  ·  w-[14px] shrink-0 h-[14px]
+  Track Name  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "轨道 01 · Teto_UTAU"
+  Separator 1 · Status Left  ·  w-[1px] shrink-0 h-[12px]
+  Note &amp; Bar Count  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "29 音符 · 2 小节"
+  Separator 2 · Status Left  ·  w-[1px] shrink-0 h-[12px]
+  Engine &amp; Language  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "UTAU · 日语"
+  Separator 3 · Status Left  ·  w-[1px] shrink-0 h-[12px]
+  Modified Timestamp  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "修改于 12:04:33"
+Status Right  ·  w-fit shrink-0 h-fit flex flex-row gap-[10px] justify-start items-center
+  Status Chip · Grid  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "网格 1/16"
+  Separator 1 · Status Right  ·  w-[1px] shrink-0 h-[12px]
+  Status Chip · Snap  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "吸附 开"
+  Separator 2 · Status Right  ·  w-[1px] shrink-0 h-[12px]
+  Status Chip · BPM  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.5px] [white-space:nowrap]
+    "120.00 BPM"
+  Separator 3 · Status Right  ·  w-[1px] shrink-0 h-[12px]
+  Status Chip · Signature  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.5px] [white-space:nowrap]
+    "4/4"
+  Separator 4 · Status Right  ·  w-[1px] shrink-0 h-[12px]
+  Status Chip · Tuning  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.5px] [white-space:nowrap]
+    "440 Hz"
+  Separator 5 · Status Right  ·  w-[1px] shrink-0 h-[12px]
+  Icon · Cpu {icon:cpu}  ·  w-[13px] shrink-0 h-[13px]
+CPU Track  ·  w-[48px] shrink-0 h-[4px] flex flex-row gap-0 justify-start items-start rounded-[999px]
+  CPU Fill  ·  w-[18px] shrink-0 h-[4px] rounded-[999px]
+CPU Value  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "36%"

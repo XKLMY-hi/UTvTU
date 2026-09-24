@@ -1,0 +1,2005 @@
+<!doctype html>
+<!--
+  ============================================================
+  UTVTU · READ-ME-FIRST
+  UTVTU · VST Plugin · VST界面  —  1440 x 900 static spec  (Simplified Chinese UI)
+  ============================================================
+  How to read this file:
+   · Structure map  : every element carries data-pencil-name="<layer name>"
+   · Layout         : Tailwind utility classes; sizes are absolute px at 1440x900
+                      fill_container -> w-full / h-full / flex-1
+                      fit_content    -> w-fit / h-fit
+                      flex-col = layout:vertical , flex-row = layout:horizontal
+   · Colors         : resolved hex in the markup -> map back to tokens
+   · Font           : 'Noto Sans SC'  (--md3-font / --md3-font-display / --md3-font-mono)
+   · Icons          : inlined <svg> with data-icon-name / data-icon-set (lucide)
+   · Tokens         : ../tokens.css , ../tokens.json , ../README.md
+                      #0E1513 --md3-surface      #1A211F --md3-surface-container
+                      #DDE4E1 --md3-on-surface   #BEC9C5 --md3-on-surface-variant
+                      #6FDBCB --md3-primary      #005046 --md3-primary-container
+                      #3F4947 --md3-outline-variant   #FF8400 --primary
+
+  Page outline (top levels):
+   · VST Plugin · VST界面
+     - Top App Bar
+       - Plugin Mark
+       - Title Cluster · Plugin
+       - Preset Field
+       - AB Compare
+       - Title Spacer
+       - Pin Button
+       - Minimize Button
+       - Maximize Button
+       - Close Button
+     - Plugin Toolbar
+       - Tab Bar · Main
+       - Toolbar Spacer
+       - Status Chip · MIDI
+       - Status Chip · Voices
+       - Status Chip · CPU
+     - Plugin Content
+       - Singer Panel
+       - Editor Column
+       - Effects Panel
+     - Status Bar
+       - Status Item · Format
+       - Status Item · Latency
+       - Status Spacer
+       - Status Item · Voices
+       - Status Item · CPU
+       - Status Item · Preset
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      tailwind = { config: { corePlugins: { preflight: false } } };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC%3Awght%40100..900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *, ::before, ::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body style="background-color: #0E1513">
+    <div
+      data-pencil-name="VST Plugin · VST界面"
+      class="box-border w-[1440px] h-[900px] flex flex-col gap-0 justify-start items-start bg-[#0E1513] overflow-hidden"
+    >
+      <div
+        data-pencil-name="Top App Bar"
+        class="box-border w-full h-[56px] shrink-0 flex flex-row gap-[14px] p-[0px_16px] justify-start items-center bg-[#1A211F]"
+      >
+        <div
+          data-pencil-name="Plugin Mark"
+          class="box-border w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center bg-[#005046] rounded-[8px]"
+        >
+          <svg
+            data-pencil-name="Icon · Plugin Mark"
+            data-icon-name="mic"
+            data-icon-set="lucide"
+            viewBox="0 0 13.99993896484375 14"
+            preserveAspectRatio="xMidYMid meet"
+            xmlns="http://www.w3.org/2000/svg"
+            class="box-border w-[20px] shrink-0 h-[20px]"
+          >
+            <path
+              d="M6.90088 0.58789q-0.64258 0.02734-1.18262 0.38623-0.53662 0.35547-0.80322 0.92969-0.14014 0.28027-0.19824 0.54687-0.02734 0.0957-0.02735 0.4751l-0.01367 4.40918 0.04102 0.16748q0.19824 0.78613 0.75879 1.26123 0.43408 0.36572 1.02197 0.51953 0.10938 0.02734 0.1914 0.03418 0.08545 0.00684 0.31104 0.00684 0.28027 0 0.43408-0.02734 0.15381-0.02734 0.3794-0.1128 0.46143-0.16748 0.82373-0.52295 0.36572-0.35889 0.54687-0.83398 0.04102-0.12646 0.08545-0.29395l0.05469-0.1709 0-4.15625q0-0.48877-0.02734-0.68701-0.01367-0.12646-0.07178-0.29394l-0.01367-0.02735q-0.23584-0.70068-0.80323-1.13476-0.56738-0.43408-1.30908-0.4751l-0.19824 0z m0.33838 1.18945q0.29395 0.05811 0.52978 0.26661 0.23926 0.2085 0.32129 0.47509 0.04443 0.12646 0.06494 0.3042 0.02051 0.17432 0.00684 2.25928l0 1.77734q-0.01367 0.36572-0.02734 0.43409-0.08545 0.29395-0.31788 0.52636-0.229 0.229-0.52294 0.31446-0.11279 0.02734-0.29395 0.02734-0.18115 0-0.29395-0.02734-0.30762-0.08545-0.5332-0.31446-0.22217-0.23242-0.30762-0.52636-0.01367-0.06836-0.02734-0.43409l0-1.77734q-0.01367-2.08496 0-2.26953 0.04102-0.30762 0.19482-0.54346 0.19824-0.29395 0.52637-0.42724 0.32813-0.1333 0.68018-0.06495z m-4.46729 3.48633q-0.14014 0.04102-0.2666 0.16748-0.0957 0.08545-0.1333 0.17774-0.03418 0.08887-0.03418 0.31445-0.01367 0.18115 0 0.69727 0 0.61865 0.01367 0.83056 0.01367 0.2085 0.08545 0.51612 0.0957 0.4751 0.31104 0.96044 0.21875 0.48193 0.52636 0.88526 0.46484 0.60156 1.09375 1.03564 0.62891 0.43408 1.35694 0.646 0.40674 0.11279 0.63232 0.12646l0.05469 0.01368 0.01367 0.70068q0 0.41699 0.01367 0.52978 0 0.16748 0.02735 0.22559 0.03076 0.05469 0.11279 0.14014l0.01367 0.01367q0.16748 0.16748 0.40674 0.16748 0.23926 0 0.40674-0.16748l0.01367-0.01367q0.08203-0.08545 0.10938-0.14014 0.03076-0.05811 0.03076-0.22559 0.01367-0.11279 0.01367-0.52978l0.01367-0.70068 0.05469-0.01368q0.04443 0 0.22558-0.04443 1.06299-0.19482 1.92432-0.8374 0.86133-0.646 1.3501-1.59619 0.36572-0.71436 0.49219-1.54151 0.02734-0.19482 0.02734-0.96386 0.01367-0.5332 0-0.70069 0-0.23926-0.0376-0.32812-0.03418-0.09229-0.12988-0.17774-0.18115-0.19482-0.44775-0.17431-0.2666 0.02051-0.42042 0.23242-0.09912 0.10938-0.11279 0.24267-0.01367 0.1333-0.01367 0.70752 0 0.54688-0.01367 0.78614-0.01367 0.23584-0.05469 0.47509-0.08545 0.38965-0.27685 0.79639-0.18799 0.40674-0.46827 0.72803-0.48877 0.60156-1.17578 0.92627-0.71436 0.34863-1.51074 0.34863-0.79639 0-1.52441-0.34863-0.49219-0.23926-0.88526-0.61866-0.9502-0.90918-1.07666-2.21142-0.01367-0.19482-0.01367-0.88184 0-0.57422-0.01367-0.69726-0.01367-0.12646-0.08545-0.23926-0.0957-0.14014-0.28027-0.2085-0.18115-0.07178-0.34864-0.03076z"
+              fill="#8CF8E7"
+            ></path>
+          </svg>
+        </div>
+        <div
+          data-pencil-name="Title Cluster · Plugin"
+          class="box-border w-fit shrink-0 h-fit flex flex-row gap-[8px] justify-start items-center"
+        >
+          <div
+            data-pencil-name="Plugin Wordmark"
+            class="text-[15px]/[normal] box-border text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold tracking-[0.5px] text-left [white-space:nowrap]"
+          >
+            UTVTU
+          </div>
+          <div
+            data-pencil-name="Plugin Subtitle"
+            class="text-[11px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+          >
+            VST 编辑器
+          </div>
+        </div>
+        <div
+          data-pencil-name="Preset Field"
+          class="box-border w-[300px] shrink-0 h-[40px] flex flex-row gap-[8px] p-[0px_12px] justify-start items-center bg-[#090F0E] rounded-[8px]"
+        >
+          <div
+            data-pencil-name="Field Label · Preset"
+            class="text-[9px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+          >
+            预设
+          </div>
+          <div
+            data-pencil-name="Field Value · Preset"
+            class="text-[12px]/[normal] box-border text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+          >
+            Kasane Teto — 柔和
+          </div>
+          <div
+            data-pencil-name="Preset Spacer"
+            class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+          ></div>
+          <svg
+            data-pencil-name="Icon · Preset Chevron"
+            data-icon-name="chevron-down"
+            data-icon-set="lucide"
+            viewBox="0 0 13.99993896484375 14"
+            preserveAspectRatio="xMidYMid meet"
+            xmlns="http://www.w3.org/2000/svg"
+            class="box-border w-[16px] shrink-0 h-[16px]"
+          >
+            <path
+              d="M3.34619 4.68945q-0.25293 0.08545-0.37939 0.30762-0.04102 0.08545-0.04102 0.25293 0 0.16748 0.04785 0.25977 0.05127 0.08887 1.8628 1.9038 1.81494 1.81152 1.9038 1.8628 0.09229 0.04785 0.25977 0.04785 0.16748 0 0.25635-0.04785 0.09229-0.05127 1.90381-1.8628 1.81494-1.81494 1.86279-1.9038 0.05127-0.09229 0.05127-0.25977 0-0.16748-0.04102-0.25293-0.09912-0.16748-0.28027-0.2666-0.05811-0.02734-0.09912-0.04102-0.04102-0.01367-0.15381-0.01367-0.11279 0-0.15381 0.01367-0.04101 0.01367-0.11279 0.04102-0.09912 0.05811-1.66455 1.62695l-1.56885 1.56543-2.82666-2.81299q-0.31104-0.29395-0.42041-0.37939-0.08545-0.05469-0.19824-0.05469l-0.02735 0q-0.14014 0-0.18115 0.01367z"
+              fill="#BEC9C5"
+            ></path>
+          </svg>
+        </div>
+        <div
+          data-pencil-name="AB Compare"
+          class="box-border w-fit shrink-0 h-[32px] flex flex-row gap-[3px] p-[3px] justify-start items-center bg-[#090F0E] rounded-[8px]"
+        >
+          <div
+            data-pencil-name="Compare Slot · A"
+            class="box-border w-[34px] shrink-0 h-[26px] flex flex-row gap-0 justify-center items-center bg-[#334B46] rounded-[4px]"
+          >
+            <div
+              data-pencil-name="Slot Label · A"
+              class="text-[11px]/[normal] box-border text-[#CCE8E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+            >
+              A
+            </div>
+          </div>
+          <div
+            data-pencil-name="Compare Slot · B"
+            class="box-border w-[34px] shrink-0 h-[26px] flex flex-row gap-0 justify-center items-center bg-[#00000000] rounded-[4px]"
+          >
+            <div
+              data-pencil-name="Slot Label · B"
+              class="text-[11px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+            >
+              B
+            </div>
+          </div>
+        </div>
+        <div
+          data-pencil-name="Title Spacer"
+          class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+        ></div>
+        <div
+          data-pencil-name="Pin Button"
+          class="box-border w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center bg-[#00000000] rounded-[999px]"
+        >
+          <svg
+            data-pencil-name="Icon · Pin"
+            data-icon-name="pin"
+            data-icon-set="lucide"
+            viewBox="0 0 13.99993896484375 14"
+            preserveAspectRatio="xMidYMid meet"
+            xmlns="http://www.w3.org/2000/svg"
+            class="box-border w-[18px] shrink-0 h-[18px]"
+          >
+            <path
+              d="M4.49463 0.60156q-0.30762 0.02734-0.60156 0.16748-0.32471 0.16748-0.56397 0.44776-0.23584 0.28027-0.34863 0.64599-0.02734 0.11279-0.04102 0.18457-0.01367 0.06836-0.01367 0.27686 0 0.25293 0.02051 0.37256 0.02051 0.11621 0.10596 0.31445 0.18115 0.43408 0.58789 0.73486 0.40674 0.30078 0.86816 0.32813l0.16748 0.01367 0 1.07666q0 1.09375-0.02051 1.19287-0.02051 0.0957-0.04785 0.18115-0.05811 0.11279-0.1914 0.20508-0.1333 0.08887-0.63575 0.3418-0.64258 0.33496-0.7417 0.40332-0.23926 0.18457-0.41357 0.44434-0.17432 0.25635-0.24609 0.56396-0.02734 0.11279-0.03418 0.20508-0.00684 0.08887-0.00684 0.41357 0 0.32129 0.00684 0.39991 0.00684 0.0752 0.03418 0.17089 0.08545 0.22559 0.24609 0.40674 0.16064 0.18115 0.35547 0.28028l0.01709 0.01367q0.12305 0.0581 0.22217 0.08545 0.12646 0.01367 0.46142 0.02734l2.74463 0 0 2.29688q0 0.18115 0.03418 0.2666 0.0376 0.08203 0.11963 0.16748 0.08545 0.08203 0.18799 0.1333 0.10596 0.04785 0.23242 0.04785 0.12646 0 0.229-0.04785 0.10596-0.05127 0.18799-0.1333 0.08545-0.08545 0.11963-0.16748 0.0376-0.08545 0.0376-0.2666l0-2.29688 2.74463 0q0.33496-0.01367 0.46142-0.02734 0.09912-0.02734 0.22217-0.08545l0.01709-0.01367q0.19482-0.09912 0.35547-0.28028 0.16065-0.18115 0.24609-0.40674 0.02734-0.0957 0.03418-0.1709 0.00684-0.07861 0.00684-0.3999 0-0.32471-0.00684-0.41357-0.00683-0.09229-0.03418-0.20508-0.07178-0.30762-0.24609-0.56396-0.17432-0.25977-0.41357-0.44434-0.09912-0.06836-0.7417-0.40332-0.50244-0.25293-0.63575-0.3418-0.1333-0.09229-0.1914-0.20508-0.02734-0.08545-0.04785-0.18115-0.02051-0.09912-0.02051-1.19287l0-1.07666 0.16748-0.01367q0.46143-0.02734 0.86816-0.32813 0.40674-0.30078 0.58789-0.73486 0.08545-0.21191 0.10596-0.32129 0.02051-0.11279 0.02051-0.36572-0.01367-0.2085-0.02051-0.27686-0.00684-0.07178-0.03418-0.18457-0.11279-0.36572-0.35205-0.64599-0.23584-0.28027-0.56055-0.44776-0.29395-0.14014-0.6289-0.16748-0.18115-0.02734-2.49854-0.02734-2.31738 0-2.48486 0.02734z m5.08252 1.20313q0.33496 0.15381 0.33496 0.5332 0 0.2666-0.18457 0.42725-0.18115 0.16064-0.4751 0.16064-0.08203 0-0.22217 0.0376-0.14014 0.03418-0.25293 0.08887-0.14014 0.08545-0.27343 0.21875-0.1333 0.12988-0.20166 0.28369l-0.01368 0.03076q-0.07178 0.12305-0.08544 0.2085-0.02734 0.11279-0.02735 0.39306l0 2.40625 0.05469 0.15381q0.19824 0.63232 0.68701 0.96729 0.11279 0.06836 0.72119 0.38623 0.6084 0.31445 0.67676 0.37939 0.07178 0.06152 0.12988 0.15723 0.02734 0.07178 0.03418 0.12646 0.00684 0.05469 0.02051 0.2666l0 0.29395-7 0 0-0.29395q0.01367-0.21191 0.02051-0.2666 0.00684-0.05469 0.03418-0.12646 0.05811-0.0957 0.12646-0.16407 0.07178-0.07178 0.68018-0.37939 0.6084-0.31104 0.72119-0.37939 0.48877-0.33496 0.68701-0.96729l0.05469-0.15381 0-2.40625q0-0.28027-0.02735-0.39306-0.01367-0.08545-0.08544-0.2085l-0.01368-0.03076q-0.06836-0.15381-0.20166-0.28369-0.1333-0.1333-0.27343-0.21875-0.11279-0.05469-0.25293-0.08887-0.14014-0.0376-0.22217-0.0376-0.43408 0-0.58789-0.32129-0.12646-0.25293-0.01709-0.50928 0.11279-0.25977 0.37939-0.33154 0.06836-0.01367 2.50537-0.01367l2.45069 0.01367 0.09912 0.04102z"
+              fill="#BEC9C5"
+            ></path>
+          </svg>
+        </div>
+        <div
+          data-pencil-name="Minimize Button"
+          class="box-border w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center bg-[#00000000] rounded-[999px]"
+        >
+          <svg
+            data-pencil-name="Icon · Minimize"
+            data-icon-name="minus"
+            data-icon-set="lucide"
+            viewBox="0 0 13.99993896484375 14"
+            preserveAspectRatio="xMidYMid meet"
+            xmlns="http://www.w3.org/2000/svg"
+            class="box-border w-[18px] shrink-0 h-[18px]"
+          >
+            <path
+              d="M2.73096 6.45313q-0.23926 0.08545-0.34522 0.3247-0.10254 0.23584-0.00683 0.46143 0.05811 0.0957 0.14013 0.18115 0.08545 0.08203 0.18457 0.12647l0.09571 0.02734 8.40136 0 0.09571-0.02734q0.09912-0.04443 0.18115-0.12647 0.08545-0.08545 0.1333-0.18799 0.05127-0.10596 0.05127-0.23242 0-0.12646-0.04102-0.23926-0.09912-0.19482-0.29394-0.29394l-0.08545-0.04102-4.22803 0q-4.22803 0-4.28271 0.02735z"
+              fill="#BEC9C5"
+            ></path>
+          </svg>
+        </div>
+        <div
+          data-pencil-name="Maximize Button"
+          class="box-border w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center bg-[#00000000] rounded-[999px]"
+        >
+          <svg
+            data-pencil-name="Icon · Maximize"
+            data-icon-name="square"
+            data-icon-set="lucide"
+            viewBox="0 0 13.99993896484375 14"
+            preserveAspectRatio="xMidYMid meet"
+            xmlns="http://www.w3.org/2000/svg"
+            class="box-border w-[18px] shrink-0 h-[18px]"
+          >
+            <path
+              d="M2.60449 1.20313q-0.50586 0.08545-0.87842 0.43749-0.36914 0.34863-0.50927 0.86475-0.02734 0.08545-0.02735 0.71436l-0.01367 3.78027 0.01367 3.78027q0 0.62891 0.02735 0.71436 0.14014 0.48877 0.46826 0.82031 0.33154 0.32813 0.82031 0.46826 0.08545 0.02734 0.71436 0.02735l3.78027 0.01367 3.78027-0.01367q0.62891 0 0.71436-0.02735 0.48877-0.14014 0.81689-0.46826 0.33154-0.33154 0.47168-0.82031 0.02734-0.08545 0.02735-0.71436l0.01367-3.78027-0.01367-3.78027q0-0.62891-0.02735-0.71436-0.12646-0.48877-0.458-0.81689-0.32813-0.33154-0.80323-0.47168l-0.14013-0.04102-4.32715 0q-4.3374 0-4.4502 0.02734z m8.70899 1.17578q0.2085 0.09912 0.30761 0.30761l0.04102 0.09912 0 8.42871-0.04102 0.09913q-0.14014 0.27685-0.43408 0.33496-0.09912 0.02734-4.18701 0.02734-4.08789 0-4.18701-0.02734-0.29395-0.05811-0.43408-0.33496l-0.04102-0.09913 0-8.42871 0.04102-0.09912q0.07178-0.14014 0.18798-0.229 0.11963-0.09229 0.25977-0.11963 0.08545 0 4.22803 0l4.15967 0 0.09912 0.04102z"
+              fill="#BEC9C5"
+            ></path>
+          </svg>
+        </div>
+        <div
+          data-pencil-name="Close Button"
+          class="box-border w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center bg-[#00000000] rounded-[999px]"
+        >
+          <svg
+            data-pencil-name="Icon · Close"
+            data-icon-name="x"
+            data-icon-set="lucide"
+            viewBox="0 0 13.99993896484375 14"
+            preserveAspectRatio="xMidYMid meet"
+            xmlns="http://www.w3.org/2000/svg"
+            class="box-border w-[18px] shrink-0 h-[18px]"
+          >
+            <path
+              d="M3.34619 2.93945q-0.25293 0.08545-0.37939 0.30762-0.04102 0.08545-0.04102 0.25293 0 0.16748 0.04102 0.25293 0.04443 0.08203 1.62353 1.66455l1.58252 1.58252-1.58252 1.58252q-1.5791 1.58252-1.62353 1.66797-0.04102 0.08203-0.04102 0.23584 0 0.15381 0.03418 0.23926 0.0376 0.08203 0.1333 0.18115 0.09912 0.0957 0.18115 0.1333 0.08545 0.03418 0.23926 0.03418 0.15381 0 0.23584-0.04102 0.08545-0.04443 1.66797-1.62353l1.58252-1.58252 1.58252 1.58252q1.58252 1.5791 1.66455 1.62353 0.08545 0.04102 0.23926 0.04102 0.15381 0 0.23584-0.03418 0.08545-0.0376 0.18115-0.1333 0.09912-0.09912 0.1333-0.18115 0.0376-0.08545 0.0376-0.23926 0-0.15381-0.04443-0.23584-0.04101-0.08545-1.62012-1.66797l-1.58252-1.58252 1.58252-1.58252q1.5791-1.58252 1.62012-1.66455 0.04443-0.08545 0.04443-0.25293 0-0.16748-0.04102-0.25293-0.09912-0.16748-0.28027-0.2666-0.05811-0.02734-0.09912-0.04102-0.04102-0.01367-0.15381-0.01367-0.11279 0-0.15381 0.01367-0.04101 0.01367-0.11279 0.04102-0.09912 0.05811-1.66455 1.62695l-1.56885 1.56543-2.82666-2.81299q-0.31104-0.29395-0.42041-0.37939-0.08545-0.05469-0.19824-0.05469l-0.02735 0q-0.14014 0-0.18115 0.01367z"
+              fill="#BEC9C5"
+            ></path>
+          </svg>
+        </div>
+      </div>
+      <div
+        data-pencil-name="Plugin Toolbar"
+        class="box-border w-full h-[44px] shrink-0 flex flex-row gap-[12px] p-[0px_16px] justify-start items-center bg-[#1A211F]"
+      >
+        <div
+          data-pencil-name="Tab Bar · Main"
+          class="box-border w-fit shrink-0 h-[36px] flex flex-row gap-[3px] p-[3px] justify-start items-center bg-[#090F0E] rounded-[999px]"
+        >
+          <div
+            data-pencil-name="Tab · Edit"
+            class="box-border w-fit shrink-0 h-[30px] flex flex-row gap-0 p-[0px_18px] justify-center items-center bg-[#334B46] rounded-[999px]"
+          >
+            <div
+              data-pencil-name="Tab Label · Edit"
+              class="text-[11px]/[normal] box-border text-[#CCE8E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+            >
+              编辑
+            </div>
+          </div>
+          <div
+            data-pencil-name="Tab · Voice"
+            class="box-border w-fit shrink-0 h-[30px] flex flex-row gap-0 p-[0px_18px] justify-center items-center bg-[#00000000] rounded-[999px]"
+          >
+            <div
+              data-pencil-name="Tab Label · Voice"
+              class="text-[11px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+            >
+              声音
+            </div>
+          </div>
+          <div
+            data-pencil-name="Tab · FX"
+            class="box-border w-fit shrink-0 h-[30px] flex flex-row gap-0 p-[0px_18px] justify-center items-center bg-[#00000000] rounded-[999px]"
+          >
+            <div
+              data-pencil-name="Tab Label · FX"
+              class="text-[11px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+            >
+              效果
+            </div>
+          </div>
+          <div
+            data-pencil-name="Tab · Matrix"
+            class="box-border w-fit shrink-0 h-[30px] flex flex-row gap-0 p-[0px_18px] justify-center items-center bg-[#00000000] rounded-[999px]"
+          >
+            <div
+              data-pencil-name="Tab Label · Matrix"
+              class="text-[11px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+            >
+              矩阵
+            </div>
+          </div>
+        </div>
+        <div
+          data-pencil-name="Toolbar Spacer"
+          class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+        ></div>
+        <div
+          data-pencil-name="Status Chip · MIDI"
+          class="box-border w-fit shrink-0 h-[28px] flex flex-row gap-[6px] p-[0px_12px] justify-start items-center bg-[#090F0E] rounded-[999px]"
+        >
+          <div
+            data-pencil-name="Chip Key · MIDI"
+            class="text-[9px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.8px] text-left [white-space:nowrap]"
+          >
+            MIDI
+          </div>
+          <div
+            data-pencil-name="Chip Value · MIDI Input"
+            class="text-[11px]/[normal] box-border text-[#6FDBCB] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+          >
+            输入
+          </div>
+        </div>
+        <div
+          data-pencil-name="Status Chip · Voices"
+          class="box-border w-fit shrink-0 h-[28px] flex flex-row gap-[6px] p-[0px_12px] justify-start items-center bg-[#090F0E] rounded-[999px]"
+        >
+          <div
+            data-pencil-name="Chip Key · Voices"
+            class="text-[9px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+          >
+            声部
+          </div>
+          <div
+            data-pencil-name="Chip Value · Voices"
+            class="text-[11px]/[normal] box-border text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+          >
+            12/64
+          </div>
+        </div>
+        <div
+          data-pencil-name="Status Chip · CPU"
+          class="box-border w-fit shrink-0 h-[28px] flex flex-row gap-[6px] p-[0px_12px] justify-start items-center bg-[#090F0E] rounded-[999px]"
+        >
+          <div
+            data-pencil-name="Chip Key · CPU"
+            class="text-[9px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.8px] text-left [white-space:nowrap]"
+          >
+            CPU
+          </div>
+          <div
+            data-pencil-name="Chip Value · CPU"
+            class="text-[11px]/[normal] box-border text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+          >
+            8%
+          </div>
+        </div>
+      </div>
+      <div
+        data-pencil-name="Plugin Content"
+        class="box-border w-full [flex:1_1_0] flex flex-row gap-[16px] p-[16px] justify-start items-start bg-[#0E1513]"
+      >
+        <div
+          data-pencil-name="Singer Panel"
+          class="box-border w-[260px] shrink-0 h-full flex flex-col gap-[12px] p-[16px] justify-start items-start bg-[#1A211F] rounded-[16px]"
+        >
+          <div
+            data-pencil-name="Singer Header"
+            class="box-border w-full h-fit shrink-0 flex flex-row gap-0 justify-start items-center"
+          >
+            <div
+              data-pencil-name="Section Title · Singer"
+              class="text-[10px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+            >
+              歌手 / 音源
+            </div>
+            <div
+              data-pencil-name="Header Spacer · Singer"
+              class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+            ></div>
+            <div
+              data-pencil-name="Singer Count"
+              class="text-[10px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+            >
+              12
+            </div>
+          </div>
+          <div
+            data-pencil-name="Search Field · Singer"
+            class="box-border w-full h-[40px] shrink-0 flex flex-row gap-[8px] p-[0px_12px] justify-start items-center bg-[#090F0E] rounded-[999px]"
+          >
+            <svg
+              data-pencil-name="Icon · Search"
+              data-icon-name="search"
+              data-icon-set="lucide"
+              viewBox="0 0 13.99993896484375 14"
+              preserveAspectRatio="xMidYMid meet"
+              xmlns="http://www.w3.org/2000/svg"
+              class="box-border w-[16px] shrink-0 h-[16px]"
+            >
+              <path
+                d="M6.00537 1.17578q-0.04102 0.01367-0.23584 0.02734-0.57422 0.07178-1.16211 0.29053-0.58789 0.21533-1.09375 0.5503-0.39307 0.2666-0.74853 0.61181-0.35547 0.3418-0.62207 0.7041-0.646 0.92285-0.86817 2.03028-0.05811 0.28027-0.07861 0.46142-0.02051 0.18115-0.02051 0.57422 0 0.43408 0.02734 0.68018 0.02734 0.24268 0.12647 0.59472 0.19482 0.75537 0.60156 1.43555 0.40674 0.67676 0.96729 1.18262 0.40674 0.3623 0.81689 0.60156 0.41357 0.23926 0.91944 0.43408 1.06299 0.39307 2.21826 0.29395 1.15527-0.09912 2.1499-0.65967 0.12646-0.06836 0.33496-0.2085 0.2085-0.14014 0.29395-0.21191l0.05468-0.05469 1.10743 1.10742q1.12109 1.104 1.20312 1.15528 0.08545 0.04785 0.23926 0.04785 0.15381 0 0.23584-0.03418 0.08545-0.0376 0.18115-0.1333 0.09912-0.09912 0.1333-0.18115 0.0376-0.08545 0.0376-0.23926 0-0.15381-0.05127-0.23584-0.04785-0.08545-1.15186-1.20654l-1.10742-1.10743 0.05469-0.06836q0.05811-0.05469 0.19824-0.25293 0.82373-1.23047 0.89209-2.70703 0.07178-1.47656-0.63916-2.76513-0.5332-0.96729-1.42187-1.64405-0.88867-0.68018-1.95508-0.9331-0.29395-0.06836-0.54004-0.09571-0.24268-0.03076-0.60498-0.04443-0.43408 0-0.49219 0z m0.7417 1.17578q0.37939 0.01367 0.79297 0.14014 0.41357 0.12646 0.78955 0.32129 0.7417 0.39307 1.28857 1.08008 0.54687 0.68359 0.75538 1.49707 0.07178 0.28027 0.09228 0.49902 0.02051 0.21533 0.02051 0.50928 0 0.70068-0.19483 1.30224-0.39307 1.16211-1.33984 1.91065-0.94336 0.74853-2.16016 0.875-0.19824 0.01367-0.49218 0.00683-0.29395-0.00684-0.48877-0.03418-0.5332-0.08545-1.03907-0.30761-0.50244-0.22559-0.93652-0.56055-0.14014-0.12646-0.35205-0.3418-0.2085-0.21875-0.33154-0.37256-0.57422-0.76904-0.7417-1.69531-0.08545-0.43408-0.06494-0.90918 0.02051-0.4751 0.11963-0.89551 0.29395-1.14844 1.18945-1.95849 0.89551-0.81348 2.05762-1.02539 0.18115-0.02734 0.42041-0.04102 0.23926-0.01367 0.34863-0.01367l0.2666 0.01367z"
+                fill="#BEC9C5"
+              ></path>
+            </svg>
+            <div
+              data-pencil-name="Search Placeholder"
+              class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+            >
+              搜索音源
+            </div>
+          </div>
+          <div
+            data-pencil-name="Singer List"
+            class="box-border w-full h-fit shrink-0 flex flex-col gap-[4px] justify-start items-start"
+          >
+            <div
+              data-pencil-name="Singer List Item · Kasane Teto"
+              class="box-border w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center bg-[#334B46] rounded-[8px]"
+            >
+              <div
+                data-pencil-name="Singer Status Dot · Kasane Teto"
+                class="box-border w-[10px] shrink-0 h-[10px] bg-[#6FDBCB] rounded-full"
+              ></div>
+              <div
+                data-pencil-name="Singer Info · Kasane Teto"
+                class="box-border w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start"
+              >
+                <div
+                  data-pencil-name="Singer Name · Kasane Teto"
+                  class="text-[12px]/[normal] box-border text-[#CCE8E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  Kasane Teto
+                </div>
+                <div
+                  data-pencil-name="Singer Meta · Kasane Teto"
+                  class="text-[9px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  JA · 女声
+                </div>
+              </div>
+              <div
+                data-pencil-name="Singer Item Spacer · Kasane Teto"
+                class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+              ></div>
+              <svg
+                data-pencil-name="Icon · Selected Marker"
+                data-icon-name="check"
+                data-icon-set="lucide"
+                viewBox="0 0 13.99993896484375 14"
+                preserveAspectRatio="xMidYMid meet"
+                xmlns="http://www.w3.org/2000/svg"
+                class="box-border w-[16px] shrink-0 h-[16px]"
+              >
+                <path
+                  d="M11.48096 2.95313q-0.07178 0.01367-0.12989 0.0581-0.05469 0.04102-3.07617 3.06592l-3.0249 3.00781-1.28857-1.28857q-1.28857-1.28516-1.38086-1.32618-0.08887-0.04443-0.22217-0.04443-0.1333 0-0.23242 0.0376-0.0957 0.03418-0.18799 0.11279-0.08887 0.0752-0.1333 0.1709-0.02734 0.07178-0.03418 0.11279-0.00684 0.04102-0.00684 0.14014l0 0.04102q-0.01367 0.11279 0.04102 0.19824 0.07178 0.10938 0.36572 0.40332 0.19482 0.21191 0.96729 0.98096l1.49707 1.48339q0.28027 0.2666 0.38964 0.33838 0.07178 0.05469 0.18457 0.04102l0.09571 0.01367q0.07178 0 0.14013-0.02734 0.08545-0.07178 0.32129-0.28711 0.23926-0.21875 0.79981-0.76221l2.2832-2.2832q2.08496-2.09863 2.7002-2.71387 0.61524-0.61865 0.64599-0.68701 0.04102-0.08545 0.04102-0.23926 0-0.09912-0.00684-0.14014-0.00684-0.04102-0.03418-0.11279-0.04443-0.08203-0.13672-0.16406-0.08887-0.08545-0.18115-0.11963-0.08887-0.0376-0.20849-0.0376-0.11963 0-0.18799 0.02734z"
+                  fill="#6FDBCB"
+                ></path>
+              </svg>
+            </div>
+            <div
+              data-pencil-name="Singer List Item · Momone Momo"
+              class="box-border w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center bg-[#00000000] rounded-[8px]"
+            >
+              <div
+                data-pencil-name="Singer Status Dot · Momone Momo"
+                class="box-border w-[10px] shrink-0 h-[10px] bg-[#F3C97E] rounded-full"
+              ></div>
+              <div
+                data-pencil-name="Singer Info · Momone Momo"
+                class="box-border w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start"
+              >
+                <div
+                  data-pencil-name="Singer Name · Momone Momo"
+                  class="text-[12px]/[normal] box-border text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  Momone Momo
+                </div>
+                <div
+                  data-pencil-name="Singer Meta · Momone Momo"
+                  class="text-[9px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  JA · 女声
+                </div>
+              </div>
+              <div
+                data-pencil-name="Singer Item Spacer · Momone Momo"
+                class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+              ></div>
+            </div>
+            <div
+              data-pencil-name="Singer List Item · Namine Ritsu"
+              class="box-border w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center bg-[#00000000] rounded-[8px]"
+            >
+              <div
+                data-pencil-name="Singer Status Dot · Namine Ritsu"
+                class="box-border w-[10px] shrink-0 h-[10px] bg-[#F3C97E] rounded-full"
+              ></div>
+              <div
+                data-pencil-name="Singer Info · Namine Ritsu"
+                class="box-border w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start"
+              >
+                <div
+                  data-pencil-name="Singer Name · Namine Ritsu"
+                  class="text-[12px]/[normal] box-border text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  Namine Ritsu
+                </div>
+                <div
+                  data-pencil-name="Singer Meta · Namine Ritsu"
+                  class="text-[9px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  JA · 男声
+                </div>
+              </div>
+              <div
+                data-pencil-name="Singer Item Spacer · Namine Ritsu"
+                class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+              ></div>
+            </div>
+            <div
+              data-pencil-name="Singer List Item · Yowane Haku"
+              class="box-border w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center bg-[#00000000] rounded-[8px]"
+            >
+              <div
+                data-pencil-name="Singer Status Dot · Yowane Haku"
+                class="box-border w-[10px] shrink-0 h-[10px] bg-[#FFB4AB] rounded-full"
+              ></div>
+              <div
+                data-pencil-name="Singer Info · Yowane Haku"
+                class="box-border w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start"
+              >
+                <div
+                  data-pencil-name="Singer Name · Yowane Haku"
+                  class="text-[12px]/[normal] box-border text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  Yowane Haku
+                </div>
+                <div
+                  data-pencil-name="Singer Meta · Yowane Haku"
+                  class="text-[9px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  JA · 女声
+                </div>
+              </div>
+              <div
+                data-pencil-name="Singer Item Spacer · Yowane Haku"
+                class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+              ></div>
+            </div>
+            <div
+              data-pencil-name="Singer List Item · Nova DS"
+              class="box-border w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center bg-[#00000000] rounded-[8px]"
+            >
+              <div
+                data-pencil-name="Singer Status Dot · Nova DS"
+                class="box-border w-[10px] shrink-0 h-[10px] bg-[#FFB4AB] rounded-full"
+              ></div>
+              <div
+                data-pencil-name="Singer Info · Nova DS"
+                class="box-border w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start"
+              >
+                <div
+                  data-pencil-name="Singer Name · Nova DS"
+                  class="text-[12px]/[normal] box-border text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  Nova DS
+                </div>
+                <div
+                  data-pencil-name="Singer Meta · Nova DS"
+                  class="text-[9px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  JA · 女声
+                </div>
+              </div>
+              <div
+                data-pencil-name="Singer Item Spacer · Nova DS"
+                class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+              ></div>
+            </div>
+            <div
+              data-pencil-name="Singer List Item · Defoko"
+              class="box-border w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center bg-[#00000000] rounded-[8px]"
+            >
+              <div
+                data-pencil-name="Singer Status Dot · Defoko"
+                class="box-border w-[10px] shrink-0 h-[10px] bg-[#A9CBE7] rounded-full"
+              ></div>
+              <div
+                data-pencil-name="Singer Info · Defoko"
+                class="box-border w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start"
+              >
+                <div
+                  data-pencil-name="Singer Name · Defoko"
+                  class="text-[12px]/[normal] box-border text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  Defoko
+                </div>
+                <div
+                  data-pencil-name="Singer Meta · Defoko"
+                  class="text-[9px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  JA · 男声
+                </div>
+              </div>
+              <div
+                data-pencil-name="Singer Item Spacer · Defoko"
+                class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+              ></div>
+            </div>
+            <div
+              data-pencil-name="Singer List Item · Akita Neru"
+              class="box-border w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center bg-[#00000000] rounded-[8px]"
+            >
+              <div
+                data-pencil-name="Singer Status Dot · Akita Neru"
+                class="box-border w-[10px] shrink-0 h-[10px] bg-[#9BE3A8] rounded-full"
+              ></div>
+              <div
+                data-pencil-name="Singer Info · Akita Neru"
+                class="box-border w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start"
+              >
+                <div
+                  data-pencil-name="Singer Name · Akita Neru"
+                  class="text-[12px]/[normal] box-border text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  Akita Neru
+                </div>
+                <div
+                  data-pencil-name="Singer Meta · Akita Neru"
+                  class="text-[9px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  JA · 女声
+                </div>
+              </div>
+              <div
+                data-pencil-name="Singer Item Spacer · Akita Neru"
+                class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+              ></div>
+            </div>
+            <div
+              data-pencil-name="Singer List Item · Aria DS"
+              class="box-border w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center bg-[#00000000] rounded-[8px]"
+            >
+              <div
+                data-pencil-name="Singer Status Dot · Aria DS"
+                class="box-border w-[10px] shrink-0 h-[10px] bg-[#C9B8E8] rounded-full"
+              ></div>
+              <div
+                data-pencil-name="Singer Info · Aria DS"
+                class="box-border w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start"
+              >
+                <div
+                  data-pencil-name="Singer Name · Aria DS"
+                  class="text-[12px]/[normal] box-border text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  Aria DS
+                </div>
+                <div
+                  data-pencil-name="Singer Meta · Aria DS"
+                  class="text-[9px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  JA · 女声
+                </div>
+              </div>
+              <div
+                data-pencil-name="Singer Item Spacer · Aria DS"
+                class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+              ></div>
+            </div>
+            <div
+              data-pencil-name="Singer List Item · Kira DS"
+              class="box-border w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center bg-[#00000000] rounded-[8px]"
+            >
+              <div
+                data-pencil-name="Singer Status Dot · Kira DS"
+                class="box-border w-[10px] shrink-0 h-[10px] bg-[#A9CBE7] rounded-full"
+              ></div>
+              <div
+                data-pencil-name="Singer Info · Kira DS"
+                class="box-border w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start"
+              >
+                <div
+                  data-pencil-name="Singer Name · Kira DS"
+                  class="text-[12px]/[normal] box-border text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  Kira DS
+                </div>
+                <div
+                  data-pencil-name="Singer Meta · Kira DS"
+                  class="text-[9px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  JA · 男声
+                </div>
+              </div>
+              <div
+                data-pencil-name="Singer Item Spacer · Kira DS"
+                class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+              ></div>
+            </div>
+            <div
+              data-pencil-name="Singer List Item · Ren DS"
+              class="box-border w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center bg-[#00000000] rounded-[8px]"
+            >
+              <div
+                data-pencil-name="Singer Status Dot · Ren DS"
+                class="box-border w-[10px] shrink-0 h-[10px] bg-[#9BE3A8] rounded-full"
+              ></div>
+              <div
+                data-pencil-name="Singer Info · Ren DS"
+                class="box-border w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start"
+              >
+                <div
+                  data-pencil-name="Singer Name · Ren DS"
+                  class="text-[12px]/[normal] box-border text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  Ren DS
+                </div>
+                <div
+                  data-pencil-name="Singer Meta · Ren DS"
+                  class="text-[9px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  EN · 男声
+                </div>
+              </div>
+              <div
+                data-pencil-name="Singer Item Spacer · Ren DS"
+                class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+              ></div>
+            </div>
+            <div
+              data-pencil-name="Singer List Item · Sora DS"
+              class="box-border w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center bg-[#00000000] rounded-[8px]"
+            >
+              <div
+                data-pencil-name="Singer Status Dot · Sora DS"
+                class="box-border w-[10px] shrink-0 h-[10px] bg-[#A9CBE7] rounded-full"
+              ></div>
+              <div
+                data-pencil-name="Singer Info · Sora DS"
+                class="box-border w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start"
+              >
+                <div
+                  data-pencil-name="Singer Name · Sora DS"
+                  class="text-[12px]/[normal] box-border text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  Sora DS
+                </div>
+                <div
+                  data-pencil-name="Singer Meta · Sora DS"
+                  class="text-[9px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  EN · 男声
+                </div>
+              </div>
+              <div
+                data-pencil-name="Singer Item Spacer · Sora DS"
+                class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+              ></div>
+            </div>
+            <div
+              data-pencil-name="Singer List Item · Hana DS"
+              class="box-border w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center bg-[#00000000] rounded-[8px]"
+            >
+              <div
+                data-pencil-name="Singer Status Dot · Hana DS"
+                class="box-border w-[10px] shrink-0 h-[10px] bg-[#FFB4AB] rounded-full"
+              ></div>
+              <div
+                data-pencil-name="Singer Info · Hana DS"
+                class="box-border w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start"
+              >
+                <div
+                  data-pencil-name="Singer Name · Hana DS"
+                  class="text-[12px]/[normal] box-border text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  Hana DS
+                </div>
+                <div
+                  data-pencil-name="Singer Meta · Hana DS"
+                  class="text-[9px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                >
+                  EN · 女声
+                </div>
+              </div>
+              <div
+                data-pencil-name="Singer Item Spacer · Hana DS"
+                class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+              ></div>
+            </div>
+          </div>
+        </div>
+        <div
+          data-pencil-name="Editor Column"
+          class="box-border w-[816px] shrink-0 h-full flex flex-col gap-[14px] justify-start items-start bg-[#00000000]"
+        >
+          <div
+            data-pencil-name="Voice Character"
+            class="box-border w-[816px] h-fit shrink-0 flex flex-col gap-[12px] p-[16px] justify-start items-start bg-[#1A211F] rounded-[16px]"
+          >
+            <div
+              data-pencil-name="Voice Header"
+              class="box-border w-full h-fit shrink-0 flex flex-row gap-0 justify-start items-center"
+            >
+              <div
+                data-pencil-name="Section Title · Voice Character"
+                class="text-[11px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+              >
+                音色特征
+              </div>
+              <div
+                data-pencil-name="Header Spacer · Voice Character"
+                class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+              ></div>
+              <div
+                data-pencil-name="Preset Button · Default"
+                class="box-border w-fit shrink-0 h-[24px] flex flex-row gap-0 p-[0px_12px] justify-center items-center bg-[#005046] rounded-[999px]"
+              >
+                <div
+                  data-pencil-name="Button Label · Default"
+                  class="text-[9px]/[normal] box-border text-[#8CF8E7] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+                >
+                  默认
+                </div>
+              </div>
+              <div
+                data-pencil-name="Preset Button · Init"
+                class="box-border w-fit shrink-0 h-[24px] flex flex-row gap-0 p-[0px_12px] justify-center items-center bg-[#252B2A] rounded-[999px]"
+              >
+                <div
+                  data-pencil-name="Button Label · Init"
+                  class="text-[9px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+                >
+                  初始化
+                </div>
+              </div>
+            </div>
+            <div
+              data-pencil-name="Knob Row · Voice Character"
+              class="box-border w-full h-fit shrink-0 flex flex-row gap-0 justify-between items-start"
+            >
+              <div
+                data-pencil-name="Knob · Breath"
+                class="box-border w-[72px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center"
+              >
+                <div
+                  data-pencil-name="Dial · Breath"
+                  class="box-border w-[56px] h-[56px] shrink-0 relative"
+                >
+                  <div
+                    data-pencil-name="Dial Base · Breath"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#2F3634] [outline:1px_solid_#3F4947] [outline-offset:-0.5px] rounded-full [z-index:0]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Track · Breath"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#3F4947] [clip-path:path('M8.201_47.799_C2.95_42.548_0_35.426_0_28_C0_12.536_12.536_0_28_0_C43.464_0_56_12.536_56_28_C56_35.426_53.05_42.548_47.799_47.799_L43.443_43.443_C47.539_39.347_49.84_33.792_49.84_28_C49.84_15.938_40.062_6.16_28_6.16_C15.938_6.16_6.16_15.938_6.16_28_C6.16_33.792_8.461_39.347_12.557_43.443_L8.201_47.799_Z')] [z-index:1]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Value · Breath"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#6FDBCB] [clip-path:path('M8.201_47.799_C2.95_42.548_0_35.426_0_28_C0_12.536_12.536_0_28_0_C33.313_0_38.517_1.512_43.003_4.359_L39.702_9.56_C36.203_7.339_32.144_6.16_28_6.16_C15.938_6.16_6.16_15.938_6.16_28_C6.16_33.792_8.461_39.347_12.557_43.443_L8.201_47.799_Z')] [z-index:2]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Dot · Breath"
+                    class="box-border w-[6px] h-[6px] absolute left-[37.303px] top-[5.614px] bg-[#DDE4E1] rounded-full [z-index:3]"
+                  ></div>
+                </div>
+                <div
+                  data-pencil-name="Param Label · Breath"
+                  class="text-[9px]/[normal] box-border w-[72px] text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  气息
+                </div>
+                <div
+                  data-pencil-name="Param Value · Breath"
+                  class="text-[11px]/[normal] box-border w-[72px] text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  62
+                </div>
+              </div>
+              <div
+                data-pencil-name="Knob · Bright"
+                class="box-border w-[72px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center"
+              >
+                <div
+                  data-pencil-name="Dial · Bright"
+                  class="box-border w-[56px] h-[56px] shrink-0 relative"
+                >
+                  <div
+                    data-pencil-name="Dial Base · Bright"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#2F3634] [outline:1px_solid_#3F4947] [outline-offset:-0.5px] rounded-full [z-index:0]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Track · Bright"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#3F4947] [clip-path:path('M8.201_47.799_C2.95_42.548_0_35.426_0_28_C0_12.536_12.536_0_28_0_C43.464_0_56_12.536_56_28_C56_35.426_53.05_42.548_47.799_47.799_L43.443_43.443_C47.539_39.347_49.84_33.792_49.84_28_C49.84_15.938_40.062_6.16_28_6.16_C15.938_6.16_6.16_15.938_6.16_28_C6.16_33.792_8.461_39.347_12.557_43.443_L8.201_47.799_Z')] [z-index:1]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Value · Bright"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#6FDBCB] [clip-path:path('M8.201_47.799_C2.95_42.548_0_35.426_0_28_C0_12.536_12.536_0_28_0_C30.202_0_32.396_0.26_34.536_0.774_L33.098_6.763_C31.429_6.363_29.717_6.16_28_6.16_C15.938_6.16_6.16_15.938_6.16_28_C6.16_33.792_8.461_39.347_12.557_43.443_L8.201_47.799_Z')] [z-index:2]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Dot · Bright"
+                    class="box-border w-[6px] h-[6px] absolute left-[30.36px] top-[2.674px] bg-[#DDE4E1] rounded-full [z-index:3]"
+                  ></div>
+                </div>
+                <div
+                  data-pencil-name="Param Label · Bright"
+                  class="text-[9px]/[normal] box-border w-[72px] text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  明亮
+                </div>
+                <div
+                  data-pencil-name="Param Value · Bright"
+                  class="text-[11px]/[normal] box-border w-[72px] text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  55
+                </div>
+              </div>
+              <div
+                data-pencil-name="Knob · Clear"
+                class="box-border w-[72px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center"
+              >
+                <div
+                  data-pencil-name="Dial · Clear"
+                  class="box-border w-[56px] h-[56px] shrink-0 relative"
+                >
+                  <div
+                    data-pencil-name="Dial Base · Clear"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#2F3634] [outline:1px_solid_#3F4947] [outline-offset:-0.5px] rounded-full [z-index:0]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Track · Clear"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#3F4947] [clip-path:path('M8.201_47.799_C2.95_42.548_0_35.426_0_28_C0_12.536_12.536_0_28_0_C43.464_0_56_12.536_56_28_C56_35.426_53.05_42.548_47.799_47.799_L43.443_43.443_C47.539_39.347_49.84_33.792_49.84_28_C49.84_15.938_40.062_6.16_28_6.16_C15.938_6.16_6.16_15.938_6.16_28_C6.16_33.792_8.461_39.347_12.557_43.443_L8.201_47.799_Z')] [z-index:1]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Value · Clear"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#6FDBCB] [clip-path:path('M8.201_47.799_C2.95_42.548_0_35.426_0_28_C0_13.557_10.986_1.483_25.365_0.124_L25.945_6.257_C14.729_7.317_6.16_16.734_6.16_28_C6.16_33.792_8.461_39.347_12.557_43.443_L8.201_47.799_Z')] [z-index:2]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Dot · Clear"
+                    class="box-border w-[6px] h-[6px] absolute left-[22.839px] top-[2.142px] bg-[#DDE4E1] rounded-full [z-index:3]"
+                  ></div>
+                </div>
+                <div
+                  data-pencil-name="Param Label · Clear"
+                  class="text-[9px]/[normal] box-border w-[72px] text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  清晰
+                </div>
+                <div
+                  data-pencil-name="Param Value · Clear"
+                  class="text-[11px]/[normal] box-border w-[72px] text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  48
+                </div>
+              </div>
+              <div
+                data-pencil-name="Knob · Gender"
+                class="box-border w-[72px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center"
+              >
+                <div
+                  data-pencil-name="Dial · Gender"
+                  class="box-border w-[56px] h-[56px] shrink-0 relative"
+                >
+                  <div
+                    data-pencil-name="Dial Base · Gender"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#2F3634] [outline:1px_solid_#3F4947] [outline-offset:-0.5px] rounded-full [z-index:0]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Track · Gender"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#3F4947] [clip-path:path('M8.201_47.799_C2.95_42.548_0_35.426_0_28_C0_12.536_12.536_0_28_0_C43.464_0_56_12.536_56_28_C56_35.426_53.05_42.548_47.799_47.799_L43.443_43.443_C47.539_39.347_49.84_33.792_49.84_28_C49.84_15.938_40.062_6.16_28_6.16_C15.938_6.16_6.16_15.938_6.16_28_C6.16_33.792_8.461_39.347_12.557_43.443_L8.201_47.799_Z')] [z-index:1]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Value · Gender"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#6FDBCB] [clip-path:path('M8.201_47.799_C2.95_42.548_0_35.426_0_28_C0_17.471_5.907_7.832_15.288_3.052_L18.085_8.54_C10.767_12.269_6.16_19.787_6.16_28_C6.16_33.792_8.461_39.347_12.557_43.443_L8.201_47.799_Z')] [z-index:2]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Dot · Gender"
+                    class="box-border w-[6px] h-[6px] absolute left-[14.576px] top-[4.542px] bg-[#DDE4E1] rounded-full [z-index:3]"
+                  ></div>
+                </div>
+                <div
+                  data-pencil-name="Param Label · Gender"
+                  class="text-[9px]/[normal] box-border w-[72px] text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  性别
+                </div>
+                <div
+                  data-pencil-name="Param Value · Gender"
+                  class="text-[11px]/[normal] box-border w-[72px] text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  40
+                </div>
+              </div>
+              <div
+                data-pencil-name="Knob · Dynamics"
+                class="box-border w-[72px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center"
+              >
+                <div
+                  data-pencil-name="Dial · Dynamics"
+                  class="box-border w-[56px] h-[56px] shrink-0 relative"
+                >
+                  <div
+                    data-pencil-name="Dial Base · Dynamics"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#2F3634] [outline:1px_solid_#3F4947] [outline-offset:-0.5px] rounded-full [z-index:0]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Track · Dynamics"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#3F4947] [clip-path:path('M8.201_47.799_C2.95_42.548_0_35.426_0_28_C0_12.536_12.536_0_28_0_C43.464_0_56_12.536_56_28_C56_35.426_53.05_42.548_47.799_47.799_L43.443_43.443_C47.539_39.347_49.84_33.792_49.84_28_C49.84_15.938_40.062_6.16_28_6.16_C15.938_6.16_6.16_15.938_6.16_28_C6.16_33.792_8.461_39.347_12.557_43.443_L8.201_47.799_Z')] [z-index:1]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Value · Dynamics"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#6FDBCB] [clip-path:path('M8.201_47.799_C2.95_42.548_0_35.426_0_28_C0_12.536_12.536_0_28_0_C36.963_0_45.384_4.291_50.652_11.542_L45.669_15.163_C41.56_9.507_34.991_6.16_28_6.16_C15.938_6.16_6.16_15.938_6.16_28_C6.16_33.792_8.461_39.347_12.557_43.443_L8.201_47.799_Z')] [z-index:2]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Dot · Dynamics"
+                    class="box-border w-[6px] h-[6px] absolute left-[43.575px] top-[11.504px] bg-[#DDE4E1] rounded-full [z-index:3]"
+                  ></div>
+                </div>
+                <div
+                  data-pencil-name="Param Label · Dynamics"
+                  class="text-[9px]/[normal] box-border w-[72px] text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  动态
+                </div>
+                <div
+                  data-pencil-name="Param Value · Dynamics"
+                  class="text-[11px]/[normal] box-border w-[72px] text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  70
+                </div>
+              </div>
+              <div
+                data-pencil-name="Knob · Vibrato"
+                class="box-border w-[72px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center"
+              >
+                <div
+                  data-pencil-name="Dial · Vibrato"
+                  class="box-border w-[56px] h-[56px] shrink-0 relative"
+                >
+                  <div
+                    data-pencil-name="Dial Base · Vibrato"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#2F3634] [outline:1px_solid_#3F4947] [outline-offset:-0.5px] rounded-full [z-index:0]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Track · Vibrato"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#3F4947] [clip-path:path('M8.201_47.799_C2.95_42.548_0_35.426_0_28_C0_12.536_12.536_0_28_0_C43.464_0_56_12.536_56_28_C56_35.426_53.05_42.548_47.799_47.799_L43.443_43.443_C47.539_39.347_49.84_33.792_49.84_28_C49.84_15.938_40.062_6.16_28_6.16_C15.938_6.16_6.16_15.938_6.16_28_C6.16_33.792_8.461_39.347_12.557_43.443_L8.201_47.799_Z')] [z-index:1]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Value · Vibrato"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#6FDBCB] [clip-path:path('M8.201_47.799_C2.95_42.548_0_35.426_0_28_C0_19.809_3.587_12.028_9.815_6.709_L13.816_11.393_C8.958_15.542_6.16_21.611_6.16_28_C6.16_33.792_8.461_39.347_12.557_43.443_L8.201_47.799_Z')] [z-index:2]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Dot · Vibrato"
+                    class="box-border w-[6px] h-[6px] absolute left-[10.089px] top-[7.541px] bg-[#DDE4E1] rounded-full [z-index:3]"
+                  ></div>
+                </div>
+                <div
+                  data-pencil-name="Param Label · Vibrato"
+                  class="text-[9px]/[normal] box-border w-[72px] text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  颤音
+                </div>
+                <div
+                  data-pencil-name="Param Value · Vibrato"
+                  class="text-[11px]/[normal] box-border w-[72px] text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  35
+                </div>
+              </div>
+              <div
+                data-pencil-name="Knob · Growl"
+                class="box-border w-[72px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center"
+              >
+                <div
+                  data-pencil-name="Dial · Growl"
+                  class="box-border w-[56px] h-[56px] shrink-0 relative"
+                >
+                  <div
+                    data-pencil-name="Dial Base · Growl"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#2F3634] [outline:1px_solid_#3F4947] [outline-offset:-0.5px] rounded-full [z-index:0]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Track · Growl"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#3F4947] [clip-path:path('M8.201_47.799_C2.95_42.548_0_35.426_0_28_C0_12.536_12.536_0_28_0_C43.464_0_56_12.536_56_28_C56_35.426_53.05_42.548_47.799_47.799_L43.443_43.443_C47.539_39.347_49.84_33.792_49.84_28_C49.84_15.938_40.062_6.16_28_6.16_C15.938_6.16_6.16_15.938_6.16_28_C6.16_33.792_8.461_39.347_12.557_43.443_L8.201_47.799_Z')] [z-index:1]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Value · Growl"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#A9CBE7] [clip-path:path('M8.201_47.799_C2.95_42.548_0_35.426_0_28_C0_22.986_1.347_18.063_3.899_13.747_L9.201_16.883_C7.21_20.249_6.16_24.089_6.16_28_C6.16_33.792_8.461_39.347_12.557_43.443_L8.201_47.799_Z')] [z-index:2]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Dot · Growl"
+                    class="box-border w-[6px] h-[6px] absolute left-[5.237px] top-[13.312px] bg-[#DDE4E1] rounded-full [z-index:3]"
+                  ></div>
+                </div>
+                <div
+                  data-pencil-name="Param Label · Growl"
+                  class="text-[9px]/[normal] box-border w-[72px] text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  咆哮
+                </div>
+                <div
+                  data-pencil-name="Param Value · Growl"
+                  class="text-[11px]/[normal] box-border w-[72px] text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  28
+                </div>
+              </div>
+              <div
+                data-pencil-name="Knob · Soft"
+                class="box-border w-[72px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center"
+              >
+                <div
+                  data-pencil-name="Dial · Soft"
+                  class="box-border w-[56px] h-[56px] shrink-0 relative"
+                >
+                  <div
+                    data-pencil-name="Dial Base · Soft"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#2F3634] [outline:1px_solid_#3F4947] [outline-offset:-0.5px] rounded-full [z-index:0]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Track · Soft"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#3F4947] [clip-path:path('M8.201_47.799_C2.95_42.548_0_35.426_0_28_C0_12.536_12.536_0_28_0_C43.464_0_56_12.536_56_28_C56_35.426_53.05_42.548_47.799_47.799_L43.443_43.443_C47.539_39.347_49.84_33.792_49.84_28_C49.84_15.938_40.062_6.16_28_6.16_C15.938_6.16_6.16_15.938_6.16_28_C6.16_33.792_8.461_39.347_12.557_43.443_L8.201_47.799_Z')] [z-index:1]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Value · Soft"
+                    class="box-border w-[56px] h-[56px] absolute left-0 top-0 bg-[#A9CBE7] [clip-path:path('M8.201_47.799_C2.95_42.548_0_35.426_0_28_C0_12.536_12.536_0_28_0_C31.529_0_35.026_0.667_38.307_1.966_L36.04_7.694_C33.48_6.68_30.753_6.16_28_6.16_C15.938_6.16_6.16_15.938_6.16_28_C6.16_33.792_8.461_39.347_12.557_43.443_L8.201_47.799_Z')] [z-index:2]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Dot · Soft"
+                    class="box-border w-[6px] h-[6px] absolute left-[33.452px] top-[3.652px] bg-[#DDE4E1] rounded-full [z-index:3]"
+                  ></div>
+                </div>
+                <div
+                  data-pencil-name="Param Label · Soft"
+                  class="text-[9px]/[normal] box-border w-[72px] text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  柔和
+                </div>
+                <div
+                  data-pencil-name="Param Value · Soft"
+                  class="text-[11px]/[normal] box-border w-[72px] text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  58
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            data-pencil-name="Graph Card"
+            class="box-border w-[816px] h-[374px] shrink-0 flex flex-col gap-[10px] p-[16px] justify-start items-start bg-[#1A211F] rounded-[16px]"
+          >
+            <div
+              data-pencil-name="Graph Header"
+              class="box-border w-full h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center"
+            >
+              <div
+                data-pencil-name="Section Title · Pitch Graph"
+                class="text-[11px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+              >
+                音高与包络
+              </div>
+              <div
+                data-pencil-name="Header Spacer · Graph"
+                class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+              ></div>
+              <div
+                data-pencil-name="Graph Tabs · Pitch Graph"
+                class="box-border w-fit shrink-0 h-[26px] flex flex-row gap-[3px] p-[3px] justify-start items-center bg-[#090F0E] rounded-[999px]"
+              >
+                <div
+                  data-pencil-name="Graph Tab · Pitch"
+                  class="box-border w-fit shrink-0 h-[20px] flex flex-row gap-0 p-[0px_12px] justify-center items-center bg-[#334B46] rounded-[999px]"
+                >
+                  <div
+                    data-pencil-name="Tab Label · Pitch"
+                    class="text-[9px]/[normal] box-border text-[#CCE8E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+                  >
+                    音高
+                  </div>
+                </div>
+                <div
+                  data-pencil-name="Graph Tab · Dynamics"
+                  class="box-border w-fit shrink-0 h-[20px] flex flex-row gap-0 p-[0px_12px] justify-center items-center bg-[#00000000] rounded-[999px]"
+                >
+                  <div
+                    data-pencil-name="Tab Label · Dynamics"
+                    class="text-[9px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+                  >
+                    动态
+                  </div>
+                </div>
+                <div
+                  data-pencil-name="Graph Tab · Timbre"
+                  class="box-border w-fit shrink-0 h-[20px] flex flex-row gap-0 p-[0px_12px] justify-center items-center bg-[#00000000] rounded-[999px]"
+                >
+                  <div
+                    data-pencil-name="Tab Label · Timbre"
+                    class="text-[9px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+                  >
+                    音色
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              data-pencil-name="Pitch Graph"
+              class="box-border w-[784px] h-[306px] shrink-0 bg-[#090F0E] rounded-[12px] overflow-hidden relative"
+            >
+              <div
+                data-pencil-name="Grid Line V 1"
+                class="box-border w-[1px] h-[306px] absolute left-0 top-0 bg-[#3F4947] [z-index:0]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line V 2"
+                class="box-border w-[1px] h-[306px] absolute left-[56px] top-0 bg-[#3F4947] [z-index:1]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line V 3"
+                class="box-border w-[1px] h-[306px] absolute left-[112px] top-0 bg-[#3F4947] [z-index:2]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line V 4"
+                class="box-border w-[1px] h-[306px] absolute left-[168px] top-0 bg-[#3F4947] [z-index:3]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line V 5"
+                class="box-border w-[1px] h-[306px] absolute left-[224px] top-0 bg-[#3F4947] [z-index:4]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line V 6"
+                class="box-border w-[1px] h-[306px] absolute left-[280px] top-0 bg-[#3F4947] [z-index:5]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line V 7"
+                class="box-border w-[1px] h-[306px] absolute left-[336px] top-0 bg-[#3F4947] [z-index:6]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line V 8"
+                class="box-border w-[1px] h-[306px] absolute left-[392px] top-0 bg-[#3F4947] [z-index:7]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line V 9"
+                class="box-border w-[1px] h-[306px] absolute left-[448px] top-0 bg-[#3F4947] [z-index:8]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line V 10"
+                class="box-border w-[1px] h-[306px] absolute left-[504px] top-0 bg-[#3F4947] [z-index:9]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line V 11"
+                class="box-border w-[1px] h-[306px] absolute left-[560px] top-0 bg-[#3F4947] [z-index:10]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line V 12"
+                class="box-border w-[1px] h-[306px] absolute left-[616px] top-0 bg-[#3F4947] [z-index:11]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line V 13"
+                class="box-border w-[1px] h-[306px] absolute left-[672px] top-0 bg-[#3F4947] [z-index:12]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line V 14"
+                class="box-border w-[1px] h-[306px] absolute left-[728px] top-0 bg-[#3F4947] [z-index:13]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line H 1"
+                class="box-border w-[784px] h-[1px] absolute left-0 top-0 bg-[#3F4947] [z-index:14]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line H 2"
+                class="box-border w-[784px] h-[1px] absolute left-0 top-[38px] bg-[#3F4947] [z-index:15]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line H 3"
+                class="box-border w-[784px] h-[1px] absolute left-0 top-[77px] bg-[#3F4947] [z-index:16]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line H 4"
+                class="box-border w-[784px] h-[1px] absolute left-0 top-[115px] bg-[#3F4947] [z-index:17]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line H 5"
+                class="box-border w-[784px] h-[1px] absolute left-0 top-[153px] bg-[#3F4947] [z-index:18]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line H 6"
+                class="box-border w-[784px] h-[1px] absolute left-0 top-[191px] bg-[#3F4947] [z-index:19]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line H 7"
+                class="box-border w-[784px] h-[1px] absolute left-0 top-[230px] bg-[#3F4947] [z-index:20]"
+              ></div>
+              <div
+                data-pencil-name="Grid Line H 8"
+                class="box-border w-[784px] h-[1px] absolute left-0 top-[268px] bg-[#3F4947] [z-index:21]"
+              ></div>
+              <div
+                data-pencil-name="Center Line"
+                class="box-border w-[784px] h-[1px] absolute left-0 top-[153px] bg-[#899390] [z-index:22]"
+              ></div>
+              <svg
+                data-pencil-name="Pitch Curve"
+                viewBox="0 0 784 306"
+                preserveAspectRatio="none"
+                xmlns="http://www.w3.org/2000/svg"
+                class="box-border w-[784px] h-[306px] absolute left-0 top-0 overflow-visible [z-index:23]"
+              >
+                <path
+                  d="M0 210c40 0 60-40 100-34 50 8 80-36 120-34 45 2 80 58 120 54 50-6 80-86 130-76 45 10 75 76 120 68 50-10 90-58 130-50 35 8 50 42 64 38"
+                  fill="#00000000"
+                ></path>
+                <path
+                  d="M0 210c40 0 60-40 100-34 50 8 80-36 120-34 45 2 80 58 120 54 50-6 80-86 130-76 45 10 75 76 120 68 50-10 90-58 130-50 35 8 50 42 64 38"
+                  fill="none"
+                  stroke="#6FDBCB"
+                  stroke-width="2"
+                  vector-effect="non-scaling-stroke"
+                ></path>
+              </svg>
+              <div
+                data-pencil-name="Graph Playhead"
+                class="box-border w-[2px] h-[306px] absolute left-[300px] top-0 bg-[#6FDBCB] [z-index:24]"
+              ></div>
+              <div
+                data-pencil-name="Axis Label"
+                class="text-[9px]/[normal] box-border absolute left-[10px] top-[8px] text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap] [z-index:25]"
+              >
+                音高 · 半音
+              </div>
+              <div
+                data-pencil-name="Graph Source Label"
+                class="text-[10px]/[normal] box-border absolute left-[10px] top-[22px] text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap] [z-index:26]"
+              >
+                Kasane Teto / UTAU
+              </div>
+            </div>
+          </div>
+          <div
+            data-pencil-name="Piano Keyboard"
+            class="box-border w-[816px] h-[170px] shrink-0 bg-[#090F0E] rounded-[12px] overflow-hidden relative"
+          >
+            <div
+              data-pencil-name="Piano Key White 1"
+              class="box-border w-[67px] h-[170px] absolute left-0 top-0 bg-[#DDE4E1] rounded-[0px_0px_3px_3px] [z-index:0]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key White 2"
+              class="box-border w-[67px] h-[170px] absolute left-[68px] top-0 bg-[#DDE4E1] rounded-[0px_0px_3px_3px] [z-index:1]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key White 3"
+              class="box-border w-[67px] h-[170px] absolute left-[136px] top-0 bg-[#005046] rounded-[0px_0px_3px_3px] [z-index:2]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key White 4"
+              class="box-border w-[67px] h-[170px] absolute left-[204px] top-0 bg-[#DDE4E1] rounded-[0px_0px_3px_3px] [z-index:3]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key White 5"
+              class="box-border w-[67px] h-[170px] absolute left-[272px] top-0 bg-[#005046] rounded-[0px_0px_3px_3px] [z-index:4]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key White 6"
+              class="box-border w-[67px] h-[170px] absolute left-[340px] top-0 bg-[#DDE4E1] rounded-[0px_0px_3px_3px] [z-index:5]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key White 7"
+              class="box-border w-[67px] h-[170px] absolute left-[408px] top-0 bg-[#DDE4E1] rounded-[0px_0px_3px_3px] [z-index:6]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key White 8"
+              class="box-border w-[67px] h-[170px] absolute left-[476px] top-0 bg-[#005046] rounded-[0px_0px_3px_3px] [z-index:7]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key White 9"
+              class="box-border w-[67px] h-[170px] absolute left-[544px] top-0 bg-[#DDE4E1] rounded-[0px_0px_3px_3px] [z-index:8]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key White 10"
+              class="box-border w-[67px] h-[170px] absolute left-[612px] top-0 bg-[#005046] rounded-[0px_0px_3px_3px] [z-index:9]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key White 11"
+              class="box-border w-[67px] h-[170px] absolute left-[680px] top-0 bg-[#DDE4E1] rounded-[0px_0px_3px_3px] [z-index:10]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key White 12"
+              class="box-border w-[67px] h-[170px] absolute left-[748px] top-0 bg-[#005046] rounded-[0px_0px_3px_3px] [z-index:11]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key Black 1"
+              class="box-border w-[34px] h-[105px] absolute left-[51px] top-0 bg-[#090F0E] rounded-[0px_0px_3px_3px] [z-index:12]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key Black 2"
+              class="box-border w-[34px] h-[105px] absolute left-[119px] top-0 bg-[#090F0E] rounded-[0px_0px_3px_3px] [z-index:13]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key Black 4"
+              class="box-border w-[34px] h-[105px] absolute left-[255px] top-0 bg-[#090F0E] rounded-[0px_0px_3px_3px] [z-index:14]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key Black 5"
+              class="box-border w-[34px] h-[105px] absolute left-[323px] top-0 bg-[#090F0E] rounded-[0px_0px_3px_3px] [z-index:15]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key Black 6"
+              class="box-border w-[34px] h-[105px] absolute left-[391px] top-0 bg-[#090F0E] rounded-[0px_0px_3px_3px] [z-index:16]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key Black 8"
+              class="box-border w-[34px] h-[105px] absolute left-[527px] top-0 bg-[#090F0E] rounded-[0px_0px_3px_3px] [z-index:17]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key Black 9"
+              class="box-border w-[34px] h-[105px] absolute left-[595px] top-0 bg-[#090F0E] rounded-[0px_0px_3px_3px] [z-index:18]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key Black 11"
+              class="box-border w-[34px] h-[105px] absolute left-[731px] top-0 bg-[#090F0E] rounded-[0px_0px_3px_3px] [z-index:19]"
+            ></div>
+            <div
+              data-pencil-name="Piano Key Label · C3"
+              class="text-[9px]/[normal] box-border w-[68px] absolute left-0 top-[148px] text-[#2B3230] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center [z-index:20]"
+            >
+              C3
+            </div>
+            <div
+              data-pencil-name="Piano Key Label · C4"
+              class="text-[9px]/[normal] box-border w-[68px] absolute left-[476px] top-[148px] text-[#2B3230] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center [z-index:21]"
+            >
+              C4
+            </div>
+          </div>
+        </div>
+        <div
+          data-pencil-name="Effects Panel"
+          class="box-border w-[300px] shrink-0 h-full flex flex-col gap-[12px] p-[16px] justify-start items-start bg-[#1A211F] rounded-[16px]"
+        >
+          <div
+            data-pencil-name="Panel Title"
+            class="text-[10px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+          >
+            效果链
+          </div>
+          <div
+            data-pencil-name="Effect Slot · Reverb"
+            class="box-border w-full h-fit shrink-0 flex flex-col gap-[10px] p-[12px] justify-start items-start bg-[#252B2A] rounded-[12px]"
+          >
+            <div
+              data-pencil-name="Effect Header · Reverb"
+              class="box-border w-full h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center"
+            >
+              <svg
+                data-pencil-name="Icon · Reverb"
+                data-icon-name="waves"
+                data-icon-set="lucide"
+                viewBox="0 0 13.99993896484375 14"
+                preserveAspectRatio="xMidYMid meet"
+                xmlns="http://www.w3.org/2000/svg"
+                class="box-border w-[16px] shrink-0 h-[16px]"
+              >
+                <path
+                  d="M5.31836 2.35156q-0.58789 0.02734-1.07666 0.32129-0.16748 0.09912-0.51611 0.36572-0.39307 0.29395-0.58448 0.37256-0.18799 0.0752-0.50927 0.0752-0.32129 0-0.50586-0.06153-0.18115-0.06494-0.43067-0.25976-0.23926-0.16748-0.31103-0.20166-0.06836-0.0376-0.22217-0.0376-0.15381 0-0.23926 0.04102-0.18115 0.09912-0.28027 0.28027-0.04102 0.08545-0.04785 0.12647-0.00684 0.04102-0.00684 0.12646 0 0.16748 0.06152 0.28027 0.06494 0.11279 0.2461 0.25293 0.43408 0.34863 0.81689 0.48877 0.38623 0.14014 0.90576 0.14014 0.2666 0 0.44776-0.02734 0.18115-0.02734 0.41015-0.10254 0.23242-0.07861 0.42041-0.19141 0.19141-0.11279 0.57081-0.39307 0.23584-0.19482 0.34863-0.25634 0.11279-0.06494 0.23926-0.10596 0.18115-0.07178 0.43066-0.07861 0.25293-0.00684 0.46484 0.04785 0.16748 0.04443 0.29395 0.12304 0.12646 0.0752 0.42041 0.29737 0.40332 0.32129 0.68359 0.46142 0.43408 0.19824 0.96729 0.22559 0.5332 0.02734 1.0083-0.12647 0.22217-0.08203 0.43066-0.21533 0.21191-0.1333 0.60498-0.42724 0.32129-0.23926 0.50928-0.30762 0.19141-0.07178 0.50586-0.07178 0.31445 0 0.4956 0.06494 0.18457 0.06152 0.44776 0.25635 0.22559 0.16748 0.29394 0.20508 0.07178 0.03418 0.21192 0.03418 0.11279 0 0.16064-0.01367 0.04785-0.01367 0.10596-0.04102 0.18115-0.08545 0.28027-0.29394 0.04101-0.09912 0.04102-0.22559 0-0.19482-0.11279-0.3418-0.11279-0.14697-0.44776-0.37256-0.30762-0.2085-0.60156-0.31445-0.29395-0.10596-0.65967-0.11963-0.71094-0.04102-1.27148 0.19483-0.23926 0.09912-0.75537 0.49218-0.39307 0.29395-0.58448 0.37256-0.18799 0.0752-0.52295 0.0752-0.28027 0-0.40673-0.02735-0.18115-0.05811-0.30762-0.14013-0.12646-0.08545-0.51611-0.39307-0.29395-0.22217-0.53321-0.3418-0.23926-0.11963-0.5332-0.1914-0.18115-0.02734-0.54688-0.05469-0.0957 0-0.29394 0.01367z m0 3.5q-0.58789 0.02734-1.07666 0.32129-0.16748 0.09912-0.51611 0.36572-0.39307 0.29395-0.58448 0.37256-0.18799 0.0752-0.50927 0.0752-0.32129 0-0.50586-0.06153-0.18115-0.06494-0.43067-0.25976-0.23926-0.16748-0.31103-0.20166-0.06836-0.0376-0.22217-0.0376-0.15381 0-0.23926 0.04102-0.18115 0.09912-0.28027 0.28027-0.04102 0.08545-0.04785 0.12647-0.00684 0.04102-0.00684 0.12646 0 0.16748 0.06152 0.28027 0.06494 0.11279 0.2461 0.25293 0.43408 0.34863 0.81689 0.48877 0.38623 0.14014 0.90576 0.14014 0.2666 0 0.44776-0.02734 0.18115-0.02734 0.41015-0.10254 0.23242-0.07861 0.42041-0.19141 0.19141-0.11279 0.57081-0.39307 0.23584-0.19482 0.34863-0.25634 0.11279-0.06494 0.23926-0.10596 0.18115-0.07178 0.43066-0.07861 0.25293-0.00684 0.46484 0.04785 0.16748 0.04443 0.29395 0.12304 0.12646 0.0752 0.42041 0.29737 0.40332 0.32129 0.68359 0.46142 0.43408 0.19824 0.96729 0.22559 0.5332 0.02734 1.0083-0.12647 0.22217-0.08203 0.43066-0.21533 0.21191-0.1333 0.60498-0.42724 0.32129-0.23926 0.50928-0.30762 0.19141-0.07178 0.50586-0.07178 0.31445 0 0.4956 0.06494 0.18457 0.06152 0.44776 0.25635 0.22559 0.16748 0.29394 0.20508 0.07178 0.03418 0.21192 0.03418 0.11279 0 0.16064-0.01367 0.04785-0.01367 0.10596-0.04102 0.18115-0.08545 0.28027-0.29394 0.04101-0.09912 0.04102-0.22559 0-0.19482-0.11279-0.3418-0.11279-0.14697-0.44776-0.37256-0.30762-0.2085-0.60156-0.31445-0.29395-0.10596-0.65967-0.11963-0.71094-0.04102-1.27148 0.19483-0.23926 0.09912-0.75537 0.49218-0.39307 0.29395-0.58448 0.37256-0.18799 0.0752-0.52295 0.0752-0.28027 0-0.40673-0.02735-0.18115-0.05811-0.30762-0.14013-0.12646-0.08545-0.51611-0.39307-0.29395-0.22217-0.53321-0.3418-0.23926-0.11963-0.5332-0.1914-0.18115-0.02734-0.54688-0.05469-0.0957 0-0.29394 0.01367z m0 3.5q-0.58789 0.02734-1.07666 0.32129-0.16748 0.09912-0.51611 0.36572-0.39307 0.29395-0.58448 0.37256-0.18799 0.0752-0.50927 0.0752-0.32129 0-0.50586-0.06153-0.18115-0.06494-0.43067-0.25976-0.23926-0.16748-0.31103-0.20166-0.06836-0.0376-0.22217-0.0376-0.15381 0-0.23926 0.04102-0.18115 0.09912-0.28027 0.28027-0.04102 0.08545-0.04785 0.12647-0.00684 0.04102-0.00684 0.12646 0 0.16748 0.06152 0.28027 0.06494 0.11279 0.2461 0.25293 0.43408 0.34863 0.81689 0.48877 0.38623 0.14014 0.90576 0.14014 0.2666 0 0.44776-0.02734 0.18115-0.02734 0.41015-0.10254 0.23242-0.07861 0.42041-0.19141 0.19141-0.11279 0.57081-0.39307 0.23584-0.19482 0.34863-0.25634 0.11279-0.06494 0.23926-0.10596 0.18115-0.07178 0.43066-0.07861 0.25293-0.00684 0.46484 0.04785 0.16748 0.04443 0.29395 0.12304 0.12646 0.0752 0.42041 0.29737 0.40332 0.32129 0.68359 0.46142 0.43408 0.19824 0.96729 0.22559 0.5332 0.02734 1.0083-0.12646 0.22217-0.08203 0.43066-0.21534 0.21191-0.1333 0.60498-0.42724 0.32129-0.23926 0.50928-0.30762 0.19141-0.07178 0.50586-0.07178 0.31445 0 0.4956 0.06494 0.18457 0.06152 0.44776 0.25635 0.22559 0.16748 0.29394 0.20508 0.07178 0.03418 0.21192 0.03418 0.11279 0 0.16064-0.01367 0.04785-0.01367 0.10596-0.04102 0.18115-0.08545 0.28027-0.29394 0.04101-0.09912 0.04102-0.22559 0-0.19482-0.11279-0.3418-0.11279-0.14697-0.44776-0.37256-0.30762-0.2085-0.60156-0.31445-0.29395-0.10596-0.65967-0.11963-0.71094-0.04102-1.27148 0.19483-0.23926 0.09912-0.75537 0.49218-0.39307 0.29395-0.58448 0.37256-0.18799 0.0752-0.52295 0.0752-0.28027 0-0.40673-0.02735-0.18115-0.0581-0.30762-0.14013-0.12646-0.08545-0.51611-0.39307-0.29395-0.22217-0.53321-0.3418-0.23926-0.11963-0.5332-0.1914-0.18115-0.02734-0.54688-0.05469-0.0957 0-0.29394 0.01367z"
+                  fill="#6FDBCB"
+                ></path>
+              </svg>
+              <div
+                data-pencil-name="Effect Name · Reverb"
+                class="text-[12px]/[normal] box-border text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+              >
+                混响
+              </div>
+              <div
+                data-pencil-name="Header Spacer · Reverb"
+                class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+              ></div>
+              <div
+                data-pencil-name="Power Toggle · Reverb"
+                class="box-border w-[34px] shrink-0 h-[20px] flex flex-row gap-0 p-[0px_3px] justify-end items-center bg-[#6FDBCB] rounded-[999px]"
+              >
+                <div
+                  data-pencil-name="Power Indicator · Reverb"
+                  class="box-border w-[14px] shrink-0 h-[14px] bg-[#00382F] rounded-full"
+                ></div>
+              </div>
+            </div>
+            <div
+              data-pencil-name="Param List · Reverb"
+              class="box-border w-full h-fit shrink-0 flex flex-row gap-0 justify-between items-start"
+            >
+              <div
+                data-pencil-name="Knob · Reverb Mix"
+                class="box-border w-[60px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center"
+              >
+                <div
+                  data-pencil-name="Dial · Reverb Mix"
+                  class="box-border w-[44px] h-[44px] shrink-0 relative"
+                >
+                  <div
+                    data-pencil-name="Dial Base · Reverb Mix"
+                    class="box-border w-[44px] h-[44px] absolute left-0 top-0 bg-[#2F3634] [outline:1px_solid_#3F4947] [outline-offset:-0.5px] rounded-full [z-index:0]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Track · Reverb Mix"
+                    class="box-border w-[44px] h-[44px] absolute left-0 top-0 bg-[#3F4947] [clip-path:path('M6.444_37.556_C2.318_33.431_0_27.835_0_22_C0_9.85_9.85_0_22_0_C34.15_0_44_9.85_44_22_C44_27.835_41.682_33.431_37.556_37.556_L34.134_34.134_C37.352_30.916_39.16_26.551_39.16_22_C39.16_12.523_31.477_4.84_22_4.84_C12.523_4.84_4.84_12.523_4.84_22_C4.84_26.551_6.648_30.916_9.866_34.134_L6.444_37.556_Z')] [z-index:1]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Value · Reverb Mix"
+                    class="box-border w-[44px] h-[44px] absolute left-0 top-0 bg-[#6FDBCB] [clip-path:path('M6.444_37.556_C2.318_33.431_0_27.835_0_22_C0_15.925_2.512_10.121_6.94_5.963_L10.253_9.491_C6.799_12.734_4.84_17.262_4.84_22_C4.84_26.551_6.648_30.916_9.866_34.134_L6.444_37.556_Z')] [z-index:2]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Dot · Reverb Mix"
+                    class="box-border w-[6px] h-[6px] absolute left-[6.651px] top-[5.849px] bg-[#DDE4E1] rounded-full [z-index:3]"
+                  ></div>
+                </div>
+                <div
+                  data-pencil-name="Param Label · Reverb Mix"
+                  class="text-[9px]/[normal] box-border w-[60px] text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  干湿
+                </div>
+                <div
+                  data-pencil-name="Param Value · Reverb Mix"
+                  class="text-[11px]/[normal] box-border w-[60px] text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  34
+                </div>
+              </div>
+              <div
+                data-pencil-name="Knob · Reverb Size"
+                class="box-border w-[60px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center"
+              >
+                <div
+                  data-pencil-name="Dial · Reverb Size"
+                  class="box-border w-[44px] h-[44px] shrink-0 relative"
+                >
+                  <div
+                    data-pencil-name="Dial Base · Reverb Size"
+                    class="box-border w-[44px] h-[44px] absolute left-0 top-0 bg-[#2F3634] [outline:1px_solid_#3F4947] [outline-offset:-0.5px] rounded-full [z-index:0]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Track · Reverb Size"
+                    class="box-border w-[44px] h-[44px] absolute left-0 top-0 bg-[#3F4947] [clip-path:path('M6.444_37.556_C2.318_33.431_0_27.835_0_22_C0_9.85_9.85_0_22_0_C34.15_0_44_9.85_44_22_C44_27.835_41.682_33.431_37.556_37.556_L34.134_34.134_C37.352_30.916_39.16_26.551_39.16_22_C39.16_12.523_31.477_4.84_22_4.84_C12.523_4.84_4.84_12.523_4.84_22_C4.84_26.551_6.648_30.916_9.866_34.134_L6.444_37.556_Z')] [z-index:1]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Value · Reverb Size"
+                    class="box-border w-[44px] h-[44px] absolute left-0 top-0 bg-[#6FDBCB] [clip-path:path('M6.444_37.556_C2.318_33.431_0_27.835_0_22_C0_9.85_9.85_0_22_0_C26.175_0_30.263_1.188_33.788_3.425_L31.195_7.511_C28.445_5.767_25.256_4.84_22_4.84_C12.523_4.84_4.84_12.523_4.84_22_C4.84_26.551_6.648_30.916_9.866_34.134_L6.444_37.556_Z')] [z-index:2]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Dot · Reverb Size"
+                    class="box-border w-[6px] h-[6px] absolute left-[28.666px] top-[3.768px] bg-[#DDE4E1] rounded-full [z-index:3]"
+                  ></div>
+                </div>
+                <div
+                  data-pencil-name="Param Label · Reverb Size"
+                  class="text-[9px]/[normal] box-border w-[60px] text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  大小
+                </div>
+                <div
+                  data-pencil-name="Param Value · Reverb Size"
+                  class="text-[11px]/[normal] box-border w-[60px] text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  62
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            data-pencil-name="Effect Slot · Delay"
+            class="box-border w-full h-fit shrink-0 flex flex-col gap-[10px] p-[12px] justify-start items-start bg-[#252B2A] rounded-[12px]"
+          >
+            <div
+              data-pencil-name="Effect Header · Delay"
+              class="box-border w-full h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center"
+            >
+              <svg
+                data-pencil-name="Icon · Delay"
+                data-icon-name="timer"
+                data-icon-set="lucide"
+                viewBox="0 0 13.99993896484375 14"
+                preserveAspectRatio="xMidYMid meet"
+                xmlns="http://www.w3.org/2000/svg"
+                class="box-border w-[16px] shrink-0 h-[16px]"
+              >
+                <path
+                  d="M5.7251 0.60156q-0.18115 0.02734-0.32129 0.18115-0.14014 0.15381-0.15381 0.35206 0 0.14014 0.06152 0.28027 0.06494 0.14014 0.19141 0.22217l0.01367 0.01367q0.06836 0.05811 0.15039 0.07178 0.08545 0.01367 0.35205 0.02734l1.96192 0q0.2666-0.01367 0.34863-0.02734 0.08545-0.01367 0.15381-0.07178l0.01367-0.01367q0.21191-0.14014 0.24609-0.36914 0.03418-0.23242-0.09912-0.43409-0.1333-0.20508-0.38281-0.23242-0.11279-0.02734-1.2749-0.02734-1.16211 0-1.26123 0.02734z m0.77246 2.33789q-0.98096 0.09912-1.86963 0.54688-0.88867 0.44775-1.54834 1.18945-1.07666 1.2168-1.30225 2.88477-0.02734 0.2085-0.0205 0.64941 0.00684 0.44092 0.03418 0.63916 0.09912 0.71436 0.34863 1.32276 0.25293 0.6084 0.67334 1.16894 0.15381 0.19482 0.44092 0.48877 0.28711 0.29395 0.47168 0.44775 0.43408 0.33496 0.93652 0.58789 0.58789 0.28027 1.1416 0.41358 0.55371 0.1333 1.19629 0.1333 0.64258 0 1.19629-0.1333 0.55371-0.1333 1.1416-0.41358 0.40674-0.2085 0.72119-0.4375 0.31445-0.23242 0.66651-0.58447 0.85107-0.84082 1.24414-1.95849 0.25293-0.72803 0.27343-1.54493 0.02051-0.82031-0.17431-1.56543-0.2666-0.93652-0.82715-1.69873-0.56055-0.76221-1.37061-1.30908-0.16748-0.11279-0.50586-0.28027-0.33496-0.16748-0.52978-0.23926-0.54688-0.19482-1.13477-0.28027-0.16748-0.02734-0.60156-0.03418-0.43408-0.00684-0.60156 0.00683z m0.96387 1.17578q0.98096 0.09912 1.82519 0.68018 0.84766 0.58105 1.32617 1.46289 0.43408 0.82715 0.46143 1.77734 0.02734 1.0083-0.39307 1.87647-0.15381 0.34863-0.33496 0.60156-0.18115 0.25293-0.44775 0.51953-0.2666 0.26318-0.50586 0.44092-0.23584 0.17432-0.55713 0.3418-1.06641 0.5332-2.24902 0.41357-1.18262-0.11963-2.13282-0.875-0.22559-0.18115-0.49218-0.46826-0.2666-0.28711-0.43409-0.56738-0.62891-0.99463-0.60839-2.20459 0.02051-1.21338 0.68017-2.20459 0.60156-0.9126 1.59619-1.40137 1.03564-0.51953 2.26612-0.39307z m1.18945 1.73633q-0.0957 0.01367-0.16748 0.05127-0.06836 0.03418-1.03565 0.98438-0.67334 0.68701-0.82031 0.84082-0.14697 0.15381-0.17432 0.22558-0.06836 0.2085 0.01368 0.42725 0.08545 0.21533 0.28027 0.31445 0.09912 0.04102 0.25293 0.04102l0.02734 0q0.11279 0 0.19483-0.04102 0.08545-0.04443 0.29736-0.23926 0.15381-0.14014 0.66992-0.65966l0.1128-0.10938q0.67334-0.67334 0.82031-0.83398 0.14697-0.16064 0.17431-0.23242 0.06836-0.2085-0.00341-0.39649-0.06836-0.19141-0.24268-0.30078-0.17432-0.11279-0.3999-0.07178z"
+                  fill="#6FDBCB"
+                ></path>
+              </svg>
+              <div
+                data-pencil-name="Effect Name · Delay"
+                class="text-[12px]/[normal] box-border text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+              >
+                延迟
+              </div>
+              <div
+                data-pencil-name="Header Spacer · Delay"
+                class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+              ></div>
+              <div
+                data-pencil-name="Power Toggle · Delay"
+                class="box-border w-[34px] shrink-0 h-[20px] flex flex-row gap-0 p-[0px_3px] justify-end items-center bg-[#6FDBCB] rounded-[999px]"
+              >
+                <div
+                  data-pencil-name="Power Indicator · Delay"
+                  class="box-border w-[14px] shrink-0 h-[14px] bg-[#00382F] rounded-full"
+                ></div>
+              </div>
+            </div>
+            <div
+              data-pencil-name="Param List · Delay"
+              class="box-border w-full h-fit shrink-0 flex flex-row gap-0 justify-between items-start"
+            >
+              <div
+                data-pencil-name="Knob · Delay Mix"
+                class="box-border w-[60px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center"
+              >
+                <div
+                  data-pencil-name="Dial · Delay Mix"
+                  class="box-border w-[44px] h-[44px] shrink-0 relative"
+                >
+                  <div
+                    data-pencil-name="Dial Base · Delay Mix"
+                    class="box-border w-[44px] h-[44px] absolute left-0 top-0 bg-[#2F3634] [outline:1px_solid_#3F4947] [outline-offset:-0.5px] rounded-full [z-index:0]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Track · Delay Mix"
+                    class="box-border w-[44px] h-[44px] absolute left-0 top-0 bg-[#3F4947] [clip-path:path('M6.444_37.556_C2.318_33.431_0_27.835_0_22_C0_9.85_9.85_0_22_0_C34.15_0_44_9.85_44_22_C44_27.835_41.682_33.431_37.556_37.556_L34.134_34.134_C37.352_30.916_39.16_26.551_39.16_22_C39.16_12.523_31.477_4.84_22_4.84_C12.523_4.84_4.84_12.523_4.84_22_C4.84_26.551_6.648_30.916_9.866_34.134_L6.444_37.556_Z')] [z-index:1]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Value · Delay Mix"
+                    class="box-border w-[44px] h-[44px] absolute left-0 top-0 bg-[#6FDBCB] [clip-path:path('M6.444_37.556_C2.318_33.431_0_27.835_0_22_C0_20.155_0.232_18.316_0.691_16.529_L5.379_17.732_C5.021_19.127_4.84_20.561_4.84_22_C4.84_26.551_6.648_30.916_9.866_34.134_L6.444_37.556_Z')] [z-index:2]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Dot · Delay Mix"
+                    class="box-border w-[6px] h-[6px] absolute left-[1.527px] top-[14.514px] bg-[#DDE4E1] rounded-full [z-index:3]"
+                  ></div>
+                </div>
+                <div
+                  data-pencil-name="Param Label · Delay Mix"
+                  class="text-[9px]/[normal] box-border w-[60px] text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  干湿
+                </div>
+                <div
+                  data-pencil-name="Param Value · Delay Mix"
+                  class="text-[11px]/[normal] box-border w-[60px] text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  22
+                </div>
+              </div>
+              <div
+                data-pencil-name="Knob · Delay Feedback"
+                class="box-border w-[60px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center"
+              >
+                <div
+                  data-pencil-name="Dial · Delay Feedback"
+                  class="box-border w-[44px] h-[44px] shrink-0 relative"
+                >
+                  <div
+                    data-pencil-name="Dial Base · Delay Feedback"
+                    class="box-border w-[44px] h-[44px] absolute left-0 top-0 bg-[#2F3634] [outline:1px_solid_#3F4947] [outline-offset:-0.5px] rounded-full [z-index:0]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Track · Delay Feedback"
+                    class="box-border w-[44px] h-[44px] absolute left-0 top-0 bg-[#3F4947] [clip-path:path('M6.444_37.556_C2.318_33.431_0_27.835_0_22_C0_9.85_9.85_0_22_0_C34.15_0_44_9.85_44_22_C44_27.835_41.682_33.431_37.556_37.556_L34.134_34.134_C37.352_30.916_39.16_26.551_39.16_22_C39.16_12.523_31.477_4.84_22_4.84_C12.523_4.84_4.84_12.523_4.84_22_C4.84_26.551_6.648_30.916_9.866_34.134_L6.444_37.556_Z')] [z-index:1]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Value · Delay Feedback"
+                    class="box-border w-[44px] h-[44px] absolute left-0 top-0 bg-[#6FDBCB] [clip-path:path('M6.444_37.556_C2.318_33.431_0_27.835_0_22_C0_13.353_5.066_5.508_12.947_1.949_L14.938_6.36_C8.791_9.136_4.84_15.255_4.84_22_C4.84_26.551_6.648_30.916_9.866_34.134_L6.444_37.556_Z')] [z-index:2]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Dot · Delay Feedback"
+                    class="box-border w-[6px] h-[6px] absolute left-[11.576px] top-[2.558px] bg-[#DDE4E1] rounded-full [z-index:3]"
+                  ></div>
+                </div>
+                <div
+                  data-pencil-name="Param Label · Delay Feedback"
+                  class="text-[9px]/[normal] box-border w-[60px] text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  反馈
+                </div>
+                <div
+                  data-pencil-name="Param Value · Delay Feedback"
+                  class="text-[11px]/[normal] box-border w-[60px] text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  41
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            data-pencil-name="Effect Slot · Chorus"
+            class="box-border w-full h-fit shrink-0 flex flex-col gap-[10px] p-[12px] justify-start items-start bg-[#252B2A] rounded-[12px]"
+          >
+            <div
+              data-pencil-name="Effect Header · Chorus"
+              class="box-border w-full h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center"
+            >
+              <svg
+                data-pencil-name="Icon · Chorus"
+                data-icon-name="sparkles"
+                data-icon-set="lucide"
+                viewBox="0 0 13.99993896484375 14"
+                preserveAspectRatio="xMidYMid meet"
+                xmlns="http://www.w3.org/2000/svg"
+                class="box-border w-[16px] shrink-0 h-[16px]"
+              >
+                <path
+                  d="M6.84619 0.58789q-0.28027 0.04102-0.54687 0.22559-0.29395 0.2085-0.40674 0.57422-0.02734 0.08203-0.3418 1.75683-0.31445 1.67139-0.35889 1.76367-0.04102 0.08887-0.10937 0.16065-0.07178 0.08203-0.15381 0.11279-0.11279 0.04102-0.4751 0.12305l-1.28857 0.23926q-1.68164 0.32129-1.77734 0.34863-0.23926 0.07178-0.44434 0.27002-0.20166 0.19482-0.29395 0.44092-0.08887 0.24268-0.06152 0.50244 0.02734 0.25635 0.16748 0.4956 0.09912 0.16748 0.27344 0.30762 0.17432 0.14014 0.35889 0.19824 0.0957 0.02734 1.76367 0.34863l1.28515 0.25293q0.37939 0.06836 0.50586 0.10938 0.08203 0.04443 0.15381 0.11279 0.05469 0.08545 0.09912 0.16748 0.04102 0.12646 0.10938 0.50586l0.23926 1.24414q0.32129 1.68164 0.34863 1.76367 0.15381 0.46484 0.58789 0.67335 0.2666 0.14014 0.51953 0.14013 0.25293 0 0.51953-0.14013 0.43408-0.2085 0.58789-0.67335 0.02734-0.08203 0.3418-1.74658 0.31445-1.66797 0.3418-1.72265 0.02734-0.11279 0.12646-0.2085 0.09912-0.09912 0.21191-0.14355 0.06836-0.02734 1.73291-0.3418 1.66797-0.31445 1.75-0.3418 0.46484-0.15381 0.67335-0.58789 0.2666-0.51953 0-1.03906-0.09912-0.2085-0.28028-0.36231-0.18115-0.15381-0.39307-0.22558-0.0957-0.02734-1.77734-0.34863l-1.23047-0.23926q-0.37939-0.06836-0.50586-0.10938-0.0957-0.03076-0.15381-0.08545-0.10938-0.11279-0.1538-0.23925-0.02734-0.06836-0.3418-1.73291-0.31445-1.66797-0.3418-1.75-0.14014-0.46484-0.60498-0.68702-0.14014-0.07178-0.31445-0.09912-0.17432-0.02734-0.3418-0.01367z m4.73047 0.01367q-0.12305 0.01367-0.24268 0.09912-0.11963 0.08203-0.1914 0.19483-0.04102 0.08545-0.05469 0.20508-0.01367 0.11621-0.01367 0.35546l0 0.29395-0.36572 0q-0.26318 0.01367-0.32813 0.02051-0.06152 0.00684-0.1333 0.03418-0.2666 0.12646-0.31445 0.42041-0.04785 0.29395 0.14697 0.50586 0.08545 0.08203 0.18115 0.14013 0.08545 0.02734 0.14697 0.03418 0.06494 0.00684 0.31788 0.02051l0.34863 0 0 0.34863q0.01367 0.25293 0.02051 0.31788 0.00683 0.06152 0.03418 0.14697 0.05811 0.0957 0.14013 0.18115 0.21191 0.19482 0.50586 0.14697 0.29395-0.04785 0.42041-0.31445 0.02734-0.08545 0.03418-0.14014 0.00684-0.05811 0.02051-0.32129l0-0.36572 0.29395 0q0.32129 0 0.45458-0.03418 0.1333-0.03418 0.25293-0.15381 0.11963-0.11963 0.15381-0.31445 0.03418-0.19824-0.04785-0.35205-0.04443-0.08203-0.12305-0.15039-0.0752-0.07178-0.1538-0.10596-0.07519-0.0376-0.14014-0.04443-0.06152-0.00684-0.32813-0.02051l-0.3623 0 0-0.34863q0-0.23926-0.00684-0.30762-0.00684-0.07178-0.03418-0.12646-0.08545-0.21191-0.25293-0.30762-0.16748-0.09912-0.37939-0.05811z m-4.26904 2.7583q0.23926 1.26123 0.29394 1.55518 0.05811 0.29395 0.1128 0.42041 0.12646 0.30762 0.38281 0.56738 0.25977 0.25635 0.56738 0.38281 0.12646 0.05469 0.41358 0.1128 0.28711 0.05469 1.54833 0.29394 1.56885 0.29395 1.57569 0.30762 0.00684 0.01367-1.60303 0.31445-1.60986 0.30078-1.72266 0.32813-0.39307 0.09912-0.72119 0.40674-0.32813 0.30762-0.46826 0.70068-0.04443 0.09912-0.09912 0.43408l-0.32129 1.63721q-0.25293 1.37402-0.2666 1.37402-0.01367 0-0.30762-1.55517-0.23926-1.2749-0.29736-1.56202-0.05469-0.28711-0.10938-0.41357-0.09912-0.23584-0.30078-0.46484-0.20166-0.23242-0.41357-0.35889-0.14014-0.09912-0.2666-0.14014-0.16748-0.04102-0.57422-0.12646l-1.28516-0.25293q-1.6543-0.30762-1.64062-0.32129 0.01367-0.01367 1.60986-0.30762l1.51416-0.29394q0.25293-0.05811 0.38965-0.1128 0.29395-0.11279 0.56738-0.37597 0.27344-0.2666 0.3999-0.57422 0.05469-0.12646 0.10938-0.41358 0.05811-0.28711 0.29736-1.56201 0.29395-1.55518 0.30762-1.55517 0.01367 0 0.30762 1.55517z m-5.33203 6.59326q-0.31104 0.07178-0.57764 0.23926-0.26318 0.16748-0.46143 0.42041-0.34863 0.4751-0.34863 1.05615 0 0.58105 0.3418 1.04249 0.34521 0.46143 0.91943 0.6289 0.64258 0.18457 1.25781-0.10937 0.32471-0.15381 0.56055-0.44092 0.23926-0.28711 0.35205-0.65283 0.02734-0.11279 0.03418-0.18116 0.00684-0.06836 0.02051-0.28027 0-0.25293-0.02051-0.3623-0.02051-0.11279-0.10596-0.32471-0.15381-0.36231-0.46826-0.63574-0.31445-0.27344-0.70752-0.38623-0.15381-0.02734-0.3999-0.03418-0.24268-0.00684-0.39648 0.0205z m0.60156 1.18946q0.24951 0.11279 0.31787 0.38623 0.07178 0.27344-0.0957 0.48193-0.12646 0.15381-0.29395 0.21192-0.16748 0.05469-0.33496 0-0.25293-0.07178-0.37939-0.33497-0.04102-0.09912-0.03418-0.23242 0.00684-0.1333 0.04785-0.23242 0.09912-0.22217 0.32129-0.29736 0.22559-0.07861 0.45117 0.01709z"
+                  fill="#BEC9C5"
+                ></path>
+              </svg>
+              <div
+                data-pencil-name="Effect Name · Chorus"
+                class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+              >
+                合唱
+              </div>
+              <div
+                data-pencil-name="Header Spacer · Chorus"
+                class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+              ></div>
+              <div
+                data-pencil-name="Power Toggle · Chorus"
+                class="box-border w-[34px] shrink-0 h-[20px] flex flex-row gap-0 p-[0px_3px] justify-start items-center bg-[#2F3634] rounded-[999px]"
+              >
+                <div
+                  data-pencil-name="Power Indicator · Chorus"
+                  class="box-border w-[14px] shrink-0 h-[14px] bg-[#BEC9C5] rounded-full"
+                ></div>
+              </div>
+            </div>
+            <div
+              data-pencil-name="Param List · Chorus"
+              class="box-border w-full h-fit shrink-0 flex flex-row gap-0 justify-between items-start"
+            >
+              <div
+                data-pencil-name="Knob · Chorus Depth"
+                class="box-border w-[60px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center"
+              >
+                <div
+                  data-pencil-name="Dial · Chorus Depth"
+                  class="box-border w-[44px] h-[44px] shrink-0 relative"
+                >
+                  <div
+                    data-pencil-name="Dial Base · Chorus Depth"
+                    class="box-border w-[44px] h-[44px] absolute left-0 top-0 bg-[#2F3634] [outline:1px_solid_#3F4947] [outline-offset:-0.5px] rounded-full [z-index:0]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Track · Chorus Depth"
+                    class="box-border w-[44px] h-[44px] absolute left-0 top-0 bg-[#3F4947] [clip-path:path('M6.444_37.556_C2.318_33.431_0_27.835_0_22_C0_9.85_9.85_0_22_0_C34.15_0_44_9.85_44_22_C44_27.835_41.682_33.431_37.556_37.556_L34.134_34.134_C37.352_30.916_39.16_26.551_39.16_22_C39.16_12.523_31.477_4.84_22_4.84_C12.523_4.84_4.84_12.523_4.84_22_C4.84_26.551_6.648_30.916_9.866_34.134_L6.444_37.556_Z')] [z-index:1]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Value · Chorus Depth"
+                    class="box-border w-[44px] h-[44px] absolute left-0 top-0 bg-[#899390] [clip-path:path('M6.444_37.556_C2.318_33.431_0_27.835_0_22_C0_11.828_6.973_2.982_16.864_0.608_L17.994_5.314_C10.279_7.166_4.84_14.066_4.84_22_C4.84_26.551_6.648_30.916_9.866_34.134_L6.444_37.556_Z')] [z-index:2]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Dot · Chorus Depth"
+                    class="box-border w-[6px] h-[6px] absolute left-[14.789px] top-[1.458px] bg-[#DDE4E1] rounded-full [z-index:3]"
+                  ></div>
+                </div>
+                <div
+                  data-pencil-name="Param Label · Chorus Depth"
+                  class="text-[9px]/[normal] box-border w-[60px] text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  深度
+                </div>
+                <div
+                  data-pencil-name="Param Value · Chorus Depth"
+                  class="text-[11px]/[normal] box-border w-[60px] text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  45
+                </div>
+              </div>
+              <div
+                data-pencil-name="Knob · Chorus Rate"
+                class="box-border w-[60px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center"
+              >
+                <div
+                  data-pencil-name="Dial · Chorus Rate"
+                  class="box-border w-[44px] h-[44px] shrink-0 relative"
+                >
+                  <div
+                    data-pencil-name="Dial Base · Chorus Rate"
+                    class="box-border w-[44px] h-[44px] absolute left-0 top-0 bg-[#2F3634] [outline:1px_solid_#3F4947] [outline-offset:-0.5px] rounded-full [z-index:0]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Track · Chorus Rate"
+                    class="box-border w-[44px] h-[44px] absolute left-0 top-0 bg-[#3F4947] [clip-path:path('M6.444_37.556_C2.318_33.431_0_27.835_0_22_C0_9.85_9.85_0_22_0_C34.15_0_44_9.85_44_22_C44_27.835_41.682_33.431_37.556_37.556_L34.134_34.134_C37.352_30.916_39.16_26.551_39.16_22_C39.16_12.523_31.477_4.84_22_4.84_C12.523_4.84_4.84_12.523_4.84_22_C4.84_26.551_6.648_30.916_9.866_34.134_L6.444_37.556_Z')] [z-index:1]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Value · Chorus Rate"
+                    class="box-border w-[44px] h-[44px] absolute left-0 top-0 bg-[#899390] [clip-path:path('M6.444_37.556_C2.318_33.431_0_27.835_0_22_C0_17.354_1.471_12.827_4.202_9.069_L8.117_11.914_C5.987_14.845_4.84_18.376_4.84_22_C4.84_26.551_6.648_30.916_9.866_34.134_L6.444_37.556_Z')] [z-index:2]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Dot · Chorus Rate"
+                    class="box-border w-[6px] h-[6px] absolute left-[4.405px] top-[8.396px] bg-[#DDE4E1] rounded-full [z-index:3]"
+                  ></div>
+                </div>
+                <div
+                  data-pencil-name="Param Label · Chorus Rate"
+                  class="text-[9px]/[normal] box-border w-[60px] text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  速率
+                </div>
+                <div
+                  data-pencil-name="Param Value · Chorus Rate"
+                  class="text-[11px]/[normal] box-border w-[60px] text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  30
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            data-pencil-name="Macro Section"
+            class="box-border w-full h-fit shrink-0 flex flex-col gap-[10px] p-[12px] justify-start items-start bg-[#252B2A] rounded-[12px]"
+          >
+            <div
+              data-pencil-name="Section Title · Macros"
+              class="text-[10px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+            >
+              宏控制
+            </div>
+            <div
+              data-pencil-name="Macro Row"
+              class="box-border w-full h-fit shrink-0 flex flex-row gap-0 justify-between items-start"
+            >
+              <div
+                data-pencil-name="Knob · Brightness"
+                class="box-border w-[64px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center"
+              >
+                <div
+                  data-pencil-name="Dial · Brightness"
+                  class="box-border w-[48px] h-[48px] shrink-0 relative"
+                >
+                  <div
+                    data-pencil-name="Dial Base · Brightness"
+                    class="box-border w-[48px] h-[48px] absolute left-0 top-0 bg-[#2F3634] [outline:1px_solid_#3F4947] [outline-offset:-0.5px] rounded-full [z-index:0]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Track · Brightness"
+                    class="box-border w-[48px] h-[48px] absolute left-0 top-0 bg-[#3F4947] [clip-path:path('M7.029_40.971_C2.529_36.47_0_30.365_0_24_C0_10.745_10.745_0_24_0_C37.255_0_48_10.745_48_24_C48_30.365_45.471_36.47_40.971_40.971_L37.237_37.237_C40.748_33.726_42.72_28.965_42.72_24_C42.72_13.661_34.339_5.28_24_5.28_C13.661_5.28_5.28_13.661_5.28_24_C5.28_28.965_7.252_33.726_10.763_37.237_L7.029_40.971_Z')] [z-index:1]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Value · Brightness"
+                    class="box-border w-[48px] h-[48px] absolute left-0 top-0 bg-[#A9CBE7] [clip-path:path('M7.029_40.971_C2.529_36.47_0_30.365_0_24_C0_10.745_10.745_0_24_0_C30.104_0_35.979_2.326_40.429_6.505_L36.815_10.354_C33.344_7.094_28.761_5.28_24_5.28_C13.661_5.28_5.28_13.661_5.28_24_C5.28_28.965_7.252_33.726_10.763_37.237_L7.029_40.971_Z')] [z-index:2]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Dot · Brightness"
+                    class="box-border w-[6px] h-[6px] absolute left-[34.472px] top-[6.654px] bg-[#DDE4E1] rounded-full [z-index:3]"
+                  ></div>
+                </div>
+                <div
+                  data-pencil-name="Param Label · Brightness"
+                  class="text-[9px]/[normal] box-border w-[64px] text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  明亮度
+                </div>
+                <div
+                  data-pencil-name="Param Value · Brightness"
+                  class="text-[11px]/[normal] box-border w-[64px] text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  66
+                </div>
+              </div>
+              <div
+                data-pencil-name="Knob · Character"
+                class="box-border w-[64px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center"
+              >
+                <div
+                  data-pencil-name="Dial · Character"
+                  class="box-border w-[48px] h-[48px] shrink-0 relative"
+                >
+                  <div
+                    data-pencil-name="Dial Base · Character"
+                    class="box-border w-[48px] h-[48px] absolute left-0 top-0 bg-[#2F3634] [outline:1px_solid_#3F4947] [outline-offset:-0.5px] rounded-full [z-index:0]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Track · Character"
+                    class="box-border w-[48px] h-[48px] absolute left-0 top-0 bg-[#3F4947] [clip-path:path('M7.029_40.971_C2.529_36.47_0_30.365_0_24_C0_10.745_10.745_0_24_0_C37.255_0_48_10.745_48_24_C48_30.365_45.471_36.47_40.971_40.971_L37.237_37.237_C40.748_33.726_42.72_28.965_42.72_24_C42.72_13.661_34.339_5.28_24_5.28_C13.661_5.28_5.28_13.661_5.28_24_C5.28_28.965_7.252_33.726_10.763_37.237_L7.029_40.971_Z')] [z-index:1]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Value · Character"
+                    class="box-border w-[48px] h-[48px] absolute left-0 top-0 bg-[#A9CBE7] [clip-path:path('M7.029_40.971_C2.529_36.47_0_30.365_0_24_C0_10.745_10.745_0_24_0_C24.754_0_25.508_0.036_26.259_0.107_L25.762_5.363_C25.176_5.308_24.588_5.28_24_5.28_C13.661_5.28_5.28_13.661_5.28_24_C5.28_28.965_7.252_33.726_10.763_37.237_L7.029_40.971_Z')] [z-index:2]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Dot · Character"
+                    class="box-border w-[6px] h-[6px] absolute left-[22.852px] top-[1.407px] bg-[#DDE4E1] rounded-full [z-index:3]"
+                  ></div>
+                </div>
+                <div
+                  data-pencil-name="Param Label · Character"
+                  class="text-[9px]/[normal] box-border w-[64px] text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  音色
+                </div>
+                <div
+                  data-pencil-name="Param Value · Character"
+                  class="text-[11px]/[normal] box-border w-[64px] text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  52
+                </div>
+              </div>
+              <div
+                data-pencil-name="Knob · Tension"
+                class="box-border w-[64px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center"
+              >
+                <div
+                  data-pencil-name="Dial · Tension"
+                  class="box-border w-[48px] h-[48px] shrink-0 relative"
+                >
+                  <div
+                    data-pencil-name="Dial Base · Tension"
+                    class="box-border w-[48px] h-[48px] absolute left-0 top-0 bg-[#2F3634] [outline:1px_solid_#3F4947] [outline-offset:-0.5px] rounded-full [z-index:0]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Track · Tension"
+                    class="box-border w-[48px] h-[48px] absolute left-0 top-0 bg-[#3F4947] [clip-path:path('M7.029_40.971_C2.529_36.47_0_30.365_0_24_C0_10.745_10.745_0_24_0_C37.255_0_48_10.745_48_24_C48_30.365_45.471_36.47_40.971_40.971_L37.237_37.237_C40.748_33.726_42.72_28.965_42.72_24_C42.72_13.661_34.339_5.28_24_5.28_C13.661_5.28_5.28_13.661_5.28_24_C5.28_28.965_7.252_33.726_10.763_37.237_L7.029_40.971_Z')] [z-index:1]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Value · Tension"
+                    class="box-border w-[48px] h-[48px] absolute left-0 top-0 bg-[#A9CBE7] [clip-path:path('M7.029_40.971_C2.529_36.47_0_30.365_0_24_C0_15.784_4.203_8.139_11.14_3.736_L13.969_8.194_C8.558_11.628_5.28_17.591_5.28_24_C5.28_28.965_7.252_33.726_10.763_37.237_L7.029_40.971_Z')] [z-index:2]"
+                  ></div>
+                  <div
+                    data-pencil-name="Dial Dot · Tension"
+                    class="box-border w-[6px] h-[6px] absolute left-[10.455px] top-[4.384px] bg-[#DDE4E1] rounded-full [z-index:3]"
+                  ></div>
+                </div>
+                <div
+                  data-pencil-name="Param Label · Tension"
+                  class="text-[9px]/[normal] box-border w-[64px] text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  张力
+                </div>
+                <div
+                  data-pencil-name="Param Value · Tension"
+                  class="text-[11px]/[normal] box-border w-[64px] text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-center"
+                >
+                  38
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        data-pencil-name="Status Bar"
+        class="box-border w-full h-[32px] shrink-0 flex flex-row gap-[20px] p-[0px_16px] justify-start items-center bg-[#1A211F]"
+      >
+        <div
+          data-pencil-name="Status Item · Format"
+          class="text-[10px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+        >
+          VST3 · 48 kHz / 24-bit · 缓冲区 256
+        </div>
+        <div
+          data-pencil-name="Status Item · Latency"
+          class="text-[10px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+        >
+          延迟 5.3 ms
+        </div>
+        <div
+          data-pencil-name="Status Spacer"
+          class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+        ></div>
+        <div
+          data-pencil-name="Status Item · Voices"
+          class="text-[10px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+        >
+          复音 12/64
+        </div>
+        <div
+          data-pencil-name="Status Item · CPU"
+          class="text-[10px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+        >
+          CPU 8%
+        </div>
+        <div
+          data-pencil-name="Status Item · Preset"
+          class="text-[10px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+        >
+          预设：Kasane Teto — 柔和
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

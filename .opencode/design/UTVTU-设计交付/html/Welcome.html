@@ -1,0 +1,1214 @@
+<!doctype html>
+<!--
+  ============================================================
+  UTVTU · READ-ME-FIRST
+  UTVTU · Welcome · 欢迎  —  1440 x 900 static spec  (Simplified Chinese UI)
+  ============================================================
+  How to read this file:
+   · Structure map  : every element carries data-pencil-name="<layer name>"
+   · Layout         : Tailwind utility classes; sizes are absolute px at 1440x900
+                      fill_container -> w-full / h-full / flex-1
+                      fit_content    -> w-fit / h-fit
+                      flex-col = layout:vertical , flex-row = layout:horizontal
+   · Colors         : resolved hex in the markup -> map back to tokens
+   · Font           : 'Noto Sans SC'  (--md3-font / --md3-font-display / --md3-font-mono)
+   · Icons          : inlined <svg> with data-icon-name / data-icon-set (lucide)
+   · Tokens         : ../tokens.css , ../tokens.json , ../README.md
+                      #0E1513 --md3-surface      #1A211F --md3-surface-container
+                      #DDE4E1 --md3-on-surface   #BEC9C5 --md3-on-surface-variant
+                      #6FDBCB --md3-primary      #005046 --md3-primary-container
+                      #3F4947 --md3-outline-variant   #FF8400 --primary
+
+  Page outline (top levels):
+   · Welcome · 欢迎
+     - Top App Bar
+       - Left Cluster
+       - Window Controls
+     - Welcome Content
+       - Brand Panel
+       - Launcher
+     - Status Bar
+       - Engine Status
+       - Audio Format
+       - Status Bar Spacer
+       - Voice Count
+       - CPU Usage
+       - Disk Usage
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      tailwind = { config: { corePlugins: { preflight: false } } };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC%3Awght%40100..900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *, ::before, ::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body style="background-color: #0E1513">
+    <div
+      data-pencil-name="Welcome · 欢迎"
+      class="box-border w-[1440px] h-[900px] flex flex-col gap-0 justify-start items-start bg-[#0E1513] overflow-hidden"
+    >
+      <div
+        data-pencil-name="Top App Bar"
+        class="box-border w-full h-[56px] shrink-0 flex flex-row gap-[16px] p-[0px_16px] justify-between items-center bg-[#1A211F]"
+      >
+        <div
+          data-pencil-name="Left Cluster"
+          class="box-border w-fit shrink-0 h-fit flex flex-row gap-[12px] justify-start items-center"
+        >
+          <div
+            data-pencil-name="App Mark"
+            class="box-border w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center bg-[#005046] rounded-[8px]"
+          >
+            <svg
+              data-pencil-name="Icon · App"
+              data-icon-name="music"
+              data-icon-set="lucide"
+              viewBox="0 0 13.99993896484375 14"
+              preserveAspectRatio="xMidYMid meet"
+              xmlns="http://www.w3.org/2000/svg"
+              class="box-border w-[20px] shrink-0 h-[20px]"
+            >
+              <path
+                d="M8.59619 1.76367q-3.52734 0.60156-3.61279 0.63916-0.08203 0.03418-0.16065 0.12647-0.0752 0.08887-0.11279 0.16748-0.03418 0.0752-0.03418 0.45459l0 2.4917q0 2.82666-0.01367 2.82666l-0.12647-0.05469q-0.25293-0.12646-0.57421-0.19824-0.15381-0.04102-0.46143-0.04102-0.25293 0-0.3999 0.02735-0.14697 0.02734-0.35547 0.09912-0.49219 0.15381-0.87158 0.5332-0.37598 0.37598-0.55713 0.85107-0.08545 0.22559-0.1128 0.3794-0.02734 0.15381-0.02734 0.43408 0 0.28027 0.02734 0.43408 0.02734 0.15381 0.1128 0.3794 0.16748 0.4751 0.52978 0.84082 0.36572 0.36231 0.84082 0.52978 0.22559 0.08545 0.3794 0.1128 0.15381 0.02734 0.43408 0.02734 0.22559 0 0.30762-0.00684 0.08545-0.00684 0.19482-0.03418 0.78613-0.19824 1.26123-0.75879 0.19482-0.22217 0.30762-0.45117 0.11279-0.23242 0.19824-0.54004l0.05469-0.1709 0-7.44775 2.9668-0.50244 2.84375-0.46143q0.02734 0 0.02734 0.09571 0.01367 0.12646 0.01367 0.63232l0 4.14258-0.12646-0.06836q-0.2666-0.12646-0.50586-0.18115-0.23584-0.05811-0.53662-0.05811-0.30078 0-0.46827 0.04102-0.61523 0.12646-1.08007 0.5332-0.46143 0.40674-0.66993 1.0083-0.09912 0.29395-0.11279 0.65625-0.01367 0.43408 0.11279 0.79981 0.18115 0.57422 0.6084 0.97412 0.42725 0.39649 0.99463 0.56054 0.56738 0.16065 1.14844 0.02051 0.58105-0.14014 1.02881-0.55371 0.44775-0.41357 0.64258-1.00146l0.01367-0.05469q0.05811-0.15723 0.07177-0.32471 0.02734-0.23584 0.02735-0.97754l0-7.11279-0.04102-0.08545q-0.08545-0.16748-0.28027-0.2666l-0.01367-0.01367q-0.08545-0.04102-0.22559-0.02735-0.2085 0-0.89551 0.1128l-2.77197 0.46142z m2.17041 6.43945q0.29394 0.05811 0.54688 0.30762 0.19482 0.18457 0.27002 0.37256 0.07861 0.18799 0.07861 0.44092 0 0.5332-0.39307 0.88183-0.32129 0.29395-0.76904 0.29395-0.44775 0-0.76904-0.29395-0.44775-0.40674-0.3794-1.0083 0.01367-0.2085 0.09571-0.36914 0.08545-0.16406 0.25293-0.33154 0.1709-0.16748 0.35205-0.24268 0.18115-0.07861 0.43408-0.07861 0.16748 0 0.28027 0.02734z m-6.97265 1.16211q0.28027 0.07178 0.52294 0.31788 0.24609 0.24268 0.31788 0.52294 0.02734 0.12647 0.02734 0.29395 0 0.16748-0.02734 0.28027-0.07178 0.29395-0.3042 0.53321-0.229 0.23584-0.53662 0.32129-0.11279 0.02734-0.29395 0.02734-0.18115 0-0.29395-0.02734-0.30762-0.08545-0.54003-0.32129-0.229-0.23926-0.30079-0.53321-0.02734-0.11279-0.02734-0.28027 0-0.16748 0.02734-0.29395 0.05811-0.22559 0.22559-0.43408 0.16748-0.2085 0.40674-0.32129 0.34863-0.18115 0.79639-0.08545z"
+                fill="#8CF8E7"
+              ></path>
+            </svg>
+          </div>
+          <div
+            data-pencil-name="App Wordmark"
+            class="text-[15px]/[normal] box-border text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold tracking-[0.5px] text-left [white-space:nowrap]"
+          >
+            UTVTU
+          </div>
+          <div
+            data-pencil-name="Header Divider"
+            class="box-border w-[1px] shrink-0 h-[20px] bg-[#3F4947]"
+          ></div>
+          <div
+            data-pencil-name="Screen Title"
+            class="text-[11px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold text-left [white-space:nowrap]"
+          >
+            欢迎
+          </div>
+        </div>
+        <div
+          data-pencil-name="Window Controls"
+          class="box-border w-fit shrink-0 h-fit flex flex-row gap-[4px] justify-start items-center"
+        >
+          <div
+            data-pencil-name="Minimize"
+            class="box-border w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]"
+          >
+            <svg
+              data-pencil-name="Icon · Minimize"
+              data-icon-name="remove"
+              data-icon-set="Material Symbols Rounded"
+              viewBox="0 0 14.000015258789062 14"
+              preserveAspectRatio="xMidYMid meet"
+              xmlns="http://www.w3.org/2000/svg"
+              class="box-border w-[18px] shrink-0 h-[18px]"
+            >
+              <path
+                d="M3.79053 7.29053q-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.2085 0-0.12305 0.08203-0.20508 0.08545-0.08545 0.2085-0.08545l6.41894 0q0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20508 0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20508 0.08203l-6.41894 0z"
+                fill="#BEC9C5"
+              ></path>
+            </svg>
+          </div>
+          <div
+            data-pencil-name="Maximize"
+            class="box-border w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]"
+          >
+            <svg
+              data-pencil-name="Icon · Maximize"
+              data-icon-name="crop_square"
+              data-icon-set="Material Symbols Rounded"
+              viewBox="0 0 14.000015258789062 14"
+              preserveAspectRatio="xMidYMid meet"
+              xmlns="http://www.w3.org/2000/svg"
+              class="box-border w-[18px] shrink-0 h-[18px]"
+            >
+              <path
+                d="M3.27441 11.66553q-0.3999 0-0.66992-0.27002-0.27002-0.27002-0.27002-0.66992l0-7.45118q0-0.3999 0.27002-0.66992 0.27002-0.27002 0.66992-0.27002l7.45118 0q0.3999 0 0.66992 0.27002 0.27002 0.27002 0.27002 0.66992l0 7.45118q0 0.3999-0.27002 0.66992-0.27002 0.27002-0.66992 0.27002l-7.45118 0z m0-0.58106l7.45118 0q0.15723 0 0.25634-0.09912 0.10254-0.10254 0.10254-0.25976l0-7.45118q0-0.15723-0.10254-0.25634-0.09912-0.10254-0.25634-0.10254l-7.45118 0q-0.15723 0-0.25976 0.10254-0.09912 0.09912-0.09912 0.25634l0 7.45118q0 0.15723 0.09912 0.25976 0.10254 0.09912 0.25976 0.09912z m-0.35888 0q0 0 0-0.09912 0-0.10254 0-0.25976l0-7.45118q0-0.15723 0-0.25634 0-0.10254 0-0.10254 0 0 0 0.10254 0 0.09912 0 0.25634l0 7.45118q0 0.15723 0 0.25976 0 0.09912 0 0.09912z"
+                fill="#BEC9C5"
+              ></path>
+            </svg>
+          </div>
+          <div
+            data-pencil-name="Close"
+            class="box-border w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]"
+          >
+            <svg
+              data-pencil-name="Icon · Close"
+              data-icon-name="close"
+              data-icon-set="Material Symbols Rounded"
+              viewBox="0 0 14.000015258789062 14"
+              preserveAspectRatio="xMidYMid meet"
+              xmlns="http://www.w3.org/2000/svg"
+              class="box-border w-[18px] shrink-0 h-[18px]"
+            >
+              <path
+                d="M7 7.41357l-3.05908 3.05909q-0.08203 0.08203-0.20166 0.08886-0.11963 0.00342-0.21192-0.08886-0.09229-0.09229-0.09228-0.20508 0-0.11279 0.09228-0.2085l3.05909-3.05908-3.05909-3.05908q-0.08203-0.08203-0.08886-0.20166-0.00342-0.11963 0.08886-0.21192 0.09229-0.09229 0.20508-0.09228 0.11279 0 0.2085 0.09228l3.05908 3.05909 3.05908-3.05909q0.08203-0.08203 0.20166-0.08545 0.11963-0.00684 0.21192 0.08545 0.09228 0.09229 0.09228 0.20508 0 0.11279-0.09228 0.2085l-3.05909 3.05908 3.05909 3.05908q0.08203 0.08203 0.08544 0.20166 0.00684 0.11963-0.08544 0.21192-0.09229 0.09228-0.20508 0.09228-0.11279 0-0.2085-0.09228l-3.05908-3.05909z"
+                fill="#BEC9C5"
+              ></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div
+        data-pencil-name="Welcome Content"
+        class="box-border w-full [flex:1_1_0] flex flex-row gap-0 justify-start items-start bg-[#0E1513]"
+      >
+        <div
+          data-pencil-name="Brand Panel"
+          class="box-border w-[480px] shrink-0 h-full flex flex-col gap-[32px] p-[48px] justify-between items-start bg-[#005046]"
+        >
+          <div
+            data-pencil-name="Brand Top"
+            class="box-border w-full h-fit shrink-0 flex flex-col gap-[32px] justify-start items-start"
+          >
+            <div
+              data-pencil-name="Brand Header"
+              class="box-border w-full h-fit shrink-0 flex flex-row gap-[12px] justify-start items-center"
+            >
+              <div
+                data-pencil-name="Logo Mark"
+                class="box-border w-[52px] shrink-0 h-[52px] flex flex-row gap-0 justify-center items-center bg-[#6FDBCB] rounded-[12px]"
+              >
+                <svg
+                  data-pencil-name="Icon · Brand"
+                  data-icon-name="mic"
+                  data-icon-set="Material Symbols Rounded"
+                  viewBox="0 0 14.000015258789062 14"
+                  preserveAspectRatio="xMidYMid meet"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="box-border w-[26px] shrink-0 h-[26px]"
+                >
+                  <path
+                    d="M7 7.58447q-0.49219 0-0.83057-0.33496-0.33496-0.33838-0.33496-0.83398l0-3.5q0-0.49219 0.33496-0.82715 0.33838-0.33838 0.83057-0.33838 0.49219 0 0.82715 0.33838 0.33838 0.33496 0.33838 0.82715l0 3.5q0 0.49561-0.33838 0.83398-0.33496 0.33496-0.82715 0.33496z m-0.29053 4.08106l0-1.76026q-1.26465-0.10938-2.17041-1.00146-0.90234-0.89209-1.01855-2.18067-0.01709-0.12305 0.06494-0.21533 0.08203-0.09229 0.20508-0.09228 0.12646 0 0.20849 0.09228 0.08545 0.08887 0.10938 0.21192 0.11279 1.12109 0.94336 1.86963 0.83398 0.74512 1.94824 0.74511 1.12793 0 1.95166-0.75195 0.82715-0.75537 0.93994-1.86279 0.02393-0.12305 0.10596-0.21192 0.08545-0.09229 0.21191-0.09228 0.12305 0 0.20508 0.09228 0.08203 0.09229 0.06494 0.21533-0.11621 1.26123-1.01513 2.16358-0.89551 0.89893-2.17383 1.01855l0 1.76026q0 0.12646-0.08545 0.21191-0.08203 0.08203-0.20508 0.08203-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.21191z m0.29053-4.66553q0.24951 0 0.41699-0.16748 0.16748-0.16748 0.16748-0.41699l0-3.5q0-0.24609-0.16748-0.41358-0.16748-0.16748-0.41699-0.16748-0.24951 0-0.41699 0.16748-0.16748 0.16748-0.16748 0.41358l0 3.5q0 0.24951 0.16748 0.41699 0.16748 0.16748 0.41699 0.16748z"
+                    fill="#00382F"
+                  ></path>
+                </svg>
+              </div>
+              <div
+                data-pencil-name="Brand Wordmark"
+                class="box-border [flex:1_1_0] h-fit flex flex-col gap-[4px] justify-start items-start"
+              >
+                <div
+                  data-pencil-name="Brand Name · UTVTU"
+                  class="text-[26px]/[normal] box-border w-full text-[#8CF8E7] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium text-left"
+                >
+                  UTVTU
+                </div>
+                <div
+                  data-pencil-name="Brand Tagline"
+                  class="text-[13px]/[normal] box-border w-full text-[#8CF8E7] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left"
+                >
+                  UTAU · DiffSinger 工作台
+                </div>
+              </div>
+            </div>
+            <div
+              data-pencil-name="Waveform"
+              class="box-border w-full h-[132px] shrink-0 flex flex-row gap-0 justify-between items-end"
+            >
+              <div
+                data-pencil-name="Waveform Bar 1"
+                class="box-border w-[6px] shrink-0 h-[18px] opacity-[0.446] bg-[#6FDBCB] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 2"
+                class="box-border w-[6px] shrink-0 h-[70px] opacity-[0.723] bg-[#A9CBE7] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 3"
+                class="box-border w-[6px] shrink-0 h-[108px] opacity-[0.925] bg-[#A9CBE7] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 4"
+                class="box-border w-[6px] shrink-0 h-[122px] bg-[#6FDBCB] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 5"
+                class="box-border w-[6px] shrink-0 h-[109px] opacity-[0.931] bg-[#A9CBE7] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 6"
+                class="box-border w-[6px] shrink-0 h-[72px] opacity-[0.734] bg-[#A9CBE7] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 7"
+                class="box-border w-[6px] shrink-0 h-[20px] opacity-[0.457] bg-[#6FDBCB] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 8"
+                class="box-border w-[6px] shrink-0 h-[68px] opacity-[0.712] bg-[#A9CBE7] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 9"
+                class="box-border w-[6px] shrink-0 h-[107px] opacity-[0.92] bg-[#A9CBE7] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 10"
+                class="box-border w-[6px] shrink-0 h-[122px] bg-[#6FDBCB] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 11"
+                class="box-border w-[6px] shrink-0 h-[110px] opacity-[0.936] bg-[#A9CBE7] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 12"
+                class="box-border w-[6px] shrink-0 h-[74px] opacity-[0.744] bg-[#A9CBE7] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 13"
+                class="box-border w-[6px] shrink-0 h-[22px] opacity-[0.467] bg-[#6FDBCB] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 14"
+                class="box-border w-[6px] shrink-0 h-[66px] opacity-[0.702] bg-[#A9CBE7] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 15"
+                class="box-border w-[6px] shrink-0 h-[105px] opacity-[0.909] bg-[#A9CBE7] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 16"
+                class="box-border w-[6px] shrink-0 h-[122px] bg-[#6FDBCB] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 17"
+                class="box-border w-[6px] shrink-0 h-[111px] opacity-[0.941] bg-[#A9CBE7] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 18"
+                class="box-border w-[6px] shrink-0 h-[75px] opacity-[0.75] bg-[#A9CBE7] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 19"
+                class="box-border w-[6px] shrink-0 h-[25px] opacity-[0.483] bg-[#6FDBCB] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 20"
+                class="box-border w-[6px] shrink-0 h-[64px] opacity-[0.691] bg-[#A9CBE7] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 21"
+                class="box-border w-[6px] shrink-0 h-[104px] opacity-[0.904] bg-[#A9CBE7] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 22"
+                class="box-border w-[6px] shrink-0 h-[122px] bg-[#6FDBCB] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 23"
+                class="box-border w-[6px] shrink-0 h-[112px] opacity-[0.947] bg-[#A9CBE7] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 24"
+                class="box-border w-[6px] shrink-0 h-[77px] opacity-[0.76] bg-[#A9CBE7] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 25"
+                class="box-border w-[6px] shrink-0 h-[27px] opacity-[0.494] bg-[#6FDBCB] rounded-[999px]"
+              ></div>
+              <div
+                data-pencil-name="Waveform Bar 26"
+                class="box-border w-[6px] shrink-0 h-[62px] opacity-[0.68] bg-[#A9CBE7] rounded-[999px]"
+              ></div>
+            </div>
+            <div
+              data-pencil-name="Tagline"
+              class="box-border w-full h-fit shrink-0 flex flex-col gap-[12px] justify-start items-start"
+            >
+              <div
+                data-pencil-name="Tagline Headline"
+                class="text-[34px]/[41px] box-border w-full text-[#8CF8E7] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left"
+              >
+                让每一首歌都有声音。
+              </div>
+              <div
+                data-pencil-name="Tagline Description"
+                class="text-[15px]/[23px] box-border w-full text-[#8CF8E7] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left"
+              >
+                谱写旋律、填写歌词，用 UTAU 与 DiffSinger 音源塑造富有表现力的歌声。
+              </div>
+            </div>
+            <div
+              data-pencil-name="Features"
+              class="box-border w-full h-fit shrink-0 flex flex-col gap-[12px] justify-start items-start"
+            >
+              <div
+                data-pencil-name="Feature · Voicebank Support"
+                class="box-border w-full h-fit shrink-0 flex flex-row gap-[12px] justify-start items-center"
+              >
+                <svg
+                  data-pencil-name="Icon · Voicebank Support"
+                  data-icon-name="tune"
+                  data-icon-set="Material Symbols Rounded"
+                  viewBox="0 0 14.000015258789062 14"
+                  preserveAspectRatio="xMidYMid meet"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="box-border w-[18px] shrink-0 h-[18px]"
+                >
+                  <path
+                    d="M7 11.95947q-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.21191l0-2.33106q0-0.12646 0.08203-0.20849 0.08545-0.08545 0.2085-0.08545 0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20849l0 0.875 4.375 0q0.12646 0 0.20849 0.08545 0.08545 0.08203 0.08545 0.20508 0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20849 0.08203l-4.375 0 0 0.875q0 0.12646-0.08545 0.21191-0.08203 0.08203-0.20508 0.08203z m-4.66553-1.16894q-0.12646 0-0.21191-0.08203-0.08203-0.08545-0.08203-0.2085 0-0.12305 0.08203-0.20508 0.08545-0.08545 0.21191-0.08545l2.33106 0q0.12646 0 0.20849 0.08545 0.08545 0.08203 0.08545 0.20508 0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20849 0.08203l-2.33106 0z m2.33106-2.33106q-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.21191l0-0.875-2.04053 0q-0.12646 0-0.21191-0.08203-0.08203-0.08545-0.08203-0.2085 0-0.12305 0.08203-0.20508 0.08545-0.08545 0.21191-0.08545l2.04053 0 0-0.875q0-0.12646 0.08203-0.20849 0.08545-0.08545 0.2085-0.08545 0.12646 0 0.20849 0.08545 0.08545 0.08203 0.08545 0.20849l0 2.33106q0 0.12646-0.08545 0.21191-0.08203 0.08203-0.20849 0.08203z m2.33447-1.16894q-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.2085 0-0.12305 0.08203-0.20508 0.08545-0.08545 0.2085-0.08545l4.66553 0q0.12646 0 0.20849 0.08545 0.08545 0.08203 0.08545 0.20508 0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20849 0.08203l-4.66553 0z m2.33447-2.33106q-0.12646 0-0.21191-0.08203-0.08203-0.08545-0.08203-0.21191l0-2.33106q0-0.12646 0.08203-0.20849 0.08545-0.08545 0.21191-0.08545 0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20849l0 0.875 2.04053 0q0.12646 0 0.20849 0.08545 0.08545 0.08203 0.08545 0.20508 0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20849 0.08203l-2.04053 0 0 0.875q0 0.12646-0.08545 0.21191-0.08203 0.08203-0.20508 0.08203z m-7-1.16894q-0.12646 0-0.21191-0.08203-0.08203-0.08545-0.08203-0.2085 0-0.12305 0.08203-0.20508 0.08545-0.08545 0.21191-0.08545l4.66553 0q0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20508 0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20508 0.08203l-4.66553 0z"
+                    fill="#6FDBCB"
+                  ></path>
+                </svg>
+                <div
+                  data-pencil-name="Feature Copy · Voicebank Support"
+                  class="text-[14px]/[normal] box-border [flex:1_1_0] text-[#8CF8E7] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left"
+                >
+                  支持 UTAU 与 DiffSinger 音源
+                </div>
+              </div>
+              <div
+                data-pencil-name="Feature · Lyric Editing"
+                class="box-border w-full h-fit shrink-0 flex flex-row gap-[12px] justify-start items-center"
+              >
+                <svg
+                  data-pencil-name="Icon · Lyric Editing"
+                  data-icon-name="graphic_eq"
+                  data-icon-set="Material Symbols Rounded"
+                  viewBox="0 0 14.000015258789062 14"
+                  preserveAspectRatio="xMidYMid meet"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="box-border w-[18px] shrink-0 h-[18px]"
+                >
+                  <path
+                    d="M4.52197 9.69336l0-5.38672q0-0.12305 0.08203-0.20508 0.08545-0.08545 0.2085-0.08545 0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20508l0 5.38672q0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20508 0.08203-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.2085z m2.1875 2.26611l0-9.91894q0-0.12305 0.08203-0.20508 0.08545-0.08545 0.2085-0.08545 0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20508l0 9.91894q0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20508 0.08203-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.2085z m-4.375-4.48779l0-0.94336q0-0.12305 0.08203-0.20508 0.08545-0.08545 0.2085-0.08545 0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20508l0 0.94336q0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20508 0.08203-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.2085z m6.5625 2.22168l0-5.38672q0-0.12305 0.08203-0.20508 0.08545-0.08545 0.2085-0.08545 0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20508l0 5.38672q0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20508 0.08203-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.2085z m2.1875-2.22168l0-0.94336q0-0.12305 0.08203-0.20508 0.08545-0.08545 0.2085-0.08545 0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20508l0 0.94336q0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20508 0.08203-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.2085z"
+                    fill="#6FDBCB"
+                  ></path>
+                </svg>
+                <div
+                  data-pencil-name="Feature Copy · Lyric Editing"
+                  class="text-[14px]/[normal] box-border [flex:1_1_0] text-[#8CF8E7] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left"
+                >
+                  音素级歌词与音高编辑
+                </div>
+              </div>
+              <div
+                data-pencil-name="Feature · Host Integration"
+                class="box-border w-full h-fit shrink-0 flex flex-row gap-[12px] justify-start items-center"
+              >
+                <svg
+                  data-pencil-name="Icon · Host Integration"
+                  data-icon-name="piano"
+                  data-icon-set="Material Symbols Rounded"
+                  viewBox="0 0 14.000015258789062 14"
+                  preserveAspectRatio="xMidYMid meet"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="box-border w-[18px] shrink-0 h-[18px]"
+                >
+                  <path
+                    d="M3.27441 11.66553q-0.3999 0-0.66992-0.27002-0.27002-0.27002-0.27002-0.66992l0-7.45118q0-0.3999 0.27002-0.66992 0.27002-0.27002 0.66992-0.27002l7.45118 0q0.3999 0 0.66992 0.27002 0.27002 0.27002 0.27002 0.66992l0 7.45118q0 0.3999-0.27002 0.66992-0.27002 0.27002-0.66992 0.27002l-7.45118 0z m0-0.58106l1.77393 0 0-2.80615-0.23584 0q-0.21533 0-0.35547-0.14014-0.13672-0.14014-0.13672-0.35205l0-4.8706-1.0459 0q-0.15723 0-0.25976 0.10254-0.09912 0.09912-0.09912 0.25634l0 7.45118q0 0.15723 0.09912 0.25976 0.10254 0.09912 0.25976 0.09912z m5.67725 0l1.77393 0q0.15723 0 0.25634-0.09912 0.10254-0.10254 0.10254-0.25976l0-7.45118q0-0.15723-0.10254-0.25634-0.09912-0.10254-0.25634-0.10254l-1.0459 0 0 4.8706q0 0.21191-0.14014 0.35205-0.13672 0.14014-0.35205 0.14014l-0.23584 0 0 2.80615z m-3.38721 0l2.8711 0 0-2.80615-0.23584 0q-0.21533 0-0.35547-0.14014-0.13672-0.14014-0.13672-0.35205l0-4.8706-1.41504 0 0 4.8706q0 0.21191-0.14014 0.35205-0.13672 0.14014-0.35205 0.14014l-0.23584 0 0 2.80615z"
+                    fill="#6FDBCB"
+                  ></path>
+                </svg>
+                <div
+                  data-pencil-name="Feature Copy · Host Integration"
+                  class="text-[14px]/[normal] box-border [flex:1_1_0] text-[#8CF8E7] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left"
+                >
+                  VST3 / ARA2 宿主集成
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            data-pencil-name="Brand Bottom"
+            class="box-border w-full h-fit shrink-0 flex flex-col gap-[12px] justify-start items-start"
+          >
+            <div
+              data-pencil-name="Installed Library Heading"
+              class="text-[11px]/[normal] box-border text-[#8CF8E7] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+            >
+              已安装音源
+            </div>
+            <div
+              data-pencil-name="Voicebank Row 1"
+              class="box-border w-full h-fit shrink-0 flex flex-row gap-[8px] justify-start items-start"
+            >
+              <div
+                data-pencil-name="Hatsune Miku V6"
+                class="box-border [flex:1_1_0] h-fit flex flex-row gap-[8px] p-[8px_12px] justify-start items-center bg-[#334B46] rounded-[999px]"
+              >
+                <div
+                  data-pencil-name="Status Dot · Hatsune Miku V6"
+                  class="box-border w-[6px] shrink-0 h-[6px] bg-[#6FDBCB] rounded-full"
+                ></div>
+                <div
+                  data-pencil-name="Voicebank Name · Kasane Teto"
+                  class="text-[12px]/[normal] box-border [flex:1_1_0] text-[#CCE8E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left"
+                >
+                  Kasane Teto · UTAU
+                </div>
+              </div>
+              <div
+                data-pencil-name="Kagamine Rin/Len V6"
+                class="box-border [flex:1_1_0] h-fit flex flex-row gap-[8px] p-[8px_12px] justify-start items-center bg-[#334B46] rounded-[999px]"
+              >
+                <div
+                  data-pencil-name="Status Dot · Kagamine Rin/Len V6"
+                  class="box-border w-[6px] shrink-0 h-[6px] bg-[#6FDBCB] rounded-full"
+                ></div>
+                <div
+                  data-pencil-name="Voicebank Name · Momone Momo"
+                  class="text-[12px]/[normal] box-border [flex:1_1_0] text-[#CCE8E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left"
+                >
+                  Momone Momo · UTAU
+                </div>
+              </div>
+            </div>
+            <div
+              data-pencil-name="Voicebank Row 2"
+              class="box-border w-full h-fit shrink-0 flex flex-row gap-[8px] justify-start items-start"
+            >
+              <div
+                data-pencil-name="Megurine Luka V4X"
+                class="box-border [flex:1_1_0] h-fit flex flex-row gap-[8px] p-[8px_12px] justify-start items-center bg-[#334B46] rounded-[999px]"
+              >
+                <div
+                  data-pencil-name="Status Dot · Megurine Luka V4X"
+                  class="box-border w-[6px] shrink-0 h-[6px] bg-[#6FDBCB] rounded-full"
+                ></div>
+                <div
+                  data-pencil-name="Voicebank Name · Yowane Haku"
+                  class="text-[12px]/[normal] box-border [flex:1_1_0] text-[#CCE8E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left"
+                >
+                  Yowane Haku · UTAU
+                </div>
+              </div>
+              <div
+                data-pencil-name="GUMI V6"
+                class="box-border [flex:1_1_0] h-fit flex flex-row gap-[8px] p-[8px_12px] justify-start items-center bg-[#334B46] rounded-[999px]"
+              >
+                <div
+                  data-pencil-name="Status Dot · GUMI V6"
+                  class="box-border w-[6px] shrink-0 h-[6px] bg-[#6FDBCB] rounded-full"
+                ></div>
+                <div
+                  data-pencil-name="Voicebank Name · Nova DS"
+                  class="text-[12px]/[normal] box-border [flex:1_1_0] text-[#CCE8E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left"
+                >
+                  Nova DS · DiffSinger
+                </div>
+              </div>
+            </div>
+            <div
+              data-pencil-name="Brand Panel Divider"
+              class="box-border w-full h-[1px] shrink-0 opacity-[0.25] bg-[#8CF8E7]"
+            ></div>
+            <div
+              data-pencil-name="Version Row"
+              class="box-border w-full h-fit shrink-0 flex flex-row gap-0 justify-between items-center"
+            >
+              <div
+                data-pencil-name="App Version"
+                class="text-[11px]/[normal] box-border text-[#8CF8E7] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+              >
+                版本 1.0.0 · 构建 20260114
+              </div>
+              <div
+                data-pencil-name="App Copyright"
+                class="text-[11px]/[normal] box-border text-[#8CF8E7] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+              >
+                © 2026
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          data-pencil-name="Launcher"
+          class="box-border [flex:1_1_0] h-full flex flex-col gap-[16px] p-[48px] justify-start items-start bg-[#0E1513]"
+        >
+          <div
+            data-pencil-name="Launcher Header"
+            class="box-border w-full h-fit shrink-0 flex flex-col gap-[4px] justify-start items-start"
+          >
+            <div
+              data-pencil-name="Greeting"
+              class="text-[30px]/[normal] box-border w-full text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left"
+            >
+              欢迎回来，制作人
+            </div>
+            <div
+              data-pencil-name="Greeting Subtitle"
+              class="text-[15px]/[21px] box-border w-full text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left"
+            >
+              开始新的演唱工程，或继续上次的工作。
+            </div>
+          </div>
+          <div
+            data-pencil-name="Quick Actions"
+            class="box-border w-full h-fit shrink-0 flex flex-row gap-[16px] justify-start items-start"
+          >
+            <div
+              data-pencil-name="New Project Action"
+              class="box-border [flex:1_1_0] h-[104px] flex flex-row gap-[16px] p-[24px] justify-start items-center bg-[#6FDBCB] rounded-[16px]"
+            >
+              <div
+                data-pencil-name="New Project Icon"
+                class="box-border w-[48px] shrink-0 h-[48px] flex flex-row gap-0 justify-center items-center bg-[#00382F] rounded-[999px]"
+              >
+                <svg
+                  data-pencil-name="Icon · Add"
+                  data-icon-name="add"
+                  data-icon-set="Material Symbols Rounded"
+                  viewBox="0 0 14.000015258789062 14"
+                  preserveAspectRatio="xMidYMid meet"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="box-border w-[26px] shrink-0 h-[26px]"
+                >
+                  <path
+                    d="M6.70947 7.29053l-2.91894 0q-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.2085 0-0.12305 0.08203-0.20508 0.08545-0.08545 0.2085-0.08545l2.91894 0 0-2.91894q0-0.12305 0.08203-0.20508 0.08545-0.08545 0.2085-0.08545 0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20508l0 2.91894 2.91894 0q0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20508 0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20508 0.08203l-2.91894 0 0 2.91894q0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20508 0.08203-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.2085l0-2.91894z"
+                    fill="#6FDBCB"
+                  ></path>
+                </svg>
+              </div>
+              <div
+                data-pencil-name="New Project Copy"
+                class="box-border [flex:1_1_0] h-fit flex flex-col gap-[4px] justify-start items-start"
+              >
+                <div
+                  data-pencil-name="New Project Title"
+                  class="text-[18px]/[normal] box-border w-full text-[#00382F] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium text-left"
+                >
+                  新建工程
+                </div>
+                <div
+                  data-pencil-name="New Project Description"
+                  class="text-[13px]/[normal] box-border w-full text-[#00382F] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left"
+                >
+                  创建空白演唱轨道
+                </div>
+              </div>
+            </div>
+            <div
+              data-pencil-name="Open Project Action"
+              class="box-border [flex:1_1_0] h-[104px] flex flex-row gap-[16px] p-[24px] justify-start items-center bg-[#252B2A] [border:1px_solid_#3F4947] rounded-[16px]"
+            >
+              <div
+                data-pencil-name="Open Project Icon"
+                class="box-border w-[48px] shrink-0 h-[48px] flex flex-row gap-0 justify-center items-center bg-[#334B46] rounded-[999px]"
+              >
+                <svg
+                  data-pencil-name="Icon · Folder"
+                  data-icon-name="folder_open"
+                  data-icon-set="Material Symbols Rounded"
+                  viewBox="0 0 14.000015258789062 14"
+                  preserveAspectRatio="xMidYMid meet"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="box-border w-[24px] shrink-0 h-[24px]"
+                >
+                  <path
+                    d="M2.625 11.08447q-0.36914 0-0.62207-0.25293-0.25293-0.25293-0.25293-0.62207l0-6.35058q0-0.36914 0.28711-0.65625 0.28711-0.28711 0.65625-0.28711l2.51221 0q0.18799 0 0.36572 0.07861 0.17773 0.0752 0.3042 0.20166l0.88867 0.88867 5.09277 0q0.12646 0 0.2085 0.08545 0.08203 0.08203 0.08203 0.20508 0 0.12305-0.08203 0.2085-0.08203 0.08203-0.2085 0.08203l-5.32861 0-1.16553-1.16553-2.66943 0q-0.15723 0-0.25977 0.10254-0.09912 0.09912-0.09912 0.25635l0 6.64111q0-0.15723 0.06153-0.11621 0.06152 0.0376 0.16064 0.09228l1.12109-3.74267q0.09229-0.30078 0.3418-0.48877 0.25293-0.18799 0.56738-0.18799l7.47852 0q0.4751 0 0.76221 0.3794 0.28711 0.37939 0.14697 0.83056l-0.96045 3.19922q-0.08203 0.27686-0.31787 0.44775-0.23242 0.1709-0.52295 0.1709l-8.54834 0z m0.54004-0.58447l7.96387 0q0.12305 0 0.21875-0.06494 0.0957-0.06836 0.12988-0.19141l0.93652-3.14111q0.05469-0.18115-0.0581-0.32129-0.10938-0.14014-0.29053-0.14014l-7.47852 0q-0.12305 0-0.21875 0.06836-0.0957 0.06494-0.12988 0.18799l-1.07324 3.60254z m-0.83057-3.76318l0-2.87793q0-0.15723 0-0.25635 0-0.10254 0-0.10254l0 1.16553q0 0 0 0.59131 0 0.59131 0 1.47998z m0.83057 3.76318l1.07324-3.60254q0.03418-0.12305 0.05469-0.18799 0.02393-0.06836 0.02392-0.06836 0 0-0.04101 0.14014-0.0376 0.14014-0.09229 0.32129l-0.93994 3.14111q-0.03418 0.12305-0.0581 0.19141-0.02051 0.06494-0.02051 0.06494z"
+                    fill="#CCE8E1"
+                  ></path>
+                </svg>
+              </div>
+              <div
+                data-pencil-name="Open Project Copy"
+                class="box-border [flex:1_1_0] h-fit flex flex-col gap-[4px] justify-start items-start"
+              >
+                <div
+                  data-pencil-name="Open Project Title"
+                  class="text-[18px]/[normal] box-border w-full text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium text-left"
+                >
+                  打开工程
+                </div>
+                <div
+                  data-pencil-name="Open Project Description"
+                  class="text-[13px]/[normal] box-border w-full text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left"
+                >
+                  浏览 .ustx、.ust 与 .mid 文件
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            data-pencil-name="Recent Section"
+            class="box-border w-full [flex:1_1_0] flex flex-col gap-[16px] justify-start items-start"
+          >
+            <div
+              data-pencil-name="Recent Header"
+              class="box-border w-full h-fit shrink-0 flex flex-row gap-0 justify-between items-center"
+            >
+              <div
+                data-pencil-name="Recent Title"
+                class="text-[18px]/[normal] box-border text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium text-left [white-space:nowrap]"
+              >
+                最近工程
+              </div>
+              <div
+                data-pencil-name="View All"
+                class="box-border w-fit shrink-0 h-fit flex flex-row gap-[4px] justify-start items-center"
+              >
+                <div
+                  data-pencil-name="View All Link"
+                  class="text-[14px]/[normal] box-border text-[#6FDBCB] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium text-left [white-space:nowrap]"
+                >
+                  查看全部
+                </div>
+                <svg
+                  data-pencil-name="Icon · View All"
+                  data-icon-name="chevron_right"
+                  data-icon-set="Material Symbols Rounded"
+                  viewBox="0 0 14.000015258789062 14"
+                  preserveAspectRatio="xMidYMid meet"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="box-border w-[18px] shrink-0 h-[18px]"
+                >
+                  <path
+                    d="M7.75537 7l-2.47803-2.47803q-0.08203-0.08203-0.08886-0.19824-0.00342-0.11963 0.08886-0.21191 0.09229-0.0957 0.20508-0.09571 0.11279 0 0.2085 0.09571l2.56006 2.56005q0.0752 0.0752 0.10595 0.15381 0.03076 0.07861 0.03077 0.17432 0 0.0957-0.03077 0.17432-0.03076 0.07861-0.10595 0.1538l-2.56006 2.56006q-0.08203 0.08203-0.20166 0.08887-0.11963 0.00684-0.21192-0.08887-0.09229-0.09229-0.09228-0.20507 0-0.11279 0.09228-0.20508l2.47803-2.47803z"
+                    fill="#6FDBCB"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+            <div
+              data-pencil-name="Project List"
+              class="box-border w-full [flex:1_1_0] flex flex-col gap-[12px] justify-start items-start"
+            >
+              <div
+                data-pencil-name="Project · Neon Horizon"
+                class="box-border w-full h-fit shrink-0 flex flex-row gap-[16px] p-[10px] justify-start items-center bg-[#1A211F] rounded-[12px]"
+              >
+                <div
+                  data-pencil-name="Thumbnail · Neon Horizon"
+                  class="box-border w-[48px] shrink-0 h-[48px] flex flex-row gap-0 justify-center items-center bg-[#334B46] rounded-[8px]"
+                >
+                  <svg
+                    data-pencil-name="Icon · Thumbnail"
+                    data-icon-name="graphic_eq"
+                    data-icon-set="Material Symbols Rounded"
+                    viewBox="0 0 14.000015258789062 14"
+                    preserveAspectRatio="xMidYMid meet"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="box-border w-[24px] shrink-0 h-[24px]"
+                  >
+                    <path
+                      d="M4.52197 9.69336l0-5.38672q0-0.12305 0.08203-0.20508 0.08545-0.08545 0.2085-0.08545 0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20508l0 5.38672q0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20508 0.08203-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.2085z m2.1875 2.26611l0-9.91894q0-0.12305 0.08203-0.20508 0.08545-0.08545 0.2085-0.08545 0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20508l0 9.91894q0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20508 0.08203-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.2085z m-4.375-4.48779l0-0.94336q0-0.12305 0.08203-0.20508 0.08545-0.08545 0.2085-0.08545 0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20508l0 0.94336q0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20508 0.08203-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.2085z m6.5625 2.22168l0-5.38672q0-0.12305 0.08203-0.20508 0.08545-0.08545 0.2085-0.08545 0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20508l0 5.38672q0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20508 0.08203-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.2085z m2.1875-2.22168l0-0.94336q0-0.12305 0.08203-0.20508 0.08545-0.08545 0.2085-0.08545 0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20508l0 0.94336q0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20508 0.08203-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.2085z"
+                      fill="#CCE8E1"
+                    ></path>
+                  </svg>
+                </div>
+                <div
+                  data-pencil-name="Project Details · Neon Horizon"
+                  class="box-border [flex:1_1_0] h-fit flex flex-col gap-[4px] justify-center items-start"
+                >
+                  <div
+                    data-pencil-name="Project Title · Neon Horizon"
+                    class="text-[15px]/[normal] box-border w-full text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium text-left"
+                  >
+                    Neon Horizon
+                  </div>
+                  <div
+                    data-pencil-name="Project Meta · Neon Horizon"
+                    class="box-border w-fit h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center"
+                  >
+                    <div
+                      data-pencil-name="Project Meta · Voicebank · Neon Horizon"
+                      class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                    >
+                      Kasane Teto
+                    </div>
+                    <div
+                      data-pencil-name="Meta Separator 1 · Neon Horizon"
+                      class="box-border w-[3px] shrink-0 h-[3px] bg-[#899390] rounded-full"
+                    ></div>
+                    <div
+                      data-pencil-name="Project Meta · Tempo · Neon Horizon"
+                      class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                    >
+                      128 BPM
+                    </div>
+                    <div
+                      data-pencil-name="Meta Separator 2 · Neon Horizon"
+                      class="box-border w-[3px] shrink-0 h-[3px] bg-[#899390] rounded-full"
+                    ></div>
+                    <div
+                      data-pencil-name="Project Meta · Key · Neon Horizon"
+                      class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                    >
+                      A♭ 大调
+                    </div>
+                  </div>
+                </div>
+                <div
+                  data-pencil-name="Project Timestamp · Neon Horizon"
+                  class="box-border w-fit shrink-0 h-fit flex flex-row gap-[12px] justify-start items-center"
+                >
+                  <div
+                    data-pencil-name="Project Modified · Neon Horizon"
+                    class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                  >
+                    2 小时前
+                  </div>
+                  <svg
+                    data-pencil-name="Icon · Open Project"
+                    data-icon-name="chevron_right"
+                    data-icon-set="Material Symbols Rounded"
+                    viewBox="0 0 14.000015258789062 14"
+                    preserveAspectRatio="xMidYMid meet"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="box-border w-[20px] shrink-0 h-[20px]"
+                  >
+                    <path
+                      d="M7.75537 7l-2.47803-2.47803q-0.08203-0.08203-0.08886-0.19824-0.00342-0.11963 0.08886-0.21191 0.09229-0.0957 0.20508-0.09571 0.11279 0 0.2085 0.09571l2.56006 2.56005q0.0752 0.0752 0.10595 0.15381 0.03076 0.07861 0.03077 0.17432 0 0.0957-0.03077 0.17432-0.03076 0.07861-0.10595 0.1538l-2.56006 2.56006q-0.08203 0.08203-0.20166 0.08887-0.11963 0.00684-0.21192-0.08887-0.09229-0.09229-0.09228-0.20507 0-0.11279 0.09228-0.20508l2.47803-2.47803z"
+                      fill="#BEC9C5"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+              <div
+                data-pencil-name="Project · Rin &amp; Len Duet"
+                class="box-border w-full h-fit shrink-0 flex flex-row gap-[16px] p-[10px] justify-start items-center bg-[#1A211F] rounded-[12px]"
+              >
+                <div
+                  data-pencil-name="Thumbnail · Rin &amp; Len Duet"
+                  class="box-border w-[48px] shrink-0 h-[48px] flex flex-row gap-0 justify-center items-center bg-[#334B46] rounded-[8px]"
+                >
+                  <svg
+                    data-pencil-name="Icon · Thumbnail"
+                    data-icon-name="piano"
+                    data-icon-set="Material Symbols Rounded"
+                    viewBox="0 0 14.000015258789062 14"
+                    preserveAspectRatio="xMidYMid meet"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="box-border w-[24px] shrink-0 h-[24px]"
+                  >
+                    <path
+                      d="M3.27441 11.66553q-0.3999 0-0.66992-0.27002-0.27002-0.27002-0.27002-0.66992l0-7.45118q0-0.3999 0.27002-0.66992 0.27002-0.27002 0.66992-0.27002l7.45118 0q0.3999 0 0.66992 0.27002 0.27002 0.27002 0.27002 0.66992l0 7.45118q0 0.3999-0.27002 0.66992-0.27002 0.27002-0.66992 0.27002l-7.45118 0z m0-0.58106l1.77393 0 0-2.80615-0.23584 0q-0.21533 0-0.35547-0.14014-0.13672-0.14014-0.13672-0.35205l0-4.8706-1.0459 0q-0.15723 0-0.25976 0.10254-0.09912 0.09912-0.09912 0.25634l0 7.45118q0 0.15723 0.09912 0.25976 0.10254 0.09912 0.25976 0.09912z m5.67725 0l1.77393 0q0.15723 0 0.25634-0.09912 0.10254-0.10254 0.10254-0.25976l0-7.45118q0-0.15723-0.10254-0.25634-0.09912-0.10254-0.25634-0.10254l-1.0459 0 0 4.8706q0 0.21191-0.14014 0.35205-0.13672 0.14014-0.35205 0.14014l-0.23584 0 0 2.80615z m-3.38721 0l2.8711 0 0-2.80615-0.23584 0q-0.21533 0-0.35547-0.14014-0.13672-0.14014-0.13672-0.35205l0-4.8706-1.41504 0 0 4.8706q0 0.21191-0.14014 0.35205-0.13672 0.14014-0.35205 0.14014l-0.23584 0 0 2.80615z"
+                      fill="#CCE8E1"
+                    ></path>
+                  </svg>
+                </div>
+                <div
+                  data-pencil-name="Project Details · Rin &amp; Len Duet"
+                  class="box-border [flex:1_1_0] h-fit flex flex-col gap-[4px] justify-center items-start"
+                >
+                  <div
+                    data-pencil-name="Project Title · Rin &amp; Len Duet"
+                    class="text-[15px]/[normal] box-border w-full text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium text-left"
+                  >
+                    Momo &amp; Ritsu Duet
+                  </div>
+                  <div
+                    data-pencil-name="Project Meta · Rin &amp; Len Duet"
+                    class="box-border w-fit h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center"
+                  >
+                    <div
+                      data-pencil-name="Project Meta · Voicebank · Rin &amp; Len Duet"
+                      class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                    >
+                      Momone Momo &amp; Namine Ritsu
+                    </div>
+                    <div
+                      data-pencil-name="Meta Separator 1 · Rin &amp; Len Duet"
+                      class="box-border w-[3px] shrink-0 h-[3px] bg-[#899390] rounded-full"
+                    ></div>
+                    <div
+                      data-pencil-name="Project Meta · Tempo · Rin &amp; Len Duet"
+                      class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                    >
+                      140 BPM
+                    </div>
+                    <div
+                      data-pencil-name="Meta Separator 2 · Rin &amp; Len Duet"
+                      class="box-border w-[3px] shrink-0 h-[3px] bg-[#899390] rounded-full"
+                    ></div>
+                    <div
+                      data-pencil-name="Project Meta · Key · Rin &amp; Len Duet"
+                      class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                    >
+                      D 小调
+                    </div>
+                  </div>
+                </div>
+                <div
+                  data-pencil-name="Project Timestamp · Rin &amp; Len Duet"
+                  class="box-border w-fit shrink-0 h-fit flex flex-row gap-[12px] justify-start items-center"
+                >
+                  <div
+                    data-pencil-name="Project Modified · Rin &amp; Len Duet"
+                    class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                  >
+                    昨天
+                  </div>
+                  <svg
+                    data-pencil-name="Icon · Open Project"
+                    data-icon-name="chevron_right"
+                    data-icon-set="Material Symbols Rounded"
+                    viewBox="0 0 14.000015258789062 14"
+                    preserveAspectRatio="xMidYMid meet"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="box-border w-[20px] shrink-0 h-[20px]"
+                  >
+                    <path
+                      d="M7.75537 7l-2.47803-2.47803q-0.08203-0.08203-0.08886-0.19824-0.00342-0.11963 0.08886-0.21191 0.09229-0.0957 0.20508-0.09571 0.11279 0 0.2085 0.09571l2.56006 2.56005q0.0752 0.0752 0.10595 0.15381 0.03076 0.07861 0.03077 0.17432 0 0.0957-0.03077 0.17432-0.03076 0.07861-0.10595 0.1538l-2.56006 2.56006q-0.08203 0.08203-0.20166 0.08887-0.11963 0.00684-0.21192-0.08887-0.09229-0.09229-0.09228-0.20507 0-0.11279 0.09228-0.20508l2.47803-2.47803z"
+                      fill="#BEC9C5"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+              <div
+                data-pencil-name="Project · Stardust Echo"
+                class="box-border w-full h-fit shrink-0 flex flex-row gap-[16px] p-[10px] justify-start items-center bg-[#1A211F] rounded-[12px]"
+              >
+                <div
+                  data-pencil-name="Thumbnail · Stardust Echo"
+                  class="box-border w-[48px] shrink-0 h-[48px] flex flex-row gap-0 justify-center items-center bg-[#334B46] rounded-[8px]"
+                >
+                  <svg
+                    data-pencil-name="Icon · Thumbnail"
+                    data-icon-name="music_note"
+                    data-icon-set="Material Symbols Rounded"
+                    viewBox="0 0 14.000015258789062 14"
+                    preserveAspectRatio="xMidYMid meet"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="box-border w-[24px] shrink-0 h-[24px]"
+                  >
+                    <path
+                      d="M5.86865 11.55615q-0.72461 0-1.2373-0.51269-0.5127-0.51611-0.5127-1.23731 0-0.72461 0.5127-1.2373 0.5127-0.5127 1.2373-0.5127 0.33496 0 0.63574 0.11963 0.30078 0.11621 0.52979 0.35547l0-5.61572q0-0.19824 0.13672-0.33496 0.13672-0.13672 0.33838-0.13672l1.90381 0q0.20166 0 0.33496 0.13672 0.1333 0.13672 0.1333 0.33496l0 0.54004q0 0.19824-0.13672 0.33496-0.1333 0.13672-0.33154 0.13672l-1.79444 0 0 5.8789q0 0.72119-0.51611 1.23731-0.5127 0.5127-1.23389 0.51269z"
+                      fill="#CCE8E1"
+                    ></path>
+                  </svg>
+                </div>
+                <div
+                  data-pencil-name="Project Details · Stardust Echo"
+                  class="box-border [flex:1_1_0] h-fit flex flex-col gap-[4px] justify-center items-start"
+                >
+                  <div
+                    data-pencil-name="Project Title · Stardust Echo"
+                    class="text-[15px]/[normal] box-border w-full text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium text-left"
+                  >
+                    Stardust Echo
+                  </div>
+                  <div
+                    data-pencil-name="Project Meta · Stardust Echo"
+                    class="box-border w-fit h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center"
+                  >
+                    <div
+                      data-pencil-name="Project Meta · Voicebank · Stardust Echo"
+                      class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                    >
+                      Yowane Haku
+                    </div>
+                    <div
+                      data-pencil-name="Meta Separator 1 · Stardust Echo"
+                      class="box-border w-[3px] shrink-0 h-[3px] bg-[#899390] rounded-full"
+                    ></div>
+                    <div
+                      data-pencil-name="Project Meta · Tempo · Stardust Echo"
+                      class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                    >
+                      96 BPM
+                    </div>
+                    <div
+                      data-pencil-name="Meta Separator 2 · Stardust Echo"
+                      class="box-border w-[3px] shrink-0 h-[3px] bg-[#899390] rounded-full"
+                    ></div>
+                    <div
+                      data-pencil-name="Project Meta · Key · Stardust Echo"
+                      class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                    >
+                      F 大调
+                    </div>
+                  </div>
+                </div>
+                <div
+                  data-pencil-name="Project Timestamp · Stardust Echo"
+                  class="box-border w-fit shrink-0 h-fit flex flex-row gap-[12px] justify-start items-center"
+                >
+                  <div
+                    data-pencil-name="Project Modified · Stardust Echo"
+                    class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                  >
+                    3 天前
+                  </div>
+                  <svg
+                    data-pencil-name="Icon · Open Project"
+                    data-icon-name="chevron_right"
+                    data-icon-set="Material Symbols Rounded"
+                    viewBox="0 0 14.000015258789062 14"
+                    preserveAspectRatio="xMidYMid meet"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="box-border w-[20px] shrink-0 h-[20px]"
+                  >
+                    <path
+                      d="M7.75537 7l-2.47803-2.47803q-0.08203-0.08203-0.08886-0.19824-0.00342-0.11963 0.08886-0.21191 0.09229-0.0957 0.20508-0.09571 0.11279 0 0.2085 0.09571l2.56006 2.56005q0.0752 0.0752 0.10595 0.15381 0.03076 0.07861 0.03077 0.17432 0 0.0957-0.03077 0.17432-0.03076 0.07861-0.10595 0.1538l-2.56006 2.56006q-0.08203 0.08203-0.20166 0.08887-0.11963 0.00684-0.21192-0.08887-0.09229-0.09229-0.09228-0.20507 0-0.11279 0.09228-0.20508l2.47803-2.47803z"
+                      fill="#BEC9C5"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+              <div
+                data-pencil-name="Project · Paper Plane"
+                class="box-border w-full h-fit shrink-0 flex flex-row gap-[16px] p-[10px] justify-start items-center bg-[#1A211F] rounded-[12px]"
+              >
+                <div
+                  data-pencil-name="Thumbnail · Paper Plane"
+                  class="box-border w-[48px] shrink-0 h-[48px] flex flex-row gap-0 justify-center items-center bg-[#334B46] rounded-[8px]"
+                >
+                  <svg
+                    data-pencil-name="Icon · Thumbnail"
+                    data-icon-name="music_note"
+                    data-icon-set="Material Symbols Rounded"
+                    viewBox="0 0 14.000015258789062 14"
+                    preserveAspectRatio="xMidYMid meet"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="box-border w-[24px] shrink-0 h-[24px]"
+                  >
+                    <path
+                      d="M5.86865 11.55615q-0.72461 0-1.2373-0.51269-0.5127-0.51611-0.5127-1.23731 0-0.72461 0.5127-1.2373 0.5127-0.5127 1.2373-0.5127 0.33496 0 0.63574 0.11963 0.30078 0.11621 0.52979 0.35547l0-5.61572q0-0.19824 0.13672-0.33496 0.13672-0.13672 0.33838-0.13672l1.90381 0q0.20166 0 0.33496 0.13672 0.1333 0.13672 0.1333 0.33496l0 0.54004q0 0.19824-0.13672 0.33496-0.1333 0.13672-0.33154 0.13672l-1.79444 0 0 5.8789q0 0.72119-0.51611 1.23731-0.5127 0.5127-1.23389 0.51269z"
+                      fill="#CCE8E1"
+                    ></path>
+                  </svg>
+                </div>
+                <div
+                  data-pencil-name="Project Details · Paper Plane"
+                  class="box-border [flex:1_1_0] h-fit flex flex-col gap-[4px] justify-center items-start"
+                >
+                  <div
+                    data-pencil-name="Project Title · Paper Plane"
+                    class="text-[15px]/[normal] box-border w-full text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium text-left"
+                  >
+                    Paper Plane
+                  </div>
+                  <div
+                    data-pencil-name="Project Meta · Paper Plane"
+                    class="box-border w-fit h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center"
+                  >
+                    <div
+                      data-pencil-name="Project Meta · Voicebank · Paper Plane"
+                      class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                    >
+                      Kasane Teto
+                    </div>
+                    <div
+                      data-pencil-name="Meta Separator 1 · Paper Plane"
+                      class="box-border w-[3px] shrink-0 h-[3px] bg-[#899390] rounded-full"
+                    ></div>
+                    <div
+                      data-pencil-name="Project Meta · Tempo · Paper Plane"
+                      class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                    >
+                      110 BPM
+                    </div>
+                    <div
+                      data-pencil-name="Meta Separator 2 · Paper Plane"
+                      class="box-border w-[3px] shrink-0 h-[3px] bg-[#899390] rounded-full"
+                    ></div>
+                    <div
+                      data-pencil-name="Project Meta · Key · Paper Plane"
+                      class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                    >
+                      C 大调
+                    </div>
+                  </div>
+                </div>
+                <div
+                  data-pencil-name="Project Timestamp · Paper Plane"
+                  class="box-border w-fit shrink-0 h-fit flex flex-row gap-[12px] justify-start items-center"
+                >
+                  <div
+                    data-pencil-name="Project Modified · Paper Plane"
+                    class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                  >
+                    上周
+                  </div>
+                  <svg
+                    data-pencil-name="Icon · Open Project"
+                    data-icon-name="chevron_right"
+                    data-icon-set="Material Symbols Rounded"
+                    viewBox="0 0 14.000015258789062 14"
+                    preserveAspectRatio="xMidYMid meet"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="box-border w-[20px] shrink-0 h-[20px]"
+                  >
+                    <path
+                      d="M7.75537 7l-2.47803-2.47803q-0.08203-0.08203-0.08886-0.19824-0.00342-0.11963 0.08886-0.21191 0.09229-0.0957 0.20508-0.09571 0.11279 0 0.2085 0.09571l2.56006 2.56005q0.0752 0.0752 0.10595 0.15381 0.03076 0.07861 0.03077 0.17432 0 0.0957-0.03077 0.17432-0.03076 0.07861-0.10595 0.1538l-2.56006 2.56006q-0.08203 0.08203-0.20166 0.08887-0.11963 0.00684-0.21192-0.08887-0.09229-0.09229-0.09228-0.20507 0-0.11279 0.09228-0.20508l2.47803-2.47803z"
+                      fill="#BEC9C5"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+              <div
+                data-pencil-name="Project · Midnight Sonata"
+                class="box-border w-full h-fit shrink-0 flex flex-row gap-[16px] p-[10px] justify-start items-center bg-[#1A211F] rounded-[12px]"
+              >
+                <div
+                  data-pencil-name="Thumbnail · Midnight Sonata"
+                  class="box-border w-[48px] shrink-0 h-[48px] flex flex-row gap-0 justify-center items-center bg-[#334B46] rounded-[8px]"
+                >
+                  <svg
+                    data-pencil-name="Icon · Thumbnail"
+                    data-icon-name="graphic_eq"
+                    data-icon-set="Material Symbols Rounded"
+                    viewBox="0 0 14.000015258789062 14"
+                    preserveAspectRatio="xMidYMid meet"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="box-border w-[24px] shrink-0 h-[24px]"
+                  >
+                    <path
+                      d="M4.52197 9.69336l0-5.38672q0-0.12305 0.08203-0.20508 0.08545-0.08545 0.2085-0.08545 0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20508l0 5.38672q0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20508 0.08203-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.2085z m2.1875 2.26611l0-9.91894q0-0.12305 0.08203-0.20508 0.08545-0.08545 0.2085-0.08545 0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20508l0 9.91894q0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20508 0.08203-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.2085z m-4.375-4.48779l0-0.94336q0-0.12305 0.08203-0.20508 0.08545-0.08545 0.2085-0.08545 0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20508l0 0.94336q0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20508 0.08203-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.2085z m6.5625 2.22168l0-5.38672q0-0.12305 0.08203-0.20508 0.08545-0.08545 0.2085-0.08545 0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20508l0 5.38672q0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20508 0.08203-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.2085z m2.1875-2.22168l0-0.94336q0-0.12305 0.08203-0.20508 0.08545-0.08545 0.2085-0.08545 0.12305 0 0.20508 0.08545 0.08545 0.08203 0.08545 0.20508l0 0.94336q0 0.12305-0.08545 0.2085-0.08203 0.08203-0.20508 0.08203-0.12305 0-0.2085-0.08203-0.08203-0.08545-0.08203-0.2085z"
+                      fill="#CCE8E1"
+                    ></path>
+                  </svg>
+                </div>
+                <div
+                  data-pencil-name="Project Details · Midnight Sonata"
+                  class="box-border [flex:1_1_0] h-fit flex flex-col gap-[4px] justify-center items-start"
+                >
+                  <div
+                    data-pencil-name="Project Title · Midnight Sonata"
+                    class="text-[15px]/[normal] box-border w-full text-[#DDE4E1] font-['Noto_Sans_SC',system-ui,sans-serif] font-medium text-left"
+                  >
+                    Midnight Sonata
+                  </div>
+                  <div
+                    data-pencil-name="Project Meta · Midnight Sonata"
+                    class="box-border w-fit h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center"
+                  >
+                    <div
+                      data-pencil-name="Project Meta · Voicebank · Midnight Sonata"
+                      class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                    >
+                      Akita Neru
+                    </div>
+                    <div
+                      data-pencil-name="Meta Separator 1 · Midnight Sonata"
+                      class="box-border w-[3px] shrink-0 h-[3px] bg-[#899390] rounded-full"
+                    ></div>
+                    <div
+                      data-pencil-name="Project Meta · Tempo · Midnight Sonata"
+                      class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                    >
+                      128 BPM
+                    </div>
+                    <div
+                      data-pencil-name="Meta Separator 2 · Midnight Sonata"
+                      class="box-border w-[3px] shrink-0 h-[3px] bg-[#899390] rounded-full"
+                    ></div>
+                    <div
+                      data-pencil-name="Project Meta · Key · Midnight Sonata"
+                      class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                    >
+                      E 小调
+                    </div>
+                  </div>
+                </div>
+                <div
+                  data-pencil-name="Project Timestamp · Midnight Sonata"
+                  class="box-border w-fit shrink-0 h-fit flex flex-row gap-[12px] justify-start items-center"
+                >
+                  <div
+                    data-pencil-name="Project Modified · Midnight Sonata"
+                    class="text-[12px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+                  >
+                    上周
+                  </div>
+                  <svg
+                    data-pencil-name="Icon · Open Project"
+                    data-icon-name="chevron_right"
+                    data-icon-set="Material Symbols Rounded"
+                    viewBox="0 0 14.000015258789062 14"
+                    preserveAspectRatio="xMidYMid meet"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="box-border w-[20px] shrink-0 h-[20px]"
+                  >
+                    <path
+                      d="M7.75537 7l-2.47803-2.47803q-0.08203-0.08203-0.08886-0.19824-0.00342-0.11963 0.08886-0.21191 0.09229-0.0957 0.20508-0.09571 0.11279 0 0.2085 0.09571l2.56006 2.56005q0.0752 0.0752 0.10595 0.15381 0.03076 0.07861 0.03077 0.17432 0 0.0957-0.03077 0.17432-0.03076 0.07861-0.10595 0.1538l-2.56006 2.56006q-0.08203 0.08203-0.20166 0.08887-0.11963 0.00684-0.21192-0.08887-0.09229-0.09229-0.09228-0.20507 0-0.11279 0.09228-0.20508l2.47803-2.47803z"
+                      fill="#BEC9C5"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            data-pencil-name="Drop Hint"
+            class="box-border w-full h-[56px] shrink-0 flex flex-row gap-[12px] p-[16px] justify-center items-center bg-[#161D1B] rounded-[12px]"
+          >
+            <svg
+              data-pencil-name="Icon · Drop"
+              data-icon-name="upload_file"
+              data-icon-set="Material Symbols Rounded"
+              viewBox="0 0 14.000015258789062 14"
+              preserveAspectRatio="xMidYMid meet"
+              xmlns="http://www.w3.org/2000/svg"
+              class="box-border w-[20px] shrink-0 h-[20px]"
+            >
+              <path
+                d="M6.70947 7.62549l0 2.44726q0 0.12646 0.08203 0.21192 0.08545 0.08203 0.2085 0.08203 0.12305 0 0.20508-0.08203 0.08545-0.08545 0.08545-0.21192l0-2.44726 1.01855 1.01855q0.04443 0.04443 0.09571 0.06494 0.05469 0.02051 0.10595 0.02051 0.05469-0.00342 0.1128-0.02392 0.05811-0.02051 0.09912-0.06495 0.09229-0.0957 0.09228-0.20507 0.00342-0.10938-0.09228-0.20508l-1.39453-1.39453q-0.0752-0.0752-0.15381-0.10596-0.07861-0.03076-0.17432-0.03076-0.0957 0-0.17432 0.03076-0.07861 0.03076-0.1538 0.10596l-1.39454 1.39453q-0.08545 0.08545-0.08886 0.20166-0.00342 0.11279 0.09228 0.20849 0.0957 0.0957 0.20508 0.09913 0.10938 0 0.2085-0.09913l1.01513-1.01513z m-2.85058 4.62451q-0.40332 0-0.67334-0.27002-0.27002-0.27002-0.27002-0.67334l0-8.61328q0-0.40332 0.27002-0.67334 0.27002-0.27002 0.67334-0.27002l4.20752 0q0.18799 0 0.36572 0.07861 0.17773 0.0752 0.3042 0.20166l2.06787 2.06446q0.12646 0.12646 0.20166 0.3042 0.07861 0.17773 0.07861 0.36914l0 6.53857q0 0.40332-0.27002 0.67334-0.27002 0.27002-0.67334 0.27002l-6.28222 0z m4.30664-8.05615l0-1.85938-4.30664 0q-0.1333 0-0.2461 0.1128-0.11279 0.10938-0.11279 0.24609l0 8.61328q0 0.13672 0.11279 0.24951 0.11279 0.10938 0.2461 0.10938l6.28222 0q0.1333 0 0.2461-0.10938 0.11279-0.11279 0.11279-0.24951l0-6.64111-1.86279 0q-0.20166 0-0.33838-0.1333-0.1333-0.1333-0.1333-0.33838z m-4.66553-1.85938l0 1.85938q0 0.20508 0 0.33838 0 0.1333 0 0.1333l0-2.33106 0 1.85938q0 0.20508 0 0.33838 0 0.1333 0 0.1333l0 6.64111q0 0.13672 0 0.24951 0 0.10938 0 0.10938 0 0 0-0.10938 0-0.11279 0-0.24951l0-8.61328q0-0.13672 0-0.24609 0-0.11279 0-0.1128z"
+                fill="#BEC9C5"
+              ></path>
+            </svg>
+            <div
+              data-pencil-name="Drop Hint Message"
+              class="text-[13px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+            >
+              将 .ustx 或 .ust 工程文件拖到此处导入
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        data-pencil-name="Status Bar"
+        class="box-border w-full h-[32px] shrink-0 flex flex-row gap-[20px] p-[0px_16px] justify-start items-center bg-[#1A211F]"
+      >
+        <div
+          data-pencil-name="Engine Status"
+          class="text-[10px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+        >
+          引擎就绪
+        </div>
+        <div
+          data-pencil-name="Audio Format"
+          class="text-[10px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+        >
+          48 kHz · 24 bit · 缓冲 256
+        </div>
+        <div
+          data-pencil-name="Status Bar Spacer"
+          class="box-border [flex:1_1_0] h-[1px] flex flex-row gap-0 justify-start items-start"
+        ></div>
+        <div
+          data-pencil-name="Voice Count"
+          class="text-[10px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+        >
+          声部 18/64
+        </div>
+        <div
+          data-pencil-name="CPU Usage"
+          class="text-[10px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+        >
+          CPU 12%
+        </div>
+        <div
+          data-pencil-name="Disk Usage"
+          class="text-[10px]/[normal] box-border text-[#BEC9C5] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal text-left [white-space:nowrap]"
+        >
+          磁盘 4%
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

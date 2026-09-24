@@ -1,0 +1,474 @@
+# VST-Plugin.html — 命名元素 373 个，最大嵌套深度 7
+          "tailwind = { config: { corePlugins: { preflight: false } } };"
+          "*, ::before, ::after { box-sizing: border-box; } body { margin: 0; }"
+        VST Plugin · VST界面  ·  w-[1440px] h-[900px] flex flex-col gap-0 justify-start items-start overflow-hidden
+          Top App Bar  ·  w-full h-[56px] shrink-0 flex flex-row gap-[14px] p-[0px_16px] justify-start items-center
+            Plugin Mark  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[8px]
+              Icon · Plugin Mark {icon:mic}  ·  w-[20px] shrink-0 h-[20px]
+          Title Cluster · Plugin  ·  w-fit shrink-0 h-fit flex flex-row gap-[8px] justify-start items-center
+            Plugin Wordmark  ·  text-[15px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold tracking-[0.5px] [white-space:nowrap]
+              "UTVTU"
+            Plugin Subtitle  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+              "VST 编辑器"
+          Preset Field  ·  w-[300px] shrink-0 h-[40px] flex flex-row gap-[8px] p-[0px_12px] justify-start items-center rounded-[8px]
+            Field Label · Preset  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+              "预设"
+            Field Value · Preset  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+              "Kasane Teto — 柔和"
+            Preset Spacer  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+            Icon · Preset Chevron {icon:chevron-down}  ·  w-[16px] shrink-0 h-[16px]
+        AB Compare  ·  w-fit shrink-0 h-[32px] flex flex-row gap-[3px] p-[3px] justify-start items-center rounded-[8px]
+          Compare Slot · A  ·  w-[34px] shrink-0 h-[26px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+            Slot Label · A  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+              "A"
+          Compare Slot · B  ·  w-[34px] shrink-0 h-[26px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+            Slot Label · B  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+              "B"
+        Title Spacer  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+        Pin Button  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+          Icon · Pin {icon:pin}  ·  w-[18px] shrink-0 h-[18px]
+      Minimize Button  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+        Icon · Minimize {icon:minus}  ·  w-[18px] shrink-0 h-[18px]
+    Maximize Button  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+      Icon · Maximize {icon:square}  ·  w-[18px] shrink-0 h-[18px]
+  Close Button  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+    Icon · Close {icon:x}  ·  w-[18px] shrink-0 h-[18px]
+Plugin Toolbar  ·  w-full h-[44px] shrink-0 flex flex-row gap-[12px] p-[0px_16px] justify-start items-center
+  Tab Bar · Main  ·  w-fit shrink-0 h-[36px] flex flex-row gap-[3px] p-[3px] justify-start items-center rounded-[999px]
+    Tab · Edit  ·  w-fit shrink-0 h-[30px] flex flex-row gap-0 p-[0px_18px] justify-center items-center rounded-[999px]
+      Tab Label · Edit  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+        "编辑"
+    Tab · Voice  ·  w-fit shrink-0 h-[30px] flex flex-row gap-0 p-[0px_18px] justify-center items-center rounded-[999px]
+      Tab Label · Voice  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+        "声音"
+    Tab · FX  ·  w-fit shrink-0 h-[30px] flex flex-row gap-0 p-[0px_18px] justify-center items-center rounded-[999px]
+      Tab Label · FX  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+        "效果"
+    Tab · Matrix  ·  w-fit shrink-0 h-[30px] flex flex-row gap-0 p-[0px_18px] justify-center items-center rounded-[999px]
+      Tab Label · Matrix  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+        "矩阵"
+  Toolbar Spacer  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+  Status Chip · MIDI  ·  w-fit shrink-0 h-[28px] flex flex-row gap-[6px] p-[0px_12px] justify-start items-center rounded-[999px]
+    Chip Key · MIDI  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.8px] [white-space:nowrap]
+      "MIDI"
+    Chip Value · MIDI Input  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "输入"
+  Status Chip · Voices  ·  w-fit shrink-0 h-[28px] flex flex-row gap-[6px] p-[0px_12px] justify-start items-center rounded-[999px]
+    Chip Key · Voices  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "声部"
+    Chip Value · Voices  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "12/64"
+  Status Chip · CPU  ·  w-fit shrink-0 h-[28px] flex flex-row gap-[6px] p-[0px_12px] justify-start items-center rounded-[999px]
+    Chip Key · CPU  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.8px] [white-space:nowrap]
+      "CPU"
+    Chip Value · CPU  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "8%"
+Plugin Content  ·  w-full flex flex-row gap-[16px] p-[16px] justify-start items-start
+  Singer Panel  ·  w-[260px] shrink-0 h-full flex flex-col gap-[12px] p-[16px] justify-start items-start rounded-[16px]
+    Singer Header  ·  w-full h-fit shrink-0 flex flex-row gap-0 justify-start items-center
+      Section Title · Singer  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+        "歌手 / 音源"
+      Header Spacer · Singer  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+      Singer Count  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "12"
+    Search Field · Singer  ·  w-full h-[40px] shrink-0 flex flex-row gap-[8px] p-[0px_12px] justify-start items-center rounded-[999px]
+      Icon · Search {icon:search}  ·  w-[16px] shrink-0 h-[16px]
+    Search Placeholder  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "搜索音源"
+  Singer List  ·  w-full h-fit shrink-0 flex flex-col gap-[4px] justify-start items-start
+    Singer List Item · Kasane Teto  ·  w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center rounded-[8px]
+      Singer Status Dot · Kasane Teto  ·  w-[10px] shrink-0 h-[10px] rounded-full
+      Singer Info · Kasane Teto  ·  w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start
+        Singer Name · Kasane Teto  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+          "Kasane Teto"
+        Singer Meta · Kasane Teto  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+          "JA · 女声"
+      Singer Item Spacer · Kasane Teto  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+      Icon · Selected Marker {icon:check}  ·  w-[16px] shrink-0 h-[16px]
+  Singer List Item · Momone Momo  ·  w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center rounded-[8px]
+    Singer Status Dot · Momone Momo  ·  w-[10px] shrink-0 h-[10px] rounded-full
+    Singer Info · Momone Momo  ·  w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start
+      Singer Name · Momone Momo  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "Momone Momo"
+      Singer Meta · Momone Momo  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "JA · 女声"
+    Singer Item Spacer · Momone Momo  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+  Singer List Item · Namine Ritsu  ·  w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center rounded-[8px]
+    Singer Status Dot · Namine Ritsu  ·  w-[10px] shrink-0 h-[10px] rounded-full
+    Singer Info · Namine Ritsu  ·  w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start
+      Singer Name · Namine Ritsu  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "Namine Ritsu"
+      Singer Meta · Namine Ritsu  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "JA · 男声"
+    Singer Item Spacer · Namine Ritsu  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+  Singer List Item · Yowane Haku  ·  w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center rounded-[8px]
+    Singer Status Dot · Yowane Haku  ·  w-[10px] shrink-0 h-[10px] rounded-full
+    Singer Info · Yowane Haku  ·  w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start
+      Singer Name · Yowane Haku  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "Yowane Haku"
+      Singer Meta · Yowane Haku  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "JA · 女声"
+    Singer Item Spacer · Yowane Haku  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+  Singer List Item · Nova DS  ·  w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center rounded-[8px]
+    Singer Status Dot · Nova DS  ·  w-[10px] shrink-0 h-[10px] rounded-full
+    Singer Info · Nova DS  ·  w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start
+      Singer Name · Nova DS  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "Nova DS"
+      Singer Meta · Nova DS  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "JA · 女声"
+    Singer Item Spacer · Nova DS  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+  Singer List Item · Defoko  ·  w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center rounded-[8px]
+    Singer Status Dot · Defoko  ·  w-[10px] shrink-0 h-[10px] rounded-full
+    Singer Info · Defoko  ·  w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start
+      Singer Name · Defoko  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "Defoko"
+      Singer Meta · Defoko  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "JA · 男声"
+    Singer Item Spacer · Defoko  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+  Singer List Item · Akita Neru  ·  w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center rounded-[8px]
+    Singer Status Dot · Akita Neru  ·  w-[10px] shrink-0 h-[10px] rounded-full
+    Singer Info · Akita Neru  ·  w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start
+      Singer Name · Akita Neru  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "Akita Neru"
+      Singer Meta · Akita Neru  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "JA · 女声"
+    Singer Item Spacer · Akita Neru  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+  Singer List Item · Aria DS  ·  w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center rounded-[8px]
+    Singer Status Dot · Aria DS  ·  w-[10px] shrink-0 h-[10px] rounded-full
+    Singer Info · Aria DS  ·  w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start
+      Singer Name · Aria DS  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "Aria DS"
+      Singer Meta · Aria DS  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "JA · 女声"
+    Singer Item Spacer · Aria DS  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+  Singer List Item · Kira DS  ·  w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center rounded-[8px]
+    Singer Status Dot · Kira DS  ·  w-[10px] shrink-0 h-[10px] rounded-full
+    Singer Info · Kira DS  ·  w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start
+      Singer Name · Kira DS  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "Kira DS"
+      Singer Meta · Kira DS  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "JA · 男声"
+    Singer Item Spacer · Kira DS  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+  Singer List Item · Ren DS  ·  w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center rounded-[8px]
+    Singer Status Dot · Ren DS  ·  w-[10px] shrink-0 h-[10px] rounded-full
+    Singer Info · Ren DS  ·  w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start
+      Singer Name · Ren DS  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "Ren DS"
+      Singer Meta · Ren DS  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "EN · 男声"
+    Singer Item Spacer · Ren DS  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+  Singer List Item · Sora DS  ·  w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center rounded-[8px]
+    Singer Status Dot · Sora DS  ·  w-[10px] shrink-0 h-[10px] rounded-full
+    Singer Info · Sora DS  ·  w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start
+      Singer Name · Sora DS  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "Sora DS"
+      Singer Meta · Sora DS  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "EN · 男声"
+    Singer Item Spacer · Sora DS  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+  Singer List Item · Hana DS  ·  w-full h-[46px] shrink-0 flex flex-row gap-[10px] p-[0px_10px] justify-start items-center rounded-[8px]
+    Singer Status Dot · Hana DS  ·  w-[10px] shrink-0 h-[10px] rounded-full
+    Singer Info · Hana DS  ·  w-fit shrink-0 h-fit flex flex-col gap-[1px] justify-start items-start
+      Singer Name · Hana DS  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "Hana DS"
+      Singer Meta · Hana DS  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "EN · 女声"
+    Singer Item Spacer · Hana DS  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+Editor Column  ·  w-[816px] shrink-0 h-full flex flex-col gap-[14px] justify-start items-start
+  Voice Character  ·  w-[816px] h-fit shrink-0 flex flex-col gap-[12px] p-[16px] justify-start items-start rounded-[16px]
+    Voice Header  ·  w-full h-fit shrink-0 flex flex-row gap-0 justify-start items-center
+      Section Title · Voice Character  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+        "音色特征"
+      Header Spacer · Voice Character  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+      Preset Button · Default  ·  w-fit shrink-0 h-[24px] flex flex-row gap-0 p-[0px_12px] justify-center items-center rounded-[999px]
+        Button Label · Default  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+          "默认"
+      Preset Button · Init  ·  w-fit shrink-0 h-[24px] flex flex-row gap-0 p-[0px_12px] justify-center items-center rounded-[999px]
+        Button Label · Init  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+          "初始化"
+    Knob Row · Voice Character  ·  w-full h-fit shrink-0 flex flex-row gap-0 justify-between items-start
+      Knob · Breath  ·  w-[72px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center
+        Dial · Breath  ·  w-[56px] h-[56px] shrink-0 relative
+          Dial Base · Breath  ·  w-[56px] h-[56px] absolute left-0 top-0 rounded-full
+          Dial Track · Breath  ·  w-[56px] h-[56px] absolute left-0 top-0
+          Dial Value · Breath  ·  w-[56px] h-[56px] absolute left-0 top-0
+          Dial Dot · Breath  ·  w-[6px] h-[6px] absolute left-[37.303px] top-[5.614px] rounded-full
+        Param Label · Breath  ·  text-[9px]/[normal] w-[72px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+          "气息"
+        Param Value · Breath  ·  text-[11px]/[normal] w-[72px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+          "62"
+      Knob · Bright  ·  w-[72px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center
+        Dial · Bright  ·  w-[56px] h-[56px] shrink-0 relative
+          Dial Base · Bright  ·  w-[56px] h-[56px] absolute left-0 top-0 rounded-full
+          Dial Track · Bright  ·  w-[56px] h-[56px] absolute left-0 top-0
+          Dial Value · Bright  ·  w-[56px] h-[56px] absolute left-0 top-0
+          Dial Dot · Bright  ·  w-[6px] h-[6px] absolute left-[30.36px] top-[2.674px] rounded-full
+        Param Label · Bright  ·  text-[9px]/[normal] w-[72px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+          "明亮"
+        Param Value · Bright  ·  text-[11px]/[normal] w-[72px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+          "55"
+      Knob · Clear  ·  w-[72px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center
+        Dial · Clear  ·  w-[56px] h-[56px] shrink-0 relative
+          Dial Base · Clear  ·  w-[56px] h-[56px] absolute left-0 top-0 rounded-full
+          Dial Track · Clear  ·  w-[56px] h-[56px] absolute left-0 top-0
+          Dial Value · Clear  ·  w-[56px] h-[56px] absolute left-0 top-0
+          Dial Dot · Clear  ·  w-[6px] h-[6px] absolute left-[22.839px] top-[2.142px] rounded-full
+        Param Label · Clear  ·  text-[9px]/[normal] w-[72px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+          "清晰"
+        Param Value · Clear  ·  text-[11px]/[normal] w-[72px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+          "48"
+      Knob · Gender  ·  w-[72px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center
+        Dial · Gender  ·  w-[56px] h-[56px] shrink-0 relative
+          Dial Base · Gender  ·  w-[56px] h-[56px] absolute left-0 top-0 rounded-full
+          Dial Track · Gender  ·  w-[56px] h-[56px] absolute left-0 top-0
+          Dial Value · Gender  ·  w-[56px] h-[56px] absolute left-0 top-0
+          Dial Dot · Gender  ·  w-[6px] h-[6px] absolute left-[14.576px] top-[4.542px] rounded-full
+        Param Label · Gender  ·  text-[9px]/[normal] w-[72px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+          "性别"
+        Param Value · Gender  ·  text-[11px]/[normal] w-[72px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+          "40"
+      Knob · Dynamics  ·  w-[72px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center
+        Dial · Dynamics  ·  w-[56px] h-[56px] shrink-0 relative
+          Dial Base · Dynamics  ·  w-[56px] h-[56px] absolute left-0 top-0 rounded-full
+          Dial Track · Dynamics  ·  w-[56px] h-[56px] absolute left-0 top-0
+          Dial Value · Dynamics  ·  w-[56px] h-[56px] absolute left-0 top-0
+          Dial Dot · Dynamics  ·  w-[6px] h-[6px] absolute left-[43.575px] top-[11.504px] rounded-full
+        Param Label · Dynamics  ·  text-[9px]/[normal] w-[72px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+          "动态"
+        Param Value · Dynamics  ·  text-[11px]/[normal] w-[72px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+          "70"
+      Knob · Vibrato  ·  w-[72px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center
+        Dial · Vibrato  ·  w-[56px] h-[56px] shrink-0 relative
+          Dial Base · Vibrato  ·  w-[56px] h-[56px] absolute left-0 top-0 rounded-full
+          Dial Track · Vibrato  ·  w-[56px] h-[56px] absolute left-0 top-0
+          Dial Value · Vibrato  ·  w-[56px] h-[56px] absolute left-0 top-0
+          Dial Dot · Vibrato  ·  w-[6px] h-[6px] absolute left-[10.089px] top-[7.541px] rounded-full
+        Param Label · Vibrato  ·  text-[9px]/[normal] w-[72px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+          "颤音"
+        Param Value · Vibrato  ·  text-[11px]/[normal] w-[72px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+          "35"
+      Knob · Growl  ·  w-[72px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center
+        Dial · Growl  ·  w-[56px] h-[56px] shrink-0 relative
+          Dial Base · Growl  ·  w-[56px] h-[56px] absolute left-0 top-0 rounded-full
+          Dial Track · Growl  ·  w-[56px] h-[56px] absolute left-0 top-0
+          Dial Value · Growl  ·  w-[56px] h-[56px] absolute left-0 top-0
+          Dial Dot · Growl  ·  w-[6px] h-[6px] absolute left-[5.237px] top-[13.312px] rounded-full
+        Param Label · Growl  ·  text-[9px]/[normal] w-[72px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+          "咆哮"
+        Param Value · Growl  ·  text-[11px]/[normal] w-[72px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+          "28"
+      Knob · Soft  ·  w-[72px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center
+        Dial · Soft  ·  w-[56px] h-[56px] shrink-0 relative
+          Dial Base · Soft  ·  w-[56px] h-[56px] absolute left-0 top-0 rounded-full
+          Dial Track · Soft  ·  w-[56px] h-[56px] absolute left-0 top-0
+          Dial Value · Soft  ·  w-[56px] h-[56px] absolute left-0 top-0
+          Dial Dot · Soft  ·  w-[6px] h-[6px] absolute left-[33.452px] top-[3.652px] rounded-full
+        Param Label · Soft  ·  text-[9px]/[normal] w-[72px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+          "柔和"
+        Param Value · Soft  ·  text-[11px]/[normal] w-[72px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+          "58"
+  Graph Card  ·  w-[816px] h-[374px] shrink-0 flex flex-col gap-[10px] p-[16px] justify-start items-start rounded-[16px]
+    Graph Header  ·  w-full h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center
+      Section Title · Pitch Graph  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+        "音高与包络"
+      Header Spacer · Graph  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+      Graph Tabs · Pitch Graph  ·  w-fit shrink-0 h-[26px] flex flex-row gap-[3px] p-[3px] justify-start items-center rounded-[999px]
+        Graph Tab · Pitch  ·  w-fit shrink-0 h-[20px] flex flex-row gap-0 p-[0px_12px] justify-center items-center rounded-[999px]
+          Tab Label · Pitch  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+            "音高"
+        Graph Tab · Dynamics  ·  w-fit shrink-0 h-[20px] flex flex-row gap-0 p-[0px_12px] justify-center items-center rounded-[999px]
+          Tab Label · Dynamics  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+            "动态"
+        Graph Tab · Timbre  ·  w-fit shrink-0 h-[20px] flex flex-row gap-0 p-[0px_12px] justify-center items-center rounded-[999px]
+          Tab Label · Timbre  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+            "音色"
+    Pitch Graph  ·  w-[784px] h-[306px] shrink-0 rounded-[12px] overflow-hidden relative
+      Grid Line V 1  ·  w-[1px] h-[306px] absolute left-0 top-0
+      Grid Line V 2  ·  w-[1px] h-[306px] absolute left-[56px] top-0
+      Grid Line V 3  ·  w-[1px] h-[306px] absolute left-[112px] top-0
+      Grid Line V 4  ·  w-[1px] h-[306px] absolute left-[168px] top-0
+      Grid Line V 5  ·  w-[1px] h-[306px] absolute left-[224px] top-0
+      Grid Line V 6  ·  w-[1px] h-[306px] absolute left-[280px] top-0
+      Grid Line V 7  ·  w-[1px] h-[306px] absolute left-[336px] top-0
+      Grid Line V 8  ·  w-[1px] h-[306px] absolute left-[392px] top-0
+      Grid Line V 9  ·  w-[1px] h-[306px] absolute left-[448px] top-0
+      Grid Line V 10  ·  w-[1px] h-[306px] absolute left-[504px] top-0
+      Grid Line V 11  ·  w-[1px] h-[306px] absolute left-[560px] top-0
+      Grid Line V 12  ·  w-[1px] h-[306px] absolute left-[616px] top-0
+      Grid Line V 13  ·  w-[1px] h-[306px] absolute left-[672px] top-0
+      Grid Line V 14  ·  w-[1px] h-[306px] absolute left-[728px] top-0
+      Grid Line H 1  ·  w-[784px] h-[1px] absolute left-0 top-0
+      Grid Line H 2  ·  w-[784px] h-[1px] absolute left-0 top-[38px]
+      Grid Line H 3  ·  w-[784px] h-[1px] absolute left-0 top-[77px]
+      Grid Line H 4  ·  w-[784px] h-[1px] absolute left-0 top-[115px]
+      Grid Line H 5  ·  w-[784px] h-[1px] absolute left-0 top-[153px]
+      Grid Line H 6  ·  w-[784px] h-[1px] absolute left-0 top-[191px]
+      Grid Line H 7  ·  w-[784px] h-[1px] absolute left-0 top-[230px]
+      Grid Line H 8  ·  w-[784px] h-[1px] absolute left-0 top-[268px]
+      Center Line  ·  w-[784px] h-[1px] absolute left-0 top-[153px]
+      Pitch Curve  ·  w-[784px] h-[306px] absolute left-0 top-0 overflow-visible
+  Graph Playhead  ·  w-[2px] h-[306px] absolute left-[300px] top-0
+  Axis Label  ·  text-[9px]/[normal] absolute left-[10px] top-[8px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "音高 · 半音"
+  Graph Source Label  ·  text-[10px]/[normal] absolute left-[10px] top-[22px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "Kasane Teto / UTAU"
+Piano Keyboard  ·  w-[816px] h-[170px] shrink-0 rounded-[12px] overflow-hidden relative
+  Piano Key White 1  ·  w-[67px] h-[170px] absolute left-0 top-0 rounded-[0px_0px_3px_3px]
+  Piano Key White 2  ·  w-[67px] h-[170px] absolute left-[68px] top-0 rounded-[0px_0px_3px_3px]
+  Piano Key White 3  ·  w-[67px] h-[170px] absolute left-[136px] top-0 rounded-[0px_0px_3px_3px]
+  Piano Key White 4  ·  w-[67px] h-[170px] absolute left-[204px] top-0 rounded-[0px_0px_3px_3px]
+  Piano Key White 5  ·  w-[67px] h-[170px] absolute left-[272px] top-0 rounded-[0px_0px_3px_3px]
+  Piano Key White 6  ·  w-[67px] h-[170px] absolute left-[340px] top-0 rounded-[0px_0px_3px_3px]
+  Piano Key White 7  ·  w-[67px] h-[170px] absolute left-[408px] top-0 rounded-[0px_0px_3px_3px]
+  Piano Key White 8  ·  w-[67px] h-[170px] absolute left-[476px] top-0 rounded-[0px_0px_3px_3px]
+  Piano Key White 9  ·  w-[67px] h-[170px] absolute left-[544px] top-0 rounded-[0px_0px_3px_3px]
+  Piano Key White 10  ·  w-[67px] h-[170px] absolute left-[612px] top-0 rounded-[0px_0px_3px_3px]
+  Piano Key White 11  ·  w-[67px] h-[170px] absolute left-[680px] top-0 rounded-[0px_0px_3px_3px]
+  Piano Key White 12  ·  w-[67px] h-[170px] absolute left-[748px] top-0 rounded-[0px_0px_3px_3px]
+  Piano Key Black 1  ·  w-[34px] h-[105px] absolute left-[51px] top-0 rounded-[0px_0px_3px_3px]
+  Piano Key Black 2  ·  w-[34px] h-[105px] absolute left-[119px] top-0 rounded-[0px_0px_3px_3px]
+  Piano Key Black 4  ·  w-[34px] h-[105px] absolute left-[255px] top-0 rounded-[0px_0px_3px_3px]
+  Piano Key Black 5  ·  w-[34px] h-[105px] absolute left-[323px] top-0 rounded-[0px_0px_3px_3px]
+  Piano Key Black 6  ·  w-[34px] h-[105px] absolute left-[391px] top-0 rounded-[0px_0px_3px_3px]
+  Piano Key Black 8  ·  w-[34px] h-[105px] absolute left-[527px] top-0 rounded-[0px_0px_3px_3px]
+  Piano Key Black 9  ·  w-[34px] h-[105px] absolute left-[595px] top-0 rounded-[0px_0px_3px_3px]
+  Piano Key Black 11  ·  w-[34px] h-[105px] absolute left-[731px] top-0 rounded-[0px_0px_3px_3px]
+  Piano Key Label · C3  ·  text-[9px]/[normal] w-[68px] absolute left-0 top-[148px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+    "C3"
+  Piano Key Label · C4  ·  text-[9px]/[normal] w-[68px] absolute left-[476px] top-[148px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+    "C4"
+Effects Panel  ·  w-[300px] shrink-0 h-full flex flex-col gap-[12px] p-[16px] justify-start items-start rounded-[16px]
+  Panel Title  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+    "效果链"
+  Effect Slot · Reverb  ·  w-full h-fit shrink-0 flex flex-col gap-[10px] p-[12px] justify-start items-start rounded-[12px]
+    Effect Header · Reverb  ·  w-full h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center
+      Icon · Reverb {icon:waves}  ·  w-[16px] shrink-0 h-[16px]
+    Effect Name · Reverb  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+      "混响"
+    Header Spacer · Reverb  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+    Power Toggle · Reverb  ·  w-[34px] shrink-0 h-[20px] flex flex-row gap-0 p-[0px_3px] justify-end items-center rounded-[999px]
+      Power Indicator · Reverb  ·  w-[14px] shrink-0 h-[14px] rounded-full
+  Param List · Reverb  ·  w-full h-fit shrink-0 flex flex-row gap-0 justify-between items-start
+    Knob · Reverb Mix  ·  w-[60px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center
+      Dial · Reverb Mix  ·  w-[44px] h-[44px] shrink-0 relative
+        Dial Base · Reverb Mix  ·  w-[44px] h-[44px] absolute left-0 top-0 rounded-full
+        Dial Track · Reverb Mix  ·  w-[44px] h-[44px] absolute left-0 top-0
+        Dial Value · Reverb Mix  ·  w-[44px] h-[44px] absolute left-0 top-0
+        Dial Dot · Reverb Mix  ·  w-[6px] h-[6px] absolute left-[6.651px] top-[5.849px] rounded-full
+      Param Label · Reverb Mix  ·  text-[9px]/[normal] w-[60px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "干湿"
+      Param Value · Reverb Mix  ·  text-[11px]/[normal] w-[60px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "34"
+    Knob · Reverb Size  ·  w-[60px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center
+      Dial · Reverb Size  ·  w-[44px] h-[44px] shrink-0 relative
+        Dial Base · Reverb Size  ·  w-[44px] h-[44px] absolute left-0 top-0 rounded-full
+        Dial Track · Reverb Size  ·  w-[44px] h-[44px] absolute left-0 top-0
+        Dial Value · Reverb Size  ·  w-[44px] h-[44px] absolute left-0 top-0
+        Dial Dot · Reverb Size  ·  w-[6px] h-[6px] absolute left-[28.666px] top-[3.768px] rounded-full
+      Param Label · Reverb Size  ·  text-[9px]/[normal] w-[60px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "大小"
+      Param Value · Reverb Size  ·  text-[11px]/[normal] w-[60px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "62"
+Effect Slot · Delay  ·  w-full h-fit shrink-0 flex flex-col gap-[10px] p-[12px] justify-start items-start rounded-[12px]
+  Effect Header · Delay  ·  w-full h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center
+    Icon · Delay {icon:timer}  ·  w-[16px] shrink-0 h-[16px]
+  Effect Name · Delay  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+    "延迟"
+  Header Spacer · Delay  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+  Power Toggle · Delay  ·  w-[34px] shrink-0 h-[20px] flex flex-row gap-0 p-[0px_3px] justify-end items-center rounded-[999px]
+    Power Indicator · Delay  ·  w-[14px] shrink-0 h-[14px] rounded-full
+Param List · Delay  ·  w-full h-fit shrink-0 flex flex-row gap-0 justify-between items-start
+  Knob · Delay Mix  ·  w-[60px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center
+    Dial · Delay Mix  ·  w-[44px] h-[44px] shrink-0 relative
+      Dial Base · Delay Mix  ·  w-[44px] h-[44px] absolute left-0 top-0 rounded-full
+      Dial Track · Delay Mix  ·  w-[44px] h-[44px] absolute left-0 top-0
+      Dial Value · Delay Mix  ·  w-[44px] h-[44px] absolute left-0 top-0
+      Dial Dot · Delay Mix  ·  w-[6px] h-[6px] absolute left-[1.527px] top-[14.514px] rounded-full
+    Param Label · Delay Mix  ·  text-[9px]/[normal] w-[60px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+      "干湿"
+    Param Value · Delay Mix  ·  text-[11px]/[normal] w-[60px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+      "22"
+  Knob · Delay Feedback  ·  w-[60px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center
+    Dial · Delay Feedback  ·  w-[44px] h-[44px] shrink-0 relative
+      Dial Base · Delay Feedback  ·  w-[44px] h-[44px] absolute left-0 top-0 rounded-full
+      Dial Track · Delay Feedback  ·  w-[44px] h-[44px] absolute left-0 top-0
+      Dial Value · Delay Feedback  ·  w-[44px] h-[44px] absolute left-0 top-0
+      Dial Dot · Delay Feedback  ·  w-[6px] h-[6px] absolute left-[11.576px] top-[2.558px] rounded-full
+    Param Label · Delay Feedback  ·  text-[9px]/[normal] w-[60px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+      "反馈"
+    Param Value · Delay Feedback  ·  text-[11px]/[normal] w-[60px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+      "41"
+Effect Slot · Chorus  ·  w-full h-fit shrink-0 flex flex-col gap-[10px] p-[12px] justify-start items-start rounded-[12px]
+  Effect Header · Chorus  ·  w-full h-fit shrink-0 flex flex-row gap-[8px] justify-start items-center
+    Icon · Chorus {icon:sparkles}  ·  w-[16px] shrink-0 h-[16px]
+  Effect Name · Chorus  ·  text-[12px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+    "合唱"
+  Header Spacer · Chorus  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+  Power Toggle · Chorus  ·  w-[34px] shrink-0 h-[20px] flex flex-row gap-0 p-[0px_3px] justify-start items-center rounded-[999px]
+    Power Indicator · Chorus  ·  w-[14px] shrink-0 h-[14px] rounded-full
+Param List · Chorus  ·  w-full h-fit shrink-0 flex flex-row gap-0 justify-between items-start
+  Knob · Chorus Depth  ·  w-[60px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center
+    Dial · Chorus Depth  ·  w-[44px] h-[44px] shrink-0 relative
+      Dial Base · Chorus Depth  ·  w-[44px] h-[44px] absolute left-0 top-0 rounded-full
+      Dial Track · Chorus Depth  ·  w-[44px] h-[44px] absolute left-0 top-0
+      Dial Value · Chorus Depth  ·  w-[44px] h-[44px] absolute left-0 top-0
+      Dial Dot · Chorus Depth  ·  w-[6px] h-[6px] absolute left-[14.789px] top-[1.458px] rounded-full
+    Param Label · Chorus Depth  ·  text-[9px]/[normal] w-[60px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+      "深度"
+    Param Value · Chorus Depth  ·  text-[11px]/[normal] w-[60px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+      "45"
+  Knob · Chorus Rate  ·  w-[60px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center
+    Dial · Chorus Rate  ·  w-[44px] h-[44px] shrink-0 relative
+      Dial Base · Chorus Rate  ·  w-[44px] h-[44px] absolute left-0 top-0 rounded-full
+      Dial Track · Chorus Rate  ·  w-[44px] h-[44px] absolute left-0 top-0
+      Dial Value · Chorus Rate  ·  w-[44px] h-[44px] absolute left-0 top-0
+      Dial Dot · Chorus Rate  ·  w-[6px] h-[6px] absolute left-[4.405px] top-[8.396px] rounded-full
+    Param Label · Chorus Rate  ·  text-[9px]/[normal] w-[60px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+      "速率"
+    Param Value · Chorus Rate  ·  text-[11px]/[normal] w-[60px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+      "30"
+Macro Section  ·  w-full h-fit shrink-0 flex flex-col gap-[10px] p-[12px] justify-start items-start rounded-[12px]
+  Section Title · Macros  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold [white-space:nowrap]
+    "宏控制"
+  Macro Row  ·  w-full h-fit shrink-0 flex flex-row gap-0 justify-between items-start
+    Knob · Brightness  ·  w-[64px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center
+      Dial · Brightness  ·  w-[48px] h-[48px] shrink-0 relative
+        Dial Base · Brightness  ·  w-[48px] h-[48px] absolute left-0 top-0 rounded-full
+        Dial Track · Brightness  ·  w-[48px] h-[48px] absolute left-0 top-0
+        Dial Value · Brightness  ·  w-[48px] h-[48px] absolute left-0 top-0
+        Dial Dot · Brightness  ·  w-[6px] h-[6px] absolute left-[34.472px] top-[6.654px] rounded-full
+      Param Label · Brightness  ·  text-[9px]/[normal] w-[64px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "明亮度"
+      Param Value · Brightness  ·  text-[11px]/[normal] w-[64px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "66"
+    Knob · Character  ·  w-[64px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center
+      Dial · Character  ·  w-[48px] h-[48px] shrink-0 relative
+        Dial Base · Character  ·  w-[48px] h-[48px] absolute left-0 top-0 rounded-full
+        Dial Track · Character  ·  w-[48px] h-[48px] absolute left-0 top-0
+        Dial Value · Character  ·  w-[48px] h-[48px] absolute left-0 top-0
+        Dial Dot · Character  ·  w-[6px] h-[6px] absolute left-[22.852px] top-[1.407px] rounded-full
+      Param Label · Character  ·  text-[9px]/[normal] w-[64px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "音色"
+      Param Value · Character  ·  text-[11px]/[normal] w-[64px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "52"
+    Knob · Tension  ·  w-[64px] shrink-0 h-fit flex flex-col gap-[5px] justify-start items-center
+      Dial · Tension  ·  w-[48px] h-[48px] shrink-0 relative
+        Dial Base · Tension  ·  w-[48px] h-[48px] absolute left-0 top-0 rounded-full
+        Dial Track · Tension  ·  w-[48px] h-[48px] absolute left-0 top-0
+        Dial Value · Tension  ·  w-[48px] h-[48px] absolute left-0 top-0
+        Dial Dot · Tension  ·  w-[6px] h-[6px] absolute left-[10.455px] top-[4.384px] rounded-full
+      Param Label · Tension  ·  text-[9px]/[normal] w-[64px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "张力"
+      Param Value · Tension  ·  text-[11px]/[normal] w-[64px] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+        "38"
+Status Bar  ·  w-full h-[32px] shrink-0 flex flex-row gap-[20px] p-[0px_16px] justify-start items-center
+  Status Item · Format  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "VST3 · 48 kHz / 24-bit · 缓冲区 256"
+  Status Item · Latency  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "延迟 5.3 ms"
+  Status Spacer  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+  Status Item · Voices  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "复音 12/64"
+  Status Item · CPU  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "CPU 8%"
+  Status Item · Preset  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "预设：Kasane Teto — 柔和"

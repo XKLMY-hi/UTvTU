@@ -1,0 +1,748 @@
+# Mixer.html — 命名元素 591 个，最大嵌套深度 7
+          "tailwind = { config: { corePlugins: { preflight: false } } };"
+          "*, ::before, ::after { box-sizing: border-box; } body { margin: 0; }"
+        Mixer · 混音台  ·  w-[1440px] h-[900px] flex flex-col gap-0 justify-start items-start overflow-hidden
+          Top App Bar  ·  w-full h-[56px] shrink-0 flex flex-row gap-[16px] p-[0px_16px] justify-start items-center
+            App Mark  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[8px]
+              Icon · App {icon:music}  ·  w-[20px] shrink-0 h-[20px]
+          App Title  ·  text-[15px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold tracking-[0.5px] [white-space:nowrap]
+            "UTVTU"
+          Screen Label  ·  text-[11px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+            "混音台"
+          Transport  ·  w-fit shrink-0 h-[40px] flex flex-row gap-[4px] p-[0px_10px] justify-start items-center rounded-[999px]
+            Prev  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+              Icon · Prev {icon:skip-back}  ·  w-[18px] shrink-0 h-[18px]
+          Stop  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+            Icon · Stop {icon:square}  ·  w-[18px] shrink-0 h-[18px]
+        Play  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+          Icon · Play {icon:play}  ·  w-[18px] shrink-0 h-[18px]
+      Record  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+        Icon · Record {icon:circle}  ·  w-[18px] shrink-0 h-[18px]
+    Loop  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+      Icon · Loop {icon:repeat}  ·  w-[18px] shrink-0 h-[18px]
+Time Display  ·  w-fit shrink-0 h-[40px] flex flex-row gap-0 p-[0px_14px] justify-start items-center rounded-[8px]
+  Time Value  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.5px] [white-space:nowrap]
+    "00:01:24:512"
+Tempo  ·  w-fit shrink-0 h-[40px] flex flex-row gap-[12px] p-[0px_14px] justify-start items-center rounded-[8px]
+  BPM Value  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "120.00"
+  Signature Value  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "4/4"
+  Key Value  ·  text-[14px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "A 小调"
+Spacer · Top App Bar  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+Undo  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+  Icon · Undo {icon:undo-2}  ·  w-[18px] shrink-0 h-[18px]
+Redo  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+  Icon · Redo {icon:redo-2}  ·  w-[18px] shrink-0 h-[18px]
+Grid  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+  Icon · Grid {icon:grid-2x2}  ·  w-[18px] shrink-0 h-[18px]
+Settings  ·  w-[36px] shrink-0 h-[36px] flex flex-row gap-0 justify-center items-center rounded-[999px]
+  Icon · Settings {icon:settings}  ·  w-[18px] shrink-0 h-[18px]
+Mixer Area  ·  w-full flex flex-row gap-[8px] p-[16px] justify-start items-start
+  Channel Strip · Teto  ·  w-[96px] shrink-0 h-full flex flex-col gap-[6px] p-[8px] justify-start items-start rounded-[12px]
+    Channel Accent · Teto  ·  w-full h-[3px] shrink-0 rounded-[999px]
+    Channel Name · Teto  ·  text-[11px]/[12px] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold
+      "Teto"
+    EQ Display  ·  w-[80px] h-[76px] shrink-0 rounded-[8px] overflow-hidden relative
+      Zero Line  ·  w-[80px] h-[1px] absolute left-0 top-[38px]
+      EQ Curve  ·  w-[80px] h-[76px] absolute left-0 top-0 overflow-visible
+Insert Section Label · Teto  ·  text-[7px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "插入"
+Inserts  ·  w-full h-fit shrink-0 flex flex-col gap-[3px] justify-start items-start
+  Insert VOCALOID 6  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 1 · VOCALOID 6  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "UTAU"
+  Insert EQ  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 2 · EQ  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "EQ"
+  Insert COMP  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 3 · COMP  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "COMP"
+Pan Control  ·  w-full h-[14px] shrink-0 flex flex-row gap-0 justify-between items-center
+  Pan Label  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "声像"
+  Pan Value  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "C"
+Mute Solo Record  ·  w-full h-fit shrink-0 flex flex-row gap-[4px] justify-start items-start
+  Mute  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Mute Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "M"
+  Solo  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Solo Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "S"
+  Arm  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Arm Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "R"
+Channel Spacer · Teto  ·  w-full flex flex-row gap-0 justify-start items-start
+Fader  ·  w-[80px] h-[500px] shrink-0 relative
+  Meter  ·  w-[8px] h-[500px] absolute left-[4px] top-0 flex flex-col gap-0 justify-end items-start rounded-[999px] overflow-hidden
+    Meter Fill  ·  w-full h-[400px] shrink-0 rounded-[999px]
+  Fader Track  ·  w-[4px] h-[500px] absolute left-[34px] top-0 rounded-[999px]
+  Fader Handle  ·  w-[24px] h-[14px] absolute left-[24px] top-[146px] rounded-[4px]
+  Fader Tick 1  ·  w-[8px] h-[1px] absolute left-[52px] top-0
+  Fader Tick 2  ·  w-[5px] h-[1px] absolute left-[52px] top-[62px]
+  Fader Tick 3  ·  w-[8px] h-[1px] absolute left-[52px] top-[125px]
+  Fader Tick 4  ·  w-[5px] h-[1px] absolute left-[52px] top-[187px]
+  Fader Tick 5  ·  w-[8px] h-[1px] absolute left-[52px] top-[249px]
+  Fader Tick 6  ·  w-[5px] h-[1px] absolute left-[52px] top-[311px]
+  Fader Tick 7  ·  w-[8px] h-[1px] absolute left-[52px] top-[374px]
+  Fader Tick 8  ·  w-[5px] h-[1px] absolute left-[52px] top-[436px]
+  Fader Tick 9  ·  w-[8px] h-[1px] absolute left-[52px] top-[498px]
+Fader dB · Teto  ·  text-[9px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+  "-4.2 dB"
+Channel Strip · Momo  ·  w-[96px] shrink-0 h-full flex flex-col gap-[6px] p-[8px] justify-start items-start rounded-[12px]
+  Channel Accent · Momo  ·  w-full h-[3px] shrink-0 rounded-[999px]
+  Channel Name · Momo  ·  text-[11px]/[12px] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold
+    "Momo"
+  EQ Display  ·  w-[80px] h-[76px] shrink-0 rounded-[8px] overflow-hidden relative
+    Zero Line  ·  w-[80px] h-[1px] absolute left-0 top-[38px]
+    EQ Curve  ·  w-[80px] h-[76px] absolute left-0 top-0 overflow-visible
+Insert Section Label · Momo  ·  text-[7px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "插入"
+Inserts  ·  w-full h-fit shrink-0 flex flex-col gap-[3px] justify-start items-start
+  Insert VOCALOID 6  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 1 · VOCALOID 6  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "UTAU"
+  Insert EQ  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 2 · EQ  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "EQ"
+  Insert DE-ESS  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 3 · DE-ESS  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "DE-ESS"
+Pan Control  ·  w-full h-[14px] shrink-0 flex flex-row gap-0 justify-between items-center
+  Pan Label  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "声像"
+  Pan Value  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "L12"
+Mute Solo Record  ·  w-full h-fit shrink-0 flex flex-row gap-[4px] justify-start items-start
+  Mute  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Mute Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "M"
+  Solo  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Solo Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "S"
+  Arm  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Arm Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "R"
+Channel Spacer · Momo  ·  w-full flex flex-row gap-0 justify-start items-start
+Fader  ·  w-[80px] h-[500px] shrink-0 relative
+  Meter  ·  w-[8px] h-[500px] absolute left-[4px] top-0 flex flex-col gap-0 justify-end items-start rounded-[999px] overflow-hidden
+    Meter Fill  ·  w-full h-[330px] shrink-0 rounded-[999px]
+  Fader Track  ·  w-[4px] h-[500px] absolute left-[34px] top-0 rounded-[999px]
+  Fader Handle  ·  w-[24px] h-[14px] absolute left-[24px] top-[185px] rounded-[4px]
+  Fader Tick 1  ·  w-[8px] h-[1px] absolute left-[52px] top-0
+  Fader Tick 2  ·  w-[5px] h-[1px] absolute left-[52px] top-[62px]
+  Fader Tick 3  ·  w-[8px] h-[1px] absolute left-[52px] top-[125px]
+  Fader Tick 4  ·  w-[5px] h-[1px] absolute left-[52px] top-[187px]
+  Fader Tick 5  ·  w-[8px] h-[1px] absolute left-[52px] top-[249px]
+  Fader Tick 6  ·  w-[5px] h-[1px] absolute left-[52px] top-[311px]
+  Fader Tick 7  ·  w-[8px] h-[1px] absolute left-[52px] top-[374px]
+  Fader Tick 8  ·  w-[5px] h-[1px] absolute left-[52px] top-[436px]
+  Fader Tick 9  ·  w-[8px] h-[1px] absolute left-[52px] top-[498px]
+Fader dB · Momo  ·  text-[9px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+  "-6.0 dB"
+Channel Strip · Ritsu  ·  w-[96px] shrink-0 h-full flex flex-col gap-[6px] p-[8px] justify-start items-start rounded-[12px]
+  Channel Accent · Ritsu  ·  w-full h-[3px] shrink-0 rounded-[999px]
+  Channel Name · Ritsu  ·  text-[11px]/[12px] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold
+    "Ritsu"
+  EQ Display  ·  w-[80px] h-[76px] shrink-0 rounded-[8px] overflow-hidden relative
+    Zero Line  ·  w-[80px] h-[1px] absolute left-0 top-[38px]
+    EQ Curve  ·  w-[80px] h-[76px] absolute left-0 top-0 overflow-visible
+Insert Section Label · Ritsu  ·  text-[7px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "插入"
+Inserts  ·  w-full h-fit shrink-0 flex flex-col gap-[3px] justify-start items-start
+  Insert VOCALOID 6  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 1 · VOCALOID 6  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "UTAU"
+  Insert EQ  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 2 · EQ  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "EQ"
+  Insert SAT  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 3 · SAT  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "SAT"
+Pan Control  ·  w-full h-[14px] shrink-0 flex flex-row gap-0 justify-between items-center
+  Pan Label  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "声像"
+  Pan Value  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "R15"
+Mute Solo Record  ·  w-full h-fit shrink-0 flex flex-row gap-[4px] justify-start items-start
+  Mute  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Mute Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "M"
+  Solo  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Solo Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "S"
+  Arm  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Arm Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "R"
+Channel Spacer · Ritsu  ·  w-full flex flex-row gap-0 justify-start items-start
+Fader  ·  w-[80px] h-[500px] shrink-0 relative
+  Meter  ·  w-[8px] h-[500px] absolute left-[4px] top-0 flex flex-col gap-0 justify-end items-start rounded-[999px] overflow-hidden
+    Meter Fill  ·  w-full h-[320px] shrink-0 rounded-[999px]
+  Fader Track  ·  w-[4px] h-[500px] absolute left-[34px] top-0 rounded-[999px]
+  Fader Handle  ·  w-[24px] h-[14px] absolute left-[24px] top-[194px] rounded-[4px]
+  Fader Tick 1  ·  w-[8px] h-[1px] absolute left-[52px] top-0
+  Fader Tick 2  ·  w-[5px] h-[1px] absolute left-[52px] top-[62px]
+  Fader Tick 3  ·  w-[8px] h-[1px] absolute left-[52px] top-[125px]
+  Fader Tick 4  ·  w-[5px] h-[1px] absolute left-[52px] top-[187px]
+  Fader Tick 5  ·  w-[8px] h-[1px] absolute left-[52px] top-[249px]
+  Fader Tick 6  ·  w-[5px] h-[1px] absolute left-[52px] top-[311px]
+  Fader Tick 7  ·  w-[8px] h-[1px] absolute left-[52px] top-[374px]
+  Fader Tick 8  ·  w-[5px] h-[1px] absolute left-[52px] top-[436px]
+  Fader Tick 9  ·  w-[8px] h-[1px] absolute left-[52px] top-[498px]
+Fader dB · Ritsu  ·  text-[9px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+  "-6.5 dB"
+Channel Strip · Haku  ·  w-[96px] shrink-0 h-full flex flex-col gap-[6px] p-[8px] justify-start items-start rounded-[12px]
+  Channel Accent · Haku  ·  w-full h-[3px] shrink-0 rounded-[999px]
+  Channel Name · Haku  ·  text-[11px]/[12px] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold
+    "Haku"
+  EQ Display  ·  w-[80px] h-[76px] shrink-0 rounded-[8px] overflow-hidden relative
+    Zero Line  ·  w-[80px] h-[1px] absolute left-0 top-[38px]
+    EQ Curve  ·  w-[80px] h-[76px] absolute left-0 top-0 overflow-visible
+Insert Section Label · Haku  ·  text-[7px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "插入"
+Inserts  ·  w-full h-fit shrink-0 flex flex-col gap-[3px] justify-start items-start
+  Insert VOCALOID 6  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 1 · VOCALOID 6  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "UTAU"
+  Insert EQ  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 2 · EQ  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "EQ"
+  Insert COMP  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 3 · COMP  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "COMP"
+Pan Control  ·  w-full h-[14px] shrink-0 flex flex-row gap-0 justify-between items-center
+  Pan Label  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "声像"
+  Pan Value  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "C"
+Mute Solo Record  ·  w-full h-fit shrink-0 flex flex-row gap-[4px] justify-start items-start
+  Mute  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Mute Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "M"
+  Solo  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Solo Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "S"
+  Arm  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Arm Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "R"
+Channel Spacer · Haku  ·  w-full flex flex-row gap-0 justify-start items-start
+Fader  ·  w-[80px] h-[500px] shrink-0 relative
+  Meter  ·  w-[8px] h-[500px] absolute left-[4px] top-0 flex flex-col gap-0 justify-end items-start rounded-[999px] overflow-hidden
+    Meter Fill  ·  w-full h-[290px] shrink-0 rounded-[999px]
+  Fader Track  ·  w-[4px] h-[500px] absolute left-[34px] top-0 rounded-[999px]
+  Fader Handle  ·  w-[24px] h-[14px] absolute left-[24px] top-[165px] rounded-[4px]
+  Fader Tick 1  ·  w-[8px] h-[1px] absolute left-[52px] top-0
+  Fader Tick 2  ·  w-[5px] h-[1px] absolute left-[52px] top-[62px]
+  Fader Tick 3  ·  w-[8px] h-[1px] absolute left-[52px] top-[125px]
+  Fader Tick 4  ·  w-[5px] h-[1px] absolute left-[52px] top-[187px]
+  Fader Tick 5  ·  w-[8px] h-[1px] absolute left-[52px] top-[249px]
+  Fader Tick 6  ·  w-[5px] h-[1px] absolute left-[52px] top-[311px]
+  Fader Tick 7  ·  w-[8px] h-[1px] absolute left-[52px] top-[374px]
+  Fader Tick 8  ·  w-[5px] h-[1px] absolute left-[52px] top-[436px]
+  Fader Tick 9  ·  w-[8px] h-[1px] absolute left-[52px] top-[498px]
+Fader dB · Haku  ·  text-[9px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+  "-5.5 dB"
+Channel Strip · Nova  ·  w-[96px] shrink-0 h-full flex flex-col gap-[6px] p-[8px] justify-start items-start rounded-[12px]
+  Channel Accent · Nova  ·  w-full h-[3px] shrink-0 rounded-[999px]
+  Channel Name · Nova  ·  text-[11px]/[12px] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold
+    "Nova"
+  EQ Display  ·  w-[80px] h-[76px] shrink-0 rounded-[8px] overflow-hidden relative
+    Zero Line  ·  w-[80px] h-[1px] absolute left-0 top-[38px]
+    EQ Curve  ·  w-[80px] h-[76px] absolute left-0 top-0 overflow-visible
+Insert Section Label · Nova  ·  text-[7px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "插入"
+Inserts  ·  w-full h-fit shrink-0 flex flex-col gap-[3px] justify-start items-start
+  Insert VOCALOID 6  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 1 · VOCALOID 6  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "DiffSinger"
+  Insert EQ  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 2 · EQ  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "EQ"
+  Insert Slot · Empty  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 3 · Empty  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "—"
+Pan Control  ·  w-full h-[14px] shrink-0 flex flex-row gap-0 justify-between items-center
+  Pan Label  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "声像"
+  Pan Value  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "L30"
+Mute Solo Record  ·  w-full h-fit shrink-0 flex flex-row gap-[4px] justify-start items-start
+  Mute  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Mute Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "M"
+  Solo  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Solo Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "S"
+  Arm  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Arm Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "R"
+Channel Spacer · Nova  ·  w-full flex flex-row gap-0 justify-start items-start
+Fader  ·  w-[80px] h-[500px] shrink-0 relative
+  Meter  ·  w-[8px] h-[500px] absolute left-[4px] top-0 flex flex-col gap-0 justify-end items-start rounded-[999px] overflow-hidden
+    Meter Fill  ·  w-full h-[260px] shrink-0 rounded-[999px]
+  Fader Track  ·  w-[4px] h-[500px] absolute left-[34px] top-0 rounded-[999px]
+  Fader Handle  ·  w-[24px] h-[14px] absolute left-[24px] top-[219px] rounded-[4px]
+  Fader Tick 1  ·  w-[8px] h-[1px] absolute left-[52px] top-0
+  Fader Tick 2  ·  w-[5px] h-[1px] absolute left-[52px] top-[62px]
+  Fader Tick 3  ·  w-[8px] h-[1px] absolute left-[52px] top-[125px]
+  Fader Tick 4  ·  w-[5px] h-[1px] absolute left-[52px] top-[187px]
+  Fader Tick 5  ·  w-[8px] h-[1px] absolute left-[52px] top-[249px]
+  Fader Tick 6  ·  w-[5px] h-[1px] absolute left-[52px] top-[311px]
+  Fader Tick 7  ·  w-[8px] h-[1px] absolute left-[52px] top-[374px]
+  Fader Tick 8  ·  w-[5px] h-[1px] absolute left-[52px] top-[436px]
+  Fader Tick 9  ·  w-[8px] h-[1px] absolute left-[52px] top-[498px]
+Fader dB · Nova  ·  text-[9px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+  "-8.0 dB"
+Channel Strip · Defoko  ·  w-[96px] shrink-0 h-full flex flex-col gap-[6px] p-[8px] justify-start items-start rounded-[12px]
+  Channel Accent · Defoko  ·  w-full h-[3px] shrink-0 rounded-[999px]
+  Channel Name · Defoko  ·  text-[11px]/[12px] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold
+    "Defoko"
+  EQ Display  ·  w-[80px] h-[76px] shrink-0 rounded-[8px] overflow-hidden relative
+    Zero Line  ·  w-[80px] h-[1px] absolute left-0 top-[38px]
+    EQ Curve  ·  w-[80px] h-[76px] absolute left-0 top-0 overflow-visible
+Insert Section Label · Defoko  ·  text-[7px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "插入"
+Inserts  ·  w-full h-fit shrink-0 flex flex-col gap-[3px] justify-start items-start
+  Insert VOCALOID 6  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 1 · VOCALOID 6  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "UTAU"
+  Insert EQ  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 2 · EQ  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "EQ"
+  Insert Slot · Empty  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 3 · Empty  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "—"
+Pan Control  ·  w-full h-[14px] shrink-0 flex flex-row gap-0 justify-between items-center
+  Pan Label  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "声像"
+  Pan Value  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "R22"
+Mute Solo Record  ·  w-full h-fit shrink-0 flex flex-row gap-[4px] justify-start items-start
+  Mute  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Mute Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "M"
+  Solo  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Solo Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "S"
+  Arm  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Arm Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "R"
+Channel Spacer · Defoko  ·  w-full flex flex-row gap-0 justify-start items-start
+Fader  ·  w-[80px] h-[500px] shrink-0 relative
+  Meter  ·  w-[8px] h-[500px] absolute left-[4px] top-0 flex flex-col gap-0 justify-end items-start rounded-[999px] overflow-hidden
+    Meter Fill  ·  w-full h-[275px] shrink-0 rounded-[999px]
+  Fader Track  ·  w-[4px] h-[500px] absolute left-[34px] top-0 rounded-[999px]
+  Fader Handle  ·  w-[24px] h-[14px] absolute left-[24px] top-[204px] rounded-[4px]
+  Fader Tick 1  ·  w-[8px] h-[1px] absolute left-[52px] top-0
+  Fader Tick 2  ·  w-[5px] h-[1px] absolute left-[52px] top-[62px]
+  Fader Tick 3  ·  w-[8px] h-[1px] absolute left-[52px] top-[125px]
+  Fader Tick 4  ·  w-[5px] h-[1px] absolute left-[52px] top-[187px]
+  Fader Tick 5  ·  w-[8px] h-[1px] absolute left-[52px] top-[249px]
+  Fader Tick 6  ·  w-[5px] h-[1px] absolute left-[52px] top-[311px]
+  Fader Tick 7  ·  w-[8px] h-[1px] absolute left-[52px] top-[374px]
+  Fader Tick 8  ·  w-[5px] h-[1px] absolute left-[52px] top-[436px]
+  Fader Tick 9  ·  w-[8px] h-[1px] absolute left-[52px] top-[498px]
+Fader dB · Defoko  ·  text-[9px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+  "-7.5 dB"
+Channel Strip · Neru  ·  w-[96px] shrink-0 h-full flex flex-col gap-[6px] p-[8px] justify-start items-start rounded-[12px]
+  Channel Accent · Neru  ·  w-full h-[3px] shrink-0 rounded-[999px]
+  Channel Name · Neru  ·  text-[11px]/[12px] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold
+    "Neru"
+  EQ Display  ·  w-[80px] h-[76px] shrink-0 rounded-[8px] overflow-hidden relative
+    Zero Line  ·  w-[80px] h-[1px] absolute left-0 top-[38px]
+    EQ Curve  ·  w-[80px] h-[76px] absolute left-0 top-0 overflow-visible
+Insert Section Label · Neru  ·  text-[7px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "插入"
+Inserts  ·  w-full h-fit shrink-0 flex flex-col gap-[3px] justify-start items-start
+  Insert VOCALOID 6  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 1 · VOCALOID 6  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "UTAU"
+  Insert EQ  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 2 · EQ  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "EQ"
+  Insert Slot · Empty  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 3 · Empty  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "—"
+Pan Control  ·  w-full h-[14px] shrink-0 flex flex-row gap-0 justify-between items-center
+  Pan Label  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "声像"
+  Pan Value  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "C"
+Mute Solo Record  ·  w-full h-fit shrink-0 flex flex-row gap-[4px] justify-start items-start
+  Mute  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Mute Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "M"
+  Solo  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Solo Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "S"
+  Arm  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Arm Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "R"
+Channel Spacer · Neru  ·  w-full flex flex-row gap-0 justify-start items-start
+Fader  ·  w-[80px] h-[500px] shrink-0 relative
+  Meter  ·  w-[8px] h-[500px] absolute left-[4px] top-0 flex flex-col gap-0 justify-end items-start rounded-[999px] overflow-hidden
+    Meter Fill  ·  w-full h-[240px] shrink-0 rounded-[999px]
+  Fader Track  ·  w-[4px] h-[500px] absolute left-[34px] top-0 rounded-[999px]
+  Fader Handle  ·  w-[24px] h-[14px] absolute left-[24px] top-[233px] rounded-[4px]
+  Fader Tick 1  ·  w-[8px] h-[1px] absolute left-[52px] top-0
+  Fader Tick 2  ·  w-[5px] h-[1px] absolute left-[52px] top-[62px]
+  Fader Tick 3  ·  w-[8px] h-[1px] absolute left-[52px] top-[125px]
+  Fader Tick 4  ·  w-[5px] h-[1px] absolute left-[52px] top-[187px]
+  Fader Tick 5  ·  w-[8px] h-[1px] absolute left-[52px] top-[249px]
+  Fader Tick 6  ·  w-[5px] h-[1px] absolute left-[52px] top-[311px]
+  Fader Tick 7  ·  w-[8px] h-[1px] absolute left-[52px] top-[374px]
+  Fader Tick 8  ·  w-[5px] h-[1px] absolute left-[52px] top-[436px]
+  Fader Tick 9  ·  w-[8px] h-[1px] absolute left-[52px] top-[498px]
+Fader dB · Neru  ·  text-[9px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+  "-9.0 dB"
+Channel Strip · Aria  ·  w-[96px] shrink-0 h-full flex flex-col gap-[6px] p-[8px] justify-start items-start rounded-[12px]
+  Channel Accent · Aria  ·  w-full h-[3px] shrink-0 rounded-[999px]
+  Channel Name · Aria  ·  text-[11px]/[12px] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold
+    "Aria"
+  EQ Display  ·  w-[80px] h-[76px] shrink-0 rounded-[8px] overflow-hidden relative
+    Zero Line  ·  w-[80px] h-[1px] absolute left-0 top-[38px]
+    EQ Curve  ·  w-[80px] h-[76px] absolute left-0 top-0 overflow-visible
+Insert Section Label · Aria  ·  text-[7px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "插入"
+Inserts  ·  w-full h-fit shrink-0 flex flex-col gap-[3px] justify-start items-start
+  Insert VOCALOID 6  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 1 · VOCALOID 6  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "DiffSinger"
+  Insert EQ  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 2 · EQ  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "EQ"
+  Insert Slot · Empty  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 3 · Empty  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "—"
+Pan Control  ·  w-full h-[14px] shrink-0 flex flex-row gap-0 justify-between items-center
+  Pan Label  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "声像"
+  Pan Value  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "L8"
+Mute Solo Record  ·  w-full h-fit shrink-0 flex flex-row gap-[4px] justify-start items-start
+  Mute  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Mute Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "M"
+  Solo  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Solo Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "S"
+  Arm  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Arm Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "R"
+Channel Spacer · Aria  ·  w-full flex flex-row gap-0 justify-start items-start
+Fader  ·  w-[80px] h-[500px] shrink-0 relative
+  Meter  ·  w-[8px] h-[500px] absolute left-[4px] top-0 flex flex-col gap-0 justify-end items-start rounded-[999px] overflow-hidden
+    Meter Fill  ·  w-full h-[225px] shrink-0 rounded-[999px]
+  Fader Track  ·  w-[4px] h-[500px] absolute left-[34px] top-0 rounded-[999px]
+  Fader Handle  ·  w-[24px] h-[14px] absolute left-[24px] top-[243px] rounded-[4px]
+  Fader Tick 1  ·  w-[8px] h-[1px] absolute left-[52px] top-0
+  Fader Tick 2  ·  w-[5px] h-[1px] absolute left-[52px] top-[62px]
+  Fader Tick 3  ·  w-[8px] h-[1px] absolute left-[52px] top-[125px]
+  Fader Tick 4  ·  w-[5px] h-[1px] absolute left-[52px] top-[187px]
+  Fader Tick 5  ·  w-[8px] h-[1px] absolute left-[52px] top-[249px]
+  Fader Tick 6  ·  w-[5px] h-[1px] absolute left-[52px] top-[311px]
+  Fader Tick 7  ·  w-[8px] h-[1px] absolute left-[52px] top-[374px]
+  Fader Tick 8  ·  w-[5px] h-[1px] absolute left-[52px] top-[436px]
+  Fader Tick 9  ·  w-[8px] h-[1px] absolute left-[52px] top-[498px]
+Fader dB · Aria  ·  text-[9px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+  "-9.5 dB"
+Channel Strip · 和声  ·  w-[96px] shrink-0 h-full flex flex-col gap-[6px] p-[8px] justify-start items-start rounded-[12px]
+  Channel Accent · 和声  ·  w-full h-[3px] shrink-0 rounded-[999px]
+  Channel Name · 和声  ·  text-[11px]/[12px] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold
+    "和声"
+  EQ Display  ·  w-[80px] h-[76px] shrink-0 rounded-[8px] overflow-hidden relative
+    Zero Line  ·  w-[80px] h-[1px] absolute left-0 top-[38px]
+    EQ Curve  ·  w-[80px] h-[76px] absolute left-0 top-0 overflow-visible
+Insert Section Label · 和声  ·  text-[7px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "插入"
+Inserts  ·  w-full h-fit shrink-0 flex flex-col gap-[3px] justify-start items-start
+  Insert HARMONY  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 1 · HARMONY  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "和声"
+  Insert EQ  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 2 · EQ  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "EQ"
+  Insert Slot · Empty  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 3 · Empty  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "—"
+Pan Control  ·  w-full h-[14px] shrink-0 flex flex-row gap-0 justify-between items-center
+  Pan Label  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "声像"
+  Pan Value  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "R8"
+Mute Solo Record  ·  w-full h-fit shrink-0 flex flex-row gap-[4px] justify-start items-start
+  Mute  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Mute Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "M"
+  Solo  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Solo Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "S"
+  Arm  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Arm Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "R"
+Channel Spacer · 和声  ·  w-full flex flex-row gap-0 justify-start items-start
+Fader  ·  w-[80px] h-[500px] shrink-0 relative
+  Meter  ·  w-[8px] h-[500px] absolute left-[4px] top-0 flex flex-col gap-0 justify-end items-start rounded-[999px] overflow-hidden
+    Meter Fill  ·  w-full h-[200px] shrink-0 rounded-[999px]
+  Fader Track  ·  w-[4px] h-[500px] absolute left-[34px] top-0 rounded-[999px]
+  Fader Handle  ·  w-[24px] h-[14px] absolute left-[24px] top-[272px] rounded-[4px]
+  Fader Tick 1  ·  w-[8px] h-[1px] absolute left-[52px] top-0
+  Fader Tick 2  ·  w-[5px] h-[1px] absolute left-[52px] top-[62px]
+  Fader Tick 3  ·  w-[8px] h-[1px] absolute left-[52px] top-[125px]
+  Fader Tick 4  ·  w-[5px] h-[1px] absolute left-[52px] top-[187px]
+  Fader Tick 5  ·  w-[8px] h-[1px] absolute left-[52px] top-[249px]
+  Fader Tick 6  ·  w-[5px] h-[1px] absolute left-[52px] top-[311px]
+  Fader Tick 7  ·  w-[8px] h-[1px] absolute left-[52px] top-[374px]
+  Fader Tick 8  ·  w-[5px] h-[1px] absolute left-[52px] top-[436px]
+  Fader Tick 9  ·  w-[8px] h-[1px] absolute left-[52px] top-[498px]
+Fader dB · 和声  ·  text-[9px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+  "-12.0 dB"
+Channel Strip · 鼓组  ·  w-[96px] shrink-0 h-full flex flex-col gap-[6px] p-[8px] justify-start items-start rounded-[12px]
+  Channel Accent · 鼓组  ·  w-full h-[3px] shrink-0 rounded-[999px]
+  Channel Name · 鼓组  ·  text-[11px]/[12px] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold
+    "鼓组"
+  EQ Display  ·  w-[80px] h-[76px] shrink-0 rounded-[8px] overflow-hidden relative
+    Zero Line  ·  w-[80px] h-[1px] absolute left-0 top-[38px]
+    EQ Curve  ·  w-[80px] h-[76px] absolute left-0 top-0 overflow-visible
+Insert Section Label · 鼓组  ·  text-[7px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "插入"
+Inserts  ·  w-full h-fit shrink-0 flex flex-col gap-[3px] justify-start items-start
+  Insert SAMPLER  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 1 · SAMPLER  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "采样"
+  Insert EQ  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 2 · EQ  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "EQ"
+  Insert COMP  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 3 · COMP  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "COMP"
+Pan Control  ·  w-full h-[14px] shrink-0 flex flex-row gap-0 justify-between items-center
+  Pan Label  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "声像"
+  Pan Value  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "C"
+Mute Solo Record  ·  w-full h-fit shrink-0 flex flex-row gap-[4px] justify-start items-start
+  Mute  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Mute Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "M"
+  Solo  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Solo Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "S"
+  Arm  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Arm Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "R"
+Channel Spacer · 鼓组  ·  w-full flex flex-row gap-0 justify-start items-start
+Fader  ·  w-[80px] h-[500px] shrink-0 relative
+  Meter  ·  w-[8px] h-[500px] absolute left-[4px] top-0 flex flex-col gap-0 justify-end items-start rounded-[999px] overflow-hidden
+    Meter Fill  ·  w-full h-[360px] shrink-0 rounded-[999px]
+  Fader Track  ·  w-[4px] h-[500px] absolute left-[34px] top-0 rounded-[999px]
+  Fader Handle  ·  w-[24px] h-[14px] absolute left-[24px] top-[156px] rounded-[4px]
+  Fader Tick 1  ·  w-[8px] h-[1px] absolute left-[52px] top-0
+  Fader Tick 2  ·  w-[5px] h-[1px] absolute left-[52px] top-[62px]
+  Fader Tick 3  ·  w-[8px] h-[1px] absolute left-[52px] top-[125px]
+  Fader Tick 4  ·  w-[5px] h-[1px] absolute left-[52px] top-[187px]
+  Fader Tick 5  ·  w-[8px] h-[1px] absolute left-[52px] top-[249px]
+  Fader Tick 6  ·  w-[5px] h-[1px] absolute left-[52px] top-[311px]
+  Fader Tick 7  ·  w-[8px] h-[1px] absolute left-[52px] top-[374px]
+  Fader Tick 8  ·  w-[5px] h-[1px] absolute left-[52px] top-[436px]
+  Fader Tick 9  ·  w-[8px] h-[1px] absolute left-[52px] top-[498px]
+Fader dB · 鼓组  ·  text-[9px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+  "-5.0 dB"
+Channel Strip · 贝斯  ·  w-[96px] shrink-0 h-full flex flex-col gap-[6px] p-[8px] justify-start items-start rounded-[12px]
+  Channel Accent · 贝斯  ·  w-full h-[3px] shrink-0 rounded-[999px]
+  Channel Name · 贝斯  ·  text-[11px]/[12px] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold
+    "贝斯"
+  EQ Display  ·  w-[80px] h-[76px] shrink-0 rounded-[8px] overflow-hidden relative
+    Zero Line  ·  w-[80px] h-[1px] absolute left-0 top-[38px]
+    EQ Curve  ·  w-[80px] h-[76px] absolute left-0 top-0 overflow-visible
+Insert Section Label · 贝斯  ·  text-[7px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "插入"
+Inserts  ·  w-full h-fit shrink-0 flex flex-col gap-[3px] justify-start items-start
+  Insert SYNTH  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 1 · SYNTH  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "合成"
+  Insert EQ  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 2 · EQ  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "EQ"
+  Insert COMP  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 3 · COMP  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "COMP"
+Pan Control  ·  w-full h-[14px] shrink-0 flex flex-row gap-0 justify-between items-center
+  Pan Label  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "声像"
+  Pan Value  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "C"
+Mute Solo Record  ·  w-full h-fit shrink-0 flex flex-row gap-[4px] justify-start items-start
+  Mute  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Mute Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "M"
+  Solo  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Solo Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "S"
+  Arm  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Arm Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "R"
+Channel Spacer · 贝斯  ·  w-full flex flex-row gap-0 justify-start items-start
+Fader  ·  w-[80px] h-[500px] shrink-0 relative
+  Meter  ·  w-[8px] h-[500px] absolute left-[4px] top-0 flex flex-col gap-0 justify-end items-start rounded-[999px] overflow-hidden
+    Meter Fill  ·  w-full h-[310px] shrink-0 rounded-[999px]
+  Fader Track  ·  w-[4px] h-[500px] absolute left-[34px] top-0 rounded-[999px]
+  Fader Handle  ·  w-[24px] h-[14px] absolute left-[24px] top-[194px] rounded-[4px]
+  Fader Tick 1  ·  w-[8px] h-[1px] absolute left-[52px] top-0
+  Fader Tick 2  ·  w-[5px] h-[1px] absolute left-[52px] top-[62px]
+  Fader Tick 3  ·  w-[8px] h-[1px] absolute left-[52px] top-[125px]
+  Fader Tick 4  ·  w-[5px] h-[1px] absolute left-[52px] top-[187px]
+  Fader Tick 5  ·  w-[8px] h-[1px] absolute left-[52px] top-[249px]
+  Fader Tick 6  ·  w-[5px] h-[1px] absolute left-[52px] top-[311px]
+  Fader Tick 7  ·  w-[8px] h-[1px] absolute left-[52px] top-[374px]
+  Fader Tick 8  ·  w-[5px] h-[1px] absolute left-[52px] top-[436px]
+  Fader Tick 9  ·  w-[8px] h-[1px] absolute left-[52px] top-[498px]
+Fader dB · 贝斯  ·  text-[9px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+  "-6.2 dB"
+Channel Strip · 效果返回  ·  w-[96px] shrink-0 h-full flex flex-col gap-[6px] p-[8px] justify-start items-start rounded-[12px]
+  Channel Accent · 效果返回  ·  w-full h-[3px] shrink-0 rounded-[999px]
+  Channel Name · 效果返回  ·  text-[11px]/[12px] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold
+    "效果返回"
+  EQ Display  ·  w-[80px] h-[76px] shrink-0 rounded-[8px] overflow-hidden relative
+    Zero Line  ·  w-[80px] h-[1px] absolute left-0 top-[38px]
+    EQ Curve  ·  w-[80px] h-[76px] absolute left-0 top-0 overflow-visible
+Insert Section Label · 效果返回  ·  text-[7px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+  "插入"
+Inserts  ·  w-full h-fit shrink-0 flex flex-col gap-[3px] justify-start items-start
+  Insert REVERB  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 1 · REVERB  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "混响"
+  Insert DELAY  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 2 · DELAY  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+      "延迟"
+  Insert Slot · Empty  ·  w-full h-[17px] shrink-0 flex flex-row gap-[5px] p-[0px_6px] justify-start items-center rounded-[4px]
+    Insert Status Dot  ·  w-[4px] shrink-0 h-[4px] rounded-[999px]
+    Insert 3 · Empty  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal tracking-[0.3px] [white-space:nowrap]
+      "—"
+Pan Control  ·  w-full h-[14px] shrink-0 flex flex-row gap-0 justify-between items-center
+  Pan Label  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "声像"
+  Pan Value  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "C"
+Mute Solo Record  ·  w-full h-fit shrink-0 flex flex-row gap-[4px] justify-start items-start
+  Mute  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Mute Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "M"
+  Solo  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Solo Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "S"
+  Arm  ·  h-[20px] flex flex-row gap-0 justify-center items-center rounded-[4px]
+    Arm Label  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-bold [white-space:nowrap]
+      "R"
+Channel Spacer · 效果返回  ·  w-full flex flex-row gap-0 justify-start items-start
+Fader  ·  w-[80px] h-[500px] shrink-0 relative
+  Meter  ·  w-[8px] h-[500px] absolute left-[4px] top-0 flex flex-col gap-0 justify-end items-start rounded-[999px] overflow-hidden
+    Meter Fill  ·  w-full h-[175px] shrink-0 rounded-[999px]
+  Fader Track  ·  w-[4px] h-[500px] absolute left-[34px] top-0 rounded-[999px]
+  Fader Handle  ·  w-[24px] h-[14px] absolute left-[24px] top-[292px] rounded-[4px]
+  Fader Tick 1  ·  w-[8px] h-[1px] absolute left-[52px] top-0
+  Fader Tick 2  ·  w-[5px] h-[1px] absolute left-[52px] top-[62px]
+  Fader Tick 3  ·  w-[8px] h-[1px] absolute left-[52px] top-[125px]
+  Fader Tick 4  ·  w-[5px] h-[1px] absolute left-[52px] top-[187px]
+  Fader Tick 5  ·  w-[8px] h-[1px] absolute left-[52px] top-[249px]
+  Fader Tick 6  ·  w-[5px] h-[1px] absolute left-[52px] top-[311px]
+  Fader Tick 7  ·  w-[8px] h-[1px] absolute left-[52px] top-[374px]
+  Fader Tick 8  ·  w-[5px] h-[1px] absolute left-[52px] top-[436px]
+  Fader Tick 9  ·  w-[8px] h-[1px] absolute left-[52px] top-[498px]
+Fader dB · 效果返回  ·  text-[9px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+  "-16.0 dB"
+Channel Strip · 主输出  ·  w-[160px] shrink-0 h-full flex flex-col gap-[6px] p-[8px] justify-start items-start rounded-[12px]
+  Channel Accent · 主输出  ·  w-full h-[3px] shrink-0 rounded-[999px]
+  Channel Name · 主输出  ·  text-[12px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-bold
+    "主输出"
+  Channel Subtitle  ·  text-[8px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-normal
+    "立体声输出"
+  Bus Info  ·  w-full h-fit shrink-0 flex flex-col gap-[8px] p-[10px] justify-start items-start rounded-[8px]
+    INTEGRATED  ·  w-full h-[14px] shrink-0 flex flex-row gap-0 justify-between items-center
+      Bus Param Label · INTEGRATED  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "综合响度"
+      Bus Param Value · INTEGRATED  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "-14.0 LUFS"
+    TRUE PEAK  ·  w-full h-[14px] shrink-0 flex flex-row gap-0 justify-between items-center
+      Bus Param Label · TRUE PEAK  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "真峰值"
+      Bus Param Value · TRUE PEAK  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "-1.0 dBTP"
+    LIMITER  ·  w-full h-[14px] shrink-0 flex flex-row gap-0 justify-between items-center
+      Bus Param Label · LIMITER  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "限制器"
+      Bus Param Value · LIMITER  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "开"
+    DITHER  ·  w-full h-[14px] shrink-0 flex flex-row gap-0 justify-between items-center
+      Bus Param Label · DITHER  ·  text-[8px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "抖动"
+      Bus Param Value · DITHER  ·  text-[9px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+        "24-bit"
+  Channel Spacer · 主输出  ·  w-full flex flex-row gap-0 justify-start items-start
+  Fader  ·  w-[144px] h-[500px] shrink-0 relative
+    Meter L  ·  w-[10px] h-[500px] absolute left-[24px] top-0 flex flex-col gap-0 justify-end items-start rounded-[999px] overflow-hidden
+      Meter Fill  ·  w-full h-[410px] shrink-0 rounded-[999px]
+    Meter R  ·  w-[10px] h-[500px] absolute left-[38px] top-0 flex flex-col gap-0 justify-end items-start rounded-[999px] overflow-hidden
+      Meter Fill  ·  w-full h-[390px] shrink-0 rounded-[999px]
+    Fader Track  ·  w-[4px] h-[500px] absolute left-[74px] top-0 rounded-[999px]
+    Fader Handle  ·  w-[24px] h-[16px] absolute left-[64px] top-[116px] rounded-[4px]
+    Fader Tick 1  ·  w-[8px] h-[1px] absolute left-[96px] top-0
+    Fader Tick 2  ·  w-[5px] h-[1px] absolute left-[96px] top-[62px]
+    Fader Tick 3  ·  w-[8px] h-[1px] absolute left-[96px] top-[125px]
+    Fader Tick 4  ·  w-[5px] h-[1px] absolute left-[96px] top-[187px]
+    Fader Tick 5  ·  w-[8px] h-[1px] absolute left-[96px] top-[249px]
+    Fader Tick 6  ·  w-[5px] h-[1px] absolute left-[96px] top-[311px]
+    Fader Tick 7  ·  w-[8px] h-[1px] absolute left-[96px] top-[374px]
+    Fader Tick 8  ·  w-[5px] h-[1px] absolute left-[96px] top-[436px]
+    Fader Tick 9  ·  w-[8px] h-[1px] absolute left-[96px] top-[498px]
+  Fader Peak dB  ·  text-[13px]/[normal] w-full font-['Noto_Sans_SC',system-ui,sans-serif] font-semibold
+    "0.0 dB"
+Status Bar  ·  w-full h-[32px] shrink-0 flex flex-row gap-[20px] p-[0px_16px] justify-start items-center
+  Audio Info  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "48 kHz · 24-bit · 缓冲 256"
+  Latency  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "5.3 ms"
+  Foot Spacer  ·  h-[1px] flex flex-row gap-0 justify-start items-start
+  Voices  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "声部 18/64"
+  CPU  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "CPU 12%"
+  Disk  ·  text-[10px]/[normal] font-['Noto_Sans_SC',system-ui,sans-serif] font-normal [white-space:nowrap]
+    "磁盘 4%"
