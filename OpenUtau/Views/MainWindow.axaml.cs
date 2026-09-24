@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -132,6 +132,15 @@ namespace OpenUtau.App.Views {
 
             DocManager.Inst.AddSubscriber(this);
 
+            // 欢迎视图：命令行带工程文件则直接打开，否则以欢迎页作为初始视图
+            var cmdArgs = Environment.GetCommandLineArgs();
+            if (cmdArgs.Length == 2 && File.Exists(cmdArgs[1])) {
+                string path = cmdArgs[1];
+                Opened += (_, _) => viewModel.OpenProject(new[] { path });
+            } else {
+                ShowWelcome();
+            }
+
             Log.Information("Main window checking Update.");
             UpdaterDialog.CheckForUpdate(
                 dialog => ShowOverlayContent(dialog),
@@ -143,6 +152,70 @@ namespace OpenUtau.App.Views {
 
         public void InitProject() {
             viewModel.InitProject();
+        }
+
+        // ── 欢迎视图（内嵌初始视图）────────────────────────────────
+        // 说明：欢迎页原为独立 WelcomeWindow（阶段 E3）；本次回归主窗口，作为单窗口内的初始视图，
+        // 打开/新建工程后隐藏。窗口级动作（偏好设置/包管理/链接）仍由本窗口承载。
+
+        /// <summary>是否处于欢迎视图。</summary>
+        public bool IsWelcomeVisible => WelcomeHost.IsVisible;
+
+        private void ShowWelcome() {
+            WelcomeHost.Host = this;
+            WelcomeHost.DataContext = viewModel;
+            WelcomeHost.SingersDataContext = sidebarViewModel;
+            viewModel.InitProject();          // 恢复状态（HasRecovery/RecoveryString）
+            WelcomeHost.IsVisible = true;
+        }
+
+        private void HideWelcome() {
+            WelcomeHost.IsVisible = false;
+        }
+
+        /// <summary>欢迎视图：新建工程。</summary>
+        public void WelcomeNewProject() {
+            HideWelcome();
+            viewModel.NewProject();           // 已存在默认工程时为重置：直接进入编辑器
+        }
+
+        /// <summary>欢迎视图：打开工程（文件选择）。</summary>
+        public async Task WelcomeOpenProject() {
+            var files = await FilePicker.OpenFilesAboutProject(
+                this, "menu.file.open",
+                FilePicker.ProjectFiles,
+                FilePicker.USTX,
+                FilePicker.VSQX,
+                FilePicker.UST,
+                FilePicker.MIDI,
+                FilePicker.UFDATA,
+                FilePicker.MUSICXML);
+            if (files == null || files.Length == 0) {
+                return;
+            }
+            HideWelcome();
+            viewModel.OpenProject(files);
+        }
+
+        /// <summary>欢迎视图：打开最近工程 / 恢复工程。</summary>
+        public void WelcomeOpenRecent(string path) {
+            HideWelcome();
+            viewModel.OpenRecent(path);
+        }
+
+        /// <summary>欢迎视图：从模板新建。</summary>
+        public void WelcomeOpenTemplate(string path) {
+            HideWelcome();
+            viewModel.OpenTemplate(path);
+        }
+
+        /// <summary>打开外部链接（欢迎视图快捷入口）。</summary>
+        public void OpenUrl(string url) {
+            try {
+                OS.OpenWeb(url);
+            } catch (Exception e) {
+                DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e));
+            }
         }
 
         // ── 阶段 E3：WelcomeWindow 打开工程后的对接入口 ──
@@ -1236,6 +1309,10 @@ namespace OpenUtau.App.Views {
                 return;
             }
             string FirstExt = Path.GetExtension(supportedFiles[0]).ToLower();
+            // 欢迎视图下拖入工程 / 音频：直接进入编辑器
+            if (ProjectExts.Contains(FirstExt) || AudioExts.Contains(FirstExt)) {
+                HideWelcome();
+            }
             //If multiple project/audio files are dropped, open/import them all.
             if (ProjectExts.Contains(FirstExt) || AudioExts.Contains(FirstExt)) {
                 var projectFiles = supportedFiles.Where(file => ProjectExts.Contains(Path.GetExtension(file).ToLower())).ToArray();

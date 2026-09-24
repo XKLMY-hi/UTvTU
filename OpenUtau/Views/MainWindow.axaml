@@ -5,6 +5,7 @@
         xmlns:vm="using:OpenUtau.App.ViewModels"
         xmlns:c="clr-namespace:OpenUtau.App.Controls"
         xmlns:controls="clr-namespace:OpenUtau.App.Controls"
+        xmlns:views="using:OpenUtau.App.Views"
         xmlns:suki="using:SukiUI.Controls"
         mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="650"
         x:Class="OpenUtau.App.Views.MainWindow"
@@ -738,6 +739,10 @@
         </Grid>
       </Border>
     </Grid>
+
+    <!-- ══════════ 欢迎视图（初始视图，内嵌于主窗口）══════════
+         打开 / 新建工程后隐藏；模态覆盖层（ZIndex 1000）仍位于其之上 -->
+    <views:WelcomeView x:Name="WelcomeHost" IsVisible="False" ZIndex="900"/>
 
     <!-- Overlay layer: in-window modal dialog host -->
     <Grid Name="OverlayLayer" IsVisible="False" ZIndex="1000" Background="Transparent">

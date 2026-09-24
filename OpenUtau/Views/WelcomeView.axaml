@@ -1,0 +1,263 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:OpenUtau.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="620"
+             x:Class="OpenUtau.App.Views.WelcomeView">
+  <!-- 欢迎视图（内嵌主窗口）· 首个迁移到 MD3 颜色池的界面：颜色一律取 md3.* 角色键 -->
+  <UserControl.Styles>
+    <!-- 动作卡 -->
+    <Style Selector="Border.actionCard">
+      <Setter Property="CornerRadius" Value="14"/>
+      <Setter Property="Padding" Value="16,14"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-low}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Border.actionCard:pointerover">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    </Style>
+    <!-- 图标底座 -->
+    <Style Selector="Border.cardIcon">
+      <Setter Property="Width" Value="38"/>
+      <Setter Property="Height" Value="38"/>
+      <Setter Property="CornerRadius" Value="11"/>
+      <Setter Property="Background" Value="{DynamicResource md3.primary-container}"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <!-- 分区标题 -->
+    <Style Selector="TextBlock.sectionTitle">
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+      <Setter Property="Margin" Value="2,0,0,8"/>
+    </Style>
+    <!-- 列表项 -->
+    <Style Selector="ListBox.welcomeList">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="ListBox.welcomeList ListBoxItem">
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Margin" Value="0,0,0,4"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="CornerRadius" Value="10"/>
+    </Style>
+    <Style Selector="ListBox.welcomeList ListBoxItem:pointerover">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    </Style>
+    <Style Selector="Border.rowItem">
+      <Setter Property="CornerRadius" Value="10"/>
+      <Setter Property="Padding" Value="10,7"/>
+    </Style>
+    <!-- 品牌面板链接 -->
+    <Style Selector="Button.brandLink">
+      <Setter Property="Height" Value="28"/>
+      <Setter Property="Padding" Value="8,0"/>
+      <Setter Property="HorizontalAlignment" Value="Left"/>
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.brandLink:pointerover">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+    </Style>
+    <!-- 音源徽标 -->
+    <Style Selector="Border.singerChip">
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="Padding" Value="4,3"/>
+      <Setter Property="Margin" Value="0,0,6,6"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    </Style>
+  </UserControl.Styles>
+
+  <Grid ColumnDefinitions="340,*" Background="{DynamicResource md3.surface}">
+    <!-- ══════════ 品牌面板 ══════════ -->
+    <Border Grid.Column="0" Background="{DynamicResource md3.surface-container}"
+            BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,1,0">
+      <Grid RowDefinitions="Auto,*,Auto" Margin="26,24,26,20">
+        <StackPanel Grid.Row="0">
+          <!-- 标识 -->
+          <StackPanel Orientation="Horizontal">
+            <Border Width="42" Height="42" CornerRadius="12" ClipToBounds="True"
+                    Background="{DynamicResource md3.primary-container}">
+              <Image Source="/Assets/OpenUtau.png" Width="42" Height="42" Stretch="Uniform"
+                     RenderOptions.BitmapInterpolationMode="HighQuality"/>
+            </Border>
+            <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+              <TextBlock Text="OpenUTAU Plus" FontSize="17" FontWeight="SemiBold"
+                         Foreground="{DynamicResource md3.on-surface}"/>
+              <TextBlock Text="{Binding AppVersion}" FontSize="10" Margin="0,2,0,0"
+                         Foreground="{DynamicResource md3.on-surface-variant}"/>
+            </StackPanel>
+          </StackPanel>
+
+          <!-- 波形装饰（示意，不承载数据） -->
+          <Path Margin="0,24,0,0" Height="58" Stretch="Fill" StrokeThickness="2" Opacity="0.55"
+                Stroke="{DynamicResource md3.primary}"
+                Data="M0,32 L6,14 L12,46 L18,22 L24,54 L30,18 L36,40 L42,26 L48,50 L54,16 L60,38 L66,24 L72,52 L78,20 L84,42 L90,28 L96,48 L102,14 L108,36 L114,22 L120,50 L126,18 L132,44 L138,26 L144,52 L150,20 L156,40 L162,28 L168,46 L174,16 L180,38 L186,24 L192,50 L198,18 L204,42 L210,30 L216,48 L222,20 L228,36 L234,26 L240,44 L246,18 L252,40 L258,28 L264,46 L270,22 L276,38 L282,30 L288,44 L294,20 L300,36"/>
+
+          <!-- 已安装音源 -->
+          <TextBlock Classes="sectionTitle" Margin="2,26,0,8" Text="{DynamicResource singers.caption}"/>
+          <ItemsControl x:Name="SingersHost" ItemsSource="{Binding Singers}" IsVisible="{Binding HasSingers}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <WrapPanel/>
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:SingerItem">
+                <Border Classes="singerChip">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Border Width="18" Height="18" CornerRadius="9"
+                            Background="{DynamicResource md3.secondary-container}">
+                      <TextBlock Text="{Binding AvatarFallback}" FontSize="10" FontWeight="SemiBold"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                                 Foreground="{DynamicResource md3.on-secondary-container}"/>
+                    </Border>
+                    <TextBlock Text="{Binding Name}" FontSize="11" VerticalAlignment="Center"
+                               Foreground="{DynamicResource md3.on-surface}"/>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+
+        <!-- 快速入口 -->
+        <StackPanel Grid.Row="2" Spacing="2">
+          <TextBlock Classes="sectionTitle" Margin="2,0,0,4" Text="{DynamicResource welcome.quicklinks}"/>
+          <Button Classes="brandLink" Content="{DynamicResource welcome.wiki}" Click="OnWiki"/>
+          <Button Classes="brandLink" Content="{DynamicResource welcome.releases}" Click="OnReleases"/>
+          <Button Classes="brandLink" Content="{DynamicResource welcome.diffsinger}" Click="OnDiffsinger"/>
+          <Button Classes="brandLink" Content="{DynamicResource welcome.teto}" Click="OnTeto"/>
+          <Button Classes="brandLink" Content="{DynamicResource welcome.packages}" Click="OnPackages"/>
+          <Button Classes="brandLink" Content="{DynamicResource welcome.prefs}" Click="OnPreferences"/>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- ══════════ 启动器 ══════════ -->
+    <Grid Grid.Column="1" RowDefinitions="Auto,Auto,*" Margin="30,26,30,20">
+      <TextBlock Grid.Row="0" Text="{DynamicResource welcome.start}" FontSize="26"
+                 FontWeight="SemiBold" Foreground="{DynamicResource md3.on-surface}"/>
+
+      <!-- 动作卡 -->
+      <Grid Grid.Row="1" ColumnDefinitions="*,*" Margin="0,18,0,0">
+        <Border Grid.Column="0" Classes="actionCard" Margin="0,0,7,0" PointerPressed="OnNewProject">
+          <Grid ColumnDefinitions="Auto,*">
+            <Border Classes="cardIcon">
+              <Path Data="{StaticResource icon-plus}" Width="18" Height="18" Stretch="Uniform"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Fill="{DynamicResource md3.on-primary-container}"/>
+            </Border>
+            <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+              <TextBlock Text="{DynamicResource welcome.new}" FontSize="14" FontWeight="SemiBold"
+                         Foreground="{DynamicResource md3.on-surface}"/>
+              <TextBlock Text="{DynamicResource welcome.new.description}" FontSize="11" Margin="0,2,0,0"
+                         Foreground="{DynamicResource md3.on-surface-variant}"/>
+            </StackPanel>
+          </Grid>
+        </Border>
+        <Border Grid.Column="1" Classes="actionCard" Margin="7,0,0,0" PointerPressed="OnOpenProject">
+          <Grid ColumnDefinitions="Auto,*">
+            <Border Classes="cardIcon">
+              <Path Data="{StaticResource icon-folder-open}" Width="18" Height="18" Stretch="Uniform"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Fill="{DynamicResource md3.on-primary-container}"/>
+            </Border>
+            <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+              <TextBlock Text="{DynamicResource welcome.open}" FontSize="14" FontWeight="SemiBold"
+                         Foreground="{DynamicResource md3.on-surface}"/>
+              <TextBlock Text="{DynamicResource welcome.open.description}" FontSize="11" Margin="0,2,0,0"
+                         Foreground="{DynamicResource md3.on-surface-variant}"/>
+            </StackPanel>
+          </Grid>
+        </Border>
+      </Grid>
+
+      <!-- 最近工程 + 模板 -->
+      <Grid Grid.Row="2" ColumnDefinitions="1.35*,*" Margin="0,22,0,0">
+        <Grid Grid.Column="0" RowDefinitions="Auto,Auto,*" Margin="0,0,14,0">
+          <TextBlock Grid.Row="0" Classes="sectionTitle" Text="{DynamicResource welcome.recent}"/>
+          <!-- 恢复条（Border 而非 Button：避免 Suki 按钮模板覆盖 MD3 角色色） -->
+          <Border Grid.Row="1" IsVisible="{Binding HasRecovery}" PointerPressed="OnRecovery"
+                  MinHeight="34" Margin="0,0,0,6" CornerRadius="10" Padding="12,8" Cursor="Hand"
+                  Background="{DynamicResource md3.error-container}">
+            <TextBlock Text="{Binding RecoveryString}" TextWrapping="Wrap" FontSize="11"
+                       Foreground="{DynamicResource md3.on-error-container}"/>
+          </Border>
+          <ListBox Grid.Row="2" Classes="welcomeList" ItemsSource="{Binding RecentFiles}"
+                   IsVisible="{Binding RecentFiles.Count}">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:RecentFileInfo">
+                <Border Classes="rowItem" PointerPressed="OnOpenRecent">
+                  <Grid ColumnDefinitions="Auto,*,Auto" Background="Transparent">
+                    <Border Width="26" Height="26" CornerRadius="8" VerticalAlignment="Center"
+                            Background="{DynamicResource md3.surface-container-high}">
+                      <Path Data="{StaticResource icon-file}" Width="13" Height="13" Stretch="Uniform"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Fill="{DynamicResource md3.on-surface-variant}"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                      <TextBlock FontSize="12" FontWeight="SemiBold" Text="{Binding Name}"
+                                 Foreground="{DynamicResource md3.on-surface}"/>
+                      <TextBlock FontSize="10" Margin="0,1,0,0" TextTrimming="CharacterEllipsis"
+                                 Text="{Binding Directory}"
+                                 Foreground="{DynamicResource md3.on-surface-variant}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="8,0,0,0">
+                      <Border Background="{DynamicResource md3.secondary-container}" CornerRadius="6"
+                              Padding="6,2" HorizontalAlignment="Right">
+                        <TextBlock FontSize="9" FontWeight="SemiBold" Text="{Binding Format}"
+                                   Foreground="{DynamicResource md3.on-secondary-container}"/>
+                      </Border>
+                      <TextBlock FontSize="9" Margin="0,3,0,0" HorizontalAlignment="Right"
+                                 Text="{Binding LastWriteTimeStr}"
+                                 Foreground="{DynamicResource md3.on-surface-variant}"/>
+                    </StackPanel>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+          <TextBlock Grid.Row="2" Margin="4,10,0,0" FontSize="11"
+                     Text="{DynamicResource welcome.open.description}"
+                     Foreground="{DynamicResource md3.on-surface-variant}"
+                     IsVisible="{Binding !RecentFiles.Count}"/>
+        </Grid>
+
+        <Grid Grid.Column="1" RowDefinitions="Auto,*">
+          <TextBlock Grid.Row="0" Classes="sectionTitle" Text="{DynamicResource welcome.template}"/>
+          <ListBox Grid.Row="1" Classes="welcomeList" ItemsSource="{Binding TemplateFiles}"
+                   IsVisible="{Binding TemplateFiles.Count}">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:RecentFileInfo">
+                <Border Classes="rowItem" PointerPressed="OnOpenTemplate">
+                  <Grid ColumnDefinitions="Auto,*" Background="Transparent">
+                    <Border Width="26" Height="26" CornerRadius="8" VerticalAlignment="Center"
+                            Background="{DynamicResource md3.surface-container-high}">
+                      <Path Data="{StaticResource icon-file-plus}" Width="13" Height="13" Stretch="Uniform"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Fill="{DynamicResource md3.on-surface-variant}"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" FontSize="12" Text="{Binding Name}"
+                               VerticalAlignment="Center" Margin="10,0,0,0"
+                               Foreground="{DynamicResource md3.on-surface}"/>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </Grid>
+      </Grid>
+    </Grid>
+  </Grid>
+</UserControl>

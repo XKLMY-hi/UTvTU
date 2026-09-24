@@ -39,5 +39,8 @@
     <None Include="Usts\**" CopyToOutputDirectory="PreserveNewest" LinkBase="Usts\" />
     <None Include="Files\**" CopyToOutputDirectory="PreserveNewest" LinkBase="Files\" />
     <None Include="Core\Theming\Data\**" CopyToOutputDirectory="PreserveNewest" LinkBase="Core\Theming\Data\" />
+    <!-- 视图 XAML 源码：契约测试需要扫描资源键（avares 不保留 .axaml 原文） -->
+    <None Include="..\OpenUtau\Views\WelcomeView.axaml" Link="Views\WelcomeView.axaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\OpenUtau\Views\MainWindow.axaml" Link="Views\MainWindow.axaml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

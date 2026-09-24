@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reactive.Disposables;
 using System.Threading;
 using System.Threading.Tasks;
@@ -61,10 +61,10 @@ namespace OpenUtau.App.Views {
                     return;
                 }
                 if (App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
-                    // 阶段 E3：先显示欢迎窗口（工程管理界面），新建/打开工程后由它创建 MainWindow
-                    var welcomeWindow = new WelcomeWindow();
-                    welcomeWindow.Show();
-                    desktop.MainWindow = welcomeWindow;
+                    // 单窗口：直接打开主窗口，欢迎页作为其内嵌初始视图（原独立 WelcomeWindow 已回归主窗口）
+                    var mainWindow = new MainWindow();
+                    mainWindow.Show();
+                    desktop.MainWindow = mainWindow;
                     LoadingWindow.InitializeLoadingWindow();
                     Close();
                 }
