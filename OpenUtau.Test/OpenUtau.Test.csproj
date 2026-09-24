@@ -38,5 +38,6 @@
   <ItemGroup>
     <None Include="Usts\**" CopyToOutputDirectory="PreserveNewest" LinkBase="Usts\" />
     <None Include="Files\**" CopyToOutputDirectory="PreserveNewest" LinkBase="Files\" />
+    <None Include="Core\Theming\Data\**" CopyToOutputDirectory="PreserveNewest" LinkBase="Core\Theming\Data\" />
   </ItemGroup>
 </Project>
