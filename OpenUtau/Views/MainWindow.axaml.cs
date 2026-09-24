@@ -164,7 +164,6 @@ namespace OpenUtau.App.Views {
         private void ShowWelcome() {
             WelcomeHost.Host = this;
             WelcomeHost.DataContext = viewModel;
-            WelcomeHost.SingersDataContext = sidebarViewModel;
             viewModel.InitProject();          // 恢复状态（HasRecovery/RecoveryString）
             WelcomeHost.IsVisible = true;
         }

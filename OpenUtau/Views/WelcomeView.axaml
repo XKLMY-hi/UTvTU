@@ -69,70 +69,30 @@
       <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     </Style>
-    <!-- 音源徽标 -->
-    <Style Selector="Border.singerChip">
-      <Setter Property="CornerRadius" Value="999"/>
-      <Setter Property="Padding" Value="4,3"/>
-      <Setter Property="Margin" Value="0,0,6,6"/>
-      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-    </Style>
   </UserControl.Styles>
 
   <Grid ColumnDefinitions="340,*" Background="{DynamicResource md3.surface}">
     <!-- ══════════ 品牌面板 ══════════ -->
     <Border Grid.Column="0" Background="{DynamicResource md3.surface-container}"
             BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,1,0">
-      <Grid RowDefinitions="Auto,*,Auto" Margin="26,24,26,20">
-        <StackPanel Grid.Row="0">
-          <!-- 标识 -->
-          <StackPanel Orientation="Horizontal">
-            <Border Width="42" Height="42" CornerRadius="12" ClipToBounds="True"
-                    Background="{DynamicResource md3.primary-container}">
-              <Image Source="/Assets/OpenUtau.png" Width="42" Height="42" Stretch="Uniform"
-                     RenderOptions.BitmapInterpolationMode="HighQuality"/>
-            </Border>
-            <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
-              <TextBlock Text="OpenUTAU Plus" FontSize="17" FontWeight="SemiBold"
-                         Foreground="{DynamicResource md3.on-surface}"/>
-              <TextBlock Text="{Binding AppVersion}" FontSize="10" Margin="0,2,0,0"
-                         Foreground="{DynamicResource md3.on-surface-variant}"/>
-            </StackPanel>
+      <StackPanel Margin="26,24,26,20">
+        <!-- 标识 -->
+        <StackPanel Orientation="Horizontal">
+          <Border Width="42" Height="42" CornerRadius="12" ClipToBounds="True"
+                  Background="{DynamicResource md3.primary-container}">
+            <Image Source="/Assets/OpenUtau.png" Width="42" Height="42" Stretch="Uniform"
+                   RenderOptions.BitmapInterpolationMode="HighQuality"/>
+          </Border>
+          <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+            <TextBlock Text="OpenUTAU Plus" FontSize="17" FontWeight="SemiBold"
+                       Foreground="{DynamicResource md3.on-surface}"/>
+            <TextBlock Text="{Binding AppVersion}" FontSize="10" Margin="0,2,0,0"
+                       Foreground="{DynamicResource md3.on-surface-variant}"/>
           </StackPanel>
-
-          <!-- 波形装饰（示意，不承载数据） -->
-          <Path Margin="0,24,0,0" Height="58" Stretch="Fill" StrokeThickness="2" Opacity="0.55"
-                Stroke="{DynamicResource md3.primary}"
-                Data="M0,32 L6,14 L12,46 L18,22 L24,54 L30,18 L36,40 L42,26 L48,50 L54,16 L60,38 L66,24 L72,52 L78,20 L84,42 L90,28 L96,48 L102,14 L108,36 L114,22 L120,50 L126,18 L132,44 L138,26 L144,52 L150,20 L156,40 L162,28 L168,46 L174,16 L180,38 L186,24 L192,50 L198,18 L204,42 L210,30 L216,48 L222,20 L228,36 L234,26 L240,44 L246,18 L252,40 L258,28 L264,46 L270,22 L276,38 L282,30 L288,44 L294,20 L300,36"/>
-
-          <!-- 已安装音源 -->
-          <TextBlock Classes="sectionTitle" Margin="2,26,0,8" Text="{DynamicResource singers.caption}"/>
-          <ItemsControl x:Name="SingersHost" ItemsSource="{Binding Singers}" IsVisible="{Binding HasSingers}">
-            <ItemsControl.ItemsPanel>
-              <ItemsPanelTemplate>
-                <WrapPanel/>
-              </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-              <DataTemplate x:DataType="vm:SingerItem">
-                <Border Classes="singerChip">
-                  <StackPanel Orientation="Horizontal" Spacing="6">
-                    <Border Width="18" Height="18" CornerRadius="9"
-                            Background="{DynamicResource md3.secondary-container}">
-                      <TextBlock Text="{Binding AvatarFallback}" FontSize="10" FontWeight="SemiBold"
-                                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                                 Foreground="{DynamicResource md3.on-secondary-container}"/>
-                    </Border>
-                    <TextBlock Text="{Binding Name}" FontSize="11" VerticalAlignment="Center"
-                               Foreground="{DynamicResource md3.on-surface}"/>
-                  </StackPanel>
-                </Border>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
         </StackPanel>
 
         <!-- 快速入口 -->
-        <StackPanel Grid.Row="2" Spacing="2">
+        <StackPanel Margin="0,28,0,0" Spacing="2">
           <TextBlock Classes="sectionTitle" Margin="2,0,0,4" Text="{DynamicResource welcome.quicklinks}"/>
           <Button Classes="brandLink" Content="{DynamicResource welcome.wiki}" Click="OnWiki"/>
           <Button Classes="brandLink" Content="{DynamicResource welcome.releases}" Click="OnReleases"/>
@@ -141,7 +101,7 @@
           <Button Classes="brandLink" Content="{DynamicResource welcome.packages}" Click="OnPackages"/>
           <Button Classes="brandLink" Content="{DynamicResource welcome.prefs}" Click="OnPreferences"/>
         </StackPanel>
-      </Grid>
+      </StackPanel>
     </Border>
 
     <!-- ══════════ 启动器 ══════════ -->

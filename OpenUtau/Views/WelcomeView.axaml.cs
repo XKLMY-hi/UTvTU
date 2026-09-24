@@ -18,11 +18,6 @@ namespace OpenUtau.App.Views {
         /// <summary>宿主主窗口；由 MainWindow 在构造时注入。</summary>
         public MainWindow? Host { get; set; }
 
-        /// <summary>音源徽标列表的数据上下文（主窗口注入 <c>SidebarViewModel</c>）。</summary>
-        public object? SingersDataContext {
-            set => SingersHost.DataContext = value;
-        }
-
         public WelcomeView() {
             InitializeComponent();
         }
