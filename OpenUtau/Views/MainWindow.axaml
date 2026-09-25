@@ -789,9 +789,6 @@
         </Border>
       </Grid>
 
-      <!-- 偏好设置（全屏视图，覆盖工作区；顶栏与状态条保持可见 → 顶栏有「完成」退出） -->
-      <views:PreferencesView x:Name="PreferencesHost" Grid.Row="1" IsVisible="False" ZIndex="20"/>
-
       <!-- ══════════ 状态条 32：左侧引擎/进度 · 右侧版本 ══════════ -->
       <Border Grid.Row="2" Background="{DynamicResource md3.surface-container}"
               BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,1,0,0">
@@ -816,7 +813,10 @@
     <!-- ══════════ 欢迎视图（初始视图，内嵌于主窗口）══════════
          打开 / 新建工程后隐藏；模态覆盖层（ZIndex 1000）仍位于其之上 -->
     <!-- 欢迎视图：内嵌工作区行（与偏好视图同一层，靠 ZIndex 分先后） -->
-    <views:WelcomeView x:Name="WelcomeHost" Grid.Row="1" IsVisible="False" ZIndex="10"/>
+    <views:WelcomeView x:Name="WelcomeHost" IsVisible="False" ZIndex="900"/>
+
+    <!-- 偏好设置：窗口级最上层（欢迎页之上；模态对话框层 1000 仍压在其上）。自带 56px 顶栏，故覆盖共享顶栏也没问题 -->
+    <views:PreferencesView x:Name="PreferencesHost" IsVisible="False" ZIndex="990"/>
 
     <!-- 偏好设置（全屏视图；模态覆盖层仍在其上） -->
 

@@ -223,7 +223,29 @@
     </Style>
   </UserControl.Styles>
 
-  <Grid ColumnDefinitions="304,*" Background="{DynamicResource md3.surface}">
+  <!-- 顶栏 56（照 6-Preferences 的 HTML：品牌标记 36 圆角 8 primary-container + UTVTU 15 粗 +
+       分隔线 1×20 outline-variant + 屏名 11 semibold on-surface-variant，底 surface-container） -->
+  <Grid RowDefinitions="56,*" Background="{DynamicResource md3.surface}">
+    <Border Grid.Row="0" Background="{DynamicResource md3.surface-container}"
+            BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1">
+      <StackPanel Orientation="Horizontal" Spacing="12" Margin="16,0" VerticalAlignment="Center">
+        <Border Width="36" Height="36" CornerRadius="8" VerticalAlignment="Center"
+                Background="{DynamicResource md3.primary-container}">
+          <Path Data="{StaticResource icon-music}" Width="18" Height="18" Stretch="Uniform"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Fill="{DynamicResource md3.on-primary-container}"/>
+        </Border>
+        <TextBlock Text="UTvTU" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"
+                   Foreground="{DynamicResource md3.on-surface}"/>
+        <Border Width="1" Height="20" VerticalAlignment="Center"
+                Background="{DynamicResource md3.outline-variant}"/>
+        <TextBlock Text="{DynamicResource prefs.caption}" FontSize="11" FontWeight="SemiBold"
+                   VerticalAlignment="Center"
+                   Foreground="{DynamicResource md3.on-surface-variant}"/>
+      </StackPanel>
+    </Border>
+
+    <Grid Grid.Row="1" ColumnDefinitions="304,*">
     <!-- ══════════ 左导航 304 ══════════ -->
     <Border Grid.Column="0" Background="{DynamicResource md3.surface-container-low}"
             BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,1,0">
@@ -608,5 +630,6 @@
       </StackPanel>
     </Border>
     </Grid>
+  </Grid>
   </Grid>
 </UserControl>
