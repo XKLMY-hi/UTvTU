@@ -41,7 +41,7 @@ namespace OpenUtau.Test.App {
         public void Md3Controls_CoversCommonControls_WithPoolRoles() {
             string xaml = StyleXaml();
             foreach (string selector in new[] {
-                "Button", "TextBox", "ComboBox", "CheckBox", "RadioButton",
+                "Button", "TextBox", "ComboBox", "CheckBox, RadioButton",
                 "ListBox", "ListBoxItem", "ToggleSwitch", "Slider", "ProgressBar", "ToolTip",
             }) {
                 Assert.Contains($"Selector=\"{selector}\"", xaml);
@@ -49,10 +49,10 @@ namespace OpenUtau.Test.App {
             // 颜色只能来自颜色池
             Assert.DoesNotMatch("#[0-9A-Fa-f]{6}", xaml);
             Assert.DoesNotContain("Plus", xaml.Replace("PlusInfo", ""));
-            // 开关/滑条的 Fluent 键名覆盖必须在 Styles.Resources 里
-            Assert.Contains("Styles.Resources", xaml);
-            Assert.Contains("ToggleSwitchFillOn", xaml);
-            Assert.Contains("SliderThumbBackground", xaml);
+            // 状态样式（悬浮/按下/选中）必须在同一层（应用级样式优先级最高）
+            Assert.Contains("Selector=\"Button:pointerover\"", xaml);
+            Assert.Contains("Selector=\"ListBoxItem:selected\"", xaml);
+            Assert.Contains("BrushTransition", xaml);
         }
 
         [AvaloniaFact]

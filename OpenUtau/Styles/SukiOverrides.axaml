@@ -128,27 +128,10 @@
     <Setter Property="FontFamily" Value="{DynamicResource PlusFontFamily}"/>
     <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
   </Style>
-  <Style Selector="Button">
-    <Setter Property="FontFamily" Value="{DynamicResource PlusFontFamily}"/>
-    <Setter Property="FontSize" Value="{DynamicResource PlusFontSizeBase}"/>
-    <Setter Property="Padding" Value="12,5,12,5"/>
-  </Style>
-  <Style Selector="TextBox, NumericUpDown, AutoCompleteBox">
-    <Setter Property="FontFamily" Value="{DynamicResource PlusFontFamily}"/>
-    <Setter Property="FontSize" Value="{DynamicResource PlusFontSizeBase}"/>
-  </Style>
   <Style Selector="TreeView, TreeViewItem">
     <Setter Property="FontFamily" Value="{DynamicResource PlusFontFamily}"/>
   </Style>
-  <Style Selector="ComboBox, ComboBoxItem, ListBox, ListBoxItem">
-    <Setter Property="FontFamily" Value="{DynamicResource PlusFontFamily}"/>
-    <Setter Property="FontSize" Value="{DynamicResource PlusFontSizeBase}"/>
-  </Style>
   <Style Selector="Menu, MenuItem, ContextMenu">
-    <Setter Property="FontFamily" Value="{DynamicResource PlusFontFamily}"/>
-    <Setter Property="FontSize" Value="{DynamicResource PlusFontSizeBase}"/>
-  </Style>
-  <Style Selector="CheckBox, RadioButton, ToggleSwitch">
     <Setter Property="FontFamily" Value="{DynamicResource PlusFontFamily}"/>
     <Setter Property="FontSize" Value="{DynamicResource PlusFontSizeBase}"/>
   </Style>

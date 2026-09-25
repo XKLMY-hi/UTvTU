@@ -40,31 +40,42 @@
 
   <Style Selector="Window">
     <Setter Property="FontSize" Value="13"/>
-    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
   </Style>
 
-  <!-- ══ 按钮：默认 = MD3 描边按钮（透明底 + outline-variant 描边 + primary 文字，圆角 8）；
-       .primary / .danger 走实心胶囊（对话主操作）；.linkButton 纯文字 ══ -->
+  <!-- ══ 按钮：基础形态 + 变体 + 悬浮/按下，全部写在这一层（应用级 Styles 优先级最高，
+       实测：高于 Suki/Fluent 的 ControlTheme）。只设控件自身属性、不碰模板部件，
+       配合 BrushTransition 让颜色平滑过渡 —— 既统一规范，也不会悬浮闪烁。 ══ -->
   <Style Selector="Button">
     <Setter Property="CornerRadius" Value="8"/>
-    <Setter Property="FontSize" Value="13"/>
-    <Setter Property="MinHeight" Value="32"/>
     <Setter Property="Padding" Value="14,6"/>
+    <Setter Property="MinHeight" Value="32"/>
+    <Setter Property="FontSize" Value="13"/>
     <Setter Property="Background" Value="Transparent"/>
     <Setter Property="BorderThickness" Value="1"/>
     <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
     <Setter Property="HorizontalContentAlignment" Value="Center"/>
     <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.12"/>
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.12"/>
+        <BrushTransition Property="Foreground" Duration="0:0:0.12"/>
+      </Transitions>
+    </Setter>
   </Style>
-  <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+  <Style Selector="Button:pointerover">
     <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
-    <Setter Property="TextBlock.Foreground" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline}"/>
   </Style>
   <Style Selector="Button:pressed">
-    <Setter Property="RenderTransform" Value="scale(0.98)"/>
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
   </Style>
+  <Style Selector="Button:disabled">
+    <Setter Property="Opacity" Value="0.38"/>
+  </Style>
+  <!-- 实心胶囊（主操作）：悬浮/按下保持主色，只做轻微明暗，避免"变灰"或闪烁 -->
   <Style Selector="Button.primary">
     <Setter Property="CornerRadius" Value="999"/>
     <Setter Property="Padding" Value="18,6"/>
@@ -73,9 +84,12 @@
     <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
     <Setter Property="FontWeight" Value="Medium"/>
   </Style>
-  <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+  <Style Selector="Button.primary:pointerover">
     <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
-    <Setter Property="TextBlock.Foreground" Value="{DynamicResource md3.on-primary}"/>
+    <Setter Property="Opacity" Value="0.92"/>
+  </Style>
+  <Style Selector="Button.primary:pressed">
+    <Setter Property="Opacity" Value="1"/>
   </Style>
   <Style Selector="Button.danger">
     <Setter Property="CornerRadius" Value="999"/>
@@ -84,19 +98,49 @@
     <Setter Property="BorderThickness" Value="0"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.on-error}"/>
   </Style>
+  <Style Selector="Button.danger:pointerover">
+    <Setter Property="Background" Value="{DynamicResource md3.error}"/>
+    <Setter Property="Opacity" Value="0.92"/>
+  </Style>
   <Style Selector="Button.linkButton">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
     <Setter Property="Padding" Value="6,2"/>
     <Setter Property="MinHeight" Value="24"/>
-    <Setter Property="BorderThickness" Value="0"/>
-    <Setter Property="Background" Value="Transparent"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
   </Style>
-  <Style Selector="Button.linkButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+  <Style Selector="Button.linkButton:pointerover">
     <Setter Property="Background" Value="Transparent"/>
-    <Setter Property="TextBlock.Foreground" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="Opacity" Value="0.8"/>
   </Style>
 
-  <!-- ══ 输入类：圆角 8 + surface-container-high 底 + outline-variant 描边（对齐偏好页字段） ══ -->
+  <!-- ══ 列表项：选中/悬浮走池色（同样只设控件自身属性） ══ -->
+  <Style Selector="ListBoxItem">
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="Padding" Value="8,4"/>
+    <Setter Property="MinHeight" Value="26"/>
+    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.12"/>
+        <BrushTransition Property="Foreground" Duration="0:0:0.12"/>
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="ListBoxItem:pointerover">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+  </Style>
+  <Style Selector="ListBoxItem:selected">
+    <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+  </Style>
+  <Style Selector="ListBoxItem:selected:pointerover">
+    <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+  </Style>
+
+  <!-- 文本框 / 下拉 / 复选框 / 单选 / 开关：规格与池色（模板与状态由各控件主题提供） -->
   <Style Selector="TextBox">
     <Setter Property="CornerRadius" Value="8"/>
     <Setter Property="MinHeight" Value="32"/>
@@ -107,112 +151,22 @@
     <Setter Property="BorderThickness" Value="1"/>
     <Setter Property="VerticalContentAlignment" Value="Center"/>
   </Style>
-  <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
-    <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
-    <Setter Property="BorderThickness" Value="2"/>
-  </Style>
   <Style Selector="ComboBox">
     <Setter Property="CornerRadius" Value="8"/>
     <Setter Property="MinHeight" Value="32"/>
+    <Setter Property="Padding" Value="12,0"/>
     <Setter Property="FontSize" Value="13"/>
     <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
     <Setter Property="BorderThickness" Value="1"/>
   </Style>
-  <Style Selector="ComboBox:pointerover">
-    <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
-  </Style>
-
-  <Style Selector="CheckBox">
+  <Style Selector="CheckBox, RadioButton">
     <Setter Property="FontSize" Value="13"/>
     <Setter Property="MinHeight" Value="28"/>
-    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+    <Setter Property="Padding" Value="8,0,0,0"/>
   </Style>
-  <Style Selector="RadioButton">
-    <Setter Property="FontSize" Value="13"/>
-    <Setter Property="MinHeight" Value="28"/>
-    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
-  </Style>
-
-  <!-- ══ 列表：圆角 8；行悬停 surface-container-highest、选中 secondary-container ══ -->
-  <Style Selector="ListBox">
-    <Setter Property="CornerRadius" Value="8"/>
-    <Setter Property="FontSize" Value="13"/>
-    <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
-  </Style>
-  <Style Selector="ListBoxItem">
-    <Setter Property="CornerRadius" Value="6"/>
-    <Setter Property="FontSize" Value="13"/>
-  </Style>
-  <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
-  </Style>
-  <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
-    <Setter Property="TextBlock.Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
-  </Style>
-  <Style Selector="ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
-    <Setter Property="TextBlock.Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
-  </Style>
-
-  <!-- ══ 开关与滑条：补齐 Suki 模板下的池色（非 Fluent 键名路径） ══ -->
   <Style Selector="ToggleSwitch">
     <Setter Property="MinHeight" Value="28"/>
     <Setter Property="Margin" Value="0"/>
-  </Style>
-  <Style Selector="Slider">
-    <Setter Property="Margin" Value="0"/>
-  </Style>
-
-  <!-- ══ 提示条/进度条/分隔线：随池色 ══ -->
-  <Style Selector="ProgressBar">
-    <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
-    <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
-  </Style>
-  <Style Selector="Separator">
-    <Setter Property="Background" Value="{DynamicResource md3.outline-variant}"/>
-  </Style>
-  <Style Selector="ToolTip">
-    <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
-    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
-    <Setter Property="CornerRadius" Value="8"/>
-    <Setter Property="FontSize" Value="12"/>
-  </Style>
-
-  <!-- ══ SukiUI 仍在用的可见浮层（对话框 / 通知）→ 改成 MD3 卡片观感：
-       应用里的确认框全部经 SukiMessageBoxHost，操作反馈经 SukiToast，
-       这两处是「其余窗口还像 SukiUI」最显眼的来源 ══ -->
-  <Style Selector="suki|SukiMessageBoxHost">
-    <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
-    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
-    <Setter Property="CornerRadius" Value="16"/>
-    <Setter Property="Padding" Value="24"/>
-  </Style>
-  <Style Selector="suki|SukiToast">
-    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
-    <Setter Property="CornerRadius" Value="12"/>
-    <Setter Property="FontSize" Value="12"/>
-  </Style>
-
-  <!-- ══ 窗口背景：SukiWindow 模板里有一层 SukiBackground（动画/渐变）和一层不透明底
-       （SukiMainHost），它们盖住了 Window.Background —— 之前"背景还是 Suki"就是这个原因。
-       这里把动画背景关掉、把宿主底与玻璃卡片换成颜色池角色（探针 DumpWindowBackgroundLayers 回验）。 ══ -->
-  <Style Selector="suki|SukiBackground">
-    <Setter Property="IsVisible" Value="False"/>
-  </Style>
-  <Style Selector="suki|SukiWindow">
-    <Setter Property="Background" Value="{DynamicResource md3.surface}"/>
-  </Style>
-  <Style Selector="suki|SukiMainHost">
-    <Setter Property="Background" Value="{DynamicResource md3.surface}"/>
-  </Style>
-  <Style Selector="suki|GlassCard">
-    <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
-    <Setter Property="CornerRadius" Value="16"/>
   </Style>
 </Styles>

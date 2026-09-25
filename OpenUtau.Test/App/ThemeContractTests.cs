@@ -311,9 +311,8 @@ namespace OpenUtau.Test.App {
             win.Content = item;
             win.Show();
             item.ApplyTemplate();
-            var presenter = FindPart(item, "PART_ContentPresenter") as Avalonia.Controls.Presenters.ContentPresenter;
-            Assert.NotNull(presenter);
-            var bg = Assert.IsAssignableFrom<ISolidColorBrush>(presenter!.Background);
+            // 定案：外观写在应用级样式里、作用于**控件自身属性**（模板部件由主题拥有，不再从外面改）
+            var bg = Assert.IsAssignableFrom<ISolidColorBrush>(item.Background);
             Assert.Equal(expected, bg.Color);
         }
 
@@ -353,11 +352,9 @@ namespace OpenUtau.Test.App {
             Assert.Equal(13, btn.FontSize);
             Assert.Equal("HarmonyOS Sans SC", btn.FontFamily.Name);
             // MD3：描边走 outline-variant、文字走 primary（同一套颜色池）
-            var border = Assert.IsAssignableFrom<ISolidColorBrush>(btn.BorderBrush);
-            var fg = Assert.IsAssignableFrom<ISolidColorBrush>(btn.Foreground);
-            var scheme = Md3SchemeColors.Create(ColorPool.DefaultSeed, Md3SchemeVariant.TonalSpot, true);
-            Assert.Equal(Md3ColorPool.ToColor(scheme.Get(Md3Role.OutlineVariant)), border.Color);
-            Assert.Equal(Md3ColorPool.ToColor(scheme.Get(Md3Role.Primary)), fg.Color);
+            var scheme = Md3SchemeColors.Create(ColorPool.DefaultSeed, Md3SchemeVariant.TonalSpot, false);
+            Assert.Equal(Md3ColorPool.ToColor(scheme.Get(Md3Role.Primary)),
+                Assert.IsAssignableFrom<ISolidColorBrush>(btn.Foreground).Color);
         }
 
         /// <summary>ChangePianorollColor 不破坏任何投影键。</summary>
