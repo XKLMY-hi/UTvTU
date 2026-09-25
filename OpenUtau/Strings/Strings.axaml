@@ -938,6 +938,12 @@ General
   <system:String x:Key="view.workspace">Workspace</system:String>
   <system:String x:Key="view.welcome">Welcome</system:String>
   <system:String x:Key="prefs.midi.empty">No MIDI device settings in this build yet.</system:String>
+  <!-- Plus: 关于页 -->
+  <system:String x:Key="prefs.nav.about">About</system:String>
+  <system:String x:Key="prefs.about.version">Version</system:String>
+  <system:String x:Key="prefs.about.repo">Repository</system:String>
+  <system:String x:Key="prefs.about.basedon">Based on OpenUTAU</system:String>
+  <system:String x:Key="prefs.about.credit">By XKLMY | Built with vibe coding (DeepSeek v4.1 Flash)</system:String>
 
   <!-- Mix Effects (post-processing) -->
   <system:String x:Key="mixfx.caption">Track Polish</system:String>

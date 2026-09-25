@@ -367,6 +367,7 @@ Suki 剩下的价值只有 Hosts（对话框/Toast 挂载点）。
 | 外观 | 主题与强调色（主题下拉 + 自定义主题编辑/新建 + 6 个种子色板）+ 界面显示（音阶名 / 音轨颜色 / 头像 / 图标 / 幽灵音符 / 悬停辉光 / 播放高亮 / 播放弹跳 / 分离卷帘）+ 语言与排序 |
 | 编辑器 | 歌词助手（类 + 括号）+ 编辑选项（默认 S 曲线 / 记住文件类型 .mid .ust .vsqx）+ 渲染（预渲染 / 线程数与告警 / 跳过静音轨 / 退出清缓存 / ONNX runner 与 GPU） |
 | MIDI 设备 | 空态说明（应用尚无 MIDI 设备设置，不做假控件） |
+| 关于 | 徽标（96 圆角 24 primary-container + 音符）+ 版本（`PlusInfo.VersionString` 唯一来源）+ 版本说明（复用 `dialogs.about.message`）+ 基于 OpenUTAU + GitHub / README 按钮 + 页尾署名（By XKLMY ︱ 使用 vibe coding（DeepSeek v4.1 Flash）） |
 | 通用 | UTAU（默认引擎 / oto 编辑器 chips / vLabeler·setParam·Wine 路径）+ DiffSinger（三步数 / 深度 / 张量缓存 / 变体局部音高 / 语言码隐藏）+ 效果器（VST 扫描路径增删 / 插件列表 / 重新扫描 / README·GitHub） |
 
 - 控件映射规则：旧 ``ToggleSwitch`` 行 → 开关行；``ComboBox`` 索引 → **分段 chips**（≤3 项）或 **选择行**（多选项）；``Slider`` 行 → 滑条行；``Button`` → 描边/实心胶囊；路径框 → 文件夹行 + 「打开 / 更改 / 重置」胶囊。
@@ -410,6 +411,7 @@ pwsh -NoProfile -File .opencode\design\extract-spec.ps1 -Path <某屏>.html [-Ma
 
 | 日期 | 变更 |
 |---|---|
+| 2026-09-25 | **偏好设置新增「关于」页**（导航第 8 项，通用之下以分隔线区隔）：徽标 + 版本说明 + 仓库/README 入口 + 页尾署名；新增 5 个键（EN/zh 各 954、缺口 0），契约用例补 PageAbout/署名断言，全量 **381 通过** |
 | 2026-09-25 | **偏好设置 P2–P4：设置项全部迁移**：7 页卡片化（音频 / 播放 / 音源与素材库 / 外观 / 编辑器 / MIDI 设备 / 通用），旧 `PreferencesDialog`（528 行 Suki SettingsLayout）与其探针测试一并删除；控件统一为 开关行 / 分段 chips / 选择行 / 滑条行 / 胶囊按钮 / 文件夹行；新增 `prefs.midi.empty`（EN/zh 各 949）；全量 **381 通过** |
 | 2026-09-25 | 五轮讨论定稿：A 单窗口 + 可分离、B 效果器统一与链面板、C 卷帘只换皮、D 莫奈动态取色、E 文案走项目现有键、F 图标**由"沿用 Phosphor"改为"全量换 Lucide"**（用户决定） |
 | 2026-09-25 | 执行三项收尾：设计交付包入库 `.opencode/design/`；本地化双向补齐（EN/zh 各 923 条、缺口 0，构建 0 错误）；`THIRD-PARTY-NOTICES` 增「图标」章节。图标署名**留待实际替换时**再改 |

@@ -731,6 +731,12 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="view.workspace">工作台</system:String>
   <system:String x:Key="view.welcome">欢迎</system:String>
   <system:String x:Key="prefs.midi.empty">本版本尚无 MIDI 设备设置。</system:String>
+  <!-- Plus: 关于页 -->
+  <system:String x:Key="prefs.nav.about">关于</system:String>
+  <system:String x:Key="prefs.about.version">版本</system:String>
+  <system:String x:Key="prefs.about.repo">仓库</system:String>
+  <system:String x:Key="prefs.about.basedon">基于 OpenUTAU</system:String>
+  <system:String x:Key="prefs.about.credit">By XKLMY ︱ 使用 vibe coding（DeepSeek v4.1 Flash）</system:String>
 
   <!-- Mix Effects -->
   <system:String x:Key="mixfx.caption">试听效果</system:String>

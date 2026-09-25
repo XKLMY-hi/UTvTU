@@ -56,7 +56,8 @@ namespace OpenUtau.App.Views {
             PageEditor.IsVisible = tag == "editor";
             PageGeneral.IsVisible = tag == "general";
             PageMidi.IsVisible = tag == "midi";
-            foreach (Button nav in new[] { NavAudio, NavLibrary, NavPlayback, NavAppearance, NavEditor, NavMidi, NavGeneral }) {
+            PageAbout.IsVisible = tag == "about";
+            foreach (Button nav in new[] { NavAudio, NavLibrary, NavPlayback, NavAppearance, NavEditor, NavMidi, NavGeneral, NavAbout }) {
                 nav.Classes.Set("selected", nav == selected);
             }
         }

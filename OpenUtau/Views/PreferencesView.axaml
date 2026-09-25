@@ -331,6 +331,13 @@
                 <TextBlock Text="{DynamicResource prefs.general}" VerticalAlignment="Center"/>
               </StackPanel>
             </Button>
+            <Border Height="1" Margin="0,8" Background="{DynamicResource md3.outline-variant}"/>
+            <Button x:Name="NavAbout" Classes="navItem" Click="OnNavClicked" Tag="about">
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <Path Data="{StaticResource icon-info}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center"/>
+                <TextBlock Text="{DynamicResource prefs.nav.about}" VerticalAlignment="Center"/>
+              </StackPanel>
+            </Button>
           </StackPanel>
         </StackPanel>
 
@@ -928,6 +935,45 @@
         </Grid>
 
         <!-- ══ MIDI 设备页（应用暂无 MIDI 设备设置） ══ -->
+        <!-- ══ 关于页（徽标 + 版本说明 + 仓库链接 + 页尾署名） ══ -->
+        <Grid x:Name="PageAbout" IsVisible="False">
+          <StackPanel Spacing="12" MaxWidth="560" HorizontalAlignment="Center">
+            <Border Classes="card" Padding="32">
+              <StackPanel Spacing="16" HorizontalAlignment="Center">
+                <Border Width="96" Height="96" CornerRadius="24" HorizontalAlignment="Center"
+                        Background="{DynamicResource md3.primary-container}">
+                  <Path Data="{StaticResource icon-music}" Width="44" Height="44" Stretch="Uniform"
+                        HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Fill="{DynamicResource md3.on-primary-container}"/>
+                </Border>
+                <TextBlock Text="UTvTU" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"
+                           Foreground="{DynamicResource md3.on-surface}"/>
+                <StackPanel Spacing="4" HorizontalAlignment="Center">
+                  <TextBlock Text="{DynamicResource prefs.about.version}" FontSize="11" HorizontalAlignment="Center"
+                             Foreground="{DynamicResource md3.on-surface-variant}"/>
+                  <TextBlock Text="{x:Static core:PlusInfo.VersionString}" FontSize="13" HorizontalAlignment="Center"
+                             Foreground="{DynamicResource md3.on-surface}"/>
+                </StackPanel>
+                <TextBlock Text="{DynamicResource dialogs.about.message}" FontSize="13" LineHeight="20"
+                           TextWrapping="Wrap" TextAlignment="Center" MaxWidth="420"
+                           Foreground="{DynamicResource md3.on-surface-variant}"/>
+                <TextBlock Text="{DynamicResource prefs.about.basedon}" FontSize="11" HorizontalAlignment="Center"
+                           Foreground="{DynamicResource md3.on-surface-variant}"/>
+                <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
+                  <Button Classes="filledPill" MinWidth="96" Content="GitHub" Click="OnOpenGithub"
+                          ToolTip.Tip="{DynamicResource prefs.about.repo}"/>
+                  <Button Classes="outlinePill" MinWidth="96" Content="README" Click="OnOpenReadme"/>
+                </StackPanel>
+              </StackPanel>
+            </Border>
+            <Border Classes="card" Padding="16">
+              <TextBlock Text="{DynamicResource prefs.about.credit}" FontSize="11" TextAlignment="Center"
+                         TextWrapping="Wrap" HorizontalAlignment="Center"
+                         Foreground="{DynamicResource md3.on-surface-variant}"/>
+            </Border>
+          </StackPanel>
+        </Grid>
+
         <Grid x:Name="PageMidi" IsVisible="False" ColumnDefinitions="*,*" ColumnSpacing="24">
           <StackPanel Grid.Column="0" Spacing="12">
             <Border Classes="card">

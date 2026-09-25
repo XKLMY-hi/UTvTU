@@ -49,15 +49,17 @@ namespace OpenUtau.Test.App {
         }
 
         [AvaloniaFact]
-        public void PreferencesView_HasSevenNavItems() {
+        public void PreferencesView_HasEightNavItems() {
             string xaml = ReadXaml();
             foreach (string nav in new[] {
-                "NavAudio", "NavLibrary", "NavPlayback", "NavAppearance", "NavEditor", "NavMidi", "NavGeneral",
+                "NavAudio", "NavLibrary", "NavPlayback", "NavAppearance", "NavEditor", "NavMidi", "NavGeneral", "NavAbout",
             }) {
                 Assert.Contains($"x:Name=\"{nav}\"", xaml);
             }
             Assert.Contains("x:Name=\"ResetButton\"", xaml);        // 恢复默认设置
             Assert.Contains("PlusInfo.VersionString", xaml);        // 版本行（唯一格式串来源）
+            Assert.Contains("prefs.about.credit", xaml);            // 关于页页尾署名
+            Assert.Contains("x:Name=\"PageAbout\"", xaml);
         }
 
         [AvaloniaFact]
