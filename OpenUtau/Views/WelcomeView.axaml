@@ -1,9 +1,8 @@
-<UserControl xmlns="https://github.com/avaloniaui"
+﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:OpenUtau.App.ViewModels"
-             xmlns:motion="using:OpenUtau.Theming"
              mc:Ignorable="d" d:DesignWidth="1440" d:DesignHeight="900"
              x:Class="OpenUtau.App.Views.WelcomeView">
   <UserControl.Resources>
@@ -101,7 +100,6 @@
          悬浮卡片形态：外缩 16 + 内边距 32 = 内容仍在 48 基准线；卡片实宽 320，圆角 r-lg(16)
          卡片底色 = surface-container（与最近工程行同色，用户裁定；稿子原为 primary-container） ══════════ -->
     <Border Grid.Column="0" Margin="16" CornerRadius="16" ClipToBounds="True"
-            motion:Motion.Enter="FromLeft"
             Background="{DynamicResource md3.surface-container}">
       <Grid RowDefinitions="Auto,*,Auto" Margin="32">
         <!-- 标识：52 圆角 12 primary 底 + mic 字形（卡片中性化后，主色只留在这一处做点睛） -->
@@ -180,12 +178,10 @@
          各段带 60ms 交错进入（Motion.PlayAll 播放，时长/缓动走动效令牌） ══════════ -->
     <Grid Grid.Column="1" Margin="48" RowDefinitions="Auto,Auto,*">
       <TextBlock Grid.Row="0" Text="{DynamicResource welcome.start}" FontSize="30"
-                 motion:Motion.Enter="FromBottom"
                  Foreground="{DynamicResource md3.on-surface}"/>
 
       <!-- 动作卡 2×2（稿里是「新建 / 打开」两个，Plus 另有两个入口沿用同一卡片几何） -->
-      <Grid Grid.Row="1" Margin="0,16,0,0" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto"
-            motion:Motion.Enter="FromBottom" motion:Motion.Delay="60">
+      <Grid Grid.Row="1" Margin="0,16,0,0" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
         <Border Grid.Row="0" Grid.Column="0" Classes="actionCard primary" Margin="0,0,8,0" PointerPressed="OnNewProject">
           <StackPanel Orientation="Horizontal" Spacing="16">
             <Border Classes="cardIcon primary">
@@ -242,8 +238,7 @@
                     FlyoutPresenterTheme="{StaticResource Md3FlyoutPresenter}">
               <Border Background="{DynamicResource md3.surface-container-high}"
                       BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="1"
-                      CornerRadius="12" Padding="6" MinWidth="240" MaxHeight="320"
-                      motion:Motion.Enter="Scale" motion:Motion.AutoPlay="True">
+                      CornerRadius="12" Padding="6" MinWidth="240" MaxHeight="320">
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled">
                   <ItemsControl ItemsSource="{Binding TemplateFiles}">
                     <ItemsControl.ItemTemplate>
@@ -281,8 +276,7 @@
       </Grid>
 
       <!-- 最近工程 -->
-      <Grid Grid.Row="2" Margin="0,16,0,0" RowDefinitions="Auto,Auto,*"
-            motion:Motion.Enter="FromBottom" motion:Motion.Delay="120">
+      <Grid Grid.Row="2" Margin="0,16,0,0" RowDefinitions="Auto,Auto,*">
         <TextBlock Grid.Row="0" Text="{DynamicResource welcome.recent}" FontSize="18" FontWeight="Medium"
                    Margin="0,0,0,16"
                    Foreground="{DynamicResource md3.on-surface}"/>

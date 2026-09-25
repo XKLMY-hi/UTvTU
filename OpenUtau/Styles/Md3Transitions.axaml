@@ -1,0 +1,74 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       动效层（2026-09-25 重做）
+
+       原则：**不再手写动效代码**（旧的 Motion 附加属性靠代码里改 RenderTransform
+       并中途 Reset，会出现闪烁与错位），改为全部使用 Avalonia 内建机制：
+         · 元素状态切换 → Transitions（框架管理属性插值）
+         · 弹出/挂载即播 → Style.Animations（框架在匹配时播放一次）
+       两者都是平台级实现，只动 Opacity / RenderTransform，不参与布局 ⇒ 不会错位。
+
+       用法（约定类名）：
+         .md3-fade  淡入淡出（Opacity 0 ↔ 1）
+         .md3-pop   淡入 + 从中心轻微放大（Opacity + RenderTransform，原点在中心）
+       代码只需切 Classes：Set("shown", true/false)。
+
+       ReduceMotion（偏好设置开关）→ 窗口加 .no-motion 类时把过渡置空。
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <Styles.Resources>
+    <!-- 颜色池动效时长（与设计稿动效令牌一致：短 150ms / 中 200ms / 视图 250ms） -->
+    <x:Double x:Key="Md3MotionFast">0.15</x:Double>
+    <x:Double x:Key="Md3MotionBase">0.2</x:Double>
+    <x:Double x:Key="Md3MotionView">0.25</x:Double>
+  </Styles.Resources>
+
+  <!-- 淡入淡出 -->
+  <Style x:SetterTargetType="Visual" Selector=".md3-fade">
+    <Setter Property="Opacity" Value="0"/>
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.2" Easing="CubicEaseOut"/>
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style x:SetterTargetType="Visual" Selector=".md3-fade.shown">
+    <Setter Property="Opacity" Value="1"/>
+  </Style>
+
+  <!-- 淡入 + 从中心轻微放大（弹层卡片） -->
+  <Style x:SetterTargetType="Visual" Selector=".md3-pop">
+    <Setter Property="Opacity" Value="0"/>
+    <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+    <Setter Property="RenderTransform" Value="scale(0.96)"/>
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.2" Easing="CubicEaseOut"/>
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" Easing="CubicEaseOut"/>
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style x:SetterTargetType="Visual" Selector=".md3-pop.shown">
+    <Setter Property="Opacity" Value="1"/>
+    <Setter Property="RenderTransform" Value="scale(1)"/>
+  </Style>
+
+  <!-- 减少动效：窗口加 .no-motion 时全部置空（立即到位） -->
+  <Style x:SetterTargetType="Visual" Selector="Window.no-motion .md3-fade, Window.no-motion .md3-pop">
+    <Setter Property="Transitions" Value="{x:Null}"/>
+  </Style>
+
+  <!-- 菜单/下拉浮层：挂载即播一次淡入（Style.Animations = 匹配时播放，框架管理） -->
+  <Style Selector="Border.menuPopup">
+    <Style.Animations>
+      <Animation Duration="0:0:0.12" FillMode="Forward">
+        <KeyFrame Cue="0%">
+          <Setter Property="Opacity" Value="0"/>
+        </KeyFrame>
+        <KeyFrame Cue="100%">
+          <Setter Property="Opacity" Value="1"/>
+        </KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+</Styles>

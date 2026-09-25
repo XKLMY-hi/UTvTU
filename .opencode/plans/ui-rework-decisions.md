@@ -479,10 +479,42 @@ WindowEx (bg = md3.surface ← 我们设的，被盖住)
 - 契约测试更新：`Window_AbandonsSukiBackground` → `Window_NotDerivedFromSukiWindow` + `Window_BackgroundComesFromColorPool`；
   `WindowEx_IsSukiWindow` → `WindowEx_IsNativeWindow_NotSukiWindow`；`WindowEx_NativeChrome_Contract` 断言背景 = `surface` 且非 SukiWindow 派生
 
+## 15. 动效重做：拆掉自研层，改用 Avalonia 内建机制（2026-09-25）
+
+**用户反馈**：动效有大量**闪烁、错位**，"应该移除现在的动效改用一套更成熟的动效库，而不是闭门造车"。
+
+**调研结论**（Avalonia 官方文档 `Setting page transitions`）：平台自带成熟机制，无需引第三方包——
+`TransitioningContentControl` + `PageTransition`（`CrossFade` / `PageSlide` / `CompositePageTransition`，可自定义 `IPageTransition`），
+以及控件级 `Transitions` 与 `Style.Animations`。我们此前的写法（代码里改 `RenderTransform` + 中途 `Reset` + `DispatcherTimer` 兜底）
+恰恰是官方文档强调要避免的路子：**属性插值交给框架，代码不要碰变换**。
+
+**已删除（自研动效层）**：
+- `OpenUtau/Theming/Motion.cs`（附加属性 `Motion.Enter/Delay/AutoPlay` + `Play/PlayAll/PlayExit/Reset`）
+- `OpenUtau/Theming/Md3MotionResources.cs`（`md3.motion.*` 资源键）
+- `OpenUtau.Core/Theming/Md3Motion.cs`（时长/缓动令牌）
+- 相关测试 `Md3MotionBehaviorTests`、`Md3MotionTests`（共 32 个用例）
+- `App.InitializeMotion()` 与 `SetTheme()` 里的令牌安装
+
+**新的动效层**：`OpenUtau/Styles/Md3Transitions.axaml`（App 级样式，声明式）
+| 约定类名 | 内容 |
+|---|---|
+| `.md3-fade` | `Opacity 0 ↔ 1`，`DoubleTransition` 200ms `CubicEaseOut`（切 `.shown` 类即过渡） |
+| `.md3-pop` | `Opacity` + `RenderTransform scale(0.96→1)`，原点 50%,50%（弹层卡片） |
+| `Border.menuPopup` | `Style.Animations` 挂载即播一次 120ms 淡入（菜单/下拉浮层） |
+| `Window.no-motion` | 「减少动效」偏好 → 过渡置空（立即到位） |
+
+**宿主侧**（MainWindow）：`Motion.*` 调用全部换成 `SetShown(control, bool)`（切 class），
+退场用 `await Task.Delay(TransitionMs)`（与样式层 0.2s 对齐；`ReduceMotion` 时为 0）。
+因为只动 `Opacity`/`RenderTransform`、不参与布局，**不会再出现错位**；不再有代码驱动的中途 Reset，**也不会闪烁**。
+
+**遗留**：钢琴卷帘/混音台面板的"滑入"简化为不参与布局的淡入（避免自绘控件的布局抖动）；
+若后续要真·滑动，用官方 `PageSlide` + `TransitioningContentControl` 承载视图切换（本轮未引入，避免动到视图生命周期）。
+
 ## 变更记录
 
 | 日期 | 变更 |
 |---|---|
+| 2026-09-25 | **动效重做**：删除自研 Motion 层（附加属性 + 令牌 + 32 个用例）与 `App.InitializeMotion`，改用 Avalonia 内建 `Transitions` / `Style.Animations`（新 `Styles/Md3Transitions.axaml`：`.md3-fade` / `.md3-pop` / `Border.menuPopup` / `Window.no-motion`）；宿主只切 class + `Task.Delay`，不再有代码驱动的变换与中途 Reset；全量 **358 通过** |
 | 2026-09-25 | **「背景还是 Suki」根治**：`WindowEx` 停止继承 `SukiWindow`（其模板自带 SukiBackground 与一层不透明底，会盖住 Window.Background —— 探针实证），改继承原生 Window；对话框/通知 Host 移到 MainWindow 根 Grid 顶层；契约测试同步更新；全量 **390 通过** |
 | 2026-09-25 | **默认控件升级为 MD3 控件**：Button 描边/实心胶囊/危险/文字四种形态、Window 前景 on-surface、SukiMessageBoxHost 与 SukiToast 改 MD3 卡片；探针实测确认 Styles 已生效、残留「像 Suki」来自 Fluent 强调色与透明默认按钮；契约测试 `Button_GetsMd3OutlinedStyle` 守住；全量 **386 通过** |
 | 2026-09-25 | **其余窗口只同步风格（不做嵌入）**：新增 App 级 `Styles/Md3Controls.axaml`（挂在样式链最后，只改形状+池色、不碰布局，契约测试守住）；开关/滑条池色覆盖升为全局；ListBoxItem 选中色改走 `secondary-container`（旧 accent-muted 契约作废）；顺手修 TrackHeader 两个菜单键悬空引用与缺失的 mergevoicebank 文案；全量 **385 通过** |

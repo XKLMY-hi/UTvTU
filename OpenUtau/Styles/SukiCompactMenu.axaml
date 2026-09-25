@@ -1,6 +1,5 @@
-<Styles xmlns="https://github.com/avaloniaui"
-        xmlns:motion="using:OpenUtau.Theming"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+﻿<Styles xmlns="https://github.com/avaloniaui"
+          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <!--
     紧凑菜单接管（探针实证：Suki 菜单条模板高 45 + MenuItem 内容区固定 ~10px，
     24px 顶栏内文字被压到 6px 半切）。菜单视觉由 Plus 紧凑模板提供（行高 ~25px）。
@@ -45,7 +44,7 @@
                           BorderThickness="1"
                           CornerRadius="12"
                           BoxShadow="{DynamicResource PlusElevationPopup}"
-                          MinWidth="180" Padding="4" ClipToBounds="True" Classes="menuPopup" motion:Motion.Enter="Fade" motion:Motion.AutoPlay="True">
+                          MinWidth="180" Padding="4" ClipToBounds="True" Classes="menuPopup">
                     <ScrollViewer HorizontalScrollBarVisibility="Disabled"
                                   VerticalScrollBarVisibility="Auto">
                       <ItemsPresenter/>
@@ -88,7 +87,7 @@
                           BorderThickness="1"
                           CornerRadius="12"
                           BoxShadow="{DynamicResource PlusElevationPopup}"
-                          MinWidth="180" Padding="4" ClipToBounds="True" Classes="menuPopup" motion:Motion.Enter="Fade" motion:Motion.AutoPlay="True">
+                          MinWidth="180" Padding="4" ClipToBounds="True" Classes="menuPopup">
                     <ScrollViewer HorizontalScrollBarVisibility="Disabled"
                                   VerticalScrollBarVisibility="Auto">
                       <ItemsPresenter/>
@@ -118,7 +117,7 @@
                     CornerRadius="12"
                     Padding="{TemplateBinding Padding}"
                     BoxShadow="{DynamicResource PlusElevationPopup}"
-                    MinWidth="180" ClipToBounds="True" motion:Motion.Enter="Fade" motion:Motion.AutoPlay="True">
+                    MinWidth="180" ClipToBounds="True">
               <ScrollViewer HorizontalScrollBarVisibility="Disabled"
                             VerticalScrollBarVisibility="Auto">
                 <ItemsPresenter ItemsPanel="{TemplateBinding ItemsPanel}"/>

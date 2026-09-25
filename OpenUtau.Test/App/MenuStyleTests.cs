@@ -36,14 +36,17 @@ namespace OpenUtau.Test.App {
         }
 
         [AvaloniaFact]
-        public void PopupContainers_UseMd3Roles_AndMotionFade() {
+        public void PopupContainers_UseMd3Roles_AndDeclarativeFade() {
             string xaml = ReadStyles("SukiCompactMenu.axaml");
             Assert.Contains("md3.surface-container-high", xaml);
             Assert.Contains("md3.outline-variant", xaml);
             Assert.Contains("CornerRadius=\"12\"", xaml);
             // 淡入走动效接口（挂载即播），不再手搓 KeyFrame 秒数
-            Assert.Contains("motion:Motion.Enter=\"Fade\"", xaml);
-            Assert.Contains("motion:Motion.AutoPlay=\"True\"", xaml);
+            // 浮层淡入改由 Styles/Md3Transitions.axaml 的 Border.menuPopup 动画提供（框架 Animation）
+            string transitions = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "Md3Transitions.axaml"));
+            Assert.Contains("Border.menuPopup", transitions);
+            Assert.Contains("<Animation", transitions);
+            Assert.DoesNotContain("motion:Motion.", xaml);
             Assert.DoesNotContain("<KeyFrame", xaml);
         }
     }

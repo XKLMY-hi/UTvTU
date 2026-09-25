@@ -23,6 +23,7 @@ public class WindowEx : Window {
     public WindowEx() {
         ApplyNativeChrome();
         ApplyMd3Background();
+        ApplyReducedMotion();
     }
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e) {
@@ -37,6 +38,11 @@ public class WindowEx : Window {
         WindowDecorations = WindowDecorations.Full;                 // 系统标题栏 + 边框
         ExtendClientAreaToDecorationsHint = false;                  // 客户区不延伸到系统标题栏
         TransparencyLevelHint = new[] { WindowTransparencyLevel.None };  // 不再需要透明合成（无自绘圆角）
+    }
+
+    /// <summary>「减少动效」偏好 → 窗口加 .no-motion 类，样式层把过渡置空（Transitions = null）。</summary>
+    private void ApplyReducedMotion() {
+        Classes.Set("no-motion", Core.Util.Preferences.Default.ReduceMotion);
     }
 
     /// <summary>背景改为 MD3 颜色池：一层 md3.surface。</summary>

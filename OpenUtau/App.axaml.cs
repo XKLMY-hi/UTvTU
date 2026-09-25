@@ -20,7 +20,6 @@ namespace OpenUtau.App {
             Log.Information("Initializing application.");
             AvaloniaXamlLoader.Load(this);
             InitializeCulture();
-            InitializeMotion();
             InitializeTheme();
             Log.Information("Initialized application.");
         }
@@ -119,18 +118,6 @@ namespace OpenUtau.App {
                 Core.Util.Preferences.Default.ThemeSeed,
                 Core.Theming.Md3SchemeVariant.TonalSpot,
                 ThemeManager.IsDarkMode);
-            // MD3 动效令牌：只随开关变化，重建也是幂等的
-            Theming.Md3MotionResources.Install();
-        }
-
-        /// <summary>
-        /// 动效令牌：必须在任何窗口 XAML 加载之前安装（XAML 侧 Duration/Easing 只能 StaticResource）。
-        /// 开关跟随偏好设置，关闭后所有时长归零。
-        /// </summary>
-        static void InitializeMotion() {
-            Core.Theming.Md3Motion.Enabled = !Core.Util.Preferences.Default.ReduceMotion;
-            Theming.Md3MotionResources.Install();
-            Log.Information($"Initialized motion tokens (enabled={Core.Theming.Md3Motion.Enabled}).");
         }
     }
 }

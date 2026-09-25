@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -139,13 +139,13 @@ namespace OpenUtau.App.Views {
             viewModel.WhenAnyValue(vm => vm.ShowPianoRoll)
                 .Subscribe(show => {
                     if (show) {
-                        Motion.Play(PianoRollRow, MotionEntrance.FromBottom);
+                        SetShown(PianoRollRow, true);
                     }
                 });
             viewModel.WhenAnyValue(vm => vm.ShowMixer)
                 .Subscribe(show => {
                     if (show) {
-                        Motion.Play(MixerContainer, MotionEntrance.FromBottom);
+                        SetShown(MixerContainer, true);
                     }
                 });
 
@@ -178,15 +178,19 @@ namespace OpenUtau.App.Views {
         /// <summary>是否处于欢迎视图。</summary>
         public bool IsWelcomeVisible => WelcomeHost.IsVisible;
 
+        /// <summary>声明式过渡时长（与 Styles/Md3Transitions.axaml 的 0.2s 对齐；减少动效时为 0）。</summary>
+        private static int TransitionMs => Core.Util.Preferences.Default.ReduceMotion ? 0 : 200;
+
+        /// <summary>切换过渡状态类（.md3-fade / .md3-pop 的 shown 态由样式层插值，不手写动画）。</summary>
+        private static void SetShown(Control control, bool shown) => control.Classes.Set("shown", shown);
+
         private void ShowWelcome() {
             WelcomeHost.Host = this;
             WelcomeHost.DataContext = viewModel;
             viewModel.InitProject();          // 恢复状态（HasRecovery/RecoveryString）
-            Motion.Reset(WelcomeHost);
             WelcomeHost.IsVisible = true;
-            // 各段按 Motion.Delay 交错滑入（品牌卡自左、启动器自下；时长/缓动走动效令牌）
             SetChromeForView("view.welcome", showTransport: false);
-            Motion.PlayAll(WelcomeHost);
+            SetShown(WelcomeHost, true);
         }
 
         /// <summary>欢迎视图退场后隐藏，并让编辑器入场（页面级过渡）。</summary>
@@ -194,11 +198,10 @@ namespace OpenUtau.App.Views {
             if (!WelcomeHost.IsVisible) {
                 return;
             }
-            await Motion.PlayExitAsync(WelcomeHost);
+            SetShown(WelcomeHost, false);
+            await Task.Delay(TransitionMs);
             WelcomeHost.IsVisible = false;
-            Motion.Reset(WelcomeHost);
             SetChromeForView("view.workspace", showTransport: true);
-            Motion.Play(MainGrid, MotionEntrance.Scale);
         }
 
         /// <summary>欢迎视图：新建工程。</summary>
@@ -804,7 +807,7 @@ namespace OpenUtau.App.Views {
             PreferencesHost.IsVisible = true;
             // 顶栏屏名切成「偏好设置」，并亮出「完成」按钮（顶栏在偏好视图之上，不被遮）
             SetChromeForView("prefs.caption", showTransport: false);
-            Motion.Play(PreferencesHost, MotionEntrance.Fade);
+            SetShown(PreferencesHost, true);
         }
 
         /// <summary>退出偏好设置（淡出后隐藏）。</summary>
@@ -812,11 +815,11 @@ namespace OpenUtau.App.Views {
             if (!PreferencesHost.IsVisible) {
                 return;
             }
-            await Motion.PlayExitAsync(PreferencesHost);
+            SetShown(PreferencesHost, false);
+            await Task.Delay(TransitionMs);
             PreferencesHost.IsVisible = false;
             bool backToWelcome = WelcomeHost.IsVisible;
             SetChromeForView(backToWelcome ? "view.welcome" : "view.workspace", showTransport: !backToWelcome);
-            Motion.Reset(PreferencesHost);
         }
 
         /// <summary>恢复默认设置（二次确认 → 重置 → 重开偏好页）。</summary>
@@ -2355,8 +2358,8 @@ namespace OpenUtau.App.Views {
             overlayGeneration++;
             // Suki 卡片浮层：主内容模糊（玻璃质感）+ 卡片弹出（缩放淡入）+ 遮罩淡入
             MainGrid.Effect = new Avalonia.Media.BlurEffect { Radius = 24 };
-            Motion.Play(OverlayCard, MotionEntrance.Scale);
-            Motion.Play(OverlayBackdrop, MotionEntrance.Fade);
+            SetShown(OverlayCard, true);
+            SetShown(OverlayBackdrop, true);
         }
 
         private void CloseOverlay() {
@@ -2370,25 +2373,27 @@ namespace OpenUtau.App.Views {
             overlayTcs = null;
             // 卡片退场后再真正隐藏（代际号防止退场途中又开了新覆盖层被误关）
             int generation = ++overlayGeneration;
-            if (!Md3Motion.Enabled) {
+            // 过渡由样式层（Transitions）插值：先切 shown=false，等过渡走完再真正隐藏
+            SetShown(OverlayCard, false);
+            SetShown(OverlayBackdrop, false);
+            if (TransitionMs == 0) {
                 HideOverlayNow();
                 return;
             }
-            Motion.PlayExit(OverlayCard);
-            Motion.PlayExit(OverlayBackdrop);
             DispatcherTimer.RunOnce(() => {
                 if (generation == overlayGeneration) {
                     HideOverlayNow();
                 }
-            }, Md3Motion.ExitDuration, DispatcherPriority.Background);
+            }, TimeSpan.FromMilliseconds(TransitionMs), DispatcherPriority.Background);
         }
 
         private void HideOverlayNow() {
             OverlayLayer.IsVisible = false;
             MainGrid.Effect = null;
             OverlayContent.Content = null;
-            Motion.Reset(OverlayCard);
-            Motion.Reset(OverlayBackdrop);
+            // 复位过渡状态：下次打开时重新播放弹入（元素此刻不可见，复位不会造成闪烁）
+            SetShown(OverlayCard, false);
+            SetShown(OverlayBackdrop, false);
         }
 
         private void OnOverlayCloseClicked(object? sender, RoutedEventArgs e) {

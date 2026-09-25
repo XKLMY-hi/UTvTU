@@ -45,6 +45,7 @@
     <None Include="..\OpenUtau\Views\PreferencesView.axaml" Link="Views\PreferencesView.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\App.axaml" Link="App.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Styles\Md3Controls.axaml" Link="Styles\Md3Controls.axaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\OpenUtau\Styles\Md3Transitions.axaml" Link="Styles\Md3Transitions.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Controls\TrackHeader.axaml" Link="Controls\TrackHeader.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Styles\SukiCompactMenu.axaml" Link="Styles\SukiCompactMenu.axaml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

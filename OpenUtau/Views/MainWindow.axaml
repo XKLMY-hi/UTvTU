@@ -559,7 +559,7 @@
                        IsVisible="False" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"
                        FontSize="11" Padding="4,2" HorizontalAlignment="Left"
                        VerticalAlignment="Bottom" Margin="4,0,0,0"/>
-            <Canvas Grid.Row="4" Grid.ColumnSpan="2" x:Name="PianoRollRow" IsVisible="{Binding ShowPianoRoll}">
+            <Canvas Grid.Row="4" Grid.ColumnSpan="2" Classes="md3-fade" x:Name="PianoRollRow" IsVisible="{Binding ShowPianoRoll}">
               <ContentControl Name="PianoRollContainer" Width="{Binding $parent[Canvas].Bounds.Width}" Height="{Binding $parent[Canvas].Bounds.Height}"/>
             </Canvas>
             <!-- Mixer resize handle (manual drag) -->
@@ -573,7 +573,7 @@
                     IsVisible="{Binding ShowMixer}"/>
             <!-- Mixer embedded -->
             <ContentControl Grid.Row="6" Grid.ColumnSpan="2"
-                            Name="MixerContainer"
+                            Name="MixerContainer" Classes="md3-fade"
                             IsVisible="{Binding ShowMixer}"/>
           </Grid>
 
@@ -808,10 +808,10 @@
     <!-- ══════════ 欢迎视图（初始视图，内嵌于主窗口）══════════
          打开 / 新建工程后隐藏；模态覆盖层（ZIndex 1000）仍位于其之上 -->
     <!-- 欢迎视图：内嵌工作区行（与偏好视图同一层，靠 ZIndex 分先后） -->
-    <views:WelcomeView x:Name="WelcomeHost" IsVisible="False" ZIndex="900"/>
+    <views:WelcomeView x:Name="WelcomeHost" Classes="md3-fade" IsVisible="False" ZIndex="900"/>
 
     <!-- 偏好设置：窗口级最上层（欢迎页之上；模态对话框层 1000 仍压在其上）。自带 56px 顶栏，故覆盖共享顶栏也没问题 -->
-    <views:PreferencesView x:Name="PreferencesHost" IsVisible="False" ZIndex="990"/>
+    <views:PreferencesView x:Name="PreferencesHost" Classes="md3-fade" IsVisible="False" ZIndex="990"/>
 
     <!-- SukiDialog / SukiToast 挂载点（WindowEx 已不继承 SukiWindow，改为直接放进窗口最上层） -->
     <suki:SukiDialogHost x:Name="DialogHost" ZIndex="1100"/>
@@ -822,8 +822,8 @@
 
     <!-- Overlay layer: in-window modal dialog host -->
     <Grid Name="OverlayLayer" IsVisible="False" ZIndex="1000" Background="Transparent">
-      <Border Name="OverlayBackdrop" Background="#A0000000" PointerPressed="OnOverlayBackdropPressed"/>
-      <Border Name="OverlayCard"
+      <Border Name="OverlayBackdrop" Classes="md3-fade" Background="#A0000000" PointerPressed="OnOverlayBackdropPressed"/>
+      <Border Name="OverlayCard" Classes="md3-pop"
               HorizontalAlignment="Center" VerticalAlignment="Center"
               MinWidth="340"
               ClipToBounds="True"

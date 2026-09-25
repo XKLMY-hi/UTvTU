@@ -54,19 +54,17 @@ namespace OpenUtau.Test.App {
         }
 
         [AvaloniaFact]
-        public void WelcomeView_Motion_ComesFromMotionInterface() {
-            // 页面级过渡一律走附加属性接口（时长/缓动由 Md3Motion 令牌给），视图里不许写死秒数或曲线
+        public void WelcomeView_UsesDeclarativeTransitions() {
+            // 动效重做（2026-09-25）：不再用自定义 Motion 附加属性（会闪烁/错位），
+            // 视图自身不写动画，改由宿主切 Classes + Styles/Md3Transitions.axaml 的 Transitions 插值。
             string xaml = ReadXaml("WelcomeView.axaml");
-            // 品牌卡片自左进入；启动器三段自下进入并 60ms 交错；模板弹层挂载即弹
-            Assert.Contains("motion:Motion.Enter=\"FromLeft\"", xaml);
-            Assert.Contains("motion:Motion.Enter=\"FromBottom\"", xaml);
-            Assert.Contains("motion:Motion.Delay=\"60\"", xaml);
-            Assert.Contains("motion:Motion.Delay=\"120\"", xaml);
-            Assert.Contains("motion:Motion.Enter=\"Scale\" motion:Motion.AutoPlay=\"True\"", xaml);
-            // 悬停微动效不做（2026-09-25 用户否决：只要页面/面板级过渡）
+            Assert.DoesNotContain("motion:Motion.", xaml);
             Assert.DoesNotContain("Motion.Hover", xaml);
-            Assert.DoesNotMatch("Duration=\"0:0", xaml);
-            Assert.DoesNotMatch("Easing=\"", xaml);
+            string mainXaml = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Views", "MainWindow.axaml"));
+            Assert.Contains("x:Name=\"WelcomeHost\" Classes=\"md3-fade\"", mainXaml);
+            string transitions = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "Md3Transitions.axaml"));
+            Assert.Contains(".md3-fade", transitions);
+            Assert.Contains("<DoubleTransition Property=\"Opacity\"", transitions);
         }
 
         [AvaloniaFact]
