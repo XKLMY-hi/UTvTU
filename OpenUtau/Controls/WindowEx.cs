@@ -8,14 +8,8 @@ namespace OpenUtau.App.Controls;
 /// <summary>
 /// 窗口基类（2026-09-25：**回归系统原生窗口 + MD3 颜色池背景**）。
 ///
-/// 历史：曾继承 <c>SukiUI.Controls.SukiWindow</c> 以复用它的对话框/通知 Host。
-/// 但 SukiWindow 的模板里**自带两层背景**——`SukiBackground`（渐变/着色器/动画）
-/// 与一层不透明底（位于模板深处，外部样式改不到）——它们会盖住 <see cref="Window.Background"/>，
-/// 导致"控件已经是 MD3、背景还是 Suki"（探针 <c>DumpWindowBackgroundLayers</c> 实证）。
-///
-/// 现在改为直接继承 <see cref="Window"/>：背景干净地由颜色池 <c>md3.surface</c> 提供。
-/// SukiUI 的 <c>SukiDialogHost</c> / <c>SukiToastHost</c> 是普通控件，仍挂在 MainWindow 里，
-/// 对话框与通知服务不受影响。
+/// 背景由颜色池 <c>md3.surface</c> 提供（曾经的三方窗口基类自带两层背景，会盖住 Window.Background，
+/// 已随第三方依赖一并移除）。对话框改由自研 <see cref="OpenUtau.App.Views.MessageBox"/> 承担。
 ///
 /// 交还系统：标题栏、窗口按钮、边框、投影、圆角、窗口动画。
 /// </summary>

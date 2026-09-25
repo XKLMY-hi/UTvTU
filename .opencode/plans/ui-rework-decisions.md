@@ -597,10 +597,35 @@ FluentTheme 挂在 `Application.Styles` 首位，因此它的 ControlTheme 与�
 
 **第 3 轮结果**：构建 0 错误 · 全量 **354 通过（0 失败）** —— 目标里的"含把当前 4 个红用例转绿"达成。
 
+**第 16 节执行记录（第 4 轮）—— 突破：ControlTheme 装上了**
+
+上一轮"不可行"的结论**已被修正**：问题不在机制，而在**跨字典的 `StaticResource` 解析**。
+把 `ControlTheme` 与"装主题"的 `Style` 放进**同一个 Styles 文件**后，应用级 Style 的
+`Setter Property="Theme"` 正常工作 —— 探针 `ControlThemeMountProbeTests` 实证：
+
+```
+App.axaml 含 Md3ControlThemes: True
+Button.Theme = ControlTheme          ← 我们的主题已装上
+Button 模板根 PART_Root: True        ← 模板是我们的
+ListBoxItem 模板根 PART_Root: True
+Button.CornerRadius = 8,8,8,8   Button.Padding = 14,6,14,6
+ListBoxItem.CornerRadius = 6,6,6,6
+```
+
+因此定案（取代上一轮的 ②）：**按钮与列表项用我们自己的 ControlTheme**
+（`Styles/Md3ControlThemes.axaml`：模板用 TemplateBinding，状态 `^:pointerover`/`^:pressed`/`^:selected`
+与变体 `.primary`/`.danger`/`.linkButton` 全部写在主题内部 —— 单一来源，不会再与外部 setter 互踩）；
+输入类（TextBox 的自有 ControlTheme，Suki 时代起就在用）继续有效；
+应用级 `Md3Controls.axaml` 只保留输入·容器·开关·滑条等**不自写模板**的控件外观。
+
+**遗留（可选）**：其余控件（CheckBox/RadioButton/ToggleSwitch/Slider/ComboBox/ProgressBar）仍用 Fluent 模板，
+其部件级状态色归 Fluent；若要全部收归自有，按同一套路数逐个补 ControlTheme 即可（模板结构已跑通）。
+
 ## 变更记录
 
 | 日期 | 变更 |
 |---|---|
+| 2026-09-25 | **ControlTheme 真正装上（第 4 轮突破）**：跨字典 StaticResource 解析失败是上轮误判的根因；把主题与装主题的 Style 放同一文件后，Button/ListBoxItem 用上自有模板与主题内状态；样式文件去 Suki 化改名（Md3InputThemes / Md3Menus）；构建 0 错误 · 全量 **355 通过** |
 | 2026-09-25 | **控件外观归属定案（第 2–3 轮）**：实测证明 Avalonia 12 + FluentTheme 下无法从外部覆盖隐式 ControlTheme 与主题画刷键（先注册者优先），据此删除无效的 ControlThemes/FluentBrushes 两层，外观统一由应用级 `Md3Controls.axaml` 拥有；用例改为静态声明校验 + 同源比较；构建 0 错误 · 全量 **354 通过** |
 | 2026-09-25 | **SukiUI 彻底移除（第 1 轮）**：MessageBox 改自研 MD3 模态窗口、删除 Suki Host/Toast 与 manager、ThemeManager 去 Suki、移除 SukiTheme 挂载与 NuGet 包引用；顺手修掉 Thickness→Double 的遗留类型错配（换主题会崩）；构建 0 错误 · 全量 **354 通过** |
 | 2026-09-25 | **决定彻底移除 SukiUI**（新增第 16 节，含全部落点清点与 6 步执行顺序）：不再在 SukiUI 之上打补丁 —— 实测其嵌套状态 setter 与隐式主题查找顺序使外部覆盖永远失效 |

@@ -15,7 +15,7 @@ namespace OpenUtau.Test.App {
 
         [AvaloniaFact]
         public void MenuItems_AreLeftAligned_WithoutIconColumn() {
-            string xaml = ReadStyles("SukiCompactMenu.axaml");
+            string xaml = ReadStyles("Md3Menus.axaml");
             // 无图标占位列（否则文字会被顶到 24px 之后，看着不左对齐）
             Assert.DoesNotContain("Content=\"{TemplateBinding Icon}\"", xaml);
             Assert.Contains("Content=\"{TemplateBinding Header}\"", xaml);
@@ -24,7 +24,7 @@ namespace OpenUtau.Test.App {
 
         [AvaloniaFact]
         public void MenuItems_HoverUsesMd3_RoundedFill() {
-            string xaml = ReadStyles("SukiCompactMenu.axaml");
+            string xaml = ReadStyles("Md3Menus.axaml");
             // 圆角填充式高光 + md3 角色色（旧 Plus 令牌不再用于菜单）
             Assert.Contains("Border x:Name=\"PART_Item\" Background=\"Transparent\" CornerRadius=\"8\"", xaml);
             Assert.Contains("^:pointerover /template/ Border#PART_Item", xaml);
@@ -37,7 +37,7 @@ namespace OpenUtau.Test.App {
 
         [AvaloniaFact]
         public void PopupContainers_UseMd3Roles_AndDeclarativeFade() {
-            string xaml = ReadStyles("SukiCompactMenu.axaml");
+            string xaml = ReadStyles("Md3Menus.axaml");
             Assert.Contains("md3.surface-container-high", xaml);
             Assert.Contains("md3.outline-variant", xaml);
             Assert.Contains("CornerRadius=\"12\"", xaml);

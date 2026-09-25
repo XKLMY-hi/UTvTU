@@ -77,7 +77,6 @@ namespace OpenUtau.App.Views {
         public MainWindow() {
             Log.Information("Creating main window.");
             InitializeComponent();
-            // B4: Suki host manager（7.x host 不自动创建 manager，需手动挂载）
             Log.Information("Initialized main window component.");
             DataContext = viewModel = new MainWindowViewModel {
                 // give the viewmodel a way to prompt/save using the view's existing method
@@ -2351,7 +2350,7 @@ namespace OpenUtau.App.Views {
             UpdateOverlayCardSize();
             OverlayLayer.IsVisible = true;
             overlayGeneration++;
-            // Suki 卡片浮层：主内容模糊（玻璃质感）+ 卡片弹出（缩放淡入）+ 遮罩淡入
+            // 覆盖层：主内容模糊 + 卡片弹出（.md3-pop）+ 遮罩淡入（.md3-fade）
             MainGrid.Effect = new Avalonia.Media.BlurEffect { Radius = 24 };
             SetShown(OverlayCard, true);
             SetShown(OverlayBackdrop, true);

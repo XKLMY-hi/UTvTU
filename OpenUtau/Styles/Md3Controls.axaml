@@ -12,11 +12,12 @@
        结构），避免影响钢琴卷帘/混音台等自绘控件的既有排版；
        带 Classes 的局部样式（.topBtn/.tpChip/.libTab/…）优先级更高，不受影响。
 
-       挂载位置：App.axaml 的 Application.Styles **最后一项**（在 SukiOverrides /
-       SukiCompactMenu 之后，才能覆盖 Suki 模板默认值）。
+       挂载位置：App.axaml 的 Application.Styles（在 Md3InputThemes / Md3Menus 之后、控件主题层之前）。
+       覆盖范围：**不自写模板**的控件（输入·容器·开关·滑条等）；按钮与列表项的外观
+       由 Styles/Md3ControlThemes.axaml 的 ControlTheme 拥有（见该文件说明）。
        ═══════════════════════════════════════════════════════════════════════ -->
   <Styles.Resources>
-    <!-- Fluent 开关：开 = primary 轨道 + on-primary 圆钮（Suki/Fluent 键名覆盖） -->
+    <!-- Fluent 开关：开 = primary 轨道 + on-primary 圆钮（Fluent 键名覆盖） -->
     <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="{DynamicResource md3.color.primary}"/>
     <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver" Color="{DynamicResource md3.color.primary}"/>
     <SolidColorBrush x:Key="ToggleSwitchFillOnPressed" Color="{DynamicResource md3.color.primary}"/>
@@ -42,66 +43,8 @@
     <Setter Property="FontSize" Value="13"/>
   </Style>
 
-  <!-- ══ 按钮：基础形态 + 变体 + 状态（悬浮/按下/禁用）—— 应用级样式优先级最高（实测），
-       是唯一能稳定生效的位置；状态色同时通过覆盖 Fluent 画刷键落到模板部件上（见 Md3FluentBrushes.axaml） ══ -->
-  <Style Selector="Button">
-    <Setter Property="CornerRadius" Value="8"/>
-    <Setter Property="Padding" Value="14,6"/>
-    <Setter Property="MinHeight" Value="32"/>
-    <Setter Property="FontSize" Value="13"/>
-    <Setter Property="Background" Value="Transparent"/>
-    <Setter Property="BorderThickness" Value="1"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
-    <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
-    <Setter Property="HorizontalContentAlignment" Value="Center"/>
-    <Setter Property="VerticalContentAlignment" Value="Center"/>
-    <Setter Property="Cursor" Value="Hand"/>
-  </Style>
-  <Style Selector="Button:pointerover">
-    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline}"/>
-  </Style>
-  <Style Selector="Button:pressed">
-    <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
-  </Style>
-  <Style Selector="Button:disabled">
-    <Setter Property="Opacity" Value="0.38"/>
-  </Style>
-  <Style Selector="Button.primary">
-    <Setter Property="CornerRadius" Value="999"/>
-    <Setter Property="Padding" Value="18,6"/>
-    <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
-    <Setter Property="BorderThickness" Value="0"/>
-    <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
-    <Setter Property="FontWeight" Value="Medium"/>
-  </Style>
-  <Style Selector="Button.danger">
-    <Setter Property="CornerRadius" Value="999"/>
-    <Setter Property="Padding" Value="18,6"/>
-    <Setter Property="Background" Value="{DynamicResource md3.error}"/>
-    <Setter Property="BorderThickness" Value="0"/>
-    <Setter Property="Foreground" Value="{DynamicResource md3.on-error}"/>
-  </Style>
-  <Style Selector="Button.linkButton">
-    <Setter Property="Background" Value="Transparent"/>
-    <Setter Property="BorderThickness" Value="0"/>
-    <Setter Property="Padding" Value="6,2"/>
-    <Setter Property="MinHeight" Value="24"/>
-    <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
-  </Style>
-
-  <!-- ══ 列表项：规格 + 选中/悬浮色（同样只设控件自身属性） ══ -->
-  <Style Selector="ListBoxItem">
-    <Setter Property="CornerRadius" Value="6"/>
-    <Setter Property="Padding" Value="8,4"/>
-    <Setter Property="MinHeight" Value="26"/>
-    <Setter Property="FontSize" Value="13"/>
-    <Setter Property="Background" Value="Transparent"/>
-  </Style>
-  <Style Selector="ListBoxItem:selected">
-    <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
-    <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
-  </Style>
+  <!-- ══ 按钮 / 列表项：外观（基础·变体·悬浮·按下·选中）已由 Styles/Md3ControlThemes.axaml
+       的 ControlTheme 拥有 —— 这里**不再**设置它们的任何属性，否则应用级样式会压住主题内的状态色 ══ -->
 
   <!-- 文本框 / 下拉 / 复选框 / 单选 / 开关：规格与池色（模板与状态由各控件主题提供） -->
   <Style Selector="TextBox">

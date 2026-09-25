@@ -29,9 +29,9 @@ namespace OpenUtau.Test.App {
         public void Md3Controls_InstalledLast() {
             string app = AppXaml();
             Assert.Contains("Styles/Md3Controls.axaml", app);
-            // 必须是 Application.Styles 的最后一项（要在 SukiOverrides / SukiCompactMenu 之后才生效）
+            // 顺序：输入主题 / 菜单（Md3InputThemes / Md3Menus）在前，本层在后才能覆盖其默认值
             int mine = app.IndexOf("Styles/Md3Controls.axaml", StringComparison.Ordinal);
-            foreach (string later in new[] { "Styles/SukiOverrides.axaml", "Styles/SukiCompactMenu.axaml" }) {
+            foreach (string later in new[] { "Styles/Md3InputThemes.axaml", "Styles/Md3Menus.axaml" }) {
                 int other = app.IndexOf(later, StringComparison.Ordinal);
                 Assert.True(other >= 0 && other < mine, $"{later} 必须排在 MD3 控件风格层之前");
             }
@@ -41,17 +41,18 @@ namespace OpenUtau.Test.App {
         public void Md3Controls_CoversCommonControls_WithPoolRoles() {
             string xaml = StyleXaml();
             foreach (string selector in new[] {
-                "Button", "TextBox", "ComboBox", "CheckBox, RadioButton", "ListBox",
-                "ListBoxItem", "ToggleSwitch", "Slider", "ProgressBar", "ToolTip", "Separator",
+                "TextBox", "ComboBox", "CheckBox, RadioButton", "ListBox",
+                "ToggleSwitch", "Slider", "ProgressBar", "ToolTip", "Separator",
             }) {
                 Assert.Contains($"Selector=\"{selector}\"", xaml);
             }
             // 颜色只能来自颜色池
             Assert.DoesNotMatch("#[0-9A-Fa-f]{6}", xaml);
             Assert.DoesNotContain("Plus", xaml.Replace("PlusInfo", ""));
-            // 状态样式与应用级外观同层；模板部件的状态色走 Fluent 画刷覆盖层
-            Assert.Contains("Selector=\"Button:pointerover\"", xaml);
-            Assert.Contains("Selector=\"ListBoxItem:selected\"", xaml);
+            // 按钮/列表项的外观（含状态）在 ControlTheme 里（Md3ControlThemes.axaml）
+            string theme = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "Md3ControlThemes.axaml"));
+            Assert.Contains("Md3ButtonTheme", theme);
+            Assert.Contains("Md3ListBoxItemTheme", theme);
         }
 
         [AvaloniaFact]

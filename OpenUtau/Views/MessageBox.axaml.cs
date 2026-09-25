@@ -19,12 +19,12 @@ using Serilog;
 
 namespace OpenUtau.App.Views {
     /// <summary>
-    /// MessageBox 门面（2026-09-25 去 SukiUI：渲染改为**自研 MD3 模态窗口**）。
+    /// MessageBox 门面（2026-09-25：渲染为**自研 MD3 模态窗口**）。
     /// 60+ 调用点签名零改动：Show/ShowError/ShowModal/ShowProcessing + 结果枚举。
     /// - Show：确认框，按钮按 <see cref="MessageBoxButtons"/> 生成（主操作走实心胶囊）
     /// - ShowError：链接化正文 + 详情 Expander + 复制按钮
     /// - ShowModal/ShowProcessing：进度内容 + 关闭/取消按钮；窗口实例由本类持有，
-    ///   SetText / Close 直接作用于它（旧实现要靠挂载事件反查 SukiMessageBox 的内部窗口）
+    ///   SetText / Close 直接作用于它（窗口实例由本类持有）
     /// </summary>
     public class MessageBox {
         public enum MessageBoxButtons { Ok, OkCancel, YesNo, YesNoCancel, OkCopy }

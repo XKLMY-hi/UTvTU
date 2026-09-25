@@ -7,8 +7,8 @@ using Xunit;
 namespace OpenUtau.App;
 
 /// <summary>
-/// 契约（2026-09-25 去 SukiUI）：MainWindow 不再声明 SukiDialogHost / SukiToastHost，
-/// 窗口也不再继承 SukiWindow；对话框改由自研 <see cref="MessageBox"/>（WindowEx 模态窗口）承担。
+/// 契约（2026-09-25）：MainWindow 不声明任何第三方对话框/通知 Host；
+/// 对话框由自研 <see cref="MessageBox"/>（WindowEx 模态窗口）承担。
 /// </summary>
 public class MainWindowHostsProbeTests {
     private static string MainWindowXaml() =>
