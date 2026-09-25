@@ -99,9 +99,11 @@
   </UserControl.Styles>
 
   <Grid ColumnDefinitions="480,*" Background="{DynamicResource md3.surface}">
-    <!-- ══════════ 品牌面板（稿：宽 480 / 内边距 48 / 上下分栏） ══════════ -->
-    <Border Grid.Column="0" Background="{DynamicResource md3.primary-container}">
-      <Grid RowDefinitions="Auto,*,Auto" Margin="48">
+    <!-- ══════════ 品牌面板（稿：宽 480 / 内边距 48 / 上下分栏）
+         悬浮卡片形态：外缩 16 + 内边距 32 = 内容仍在 48 基准线，圆角取 r-xl(28) 与外层层级拉开 ══════════ -->
+    <Border Grid.Column="0" Margin="16" CornerRadius="28" ClipToBounds="True"
+            Background="{DynamicResource md3.primary-container}">
+      <Grid RowDefinitions="Auto,*,Auto" Margin="32">
         <!-- 标识：52 圆角 12 primary 底 + mic 字形 -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
           <Border Width="52" Height="52" CornerRadius="12"

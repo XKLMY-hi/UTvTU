@@ -40,6 +40,9 @@ namespace OpenUtau.Test.App {
             Assert.Contains("ColumnDefinitions=\"480,*\"", xaml);
             // 品牌面板实底 = primary-container（稿：bg-[#005046]）
             Assert.Contains("md3.primary-container", xaml);
+            // 悬浮圆角卡片：外缩 16 / 圆角 28（内边距 32 → 内容仍落在稿子的 48 基准线）
+            Assert.Contains("Margin=\"16\"", xaml);
+            Assert.Contains("CornerRadius=\"28\"", xaml);
             // 四个入口卡片：新建 / 打开 / 导入音轨 / 模板
             foreach (string handler in new[] { "OnNewProject", "OnOpenProject", "OnImportAudio", "OnShowTemplates" }) {
                 Assert.Contains($"PointerPressed=\"{handler}\"", xaml);
