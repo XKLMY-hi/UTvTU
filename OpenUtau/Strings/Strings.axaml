@@ -667,7 +667,7 @@ Warning: this option removes custom presets.</system:String>
   <system:String x:Key="prefs.status.installed">Installed</system:String>
   <system:String x:Key="prefs.migrating">This page is still being migrated.</system:String>
   <system:String x:Key="prefs.openlegacy">Open Legacy Settings</system:String>
-  <system:String x:Key="prefs.close">Done</system:String>
+  <system:String x:Key="prefs.close">Close</system:String>
   <system:String x:Key="prefs.diffsinger">DiffSinger</system:String>
   <system:String x:Key="prefs.editing">Editing</system:String>
   <system:String x:Key="prefs.general">General</system:String>

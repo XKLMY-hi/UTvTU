@@ -59,6 +59,10 @@ namespace OpenUtau.Test.App {
             Assert.Contains("x:Name=\"ResetButton\"", xaml);        // 恢复默认设置
             Assert.Contains("PlusInfo.VersionString", xaml);        // 版本行（唯一格式串来源）
             Assert.Contains("prefs.about.credit", xaml);            // 关于页页尾署名
+            // 底部操作条：单个「关闭」按钮（不再有 应用/完成 两个）
+            Assert.Contains("OnCloseClicked", xaml);
+            Assert.DoesNotContain("OnApplyClicked", xaml);
+            Assert.DoesNotContain("OnDoneClicked", xaml);
             Assert.Contains("x:Name=\"PageAbout\"", xaml);
         }
 

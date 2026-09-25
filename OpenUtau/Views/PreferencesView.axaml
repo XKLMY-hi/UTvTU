@@ -988,13 +988,11 @@
       </StackPanel>
     </ScrollViewer>
 
-    <!-- 吸底操作条：应用（不退出）/ 完成（应用并退出），右下角对齐 -->
+    <!-- 吸底操作条：关闭（落盘并重套主题后退出），右下角对齐 -->
     <Border Grid.Row="1" Padding="32,12" Background="{DynamicResource md3.surface}"
             BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,1,0,0">
-      <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right">
-        <Button Classes="outlinePill" Content="{DynamicResource button.apply}" Click="OnApplyClicked"/>
-        <Button Classes="filledPill" MinWidth="88" Content="{DynamicResource prefs.close}" Click="OnDoneClicked"/>
-      </StackPanel>
+      <Button Classes="filledPill" MinWidth="88" HorizontalAlignment="Right"
+              Content="{DynamicResource prefs.close}" Click="OnCloseClicked"/>
     </Border>
     </Grid>
   </Grid>

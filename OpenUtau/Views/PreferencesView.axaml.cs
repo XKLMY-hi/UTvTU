@@ -65,9 +65,8 @@ namespace OpenUtau.App.Views {
         // ── 底部操作条 ───────────────────────────────────────────
         private void OnResetAll(object? sender, RoutedEventArgs e) => Host?.ResetAllPreferences();
 
-        private void OnApplyClicked(object? sender, RoutedEventArgs e) => ApplyPreferences();
-
-        private void OnDoneClicked(object? sender, RoutedEventArgs e) {
+        /// <summary>关闭：落盘 + 重套主题/颜色池，然后退出偏好页。</summary>
+        private void OnCloseClicked(object? sender, RoutedEventArgs e) {
             ApplyPreferences();
             Host?.HidePreferences();
         }
