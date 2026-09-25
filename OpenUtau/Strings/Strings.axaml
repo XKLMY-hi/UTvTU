@@ -100,10 +100,10 @@
   <system:String x:Key="debug.copylog">Copy Log</system:String>
   <system:String x:Key="debug.reverselogorder">Reverse Log Order</system:String>
 
-  <system:String x:Key="dialogs.about.caption">About OpenUTAU Plus</system:String>
+  <system:String x:Key="dialogs.about.caption">About UTvTU</system:String>
   <system:String x:Key="dialogs.about.message">
-OpenUTAU Plus is an enhanced fork of OpenUtau, an open source editing environment for UTAU community, with a modern user experience and intelligent phonological support.</system:String>
-  <system:String x:Key="dialogs.exitsave.caption">Exit OpenUTAU Plus</system:String>
+UTvTU is an enhanced fork of OpenUtau, an open source editing environment for UTAU community, with a modern user experience and intelligent phonological support.</system:String>
+  <system:String x:Key="dialogs.exitsave.caption">Exit UTvTU</system:String>
   <system:String x:Key="dialogs.exitsave.message">The current project contains unsaved changes. Do you want to save it?</system:String>
   <system:String x:Key="dialogs.export.caption">Export</system:String>
   <system:String x:Key="dialogs.export.savefirst">Save project file first</system:String>
@@ -131,7 +131,7 @@ Do you want to continue by splitting at the nearest position after current playh
   <system:String x:Key="dialogs.messagebox.yes">Yes</system:String>
   <system:String x:Key="dialogs.noresampler.caption">No resampler</system:String>
   <system:String x:Key="dialogs.noresampler.message">No resampler! Put your favourite resampler exe or dll in the Resamplers folder and choose it in Preferences!</system:String>
-  <system:String x:Key="dialogs.recovery">Previously, OpenUTAU Plus terminated abnormally. Click here to recover.</system:String>
+  <system:String x:Key="dialogs.recovery">Previously, UTvTU terminated abnormally. Click here to recover.</system:String>
   <system:String x:Key="dialogs.recovery.caption">Recovery project</system:String>
   <system:String x:Key="dialogs.remaptimeaxis.message">This tool will change the tempo of the project without changing the actual positions and durations (in seconds) of notes.
   New BPM:</system:String>
@@ -190,7 +190,7 @@ Do you want to continue by splitting at the nearest position after current playh
   <system:String x:Key="errors.failed.loadprefs">Failed to load prefs. Initialize it.</system:String>
   <system:String x:Key="errors.failed.openfile">Failed to open</system:String>
   <system:String x:Key="errors.failed.openlocation">Failed to open location</system:String>
-  <system:String x:Key="errors.failed.opennewerproject">Project file is newer than software! Upgrade OpenUTAU Plus!</system:String>
+  <system:String x:Key="errors.failed.opennewerproject">Project file is newer than software! Upgrade UTvTU!</system:String>
   <system:String x:Key="errors.failed.render">Failed to render.</system:String>
   <system:String x:Key="errors.failed.runeditingmacro">Failed to run editing macro</system:String>
   <system:String x:Key="errors.failed.save">Failed to save</system:String>
@@ -320,7 +320,7 @@ Do you want to continue by splitting at the nearest position after current playh
   <system:String x:Key="menu.file.saveas">Save As...</system:String>
   <system:String x:Key="menu.file.savetemplate">Save Template...</system:String>
   <system:String x:Key="menu.help">Help</system:String>
-  <system:String x:Key="menu.help.about">About OpenUTAU Plus</system:String>
+  <system:String x:Key="menu.help.about">About UTvTU</system:String>
   <system:String x:Key="menu.help.checkupdate">Check Update</system:String>
   <system:String x:Key="menu.help.logslocation">Open Logs Location</system:String>
   <system:String x:Key="menu.help.reportissue">Report Issue</system:String>
@@ -649,7 +649,7 @@ Warning: this option removes custom presets.</system:String>
   <system:String x:Key="prefs.diffsinger">DiffSinger</system:String>
   <system:String x:Key="prefs.editing">Editing</system:String>
   <system:String x:Key="prefs.general">General</system:String>
-  <system:String x:Key="prefs.note.restart">Note: please restart OpenUTAU Plus after changing this item.</system:String>
+  <system:String x:Key="prefs.note.restart">Note: please restart UTvTU after changing this item.</system:String>
   <system:String x:Key="prefs.otoeditor">Oto Editor</system:String>
   <system:String x:Key="prefs.otoeditor.select">Default Oto Editor</system:String>
   <system:String x:Key="prefs.otoeditor.setparampath">setParam Path</system:String>
@@ -702,9 +702,9 @@ Warning: this option removes custom presets.</system:String>
   1. Set "resampler-compatibility" to "on" in moreconfig.txt.
   2. Set "auto-update-llsm-mrq" to "off" in moreconfig.txt.
   3. Patiently wait for moresampler to generate missing llsm files.</system:String>
-  <system:String x:Key="prefs.rendering.resampler.note">Note: to use external resamplers, please add the resampler DLL or EXE file in the Resamplers folder in the OpenUTAU Plus install path and choose it in Preferences.</system:String>
+  <system:String x:Key="prefs.rendering.resampler.note">Note: to use external resamplers, please add the resampler DLL or EXE file in the Resamplers folder in the UTvTU install path and choose it in Preferences.</system:String>
   <system:String x:Key="prefs.rendering.skipmuted">Skip muted tracks</system:String>
-  <system:String x:Key="prefs.rendering.threads.cpuwarn">Warning: too many render threads may cause OpenUTAU Plus to run slowly.</system:String>
+  <system:String x:Key="prefs.rendering.threads.cpuwarn">Warning: too many render threads may cause UTvTU to run slowly.</system:String>
   <system:String x:Key="prefs.rendering.threads.numthreads">Maximum Render Threads</system:String>
   <system:String x:Key="prefs.rendering.wavtool">Wavtool</system:String>
   <system:String x:Key="prefs.utau">UTAU</system:String>
@@ -887,7 +887,7 @@ General
   <system:String x:Key="updater.update">Update</system:String>
 
   <system:String x:Key="warning">Warning</system:String>
-  <system:String x:Key="warning.asciipath">Your OpenUTAU Plus home path "{0}" contains non-ASCII character. Exe resamplers may not work.</system:String>
+  <system:String x:Key="warning.asciipath">Your UTvTU home path "{0}" contains non-ASCII character. Exe resamplers may not work.</system:String>
   <system:String x:Key="warning.renderer">No settings for this renderer.</system:String>
 
   <system:String x:Key="welcome.new">New</system:String>
@@ -948,7 +948,7 @@ General
   <system:String x:Key="effects.edit">Edit</system:String>
   <system:String x:Key="effects.noplugins">No VST/VST3 effect plugins found.</system:String>
   <system:String x:Key="effects.instruments.excluded">instrument plugin(s) excluded.</system:String>
-  <system:String x:Key="effects.addscanpaths">Add scan paths in Settings → OpenUTAU Plus.</system:String>
+  <system:String x:Key="effects.addscanpaths">Add scan paths in Settings → UTvTU.</system:String>
   <system:String x:Key="effects.available">effects available</system:String>
   <system:String x:Key="effects.instruments.filtered">(instruments filtered)</system:String>
   <system:String x:Key="effects.info">Info</system:String>
@@ -991,7 +991,7 @@ General
   <system:String x:Key="prefs.vst.remove">Remove</system:String>
   <system:String x:Key="prefs.vst.discovered">Discovered Plugins</system:String>
   <system:String x:Key="prefs.vst.rescan">Rescan</system:String>
-  <system:String x:Key="prefs.plus.footer1">OpenUTAU Plus {0} · Fork author: XKLMY</system:String>
+  <system:String x:Key="prefs.plus.footer1">UTvTU {0} · Fork author: XKLMY</system:String>
   <system:String x:Key="prefs.plus.footer2">This project is built with vibe coding (deepseek-v4)</system:String>
 
   <!-- ============================================================
@@ -1043,7 +1043,7 @@ General
   <system:String x:Key="welcome.wiki">OpenUTAU Wiki</system:String>
   <system:String x:Key="welcome.diffsinger">DiffSinger</system:String>
   <system:String x:Key="welcome.teto">Kasane Teto Official</system:String>
-  <system:String x:Key="welcome.plus">OpenUTAU Plus</system:String>
+  <system:String x:Key="welcome.plus">UTvTU</system:String>
   <system:String x:Key="render.mode">Output Mode</system:String>
   <system:String x:Key="render.range">Render Range</system:String>
   <system:String x:Key="render.format">Output Format</system:String>

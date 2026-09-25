@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" Width="400" Height="180"
         x:Class="OpenUtau.App.Views.SplashWindow"
-        Title="OpenUTAU Plus"
+        Title="UTvTU"
         Icon="/Assets/open-utau.ico"
         CanResize="False"
         WindowDecorations="None"

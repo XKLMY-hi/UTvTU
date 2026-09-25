@@ -6,7 +6,7 @@
         mc:Ignorable="d"
         x:Class="OpenUtau.App.Views.TypeInDialog"
         Icon="/Assets/open-utau.ico"
-        Title="OpenUTAU Plus" Height="120" Width="320" WindowStartupLocation="CenterOwner">
+        Title="UTvTU" Height="120" Width="320" WindowStartupLocation="CenterOwner">
 <DockPanel LastChildFill="True">
       <Border>
   <StackPanel VerticalAlignment="Center">

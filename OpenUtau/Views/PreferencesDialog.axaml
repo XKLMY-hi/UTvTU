@@ -493,8 +493,8 @@
         </suki:SettingsLayoutItem.Content>
         </suki:SettingsLayoutItem>
 
-      <!-- OpenUTAU Plus -->
-        <suki:SettingsLayoutItem Header="OpenUTAU Plus">
+      <!-- UTvTU -->
+        <suki:SettingsLayoutItem Header="UTvTU">
           <suki:SettingsLayoutItem.Content>
         <StackPanel Classes="settingsContent">
           <TextBlock Text="{DynamicResource prefs.vst.title}" FontSize="12" FontWeight="SemiBold" Opacity="0.7"/>

@@ -59,6 +59,17 @@ namespace OpenUtau.Test.App {
         }
 
         [AvaloniaFact]
+        public void WelcomeView_RecentRows_NotSubjectToGlobalListBoxItemStyle() {
+            // 约定：新 MD3 界面不吃旧的全局隐式样式。
+            // Styles.axaml 有全局 ListBoxItem{MinHeight=28,Height=28}（旧密度覆盖），
+            // 会把设计稿 68px 的最近工程行夹扁 → 欢迎页改用 ScrollViewer + ItemsControl，行自己定尺寸。
+            string xaml = ReadXaml("WelcomeView.axaml");
+            Assert.DoesNotContain("<ListBox", xaml);
+            Assert.Contains("Classes=\"recentRow\"", xaml);
+            Assert.Contains("<ItemsControl", xaml);
+        }
+
+        [AvaloniaFact]
         public void WelcomeView_Instantiates() {
             ColorPool.Initialize(ColorPool.DefaultSeed, Md3SchemeVariant.TonalSpot, false);
             var view = new WelcomeView();
@@ -91,8 +102,16 @@ namespace OpenUtau.Test.App {
         [AvaloniaFact]
         public void IconKeys_Resolve() {
             Application app = Application.Current!;
+            string xaml = ReadXaml("WelcomeView.axaml");
+            // 视图内自定义的键（如弹层外框 ControlTheme）在同文件定义，不走应用资源
+            var local = Regex.Matches(xaml, "x:Key=\"([^\"]+)\"")
+                .Select(m => m.Groups[1].Value)
+                .ToHashSet(StringComparer.Ordinal);
             var missing = new List<string>();
-            foreach (string key in KeysOf(ReadXaml("WelcomeView.axaml"), "StaticResource")) {
+            foreach (string key in KeysOf(xaml, "StaticResource")) {
+                if (local.Contains(key)) {
+                    continue;
+                }
                 if (!app.TryFindResource(key, out _)) {
                     missing.Add(key);
                 }

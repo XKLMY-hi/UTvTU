@@ -44,7 +44,7 @@ namespace OpenUtau.App {
             Log.Information($"{RuntimeInformation.OSDescription} " +
                 $"{RuntimeInformation.OSArchitecture} " +
                 $"{RuntimeInformation.ProcessArchitecture}");
-            Log.Information($"OpenUtau Plus v{Assembly.GetEntryAssembly()?.GetName().Version} p{Core.PlusInfo.PlusVersion} " +
+            Log.Information($"UTvTU v{Assembly.GetEntryAssembly()?.GetName().Version} p{Core.PlusInfo.PlusVersion} " +
                 $"{RuntimeInformation.RuntimeIdentifier}");
             Log.Information($"Data path = {PathManager.Inst.DataPath}");
             Log.Information($"Cache path = {PathManager.Inst.CachePath}");

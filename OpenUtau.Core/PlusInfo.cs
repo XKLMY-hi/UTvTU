@@ -1,7 +1,7 @@
-namespace OpenUtau.Core {
+﻿namespace OpenUtau.Core {
     /// <summary>
     /// Plus 版本信息——独立于上游主线版本递增。
-    /// 版本号规则：OpenUTAU Plus v{上游主线版本} p{Plus版本}
+    /// 版本号规则：UTvTU v{上游主线版本} p{Plus版本}
     /// （上游版本来自 csproj Version，与 openutau/OpenUtau 同步时更新；
     /// Plus 版本在此手工递增）。
     /// </summary>

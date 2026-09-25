@@ -5,6 +5,15 @@
              xmlns:vm="using:OpenUtau.App.ViewModels"
              mc:Ignorable="d" d:DesignWidth="1440" d:DesignHeight="900"
              x:Class="OpenUtau.App.Views.WelcomeView">
+  <UserControl.Resources>
+    <!-- 弹层外框：把 Fluent/Flyout 自带的内边距与边框去掉，只留 md3 容器（旧主题键不进新界面） -->
+    <ControlTheme x:Key="Md3FlyoutPresenter" TargetType="FlyoutPresenter">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="CornerRadius" Value="12"/>
+    </ControlTheme>
+  </UserControl.Resources>
   <!-- 欢迎视图（内嵌主窗口）· 结构对齐设计稿 1-Welcome：
        .opencode/design/UTVTU-设计交付/{png/1-Welcome.png,spec/Welcome.txt}
        左侧品牌面板 480（primary-container 实底）+ 右侧启动器；颜色一律取 md3 角色键，文案一律取现有字符串键。
@@ -64,7 +73,9 @@
       <Setter Property="Background" Value="{DynamicResource md3.on-primary}"/>
     </Style>
 
-    <!-- ══ 启动器：最近工程行（稿：内边距 10 / 圆角 12 / 缩略图 48 圆角 8） ══ -->
+    <!-- ══ 启动器：最近工程行（稿：内边距 10 / 圆角 12 / 缩略图 48 圆角 8）
+         注意：不用 ListBox——Styles.axaml 里有全局隐式 ListBoxItem{Height=28}（旧密度覆盖），
+         会把 68px 的行夹扁；新界面自己定尺寸，不吃旧全局样式。 ══ -->
     <Style Selector="Border.recentRow">
       <Setter Property="CornerRadius" Value="12"/>
       <Setter Property="Padding" Value="10"/>
@@ -73,20 +84,6 @@
     </Style>
     <Style Selector="Border.recentRow:pointerover">
       <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-    </Style>
-    <Style Selector="ListBox.welcomeList">
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="BorderThickness" Value="0"/>
-    </Style>
-    <Style Selector="ListBox.welcomeList ListBoxItem">
-      <Setter Property="Padding" Value="0"/>
-      <Setter Property="Margin" Value="0,0,0,12"/>
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="CornerRadius" Value="12"/>
-    </Style>
-    <!-- 行自带底色，选中态不再叠一层高亮 -->
-    <Style Selector="ListBox.welcomeList ListBoxItem:selected /template/ ContentPresenter">
-      <Setter Property="Background" Value="Transparent"/>
     </Style>
 
     <!-- ══ 模板下拉（稿里没有的形态：卡片飞行弹层） ══ -->
@@ -113,7 +110,7 @@
                   HorizontalAlignment="Center" VerticalAlignment="Center"
                   Fill="{DynamicResource md3.on-primary}"/>
           </Border>
-          <TextBlock Text="OpenUTAU Plus" FontSize="26" FontWeight="Medium"
+          <TextBlock Text="UTvTU" FontSize="26" FontWeight="Medium"
                      VerticalAlignment="Center"
                      Foreground="{DynamicResource md3.on-primary-container}"/>
         </StackPanel>
@@ -239,7 +236,8 @@
                 IsVisible="{Binding TemplateFiles.Count}"
                 PointerPressed="OnShowTemplates">
           <FlyoutBase.AttachedFlyout>
-            <Flyout Placement="BottomEdgeAlignedLeft">
+            <Flyout Placement="BottomEdgeAlignedLeft"
+                    FlyoutPresenterTheme="{StaticResource Md3FlyoutPresenter}">
               <Border Background="{DynamicResource md3.surface-container-high}"
                       BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="1"
                       CornerRadius="12" Padding="6" MinWidth="240" MaxHeight="320">
@@ -293,45 +291,49 @@
                      Foreground="{DynamicResource md3.on-error-container}"/>
         </Border>
 
-        <ListBox Grid.Row="2" Classes="welcomeList" ItemsSource="{Binding RecentFiles}"
-                 IsVisible="{Binding RecentFiles.Count}">
-          <ListBox.ItemTemplate>
-            <DataTemplate x:DataType="vm:RecentFileInfo">
-              <Border Classes="recentRow" PointerPressed="OnOpenRecent">
-                <Grid ColumnDefinitions="Auto,*,Auto" Background="Transparent">
-                  <Border Width="48" Height="48" CornerRadius="8"
-                          Background="{DynamicResource md3.secondary-container}">
-                    <Path Data="{StaticResource icon-file}" Width="24" Height="24" Stretch="Uniform"
-                          HorizontalAlignment="Center" VerticalAlignment="Center"
-                          Fill="{DynamicResource md3.on-secondary-container}"/>
-                  </Border>
-                  <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center" Spacing="4">
-                    <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="Medium"
-                               TextTrimming="CharacterEllipsis"
-                               Foreground="{DynamicResource md3.on-surface}"/>
-                    <TextBlock FontSize="12" TextTrimming="CharacterEllipsis"
-                               Foreground="{DynamicResource md3.on-surface-variant}">
-                      <TextBlock.Text>
-                        <MultiBinding StringFormat="{}{0} · {1}">
-                          <Binding Path="Format"/>
-                          <Binding Path="Directory"/>
-                        </MultiBinding>
-                      </TextBlock.Text>
-                    </TextBlock>
-                  </StackPanel>
-                  <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12"
-                              VerticalAlignment="Center">
-                    <TextBlock Text="{Binding LastWriteTimeStr}" FontSize="12" VerticalAlignment="Center"
-                               Foreground="{DynamicResource md3.on-surface-variant}"/>
-                    <Path Data="{StaticResource icon-chevron-right}" Width="20" Height="20"
-                          Stretch="Uniform" VerticalAlignment="Center"
-                          Fill="{DynamicResource md3.on-surface-variant}"/>
-                  </StackPanel>
-                </Grid>
-              </Border>
-            </DataTemplate>
-          </ListBox.ItemTemplate>
-        </ListBox>
+        <ScrollViewer Grid.Row="2" AllowAutoHide="False"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto"
+                      IsVisible="{Binding RecentFiles.Count}">
+          <ItemsControl ItemsSource="{Binding RecentFiles}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:RecentFileInfo">
+                <Border Classes="recentRow" Margin="0,0,0,12" PointerPressed="OnOpenRecent">
+                  <Grid ColumnDefinitions="Auto,*,Auto" Background="Transparent">
+                    <Border Width="48" Height="48" CornerRadius="8"
+                            Background="{DynamicResource md3.secondary-container}">
+                      <Path Data="{StaticResource icon-file}" Width="24" Height="24" Stretch="Uniform"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Fill="{DynamicResource md3.on-secondary-container}"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center" Spacing="4">
+                      <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="Medium"
+                                 TextTrimming="CharacterEllipsis"
+                                 Foreground="{DynamicResource md3.on-surface}"/>
+                      <TextBlock FontSize="12" TextTrimming="CharacterEllipsis"
+                                 Foreground="{DynamicResource md3.on-surface-variant}">
+                        <TextBlock.Text>
+                          <MultiBinding StringFormat="{}{0} · {1}">
+                            <Binding Path="Format"/>
+                            <Binding Path="Directory"/>
+                          </MultiBinding>
+                        </TextBlock.Text>
+                      </TextBlock>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12"
+                                VerticalAlignment="Center">
+                      <TextBlock Text="{Binding LastWriteTimeStr}" FontSize="12" VerticalAlignment="Center"
+                                 Foreground="{DynamicResource md3.on-surface-variant}"/>
+                      <Path Data="{StaticResource icon-chevron-right}" Width="20" Height="20"
+                            Stretch="Uniform" VerticalAlignment="Center"
+                            Fill="{DynamicResource md3.on-surface-variant}"/>
+                    </StackPanel>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
 
         <TextBlock Grid.Row="2" Margin="4,4,0,0" FontSize="12"
                    Text="{DynamicResource welcome.open.description}"

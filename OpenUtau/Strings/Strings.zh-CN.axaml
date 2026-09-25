@@ -35,11 +35,11 @@
   <system:String x:Key="debug.copylog">复制日志</system:String>
   <system:String x:Key="debug.reverselogorder">反序</system:String>
 
-  <system:String x:Key="dialogs.about.caption">关于 OpenUTAU Plus</system:String>
+  <system:String x:Key="dialogs.about.caption">关于 UTvTU</system:String>
   <system:String x:Key="dialogs.about.message">
-    OpenUTAU Plus 是 OpenUtau 的增强分支版本，一个开源编辑环境, 旨在为 UTAU 用户社区提供现代的用户体验和智能的语音学支持.
+    UTvTU 是 OpenUtau 的增强分支版本，一个开源编辑环境, 旨在为 UTAU 用户社区提供现代的用户体验和智能的语音学支持.
   </system:String>
-  <system:String x:Key="dialogs.exitsave.caption">退出 OpenUTAU Plus</system:String>
+  <system:String x:Key="dialogs.exitsave.caption">退出 UTvTU</system:String>
   <system:String x:Key="dialogs.exitsave.message">当前工程有未保存改动。是否保存？</system:String>
   <system:String x:Key="dialogs.export.caption">导出</system:String>
   <system:String x:Key="dialogs.export.savefirst">请先保存工程文件</system:String>
@@ -62,7 +62,7 @@
   <system:String x:Key="dialogs.messagebox.yes">是</system:String>
   <system:String x:Key="dialogs.noresampler.caption">无Resampler</system:String>
   <system:String x:Key="dialogs.noresampler.message">无Resampler! 将你选择的resampler exe 或者 dll 文件放入 Resamplers 文件夹中并在使用偏好中选择它!</system:String>
-  <system:String x:Key="dialogs.recovery">上一次 OpenUTAU Plus 异常退出。你想要恢复吗？</system:String>
+  <system:String x:Key="dialogs.recovery">上一次 UTvTU 异常退出。你想要恢复吗？</system:String>
   <system:String x:Key="dialogs.recovery.caption">恢复项目</system:String>
   <system:String x:Key="dialogs.remaptimeaxis.message">此工具会改变工程的曲速及各音符的tick时值，而不改变各音符的位置与时长（以秒为单位）
   新曲速：</system:String>
@@ -116,7 +116,7 @@
   <system:String x:Key="errors.failed.loadprefs">导入使用偏好失败。请初始化。</system:String>
   <system:String x:Key="errors.failed.openfile">打开失败</system:String>
   <system:String x:Key="errors.failed.openlocation">打开位置失败</system:String>
-  <system:String x:Key="errors.failed.opennewerproject">项目版本高于软件！请升级 OpenUTAU Plus！</system:String>
+  <system:String x:Key="errors.failed.opennewerproject">项目版本高于软件！请升级 UTvTU！</system:String>
   <system:String x:Key="errors.failed.render">渲染失败</system:String>
   <system:String x:Key="errors.failed.runeditingmacro">编辑宏失败</system:String>
   <system:String x:Key="errors.failed.save">保存失败</system:String>
@@ -236,7 +236,7 @@
   <system:String x:Key="menu.file.saveas">另存为...</system:String>
   <system:String x:Key="menu.file.savetemplate">保存模板...</system:String>
   <system:String x:Key="menu.help">帮助</system:String>
-  <system:String x:Key="menu.help.about">关于 OpenUTAU Plus</system:String>
+  <system:String x:Key="menu.help.about">关于 UTvTU</system:String>
   <system:String x:Key="menu.help.checkupdate">检查更新</system:String>
   <system:String x:Key="menu.help.logslocation">打开日志位置</system:String>
   <system:String x:Key="menu.help.reportissue">报告问题</system:String>
@@ -480,7 +480,7 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="prefs.caption">使用偏好</system:String>
   <!--<system:String x:Key="prefs.diffsinger">DiffSinger</system:String>-->
   <system:String x:Key="prefs.editing">编辑</system:String>
-  <system:String x:Key="prefs.note.restart">注意: 修改本项后请重启OpenUTAU Plus</system:String>
+  <system:String x:Key="prefs.note.restart">注意: 修改本项后请重启UTvTU</system:String>
   <system:String x:Key="prefs.off">关</system:String>
   <system:String x:Key="prefs.on">开</system:String>
   <system:String x:Key="prefs.otoeditor">原音设定编辑器</system:String>
@@ -536,7 +536,7 @@ Syntax: prefix,suffix</system:String>-->
   </system:String>
   <system:String x:Key="prefs.rendering.skipmuted">跳过静音音轨</system:String>
   <system:String x:Key="prefs.rendering.threads.cpuwarn">
-    警告：渲染线程过多可能会导致OpenUTAU Plus运行缓慢
+    警告：渲染线程过多可能会导致UTvTU运行缓慢
   </system:String>
   <system:String x:Key="prefs.rendering.threads.numthreads">最大渲染线程数</system:String>
   <!--<system:String x:Key="prefs.rendering.wavtool">Wavtool</system:String>-->
@@ -680,7 +680,7 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="updater.update">更新</system:String>
 
   <system:String x:Key="warning">警告</system:String>
-  <system:String x:Key="warning.asciipath">OpenUTAU Plus路径"{0}"包含非ASCII字符. Exe格式resampler可能无法正常工作.</system:String>
+  <system:String x:Key="warning.asciipath">UTvTU路径"{0}"包含非ASCII字符. Exe格式resampler可能无法正常工作.</system:String>
   <system:String x:Key="warning.renderer">此渲染器没有设置项</system:String>
 
   <system:String x:Key="welcome.new">新建</system:String>
@@ -1079,7 +1079,7 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="effects.edit">编辑</system:String>
   <system:String x:Key="effects.noplugins">未找到 VST/VST3 效果器插件。</system:String>
   <system:String x:Key="effects.instruments.excluded">个乐器插件已排除。</system:String>
-  <system:String x:Key="effects.addscanpaths">在 设置 → OpenUTAU Plus 中添加扫描路径。</system:String>
+  <system:String x:Key="effects.addscanpaths">在 设置 → UTvTU 中添加扫描路径。</system:String>
   <system:String x:Key="effects.available">个效果器可用</system:String>
   <system:String x:Key="effects.instruments.filtered">(个乐器已过滤)</system:String>
   <system:String x:Key="effects.info">信息</system:String>
@@ -1122,7 +1122,7 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="prefs.vst.remove">移除</system:String>
   <system:String x:Key="prefs.vst.discovered">已发现的插件</system:String>
   <system:String x:Key="prefs.vst.rescan">重新扫描</system:String>
-  <system:String x:Key="prefs.plus.footer1">OpenUTAU Plus {0} · 分支作者：XKLMY</system:String>
+  <system:String x:Key="prefs.plus.footer1">UTvTU {0} · 分支作者：XKLMY</system:String>
   <system:String x:Key="prefs.plus.footer2">本项目使用 vibe coding（deepseek-v4）</system:String>
 
   <!-- ============================================================
@@ -1174,7 +1174,7 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="welcome.wiki">OpenUTAU 文档</system:String>
   <system:String x:Key="welcome.diffsinger">DiffSinger 官网</system:String>
   <system:String x:Key="welcome.teto">Kasane Teto 公式</system:String>
-  <system:String x:Key="welcome.plus">OpenUTAU Plus 官网</system:String>
+  <system:String x:Key="welcome.plus">UTvTU 官网</system:String>
   <system:String x:Key="render.mode">输出模式</system:String>
   <system:String x:Key="render.range">渲染范围</system:String>
   <system:String x:Key="render.format">输出格式</system:String>

@@ -19,8 +19,8 @@
     <StartupObject />
   </PropertyGroup>
   <PropertyGroup>
-    <CFBundleName>OpenUTAU Plus</CFBundleName>
-    <CFBundleDisplayName>OpenUTAU Plus</CFBundleDisplayName>
+    <CFBundleName>UTvTU</CFBundleName>
+    <CFBundleDisplayName>UTvTU</CFBundleDisplayName>
     <CFBundleIdentifier>com.stakira.openutau</CFBundleIdentifier>
     <CFBundleVersion>0.1.568.2</CFBundleVersion>
     <CFBundleShortVersionString>0.1.568-plus.2</CFBundleShortVersionString>
@@ -34,7 +34,7 @@
         <array>
             <dict>
                 <key>CFBundleTypeName</key>
-                <string>OpenUTAU Plus Sequence File</string>
+                <string>UTvTU Sequence File</string>
                 <key>CFBundleTypeExtensions</key>
                 <array>
                     <string>ustx</string>
