@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -57,7 +57,8 @@ namespace OpenUtau.App.ViewModels {
 
         // 阶段 E3：欢迎页独立成 WelcomeWindow，Page（Carousel 索引）移除
         public ObservableCollectionExtended<RecentFileInfo> RecentFiles { get; } = new ObservableCollectionExtended<RecentFileInfo>();
-        ObservableCollectionExtended<RecentFileInfo> TemplateFiles { get; } = new ObservableCollectionExtended<RecentFileInfo>();
+        // 模板列表：欢迎页「模板」卡片的下拉要绑定它——公开是绑定可见性的保证（Avalonia 按公开属性解析绑定）
+        public ObservableCollectionExtended<RecentFileInfo> TemplateFiles { get; } = new ObservableCollectionExtended<RecentFileInfo>();
         [Reactive] public bool HasRecovery { get; set; } = false;
         [Reactive] public string RecoveryPath { get; set; } = String.Empty;
         [Reactive] public string RecoveryString { get; set; } = String.Empty;

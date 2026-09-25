@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -32,6 +32,31 @@ namespace OpenUtau.Test.App {
                 .Distinct()
                 .OrderBy(k => k, StringComparer.Ordinal)
                 .ToList();
+
+        [AvaloniaFact]
+        public void WelcomeView_MatchesDesignGeometry() {
+            // 设计稿 1-Welcome 的硬结构：左品牌面板 480 固定宽 + 右启动器自适应
+            string xaml = ReadXaml("WelcomeView.axaml");
+            Assert.Contains("ColumnDefinitions=\"480,*\"", xaml);
+            // 品牌面板实底 = primary-container（稿：bg-[#005046]）
+            Assert.Contains("md3.primary-container", xaml);
+            // 四个入口卡片：新建 / 打开 / 导入音轨 / 模板
+            foreach (string handler in new[] { "OnNewProject", "OnOpenProject", "OnImportAudio", "OnShowTemplates" }) {
+                Assert.Contains($"PointerPressed=\"{handler}\"", xaml);
+            }
+            // 最近工程行用容器底色（稿：bg-[#1A211F]）
+            Assert.Contains("md3.surface-container", xaml);
+        }
+
+        [AvaloniaFact]
+        public void WelcomeView_UsesNoLegacyColorKeys() {
+            // 颜色一律来自颜色池：旧的 Plus*/Suki/Fluent 颜色键与硬编码色值都不允许出现
+            string xaml = ReadXaml("WelcomeView.axaml");
+            foreach (string legacy in new[] { "PlusSurface", "PlusBorder", "SystemControl", "AccentBrush", "NeutralAccent" }) {
+                Assert.DoesNotContain(legacy, xaml);
+            }
+            Assert.DoesNotMatch("#[0-9A-Fa-f]{6}", xaml);
+        }
 
         [AvaloniaFact]
         public void WelcomeView_Instantiates() {
