@@ -38,8 +38,9 @@ namespace OpenUtau.Test.App {
             // 设计稿 1-Welcome：左品牌面板固定宽 + 右启动器自适应（面板按用户要求收窄为悬浮卡片）
             string xaml = ReadXaml("WelcomeView.axaml");
             Assert.Contains("ColumnDefinitions=\"352,*\"", xaml);
-            // 品牌面板实底 = primary-container（稿：bg-[#005046]）
-            Assert.Contains("md3.primary-container", xaml);
+            // 品牌卡片实底 = surface-container（与最近工程行同色，用户裁定；稿子的 primary-container 实底不用了）
+            Assert.Contains("md3.surface-container", xaml);
+            Assert.DoesNotContain("md3.primary-container", xaml);
             // 悬浮圆角卡片：列 352 - 外缩 16×2 = 卡 320，圆角 16（内边距 32 → 内容仍落在 48 基准线）
             Assert.Contains("Margin=\"16\"", xaml);
             Assert.Contains("CornerRadius=\"16\"", xaml);

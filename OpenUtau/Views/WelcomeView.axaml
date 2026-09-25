@@ -28,10 +28,10 @@
       <Setter Property="Cursor" Value="Hand"/>
     </Style>
     <Style Selector="Border.linkRow Path">
-      <Setter Property="Fill" Value="{DynamicResource md3.on-primary-container}"/>
+      <Setter Property="Fill" Value="{DynamicResource md3.on-surface}"/>
     </Style>
     <Style Selector="Border.linkRow TextBlock">
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-primary-container}"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     </Style>
     <Style Selector="Border.linkRow:pointerover Path">
       <Setter Property="Fill" Value="{DynamicResource md3.primary}"/>
@@ -100,11 +100,12 @@
 
   <Grid ColumnDefinitions="352,*" Background="{DynamicResource md3.surface}">
     <!-- ══════════ 品牌面板（稿：内边距 48 上下分栏）
-         悬浮卡片形态：外缩 16 + 内边距 32 = 内容仍在 48 基准线；卡片实宽 320，圆角取 r-lg(16) ══════════ -->
+         悬浮卡片形态：外缩 16 + 内边距 32 = 内容仍在 48 基准线；卡片实宽 320，圆角 r-lg(16)
+         卡片底色 = surface-container（与最近工程行同色，用户裁定；稿子原为 primary-container） ══════════ -->
     <Border Grid.Column="0" Margin="16" CornerRadius="16" ClipToBounds="True"
-            Background="{DynamicResource md3.primary-container}">
+            Background="{DynamicResource md3.surface-container}">
       <Grid RowDefinitions="Auto,*,Auto" Margin="32">
-        <!-- 标识：52 圆角 12 primary 底 + mic 字形 -->
+        <!-- 标识：52 圆角 12 primary 底 + mic 字形（卡片中性化后，主色只留在这一处做点睛） -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
           <Border Width="52" Height="52" CornerRadius="12"
                   Background="{DynamicResource md3.primary}">
@@ -114,13 +115,13 @@
           </Border>
           <TextBlock Text="UTvTU" FontSize="26" FontWeight="Medium"
                      VerticalAlignment="Center"
-                     Foreground="{DynamicResource md3.on-primary-container}"/>
+                     Foreground="{DynamicResource md3.on-surface}"/>
         </StackPanel>
 
         <!-- 快捷入口 -->
         <StackPanel Grid.Row="1" VerticalAlignment="Top" Margin="0,32,0,0" Spacing="12">
-          <TextBlock Text="{DynamicResource welcome.quicklinks}" FontSize="11" Opacity="0.7"
-                     Foreground="{DynamicResource md3.on-primary-container}"/>
+          <TextBlock Text="{DynamicResource welcome.quicklinks}" FontSize="11"
+                     Foreground="{DynamicResource md3.on-surface-variant}"/>
           <StackPanel Spacing="2">
             <Border Classes="linkRow" PointerPressed="OnWiki">
               <StackPanel Orientation="Horizontal" Spacing="12">
@@ -169,9 +170,9 @@
 
         <!-- 版本行 -->
         <StackPanel Grid.Row="2" Spacing="12">
-          <Border Height="1" Opacity="0.25" Background="{DynamicResource md3.on-primary-container}"/>
+          <Border Height="1" Background="{DynamicResource md3.outline-variant}"/>
           <TextBlock Text="{Binding AppVersion}" FontSize="11"
-                     Foreground="{DynamicResource md3.on-primary-container}"/>
+                     Foreground="{DynamicResource md3.on-surface-variant}"/>
         </StackPanel>
       </Grid>
     </Border>
