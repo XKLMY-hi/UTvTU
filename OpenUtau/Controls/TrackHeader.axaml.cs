@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -73,6 +74,9 @@ namespace OpenUtau.App.Controls {
             this.canvas = canvas;
             unbinds.Add(this.Bind(TrackHeightProperty, canvas.GetObservable(TrackHeaderCanvas.TrackHeightProperty)));
             unbinds.Add(this.Bind(HeightProperty, canvas.GetObservable(TrackHeaderCanvas.TrackHeightProperty)));
+            // 宽度跟随轨头列（设计稿 264）：原来写死 300，换列宽后会与编排区对不上
+            unbinds.Add(this.Bind(WidthProperty,
+                canvas.GetObservable(Visual.BoundsProperty).Select(bounds => bounds.Width)));
             unbinds.Add(this.Bind(OffsetProperty, canvas.WhenAnyValue(x => x.TrackOffset, trackOffset => new Point(0, -trackOffset * TrackHeight))));
             SetPosition();
         }

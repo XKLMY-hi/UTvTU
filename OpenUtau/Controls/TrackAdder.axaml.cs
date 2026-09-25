@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using System.Reactive.Linq;
 using OpenUtau.App.ViewModels;
 using ReactiveUI;
 
@@ -55,6 +56,8 @@ namespace OpenUtau.App.Controls {
         internal void Bind(TrackHeaderCanvas canvas) {
             this.Bind(TrackHeightProperty, canvas.GetObservable(TrackHeaderCanvas.TrackHeightProperty));
             this.Bind(HeightProperty, canvas.GetObservable(TrackHeaderCanvas.TrackHeightProperty));
+            // 宽度跟随轨头列（设计稿 264）：原来写死 300
+            this.Bind(WidthProperty, canvas.GetObservable(Visual.BoundsProperty).Select(bounds => bounds.Width));
             this.Bind(OffsetProperty, canvas.WhenAnyValue(x => x.TrackOffset, trackOffset => new Point(0, -trackOffset * TrackHeight)));
             SetPosition();
         }

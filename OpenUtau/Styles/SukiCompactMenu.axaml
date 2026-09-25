@@ -1,4 +1,5 @@
 <Styles xmlns="https://github.com/avaloniaui"
+        xmlns:motion="using:OpenUtau.Theming"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <!--
     紧凑菜单接管（探针实证：Suki 菜单条模板高 45 + MenuItem 内容区固定 ~10px，
@@ -22,80 +23,84 @@
       <!-- 顶栏一级菜单项：Popup 无 Placement（MenuItem 逻辑按 Menu 直接子项设 Bottom 向下）。
            由 Menu.ItemContainerTheme 指定（Menu 容器专用）。
            ⚠️ PART_Popup 必须有名字：MenuItem 靠模板 Popup 判断"鼠标是否在子菜单上"
-           （IsPointerOverSubMenu），无名则 _popup=null → 鼠标移入子菜单即关闭 -->
+           （IsPointerOverSubMenu），无名则 _popup=null → 鼠标移入子菜单即关闭
+           2026-09-25：文字左对齐（去掉无用的图标占位列）、悬浮高光改圆角 + md3 角色色 -->
       <ControlTheme x:Key="MenuItemTopLevel" TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
         <Setter Property="Padding" Value="10,5"/>
         <Setter Property="Template">
           <ControlTemplate>
-            <Grid ColumnDefinitions="Auto,*,Auto" Background="Transparent">
-              <ContentPresenter Grid.Column="0" Content="{TemplateBinding Icon}"
-                                Width="16" Height="16" Margin="0,0,8,0"
-                                VerticalAlignment="Center"/>
-              <ContentPresenter Grid.Column="1" Content="{TemplateBinding Header}"
-                                VerticalAlignment="Center" HorizontalAlignment="Left"/>
-              <TextBlock Grid.Column="2" Text="{TemplateBinding InputGesture}"
-                         FontSize="11" Opacity="0.5" Margin="16,0,0,0"
-                         VerticalAlignment="Center"/>
-              <Popup x:Name="PART_Popup" IsOpen="{TemplateBinding IsSubMenuOpen}"
-                     HorizontalOffset="2">
-                <Border Background="{DynamicResource PlusBrushSurfaceOverlay}"
-                        BorderBrush="{DynamicResource PlusBrushBorderDefault}"
-                        BorderThickness="1"
-                        CornerRadius="{DynamicResource PlusRadiusLg}"
-                        BoxShadow="{DynamicResource PlusElevationPopup}"
-                        MinWidth="180" Padding="4" ClipToBounds="True" Classes="menuPopup">
-                  <ScrollViewer HorizontalScrollBarVisibility="Disabled"
-                                VerticalScrollBarVisibility="Auto">
-                    <ItemsPresenter/>
-                  </ScrollViewer>
-                </Border>
-              </Popup>
-            </Grid>
+            <Border x:Name="PART_Item" Background="Transparent" CornerRadius="8"
+                    Padding="{TemplateBinding Padding}">
+              <Grid ColumnDefinitions="*,Auto">
+                <ContentPresenter Grid.Column="0" Content="{TemplateBinding Header}"
+                                  VerticalAlignment="Center" HorizontalAlignment="Left"
+                                  Foreground="{DynamicResource md3.on-surface}"/>
+                <TextBlock Grid.Column="2" Text="{TemplateBinding InputGesture}"
+                           FontSize="11" Margin="16,0,0,0" VerticalAlignment="Center"
+                           Foreground="{DynamicResource md3.on-surface-variant}"/>
+                <Popup x:Name="PART_Popup" IsOpen="{TemplateBinding IsSubMenuOpen}"
+                       HorizontalOffset="2">
+                  <Border Background="{DynamicResource md3.surface-container-high}"
+                          BorderBrush="{DynamicResource md3.outline-variant}"
+                          BorderThickness="1"
+                          CornerRadius="12"
+                          BoxShadow="{DynamicResource PlusElevationPopup}"
+                          MinWidth="180" Padding="4" ClipToBounds="True" Classes="menuPopup" motion:Motion.Enter="Fade" motion:Motion.AutoPlay="True">
+                    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto">
+                      <ItemsPresenter/>
+                    </ScrollViewer>
+                  </Border>
+                </Popup>
+              </Grid>
+            </Border>
           </ControlTemplate>
         </Setter>
-        <Style Selector="^:pointerover /template/ Grid">
-          <Setter Property="Background" Value="{DynamicResource PlusBrushSurfaceHover}"/>
+        <Style Selector="^:pointerover /template/ Border#PART_Item">
+          <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
         </Style>
         <Style Selector="^:disabled /template/ ContentPresenter">
           <Setter Property="Opacity" Value="0.4"/>
         </Style>
       </ControlTheme>
 
-      <!-- 默认菜单项：Popup 向右（右键一级 / 各级二级） -->
+      <!-- 默认菜单项：Popup 向右（右键一级 / 各级二级）
+           2026-09-25：文字左对齐、悬浮高光改圆角 + md3 角色色（原先整行直角 + Plus 旧令牌） -->
       <ControlTheme x:Key="{x:Type MenuItem}" TargetType="MenuItem">
         <Setter Property="Padding" Value="10,5"/>
         <Setter Property="Template">
           <ControlTemplate>
-            <Grid ColumnDefinitions="Auto,*,Auto" Background="Transparent">
-              <ContentPresenter Grid.Column="0" Content="{TemplateBinding Icon}"
-                                Width="16" Height="16" Margin="0,0,8,0"
-                                VerticalAlignment="Center"/>
-              <ContentPresenter Grid.Column="1" Content="{TemplateBinding Header}"
-                                VerticalAlignment="Center" HorizontalAlignment="Left"/>
-              <TextBlock Grid.Column="2" Text="{TemplateBinding InputGesture}"
-                         FontSize="11" Opacity="0.5" Margin="16,0,0,0"
-                         VerticalAlignment="Center"/>
-              <!-- Placement 硬编码向右（右键一级的 MenuItem 逻辑判"顶层"会给 Bottom，
-                   需显式向右；二级亦向右） -->
-              <Popup x:Name="PART_Popup" IsOpen="{TemplateBinding IsSubMenuOpen}"
-                     Placement="RightEdgeAlignedTop" HorizontalOffset="2">
-                <Border Background="{DynamicResource PlusBrushSurfaceOverlay}"
-                        BorderBrush="{DynamicResource PlusBrushBorderDefault}"
-                        BorderThickness="1"
-                        CornerRadius="{DynamicResource PlusRadiusLg}"
-                        BoxShadow="{DynamicResource PlusElevationPopup}"
-                        MinWidth="180" Padding="4" ClipToBounds="True" Classes="menuPopup">
-                  <ScrollViewer HorizontalScrollBarVisibility="Disabled"
-                                VerticalScrollBarVisibility="Auto">
-                    <ItemsPresenter/>
-                  </ScrollViewer>
-                </Border>
-              </Popup>
-            </Grid>
+            <Border x:Name="PART_Item" Background="Transparent" CornerRadius="8"
+                    Padding="{TemplateBinding Padding}">
+              <Grid ColumnDefinitions="*,Auto">
+                <ContentPresenter Grid.Column="0" Content="{TemplateBinding Header}"
+                                  VerticalAlignment="Center" HorizontalAlignment="Left"
+                                  Foreground="{DynamicResource md3.on-surface}"/>
+                <TextBlock Grid.Column="2" Text="{TemplateBinding InputGesture}"
+                           FontSize="11" Margin="16,0,0,0" VerticalAlignment="Center"
+                           Foreground="{DynamicResource md3.on-surface-variant}"/>
+                <!-- Placement 硬编码向右（右键一级的 MenuItem 逻辑判"顶层"会给 Bottom，
+                     需显式向右；二级亦向右） -->
+                <Popup x:Name="PART_Popup" IsOpen="{TemplateBinding IsSubMenuOpen}"
+                       Placement="RightEdgeAlignedTop" HorizontalOffset="2">
+                  <Border Background="{DynamicResource md3.surface-container-high}"
+                          BorderBrush="{DynamicResource md3.outline-variant}"
+                          BorderThickness="1"
+                          CornerRadius="12"
+                          BoxShadow="{DynamicResource PlusElevationPopup}"
+                          MinWidth="180" Padding="4" ClipToBounds="True" Classes="menuPopup" motion:Motion.Enter="Fade" motion:Motion.AutoPlay="True">
+                    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto">
+                      <ItemsPresenter/>
+                    </ScrollViewer>
+                  </Border>
+                </Popup>
+              </Grid>
+            </Border>
           </ControlTemplate>
         </Setter>
-        <Style Selector="^:pointerover /template/ Grid">
-          <Setter Property="Background" Value="{DynamicResource PlusBrushSurfaceHover}"/>
+        <Style Selector="^:pointerover /template/ Border#PART_Item">
+          <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
         </Style>
         <Style Selector="^:disabled /template/ ContentPresenter">
           <Setter Property="Opacity" Value="0.4"/>
@@ -107,13 +112,13 @@
         <Setter Property="Template">
           <ControlTemplate>
             <Border x:Name="PART_PopupBorder"
-                    Background="{DynamicResource PlusBrushSurfaceOverlay}"
-                    BorderBrush="{DynamicResource PlusBrushBorderDefault}"
+                    Background="{DynamicResource md3.surface-container-high}"
+                    BorderBrush="{DynamicResource md3.outline-variant}"
                     BorderThickness="1"
-                    CornerRadius="{DynamicResource PlusRadiusLg}"
+                    CornerRadius="12"
                     Padding="{TemplateBinding Padding}"
                     BoxShadow="{DynamicResource PlusElevationPopup}"
-                    MinWidth="180" ClipToBounds="True">
+                    MinWidth="180" ClipToBounds="True" motion:Motion.Enter="Fade" motion:Motion.AutoPlay="True">
               <ScrollViewer HorizontalScrollBarVisibility="Disabled"
                             VerticalScrollBarVisibility="Auto">
                 <ItemsPresenter ItemsPanel="{TemplateBinding ItemsPanel}"/>
@@ -130,18 +135,5 @@
     <Setter Property="ItemContainerTheme" Value="{StaticResource MenuItemTopLevel}"/>
   </Style>
 
-  <!-- 弹出动画：Popup 打开 = menuPopup Border 附加到 PopupRoot 时淡入
-       （与右键一级一致；Avalonia 12.1 Transition 重构无 From/To，用旧式 KeyFrame） -->
-  <Style Selector="Border.menuPopup">
-    <Style.Animations>
-      <Animation Duration="0:0:0.15">
-        <KeyFrame Cue="0%">
-          <Setter Property="Opacity" Value="0"/>
-        </KeyFrame>
-        <KeyFrame Cue="100%">
-          <Setter Property="Opacity" Value="1"/>
-        </KeyFrame>
-      </Animation>
-    </Style.Animations>
-  </Style>
+  <!-- 弹出淡入由 Motion.Enter="Fade" + AutoPlay 提供（时长/缓动走动效令牌） -->
 </Styles>
