@@ -134,6 +134,20 @@ namespace OpenUtau.App.Views {
 
             DocManager.Inst.AddSubscriber(this);
 
+            // 面板过渡：钢琴卷帘 / 混音台展开时自下滑入（时长/缓动一律走动效令牌）
+            viewModel.WhenAnyValue(vm => vm.ShowPianoRoll)
+                .Subscribe(show => {
+                    if (show) {
+                        Motion.Play(PianoRollRow, MotionEntrance.FromBottom);
+                    }
+                });
+            viewModel.WhenAnyValue(vm => vm.ShowMixer)
+                .Subscribe(show => {
+                    if (show) {
+                        Motion.Play(MixerContainer, MotionEntrance.FromBottom);
+                    }
+                });
+
             // 欢迎视图：命令行带工程文件则直接打开，否则以欢迎页作为初始视图
             var cmdArgs = Environment.GetCommandLineArgs();
             if (cmdArgs.Length == 2 && File.Exists(cmdArgs[1])) {
@@ -167,41 +181,21 @@ namespace OpenUtau.App.Views {
             WelcomeHost.Host = this;
             WelcomeHost.DataContext = viewModel;
             viewModel.InitProject();          // 恢复状态（HasRecovery/RecoveryString）
-            EnsureWelcomeMotion();
-            WelcomeHost.Opacity = 0;          // 从透明淡入（时长/缓动取动效令牌）
+            Motion.Reset(WelcomeHost);
             WelcomeHost.IsVisible = true;
-            Dispatcher.UIThread.Post(() => WelcomeHost.Opacity = 1, DispatcherPriority.Background);
+            // 各段按 Motion.Delay 交错滑入（品牌卡自左、启动器自下；时长/缓动走动效令牌）
+            Motion.PlayAll(WelcomeHost);
         }
 
-        /// <summary>欢迎视图淡出后再隐藏（进入编辑器时；视图级切换走动效令牌的 ViewDuration）。</summary>
-        private void HideWelcome() {
+        /// <summary>欢迎视图退场后隐藏，并让编辑器入场（页面级过渡）。</summary>
+        private async void HideWelcome() {
             if (!WelcomeHost.IsVisible) {
                 return;
             }
-            if (!Md3Motion.Enabled) {
-                WelcomeHost.IsVisible = false;
-                return;
-            }
-            EnsureWelcomeMotion();
-            WelcomeHost.Opacity = 0;
-            DispatcherTimer.RunOnce(() => {
-                WelcomeHost.IsVisible = false;
-                WelcomeHost.Opacity = 1;      // 复位，下次再进欢迎页重新淡入
-            }, Md3Motion.ViewDuration, DispatcherPriority.Background);
-        }
-
-        /// <summary>欢迎视图的淡入淡出过渡：时长/缓动一律取动效令牌，不写死秒数。</summary>
-        private void EnsureWelcomeMotion() {
-            if (WelcomeHost.Transitions != null) {
-                return;
-            }
-            WelcomeHost.Transitions = new Transitions {
-                new DoubleTransition {
-                    Property = Visual.OpacityProperty,
-                    Duration = Md3Motion.ViewDuration,
-                    Easing = Md3MotionResources.Easing(Md3Motion.ViewEasing),
-                },
-            };
+            await Motion.PlayExitAsync(WelcomeHost);
+            WelcomeHost.IsVisible = false;
+            Motion.Reset(WelcomeHost);
+            Motion.Play(MainGrid, MotionEntrance.Scale);
         }
 
         /// <summary>欢迎视图：新建工程。</summary>
@@ -921,6 +915,7 @@ namespace OpenUtau.App.Views {
                 SidebarCloseIcon.IsVisible = true;
                 SidebarOpenIcon.IsVisible = false;
                 SidebarOpenBtn.IsVisible = false;
+                Motion.Play(SidebarPanel, MotionEntrance.FromLeft);   // 展开时滑入
             }
         }
 
@@ -2336,23 +2331,11 @@ namespace OpenUtau.App.Views {
             }
             UpdateOverlayCardSize();
             OverlayLayer.IsVisible = true;
-            // Suki 卡片浮层：主内容模糊（玻璃质感）+ 卡片/遮罩淡入
+            overlayGeneration++;
+            // Suki 卡片浮层：主内容模糊（玻璃质感）+ 卡片弹出（缩放淡入）+ 遮罩淡入
             MainGrid.Effect = new Avalonia.Media.BlurEffect { Radius = 24 };
-            OverlayCard.Opacity = 0;
-            OverlayBackdrop.Opacity = 0;
-            MakeOverlayFadeIn().RunAsync(OverlayCard);
-            MakeOverlayFadeIn().RunAsync(OverlayBackdrop);
-        }
-
-        /// <summary>Suki 卡片浮层淡入动画（160ms Opacity 0→1）。</summary>
-        private static Animation MakeOverlayFadeIn() {
-            var anim = new Animation {
-                Duration = TimeSpan.FromMilliseconds(160),
-                FillMode = FillMode.Forward,
-            };
-            anim.Children.Add(new KeyFrame { Cue = new Cue(0d), Setters = { new Setter(OpacityProperty, 0d) } });
-            anim.Children.Add(new KeyFrame { Cue = new Cue(1d), Setters = { new Setter(OpacityProperty, 1d) } });
-            return anim;
+            Motion.Play(OverlayCard, MotionEntrance.Scale);
+            Motion.Play(OverlayBackdrop, MotionEntrance.Fade);
         }
 
         private void CloseOverlay() {
@@ -2362,11 +2345,29 @@ namespace OpenUtau.App.Views {
             if (OverlayContent.Content is UpdaterDialog updater) {
                 updater.OnClosed();
             }
+            overlayTcs?.TrySetResult(MessageBox.MessageBoxResult.Cancel);
+            overlayTcs = null;
+            // 卡片退场后再真正隐藏（代际号防止退场途中又开了新覆盖层被误关）
+            int generation = ++overlayGeneration;
+            if (!Md3Motion.Enabled) {
+                HideOverlayNow();
+                return;
+            }
+            Motion.PlayExit(OverlayCard);
+            Motion.PlayExit(OverlayBackdrop);
+            DispatcherTimer.RunOnce(() => {
+                if (generation == overlayGeneration) {
+                    HideOverlayNow();
+                }
+            }, Md3Motion.ExitDuration, DispatcherPriority.Background);
+        }
+
+        private void HideOverlayNow() {
             OverlayLayer.IsVisible = false;
             MainGrid.Effect = null;
             OverlayContent.Content = null;
-            overlayTcs?.TrySetResult(MessageBox.MessageBoxResult.Cancel);
-            overlayTcs = null;
+            Motion.Reset(OverlayCard);
+            Motion.Reset(OverlayBackdrop);
         }
 
         private void OnOverlayCloseClicked(object? sender, RoutedEventArgs e) {
@@ -2374,6 +2375,7 @@ namespace OpenUtau.App.Views {
         }
 
         private double overlaySizeFraction;
+        private int overlayGeneration;
 
         private void OnWindowSizeChanged(object? sender, SizeChangedEventArgs e) {
             if (OverlayLayer.IsVisible) {

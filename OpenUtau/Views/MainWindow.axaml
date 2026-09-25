@@ -296,7 +296,7 @@
       <!-- ══════════ 主区：侧栏 + 内容页 ══════════ -->
       <Grid Grid.Row="1" x:Name="MainLayout" ColumnDefinitions="240,6,*">
         <!-- ── 左侧栏：项目 / 素材库 双选项卡 ── -->
-        <Border Grid.Column="0" Background="{DynamicResource PlusSurfaceRaised}"
+        <Border Grid.Column="0" x:Name="SidebarPanel" Background="{DynamicResource PlusSurfaceRaised}"
                 BorderBrush="{DynamicResource PlusBorderSubtle}" BorderThickness="0,0,1,0">
           <DockPanel>
             <!-- 折叠按钮 -->
@@ -708,7 +708,7 @@
                        IsVisible="False" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"
                        FontSize="11" Padding="4,2" HorizontalAlignment="Left"
                        VerticalAlignment="Bottom" Margin="4,0,0,0"/>
-            <Canvas Grid.Row="4" Grid.ColumnSpan="3" IsVisible="{Binding ShowPianoRoll}">
+            <Canvas Grid.Row="4" Grid.ColumnSpan="3" x:Name="PianoRollRow" IsVisible="{Binding ShowPianoRoll}">
               <ContentControl Name="PianoRollContainer" Width="{Binding $parent[Canvas].Bounds.Width}" Height="{Binding $parent[Canvas].Bounds.Height}"/>
             </Canvas>
             <!-- Mixer resize handle (manual drag) -->

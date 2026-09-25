@@ -133,13 +133,19 @@
 |---|---|---|
 | 令牌（纯数据，零 Avalonia 依赖） | `OpenUtau.Core/Theming/Md3Motion.cs` | M3 **16 档时长**（short1…extra-long4 = 50…1000ms）+ **6 档缓动**（linear / standard / standard±decelerate / emphasized±decelerate）；`Enabled` 总开关（关掉所有时长归零）；**语义档**（控件只认这个）：悬停 `short3·standard`、进入 `short4·emphasized-decelerate`、离开 `short3·emphasized-accelerate`、视图 `medium2·emphasized-decelerate` |
 | 资源桥 | `OpenUtau/Theming/Md3MotionResources.cs` | 装 `md3.motion.duration.*`（TimeSpan）与 `md3.motion.easing.*`（SplineEasing）。**必须早于任何窗口 XAML 安装**（`Duration`/`Easing` 在 Avalonia 里是普通 CLR 属性，只能 `StaticResource`）→ 挂在 `App.Initialize()` |
-| 控件接口 | `OpenUtau/Theming/Motion.cs` | 附加属性：`Motion.Hover`（Background / BorderBrush / Foreground / Opacity 过渡）、`Motion.Enter`（淡入 + 上移 8）、`Motion.Popup`（淡入 + 0.96→1）。同一元素挂多个标签时**按属性合并**，不会互相顶掉整份 `Transitions` |
+| 控件接口 | `OpenUtau/Theming/Motion.cs` | **页面/面板级过渡**接口（附加属性 + 代码调用）：`Motion.Enter`（来向枚举 `FromBottom/FromTop/FromLeft/FromRight/Scale/Fade`）+ `Motion.Delay`（交错毫秒）+ `Motion.AutoPlay`（弹层挂载即播）；代码侧 `Motion.Play`（单元素）/ `PlayAll`（子树按各自 Delay 交错）/ `PlayExit`·`PlayExitAsync`（退场：淡出 + 1.04 放大）/ `Reset`（复位以便重播） |
 
+- **口径（2026-09-25 用户裁定）**：**只做页面/面板级过渡**——控件滑入、卡片弹出、视图切换、面板展开收起。
+  **悬停/按压之类微动效不做**（第一版做成 hover 颜色过渡被否决，已删除 `Motion.Hover`）；状态的即时变色保留即可。
 - **约定**：控件里**不许写死秒数或曲线**；动效一律走令牌，开关一关全部变瞬变（无障碍 / 低配机器），代码零分支。
 - **开关**：`Preferences.Default.ReduceMotion`（默认 false；偏好页的 UI 开关待偏好页重做时加）。系统级"减少动画"**Avalonia 未暴露**（只有点击时长那几项），只能自建。
-- **Avalonia 12 事实（反射核实，与 11 不同）**：缓动只剩 `LinearEasing` / `SplineEasing(x1,y1,x2,y2)` / `SpringEasing(mass,stiffness,damping,v0)`（11 的 `CubicEaseInOut` 那一批已移除）；`TransformOperationsTransition : Transition<ITransform>`，可直接给 `ScaleTransform` / `TranslateTransform`。
-- **首个试点（2026-09-25）**：欢迎页——4 张动作卡 + 6 行快捷入口 + 最近工程行挂 `Motion.Hover`（入口行 hover 由"文字转主色"改为状态层底色，色变才有可动画的载体）；模板弹层挂 `Motion.Popup`；欢迎视图 ↔ 编辑器走 `ViewDuration` 淡入淡出（`MainWindow.ShowWelcome/HideWelcome`）。
-- **待办**：① 菜单 / 对话框 / 顶栏视图胶囊指示器 / 侧栏与状态条的动效；② M3 Expressive 的**弹簧**（`SpringEasing`）标定；③ "分离"窗口与面板拖拽的动效；④ 列表项**不做**交错进入（虚拟化成本）。
+- **Avalonia 12 事实（反射核实，与 11 不同）**：缓动只剩 `LinearEasing` / `SplineEasing(x1,y1,x2,y2)` / `SpringEasing(mass,stiffness,damping,v0)`（11 的 `CubicEaseInOut` 那一批已移除）；`TransformOperationsTransition : Transition<ITransform>`，可直接给 `ScaleTransform` / `TranslateTransform`；`Visual.IsEffectivelyVisible` **没有**可订阅的 AvaloniaProperty，所以"出现即播"用 `AutoPlay`（AttachedToVisualTree）或代码 `PlayAll`，不做祖先可见性监听。
+- **首个试点（2026-09-25）**：
+  - 欢迎页：品牌卡片**自左滑入**，启动器「标题 / 动作卡 / 最近工程」**自下依次滑入**（Delay 0/60/120），由 `ShowWelcome()` 调 `PlayAll` 起播；模板弹层 `Scale` + `AutoPlay` 弹出。
+  - 欢迎视图 ↔ 编辑器：`PlayExitAsync`（淡出 + 放大退场）后隐藏，编辑器 `Scale` 入场（`MainWindow.HideWelcome`）。
+  - 面板：钢琴卷帘 / 混音台展开时自下滑入（订阅 `ShowPianoRoll`/`ShowMixer`）；侧栏展开时自左滑入。
+  - 对话框：覆盖层卡片 `Scale` 弹出、遮罩 `Fade`，关闭时退场后再隐藏（带代际号防误关），替换了原先手搓的 160ms 淡入 `MakeOverlayFadeIn`。
+- **待办**：① 顶栏视图胶囊指示器滑动（A4，待视图切换器落地）；② 菜单 / 右键菜单的展开；③ "分离"窗口与面板拖拽；④ M3 Expressive 的**弹簧**（`SpringEasing`）标定；⑤ 列表项**不做**交错进入（虚拟化成本）。
 
 
 
@@ -318,4 +324,5 @@ pwsh -NoProfile -File .opencode\design\extract-spec.ps1 -Path <某屏>.html [-Ma
 | 2026-09-25 | **窗口回归系统原生装饰**：`WindowEx` 退役自绘标题栏/边框、关透明合成与 DWM 三属性；MainWindow 去掉给自绘标题栏留的 8px 顶部内边距；旧「圆角外透明」契约改为 `WindowEx_NativeChrome_Contract`，全量 **330 通过** |
 | 2026-09-25 | **欢迎页按设计稿重做**（新增 A8 口径：只搬结构 / 文案用现有键 / 无波形与音源胶囊 / 顶栏与状态条待主窗统一 / 模板走卡片+飞行弹层）：左 480 品牌面板 + 右启动器 2×2 动作卡 + 最近工程行；新增 2 个结构契约用例，全量 **332 通过** |
 | 2026-09-25 | 欢迎页细节按用户裁定迭代：品牌面板改**悬浮圆角卡片**（列 480→352、卡 448→320、圆角 28→16，内容仍在 48 基准线）、卡底色 `primary-container`→`surface-container`（与最近工程行同色）、产品显示名全量改 **UTvTU**、最近工程行脱离全局 `ListBoxItem{Height=28}` 隐式覆盖（改 `ScrollViewer`+`ItemsControl`） |
-| 2026-09-25 | **动效令牌层落地**（新增第 3.H 节）：`Md3Motion`（16 时长档 + 6 缓动档 + 总开关 + 语义档）+ `Md3MotionResources` 资源桥 + `Motion.Hover/Enter/Popup` 附加属性接口；欢迎页试点（卡片/入口行/最近行悬停、模板弹层进入、欢迎视图↔编辑器淡入淡出）；新增 30 个用例，全量 **363 通过** |
+| 2026-09-25 | **动效令牌层落地**（新增第 3.H 节）：`Md3Motion`（16 时长档 + 6 缓动档 + 总开关 + 语义档）+ `Md3MotionResources` 资源桥 + `Motion` 接口；新增 30 个用例，全量 **363 通过** |
+| 2026-09-25 | **动效口径修正**（用户裁定：只要页面/面板级过渡，不要悬停微动效）：删除 `Motion.Hover`；接口改为 `Enter`（来向）+ `Delay`（交错）+ `AutoPlay`（挂载即播）+ 代码侧 `Play/PlayAll/PlayExit/Reset`；落地欢迎页交错滑入、欢迎↔编辑器退场/入场、卷帘与混音台面板滑入、侧栏滑入、对话框弹出（替换手搓淡入）；全量 **366 通过** |

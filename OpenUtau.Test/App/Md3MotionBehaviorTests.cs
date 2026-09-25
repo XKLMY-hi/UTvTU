@@ -4,67 +4,96 @@ using Avalonia;
 using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
+using Avalonia.Media;
 using OpenUtau.Core.Theming;
 using OpenUtau.Theming;
 using Xunit;
 
 namespace OpenUtau.Test.App {
     /// <summary>
-    /// 动效接口契约：控件只贴标签（Motion.Hover / Enter / Popup），
-    /// 过渡的时长一律来自令牌；多个附加属性共存时不能互相顶掉整份 Transitions。
+    /// 动效接口契约：控件只贴标签或由代码点名播放，时长/延迟一律来自令牌。
+    /// 覆盖：进入（单元素 / 子树交错）、离开、关掉动效后的兜底。
     /// </summary>
     public class Md3MotionBehaviorTests {
         [AvaloniaFact]
-        public void Hover_AttachesTokenDurationTransitions() {
+        public void Play_StartsHidden_WithTokenDuration() {
             var border = new Border();
-            Motion.SetHover(border, true);
-            Assert.NotNull(border.Transitions);
-            var transitions = border.Transitions!.OfType<TransitionBase>().ToList();
-            Assert.NotEmpty(transitions);
-            Assert.All(transitions, t => Assert.Equal(Md3Motion.HoverDuration, t.Duration));
-            // 容器悬停要动的三个颜色属性都在（Border 上 Background/BorderBrush/Foreground 齐全）
-            Assert.Contains(transitions, t => t.Property == Border.BackgroundProperty);
-            Assert.Contains(transitions, t => t.Property == Border.BorderBrushProperty);
-            Assert.Contains(transitions, t => t.Property == Visual.OpacityProperty);
-        }
-
-        [AvaloniaFact]
-        public void Popup_StartsTransparent_WithTokenDuration() {
-            var border = new Border();
-            Motion.SetPopup(border, true);
-            Assert.NotNull(border.Transitions);
+            Motion.Play(border, MotionEntrance.FromBottom);
             Assert.Equal(0d, border.Opacity);
             Assert.NotNull(border.RenderTransform);
             var transitions = border.Transitions!.OfType<TransitionBase>().ToList();
+            Assert.NotEmpty(transitions);
             Assert.All(transitions, t => Assert.Equal(Md3Motion.EnterDuration, t.Duration));
             Assert.Contains(transitions, t => t.Property == Visual.OpacityProperty);
             Assert.Contains(transitions, t => t.Property == Visual.RenderTransformProperty);
         }
 
         [AvaloniaFact]
-        public void HoverAndPopup_ShareOneTransitionList() {
+        public void Play_ScaleEntrance_UsesCenterOrigin() {
             var border = new Border();
-            Motion.SetHover(border, true);
-            Motion.SetPopup(border, true);
-            var transitions = border.Transitions!.OfType<TransitionBase>().ToList();
-            // 进入动画不能把悬停的颜色过渡顶掉；同一属性只留一条
-            Assert.Contains(transitions, t => t.Property == Border.BackgroundProperty);
-            Assert.Contains(transitions, t => t.Property == Visual.OpacityProperty);
-            Assert.Equal(1, transitions.Count(t => t.Property == Visual.OpacityProperty));
+            Motion.Play(border, MotionEntrance.Scale);
+            Assert.Equal(RelativePoint.Center, border.RenderTransformOrigin);
+            Assert.IsType<ScaleTransform>(border.RenderTransform);
         }
 
         [AvaloniaFact]
-        public void DisabledToken_StillLeavesElementUsable() {
-            // 关掉动效时进入动画立刻落到终态（不会留下一层透明元素）
+        public void Play_WithDelay_PutsDelayOnTransitions() {
+            var border = new Border();
+            Motion.Play(border, MotionEntrance.FromBottom, 120);
+            var transitions = border.Transitions!.OfType<TransitionBase>().ToList();
+            Assert.All(transitions, t => Assert.Equal(TimeSpan.FromMilliseconds(120), t.Delay));
+        }
+
+        [AvaloniaFact]
+        public void PlayAll_PlaysTaggedDescendants_WithOwnDelay() {
+            var root = new StackPanel();
+            var first = new Border();
+            Motion.SetEnter(first, MotionEntrance.FromLeft);
+            var second = new Border();
+            Motion.SetEnter(second, MotionEntrance.FromBottom);
+            Motion.SetDelay(second, 180);
+            var untouched = new Border();
+            root.Children.Add(first);
+            root.Children.Add(second);
+            root.Children.Add(untouched);
+
+            Assert.Equal(2, Motion.PlayAll(root));
+            Assert.Equal(0d, first.Opacity);
+            Assert.Equal(0d, second.Opacity);
+            Assert.Equal(1d, untouched.Opacity);   // 没贴标签的不动
+            Assert.All(second.Transitions!.OfType<TransitionBase>(),
+                t => Assert.Equal(TimeSpan.FromMilliseconds(180), t.Delay));
+        }
+
+        [AvaloniaFact]
+        public void PlayExit_FadesOutWithExitToken() {
+            var border = new Border();
+            Motion.PlayExit(border);
+            Assert.Equal(0d, border.Opacity);
+            var transitions = border.Transitions!.OfType<TransitionBase>().ToList();
+            Assert.All(transitions, t => Assert.Equal(Md3Motion.ExitDuration, t.Duration));
+        }
+
+        [AvaloniaFact]
+        public void Reset_RestoresPlayableState() {
+            var border = new Border();
+            Motion.Play(border, MotionEntrance.Scale);
+            Motion.Reset(border);
+            Assert.Equal(1d, border.Opacity);
+            Assert.Null(border.RenderTransform);
+        }
+
+        [AvaloniaFact]
+        public void DisabledToken_JumpsToFinalState() {
+            // 关掉动效后不应留下透明元素，时长也必须归零
             bool was = Md3Motion.Enabled;
             try {
                 Md3Motion.Enabled = false;
                 var border = new Border();
-                Motion.SetEnter(border, true);
+                Motion.Play(border, MotionEntrance.FromBottom);
                 Assert.Equal(1d, border.Opacity);
-                Assert.NotNull(border.Transitions);
-                var transitions = border.Transitions!.OfType<TransitionBase>().ToList();
-                Assert.All(transitions, t => Assert.Equal(TimeSpan.Zero, t.Duration));
+                Assert.All(border.Transitions!.OfType<TransitionBase>(),
+                    t => Assert.Equal(TimeSpan.Zero, t.Duration));
             } finally {
                 Md3Motion.Enabled = was;
             }
