@@ -62,7 +62,7 @@
   </UserControl.Styles>
 
   <UserControl.Resources>
-    <ContextMenu x:Key="RenderersMenuRes" Classes="context" Name="RenderersMenu" Placement="BottomEdgeAlignedLeft"
+    <ContextMenu x:Key="RendererMenuRes" Classes="context" Name="RenderersMenu" Placement="BottomEdgeAlignedLeft"
                  HorizontalOffset="-3" ItemsSource="{Binding RenderersMenuItems}">
       <ContextMenu.Styles>
         <Style Selector="MenuItem">
@@ -73,7 +73,7 @@
         </Style>
       </ContextMenu.Styles>
     </ContextMenu>
-    <ContextMenu x:Key="PhonemizersMenuRes" Classes="context" Name="PhonemizersMenu" Placement="BottomEdgeAlignedLeft"
+    <ContextMenu x:Key="PhonemizerMenuRes" Classes="context" Name="PhonemizersMenu" Placement="BottomEdgeAlignedLeft"
                  HorizontalOffset="-3" ItemsSource="{Binding PhonemizerMenuItems}">
       <ContextMenu.Styles>
         <Style Selector="MenuItem">

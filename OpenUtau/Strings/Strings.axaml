@@ -354,6 +354,7 @@ Do you want to continue by splitting at the nearest position after current playh
   <system:String x:Key="mergevoicebank.error">Failed to merge singer.</system:String>
   <system:String x:Key="mergevoicebank.merge">Merge</system:String>
   <system:String x:Key="mergevoicebank.next">Next</system:String>
+  <system:String x:Key="mergevoicebank.voicebank.prompt">Merging copies files into the destination voicebank.</system:String>
   <system:String x:Key="mergevoicebank.selectsinger">This tool will merge another voicebank into current voicebank as new voice colors.
 Choose the voicebank that you want to merge into current voicebank</system:String>
   <system:String x:Key="mergevoicebank.setfolder">Set new names for copied folders.</system:String>

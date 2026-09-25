@@ -897,6 +897,7 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="mergevoicebank.error">合并歌手失败。</system:String>
   <system:String x:Key="mergevoicebank.merge">合并</system:String>
   <system:String x:Key="mergevoicebank.next">下一步</system:String>
+  <system:String x:Key="mergevoicebank.voicebank.prompt">合并会把文件复制进目标声库。</system:String>
   <system:String x:Key="mergevoicebank.selectsinger">此工具将把另一个声库作为新的音色合并到当前声库中。
 选择要合并到当前声库的声库</system:String>
   <system:String x:Key="mergevoicebank.setfolder">为复制的文件夹设置新名称。</system:String>

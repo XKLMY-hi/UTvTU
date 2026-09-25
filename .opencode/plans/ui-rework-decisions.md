@@ -407,10 +407,39 @@ pwsh -NoProfile -File .opencode\design\extract-spec.ps1 -Path <某屏>.html [-Ma
 
 ---
 
+## 14. 其余窗口的风格同步（2026-09-25 · 不做嵌入）
+
+**裁定**：其他窗口（钢琴卷帘 / 混音台 / 各类对话框共 35 个 Views）**先不做嵌入**，只同步 UI 风格。
+
+**做法**：App 级样式层 `OpenUtau/Styles/Md3Controls.axaml`，挂在 `Application.Styles` **最后一项**
+（必须在 SukiOverrides / SukiCompactMenu 之后才能覆盖 Suki/Fluent 模板默认值）：
+
+| 类别 | 内容 |
+|---|---|
+| 形状 | Button 圆角 8 + 13px；TextBox/ComboBox 圆角 8 + 最小高 32；ListBox 圆角 8、ListItem 6；CheckBox/RadioButton/ToggleSwitch 最小高 28 |
+| 池色 | TextBox/ComboBox 底 `surface-container-high` + 描边 `outline-variant`（聚焦 2px `primary`）；ListBox 底 `surface-container`、行悬停 `surface-container-highest`、**选中 `secondary-container`**；ProgressBar/ToolTip/Separator 全走池色 |
+| Fluent 键名覆盖 | `ToggleSwitch*` / `Slider*` 系列画刷放 `Styles.Resources` → 全局开关与滑条直接取池色（原先只在偏好页局部覆盖） |
+
+**边界（契约测试守住）**：这一层**只改形状与颜色，不碰布局**——禁止出现 Width/Height/对齐/Spacing；
+带 Classes 的局部样式（`.topBtn`/`.tpChip`/`.libTab`/钢琴卷帘各控件）优先级更高，不受影响。
+
+**顺手修掉的悬空引用（真 bug，与本次改造无关的存量问题）**：
+1. `Controls/TrackHeader.axaml`：菜单键定义为 `RenderersMenuRes` / `PhonemizersMenuRes`（复数），
+   引用却写 `RendererMenuRes` / `PhonemizerMenuRes`（单数）→ 轨道头的「选择渲染器 / 选择音素化器」
+   右键菜单取不到资源。已把定义改成引用名（`Name` 保持 `RenderersMenu`/`PhonemizersMenu` 不动，
+   代码后置按 Name 取，不受影响）。
+2. `mergevoicebank.voicebank.prompt`：EN/zh 两份文案都缺 → 合并声库对话框那行提示为空白。已补。
+
+**仍待做（按窗口逐个）**：对话框的**结构**统一（标题栏 / 卡片容器 / 按钮排布）不属于"风格同步"范畴，
+需要动各窗口 XAML；钢琴卷帘与混音台的深度改造继续按 §11 S5 走。
+
+**变更记录**（追加）：
+
 ## 变更记录
 
 | 日期 | 变更 |
 |---|---|
+| 2026-09-25 | **其余窗口只同步风格（不做嵌入）**：新增 App 级 `Styles/Md3Controls.axaml`（挂在样式链最后，只改形状+池色、不碰布局，契约测试守住）；开关/滑条池色覆盖升为全局；ListBoxItem 选中色改走 `secondary-container`（旧 accent-muted 契约作废）；顺手修 TrackHeader 两个菜单键悬空引用与缺失的 mergevoicebank 文案；全量 **385 通过** |
 | 2026-09-25 | **偏好设置底部改为单个「关闭」按钮**（原「应用 / 完成」两个）：关闭 = 落盘 + 重套主题/颜色池后退出；`prefs.close` 文案改为 关闭/Close；契约用例加「只有 OnCloseClicked」守卫，全量 **381 通过** |
 | 2026-09-25 | **偏好设置新增「关于」页**（导航第 8 项，通用之下以分隔线区隔）：徽标 + 版本说明 + 仓库/README 入口 + 页尾署名；新增 5 个键（EN/zh 各 954、缺口 0），契约用例补 PageAbout/署名断言，全量 **381 通过** |
 | 2026-09-25 | **偏好设置 P2–P4：设置项全部迁移**：7 页卡片化（音频 / 播放 / 音源与素材库 / 外观 / 编辑器 / MIDI 设备 / 通用），旧 `PreferencesDialog`（528 行 Suki SettingsLayout）与其探针测试一并删除；控件统一为 开关行 / 分段 chips / 选择行 / 滑条行 / 胶囊按钮 / 文件夹行；新增 `prefs.midi.empty`（EN/zh 各 949）；全量 **381 通过** |

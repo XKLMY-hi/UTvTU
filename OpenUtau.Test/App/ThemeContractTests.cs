@@ -302,10 +302,12 @@ namespace OpenUtau.Test.App {
                 $"off knob should be left of on knob, got off={offKnob.Bounds.X} on={onKnob.Bounds.X}");
         }
 
-        /// <summary>诊断：ListBoxItem 选中背景为 accent-muted（红），hover 不消失。</summary>
+        /// <summary>契约：ListBoxItem 选中背景 = 颜色池 secondary-container（v4.0 起统一走池，不再用旧 accent-muted）。</summary>
         [AvaloniaFact]
         public void ListBoxItem_SelectedGetsAccentMuted() {
             ThemeManager.Apply("Dark");
+            ColorPool.SetDark(true);
+            var expected = Md3ColorPool.ToColor(Md3SchemeColors.Create(ColorPool.DefaultSeed, Md3SchemeVariant.TonalSpot, true).Get(Md3Role.SecondaryContainer));
             var item = new ListBoxItem { IsSelected = true };
             var win = new OpenUtau.App.Controls.WindowEx();
             win.Content = item;
@@ -314,7 +316,7 @@ namespace OpenUtau.Test.App {
             var presenter = FindPart(item, "PART_ContentPresenter") as Avalonia.Controls.Presenters.ContentPresenter;
             Assert.NotNull(presenter);
             var bg = Assert.IsAssignableFrom<ISolidColorBrush>(presenter!.Background);
-            Assert.True(bg.Color.R > 0x60, $"selected bg should be reddish (accent-muted), got {bg.Color}");
+            Assert.Equal(expected, bg.Color);
         }
 
         /// <summary>诊断：ComboBox 边框属性取 v4.0 值（PlusBrushBorderDefault + 1px）。</summary>

@@ -55,6 +55,9 @@
     <!-- 紧凑菜单接管：Suki 菜单模板高 45px 与 Plus 24px 顶栏冲突（文字半切），
          菜单改由 Plus 紧凑模板提供（向下/向右弹出 + 实色浮层 + 淡入动画） -->
     <StyleInclude Source="/Styles/SukiCompactMenu.axaml"/>
+    <!-- MD3 全局控件风格层（最后一项 → 覆盖 Suki/Fluent 模板默认值）：
+         其余 35 个窗口/对话框的按钮·输入·列表·开关·滑条一律走颜色池与设计稿规格 -->
+    <StyleInclude Source="/Styles/Md3Controls.axaml"/>
   </Application.Styles>
   <NativeMenu.Menu>
     <NativeMenu/>

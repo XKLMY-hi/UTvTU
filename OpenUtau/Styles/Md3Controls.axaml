@@ -1,0 +1,138 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       MD3 全局控件风格层（2026-09-25）
+
+       目的：让**所有窗口/对话框**（35 个 Views + 各 Controls）与新版
+       欢迎页 / 主窗 / 偏好设置共用同一套语言——颜色一律取自颜色池
+       （md3.* 角色），圆角/高度/字号对齐设计稿的控件规格。
+
+       只做「形状 + 池色」两类改动，**不碰布局**（不改 Padding/MinHeight 之外的
+       结构），避免影响钢琴卷帘/混音台等自绘控件的既有排版；
+       带 Classes 的局部样式（.topBtn/.tpChip/.libTab/…）优先级更高，不受影响。
+
+       挂载位置：App.axaml 的 Application.Styles **最后一项**（在 SukiOverrides /
+       SukiCompactMenu 之后，才能覆盖 Suki 模板默认值）。
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <Styles.Resources>
+    <!-- Fluent 开关：开 = primary 轨道 + on-primary 圆钮（Suki/Fluent 键名覆盖） -->
+    <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="{DynamicResource md3.color.primary}"/>
+    <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver" Color="{DynamicResource md3.color.primary}"/>
+    <SolidColorBrush x:Key="ToggleSwitchFillOnPressed" Color="{DynamicResource md3.color.primary}"/>
+    <SolidColorBrush x:Key="ToggleSwitchFillOff" Color="{DynamicResource md3.color.surface-container-highest}"/>
+    <SolidColorBrush x:Key="ToggleSwitchFillOffPointerOver" Color="{DynamicResource md3.color.surface-container-highest}"/>
+    <SolidColorBrush x:Key="ToggleSwitchStrokeOff" Color="{DynamicResource md3.color.outline}"/>
+    <SolidColorBrush x:Key="ToggleSwitchStrokeOffPointerOver" Color="{DynamicResource md3.color.outline}"/>
+    <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="{DynamicResource md3.color.on-primary}"/>
+    <SolidColorBrush x:Key="ToggleSwitchKnobFillOff" Color="{DynamicResource md3.color.outline}"/>
+    <!-- Fluent 滑条：已选 primary / 未选 surface-container-highest / 圆钮 primary -->
+    <SolidColorBrush x:Key="SliderTrackValueFill" Color="{DynamicResource md3.color.primary}"/>
+    <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="{DynamicResource md3.color.primary}"/>
+    <SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="{DynamicResource md3.color.primary}"/>
+    <SolidColorBrush x:Key="SliderTrackFill" Color="{DynamicResource md3.color.surface-container-highest}"/>
+    <SolidColorBrush x:Key="SliderTrackFillPointerOver" Color="{DynamicResource md3.color.surface-container-highest}"/>
+    <SolidColorBrush x:Key="SliderTrackFillPressed" Color="{DynamicResource md3.color.surface-container-highest}"/>
+    <SolidColorBrush x:Key="SliderThumbBackground" Color="{DynamicResource md3.color.primary}"/>
+    <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="{DynamicResource md3.color.primary}"/>
+    <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="{DynamicResource md3.color.primary}"/>
+  </Styles.Resources>
+
+  <Style Selector="Window">
+    <Setter Property="FontSize" Value="13"/>
+  </Style>
+
+  <!-- ══ 按钮：统一圆角 8（MD3 small）+ 13px；不改内边距/高度，避免动到图标按钮排版 ══ -->
+  <Style Selector="Button">
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="FontSize" Value="13"/>
+  </Style>
+  <Style Selector="Button:pressed">
+    <Setter Property="RenderTransform" Value="scale(0.98)"/>
+  </Style>
+
+  <!-- ══ 输入类：圆角 8 + surface-container-high 底 + outline-variant 描边（对齐偏好页字段） ══ -->
+  <Style Selector="TextBox">
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="MinHeight" Value="32"/>
+    <Setter Property="Padding" Value="10,0"/>
+    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+  </Style>
+  <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="BorderThickness" Value="2"/>
+  </Style>
+  <Style Selector="ComboBox">
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="MinHeight" Value="32"/>
+    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+  </Style>
+  <Style Selector="ComboBox:pointerover">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+  </Style>
+
+  <Style Selector="CheckBox">
+    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="MinHeight" Value="28"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+  </Style>
+  <Style Selector="RadioButton">
+    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="MinHeight" Value="28"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+  </Style>
+
+  <!-- ══ 列表：圆角 8；行悬停 surface-container-highest、选中 secondary-container ══ -->
+  <Style Selector="ListBox">
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+  </Style>
+  <Style Selector="ListBoxItem">
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="FontSize" Value="13"/>
+  </Style>
+  <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+  </Style>
+  <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+    <Setter Property="TextBlock.Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+  </Style>
+  <Style Selector="ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+    <Setter Property="TextBlock.Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+  </Style>
+
+  <!-- ══ 开关与滑条：补齐 Suki 模板下的池色（非 Fluent 键名路径） ══ -->
+  <Style Selector="ToggleSwitch">
+    <Setter Property="MinHeight" Value="28"/>
+    <Setter Property="Margin" Value="0"/>
+  </Style>
+  <Style Selector="Slider">
+    <Setter Property="Margin" Value="0"/>
+  </Style>
+
+  <!-- ══ 提示条/进度条/分隔线：随池色 ══ -->
+  <Style Selector="ProgressBar">
+    <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+  </Style>
+  <Style Selector="Separator">
+    <Setter Property="Background" Value="{DynamicResource md3.outline-variant}"/>
+  </Style>
+  <Style Selector="ToolTip">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="FontSize" Value="12"/>
+  </Style>
+</Styles>
