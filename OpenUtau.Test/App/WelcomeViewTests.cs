@@ -35,14 +35,14 @@ namespace OpenUtau.Test.App {
 
         [AvaloniaFact]
         public void WelcomeView_MatchesDesignGeometry() {
-            // 设计稿 1-Welcome 的硬结构：左品牌面板 480 固定宽 + 右启动器自适应
+            // 设计稿 1-Welcome：左品牌面板固定宽 + 右启动器自适应（面板按用户要求收窄为悬浮卡片）
             string xaml = ReadXaml("WelcomeView.axaml");
-            Assert.Contains("ColumnDefinitions=\"480,*\"", xaml);
+            Assert.Contains("ColumnDefinitions=\"352,*\"", xaml);
             // 品牌面板实底 = primary-container（稿：bg-[#005046]）
             Assert.Contains("md3.primary-container", xaml);
-            // 悬浮圆角卡片：外缩 16 / 圆角 28（内边距 32 → 内容仍落在稿子的 48 基准线）
+            // 悬浮圆角卡片：列 352 - 外缩 16×2 = 卡 320，圆角 16（内边距 32 → 内容仍落在 48 基准线）
             Assert.Contains("Margin=\"16\"", xaml);
-            Assert.Contains("CornerRadius=\"28\"", xaml);
+            Assert.Contains("CornerRadius=\"16\"", xaml);
             // 四个入口卡片：新建 / 打开 / 导入音轨 / 模板
             foreach (string handler in new[] { "OnNewProject", "OnOpenProject", "OnImportAudio", "OnShowTemplates" }) {
                 Assert.Contains($"PointerPressed=\"{handler}\"", xaml);

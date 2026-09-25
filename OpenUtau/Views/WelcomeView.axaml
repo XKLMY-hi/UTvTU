@@ -98,10 +98,10 @@
     </Style>
   </UserControl.Styles>
 
-  <Grid ColumnDefinitions="480,*" Background="{DynamicResource md3.surface}">
-    <!-- ══════════ 品牌面板（稿：宽 480 / 内边距 48 / 上下分栏）
-         悬浮卡片形态：外缩 16 + 内边距 32 = 内容仍在 48 基准线，圆角取 r-xl(28) 与外层层级拉开 ══════════ -->
-    <Border Grid.Column="0" Margin="16" CornerRadius="28" ClipToBounds="True"
+  <Grid ColumnDefinitions="352,*" Background="{DynamicResource md3.surface}">
+    <!-- ══════════ 品牌面板（稿：内边距 48 上下分栏）
+         悬浮卡片形态：外缩 16 + 内边距 32 = 内容仍在 48 基准线；卡片实宽 320，圆角取 r-lg(16) ══════════ -->
+    <Border Grid.Column="0" Margin="16" CornerRadius="16" ClipToBounds="True"
             Background="{DynamicResource md3.primary-container}">
       <Grid RowDefinitions="Auto,*,Auto" Margin="32">
         <!-- 标识：52 圆角 12 primary 底 + mic 字形 -->
