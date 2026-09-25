@@ -335,24 +335,31 @@ namespace OpenUtau.Test.App {
         }
 
         /// <summary>
-        /// 验证 Suki 接管 Button 模板（阶段 A 实证：{x:Type} ControlTheme 按 Styles 顺序后者胜，
-        /// SukiTheme 后挂载覆盖 PlusTheme/Fluent）：圆角 8、高度由 Padding 撑起；
-        /// SukiOverrides 收敛层把 Padding 收为 12,5（Suki 默认 20,8 偏大）。
+        /// 契约（v4.0 · MD3 控件风格层）：默认按钮 = 描边按钮 —— 圆角 8、内边距 14,6、
+        /// 最小高 32、描边 outline-variant、文字 primary；字体仍由 SukiOverrides 收敛为 HarmonyOS 13px。
         /// </summary>
         [AvaloniaFact]
-        public void Button_GetsSukiTheme() {
+        public void Button_GetsMd3OutlinedStyle() {
             ThemeManager.Apply("Dark");
+            ColorPool.SetDark(true);
             var win = new OpenUtau.App.Controls.WindowEx();
             var btn = new Avalonia.Controls.Button();
             win.Content = btn;
             win.Show();
             btn.ApplyTemplate();
             Assert.Equal(new CornerRadius(8), btn.CornerRadius);
-            Assert.True(double.IsNaN(btn.Height), $"Suki 按钮高度应由 Padding 决定，实际 {btn.Height}");
-            Assert.Equal(new Thickness(12, 5, 12, 5), btn.Padding);
-            // SukiOverrides 收敛层：字体归 Plus 令牌（HarmonyOS 13px，替代 Suki 默认 Quicksand 15px）
+            Assert.True(double.IsNaN(btn.Height), $"按钮高度应由 Padding/MinHeight 决定，实际 {btn.Height}");
+            Assert.Equal(new Thickness(14, 6, 14, 6), btn.Padding);
+            Assert.Equal(32, btn.MinHeight);
+            // SukiOverrides 收敛层：字体归 Plus 令牌（HarmonyOS 13px）
             Assert.Equal(13, btn.FontSize);
             Assert.Equal("HarmonyOS Sans SC", btn.FontFamily.Name);
+            // MD3：描边走 outline-variant、文字走 primary（同一套颜色池）
+            var border = Assert.IsAssignableFrom<ISolidColorBrush>(btn.BorderBrush);
+            var fg = Assert.IsAssignableFrom<ISolidColorBrush>(btn.Foreground);
+            var scheme = Md3SchemeColors.Create(ColorPool.DefaultSeed, Md3SchemeVariant.TonalSpot, true);
+            Assert.Equal(Md3ColorPool.ToColor(scheme.Get(Md3Role.OutlineVariant)), border.Color);
+            Assert.Equal(Md3ColorPool.ToColor(scheme.Get(Md3Role.Primary)), fg.Color);
         }
 
         /// <summary>ChangePianorollColor 不破坏任何投影键。</summary>

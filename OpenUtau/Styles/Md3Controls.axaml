@@ -1,5 +1,6 @@
 <Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:suki="using:SukiUI.Controls">
   <!-- ═══════════════════════════════════════════════════════════════════════
        MD3 全局控件风格层（2026-09-25）
 
@@ -39,15 +40,60 @@
 
   <Style Selector="Window">
     <Setter Property="FontSize" Value="13"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
   </Style>
 
-  <!-- ══ 按钮：统一圆角 8（MD3 small）+ 13px；不改内边距/高度，避免动到图标按钮排版 ══ -->
+  <!-- ══ 按钮：默认 = MD3 描边按钮（透明底 + outline-variant 描边 + primary 文字，圆角 8）；
+       .primary / .danger 走实心胶囊（对话主操作）；.linkButton 纯文字 ══ -->
   <Style Selector="Button">
     <Setter Property="CornerRadius" Value="8"/>
     <Setter Property="FontSize" Value="13"/>
+    <Setter Property="MinHeight" Value="32"/>
+    <Setter Property="Padding" Value="14,6"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+  </Style>
+  <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+    <Setter Property="TextBlock.Foreground" Value="{DynamicResource md3.primary}"/>
   </Style>
   <Style Selector="Button:pressed">
     <Setter Property="RenderTransform" Value="scale(0.98)"/>
+  </Style>
+  <Style Selector="Button.primary">
+    <Setter Property="CornerRadius" Value="999"/>
+    <Setter Property="Padding" Value="18,6"/>
+    <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
+    <Setter Property="FontWeight" Value="Medium"/>
+  </Style>
+  <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="TextBlock.Foreground" Value="{DynamicResource md3.on-primary}"/>
+  </Style>
+  <Style Selector="Button.danger">
+    <Setter Property="CornerRadius" Value="999"/>
+    <Setter Property="Padding" Value="18,6"/>
+    <Setter Property="Background" Value="{DynamicResource md3.error}"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-error}"/>
+  </Style>
+  <Style Selector="Button.linkButton">
+    <Setter Property="Padding" Value="6,2"/>
+    <Setter Property="MinHeight" Value="24"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+  </Style>
+  <Style Selector="Button.linkButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="TextBlock.Foreground" Value="{DynamicResource md3.primary}"/>
   </Style>
 
   <!-- ══ 输入类：圆角 8 + surface-container-high 底 + outline-variant 描边（对齐偏好页字段） ══ -->
@@ -133,6 +179,22 @@
     <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
     <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="FontSize" Value="12"/>
+  </Style>
+
+  <!-- ══ SukiUI 仍在用的可见浮层（对话框 / 通知）→ 改成 MD3 卡片观感：
+       应用里的确认框全部经 SukiMessageBoxHost，操作反馈经 SukiToast，
+       这两处是「其余窗口还像 SukiUI」最显眼的来源 ══ -->
+  <Style Selector="suki|SukiMessageBoxHost">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+    <Setter Property="CornerRadius" Value="16"/>
+    <Setter Property="Padding" Value="24"/>
+  </Style>
+  <Style Selector="suki|SukiToast">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+    <Setter Property="CornerRadius" Value="12"/>
     <Setter Property="FontSize" Value="12"/>
   </Style>
 </Styles>

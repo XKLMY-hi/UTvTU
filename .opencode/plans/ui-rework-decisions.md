@@ -435,10 +435,32 @@ pwsh -NoProfile -File .opencode\design\extract-spec.ps1 -Path <某屏>.html [-Ma
 
 **变更记录**（追加）：
 
+**第 14 节补充（2026-09-25 · 用户反馈「大部分残留着 SukiUI 的控件」后的实测结论）**：
+
+1. **XAML 里的 `<suki:` 元素其实只剩 3 处**（`SukiDialogHost` / `SukiToastHost` / `SukiTheme`），
+   其余都是 `WindowEx : SukiWindow` 的继承关系。所以"像 SukiUI"不是元素层面的，而是**外观层面**。
+2. 探针实测（`SukiResourceProbeTests`，输出到 `%TEMP%\suki-resources.txt`）：
+   `Button/TextBox/ListBoxItem` 等的圆角与底色**已经是颜色池的值**（App 级 Styles 生效），
+   但**默认按钮是透明底**、`CheckBox/RadioButton` 等 Fluent 模板控件仍走 Fluent 自带的强调色 → 观感仍像旧版。
+3. 因此把风格层从"只改形状"升级为"默认控件成为 MD3 控件"：
+   | 控件 | 新规格 |
+   |---|---|
+   | `Button`（默认） | **MD3 描边按钮**：透明底 + 1px `outline-variant` + 文字 `primary` + 圆角 8 + 最小高 32 + 内边距 14,6；悬停 `surface-container-high` |
+   | `Button.primary` | 实心胶囊：`primary` 底 + `on-primary` 文字 + 圆角 999 |
+   | `Button.danger` | `error` 底 + `on-error` 文字 + 圆角 999 |
+   | `Button.linkButton` | 纯文字按钮（透明、无描边） |
+   | `Window` | 前景色 `on-surface`（所有窗口文字默认随池） |
+   | `SukiMessageBoxHost` / `SukiToast` | 对话框与通知改成 MD3 卡片观感（`surface-container` / `surface-container-high` + 圆角 16/12） |
+4. 契约测试更新：`Button_GetsSukiTheme` → **`Button_GetsMd3OutlinedStyle`**（断言默认按钮的圆角/内边距/描边 `outline-variant`/文字 `primary` 全部来自颜色池）。
+
+**仍待确认**：还有哪些具体窗口"像 SukiUI"需要点名（对话框内部的 Suki 按钮由 `SukiMessageBoxButtonsFactory` 创建，可能带 Suki 自己的样式类；
+若有，则下一步把 `MessageBox` 的对话框实现换成自绘 MD3 版）。
+
 ## 变更记录
 
 | 日期 | 变更 |
 |---|---|
+| 2026-09-25 | **默认控件升级为 MD3 控件**：Button 描边/实心胶囊/危险/文字四种形态、Window 前景 on-surface、SukiMessageBoxHost 与 SukiToast 改 MD3 卡片；探针实测确认 Styles 已生效、残留「像 Suki」来自 Fluent 强调色与透明默认按钮；契约测试 `Button_GetsMd3OutlinedStyle` 守住；全量 **386 通过** |
 | 2026-09-25 | **其余窗口只同步风格（不做嵌入）**：新增 App 级 `Styles/Md3Controls.axaml`（挂在样式链最后，只改形状+池色、不碰布局，契约测试守住）；开关/滑条池色覆盖升为全局；ListBoxItem 选中色改走 `secondary-container`（旧 accent-muted 契约作废）；顺手修 TrackHeader 两个菜单键悬空引用与缺失的 mergevoicebank 文案；全量 **385 通过** |
 | 2026-09-25 | **偏好设置底部改为单个「关闭」按钮**（原「应用 / 完成」两个）：关闭 = 落盘 + 重套主题/颜色池后退出；`prefs.close` 文案改为 关闭/Close；契约用例加「只有 OnCloseClicked」守卫，全量 **381 通过** |
 | 2026-09-25 | **偏好设置新增「关于」页**（导航第 8 项，通用之下以分隔线区隔）：徽标 + 版本说明 + 仓库/README 入口 + 页尾署名；新增 5 个键（EN/zh 各 954、缺口 0），契约用例补 PageAbout/署名断言，全量 **381 通过** |
