@@ -41,8 +41,8 @@ namespace OpenUtau.Test.App {
         public void Md3Controls_CoversCommonControls_WithPoolRoles() {
             string xaml = StyleXaml();
             foreach (string selector in new[] {
-                "Button", "TextBox", "ComboBox", "CheckBox, RadioButton",
-                "ListBox", "ListBoxItem", "ToggleSwitch", "Slider", "ProgressBar", "ToolTip",
+                "Button", "TextBox", "ComboBox", "CheckBox, RadioButton", "ListBox",
+                "ListBoxItem", "ToggleSwitch", "Slider", "ProgressBar", "ToolTip", "Separator",
             }) {
                 Assert.Contains($"Selector=\"{selector}\"", xaml);
             }

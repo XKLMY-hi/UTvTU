@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
     <TargetFramework>net8.0-windows</TargetFramework>
   </PropertyGroup>
@@ -75,7 +75,6 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
-    <PackageReference Include="SukiUI" Version="7.0.2-nightly20260801" />
     <PackageReference Include="System.Text.Json" Version="9.0.2" />
   </ItemGroup>
   <ItemGroup>

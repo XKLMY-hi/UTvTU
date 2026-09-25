@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +6,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
-using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
@@ -14,26 +13,31 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
+using OpenUtau.App.Controls;
 using OpenUtau.Core;
 using Serilog;
-using SukiUI.Controls;
-using SukiUI.MessageBox;
 
 namespace OpenUtau.App.Views {
     /// <summary>
-    /// MessageBox 门面（阶段 D）：自研窗口 → SukiMessageBox 渲染（SukiWindow 玻璃卡片 + 主题跟随）。
+    /// MessageBox 门面（2026-09-25 去 SukiUI：渲染改为**自研 MD3 模态窗口**）。
     /// 60+ 调用点签名零改动：Show/ShowError/ShowModal/ShowProcessing + 结果枚举。
-    /// - Show：简单确认框走 SukiMessageBox.ShowDialogResult 预设按钮
-    /// - ShowError：host 自定义内容（链接化文本 + 详情 Expander + 复制按钮）+ Error 图标
-    /// - ShowModal/ShowProcessing：host 自定义进度内容；窗口引用经
-    ///   AttachedToVisualTree → GetTopLevel 获取（SukiMessageBox 不暴露窗口实例）
+    /// - Show：确认框，按钮按 <see cref="MessageBoxButtons"/> 生成（主操作走实心胶囊）
+    /// - ShowError：链接化正文 + 详情 Expander + 复制按钮
+    /// - ShowModal/ShowProcessing：进度内容 + 关闭/取消按钮；窗口实例由本类持有，
+    ///   SetText / Close 直接作用于它（旧实现要靠挂载事件反查 SukiMessageBox 的内部窗口）
     /// </summary>
     public class MessageBox {
         public enum MessageBoxButtons { Ok, OkCancel, YesNo, YesNoCancel, OkCopy }
         public enum MessageBoxResult { Ok, Cancel, Yes, No }
 
-        // ShowModal/ShowProcessing 持有的运行时状态
-        private SukiMessageBoxHost? _host;
+        /// <summary>按钮描述（label + 结果 + 是否主操作 + 可选自定义动作）。</summary>
+        private sealed class DialogButton {
+            public string Label = string.Empty;
+            public MessageBoxResult Result = MessageBoxResult.Ok;
+            public bool Primary;
+            public Func<Task>? Action;
+        }
+
         private TextBlock? _contentText;
         private Window? _window;
         private bool _closeRequested;
@@ -61,24 +65,7 @@ namespace OpenUtau.App.Views {
             });
         }
 
-        /// <summary>
-        /// 内容控件挂载后捕获宿主窗口（SukiMessageBox 创建的内部 SukiWindow 不对外暴露）。
-        /// 窗口关闭时引用置空，Close() 自然幂等。
-        /// </summary>
-        private void CaptureWindow(Control content) {
-            content.AttachedToVisualTree += (_, __) => {
-                _window = TopLevel.GetTopLevel(content) as Window;
-                if (_window != null) {
-                    _window.Closed += (_, _) => _window = null;
-                }
-                if (_closeRequested && _window != null) {
-                    _closeRequested = false;
-                    _window.Close();
-                }
-            };
-        }
-
-        /// <summary>错误对话框：异常翻译/聚合/版本号逻辑保留，渲染走 SukiMessageBox host。</summary>
+        /// <summary>错误对话框：异常翻译/聚合/版本号逻辑保留，渲染走自研 MD3 窗口。</summary>
         public static Task<MessageBoxResult> ShowError(Window parent, Exception? e, string message = "", bool fromNotif = false) {
             string text = message;
             string title = ThemeManager.GetString("errors.caption");
@@ -169,29 +156,12 @@ namespace OpenUtau.App.Views {
         }
 
         /// <summary>
-        /// 普通对话框：Ok/OkCancel/YesNo/YesNoCancel 走 SukiMessageBox 预设按钮；OkCopy 走 host（复制按钮）。
-        /// 注意：门面保持同步方法返回 Task（旧实现即如此），避免 CS4014 波及相关 async 调用点。
+        /// 普通对话框：Ok/OkCancel/YesNo/YesNoCancel 生成对应按钮；OkCopy 追加「复制」按钮。
+        /// 门面保持同步方法返回 Task（旧实现即如此），避免 CS4014 波及相关 async 调用点。
         /// </summary>
         public static Task<MessageBoxResult> Show(Window parent, string text, string title, MessageBoxButtons buttons, string? stackTrace = null) {
-            if (buttons == MessageBoxButtons.OkCopy) {
-                return ShowErrorHost(parent, text, title, stackTrace);
-            }
-            var sukiButtons = buttons switch {
-                MessageBoxButtons.Ok => SukiMessageBoxButtons.OK,
-                MessageBoxButtons.OkCancel => SukiMessageBoxButtons.OKCancel,
-                MessageBoxButtons.YesNo => SukiMessageBoxButtons.YesNo,
-                _ => SukiMessageBoxButtons.YesNoCancel,
-            };
-            return ShowCore(parent, text, title, buttons, sukiButtons);
-        }
+            bool withDetails = buttons == MessageBoxButtons.OkCopy;
 
-        private static async Task<MessageBoxResult> ShowCore(Window parent, string text, string title, MessageBoxButtons buttons, SukiMessageBoxButtons sukiButtons) {
-            var result = await SukiMessageBox.ShowDialogResult(parent, text, sukiButtons, title);
-            return MapResult(result, buttons);
-        }
-
-        /// <summary>错误详情 host：链接化正文 + 详情 Expander + [OK][复制] 按钮 + Error 图标。</summary>
-        private static async Task<MessageBoxResult> ShowErrorHost(Window parent, string text, string title, string? stackTrace) {
             var contentPanel = new StackPanel {
                 MaxWidth = 560,
                 Spacing = 4,
@@ -207,32 +177,35 @@ namespace OpenUtau.App.Views {
                 SetTextWithLink(stackTrace, stackTracePanel);
             }
 
-            var host = new SukiMessageBoxHost {
-                Header = title,
-                IconPreset = SukiMessageBoxIcons.Error,
-                Content = contentPanel,
-            };
-            var okBtn = SukiMessageBoxButtonsFactory.CreateButton(
-                ThemeManager.GetString("button.ok"), SukiMessageBoxResult.OK, "Flat");
-            var copyBtn = SukiMessageBoxButtonsFactory.CreateButton(
-                ThemeManager.GetString("dialogs.messagebox.copy"), null, "Flat");
-            copyBtn.Click += (_, __) => {
-                try {
-                    var data = new Avalonia.Input.DataTransfer();
-                    data.Add(Avalonia.Input.DataTransferItem.CreateText(text + "\n" + stackTrace));
-                    _ = TopLevel.GetTopLevel(parent)?.Clipboard?.SetDataAsync(data);
-                } catch { }
-            };
-            host.ActionButtonsSource = new AvaloniaList<Button> { okBtn, copyBtn };
-
-            var result = await SukiMessageBox.ShowDialog(parent, host, title);
-            if (result is SukiMessageBoxResult r) {
-                return MapResult(r, MessageBoxButtons.OkCopy);
+            var dialogButtons = new List<DialogButton>();
+            if (withDetails) {
+                dialogButtons.Add(new DialogButton {
+                    Label = ThemeManager.GetString("dialogs.messagebox.copy"),
+                    Result = MessageBoxResult.Ok,
+                    Action = async () => {
+                        try {
+                            var data = new DataTransfer();
+                            data.Add(DataTransferItem.CreateText(text + "\n" + stackTrace));
+                            var clipboard = TopLevel.GetTopLevel(parent)?.Clipboard;
+                            if (clipboard != null) {
+                                await clipboard.SetDataAsync(data);
+                            }
+                        } catch (Exception ex) {
+                            Log.Error(ex, "Failed to copy message");
+                        }
+                    },
+                });
             }
-            return DefaultResult(MessageBoxButtons.OkCopy); // 关闭窗口（ESC/X）→ 默认按钮
+            foreach (var (label, result, primary) in ButtonsOf(buttons)) {
+                dialogButtons.Add(new DialogButton { Label = label, Result = result, Primary = primary });
+            }
+
+            var msgbox = new MessageBox();
+            var window = BuildWindow(title, contentPanel, dialogButtons, msgbox, DefaultResult(buttons));
+            return ShowDialogAsync(parent, window, msgbox, DefaultResult(buttons));
         }
 
-        /// <summary>模态进度框：host 进度内容 + OK 按钮；返回实例供 SetText/Close/Closed 使用。</summary>
+        /// <summary>模态进度框：正文 + OK 按钮；返回实例供 SetText/Close/Closed 使用。</summary>
         public static MessageBox ShowModal(Window parent, string text, string title) {
             var msgbox = new MessageBox();
             var content = new TextBlock {
@@ -241,22 +214,19 @@ namespace OpenUtau.App.Views {
                 MaxWidth = 560,
                 VerticalAlignment = VerticalAlignment.Center,
             };
-            var host = new SukiMessageBoxHost { Header = title, Content = content };
-            host.ActionButtonsSource = new AvaloniaList<Button> {
-                SukiMessageBoxButtonsFactory.CreateButton(
-                    ThemeManager.GetString("button.ok"), SukiMessageBoxResult.OK, "Flat"),
-            };
-            msgbox._host = host;
             msgbox._contentText = content;
-            msgbox.CaptureWindow(content);
-            _ = SukiMessageBox.ShowDialog(parent, host, title).ContinueWith(t => {
-                msgbox.Closed?.Invoke(msgbox, EventArgs.Empty);
-            }, TaskScheduler.FromCurrentSynchronizationContext());
+            var buttons = new List<DialogButton> {
+                new DialogButton { Label = ThemeManager.GetString("button.ok"), Result = MessageBoxResult.Ok, Primary = true },
+            };
+            var window = BuildWindow(title, content, buttons, msgbox, MessageBoxResult.Ok);
+            _ = ShowDialogAsync(parent, window, msgbox, MessageBoxResult.Ok)
+                .ContinueWith(_ => msgbox.Closed?.Invoke(msgbox, EventArgs.Empty),
+                    TaskScheduler.FromCurrentSynchronizationContext());
             return msgbox;
         }
 
         /// <summary>
-        /// 后台任务进度框：host 进度内容 + 取消按钮。取消 → token 取消；任务完成 → 自动关窗。
+        /// 后台任务进度框：正文 + 取消按钮。取消 → token 取消；任务完成 → 自动关窗。
         /// 语义与旧实现一致：返回执行任务本身（fault 检查、取消时 Result=Cancel）。
         /// </summary>
         public static Task<MessageBoxResult> ShowProcessing(
@@ -272,14 +242,11 @@ namespace OpenUtau.App.Views {
                 MaxWidth = 560,
                 VerticalAlignment = VerticalAlignment.Center,
             };
-            var host = new SukiMessageBoxHost { Header = title, Content = content };
-            host.ActionButtonsSource = new AvaloniaList<Button> {
-                SukiMessageBoxButtonsFactory.CreateButton(
-                    ThemeManager.GetString("button.cancel"), SukiMessageBoxResult.Cancel, "Flat"),
-            };
-            msgbox._host = host;
             msgbox._contentText = content;
-            msgbox.CaptureWindow(content);
+            var buttons = new List<DialogButton> {
+                new DialogButton { Label = ThemeManager.GetString("button.cancel"), Result = MessageBoxResult.Cancel },
+            };
+            var window = BuildWindow(title, content, buttons, msgbox, MessageBoxResult.Cancel);
 
             var res = MessageBoxResult.Ok;
             var tokenSource = new CancellationTokenSource();
@@ -290,15 +257,13 @@ namespace OpenUtau.App.Views {
             }, tokenSource.Token);
 
             // 任务完成 → 关窗（若还在）+ 通知调用方
-            task.ContinueWith(t => {
+            task.ContinueWith(_ => {
                 msgbox.Close();
-                if (onFinished != null) {
-                    onFinished(task);
-                }
+                onFinished?.Invoke(task);
             }, scheduler);
 
-            // 窗口关闭（用户点取消/关窗）→ 若任务未完成则取消
-            _ = SukiMessageBox.ShowDialog(parent, host, title).ContinueWith(dialogTask => {
+            // 窗口关闭（用户点取消 / 关窗）→ 若任务未完成则取消
+            _ = ShowDialogAsync(parent, window, msgbox, MessageBoxResult.Cancel).ContinueWith(_ => {
                 if (!task.IsCompleted) {
                     res = MessageBoxResult.Cancel;
                     tokenSource.Cancel();
@@ -308,13 +273,98 @@ namespace OpenUtau.App.Views {
             return task;
         }
 
-        private static MessageBoxResult MapResult(SukiMessageBoxResult r, MessageBoxButtons buttons) {
-            return r switch {
-                SukiMessageBoxResult.OK => MessageBoxResult.Ok,
-                SukiMessageBoxResult.Cancel => MessageBoxResult.Cancel,
-                SukiMessageBoxResult.Yes => MessageBoxResult.Yes,
-                SukiMessageBoxResult.No => MessageBoxResult.No,
-                _ => DefaultResult(buttons), // Close（ESC/X）
+        // ── 自研 MD3 模态窗口 ────────────────────────────────────
+
+        /// <summary>
+        /// 组装 MD3 对话框窗口：标题 16 medium、正文 13、右下角按钮（主操作实心胶囊）。
+        /// ESC = 默认按钮；回车 = 第一个主操作按钮。
+        /// </summary>
+        private static Window BuildWindow(string title, Control content, List<DialogButton> buttons, MessageBox messageBox, MessageBoxResult escapeResult) {
+            var root = new StackPanel {
+                Margin = new Thickness(24),
+                Spacing = 16,
+                MinWidth = 360,
+            };
+            root.Children.Add(new TextBlock {
+                Text = title,
+                FontSize = 16,
+                FontWeight = FontWeight.Medium,
+                TextWrapping = TextWrapping.Wrap,
+            });
+            root.Children.Add(content);
+
+            var buttonRow = new StackPanel {
+                Orientation = Orientation.Horizontal,
+                Spacing = 12,
+                HorizontalAlignment = HorizontalAlignment.Right,
+            };
+            foreach (var descriptor in buttons) {
+                var button = new Button {
+                    Content = descriptor.Label,
+                    MinWidth = 88,
+                };
+                if (descriptor.Primary) {
+                    button.Classes.Add("primary");
+                }
+                var captured = descriptor;
+                button.Click += async (_, _) => {
+                    if (captured.Action != null) {
+                        await captured.Action();
+                    }
+                    messageBox.Result = captured.Result;
+                    messageBox._window?.Close();
+                };
+                buttonRow.Children.Add(button);
+            }
+            root.Children.Add(buttonRow);
+
+            var window = new WindowEx {
+                Title = title,
+                Content = root,
+                SizeToContent = SizeToContent.WidthAndHeight,
+                CanResize = false,
+                ShowInTaskbar = false,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                MaxWidth = 640,
+            };
+            window.KeyDown += (_, e) => {
+                if (e.Key == Key.Escape) {
+                    messageBox.Result = escapeResult;
+                    window.Close();
+                    e.Handled = true;
+                }
+            };
+            return window;
+        }
+
+        /// <summary>本次对话的结果（窗口关闭后读取）。</summary>
+        private MessageBoxResult Result { get; set; } = MessageBoxResult.Cancel;
+
+        /// <summary>显示并等待关闭，返回结果（关闭窗口/ESC → escapeResult 已由调用方设定）。</summary>
+        private static async Task<MessageBoxResult> ShowDialogAsync(Window parent, Window window, MessageBox messageBox, MessageBoxResult escapeResult) {
+            messageBox._window = window;
+            if (messageBox._closeRequested) {
+                messageBox._closeRequested = false;
+                return escapeResult;
+            }
+            await window.ShowDialog(parent);
+            messageBox._window = null;
+            return messageBox.Result;
+        }
+
+        private static IEnumerable<(string label, MessageBoxResult result, bool primary)> ButtonsOf(MessageBoxButtons buttons) {
+            string ok = ThemeManager.GetString("button.ok");
+            string cancel = ThemeManager.GetString("button.cancel");
+            string yes = ThemeManager.TryGetString("button.yes", out var y) ? y : "Yes";
+            string no = ThemeManager.TryGetString("button.no", out var n) ? n : "No";
+            return buttons switch {
+                MessageBoxButtons.Ok => new[] { (ok, MessageBoxResult.Ok, true) },
+                MessageBoxButtons.OkCancel => new[] { (cancel, MessageBoxResult.Cancel, false), (ok, MessageBoxResult.Ok, true) },
+                MessageBoxButtons.YesNo => new[] { (no, MessageBoxResult.No, false), (yes, MessageBoxResult.Yes, true) },
+                MessageBoxButtons.YesNoCancel => new[] {
+                    (cancel, MessageBoxResult.Cancel, false), (no, MessageBoxResult.No, false), (yes, MessageBoxResult.Yes, true),
+                },
+                _ => new[] { (ok, MessageBoxResult.Ok, true) },   // OkCopy：复制按钮单独加，末尾补确定
             };
         }
 
@@ -333,11 +383,12 @@ namespace OpenUtau.App.Views {
             var regex = new Regex(@"http(s)?://[^(\r\n|\n| )]+", RegexOptions.IgnoreCase | RegexOptions.Singleline);
             var match = regex.Match(text);
             if (match.Success) {
-                textPanel.Children.Add(new TextBlock { Text = text.Substring(0, match.Index) });
+                textPanel.Children.Add(new TextBlock { Text = text.Substring(0, match.Index), TextWrapping = TextWrapping.Wrap });
                 var hyperlink = new Button {
                     Content = match.Value.Trim(),
                     Cursor = new Cursor(StandardCursorType.Hand),
                     Classes = { "linkButton" },
+                    HorizontalAlignment = HorizontalAlignment.Left,
                 };
                 hyperlink.Click += OnUrlClick;
                 textPanel.Children.Add(hyperlink);
@@ -345,7 +396,7 @@ namespace OpenUtau.App.Views {
                 SetTextWithLink(text.Substring(match.Index + match.Length), textPanel);
             } else {
                 if (!string.IsNullOrEmpty(text)) {
-                    textPanel.Children.Add(new TextBlock { Text = text });
+                    textPanel.Children.Add(new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap });
                 }
             }
         }

@@ -32,9 +32,6 @@ using OpenUtau.Theming;
 using ReactiveUI;
 using Serilog;
 using SharpCompress;
-using SukiUI.Controls;
-using SukiUI.Dialogs;
-using SukiUI.Toasts;
 using Point = Avalonia.Point;
 
 namespace OpenUtau.App.Views {
@@ -81,8 +78,6 @@ namespace OpenUtau.App.Views {
             Log.Information("Creating main window.");
             InitializeComponent();
             // B4: Suki host manager（7.x host 不自动创建 manager，需手动挂载）
-            DialogHost!.Manager = new SukiDialogManager();
-            ToastHost!.Manager = new SukiToastManager();
             Log.Information("Initialized main window component.");
             DataContext = viewModel = new MainWindowViewModel {
                 // give the viewmodel a way to prompt/save using the view's existing method

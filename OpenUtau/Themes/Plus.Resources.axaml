@@ -150,9 +150,4 @@
   <system:Double x:Key="ControlContentThemeFontSize">13</system:Double>
   <system:Double x:Key="ComboBoxThemeMinWidth">120</system:Double>
   <system:Double x:Key="ComboBoxMinHeight">32</system:Double>
-  <Thickness x:Key="ComboBoxPadding">8,4,8,4</Thickness>
-  <Thickness x:Key="ComboBoxDropdownBorderThickness">1</Thickness>
-  <Thickness x:Key="ComboBoxDropdownBorderPadding">0</Thickness>
-  <Thickness x:Key="AutoCompleteListPadding">8,4,8,4</Thickness>
-  <Thickness x:Key="RadioButtonBorderThemeThickness">2</Thickness>
 </ResourceDictionary>

@@ -1,6 +1,6 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:suki="using:SukiUI.Controls">
+        >
   <!-- ═══════════════════════════════════════════════════════════════════════
        MD3 全局控件风格层（2026-09-25）
 
@@ -168,5 +168,35 @@
   <Style Selector="ToggleSwitch">
     <Setter Property="MinHeight" Value="28"/>
     <Setter Property="Margin" Value="0"/>
+  </Style>
+  <!-- ══ 列表容器 / 滑条 / 进度条 / 提示 / 分隔线：与设计稿同规格、颜色走池 ══ -->
+  <Style Selector="ListBox">
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="Padding" Value="4"/>
+    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+  </Style>
+  <Style Selector="Slider">
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="MinHeight" Value="20"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+  </Style>
+  <Style Selector="ProgressBar">
+    <Setter Property="MinHeight" Value="6"/>
+    <Setter Property="CornerRadius" Value="999"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+  </Style>
+  <Style Selector="Separator">
+    <Setter Property="Background" Value="{DynamicResource md3.outline-variant}"/>
+  </Style>
+  <Style Selector="ToolTip">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="FontSize" Value="12"/>
   </Style>
 </Styles>

@@ -74,9 +74,9 @@ namespace OpenUtau.Test.App {
             "RadioButtonOuterEllipseFill", "RadioButtonOuterEllipseStroke",
             "RadioButtonOuterEllipseFillPointerOver", "RadioButtonOuterEllipseStrokePointerOver",
             "SliderHorizontalThumbWidth", "SliderHorizontalThumbHeight", "ControlContentThemeFontSize",
-            "ComboBoxThemeMinWidth", "ComboBoxMinHeight", "ComboBoxPadding",
-            "ComboBoxDropdownBorderThickness", "ComboBoxDropdownBorderPadding",
-            "AutoCompleteListPadding", "RadioButtonBorderThemeThickness",
+            "ComboBoxThemeMinWidth", "ComboBoxMinHeight",
+            
+            
         };
 
         /// <summary>ThemeManager.BrushBindings 投影所依赖的键（缺键会打 WARN 并保留旧值）。</summary>
@@ -125,13 +125,11 @@ namespace OpenUtau.Test.App {
             Assert.NotNull(ThemeManager.AccentBrush1);
             Assert.NotNull(ThemeManager.ForegroundBrush);
             // Suki 同步：暖灰为活动主题色（顺序铁律：先 ChangeBaseTheme 后 ChangeColorTheme）
-            Assert.Equal("Plus 暖灰", SukiUI.SukiTheme.GetInstance().ActiveColorTheme?.DisplayName);
 
             ThemeManager.Apply("Light");
             Assert.Equal(ThemeVariant.Light, Application.Current!.RequestedThemeVariant);
             Assert.False(ThemeManager.IsDarkMode);
             Assert.NotNull(ThemeManager.AccentBrush1);
-            Assert.Equal("Plus 暖灰", SukiUI.SukiTheme.GetInstance().ActiveColorTheme?.DisplayName);
 
             // 自定义 YAML（无文件则回退 Light 基座；注册为独立 ThemeVariant，非内置 Light）
             ThemeManager.Apply("SomeCustom");
@@ -209,8 +207,8 @@ namespace OpenUtau.Test.App {
             var win = new OpenUtau.App.Controls.WindowEx();
             Assert.Equal(WindowDecorations.Full, win.WindowDecorations);
             Assert.False(win.ExtendClientAreaToDecorationsHint);
-            Assert.False(typeof(SukiUI.Controls.SukiWindow).IsAssignableFrom(typeof(OpenUtau.App.Controls.WindowEx)),
-                "WindowEx 不应再继承 SukiWindow（其模板会盖住 MD3 背景）");
+            Assert.False(typeof(OpenUtau.App.Controls.WindowEx).GetProperties().Any(p => p.DeclaringType?.Namespace?.StartsWith("SukiUI") == true),
+                "WindowEx 不应再依赖 SukiUI");
 
             win.Show();
             try {
@@ -229,7 +227,8 @@ namespace OpenUtau.Test.App {
         /// </summary>
         [AvaloniaFact]
         public void InputControls_ApplyTemplateWithoutError() {
-            ThemeManager.Apply("Dark");
+            // 目的：应用级样式不得破坏各控件模板的套用（缺必选 PART 会抛异常）。
+            // 注意：不在用例内切主题变体 —— 变体会触发全部 DynamicResource 重解析，与本用例目的无关。
             var win = new OpenUtau.App.Controls.WindowEx();
             var stack = new Avalonia.Controls.StackPanel();
             win.Content = stack;
@@ -244,8 +243,9 @@ namespace OpenUtau.Test.App {
             foreach (var c in controls) {
                 c.ApplyTemplate();   // 缺必选 PART 会在此抛异常
             }
-            // TextBox 取 PlusTheme 高度（32）
-            Assert.Equal(32, ((TextBox)controls[0]).Height);
+            // 规格由应用级样式给定（不再依赖第三方模板）
+            Assert.Equal(32, ((TextBox)controls[0]).MinHeight);
+            win.Close();
         }
 
         /// <summary>视觉树按名查找（Avalonia 11 模板部件经 NameScope 注册，控件无 GetTemplateChild）。</summary>
@@ -260,44 +260,6 @@ namespace OpenUtau.Test.App {
                 }
             }
             return null;
-        }
-
-        /// <summary>
-        /// 诊断：Suki ToggleSwitch（模板 PART：SwitchBackground 轨道 + PanelSelected 选中填充 +
-        /// PART_SwitchKnob/SwitchKnob）。off：填充在轨道外（Clip 缩回）、knob 在左；
-        /// on：填充覆盖轨道、knob 在右。轨道底色动态渐变无法断言颜色，用相对位置断言。
-        /// </summary>
-        [AvaloniaFact]
-        public void ToggleSwitch_TrackAndKnobPerState() {
-            ThemeManager.Apply("Dark");
-            var off = new ToggleSwitch { IsChecked = false };
-            var on = new ToggleSwitch { IsChecked = true };
-            var win = new OpenUtau.App.Controls.WindowEx();
-            var sp = new Avalonia.Controls.StackPanel { Children = { off, on } };
-            win.Content = sp;
-            win.Show();
-            off.ApplyTemplate();
-            on.ApplyTemplate();
-
-            var offTrack = FindPart(off, "SwitchBackground") as Border;
-            var onTrack = FindPart(on, "SwitchBackground") as Border;
-            var offFill = FindPart(off, "PanelSelected") as Avalonia.Controls.Panel;
-            var onFill = FindPart(on, "PanelSelected") as Avalonia.Controls.Panel;
-            var offKnob = FindPart(off, "SwitchKnob") as Border;
-            var onKnob = FindPart(on, "SwitchKnob") as Border;
-            Assert.NotNull(offTrack);
-            Assert.NotNull(onTrack);
-            Assert.NotNull(offFill);
-            Assert.NotNull(onFill);
-            Assert.NotNull(offKnob);
-            Assert.NotNull(onKnob);
-
-            // 选中填充（Clip 动画）：off 缩回轨道外，on 展开覆盖轨道
-            Assert.True(offFill!.Bounds.X > 0, $"off fill should sit outside track, got X={offFill.Bounds.X}");
-            Assert.True(onFill!.Bounds.X < 0, $"on fill should cover track, got X={onFill.Bounds.X}");
-            // knob 相对位置：off 在左、on 在右
-            Assert.True(offKnob!.Bounds.X < onKnob!.Bounds.X,
-                $"off knob should be left of on knob, got off={offKnob.Bounds.X} on={onKnob.Bounds.X}");
         }
 
         /// <summary>契约：ListBoxItem 选中背景 = 颜色池 secondary-container（v4.0 起统一走池，不再用旧 accent-muted）。</summary>
@@ -352,8 +314,7 @@ namespace OpenUtau.Test.App {
             Assert.Equal(13, btn.FontSize);
             Assert.Equal("HarmonyOS Sans SC", btn.FontFamily.Name);
             // MD3：描边走 outline-variant、文字走 primary（同一套颜色池）
-            var scheme = Md3SchemeColors.Create(ColorPool.DefaultSeed, Md3SchemeVariant.TonalSpot, false);
-            Assert.Equal(Md3ColorPool.ToColor(scheme.Get(Md3Role.Primary)),
+            Assert.Equal(ColorPool.Current.Color(Md3Role.Primary),
                 Assert.IsAssignableFrom<ISolidColorBrush>(btn.Foreground).Color);
         }
 

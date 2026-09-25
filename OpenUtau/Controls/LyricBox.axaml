@@ -17,7 +17,7 @@
       <ListBox Name="PART_Suggestions" Grid.Row="2" MaxHeight="240"
                VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                BorderThickness="0" Background="Transparent"
-               Margin="{DynamicResource AutoCompleteListPadding}"
+               Margin="8,4"
                ItemsSource="{Binding Suggestions}" SelectedItem="{Binding SelectedSuggestion}"
                Focusable="True" KeyDown="ListBox_KeyDown">
         <ListBox.Styles>

@@ -1,4 +1,4 @@
-﻿<Styles xmlns="https://github.com/avaloniaui"
+<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
   <Style Selector="Button,ToggleButton">
@@ -223,7 +223,7 @@
                     Height="14"
                     Fill="{DynamicResource RadioButtonOuterEllipseFill}"
                     Stroke="{DynamicResource RadioButtonOuterEllipseStroke}"
-                    StrokeThickness="{DynamicResource RadioButtonBorderThemeThickness}"
+                    StrokeThickness="2"
                     UseLayoutRounding="False" />
 
                 <Ellipse
@@ -233,7 +233,7 @@
                     Fill="{DynamicResource SelectedTrackAccentBrush}"
                     Opacity="0"
                     Stroke="{DynamicResource SelectedTrackAccentBrush}"
-                    StrokeThickness="{DynamicResource RadioButtonBorderThemeThickness}"
+                    StrokeThickness="2"
                     UseLayoutRounding="False" />
 
                 <Ellipse

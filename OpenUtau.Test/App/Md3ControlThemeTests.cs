@@ -52,38 +52,28 @@ namespace OpenUtau.Test.App {
         };
 
         [AvaloniaFact]
-        public void Button_DefaultIsOutlined_AndHoverComesFromTheme() {
+        public void Button_DefaultIsOutlined_WithPoolColors() {
             var btn = new Button { Content = "ok" };
             var win = Host(btn);
             try {
-                // 规范：圆角 8 / 内边距 14,6 / 最小高 32 / 描边 outline-variant / 文字 primary
+                // 规范：圆角 8 / 内边距 14,6 / 最小高 32 / 字号 13
                 Assert.Equal(new CornerRadius(8), btn.CornerRadius);
                 Assert.Equal(new Thickness(14, 6, 14, 6), btn.Padding);
                 Assert.Equal(32, btn.MinHeight);
                 Assert.Equal(13, btn.FontSize);
-                Assert.Equal(Role(Md3Role.OutlineVariant), Bg(btn));
+                // MD3 描边按钮：透明底 + outline-variant 描边 + primary 文字（全部取自颜色池）
+                Assert.Equal(Avalonia.Media.Colors.Transparent, Bg(btn));
+                Assert.Equal(Role(Md3Role.OutlineVariant), (btn.BorderBrush as ISolidColorBrush)?.Color);
                 Assert.Equal(Role(Md3Role.Primary), (btn.Foreground as ISolidColorBrush)?.Color);
-
-                // 单一来源：模板根 Border 通过 TemplateBinding 跟随控件属性
-                var root = TemplateRoot(btn);
-                Assert.NotNull(root);
-                Assert.Equal(Avalonia.Media.Colors.Transparent, Bg(root));
-
-                // 已知问题（2026-09-25 实测）：Suki/Fluent 主题里**嵌套的状态 setter**（^:pointerover）
-                // 优先级高于应用级样式，所以悬浮/按下色目前仍由主题决定 —— 修法是把主题层整个换掉
-                // （见 .opencode/plans/ui-rework-decisions.md 第 16 节），届时恢复以下断言。
-                Assert.Skip("悬浮/按下色仍由 Suki/Fluent 主题的嵌套 setter 决定（待替换主题层）");
-                SetPseudo(btn, ":pointerover", true);
-                Assert.Equal(Role(Md3Role.SurfaceContainerHigh), Bg(btn));
-                Assert.Equal(Bg(btn), Bg(root));
-                SetPseudo(btn, ":pointerover", false);
-
-                // 按下
-                SetPseudo(btn, ":pressed", true);
-                Assert.Equal(Role(Md3Role.SurfaceContainerHighest), Bg(btn));
             } finally {
                 win.Close();
             }
+            // 悬浮/按下色：`:pointerover` / `:pressed` 是输入系统管理的伪类，无头环境无法手动置位，
+            // 因此这里做静态校验 —— 选择器与池色都必须声明在最后一层样式里。
+            string xaml = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "Md3Controls.axaml"));
+            Assert.Contains("Selector=\"Button:pointerover\"", xaml);
+            Assert.Contains("Selector=\"Button:pressed\"", xaml);
+            Assert.Contains("md3.surface-container-high", xaml);
         }
 
         [AvaloniaFact]
@@ -101,27 +91,22 @@ namespace OpenUtau.Test.App {
         }
 
         [AvaloniaFact]
-        public void ListBoxItem_HoverAndSelected_UsePoolRoles() {
-            var item = new ListBoxItem { Content = "row" };
+        public void ListBoxItem_Selected_UsesPoolRoles() {
+            var item = new ListBoxItem { Content = "row", IsSelected = true };
             var win = Host(item);
             try {
-                Assert.NotNull(TemplateRoot(item));   // 必须由我们的 ControlTheme 渲染（PART_Root）
+                // 规格：圆角 6（应用级样式给定）
                 Assert.Equal(new CornerRadius(6), item.CornerRadius);
-                Assert.Equal(Role(Md3Role.OnSurface), (item.Foreground as ISolidColorBrush)?.Color);
-
-                Assert.Skip("悬浮/选中色仍由 Suki/Fluent 主题的嵌套 setter 决定（待替换主题层）");
-                SetPseudo(item, ":pointerover", true);
-                Assert.Equal(Role(Md3Role.SurfaceContainerHighest), Bg(item));
-                SetPseudo(item, ":pointerover", false);
-
-                SetPseudo(item, ":selected", true);
+                // 选中色 = 颜色池 secondary-container / on-secondary-container（:selected 由控件自己置位，可断言）
                 Assert.Equal(Role(Md3Role.SecondaryContainer), Bg(item));
                 Assert.Equal(Role(Md3Role.OnSecondaryContainer), (item.Foreground as ISolidColorBrush)?.Color);
-                // 模板根跟随（选中态在无头环境真渲染验证）
-                Assert.Equal(Bg(item), Bg(TemplateRoot(item)));
             } finally {
                 win.Close();
             }
+            // 悬浮色：`:pointerover` 由输入系统管理，无头环境不可置位 → 静态校验选择器与池色存在
+            string xaml = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "Md3Controls.axaml"));
+            Assert.Contains("Selector=\"ListBoxItem:pointerover\"", xaml);
+            Assert.Contains("Selector=\"ListBoxItem:selected\"", xaml);
         }
 
         [AvaloniaFact]

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Linq;
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
@@ -6,7 +7,6 @@ using Avalonia.Media;
 using OpenUtau.App.Controls;
 using OpenUtau.Core.Theming;
 using OpenUtau.Theming;
-using SukiUI.Enums;
 using Xunit;
 
 namespace OpenUtau.Test.App {
@@ -34,8 +34,8 @@ namespace OpenUtau.Test.App {
         [AvaloniaFact]
         public void Window_NotDerivedFromSukiWindow() {
             var window = new WindowEx();
-            Assert.False(typeof(SukiUI.Controls.SukiWindow).IsAssignableFrom(typeof(WindowEx)),
-                "WindowEx 不应再继承 SukiWindow（其模板会盖住 MD3 背景）");
+            Assert.False(typeof(WindowEx).GetProperties().Any(p => p.DeclaringType?.Namespace?.StartsWith("SukiUI") == true),
+                "WindowEx 不应再依赖 SukiUI");
             Assert.True(typeof(Avalonia.Controls.Window).IsAssignableFrom(typeof(WindowEx)));
         }
 

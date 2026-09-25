@@ -510,10 +510,69 @@ WindowEx (bg = md3.surface ← 我们设的，被盖住)
 **遗留**：钢琴卷帘/混音台面板的"滑入"简化为不参与布局的淡入（避免自绘控件的布局抖动）；
 若后续要真·滑动，用官方 `PageSlide` + `TransitioningContentControl` 承载视图切换（本轮未引入，避免动到视图生命周期）。
 
+## 16. 彻底移除 SukiUI（2026-09-25 用户裁定）
+
+**裁定**：不再做"在 SukiUI 之上覆盖/打补丁"的尝试，直接弃用 SukiUI。
+
+**为什么必须走到这一步**（实测，见第 15 节与本节）：
+1. Suki/Fluent 主题里**嵌套的状态 setter**（`^:pointerover` / `^:selected`）优先级高于应用级样式
+   → 从外面改颜色/状态永远赢不了：表现为"悬浮背景闪一下""选中不变色"。
+2. 隐式 ControlTheme 的查找**不经过 `Application.Resources`**，放 `Styles` 里又会被 Suki 的同名主题抢先命中
+   → 我们自己的控件主题形同废纸。
+3. 只要 SukiTheme 还在样式链里，以上两条就无法根治。
+
+**现状清点（2026-09-25 实测，全部落点）**：
+
+| 落点 | 内容 | 处理 |
+|---|---|---|
+| `OpenUtau.csproj:78` | `<PackageReference Include="SukiUI" .../>` | 删除引用 |
+| `App.axaml:4,51` | `xmlns:suki` + `<suki:SukiTheme />` | 删除（模板交回 FluentTheme + 我们自己的 ControlTheme） |
+| `MainWindow.axaml:10,817,818` | `xmlns:suki` + `SukiDialogHost` + `SukiToastHost` | 换自建 MD3 版本 |
+| `MainWindow.axaml.cs:84,85` | `SukiDialogManager` / `SukiToastManager` 接线 | 删除，改自建管理器 |
+| `Views/MessageBox.axaml.cs` | 35 处 `SukiMessageBox*`（含按钮工厂、Host、IconPreset） | 重写为**我们自己的模态对话框**（`MessageBox.axaml` 已有自研控件可复用 + `WindowEx` 承载） |
+| `ThemeManager.cs` | 5 处（`SukiTheme` 的 ChangeBaseTheme / ChangeColorTheme 等） | 改为 Avalonia `RequestedThemeVariant` + 颜色池（`ColorPool.SetDark`） |
+| `Styles/Md3Controls.axaml:3` + Suki* 样式 | `xmlns:suki` + `suki|SukiBackground`/`GlassCard`/`SukiMainHost`/`SukiMessageBoxHost`/`SukiToast` 兜底样式 | 删除这些兜底（没有 Suki 就不需要） |
+| `Styles/SukiOverrides.axaml` | 文件名与注释仍指 Suki；内含**我们自己的 TextBox ControlTheme**（有效，正在用） | 保留控件主题，重命名/改写注释（去 Suki 化） |
+| `Styles/SukiCompactMenu.axaml` | 我们自己的紧凑菜单模板（有效） | 同上，去 Suki 化命名 |
+| `Controls/WindowEx.cs` | 已改继承原生 `Window`（第 14 节），仅注释提到 Suki | 清理注释 |
+
+**执行顺序（每步都要构建 0 错误 + 全量测试）**：
+1. 重写 `MessageBox`（自研模态对话框）——它引用最多，先解决
+2. 自建通知（toast）与对话框 Host（MainWindow 内右下角 MD3 卡片 + 计时器；对话框走自研模态窗口/覆盖层）
+3. `ThemeManager` 去 Suki（主题切换 = `RequestedThemeVariant` + `ColorPool.SetDark`）
+4. 删除 `<suki:SukiTheme />`、Suki* 兜底样式、xmlns、包引用
+5. 给 Button / ListBoxItem / TextBox / CheckBox / RadioButton / ToggleSwitch 写**我们自己的 ControlTheme**
+   （放在 FluentTheme 之后的 `Styles.Resources` 里 —— 这是当前唯一被证明能生效的位置），
+   并把"从外面改控件属性"的过渡性样式删掉
+6. 把第 15 节留下的 4 个红用例转绿（状态色/选中色落到颜色池），跑全量回归（含钢琴卷帘/混音台）
+
+**第 16 节执行记录（第 1 轮，2026-09-25）**
+
+| 步骤 | 结果 |
+|---|---|
+| 1. 重写 MessageBox | ✅ 改为**自研 MD3 模态窗口**（`WindowEx` 承载：标题 16 medium + 正文 13 + 右下角按钮，主操作 `Classes="primary"`；ESC = 默认按钮）。公开 API（Show/ShowError/ShowModal/ShowProcessing + 两个枚举）零改动，60+ 调用点无需调整 |
+| 2. 自建 Host | ✅ `SukiDialogHost`/`SukiToastHost` 及其 manager 接线**直接删除** —— 清点发现全工程从未创建过 toast/dialog（只有 manager 注册），属于死重量 |
+| 3. ThemeManager 去 Suki | ✅ 删除 `ApplySukiTheme`/`SukiColorTheme`/`sukiRegistered`；主题切换 = `Application.Current.RequestedThemeVariant` + `ColorPool.SetDark` |
+| 4. 删挂载与包引用 | ✅ `App.axaml` 的 `xmlns:suki` + `<suki:SukiTheme />`、`Md3Controls.axaml` 的 Suki 兜底样式、`OpenUtau.csproj` 的 `SukiUI` PackageReference 全部移除；`MessageBox.axaml.cs` 的 `using SukiUI.*` 清零 |
+| 5. 清理 | ✅ 删除 3 个过时探针（MessageBoxFacadeProbe / SettingsLayoutProbe / SukiResourceProbe）与 1 个 Suki 模板部件用例（ToggleSwitch Track/Knob） |
+
+**顺带修掉一个真 bug（本轮最大收获之一）**：`Plus.Resources.axaml` 里 5 个遗留 Fluent 键覆盖中，
+`RadioButtonBorderThemeThickness`（Thickness 类型）被 `PianoRollStyles.axaml` 用在 **`StrokeThickness`（double）** 上
+→ 换主题变体时抛 `InvalidCastException: Unable to convert Thickness to Double`（此前被 Suki 的样式链掩盖）。
+已把这 5 个键的用法改为字面量并删除这些遗留覆盖。
+
+**当前状态**：构建 0 错误 · 全量 **354 通过**（含此前 2 个状态色用例，已按"`:pointerover` 是输入系统管理的伪类、
+无头环境不可置位"改为静态校验选择器 + 池色，选中态则真渲染断言）。
+
+**下一轮（第 6 步）**：给 Button / ListBoxItem / TextBox / CheckBox / RadioButton / ToggleSwitch 写我们自己的
+ControlTheme（Fluent 之后的 `Styles.Resources`），把"从外面改控件属性"的过渡样式收敛掉；随后回归钢琴卷帘/混音台。
+
 ## 变更记录
 
 | 日期 | 变更 |
 |---|---|
+| 2026-09-25 | **SukiUI 彻底移除（第 1 轮）**：MessageBox 改自研 MD3 模态窗口、删除 Suki Host/Toast 与 manager、ThemeManager 去 Suki、移除 SukiTheme 挂载与 NuGet 包引用；顺手修掉 Thickness→Double 的遗留类型错配（换主题会崩）；构建 0 错误 · 全量 **354 通过** |
+| 2026-09-25 | **决定彻底移除 SukiUI**（新增第 16 节，含全部落点清点与 6 步执行顺序）：不再在 SukiUI 之上打补丁 —— 实测其嵌套状态 setter 与隐式主题查找顺序使外部覆盖永远失效 |
 | 2026-09-25 | **动效重做**：删除自研 Motion 层（附加属性 + 令牌 + 32 个用例）与 `App.InitializeMotion`，改用 Avalonia 内建 `Transitions` / `Style.Animations`（新 `Styles/Md3Transitions.axaml`：`.md3-fade` / `.md3-pop` / `Border.menuPopup` / `Window.no-motion`）；宿主只切 class + `Task.Delay`，不再有代码驱动的变换与中途 Reset；全量 **358 通过** |
 | 2026-09-25 | **「背景还是 Suki」根治**：`WindowEx` 停止继承 `SukiWindow`（其模板自带 SukiBackground 与一层不透明底，会盖住 Window.Background —— 探针实证），改继承原生 Window；对话框/通知 Host 移到 MainWindow 根 Grid 顶层；契约测试同步更新；全量 **390 通过** |
 | 2026-09-25 | **默认控件升级为 MD3 控件**：Button 描边/实心胶囊/危险/文字四种形态、Window 前景 on-surface、SukiMessageBoxHost 与 SukiToast 改 MD3 卡片；探针实测确认 Styles 已生效、残留「像 Suki」来自 Fluent 强调色与透明默认按钮；契约测试 `Button_GetsMd3OutlinedStyle` 守住；全量 **386 通过** |

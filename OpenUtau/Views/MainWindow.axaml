@@ -7,7 +7,6 @@
         xmlns:controls="clr-namespace:OpenUtau.App.Controls"
         xmlns:views="using:OpenUtau.App.Views"
         xmlns:motion="using:OpenUtau.Theming"
-        xmlns:suki="using:SukiUI.Controls"
         mc:Ignorable="d" d:DesignWidth="1440" d:DesignHeight="900"
         x:Class="OpenUtau.App.Views.MainWindow"
         Icon="/Assets/open-utau.ico"
@@ -812,10 +811,6 @@
 
     <!-- 偏好设置：窗口级最上层（欢迎页之上；模态对话框层 1000 仍压在其上）。自带 56px 顶栏，故覆盖共享顶栏也没问题 -->
     <views:PreferencesView x:Name="PreferencesHost" Classes="md3-fade" IsVisible="False" ZIndex="990"/>
-
-    <!-- SukiDialog / SukiToast 挂载点（WindowEx 已不继承 SukiWindow，改为直接放进窗口最上层） -->
-    <suki:SukiDialogHost x:Name="DialogHost" ZIndex="1100"/>
-    <suki:SukiToastHost x:Name="ToastHost" ZIndex="1100"/>
 
     <!-- 偏好设置（全屏视图；模态覆盖层仍在其上） -->
 

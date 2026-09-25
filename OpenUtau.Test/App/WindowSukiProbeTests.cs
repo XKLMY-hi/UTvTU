@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using System.Linq;
+using Xunit;
 using Avalonia.Headless.XUnit;
 using OpenUtau.App.Controls;
 using OpenUtau.App.Views;
@@ -15,8 +16,8 @@ public class WindowSukiProbeTests {
     public void WindowEx_IsNativeWindow_NotSukiWindow() {
         var win = new LoadingWindow();
         Assert.IsAssignableFrom<WindowEx>(win);
-        Assert.False(typeof(SukiUI.Controls.SukiWindow).IsAssignableFrom(win.GetType()),
-            "窗口不应再继承 SukiWindow（会盖住 MD3 背景）");
+        Assert.False(win.GetType().GetProperties().Any(p => p.DeclaringType?.Namespace?.StartsWith("SukiUI") == true),
+            "窗口不应再依赖 SukiUI");
         Assert.IsAssignableFrom<Avalonia.Controls.Window>(win);
     }
 

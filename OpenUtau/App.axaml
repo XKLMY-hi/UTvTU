@@ -1,8 +1,7 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="using:OpenUtau.App"
-             xmlns:suki="using:SukiUI"
-             x:Class="OpenUtau.App.App" Name="UTvTU">
+                  x:Class="OpenUtau.App.App" Name="UTvTU">
   <Application.DataTemplates>
     <local:ViewLocator/>
   </Application.DataTemplates>
@@ -45,10 +44,6 @@
     <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
     <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
     <StyleInclude Source="/Styles/Styles.axaml"/>
-    <!-- SukiUI 7.x：SukiTheme 自身是 IStyle，直接注册（旧版 avares StyleInclude 已废弃）。
-         放尾部以覆盖 Fluent 隐式模板；TextBox 的 {x:Type} 显式 ControlTheme 并入
-         SukiOverrides（阶段 C 后 PlusTheme 退役） -->
-    <suki:SukiTheme />
     <!-- Suki 尺寸/字体收敛层：Quicksand 15px → Plus 令牌（HarmonyOS 13px），
          必须在 SukiTheme 之后挂载才能覆盖其模板默认值 -->
     <StyleInclude Source="/Styles/SukiOverrides.axaml"/>
