@@ -456,10 +456,34 @@ pwsh -NoProfile -File .opencode\design\extract-spec.ps1 -Path <某屏>.html [-Ma
 **仍待确认**：还有哪些具体窗口"像 SukiUI"需要点名（对话框内部的 Suki 按钮由 `SukiMessageBoxButtonsFactory` 创建，可能带 Suki 自己的样式类；
 若有，则下一步把 `MessageBox` 的对话框实现换成自绘 MD3 版）。
 
+**第 14 节结论（2026-09-25 · 用户「控件现在已经是 md3 但背景还是 suki 背景」）**：
+
+探针 `DumpWindowBackgroundLayers` 把 `WindowEx` 的视觉树打出来后**根因确定**：
+
+```
+WindowEx (bg = md3.surface ← 我们设的，被盖住)
+└ Panel PART_Root
+  └ SukiMainHost [SUKI]
+    └ Border(transparent) → Grid → Panel PART_Root
+      ├ SukiBackground  name=PART_Background   ←★★ Suki 的渐变/着色器背景层
+      └ Border bg=#FFFFFF (520x360)            ←★★ 一层不透明底，盖住整个窗口
+```
+
+这两层都在 **SukiWindow 的模板**里，外部样式改不到（SukiBackground 能靠 `IsVisible=False` 关掉，
+但那层不透明底是模板深处的 Border，没有名字、也不是宿主属性，Styles 打不着）。
+
+**根治**：`WindowEx` 不再继承 `SukiUI.Controls.SukiWindow`，直接继承原生 `Avalonia.Controls.Window`：
+- 背景由颜色池 `md3.surface` 提供（探针回验：窗口树里再无任何 Suki 层）
+- `SukiDialogHost` / `SukiToastHost` 是普通控件，从 `<WindowEx.Hosts>` 改为直接挂在 MainWindow 根 Grid（ZIndex 1100 > 模态层 1000）
+- 同时把 `SukiBackground`（IsVisible=False）/`SukiMainHost`/`GlassCard`/`SukiMessageBoxHost`/`SukiToast` 的池色样式留在风格层里兜底
+- 契约测试更新：`Window_AbandonsSukiBackground` → `Window_NotDerivedFromSukiWindow` + `Window_BackgroundComesFromColorPool`；
+  `WindowEx_IsSukiWindow` → `WindowEx_IsNativeWindow_NotSukiWindow`；`WindowEx_NativeChrome_Contract` 断言背景 = `surface` 且非 SukiWindow 派生
+
 ## 变更记录
 
 | 日期 | 变更 |
 |---|---|
+| 2026-09-25 | **「背景还是 Suki」根治**：`WindowEx` 停止继承 `SukiWindow`（其模板自带 SukiBackground 与一层不透明底，会盖住 Window.Background —— 探针实证），改继承原生 Window；对话框/通知 Host 移到 MainWindow 根 Grid 顶层；契约测试同步更新；全量 **390 通过** |
 | 2026-09-25 | **默认控件升级为 MD3 控件**：Button 描边/实心胶囊/危险/文字四种形态、Window 前景 on-surface、SukiMessageBoxHost 与 SukiToast 改 MD3 卡片；探针实测确认 Styles 已生效、残留「像 Suki」来自 Fluent 强调色与透明默认按钮；契约测试 `Button_GetsMd3OutlinedStyle` 守住；全量 **386 通过** |
 | 2026-09-25 | **其余窗口只同步风格（不做嵌入）**：新增 App 级 `Styles/Md3Controls.axaml`（挂在样式链最后，只改形状+池色、不碰布局，契约测试守住）；开关/滑条池色覆盖升为全局；ListBoxItem 选中色改走 `secondary-container`（旧 accent-muted 契约作废）；顺手修 TrackHeader 两个菜单键悬空引用与缺失的 mergevoicebank 文案；全量 **385 通过** |
 | 2026-09-25 | **偏好设置底部改为单个「关闭」按钮**（原「应用 / 完成」两个）：关闭 = 落盘 + 重套主题/颜色池后退出；`prefs.close` 文案改为 关闭/Close；契约用例加「只有 OnCloseClicked」守卫，全量 **381 通过** |

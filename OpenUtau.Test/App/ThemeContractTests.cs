@@ -198,28 +198,26 @@ namespace OpenUtau.Test.App {
         }
 
         /// <summary>
-        /// 回归（2026-09-25 设计变更）：WindowEx **回归系统原生窗口**——
-        /// 原生装饰 + 不自绘标题栏 + 无透明合成 + 内容直角；
-        /// 窗口背景由 Styles.axaml 的 Window 样式提供（PlusBrushWindowBackground 主题渐变）。
+        /// 回归（2026-09-25 设计变更）：WindowEx = **原生窗口 + MD3 颜色池背景** ——
+        /// 原生装饰 + 不自绘标题栏 + 无透明合成；且**不再继承 SukiWindow**
+        /// （Suki 模板自带的两层背景会盖住 Window.Background，即"背景还是 Suki"的根因）。
         /// </summary>
         [AvaloniaFact]
         public void WindowEx_NativeChrome_Contract() {
             ThemeManager.Apply("Dark");
+            ColorPool.SetDark(true);
             var win = new OpenUtau.App.Controls.WindowEx();
             Assert.Equal(WindowDecorations.Full, win.WindowDecorations);
             Assert.False(win.ExtendClientAreaToDecorationsHint);
-            Assert.False(win.IsTitleBarVisible);
-            Assert.Equal(new CornerRadius(0), win.RootCornerRadius);
-            // 背景：全面舍弃 SukiUI（不画渐变/着色器，改由颜色池的 md3.surface 提供）
-            Assert.Equal(SukiUI.Enums.SukiBackgroundStyle.Flat, win.BackgroundStyle);
-            Assert.Null(win.BackgroundShaderFile);
-            Assert.False(win.BackgroundAnimationEnabled);
+            Assert.False(typeof(SukiUI.Controls.SukiWindow).IsAssignableFrom(typeof(OpenUtau.App.Controls.WindowEx)),
+                "WindowEx 不应再继承 SukiWindow（其模板会盖住 MD3 背景）");
 
             win.Show();
             try {
-                // 不再强制透明：本地值不得是"全透明"（可见背景由样式/渐变提供）
-                Assert.False(win.Background is ISolidColorBrush solid && solid.Color.A == 0,
-                    "WindowEx 背景不应再是透明（自绘圆角已退役）");
+                // 背景 = 颜色池的 surface，且不是全透明
+                var solid = Assert.IsAssignableFrom<ISolidColorBrush>(win.Background);
+                Assert.Equal(ColorPool.Current.Color(Md3Role.Surface), solid.Color);
+                Assert.NotEqual(0, solid.Color.A);
             } finally {
                 win.Close();
             }

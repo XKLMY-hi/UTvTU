@@ -1,20 +1,23 @@
-using Xunit;
+﻿using Xunit;
 using Avalonia.Headless.XUnit;
+using OpenUtau.App.Controls;
 using OpenUtau.App.Views;
-using SukiUI.Controls;
 
 namespace OpenUtau.App;
 
 /// <summary>
-/// B1b 探针（阶段 D 更新）：SukiWindow 派生窗口链验证。
-/// 原 MessageBox x:Name 实证对象已随阶段 D 重构退役（MessageBox 不再继承 WindowEx，
-/// 改为 SukiMessageBox 门面）；x:Name 填充验证由 PreferencesDialogProbeTests 覆盖。
+/// 窗口基类契约（2026-09-25 变更后）：应用窗口走 <see cref="WindowEx"/>（原生 Window + 颜色池背景），
+/// **不再继承 SukiUI 的 SukiWindow** —— 其模板自带两层背景（SukiBackground + 不透明底）
+/// 会盖住 Window.Background，也就是"控件已 MD3、背景还是 Suki"的根因。
 /// </summary>
 public class WindowSukiProbeTests {
     [AvaloniaFact]
-    public void WindowEx_IsSukiWindow() {
+    public void WindowEx_IsNativeWindow_NotSukiWindow() {
         var win = new LoadingWindow();
-        Assert.IsAssignableFrom<SukiWindow>(win);
+        Assert.IsAssignableFrom<WindowEx>(win);
+        Assert.False(typeof(SukiUI.Controls.SukiWindow).IsAssignableFrom(win.GetType()),
+            "窗口不应再继承 SukiWindow（会盖住 MD3 背景）");
+        Assert.IsAssignableFrom<Avalonia.Controls.Window>(win);
     }
 
     [AvaloniaFact]

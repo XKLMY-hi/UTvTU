@@ -25,14 +25,26 @@ namespace OpenUtau.Test.App {
             return Assert.IsAssignableFrom<ISolidColorBrush>(value).Color;
         }
 
+        /// <summary>
+        /// 契约：WindowEx 不再继承 SukiWindow —— Suki 模板自带的两层背景
+        /// （SukiBackground + 深处的不透明底）会盖住 Window.Background，
+        /// 这正是「控件已 MD3、背景还是 Suki」的根因（探针 DumpWindowBackgroundLayers 实证）。
+        /// 现在基类是 Avalonia 原生 Window，背景由颜色池 md3.surface 提供。
+        /// </summary>
         [AvaloniaFact]
-        public void Window_AbandonsSukiBackground() {
+        public void Window_NotDerivedFromSukiWindow() {
             var window = new WindowEx();
-            Assert.Equal(SukiBackgroundStyle.Flat, window.BackgroundStyle);
-            Assert.Null(window.BackgroundShaderFile);
-            Assert.Null(window.BackgroundShaderCode);
-            Assert.False(window.BackgroundAnimationEnabled);
-            Assert.False(window.BackgroundTransitionsEnabled);
+            Assert.False(typeof(SukiUI.Controls.SukiWindow).IsAssignableFrom(typeof(WindowEx)),
+                "WindowEx 不应再继承 SukiWindow（其模板会盖住 MD3 背景）");
+            Assert.True(typeof(Avalonia.Controls.Window).IsAssignableFrom(typeof(WindowEx)));
+        }
+
+        [AvaloniaFact]
+        public void Window_BackgroundComesFromColorPool() {
+            ColorPool.Initialize(ColorPool.DefaultSeed, Md3SchemeVariant.TonalSpot, false);
+            var window = new WindowEx();
+            var brush = Assert.IsAssignableFrom<ISolidColorBrush>(window.Background);
+            Assert.Equal(RoleOf(Md3Role.Surface), brush.Color);
         }
 
         [AvaloniaFact]

@@ -197,4 +197,22 @@
     <Setter Property="CornerRadius" Value="12"/>
     <Setter Property="FontSize" Value="12"/>
   </Style>
+
+  <!-- ══ 窗口背景：SukiWindow 模板里有一层 SukiBackground（动画/渐变）和一层不透明底
+       （SukiMainHost），它们盖住了 Window.Background —— 之前"背景还是 Suki"就是这个原因。
+       这里把动画背景关掉、把宿主底与玻璃卡片换成颜色池角色（探针 DumpWindowBackgroundLayers 回验）。 ══ -->
+  <Style Selector="suki|SukiBackground">
+    <Setter Property="IsVisible" Value="False"/>
+  </Style>
+  <Style Selector="suki|SukiWindow">
+    <Setter Property="Background" Value="{DynamicResource md3.surface}"/>
+  </Style>
+  <Style Selector="suki|SukiMainHost">
+    <Setter Property="Background" Value="{DynamicResource md3.surface}"/>
+  </Style>
+  <Style Selector="suki|GlassCard">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+    <Setter Property="CornerRadius" Value="16"/>
+  </Style>
 </Styles>

@@ -1,4 +1,4 @@
-<controls:WindowEx xmlns="https://github.com/avaloniaui"
+﻿<controls:WindowEx xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -173,11 +173,6 @@
       <Setter Property="BorderThickness" Value="1"/>
     </Style>
   </Window.Styles>
-  <!-- B4: Suki 窗口级覆盖层——SukiDialog/SukiToast 从这里挂 -->
-  <controls:WindowEx.Hosts>
-    <suki:SukiDialogHost x:Name="DialogHost"/>
-    <suki:SukiToastHost x:Name="ToastHost"/>
-  </controls:WindowEx.Hosts>
   <!-- 窗口装饰已交还系统（原生标题栏），内容不再为自绘标题栏留白 -->
   <Border Padding="0">
   <Grid>
@@ -817,6 +812,10 @@
 
     <!-- 偏好设置：窗口级最上层（欢迎页之上；模态对话框层 1000 仍压在其上）。自带 56px 顶栏，故覆盖共享顶栏也没问题 -->
     <views:PreferencesView x:Name="PreferencesHost" IsVisible="False" ZIndex="990"/>
+
+    <!-- SukiDialog / SukiToast 挂载点（WindowEx 已不继承 SukiWindow，改为直接放进窗口最上层） -->
+    <suki:SukiDialogHost x:Name="DialogHost" ZIndex="1100"/>
+    <suki:SukiToastHost x:Name="ToastHost" ZIndex="1100"/>
 
     <!-- 偏好设置（全屏视图；模态覆盖层仍在其上） -->
 
