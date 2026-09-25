@@ -53,6 +53,18 @@ namespace OpenUtau.Test.App {
         }
 
         [AvaloniaFact]
+        public void WelcomeView_Motion_ComesFromMotionInterface() {
+            // 动效一律走附加属性接口（时长/缓动由 Md3Motion 令牌给），视图里不许写死秒数或曲线
+            string xaml = ReadXaml("WelcomeView.axaml");
+            Assert.Contains("motion:Motion.Hover=\"True\"", xaml);
+            Assert.Contains("motion:Motion.Popup=\"True\"", xaml);
+            Assert.DoesNotMatch("Duration=\"0:0", xaml);
+            Assert.DoesNotMatch("Easing=\"", xaml);
+            // 可交互元素都应挂上悬停过渡：6 行快捷入口 + 4 张动作卡 + 1 个最近行
+            Assert.Equal(11, Regex.Matches(xaml, "Motion\\.Hover=\"True\"").Count);
+        }
+
+        [AvaloniaFact]
         public void WelcomeView_UsesNoLegacyColorKeys() {
             // 颜色一律来自颜色池：旧的 Plus*/Suki/Fluent 颜色键与硬编码色值都不允许出现
             string xaml = ReadXaml("WelcomeView.axaml");

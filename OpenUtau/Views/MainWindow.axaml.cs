@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -26,6 +26,8 @@ using OpenUtau.Core.DiffSinger;
 using OpenUtau.Core.Format;
 using OpenUtau.Core.Ustx;
 using OpenUtau.Core.Util;
+using OpenUtau.Core.Theming;
+using OpenUtau.Theming;
 using ReactiveUI;
 using Serilog;
 using SharpCompress;
@@ -165,11 +167,41 @@ namespace OpenUtau.App.Views {
             WelcomeHost.Host = this;
             WelcomeHost.DataContext = viewModel;
             viewModel.InitProject();          // 恢复状态（HasRecovery/RecoveryString）
+            EnsureWelcomeMotion();
+            WelcomeHost.Opacity = 0;          // 从透明淡入（时长/缓动取动效令牌）
             WelcomeHost.IsVisible = true;
+            Dispatcher.UIThread.Post(() => WelcomeHost.Opacity = 1, DispatcherPriority.Background);
         }
 
+        /// <summary>欢迎视图淡出后再隐藏（进入编辑器时；视图级切换走动效令牌的 ViewDuration）。</summary>
         private void HideWelcome() {
-            WelcomeHost.IsVisible = false;
+            if (!WelcomeHost.IsVisible) {
+                return;
+            }
+            if (!Md3Motion.Enabled) {
+                WelcomeHost.IsVisible = false;
+                return;
+            }
+            EnsureWelcomeMotion();
+            WelcomeHost.Opacity = 0;
+            DispatcherTimer.RunOnce(() => {
+                WelcomeHost.IsVisible = false;
+                WelcomeHost.Opacity = 1;      // 复位，下次再进欢迎页重新淡入
+            }, Md3Motion.ViewDuration, DispatcherPriority.Background);
+        }
+
+        /// <summary>欢迎视图的淡入淡出过渡：时长/缓动一律取动效令牌，不写死秒数。</summary>
+        private void EnsureWelcomeMotion() {
+            if (WelcomeHost.Transitions != null) {
+                return;
+            }
+            WelcomeHost.Transitions = new Transitions {
+                new DoubleTransition {
+                    Property = Visual.OpacityProperty,
+                    Duration = Md3Motion.ViewDuration,
+                    Easing = Md3MotionResources.Easing(Md3Motion.ViewEasing),
+                },
+            };
         }
 
         /// <summary>欢迎视图：新建工程。</summary>

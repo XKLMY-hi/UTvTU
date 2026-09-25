@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:OpenUtau.App.ViewModels"
+             xmlns:motion="using:OpenUtau.Theming"
              mc:Ignorable="d" d:DesignWidth="1440" d:DesignHeight="900"
              x:Class="OpenUtau.App.Views.WelcomeView">
   <UserControl.Resources>
@@ -19,7 +20,7 @@
        左侧品牌面板 480（primary-container 实底）+ 右侧启动器；颜色一律取 md3 角色键，文案一律取现有字符串键。
        设计稿自带的 56px 顶栏与 32px 状态条属于窗口级 chrome，待主窗统一时做（本轮不做）。 -->
   <UserControl.Styles>
-    <!-- ══ 左栏：快捷入口行（14px 图标 + 文案，hover 转 primary） ══ -->
+    <!-- ══ 左栏：快捷入口行（14px 图标 + 文案；hover 走状态层底色，过渡由动效令牌给） ══ -->
     <Style Selector="Border.linkRow">
       <Setter Property="Height" Value="32"/>
       <Setter Property="CornerRadius" Value="8"/>
@@ -33,11 +34,8 @@
     <Style Selector="Border.linkRow TextBlock">
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     </Style>
-    <Style Selector="Border.linkRow:pointerover Path">
-      <Setter Property="Fill" Value="{DynamicResource md3.primary}"/>
-    </Style>
-    <Style Selector="Border.linkRow:pointerover TextBlock">
-      <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+    <Style Selector="Border.linkRow:pointerover">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
     </Style>
 
     <!-- ══ 启动器：动作卡（稿：高 104 / 圆角 16 / 内边距 24 / 图标圆 48） ══ -->
@@ -123,42 +121,42 @@
           <TextBlock Text="{DynamicResource welcome.quicklinks}" FontSize="11"
                      Foreground="{DynamicResource md3.on-surface-variant}"/>
           <StackPanel Spacing="2">
-            <Border Classes="linkRow" PointerPressed="OnWiki">
+            <Border Classes="linkRow" motion:Motion.Hover="True" PointerPressed="OnWiki">
               <StackPanel Orientation="Horizontal" Spacing="12">
                 <Path Data="{StaticResource icon-book-open}" Width="18" Height="18" Stretch="Uniform"
                       VerticalAlignment="Center"/>
                 <TextBlock Text="{DynamicResource welcome.wiki}" FontSize="14" VerticalAlignment="Center"/>
               </StackPanel>
             </Border>
-            <Border Classes="linkRow" PointerPressed="OnReleases">
+            <Border Classes="linkRow" motion:Motion.Hover="True" PointerPressed="OnReleases">
               <StackPanel Orientation="Horizontal" Spacing="12">
                 <Path Data="{StaticResource icon-download}" Width="18" Height="18" Stretch="Uniform"
                       VerticalAlignment="Center"/>
                 <TextBlock Text="{DynamicResource welcome.releases}" FontSize="14" VerticalAlignment="Center"/>
               </StackPanel>
             </Border>
-            <Border Classes="linkRow" PointerPressed="OnDiffsinger">
+            <Border Classes="linkRow" motion:Motion.Hover="True" PointerPressed="OnDiffsinger">
               <StackPanel Orientation="Horizontal" Spacing="12">
                 <Path Data="{StaticResource icon-sparkles}" Width="18" Height="18" Stretch="Uniform"
                       VerticalAlignment="Center"/>
                 <TextBlock Text="{DynamicResource welcome.diffsinger}" FontSize="14" VerticalAlignment="Center"/>
               </StackPanel>
             </Border>
-            <Border Classes="linkRow" PointerPressed="OnTeto">
+            <Border Classes="linkRow" motion:Motion.Hover="True" PointerPressed="OnTeto">
               <StackPanel Orientation="Horizontal" Spacing="12">
                 <Path Data="{StaticResource icon-globe}" Width="18" Height="18" Stretch="Uniform"
                       VerticalAlignment="Center"/>
                 <TextBlock Text="{DynamicResource welcome.teto}" FontSize="14" VerticalAlignment="Center"/>
               </StackPanel>
             </Border>
-            <Border Classes="linkRow" PointerPressed="OnPackages">
+            <Border Classes="linkRow" motion:Motion.Hover="True" PointerPressed="OnPackages">
               <StackPanel Orientation="Horizontal" Spacing="12">
                 <Path Data="{StaticResource icon-package}" Width="18" Height="18" Stretch="Uniform"
                       VerticalAlignment="Center"/>
                 <TextBlock Text="{DynamicResource welcome.packages}" FontSize="14" VerticalAlignment="Center"/>
               </StackPanel>
             </Border>
-            <Border Classes="linkRow" PointerPressed="OnPreferences">
+            <Border Classes="linkRow" motion:Motion.Hover="True" PointerPressed="OnPreferences">
               <StackPanel Orientation="Horizontal" Spacing="12">
                 <Path Data="{StaticResource icon-settings}" Width="18" Height="18" Stretch="Uniform"
                       VerticalAlignment="Center"/>
@@ -182,10 +180,10 @@
       <TextBlock Grid.Row="0" Text="{DynamicResource welcome.start}" FontSize="30"
                  Foreground="{DynamicResource md3.on-surface}"/>
 
-      <!-- 动作卡 2×2（稿里是「新建 / 打开」两个，Plus 另有两个入口沿用同一卡片几何） -->
+      <!-- 动作卡 2×2（稿里是「新建 / 打开」两个，Plus 另有两个入口沿用同一卡片几何）；hover 过渡走动效令牌 -->
       <Grid Grid.Row="1" Margin="0,16,0,0" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
         <Border Grid.Row="0" Grid.Column="0" Classes="actionCard primary" Margin="0,0,8,0"
-                PointerPressed="OnNewProject">
+                motion:Motion.Hover="True" PointerPressed="OnNewProject">
           <StackPanel Orientation="Horizontal" Spacing="16">
             <Border Classes="cardIcon primary">
               <Path Data="{StaticResource icon-plus}" Width="26" Height="26" Stretch="Uniform"
@@ -202,7 +200,7 @@
         </Border>
 
         <Border Grid.Row="0" Grid.Column="1" Classes="actionCard" Margin="8,0,0,0"
-                PointerPressed="OnOpenProject">
+                motion:Motion.Hover="True" PointerPressed="OnOpenProject">
           <StackPanel Orientation="Horizontal" Spacing="16">
             <Border Classes="cardIcon">
               <Path Data="{StaticResource icon-folder-open}" Width="24" Height="24" Stretch="Uniform"
@@ -219,7 +217,7 @@
         </Border>
 
         <Border Grid.Row="1" Grid.Column="0" Classes="actionCard" Margin="0,16,8,0"
-                PointerPressed="OnImportAudio">
+                motion:Motion.Hover="True" PointerPressed="OnImportAudio">
           <StackPanel Orientation="Horizontal" Spacing="16">
             <Border Classes="cardIcon">
               <Path Data="{StaticResource icon-music}" Width="24" Height="24" Stretch="Uniform"
@@ -237,13 +235,15 @@
 
         <Border Grid.Row="1" Grid.Column="1" Classes="actionCard" Margin="8,16,0,0"
                 IsVisible="{Binding TemplateFiles.Count}"
+                motion:Motion.Hover="True"
                 PointerPressed="OnShowTemplates">
           <FlyoutBase.AttachedFlyout>
             <Flyout Placement="BottomEdgeAlignedLeft"
                     FlyoutPresenterTheme="{StaticResource Md3FlyoutPresenter}">
               <Border Background="{DynamicResource md3.surface-container-high}"
                       BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="1"
-                      CornerRadius="12" Padding="6" MinWidth="240" MaxHeight="320">
+                      CornerRadius="12" Padding="6" MinWidth="240" MaxHeight="320"
+                      motion:Motion.Popup="True">
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled">
                   <ItemsControl ItemsSource="{Binding TemplateFiles}">
                     <ItemsControl.ItemTemplate>
@@ -301,7 +301,8 @@
           <ItemsControl ItemsSource="{Binding RecentFiles}">
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="vm:RecentFileInfo">
-                <Border Classes="recentRow" Margin="0,0,0,12" PointerPressed="OnOpenRecent">
+                <Border Classes="recentRow" Margin="0,0,0,12" motion:Motion.Hover="True"
+                        PointerPressed="OnOpenRecent">
                   <Grid ColumnDefinitions="Auto,*,Auto" Background="Transparent">
                     <Border Width="48" Height="48" CornerRadius="8"
                             Background="{DynamicResource md3.secondary-container}">

@@ -125,6 +125,22 @@
 - **待办**：① 壁纸种子 provider（含黑白兜底，见 D1）；② 偏好设置里的"种子 / 配色方案"选项；③ Content / Fidelity 两个方案（需移植 `TemperatureCache`）；④ 控件逐个迁移到 `md3.*`。
 - **首个迁移界面（2026-09-25）**：欢迎页（`Views/WelcomeView.axaml`）——颜色**全部**取 md3 角色键，旧的 Plus*/Suki 颜色键一个不用；契约测试 `WelcomeViewTests` 锁死这一点（顺便校验图标/文案键可解析）。
 
+### H. 动效（**已落地** 2026-09-25）
+
+与颜色池**同构**：一个令牌层管所有动效，控件只贴标签，一个开关全局生效。
+
+| 层 | 位置 | 内容 |
+|---|---|---|
+| 令牌（纯数据，零 Avalonia 依赖） | `OpenUtau.Core/Theming/Md3Motion.cs` | M3 **16 档时长**（short1…extra-long4 = 50…1000ms）+ **6 档缓动**（linear / standard / standard±decelerate / emphasized±decelerate）；`Enabled` 总开关（关掉所有时长归零）；**语义档**（控件只认这个）：悬停 `short3·standard`、进入 `short4·emphasized-decelerate`、离开 `short3·emphasized-accelerate`、视图 `medium2·emphasized-decelerate` |
+| 资源桥 | `OpenUtau/Theming/Md3MotionResources.cs` | 装 `md3.motion.duration.*`（TimeSpan）与 `md3.motion.easing.*`（SplineEasing）。**必须早于任何窗口 XAML 安装**（`Duration`/`Easing` 在 Avalonia 里是普通 CLR 属性，只能 `StaticResource`）→ 挂在 `App.Initialize()` |
+| 控件接口 | `OpenUtau/Theming/Motion.cs` | 附加属性：`Motion.Hover`（Background / BorderBrush / Foreground / Opacity 过渡）、`Motion.Enter`（淡入 + 上移 8）、`Motion.Popup`（淡入 + 0.96→1）。同一元素挂多个标签时**按属性合并**，不会互相顶掉整份 `Transitions` |
+
+- **约定**：控件里**不许写死秒数或曲线**；动效一律走令牌，开关一关全部变瞬变（无障碍 / 低配机器），代码零分支。
+- **开关**：`Preferences.Default.ReduceMotion`（默认 false；偏好页的 UI 开关待偏好页重做时加）。系统级"减少动画"**Avalonia 未暴露**（只有点击时长那几项），只能自建。
+- **Avalonia 12 事实（反射核实，与 11 不同）**：缓动只剩 `LinearEasing` / `SplineEasing(x1,y1,x2,y2)` / `SpringEasing(mass,stiffness,damping,v0)`（11 的 `CubicEaseInOut` 那一批已移除）；`TransformOperationsTransition : Transition<ITransform>`，可直接给 `ScaleTransform` / `TranslateTransform`。
+- **首个试点（2026-09-25）**：欢迎页——4 张动作卡 + 6 行快捷入口 + 最近工程行挂 `Motion.Hover`（入口行 hover 由"文字转主色"改为状态层底色，色变才有可动画的载体）；模板弹层挂 `Motion.Popup`；欢迎视图 ↔ 编辑器走 `ViewDuration` 淡入淡出（`MainWindow.ShowWelcome/HideWelcome`）。
+- **待办**：① 菜单 / 对话框 / 顶栏视图胶囊指示器 / 侧栏与状态条的动效；② M3 Expressive 的**弹簧**（`SpringEasing`）标定；③ "分离"窗口与面板拖拽的动效；④ 列表项**不做**交错进入（虚拟化成本）。
+
 
 
 ## 4. 设计基准：Pen 交付包 + 差异清单
@@ -247,6 +263,14 @@
    - 本地化**双向补齐**：EN 与 zh-CN 各 923 条、缺口 0；构建 0 错误。
    - `THIRD-PARTY-NOTICES.md` 增「图标」章节（Phosphor MIT 现状 + Lucide ISC 计划替换说明）。
    - **欢迎页按设计稿重做**（`c9d5aba1`，口径见 A8）：左 480 `primary-container` 品牌面板（52 标识 + 快捷入口 6 行 + 版本行）+ 右启动器（30px 标题、2×2 动作卡 104/16/24/48、最近工程行 10/12/48/8）；四入口沿用原欢迎窗能力（新建 / 打开 / 导入音轨 / 模板）；颜色全部取颜色池角色键；新增 2 个结构契约用例，全量 **332 通过**。
+   - **动效令牌层 + 欢迎页试点**（第 3.H 节）：`Md3Motion` / `Md3MotionResources` / `Motion` 附加属性；欢迎页悬停与弹层、欢迎视图淡入淡出已接；`Preferences.Default.ReduceMotion` 为总开关；新增 30 个用例，全量 **363 通过**。
+
+## 10. 动效接入清单（给后续每屏用）
+1. 容器悬停/状态层：给元素挂 `motion:Motion.Hover="True"`，并在样式里写 `:pointerover` 的目标色（**色变必须有载体**，纯文字变色不可动画）。
+2. 弹层/飞行卡片：内容根元素挂 `motion:Motion.Popup="True"`（每次打开都会跑）。
+3. 元素进入（页内区块、列表整体）：挂 `motion:Motion.Enter="True"`。
+4. 视图级切换：用 `Md3Motion.ViewDuration` + `Md3MotionResources.Easing(Md3Motion.ViewEasing)` 在代码里建 `DoubleTransition(Opacity)`（如 `MainWindow.ShowWelcome/HideWelcome`）。
+5. 绝不写死秒数；新增语义档时**只改 `Md3Motion` 的语义属性**，不要改控件。
 3. **等图标真正替换时再做**：`Icons.axaml` 头部署名与 notices 的图标条目一并改为 Lucide ISC——**现在不能改**（当前 55 个图标仍是 Phosphor，改了就是错误署名）。
 
 ---
@@ -293,3 +317,5 @@ pwsh -NoProfile -File .opencode\design\extract-spec.ps1 -Path <某屏>.html [-Ma
 | 2026-09-25 | **欢迎页回归主窗口**（A7）：新建 `Views/WelcomeView.axaml`（首个只吃 md3 颜色键的界面），内嵌 MainWindow 作为初始视图；删除独立 `WelcomeWindow`；Splash 直接开主窗口；新增 6 个契约用例，全量 **330 通过** |
 | 2026-09-25 | **窗口回归系统原生装饰**：`WindowEx` 退役自绘标题栏/边框、关透明合成与 DWM 三属性；MainWindow 去掉给自绘标题栏留的 8px 顶部内边距；旧「圆角外透明」契约改为 `WindowEx_NativeChrome_Contract`，全量 **330 通过** |
 | 2026-09-25 | **欢迎页按设计稿重做**（新增 A8 口径：只搬结构 / 文案用现有键 / 无波形与音源胶囊 / 顶栏与状态条待主窗统一 / 模板走卡片+飞行弹层）：左 480 品牌面板 + 右启动器 2×2 动作卡 + 最近工程行；新增 2 个结构契约用例，全量 **332 通过** |
+| 2026-09-25 | 欢迎页细节按用户裁定迭代：品牌面板改**悬浮圆角卡片**（列 480→352、卡 448→320、圆角 28→16，内容仍在 48 基准线）、卡底色 `primary-container`→`surface-container`（与最近工程行同色）、产品显示名全量改 **UTvTU**、最近工程行脱离全局 `ListBoxItem{Height=28}` 隐式覆盖（改 `ScrollViewer`+`ItemsControl`） |
+| 2026-09-25 | **动效令牌层落地**（新增第 3.H 节）：`Md3Motion`（16 时长档 + 6 缓动档 + 总开关 + 语义档）+ `Md3MotionResources` 资源桥 + `Motion.Hover/Enter/Popup` 附加属性接口；欢迎页试点（卡片/入口行/最近行悬停、模板弹层进入、欢迎视图↔编辑器淡入淡出）；新增 30 个用例，全量 **363 通过** |

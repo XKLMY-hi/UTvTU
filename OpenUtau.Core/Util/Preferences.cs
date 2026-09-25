@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -158,6 +158,8 @@ namespace OpenUtau.Core.Util {
             public int PlaybackDeviceNumber;
             public bool ShowPrefs = true;
             public bool ShowTips = true;
+            /// <summary>减少界面动效（MD3 动效令牌全部归零；偏好页的开关待偏好页重做时加）。</summary>
+            public bool ReduceMotion = false;
             public string ThemeName = "Dark";
             public int DegreeStyle;
             public bool UseTrackColor = false;
