@@ -187,18 +187,29 @@ namespace OpenUtau.Test.App {
         }
 
         /// <summary>
-        /// 回归：阶段 E（722597bc）窗口收敛后 WindowEx 外层背景为透明（圆角外 OS 合成），
-        /// 可见面由 BackgroundStyle=GradientDarker 渐变承担——防"渐变面丢失退化为 Suki 默认"回归。
+        /// 回归（2026-09-25 设计变更）：WindowEx **回归系统原生窗口**——
+        /// 原生装饰 + 不自绘标题栏 + 无透明合成 + 内容直角；
+        /// 窗口背景由 Styles.axaml 的 Window 样式提供（PlusBrushWindowBackground 主题渐变）。
         /// </summary>
         [AvaloniaFact]
-        public void WindowBackground_RoundedCornerContract() {
+        public void WindowEx_NativeChrome_Contract() {
             ThemeManager.Apply("Dark");
             var win = new OpenUtau.App.Controls.WindowEx();
-            // 圆角外透明：外层画刷必须为 Transparent（阶段 E 设计，非"全透明"缺陷）
-            var brush = Assert.IsAssignableFrom<ISolidColorBrush>(win.Background);
-            Assert.Equal((byte)0, brush.Color.A);
-            // 可见渐变面：Suki 渐变承担窗口可见背景（丢失则窗口退化为 Suki 默认外观）
+            Assert.Equal(WindowDecorations.Full, win.WindowDecorations);
+            Assert.False(win.ExtendClientAreaToDecorationsHint);
+            Assert.False(win.IsTitleBarVisible);
+            Assert.Equal(new CornerRadius(0), win.RootCornerRadius);
+            // 内容背景仍由 Suki 渐变承担
             Assert.Equal(SukiUI.Enums.SukiBackgroundStyle.GradientDarker, win.BackgroundStyle);
+
+            win.Show();
+            try {
+                // 不再强制透明：本地值不得是"全透明"（可见背景由样式/渐变提供）
+                Assert.False(win.Background is ISolidColorBrush solid && solid.Color.A == 0,
+                    "WindowEx 背景不应再是透明（自绘圆角已退役）");
+            } finally {
+                win.Close();
+            }
         }
 
         /// <summary>

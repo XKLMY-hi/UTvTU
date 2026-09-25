@@ -1,4 +1,4 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -12,7 +12,7 @@
     <StyleInclude Source="/Styles/PianoRollStyles.axaml"/>
   </UserControl.Styles>
   <Border>
-    <!-- 注：WindowDecorationMargin 已由 WindowEx.OnApplyTemplate 对窗口内容统一处理，此处不再绑 -->
+    <!-- 注：窗口装饰已交还系统（原生标题栏），内容不需为标题栏留白，故不再绑 WindowDecorationMargin -->
     <Grid PointerMoved="BackgroundPointerMoved">
       <Grid.RowDefinitions>
         <RowDefinition Height="24"/>

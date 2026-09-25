@@ -154,6 +154,8 @@ dotnet test OpenUtau.Test\OpenUtau.Test.csproj --no-build
 
 **约定（2026-08-02 用户规定）：一般情况下不使用自截图**；当需要截图参考时由**用户主动提供**截图（用户提供图片 → 用 image-recognize skill 识别）。
 
+**默认流程（2026-09-25 用户再次明确）**：改完 UI 后**交给用户实机查看**——我只说明"改了什么、请他看哪里 / 试什么"，**不自己截图核对**。只有用户明确要求"自迭代"时，我才自己抓图（`auto-look.py --window OpenUTAU` 或 headless 渲染）逐轮核对。
+
 识别工具（用户提供截图时使用）：
 - `python "...\image-recognize\recognize.py" <图片路径>`：识别图片内容（布局/颜色/坐标/文字）
 - `auto-look.py --window OpenUTAU --list / --hwnd <句柄>`：用户需要指定窗口截图时用

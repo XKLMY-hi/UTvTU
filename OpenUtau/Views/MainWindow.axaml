@@ -135,7 +135,8 @@
     <suki:SukiDialogHost x:Name="DialogHost"/>
     <suki:SukiToastHost x:Name="ToastHost"/>
   </controls:WindowEx.Hosts>
-  <Border Padding="0,8,0,0">
+  <!-- 窗口装饰已交还系统（原生标题栏），内容不再为自绘标题栏留白 -->
+  <Border Padding="0">
   <Grid>
     <!-- MainGrid：主内容（overlay 时模糊目标） -->
     <Grid x:Name="MainGrid" RowDefinitions="40,*,28">

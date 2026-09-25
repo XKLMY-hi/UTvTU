@@ -467,7 +467,7 @@ namespace OpenUtau.App.Views {
                 picker.Close();
             };
 
-            // 窗口装饰由 WindowEx（SukiWindow）统一提供，无需手动标题栏
+            // 窗口装饰由系统提供（WindowEx 已回归原生窗口），无需手动标题栏
             var dp = new DockPanel { LastChildFill = true };
             dp.Children.Add(new Border { Child = layout, Margin = new(0) });
             picker.Content = dp;
