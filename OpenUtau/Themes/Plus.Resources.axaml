@@ -18,17 +18,7 @@
 
   <!-- ══════════ Layer 1 · palette 颜色（DARK 默认，主题字典覆写）══════════ -->
   <!-- 窗口渐变背景两档（跟随主题色：底部微注入 accent，主题字典覆写） -->
-  <Color x:Key="PlusSurfaceBgTop">#1e1e28</Color>     <!-- 窗口背景顶部（= PlusSurfaceBase） -->
-  <Color x:Key="PlusSurfaceBgBottom">#282029</Color>  <!-- 窗口背景底部（accent 注入 ~6%） -->
   <!-- Surface 实色 8 档 -->
-  <Color x:Key="PlusSurfaceDeep">#16161e</Color>      <!-- 钢琴窗画布 · VU · 波形 -->
-  <Color x:Key="PlusSurfaceBase">#1e1e28</Color>      <!-- 窗口底色 -->
-  <Color x:Key="PlusSurfaceRaised">#22222c</Color>    <!-- 侧栏 · 轨道头 · strip · transport -->
-  <Color x:Key="PlusSurfaceControl">#282838</Color>   <!-- 控件静态面 -->
-  <Color x:Key="PlusSurfaceHover">#4682B4</Color>     <!-- hover（钢蓝，2026-08-03） -->
-  <Color x:Key="PlusSurfacePressed">#4682B4</Color>   <!-- pressed（同 hover，2026-08-03） -->
-  <Color x:Key="PlusSurfaceDisabled">#222230</Color>  <!-- disabled 面 -->
-  <Color x:Key="PlusSurfaceOverlay">#2e2e3e</Color>   <!-- 弹出层不透明底 -->
 
   <!-- Border 4 + 玻璃描边 -->
   <Color x:Key="PlusBorderSubtle">#2a2a3a</Color>
@@ -67,53 +57,21 @@
   <Color x:Key="PlusGlassInsetBottom">#24000000</Color>   <!-- 底部内阴影 -->
 
   <!-- legacy 33 键暗色默认（变体未设时的启动兜底；Brushes.axaml 依赖这些键解析） -->
-  <Color x:Key="BackgroundColor">#1e1e28</Color>
-  <Color x:Key="BackgroundColorPointerOver">#282838</Color>
-  <Color x:Key="BackgroundColorPressed">#303048</Color>
-  <Color x:Key="BackgroundColorDisabled">#222230</Color>
-  <Color x:Key="ForegroundColor">#f0f0f0</Color>
-  <Color x:Key="ForegroundColorPointerOver">#ffffff</Color>
-  <Color x:Key="ForegroundColorPressed">#e8e8f0</Color>
-  <Color x:Key="ForegroundColorDisabled">#707080</Color>
-  <Color x:Key="BorderColor">#383848</Color>
-  <Color x:Key="BorderColorPointerOver">#484858</Color>
-  <Color x:Key="SystemAccentColor">#B0C4DE</Color>
-  <Color x:Key="SystemAccentColorLight1">#BED4EE</Color>
-  <Color x:Key="SystemAccentColorDark1">#9BABC1</Color>
-  <Color x:Key="NeutralAccentColor">#585868</Color>
-  <Color x:Key="NeutralAccentColorPointerOver">#686878</Color>
-  <Color x:Key="AccentColor1">#B0C4DE</Color>
-  <Color x:Key="AccentColor2">#BED4EE</Color>
-  <Color x:Key="AccentColor3">#9BABC1</Color>
-  <Color x:Key="TickLineColor">#383848</Color>
-  <Color x:Key="BarNumberColor">#a0a0b0</Color>
-  <Color x:Key="FinalPitchColor">#a0a0b0</Color>
-  <Color x:Key="TrackBackgroundAltColor">#222230</Color>
-  <Color x:Key="WarningColor">#4a3520</Color>
-  <Color x:Key="WhiteKeyColorLeft">#1c1c2a</Color>
-  <Color x:Key="WhiteKeyColorRight">#CC1c1c2a</Color>
-  <Color x:Key="WhiteKeyNameColor">#c8c8d0</Color>
-  <Color x:Key="CenterKeyColorLeft">#B0C4DE</Color>
-  <Color x:Key="CenterKeyColorRight">#CCFFFFFF</Color>
-  <Color x:Key="CenterKeyNameColor">#f0f0f0</Color>
-  <Color x:Key="BlackKeyColorLeft">#181820</Color>
-  <Color x:Key="BlackKeyColorRight">#CC181820</Color>
-  <Color x:Key="BlackKeyNameColor">#808090</Color>
 
   <!-- ══════════ Layer 2 · 语义画刷（映射 palette → 消费）══════════ -->
   <!-- 窗口背景：顶部 base → 底部 accent 注入（跟随主题色；GradientStop 动态资源随主题字典切换） -->
   <LinearGradientBrush x:Key="PlusBrushWindowBackground" StartPoint="0,0" EndPoint="0,1">
-    <GradientStop Offset="0" Color="{DynamicResource PlusSurfaceBgTop}"/>
-    <GradientStop Offset="0.55" Color="{DynamicResource PlusSurfaceBase}"/>
-    <GradientStop Offset="1" Color="{DynamicResource PlusSurfaceBgBottom}"/>
+    <GradientStop Offset="0" Color="{DynamicResource md3.color.surface-container-lowest}"/>
+    <GradientStop Offset="0.55" Color="{DynamicResource md3.color.surface}"/>
+    <GradientStop Offset="1" Color="{DynamicResource md3.color.surface-container-low}"/>
   </LinearGradientBrush>
-  <SolidColorBrush x:Key="PlusBrushSurfaceDeep" Color="{DynamicResource PlusSurfaceDeep}"/>
-  <SolidColorBrush x:Key="PlusBrushSurfaceBase" Color="{DynamicResource PlusSurfaceBase}"/>
-  <SolidColorBrush x:Key="PlusBrushSurfaceRaised" Color="{DynamicResource PlusSurfaceRaised}"/>
-  <SolidColorBrush x:Key="PlusBrushSurfaceControl" Color="{DynamicResource PlusSurfaceControl}"/>
-  <SolidColorBrush x:Key="PlusBrushSurfaceHover" Color="{DynamicResource PlusSurfaceHover}"/>
-  <SolidColorBrush x:Key="PlusBrushSurfacePressed" Color="{DynamicResource PlusSurfacePressed}"/>
-  <SolidColorBrush x:Key="PlusBrushSurfaceDisabled" Color="{DynamicResource PlusSurfaceDisabled}"/>
+  <SolidColorBrush x:Key="PlusBrushSurfaceDeep" Color="{DynamicResource md3.color.surface-container-lowest}"/>
+  <SolidColorBrush x:Key="PlusBrushSurfaceBase" Color="{DynamicResource md3.color.surface}"/>
+  <SolidColorBrush x:Key="PlusBrushSurfaceRaised" Color="{DynamicResource md3.color.surface-container}"/>
+  <SolidColorBrush x:Key="PlusBrushSurfaceControl" Color="{DynamicResource md3.color.surface-container-high}"/>
+  <SolidColorBrush x:Key="PlusBrushSurfaceHover" Color="{DynamicResource md3.color.surface-container-highest}"/>
+  <SolidColorBrush x:Key="PlusBrushSurfacePressed" Color="{DynamicResource md3.color.surface-container-highest}"/>
+  <SolidColorBrush x:Key="PlusBrushSurfaceDisabled" Color="{DynamicResource md3.color.surface-container-low}"/>
   <SolidColorBrush x:Key="PlusBrushBorderSubtle" Color="{DynamicResource PlusBorderSubtle}"/>
   <SolidColorBrush x:Key="PlusBrushBorderDefault" Color="{DynamicResource PlusBorderDefault}"/>
   <SolidColorBrush x:Key="PlusBrushBorderHover" Color="{DynamicResource PlusBorderHover}"/>

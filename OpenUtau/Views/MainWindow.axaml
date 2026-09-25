@@ -99,11 +99,11 @@
     <Style Selector="Button.tpPlay:pointerover">
       <Setter Property="Opacity" Value="0.92"/>
     </Style>
-    <!-- 顶栏：时间 / 速度圆角块 -->
+    <!-- 顶栏：时间 / 速度圆角块（面板之上提一档 = 控件层） -->
     <Style Selector="Border.tpChip">
       <Setter Property="Height" Value="40"/>
       <Setter Property="CornerRadius" Value="8"/>
-      <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
     <!-- 素材库：页签胶囊（稿：高 28 / 文字 10） -->
@@ -184,7 +184,7 @@
     <!-- MainGrid：主内容（overlay 时模糊目标） -->
     <Grid x:Name="MainGrid" RowDefinitions="56,*,32">
       <!-- ══════════ 顶栏 56：品牌(=菜单) · 运输条 · 时间/速度 · 右侧图标 ══════════ -->
-      <Border Grid.Row="0" Background="{DynamicResource md3.surface}"
+      <Border Grid.Row="0" Background="{DynamicResource md3.surface-container}"
               BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1">
         <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto" Margin="16,0">
           <!-- 品牌 = 菜单按钮（稿：36 标记 + UTVTU + 分隔线 + 屏名） -->
@@ -384,8 +384,8 @@
 
       <!-- ══════════ 工作区：左 轨道头 264 · 中 编排区 · 右 素材库 296 ══════════ -->
       <Grid Grid.Row="1" x:Name="MainLayout" ColumnDefinitions="264,*,296">
-        <!-- ── 左：轨道头 ── -->
-        <Border Grid.Column="0" Background="{DynamicResource md3.surface}"
+        <!-- ── 左：轨道头（面板层） ── -->
+        <Border Grid.Column="0" Background="{DynamicResource md3.surface-container}"
                 BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,1,0">
           <Grid RowDefinitions="34,16,*">
             <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="12,0">
@@ -408,7 +408,7 @@
         </Border>
 
         <!-- ── 中：编排区（标尺 34 / 横向滚动 16 / 轨道 / 卷帘 / 混音台）── -->
-        <Grid Grid.Column="1" ColumnDefinitions="*,8">
+        <Grid Grid.Column="1" ColumnDefinitions="*,8" Background="{DynamicResource md3.surface}">
           <Grid Grid.Row="0" Grid.Column="0" x:Name="ArrangementArea">
             <Grid.RowDefinitions>
               <RowDefinition Height="34"/>
@@ -590,7 +590,7 @@
         </Grid>
 
         <!-- ── 右：素材库 296（表头 44 / 页签 40 / 内容）── -->
-        <Border Grid.Column="2" Background="{DynamicResource md3.surface}"
+        <Border Grid.Column="2" Background="{DynamicResource md3.surface-container}"
                 BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="1,0,0,0">
           <Grid RowDefinitions="44,40,*">
             <!-- 表头 -->
@@ -786,7 +786,7 @@
       </Grid>
 
       <!-- ══════════ 状态条 32：左侧引擎/进度 · 右侧版本 ══════════ -->
-      <Border Grid.Row="2" Background="{DynamicResource md3.surface}"
+      <Border Grid.Row="2" Background="{DynamicResource md3.surface-container}"
               BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,1,0,0">
         <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,0">
           <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">

@@ -5,66 +5,23 @@
 
   <!-- Warm gray light palette -->
   <!-- 窗口渐变背景（跟随主题色：底部微注入 accent ≈ 5%） -->
-  <Color x:Key="PlusSurfaceBgTop">#f5f2f0</Color>
-  <Color x:Key="PlusSurfaceBgBottom">#f1e9e7</Color>
-  <Color x:Key="BackgroundColor">#f5f2f0</Color>
-  <Color x:Key="BackgroundColorPointerOver">#ebe7e3</Color>
-  <Color x:Key="BackgroundColorPressed">#ddd9d5</Color>
-  <Color x:Key="BackgroundColorDisabled">#f0edea</Color>
 
-  <Color x:Key="ForegroundColor">#1a1a20</Color>
-  <Color x:Key="ForegroundColorPointerOver">#000000</Color>
-  <Color x:Key="ForegroundColorPressed">#282830</Color>
-  <Color x:Key="ForegroundColorDisabled">#909098</Color>
 
-  <Color x:Key="BorderColor">#c8c4c0</Color>
-  <Color x:Key="BorderColorPointerOver">#a09890</Color>
 
   <!-- Accent: warm red #B0C4DE -->
-  <Color x:Key="SystemAccentColor">#B0C4DE</Color>
   <!-- PointerOver -->
-  <Color x:Key="SystemAccentColorLight1">#BED4EE</Color>
   <!-- Pressed -->
-  <Color x:Key="SystemAccentColorDark1">#9BABC1</Color>
 
-  <Color x:Key="NeutralAccentColor">#c8c4c0</Color>
-  <Color x:Key="NeutralAccentColorPointerOver">#b0aca8</Color>
-  <Color x:Key="AccentColor1">#B0C4DE</Color>
-  <Color x:Key="AccentColor2">#BED4EE</Color>
-  <Color x:Key="AccentColor3">#9BABC1</Color>
 
-  <Color x:Key="TickLineColor">#c8c4c0</Color>
-  <Color x:Key="BarNumberColor">#787068</Color>
-  <Color x:Key="FinalPitchColor">#909098</Color>
-  <Color x:Key="TrackBackgroundAltColor">#f0edea</Color>
 
-  <Color x:Key="WarningColor">#FFF4CE</Color>
 
   <!--Keyboard Background-->
-  <Color x:Key="WhiteKeyColorLeft">Transparent</Color>
-  <Color x:Key="WhiteKeyColorRight">Transparent</Color>
-  <Color x:Key="WhiteKeyNameColor">#FF347c</Color>
 
-  <Color x:Key="CenterKeyColorLeft">#FFDDE6</Color>
-  <Color x:Key="CenterKeyColorRight">#FFCEDC</Color>
-  <Color x:Key="CenterKeyNameColor">#FF347C</Color>
 
-  <Color x:Key="BlackKeyColorLeft">#FF71A3</Color>
-  <Color x:Key="BlackKeyColorRight">#FF347C</Color>
-  <Color x:Key="BlackKeyNameColor">#B0C4DE</Color>
 
   <!-- ════════ PlusTheme palette v4.0（覆写 Plus.Resources 默认）════════ -->
   <!-- Surface 实色 8 档 -->
-  <Color x:Key="PlusSurfaceDeep">#efece8</Color>
-  <Color x:Key="PlusSurfaceBase">#f5f2f0</Color>
-  <Color x:Key="PlusSurfaceRaised">#22222c</Color>
-  <Color x:Key="PlusSurfaceControl">#e0dcd8</Color>
-  <Color x:Key="PlusSurfaceHover">#4682B4</Color>
-  <Color x:Key="PlusSurfacePressed">#4682B4</Color>
-  <Color x:Key="PlusSurfaceDisabled">#f0edea</Color>
-  <Color x:Key="PlusSurfaceOverlay">#e8e4e0</Color>
   <!-- 对话框卡片（Suki GlassCard 同款质感：亮色近白） -->
-  <Color x:Key="PlusDialogCard">#fdfefefe</Color>
   <!-- Border -->
   <Color x:Key="PlusBorderSubtle">#d0ccc8</Color>
   <Color x:Key="PlusBorderDefault">#c8c4c0</Color>

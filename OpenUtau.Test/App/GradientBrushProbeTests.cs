@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using Xunit;
 using Avalonia;
 using Avalonia.Controls;
@@ -14,6 +14,7 @@ namespace OpenUtau.App;
 /// 是否在 App 资源环境中正常解析。用户反馈 B1（SukiWindow 接管窗口背景）后
 /// 音符属性面板背景变成纯色——怀疑渐变停靠点颜色键未解析（全回落默认色）。
 /// </summary>
+[Collection("Theme")]   // 这些用例会改全局主题/颜色池，串行执行避免互相污染
 public class GradientBrushProbeTests {
     [AvaloniaFact]
     public void WindowGradientBrush_Exists() {
@@ -26,7 +27,8 @@ public class GradientBrushProbeTests {
     [AvaloniaFact]
     public void DarkVariant_RendersStops() {
         // 实机默认深色主题——验证 Dark 变体下画刷渐变正常
-        Application.Current!.RequestedThemeVariant = ThemeVariant.Dark;
+        // 走主题唯一入口（会同步 MD3 颜色池，渐变停靠点接的是池子里的角色色）
+        ThemeManager.Apply("Dark");
         Assert.True(
             Application.Current.TryGetResource("PlusBrushWindowBackground", ThemeVariant.Dark, out var res),
             "Dark 变体下 PlusBrushWindowBackground 应可解析");

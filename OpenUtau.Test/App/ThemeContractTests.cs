@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
@@ -6,6 +6,8 @@ using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.VisualTree;
 using OpenUtau.App;
+using OpenUtau.Core.Theming;
+using OpenUtau.Theming;
 using OpenUtau.Colors;
 using Xunit;
 
@@ -15,12 +17,11 @@ namespace OpenUtau.Test.App {
     /// 删除 FluentTheme 前后都必须保持：所有 Plus* 令牌 / Fluent 兼容键 / ThemeManager 绑定键可解析。
     /// 缺键即 CI 红，杜绝"新画笔不同步"与"删除 Fluent 后断链"。
     /// </summary>
+    [Collection("Theme")]   // 这些用例会改全局主题/颜色池，串行执行避免互相污染
     public class ThemeContractTests {
         private static readonly string[] PlusColorKeys = {
-            // Surface 8
-            "PlusSurfaceDeep", "PlusSurfaceBase", "PlusSurfaceRaised", "PlusSurfaceControl",
-            "PlusSurfaceHover", "PlusSurfacePressed", "PlusSurfaceDisabled", "PlusSurfaceOverlay",
-            "PlusDialogCard",
+            // Surface：2026-09-25 起这 9 个旧颜色键已退役，改为直接由画刷键接 MD3 颜色池
+            // （PlusBrushSurface* / PlusBrushDialogCard 见下方画刷清单）
             // Border 6
             "PlusBorderSubtle", "PlusBorderDefault", "PlusBorderHover", "PlusBorderFocus",
             "PlusBorderGlass", "PlusBorderGlassStrong",
@@ -141,26 +142,36 @@ namespace OpenUtau.Test.App {
 
         /// <summary>
         /// 切换后解析到的颜色值确实变化（防"切换不完全"回归）：
-        /// 变体字典须真正生效，且根字典/Plus.Resources 兜底不得遮蔽变体。
+        /// 2026-09-25 起背景/色阶键直接接 MD3 颜色池，契约改为
+        /// **主题 → 颜色池 → 旧键画刷** 三段同步：任一段脱节即红。
         /// </summary>
         [AvaloniaFact]
         public void ThemeSwitch_ChangesResolvedColorValues() {
             ThemeManager.Apply("Dark");
-            Assert.Equal(Color.Parse("#1e1e28"), ResolveValue("BackgroundColor"));
-            Assert.Equal(Color.Parse("#282029"), ResolveValue("PlusSurfaceBgBottom"));
-            // 窗口渐变背景画刷（跟随主题色，替代已删除的 AcrylicTintBrush）
+            Color darkSurface = ColorPool.Current.Color(Md3Role.Surface);
+            Assert.Equal(darkSurface, BrushColorOf("SystemControlBackgroundAltHighBrush"));
+            Assert.Equal(ColorPool.Current.Color(Md3Role.SurfaceContainer), BrushColorOf("PlusBrushSurfaceRaised"));
+            // 窗口渐变背景画刷（停靠点也接颜色池）
+            // 注意：资源键指向的是**同一个** LinearGradientBrush 实例，停靠点被 DynamicResource 就地更新，
+            // 所以必须当场取"颜色值"，不能留画刷引用到下一段再读
             var bgDark = Assert.IsType<LinearGradientBrush>(ResolveValue("PlusBrushWindowBackground"));
             Assert.Equal(3, bgDark.GradientStops.Count);
+            Color darkStop = bgDark.GradientStops[0].Color;
 
             ThemeManager.Apply("Light");
-            Assert.Equal(Color.Parse("#f5f2f0"), ResolveValue("BackgroundColor"));
-            Assert.Equal(Color.Parse("#f1e9e7"), ResolveValue("PlusSurfaceBgBottom"));
+            Color lightSurface = ColorPool.Current.Color(Md3Role.Surface);
+            Assert.Equal(lightSurface, BrushColorOf("SystemControlBackgroundAltHighBrush"));
+            Assert.NotEqual(darkSurface, lightSurface);
+            Color lightStop = Assert.IsType<LinearGradientBrush>(ResolveValue("PlusBrushWindowBackground")).GradientStops[0].Color;
+            Assert.NotEqual(darkStop, lightStop);
 
             // 切回 Dark 确认往返
             ThemeManager.Apply("Dark");
-            Assert.Equal(Color.Parse("#1e1e28"), ResolveValue("BackgroundColor"));
-            Assert.Equal(Color.Parse("#282029"), ResolveValue("PlusSurfaceBgBottom"));
+            Assert.Equal(darkSurface, BrushColorOf("SystemControlBackgroundAltHighBrush"));
         }
+
+        private static Color BrushColorOf(string key) =>
+            Assert.IsAssignableFrom<ISolidColorBrush>(ResolveValue(key)).Color;
 
         /// <summary>
         /// 回归：TextBlock 默认前景必须跟随主题（防"Suki 后挂覆盖 Fluent 文本键 → 暗色下黑字"）。
@@ -199,8 +210,10 @@ namespace OpenUtau.Test.App {
             Assert.False(win.ExtendClientAreaToDecorationsHint);
             Assert.False(win.IsTitleBarVisible);
             Assert.Equal(new CornerRadius(0), win.RootCornerRadius);
-            // 内容背景仍由 Suki 渐变承担
-            Assert.Equal(SukiUI.Enums.SukiBackgroundStyle.GradientDarker, win.BackgroundStyle);
+            // 背景：全面舍弃 SukiUI（不画渐变/着色器，改由颜色池的 md3.surface 提供）
+            Assert.Equal(SukiUI.Enums.SukiBackgroundStyle.Flat, win.BackgroundStyle);
+            Assert.Null(win.BackgroundShaderFile);
+            Assert.False(win.BackgroundAnimationEnabled);
 
             win.Show();
             try {

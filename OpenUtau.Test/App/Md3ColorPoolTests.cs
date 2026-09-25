@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -16,6 +16,7 @@ namespace OpenUtau.Test.App {
     /// 覆盖：49 个角色在深浅两套下都能取到颜色／画刷／画笔；XAML 资源键齐全且可解析；
     /// 键名规则稳定；深浅切换会刷新资源并触发 Changed；与基线种子对照谷歌参考值。
     /// </summary>
+    [Collection("Theme")]   // 这些用例会改全局主题/颜色池，串行执行避免互相污染
     public class Md3ColorPoolTests {
         [AvaloniaFact]
         public void AllRoles_ResolveColorBrushPen_LightAndDark() {

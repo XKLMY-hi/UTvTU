@@ -1,195 +1,195 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <SolidColorBrush x:Key="SystemRegionBrush"
-                   Color="{DynamicResource BackgroundColor}"/>
+                   Color="{DynamicResource md3.color.surface}"/>
   <SolidColorBrush x:Key="SystemControlBackgroundAltHighBrush"
-                   Color="{DynamicResource BackgroundColor}"/>
+                   Color="{DynamicResource md3.color.surface}"/>
   <SolidColorBrush x:Key="BackgroundBrushSemi"
-                   Color="{DynamicResource BackgroundColor}" Opacity="0.5"/>
+                   Color="{DynamicResource md3.color.surface}" Opacity="0.5"/>
   <SolidColorBrush x:Key="SystemControlBackgroundAltHighBrushPointerOver"
-                   Color="{DynamicResource BackgroundColorPointerOver}"/>
+                   Color="{DynamicResource md3.color.surface-container-high}"/>
   <SolidColorBrush x:Key="SystemControlBackgroundAltHighBrushDisabled"
-                   Color="{DynamicResource BackgroundColorDisabled}"/>
+                   Color="{DynamicResource md3.color.surface-container-low}"/>
   <SolidColorBrush x:Key="SystemControlBackgroundBaseLowBrush"
-                   Color="{DynamicResource BackgroundColorPointerOver}"/>
+                   Color="{DynamicResource md3.color.surface-container-high}"/>
   <SolidColorBrush x:Key="SystemControlForegroundBaseHighBrush"
-                   Color="{DynamicResource ForegroundColor}" />
+                   Color="{DynamicResource md3.color.on-surface}" />
   <!-- 浮层面画刷（Plus.Menu / Plus.ComboBox / SukiCompactMenu 引用；此前从未定义，
        菜单浮层背景一直解析失败为透明——幽灵键修复） -->
   <SolidColorBrush x:Key="PlusBrushSurfaceOverlay"
-                   Color="{DynamicResource PlusSurfaceOverlay}" />
+                   Color="{DynamicResource md3.color.surface-container-high}" />
   <!-- 对话框卡片画刷（Suki GlassCard 同款半透明质感，配合主内容模糊） -->
   <SolidColorBrush x:Key="PlusBrushDialogCard"
-                   Color="{DynamicResource PlusDialogCard}" />
+                   Color="{DynamicResource md3.color.surface-container-high}" />
   <!-- Avalonia 12 Fluent 文本键（Suki 后挂载会覆盖 Fluent 的同名键导致暗色下黑字，
        本层在 Application.Resources 优先于 Styles 层，强制跟随 ForegroundColor 系） -->
   <SolidColorBrush x:Key="TextFillColorPrimaryBrush"
-                   Color="{DynamicResource ForegroundColor}" />
+                   Color="{DynamicResource md3.color.on-surface}" />
   <SolidColorBrush x:Key="TextFillColorSecondaryBrush"
-                   Color="{DynamicResource ForegroundColorPointerOver}" />
+                   Color="{DynamicResource md3.color.on-surface}" />
   <SolidColorBrush x:Key="TextFillColorDisabledBrush"
-                   Color="{DynamicResource ForegroundColorDisabled}" />
+                   Color="{DynamicResource md3.color.on-surface-variant}" />
   <SolidColorBrush x:Key="TextControlForeground"
-                   Color="{DynamicResource ForegroundColor}" />
+                   Color="{DynamicResource md3.color.on-surface}" />
   <SolidColorBrush x:Key="SystemControlForegroundBaseHighBrushPointerOver"
-                   Color="{DynamicResource ForegroundColorPointerOver}" />
+                   Color="{DynamicResource md3.color.on-surface}" />
   <SolidColorBrush x:Key="SystemControlForegroundBaseHighBrushDisabled"
-                   Color="{DynamicResource ForegroundColorDisabled}" />
+                   Color="{DynamicResource md3.color.on-surface-variant}" />
   <SolidColorBrush x:Key="SystemControlForegroundBaseMediumBrush"
-                   Color="{DynamicResource BorderColor}" />
+                   Color="{DynamicResource md3.color.outline-variant}" />
   <SolidColorBrush x:Key="SystemControlHighlightBaseMediumHighBrush"
-                   Color="{DynamicResource BorderColorPointerOver}" />
+                   Color="{DynamicResource md3.color.outline}" />
   <SolidColorBrush x:Key="SystemControlDisabledBaseMediumLowBrush"
-                   Color="{DynamicResource ForegroundColorDisabled}" />
+                   Color="{DynamicResource md3.color.on-surface-variant}" />
   <SolidColorBrush x:Key="SystemControlHighlightAltBaseHighBrush"
-                   Color="{DynamicResource ForegroundColorPointerOver}" />
+                   Color="{DynamicResource md3.color.on-surface}" />
   <SolidColorBrush x:Key="SystemControlHighlightBaseHighBrush"
-                   Color="{DynamicResource ForegroundColorPointerOver}" />
+                   Color="{DynamicResource md3.color.on-surface}" />
   <SolidColorBrush x:Key="MenuFlyoutPresenterBackground"
-                   Color="{DynamicResource BackgroundColor}" />
+                   Color="{DynamicResource md3.color.surface}" />
   <SolidColorBrush x:Key="MenuFlyoutItemBackground"
-                   Color="{DynamicResource BackgroundColor}" />
+                   Color="{DynamicResource md3.color.surface}" />
   <SolidColorBrush x:Key="MenuFlyoutItemBackgroundPointerOver"
-                   Color="{DynamicResource BackgroundColorPointerOver}" />
+                   Color="{DynamicResource md3.color.surface-container-high}" />
   <SolidColorBrush x:Key="MenuFlyoutItemBackgroundDisabled"
-                   Color="{DynamicResource BackgroundColorDisabled}" />
+                   Color="{DynamicResource md3.color.surface-container-low}" />
   <SolidColorBrush x:Key="MenuFlyoutItemForeground"
-                   Color="{DynamicResource ForegroundColor}" />
+                   Color="{DynamicResource md3.color.on-surface}" />
   <SolidColorBrush x:Key="MenuFlyoutItemForegroundPointerOver"
-                   Color="{DynamicResource ForegroundColorPointerOver}" />
+                   Color="{DynamicResource md3.color.on-surface}" />
   <SolidColorBrush x:Key="MenuFlyoutItemForegroundDisabled"
-                   Color="{DynamicResource ForegroundColorDisabled}" />
+                   Color="{DynamicResource md3.color.on-surface-variant}" />
   <!--combo box background-->
   <SolidColorBrush x:Key="SystemControlBackgroundAltMediumLowBrush"
-                   Color="{DynamicResource BackgroundColorPointerOver}" />
+                   Color="{DynamicResource md3.color.surface-container-high}" />
   <!--combo box pointer over-->
   <SolidColorBrush x:Key="SystemControlPageBackgroundAltMediumBrush"
-                   Color="{DynamicResource BackgroundColorPressed}" />
+                   Color="{DynamicResource md3.color.surface-container-highest}" />
   <!--combo box flyout background-->
   <SolidColorBrush x:Key="SystemControlTransientBackgroundBrush"
-                   Color="{DynamicResource BackgroundColorPointerOver}" />
+                   Color="{DynamicResource md3.color.surface-container-high}" />
   <!--combo box highlight overlay-->
   <SolidColorBrush x:Key="SystemControlHighlightListLowBrush"
-                   Color="{DynamicResource ForegroundColorPressed}" Opacity="0.25" />
+                   Color="{DynamicResource md3.color.on-surface}" Opacity="0.25" />
   <!--text box disabled text-->
   <SolidColorBrush x:Key="SystemControlDisabledChromeDisabledLowBrush"
-                   Color="{DynamicResource ForegroundColorDisabled}" />
+                   Color="{DynamicResource md3.color.on-surface-variant}" />
   <!--text box disabled background-->
   <SolidColorBrush x:Key="TextControlBackgroundDisabled"
-                   Color="{DynamicResource BackgroundColorDisabled}" />
+                   Color="{DynamicResource md3.color.surface-container-low}" />
   <SolidColorBrush x:Key="SystemControlBackgroundChromeMediumLowBrush"
-                   Color="{DynamicResource BackgroundColorPointerOver}"/>
+                   Color="{DynamicResource md3.color.surface-container-high}"/>
   <SolidColorBrush x:Key="DataGridColumnHeaderBackgroundBrush"
-                   Color="{DynamicResource BackgroundColorPointerOver}" />
+                   Color="{DynamicResource md3.color.surface-container-high}" />
   <SolidColorBrush x:Key="DataGridColumnHeaderForegroundBrush"
-                   Color="{DynamicResource ForegroundColor}" />
+                   Color="{DynamicResource md3.color.on-surface}" />
   <SolidColorBrush x:Key="DataGridScrollBarsSeparatorBackground"
-                   Color="{DynamicResource BackgroundColor}" />
+                   Color="{DynamicResource md3.color.surface}" />
   <!--botton background pointer over overlap-->
   <SolidColorBrush x:Key="ButtonBackgroundPointerOver"
-                   Color="{DynamicResource ForegroundColorPressed}" Opacity="0.25" />
+                   Color="{DynamicResource md3.color.on-surface}" Opacity="0.25" />
   <SolidColorBrush x:Key="ButtonBackgroundDisabled"
-                   Color="{DynamicResource BackgroundColorDisabled}" />
+                   Color="{DynamicResource md3.color.surface-container-low}" />
   <SolidColorBrush x:Key="MenuFlyoutPresenterBorderBrush"
-                   Color="{DynamicResource BorderColor}" />
+                   Color="{DynamicResource md3.color.outline-variant}" />
 
   <SolidColorBrush x:Key="TickLineBrush"
-                   Color="{DynamicResource TickLineColor}" />
+                   Color="{DynamicResource md3.color.outline-variant}" />
   <SolidColorBrush x:Key="TickLineBrushLow"
-                   Color="{DynamicResource TickLineColor}" Opacity="0.5"/>
+                   Color="{DynamicResource md3.color.outline-variant}" Opacity="0.5"/>
   <SolidColorBrush x:Key="BarNumberBrush"
-                   Color="{DynamicResource BarNumberColor}" />
+                   Color="{DynamicResource md3.color.on-surface-variant}" />
   <SolidColorBrush x:Key="FinalPitchBrush"
-                   Color="{DynamicResource FinalPitchColor}" />
+                   Color="{DynamicResource md3.color.on-surface-variant}" />
   <SolidColorBrush x:Key="RealCurveStrokeBrush"
-                   Color="{DynamicResource AccentColor1}" Opacity="0.25" />
+                   Color="{DynamicResource md3.color.primary}" Opacity="0.25" />
   <LinearGradientBrush x:Key="RealCurveFillBrush" StartPoint="0%,0%" EndPoint="0%,100%" Opacity="0.25">
-      <GradientStop Color="{DynamicResource AccentColor1}" Offset="0.0"/>
+      <GradientStop Color="{DynamicResource md3.color.primary}" Offset="0.0"/>
       <GradientStop Color="Transparent" Offset="1.0"/>
   </LinearGradientBrush>
   <SolidColorBrush x:Key="TrackBackgroundAltBrush"
-                   Color="{DynamicResource TrackBackgroundAltColor}"/>
+                   Color="{DynamicResource md3.color.surface-container-low}"/>
   <SolidColorBrush x:Key="NeutralAccentBrush"
-                   Color="{DynamicResource NeutralAccentColor}" />
+                   Color="{DynamicResource md3.color.secondary}" />
   <SolidColorBrush x:Key="NeutralAccentBrushSemi"
-                   Color="{DynamicResource NeutralAccentColor}" Opacity="0.5" />
+                   Color="{DynamicResource md3.color.secondary}" Opacity="0.5" />
   <SolidColorBrush x:Key="NeutralAccentBrushSemi2"
-                   Color="{DynamicResource NeutralAccentColor}" Opacity="0.25" />
+                   Color="{DynamicResource md3.color.secondary}" Opacity="0.25" />
   <SolidColorBrush x:Key="NeutralAccentBrushPointerOver"
-                   Color="{DynamicResource NeutralAccentColorPointerOver}" />
+                   Color="{DynamicResource md3.color.secondary}" />
   <SolidColorBrush x:Key="AccentBrush1"
-                   Color="{DynamicResource AccentColor1}" />
+                   Color="{DynamicResource md3.color.primary}" />
   <SolidColorBrush x:Key="AccentBrush1Semi"
-                   Color="{DynamicResource AccentColor1}" Opacity="0.5" />
+                   Color="{DynamicResource md3.color.primary}" Opacity="0.5" />
   <SolidColorBrush x:Key="AccentBrush2"
-                   Color="{DynamicResource AccentColor2}" />
+                   Color="{DynamicResource md3.color.tertiary}" />
   <SolidColorBrush x:Key="AccentBrush2Semi"
-                   Color="{DynamicResource AccentColor2}" Opacity="0.5" />
+                   Color="{DynamicResource md3.color.tertiary}" Opacity="0.5" />
   <SolidColorBrush x:Key="AccentBrush3"
-                   Color="{DynamicResource AccentColor3}" />
+                   Color="{DynamicResource md3.color.primary}" />
   <SolidColorBrush x:Key="AccentBrush3Semi"
-                   Color="{DynamicResource AccentColor3}" Opacity="0.5" />
+                   Color="{DynamicResource md3.color.primary}" Opacity="0.5" />
   <SolidColorBrush x:Key="SelectedTrackAccentBrush"
-                   Color="{DynamicResource SystemAccentColor}" />
+                   Color="{DynamicResource md3.color.primary}" />
   <SolidColorBrush x:Key="SelectedTrackAccentLightBrush"
-                   Color="{DynamicResource SystemAccentColorLight1}" />
+                   Color="{DynamicResource md3.color.primary}" />
   <SolidColorBrush x:Key="SelectedTrackAccentLightBrushSemi"
-                   Color="{DynamicResource SystemAccentColorLight1}" Opacity="0.5"/>
+                   Color="{DynamicResource md3.color.primary}" Opacity="0.5"/>
   <SolidColorBrush x:Key="SelectedTrackAccentDarkBrush"
-                   Color="{DynamicResource SystemAccentColorDark1}" />
+                   Color="{DynamicResource md3.color.primary}" />
   <SolidColorBrush x:Key="SelectedTrackCenterKeyBrush"
-                   Color="{DynamicResource AccentColor2}" />
+                   Color="{DynamicResource md3.color.tertiary}" />
   <SolidColorBrush x:Key="WarningBrush"
-                   Color="{DynamicResource WarningColor}" />
+                   Color="{DynamicResource md3.color.error-container}" />
 
   <LinearGradientBrush x:Key="WhiteKeyBrush" StartPoint="0%,50%" EndPoint="100%,50%">
     <LinearGradientBrush.GradientStops>
-      <GradientStop Color="{DynamicResource WhiteKeyColorLeft}" Offset="0"/>
-      <GradientStop Color="{DynamicResource WhiteKeyColorRight}" Offset="1"/>
+      <GradientStop Color="{DynamicResource md3.color.surface-container-low}" Offset="0"/>
+      <GradientStop Color="{DynamicResource md3.color.surface-container}" Offset="1"/>
     </LinearGradientBrush.GradientStops>
   </LinearGradientBrush >
   <SolidColorBrush x:Key="WhiteKeyNameBrush"
-                   Color="{DynamicResource WhiteKeyNameColor}"/>
+                   Color="{DynamicResource md3.color.on-surface-variant}"/>
   <LinearGradientBrush x:Key="CenterKeyBrush" StartPoint="0%,50%" EndPoint="100%,50%">
     <LinearGradientBrush.GradientStops>
-      <GradientStop Color="{DynamicResource CenterKeyColorLeft}" Offset="0"/>
-      <GradientStop Color="{DynamicResource CenterKeyColorRight}" Offset="1"/>
+      <GradientStop Color="{DynamicResource md3.color.primary-container}" Offset="0"/>
+      <GradientStop Color="{DynamicResource md3.color.primary-container}" Offset="1"/>
     </LinearGradientBrush.GradientStops>
   </LinearGradientBrush >
   <SolidColorBrush x:Key="CenterKeyNameBrush"
-                   Color="{DynamicResource CenterKeyNameColor}"/>
+                   Color="{DynamicResource md3.color.on-primary-container}"/>
   <LinearGradientBrush x:Key="BlackKeyBrush" StartPoint="0%,50%" EndPoint="100%,50%">
     <LinearGradientBrush.GradientStops>
-      <GradientStop Color="{DynamicResource BlackKeyColorLeft}" Offset="0"/>
-      <GradientStop Color="{DynamicResource BlackKeyColorRight}" Offset="1"/>
+      <GradientStop Color="{DynamicResource md3.color.surface-container-lowest}" Offset="0"/>
+      <GradientStop Color="{DynamicResource md3.color.surface-container-lowest}" Offset="1"/>
     </LinearGradientBrush.GradientStops>
   </LinearGradientBrush >
   <SolidColorBrush x:Key="BlackKeyNameBrush"
-                   Color="{DynamicResource BlackKeyNameColor}"/>
+                   Color="{DynamicResource md3.color.on-surface-variant}"/>
 
   <!-- ════════ Fluent 兼容键补齐（删除 FluentTheme 前预备，PlusTheme 承接）════════ -->
   <!-- 低强调前景：Subtle 文字 / 分隔线 / 图标 -->
   <SolidColorBrush x:Key="SystemControlForegroundBaseLowBrush"
-                   Color="{DynamicResource ForegroundColorDisabled}" />
+                   Color="{DynamicResource md3.color.on-surface-variant}" />
   <!-- 中强调背景（MixerTrackStrip / RenderWindow 引用） -->
   <SolidColorBrush x:Key="SystemControlBackgroundAltMediumBrush"
-                   Color="{DynamicResource BackgroundColorPressed}" />
+                   Color="{DynamicResource md3.color.surface-container-highest}" />
   <SolidColorBrush x:Key="MenuFlyoutItemForegroundPressed"
-                   Color="{DynamicResource ForegroundColorPressed}" />
+                   Color="{DynamicResource md3.color.on-surface}" />
   <SolidColorBrush x:Key="TextControlForegroundDisabled"
-                   Color="{DynamicResource ForegroundColorDisabled}" />
+                   Color="{DynamicResource md3.color.on-surface-variant}" />
   <!-- ComboBox 下拉弹层 -->
   <SolidColorBrush x:Key="ComboBoxDropDownBackground"
-                   Color="{DynamicResource BackgroundColor}" />
+                   Color="{DynamicResource md3.color.surface}" />
   <SolidColorBrush x:Key="ComboBoxDropDownBorderBrush"
-                   Color="{DynamicResource BorderColor}" />
+                   Color="{DynamicResource md3.color.outline-variant}" />
   <!-- RadioButton（PianoRollStyles 模板引用） -->
   <SolidColorBrush x:Key="RadioButtonOuterEllipseFill"
-                   Color="{DynamicResource ForegroundColor}" />
+                   Color="{DynamicResource md3.color.on-surface}" />
   <SolidColorBrush x:Key="RadioButtonOuterEllipseStroke"
-                   Color="{DynamicResource BorderColor}" />
+                   Color="{DynamicResource md3.color.outline-variant}" />
   <SolidColorBrush x:Key="RadioButtonOuterEllipseFillPointerOver"
-                   Color="{DynamicResource ForegroundColorPressed}" />
+                   Color="{DynamicResource md3.color.on-surface}" />
   <SolidColorBrush x:Key="RadioButtonOuterEllipseStrokePointerOver"
-                   Color="{DynamicResource BorderColorPointerOver}" />
+                   Color="{DynamicResource md3.color.outline}" />
 </ResourceDictionary>

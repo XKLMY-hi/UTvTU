@@ -33,8 +33,8 @@
       <Setter Property="CornerRadius" Value="8"/>
     </Style>
     <Style Selector="Button.fxEntryBtn.fxActive">
-      <Setter Property="BorderBrush" Value="{DynamicResource AccentColor1}"/>
-      <Setter Property="Foreground" Value="{DynamicResource AccentColor1}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.color.primary}"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.color.primary}"/>
     </Style>
     <Style Selector="TextBlock.sectionLabel">
       <Setter Property="FontSize" Value="8"/>

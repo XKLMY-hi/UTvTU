@@ -1,4 +1,4 @@
-﻿<controls:WindowEx xmlns="https://github.com/avaloniaui"
+<controls:WindowEx xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:OpenUtau.App.Controls"
         x:Class="OpenUtau.App.Views.RenderWindow"
@@ -9,7 +9,7 @@
   <Window.Styles>
     <!-- 阶段 E 风格：卡片圆角 10 + Surface 系 -->
     <Style Selector="Border.renderCard">
-      <Setter Property="Background" Value="{DynamicResource PlusSurfaceControl}"/>
+      <Setter Property="Background" Value="{DynamicResource md3.color.surface-container-high}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource PlusBorderSubtle}"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="CornerRadius" Value="10"/>

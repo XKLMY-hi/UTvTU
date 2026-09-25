@@ -304,6 +304,37 @@
 
 ---
 
+## 12. 背景与色阶编排（2026-09-25 落地）
+
+**判决**：① **全面舍弃 SukiUI 的背景**；② 控件颜色必须按 MD3 **容器梯度**分工，不许平铺一个色。
+
+### 12.1 窗口背景
+`WindowEx`：`BackgroundStyle = Flat`、着色器/文件/代码置空、关背景动画与过渡，`Background = {DynamicResource md3.surface}`。
+Suki 剩下的价值只有 Hosts（对话框/Toast 挂载点）。
+
+### 12.2 令牌桥：旧颜色键退役，画刷直接接颜色池
+- **41 个旧颜色键**（`BackgroundColor*` / `PlusSurface*` / `PlusDialogCard` / `PlusSurfaceBg*` / `TrackBackgroundAlt*` / `TickLine*` / `BarNumber*` / `Foreground*` / `Border*` / `SystemAccent*` / `Accent1-3` / `NeutralAccent*` / 钢琴卷帘键盘色 / `WarningColor`）**已从 `Colors/{Light,Dark}Theme.axaml` 与 `Themes/Plus.Resources.axaml` 删除**。
+- 之所以在**画刷层**做桥接：`<Color>` 是结构体，**不能**绑 `DynamicResource`；而 `Colors/Brushes.axaml` + `Themes/Plus.Resources.axaml` 里的画刷都是 `Color="{DynamicResource …}"`，把画刷直接指向 `md3.color.<role>` 即可——**未迁移的旧控件与自绘 Canvas 也一起跟随颜色池**（换种子/切深浅色全应用同步）。
+- 主题同步：`ThemeManager.Apply`（主题唯一入口）末尾调 `ColorPool.SetDark(IsDarkMode)`——原先只有 `App.SetTheme` 调，偏好页/主题编辑器/自定义主题路径会漏。
+
+### 12.3 容器梯度表（谁用哪一档）
+| 层 | 角色 | 用在哪 |
+|---|---|---|
+| 内容/应用底 | `surface` | 窗口、编排画布（最低层，让片段/网格浮起） |
+| 面板 | `surface-container` | 顶栏 56、轨头列 264、素材库 296、状态条 32 |
+| 面板上的控件 | `surface-container-high` | 运输条/时间/速度胶囊、素材库卡片、输入 |
+| 悬停 / 按下 | `surface-container-highest` | 图标按钮悬停、列表行悬停、菜单项悬停 |
+| 浮层 | `surface-container-high` | 菜单/下拉/对话框卡片（**去掉 Suki 玻璃半透明，改实色**） |
+| 强调实底 | `primary` / `primary-container` | 播放键、品牌标记、选中页签（`secondary-container`） |
+| 描边 / 网格 | `outline-variant`（悬停 `outline`） | 分栏线、表头分隔、网格线 |
+| 文字 | `on-surface` / `on-surface-variant` | 主文字 / 次文字 |
+
+### 12.4 测试约定
+主题/颜色池是**全局状态**：`ThemeContractTests` / `Md3ColorPoolTests` / `Md3BackgroundTests` / `GradientBrushProbeTests` / `WelcomeViewTests` 已加 `[Collection("Theme")]` **串行执行**（xUnit 默认按类并行，会互相污染）。
+读"会被就地更新的资源"时（如渐变画刷停靠点）必须**当场取颜色值**，不能留画刷引用到下一段再读。
+
+---
+
 ## 附录 A：实测数据（2026-09-25，本地 `plus-develop` @ `a0e1995e`）
 
 | 项 | 数值 |
@@ -350,3 +381,4 @@ pwsh -NoProfile -File .opencode\design\extract-spec.ps1 -Path <某屏>.html [-Ma
 | 2026-09-25 | **动效令牌层落地**（新增第 3.H 节）：`Md3Motion`（16 时长档 + 6 缓动档 + 总开关 + 语义档）+ `Md3MotionResources` 资源桥 + `Motion` 接口；新增 30 个用例，全量 **363 通过** |
 | 2026-09-25 | **动效口径修正**（用户裁定：只要页面/面板级过渡，不要悬停微动效）：删除 `Motion.Hover`；接口改为 `Enter`（来向）+ `Delay`（交错）+ `AutoPlay`（挂载即播）+ 代码侧 `Play/PlayAll/PlayExit/Reset`；落地欢迎页交错滑入、欢迎↔编辑器退场/入场、卷帘与混音台面板滑入、侧栏滑入、对话框弹出（替换手搓淡入）；全量 **366 通过** |
 | 2026-09-25 | **主编辑器 S1 外壳落地**（第 11 节新增切分表）：顶栏 56（品牌=菜单 MenuFlyout / 运输条 40 胶囊 / 时间与速度 40 圆角块 / 右侧 撤销·重做·布局·混音台·设置·轨道高度）、状态条 32、三列骨架（轨头 264 / 编排 / 素材库 296）；老侧栏 240 退役（项目页信息上顶栏、最近工程留欢迎页）；素材库四页签；新增 `sidebar.midi`/`sidebar.effects`/`view.workspace` 三键（EN/zh 各 926、缺口 0）；新增 5 个外壳契约用例，全量 **371 通过** |
+| 2026-09-25 | **背景全面舍弃 SukiUI + 色阶按 MD3 梯度编排**（新增第 12 节）：WindowEx 关 Suki 背景（Flat/无着色器/无动画）改 md3.surface；41 个旧颜色键退役、画刷层直接接 md3.color.*（旧控件与自绘 Canvas 自动跟随）；ThemeManager.Apply 末尾同步颜色池；梯度表定稿（surface / container / high / highest / outline / on-surface）；主题相关用例加 `[Collection("Theme")]` 串行；全量 **377 通过** |

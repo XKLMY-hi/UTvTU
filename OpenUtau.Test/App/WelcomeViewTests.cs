@@ -21,6 +21,7 @@ namespace OpenUtau.Test.App {
     /// 2) 视图用到的所有 DynamicResource 键都能解析——其中颜色键**必须来自 MD3 颜色池**
     ///    （欢迎页是首个迁移到颜色池的界面，禁止再混用旧的 Plus*/Suki 颜色键）。
     /// </summary>
+    [Collection("Theme")]   // 这些用例会改全局主题/颜色池，串行执行避免互相污染
     public class WelcomeViewTests {
         // 视图 XAML 由测试工程以链接文件复制到输出目录（见 OpenUtau.Test.csproj）
         private static string ReadXaml(string fileName) =>

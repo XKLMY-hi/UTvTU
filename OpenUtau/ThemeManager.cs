@@ -143,6 +143,10 @@ namespace OpenUtau.App {
                 Application.Current.RequestedThemeVariant = variant;
             }
             RebuildProjection();
+            // MD3 颜色池跟随主题：旧背景/色阶键（Brushes.axaml / Plus.Resources.axaml）已直接接
+            // md3 角色色，池子的深浅色变体必须跟主题同步，否则旧键会停在上一套变体
+            // （ThemeManager.Apply 是主题唯一入口：偏好页 / 主题编辑器 / 自定义主题都经它）
+            Theming.ColorPool.SetDark(IsDarkMode);
         }
 
         /// <summary>供 ThemeEditor 实时改写资源键后刷新静态画刷投影（不改主题本身）。</summary>
