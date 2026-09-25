@@ -336,6 +336,14 @@
 
           <!-- 右侧：撤销/重做 · 布局 · 混音台 · 设置 · 轨道高度 -->
           <StackPanel Grid.Column="5" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+            <!-- 偏好设置：完成（仅偏好页显示） -->
+            <Button x:Name="PreferencesCloseButton" Classes="topBtn" IsVisible="False"
+                    Click="OnPreferencesClose" ToolTip.Tip="{DynamicResource prefs.close}">
+              <Path Data="{StaticResource icon-x}" Width="16" Height="16" Stretch="Uniform"
+                    Fill="{DynamicResource md3.on-surface}"/>
+            </Button>
+            <Border x:Name="PreferencesCloseDivider" Width="1" Height="20" Margin="6,0" VerticalAlignment="Center"
+                    IsVisible="False" Background="{DynamicResource md3.outline-variant}"/>
             <Button Classes="topBtn" Command="{Binding Undo}" IsEnabled="{Binding CanUndo}"
                     ToolTip.Tip="{DynamicResource menu.edit.undo}">
               <Path Data="{StaticResource icon-undo}" Width="16" Height="16" Stretch="Uniform"
@@ -809,6 +817,9 @@
     <!-- ══════════ 欢迎视图（初始视图，内嵌于主窗口）══════════
          打开 / 新建工程后隐藏；模态覆盖层（ZIndex 1000）仍位于其之上 -->
     <views:WelcomeView x:Name="WelcomeHost" IsVisible="False" ZIndex="900"/>
+
+    <!-- 偏好设置（全屏视图；模态覆盖层仍在其上） -->
+    <views:PreferencesView x:Name="PreferencesHost" IsVisible="False" ZIndex="950"/>
 
     <!-- Overlay layer: in-window modal dialog host -->
     <Grid Name="OverlayLayer" IsVisible="False" ZIndex="1000" Background="Transparent">

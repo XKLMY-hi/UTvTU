@@ -247,7 +247,6 @@ namespace OpenUtau.App.Views {
         public void OpenProjectFiles(string[] files) => viewModel.OpenProject(files);
         public void OpenTemplateFile(string file) => viewModel.OpenTemplate(file);
         public void ImportAudio() => OnMenuImportAudio(this, new RoutedEventArgs());
-        public void ShowPreferences() => OnMenuPreferences(this, new RoutedEventArgs());
         public void ShowPackageManager() => OnMenuPackageManager(this, new RoutedEventArgs());
 
         void OnEditTimeSignature(object sender, PointerPressedEventArgs args) {
@@ -773,7 +772,10 @@ namespace OpenUtau.App.Views {
             }
         }
 
-        void OnMenuPreferences(object sender, RoutedEventArgs args) {
+        void OnMenuPreferences(object sender, RoutedEventArgs args) => ShowPreferences();
+
+        /// <summary>偏好设置（全屏视图，设计稿 6-Preferences）。</summary>
+        public void ShowPreferences() {
             PreferencesViewModel dataContext;
             try {
                 dataContext = new PreferencesViewModel();
@@ -783,12 +785,54 @@ namespace OpenUtau.App.Views {
                 Preferences.Reset();
                 dataContext = new PreferencesViewModel();
             }
+            PreferencesHost.Host = this;
+            PreferencesHost.DataContext = dataContext;
+            PreferencesHost.SingersDataContext = sidebarViewModel;
+            PreferencesHost.ShowDefaultPage();
+            PreferencesHost.IsVisible = true;
+            PreferencesCloseButton.IsVisible = true;
+            Motion.Play(PreferencesHost, MotionEntrance.Fade);
+        }
+
+        /// <summary>退出偏好设置（淡出后隐藏）。</summary>
+        public async void HidePreferences() {
+            if (!PreferencesHost.IsVisible) {
+                return;
+            }
+            await Motion.PlayExitAsync(PreferencesHost);
+            PreferencesHost.IsVisible = false;
+            PreferencesCloseButton.IsVisible = false;
+            Motion.Reset(PreferencesHost);
+        }
+
+        private void OnPreferencesClose(object? sender, RoutedEventArgs args) => HidePreferences();
+
+        /// <summary>旧版设置对话框（未迁移到新偏好页的设置项暂时从这里进入）。</summary>
+        public void ShowLegacyPreferences() {
+            var dataContext = new PreferencesViewModel();
             var prefs = new PreferencesDialog() {
                 DataContext = dataContext,
                 HostWindow = this,
             };
             ShowOverlayContent(prefs, sizeFraction: 0.60, headerTitle: ThemeManager.GetString("prefs.caption"));
         }
+
+        /// <summary>恢复默认设置（二次确认 → 重置 → 重开偏好页）。</summary>
+        public async void ResetAllPreferences() {
+            var result = await MessageBox.Show(this,
+                ThemeManager.GetString("prefs.reset.all"),
+                ThemeManager.GetString("prefs.caption"),
+                MessageBox.MessageBoxButtons.OkCancel);
+            if (result != MessageBox.MessageBoxResult.Ok) {
+                return;
+            }
+            Preferences.Reset();
+            App.SetTheme();
+            ShowPreferences();
+        }
+
+        /// <summary>选择文件夹（偏好页的「更改」按钮）。</summary>
+        public Task<string?> PickFolder(string titleKey) => FilePicker.OpenFolderAboutSinger(this, titleKey);
 
         void OnMenuFullScreen(object sender, RoutedEventArgs args) {
             this.WindowState = this.WindowState == WindowState.FullScreen

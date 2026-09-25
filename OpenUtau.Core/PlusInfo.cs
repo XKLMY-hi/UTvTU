@@ -8,5 +8,12 @@
     public static class PlusInfo {
         /// <summary>Plus 版本号。</summary>
         public const string PlusVersion = "0.0.3";
+
+        /// <summary>产品显示名。</summary>
+        public const string DisplayName = "UTvTU";
+
+        /// <summary>完整版本串（窗口标题 / 状态条 / 偏好设置版本行共用一处，避免多份格式串漂移）。</summary>
+        public static string VersionString =>
+            $"{DisplayName} v{System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version} p{PlusVersion}";
     }
 }

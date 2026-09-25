@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -114,8 +114,11 @@ namespace OpenUtau.App {
             }
             // v4.0：主题状态收敛到 ThemeManager.Apply 单一入口
             ThemeManager.Apply(Core.Util.Preferences.Default.ThemeName);
-            // MD3 颜色池：与现有主题体系并存（控件逐步迁移），主题变更后刷新角色色与资源字典
-            Theming.ColorPool.SetDark(ThemeManager.IsDarkMode);
+            // MD3 颜色池：按偏好里的种子重建（主题变更后刷新角色色与资源字典；种子可在偏好设置里换）
+            Theming.ColorPool.Initialize(
+                Core.Util.Preferences.Default.ThemeSeed,
+                Core.Theming.Md3SchemeVariant.TonalSpot,
+                ThemeManager.IsDarkMode);
             // MD3 动效令牌：只随开关变化，重建也是幂等的
             Theming.Md3MotionResources.Install();
         }

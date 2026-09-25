@@ -27,6 +27,23 @@ namespace OpenUtau.App.ViewModels {
         }
     }
 
+    /// <summary>「外观 · 强调色」色板项：显示的是**该种子在当前深浅色下真正生成的主色**（所见即所得）。</summary>
+    public class AccentSwatchViewModel {
+        public uint Seed { get; }
+        public Avalonia.Media.IBrush Brush { get; }
+        public bool IsSelected { get; }
+        public string Tooltip { get; }
+
+        public AccentSwatchViewModel(uint seed, bool isDark, uint currentSeed) {
+            Seed = seed;
+            var colors = Core.Theming.Md3SchemeColors.Create(seed, Core.Theming.Md3SchemeVariant.TonalSpot, isDark);
+            Brush = new Avalonia.Media.Immutable.ImmutableSolidColorBrush(
+                Theming.Md3ColorPool.ToColor(colors.Get(Core.Theming.Md3Role.Primary)));
+            IsSelected = seed == currentSeed;
+            Tooltip = $"#{seed & 0xFFFFFF:X6}";
+        }
+    }
+
     public class PreferencesViewModel : ViewModelBase {
         // General
         private CultureInfo? language;
@@ -45,7 +62,6 @@ namespace OpenUtau.App.ViewModels {
         // Playback
         private List<AudioOutputDevice>? audioOutputDevices;
         private AudioOutputDevice? audioOutputDevice;
-
         public List<AudioOutputDevice>? AudioOutputDevices {
             get => audioOutputDevices;
             set => this.RaiseAndSetIfChanged(ref audioOutputDevices, value);
@@ -105,6 +121,9 @@ namespace OpenUtau.App.ViewModels {
 
         // Appearance
         [Reactive] public string ThemeName { get; set; }
+        /// <summary>MD3 颜色池种子（决定整应用的强调色阶；D4）。</summary>
+        public ObservableCollection<AccentSwatchViewModel> AccentSwatches { get; } = new ObservableCollection<AccentSwatchViewModel>();
+        public ReactiveCommand<AccentSwatchViewModel, System.Reactive.Unit>? SelectAccentCommand { get; private set; }
         [Reactive] public int DegreeStyle { get; set; }
         [Reactive] public bool UseTrackColor { get; set; }
         [Reactive] public bool ShowPortrait { get; set; }
@@ -117,6 +136,29 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public bool ThemeEditable { get; set; }
         public List<string> ThemeItems => ThemeManager.GetAvailableThemes();
         public bool IsThemeEditorOpen => Views.ThemeEditorWindow.IsOpen;
+
+        /// <summary>可选强调色种子（取自设计稿「强调色」色板；色板上显示的是该种子**真实生成**的主色）。</summary>
+        private static readonly uint[] AccentSeeds = {
+            0xFF6FDBCB, 0xFFFFB4AB, 0xFFA9CBE7, 0xFFF3C97E, 0xFFC9B8E8, 0xFF9BE3A8,
+        };
+
+        /// <summary>换种子 → 立即重建颜色池（整应用重着色），并落盘（见决定文档 D4）。</summary>
+        public void ApplyThemeSeed(uint seed) {
+            if (Preferences.Default.ThemeSeed == seed) {
+                return;
+            }
+            Preferences.Default.ThemeSeed = seed;
+            Preferences.Save();
+            Theming.ColorPool.Initialize(seed, Core.Theming.Md3SchemeVariant.TonalSpot, ThemeManager.IsDarkMode);
+            RebuildAccentSwatches();
+        }
+
+        private void RebuildAccentSwatches() {
+            AccentSwatches.Clear();
+            foreach (uint seed in AccentSeeds) {
+                AccentSwatches.Add(new AccentSwatchViewModel(seed, ThemeManager.IsDarkMode, Preferences.Default.ThemeSeed));
+            }
+        }
 
         // UTAU
         public List<string> DefaultRendererOptions { get; set; }
@@ -197,6 +239,9 @@ namespace OpenUtau.App.ViewModels {
             DiffSingerLangCodeHide = Preferences.Default.DiffSingerLangCodeHide;
             SkipRenderingMutedTracks = Preferences.Default.SkipRenderingMutedTracks;
             ThemeName = Preferences.Default.ThemeName;
+            // MD3 配色：色板显示"该种子在当前深浅色下真正生成的主色"（D4 种子可选）
+            SelectAccentCommand = ReactiveCommand.Create<AccentSwatchViewModel>(swatch => ApplyThemeSeed(swatch.Seed));
+            RebuildAccentSwatches();
             DegreeStyle = Preferences.Default.DegreeStyle;
             UseTrackColor = Preferences.Default.UseTrackColor;
             ShowPortrait = Preferences.Default.ShowPortrait;
@@ -308,7 +353,9 @@ namespace OpenUtau.App.ViewModels {
                         App.SetTheme();
                     }
                 });
-            this.WhenAnyValue(vm => vm.DegreeStyle)
+            // 主题切换后色板要跟着换深浅色（显示的是当前变体下真实生成的主色）
+            MessageBus.Current.Listen<ThemeChangedEvent>()
+                .Subscribe(_ => RebuildAccentSwatches());            this.WhenAnyValue(vm => vm.DegreeStyle)
                 .Subscribe(degreeStyle => {
                     Preferences.Default.DegreeStyle = degreeStyle;
                     Preferences.Save();

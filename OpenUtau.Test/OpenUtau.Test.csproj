@@ -42,6 +42,7 @@
     <!-- 视图 XAML 源码：契约测试需要扫描资源键（avares 不保留 .axaml 原文） -->
     <None Include="..\OpenUtau\Views\WelcomeView.axaml" Link="Views\WelcomeView.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Views\MainWindow.axaml" Link="Views\MainWindow.axaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\OpenUtau\Views\PreferencesView.axaml" Link="Views\PreferencesView.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Styles\SukiCompactMenu.axaml" Link="Styles\SukiCompactMenu.axaml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,601 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:OpenUtau.App.ViewModels"
+             xmlns:core="using:OpenUtau.Core"
+             xmlns:motion="using:OpenUtau.Theming"
+             mc:Ignorable="d" d:DesignWidth="1440" d:DesignHeight="900"
+             x:Class="OpenUtau.App.Views.PreferencesView">
+  <!-- 全屏偏好设置（结构/尺寸/配色照设计稿 6-Preferences 的 HTML 抽取值）：
+       左导航 304（surface-container-low，项高 44 圆角 999，选中 secondary-container）
+       + 内容区 内边距 32 / 间距 24（surface），页头 28+14，两列卡片（圆角 16 / 内边距 16 / 描边 outline-variant）
+       控件语言：字段标签 13、选择行 44 高、分段控件 40 高（内边距 4、选中 secondary-container + ✓）、
+       开关行、文件夹行、色板 36 圆。 -->
+  <UserControl.Resources>
+    <!-- Fluent 开关的配色改走颜色池（MD3：开 = primary 轨道 + on-primary 圆钮） -->
+    <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="{DynamicResource md3.color.primary}"/>
+    <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver" Color="{DynamicResource md3.color.primary}"/>
+    <SolidColorBrush x:Key="ToggleSwitchFillOff" Color="{DynamicResource md3.color.surface-container-highest}"/>
+    <SolidColorBrush x:Key="ToggleSwitchStrokeOff" Color="{DynamicResource md3.color.outline}"/>
+    <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="{DynamicResource md3.color.on-primary}"/>
+    <SolidColorBrush x:Key="ToggleSwitchKnobFillOff" Color="{DynamicResource md3.color.outline}"/>
+    <!-- Fluent 滑条的配色改走颜色池（MD3：已选 primary，未选 surface-container-highest） -->
+    <SolidColorBrush x:Key="SliderTrackValueFill" Color="{DynamicResource md3.color.primary}"/>
+    <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="{DynamicResource md3.color.primary}"/>
+    <SolidColorBrush x:Key="SliderTrackFill" Color="{DynamicResource md3.color.surface-container-highest}"/>
+    <SolidColorBrush x:Key="SliderTrackFillPointerOver" Color="{DynamicResource md3.color.surface-container-highest}"/>
+    <SolidColorBrush x:Key="SliderThumbBackground" Color="{DynamicResource md3.color.primary}"/>
+    <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="{DynamicResource md3.color.primary}"/>
+  </UserControl.Resources>
+  <UserControl.Styles>
+    <!-- ══ 左导航 ══ -->
+    <Style Selector="Button.navItem">
+      <Setter Property="Height" Value="44"/>
+      <Setter Property="Padding" Value="16,0"/>
+      <Setter Property="Margin" Value="0"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.navItem:pointerover">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    </Style>
+    <Style Selector="Button.navItem.selected">
+      <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+    </Style>
+    <Style Selector="Button.navItem.selected Path">
+      <Setter Property="Fill" Value="{DynamicResource md3.on-secondary-container}"/>
+    </Style>
+    <Style Selector="Button.navItem Path">
+      <Setter Property="Fill" Value="{DynamicResource md3.on-surface-variant}"/>
+    </Style>
+
+    <!-- ══ 卡片与字段 ══ -->
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="16"/>
+      <Setter Property="Padding" Value="16"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    </Style>
+    <Style Selector="TextBlock.cardTitle">
+      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+    <Style Selector="TextBlock.cardSub">
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="LineHeight" Value="18"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+    <Style Selector="TextBlock.fieldLabel">
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+    </Style>
+    <Style Selector="TextBlock.helpText">
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+    <Style Selector="TextBlock.valueText">
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+    </Style>
+
+    <!-- ══ 分段控件（稿：容器 40 高圆角 999 内边距 4；选中项 secondary-container + ✓） ══ -->
+    <Style Selector="Border.segmented">
+      <Setter Property="Height" Value="40"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="Padding" Value="4"/>
+    </Style>
+    <Style Selector="RadioButton.chip">
+      <Setter Property="Margin" Value="0"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border x:Name="PART_ChipBg" Background="Transparent" CornerRadius="999">
+            <StackPanel Orientation="Horizontal" Spacing="4"
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+              <Path x:Name="PART_ChipCheck" Data="{StaticResource icon-check}" Width="12" Height="12"
+                    Stretch="Uniform" IsVisible="False" VerticalAlignment="Center"
+                    Fill="{DynamicResource md3.on-secondary-container}"/>
+              <ContentPresenter Content="{TemplateBinding Content}" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Border>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="RadioButton.chip:pointerover /template/ Border#PART_ChipBg">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+    </Style>
+    <Style Selector="RadioButton.chip:checked /template/ Border#PART_ChipBg">
+      <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+    </Style>
+    <Style Selector="RadioButton.chip:checked /template/ Path#PART_ChipCheck">
+      <Setter Property="IsVisible" Value="True"/>
+    </Style>
+    <Style Selector="RadioButton.chip:checked">
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+    </Style>
+
+    <!-- ══ 文件夹行 / 描边胶囊按钮 ══ -->
+    <Style Selector="Border.folderRow">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="Padding" Value="12"/>
+    </Style>
+    <Style Selector="Border.folderIcon">
+      <Setter Property="Width" Value="40"/>
+      <Setter Property="Height" Value="40"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="Background" Value="{DynamicResource md3.tertiary-container}"/>
+    </Style>
+    <Style Selector="Button.outlinePill">
+      <Setter Property="Height" Value="32"/>
+      <Setter Property="Padding" Value="16,0"/>
+      <Setter Property="Margin" Value="0"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.outline}"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.outlinePill:pointerover">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+    </Style>
+    <Style Selector="Button.filledPill">
+      <Setter Property="Height" Value="32"/>
+      <Setter Property="Padding" Value="16,0"/>
+      <Setter Property="Margin" Value="0"/>
+      <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.filledPill:pointerover">
+      <Setter Property="Opacity" Value="0.92"/>
+    </Style>
+
+    <!-- ══ 色板 ══ -->
+    <Style Selector="Button.swatch">
+      <Setter Property="Width" Value="36"/>
+      <Setter Property="Height" Value="36"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Margin" Value="0"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+
+    <!-- ══ 选择行（设备）与滑条：把 Fluent 控件收敛成稿子的样子 ══ -->
+    <Style Selector="ComboBox.selectField">
+      <Setter Property="Height" Value="44"/>
+      <Setter Property="MinHeight" Value="44"/>
+      <Setter Property="Padding" Value="16,0"/>
+      <Setter Property="Margin" Value="0"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    </Style>
+    <Style Selector="Slider.rowSlider">
+      <Setter Property="Margin" Value="0"/>
+      <Setter Property="MinHeight" Value="16"/>
+      <Setter Property="Height" Value="16"/>
+    </Style>
+    <Style Selector="ToggleSwitch">
+      <Setter Property="Margin" Value="0"/>
+      <Setter Property="OnContent" Value=""/>
+      <Setter Property="OffContent" Value=""/>
+    </Style>
+  </UserControl.Styles>
+
+  <Grid ColumnDefinitions="304,*" Background="{DynamicResource md3.surface}">
+    <!-- ══════════ 左导航 304 ══════════ -->
+    <Border Grid.Column="0" Background="{DynamicResource md3.surface-container-low}"
+            BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,1,0">
+      <Grid RowDefinitions="Auto,*,Auto" Margin="24">
+        <StackPanel Grid.Row="0" Spacing="24">
+          <!-- 品牌行 -->
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Path Data="{StaticResource icon-settings}" Width="16" Height="16" Stretch="Uniform"
+                  VerticalAlignment="Center" Fill="{DynamicResource md3.on-surface-variant}"/>
+            <TextBlock Text="{DynamicResource prefs.caption}" FontSize="12" FontWeight="Medium"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource md3.on-surface-variant}"/>
+          </StackPanel>
+          <!-- 导航项 -->
+          <StackPanel Spacing="4">
+            <Button x:Name="NavAudio" Classes="navItem selected" Click="OnNavClicked" Tag="audio">
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <Path Data="{StaticResource icon-volume-x}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center"/>
+                <TextBlock Text="{DynamicResource prefs.nav.audio}" VerticalAlignment="Center"/>
+              </StackPanel>
+            </Button>
+            <Button x:Name="NavLibrary" Classes="navItem" Click="OnNavClicked" Tag="library">
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <Path Data="{StaticResource icon-book-open}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center"/>
+                <TextBlock Text="{DynamicResource prefs.nav.library}" VerticalAlignment="Center"/>
+              </StackPanel>
+            </Button>
+            <Button x:Name="NavPlayback" Classes="navItem" Click="OnNavClicked" Tag="playback">
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <Path Data="{StaticResource icon-play}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center"/>
+                <TextBlock Text="{DynamicResource prefs.playback}" VerticalAlignment="Center"/>
+              </StackPanel>
+            </Button>
+            <Button x:Name="NavAppearance" Classes="navItem" Click="OnNavClicked" Tag="appearance">
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <Path Data="{StaticResource icon-palette}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center"/>
+                <TextBlock Text="{DynamicResource prefs.appearance}" VerticalAlignment="Center"/>
+              </StackPanel>
+            </Button>
+            <Button x:Name="NavEditor" Classes="navItem" Click="OnNavClicked" Tag="editor">
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <Path Data="{StaticResource icon-pencil}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center"/>
+                <TextBlock Text="{DynamicResource prefs.editing}" VerticalAlignment="Center"/>
+              </StackPanel>
+            </Button>
+            <Button x:Name="NavMidi" Classes="navItem" Click="OnNavClicked" Tag="midi">
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <Path Data="{StaticResource icon-music}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center"/>
+                <TextBlock Text="{DynamicResource prefs.nav.midi}" VerticalAlignment="Center"/>
+              </StackPanel>
+            </Button>
+            <Button x:Name="NavGeneral" Classes="navItem" Click="OnNavClicked" Tag="general">
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <Path Data="{StaticResource icon-sliders}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center"/>
+                <TextBlock Text="{DynamicResource prefs.general}" VerticalAlignment="Center"/>
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </StackPanel>
+
+        <!-- 底部：恢复默认 + 版本 -->
+        <StackPanel Grid.Row="2" Spacing="12">
+          <Border Height="1" Background="{DynamicResource md3.outline-variant}"/>
+          <Button x:Name="ResetButton" Classes="navItem" Click="OnResetAll">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <Path Data="{StaticResource icon-refresh-cw}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center"/>
+              <TextBlock Text="{DynamicResource prefs.reset.all}" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
+          <TextBlock Text="{x:Static core:PlusInfo.VersionString}" FontSize="11" Margin="16,0,0,0"
+                     Foreground="{DynamicResource md3.on-surface-variant}"/>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- ══════════ 内容区 ══════════ -->
+    <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+      <StackPanel Margin="32" Spacing="24">
+        <!-- 页头 -->
+        <StackPanel Spacing="4">
+          <TextBlock Text="{DynamicResource prefs.caption}" FontSize="28"
+                     Foreground="{DynamicResource md3.on-surface}"/>
+          <TextBlock Text="{DynamicResource prefs.page.sub}" FontSize="14"
+                     Foreground="{DynamicResource md3.on-surface-variant}"/>
+        </StackPanel>
+
+        <!-- ══ 音频页（设计稿这一屏） ══ -->
+        <Grid x:Name="PageAudio" ColumnDefinitions="*,*" ColumnSpacing="24">
+          <StackPanel Grid.Column="0" Spacing="12">
+            <!-- 音频输出 -->
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="cardTitle" Text="{DynamicResource prefs.card.audioout}"/>
+                  <TextBlock Classes="cardSub" Text="{DynamicResource prefs.card.audioout.sub}"/>
+                </StackPanel>
+                <StackPanel Spacing="8">
+                  <TextBlock Classes="fieldLabel" Text="{DynamicResource prefs.playback.device}"/>
+                  <ComboBox Classes="selectField" ItemsSource="{Binding AudioOutputDevices}"
+                            SelectedItem="{Binding AudioOutputDevice}"
+                            IsEnabled="{Binding !UseSystemDefaultDevice}"/>
+                </StackPanel>
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Grid.Column="0" Classes="fieldLabel" VerticalAlignment="Center"
+                             Text="{DynamicResource prefs.playback.systemdefault}"/>
+                  <ToggleSwitch Grid.Column="1" IsChecked="{Binding UseSystemDefaultDevice}"/>
+                </Grid>
+                <StackPanel Spacing="8">
+                  <TextBlock Classes="fieldLabel" Text="{DynamicResource prefs.playback.backend}"/>
+                  <Border Classes="segmented">
+                    <UniformGrid Columns="2">
+                      <RadioButton Classes="chip" Content="{DynamicResource prefs.playback.backend.auto}"
+                                   IsChecked="{Binding PreferPortAudio, Converter={x:Static vm:ValueEqualsConverter.Instance}, ConverterParameter=0}"/>
+                      <RadioButton Classes="chip" Content="{DynamicResource prefs.playback.backend.mini}"
+                                   IsChecked="{Binding PreferPortAudio, Converter={x:Static vm:ValueEqualsConverter.Instance}, ConverterParameter=1}"/>
+                    </UniformGrid>
+                  </Border>
+                </StackPanel>
+                <Button Classes="filledPill" HorizontalAlignment="Stretch"
+                        Content="{DynamicResource prefs.playback.test}"
+                        Command="{Binding TestAudioOutputDevice}"/>
+              </StackPanel>
+            </Border>
+
+            <!-- 播放与延迟 -->
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="cardTitle" Text="{DynamicResource prefs.card.playback}"/>
+                  <TextBlock Classes="cardSub" Text="{DynamicResource prefs.card.playback.sub}"/>
+                </StackPanel>
+                <StackPanel Spacing="8">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0" Classes="fieldLabel"
+                               Text="{DynamicResource prefs.playback.cursorposition}"/>
+                    <TextBlock Grid.Column="1" Classes="valueText">
+                      <TextBlock.Text>
+                        <MultiBinding StringFormat="{}{0:#0.0}">
+                          <Binding Path="PlayPosMarkerMargin"/>
+                        </MultiBinding>
+                      </TextBlock.Text>
+                    </TextBlock>
+                  </Grid>
+                  <Slider Classes="rowSlider" Minimum="0" Maximum="1" TickFrequency="0.1"
+                          IsSnapToTickEnabled="True" Value="{Binding PlayPosMarkerMargin}"/>
+                </StackPanel>
+                <StackPanel Spacing="8">
+                  <TextBlock Classes="fieldLabel" Text="{DynamicResource prefs.playback.autoscroll}"/>
+                  <Border Classes="segmented">
+                    <UniformGrid Columns="3">
+                      <RadioButton Classes="chip" Content="{DynamicResource prefs.playback.autoscrollmode.off}"
+                                   IsChecked="{Binding PlaybackAutoScroll, Converter={x:Static vm:ValueEqualsConverter.Instance}, ConverterParameter=0}"/>
+                      <RadioButton Classes="chip" Content="{DynamicResource prefs.playback.autoscrollmode.stationarycursor}"
+                                   IsChecked="{Binding PlaybackAutoScroll, Converter={x:Static vm:ValueEqualsConverter.Instance}, ConverterParameter=1}"/>
+                      <RadioButton Classes="chip" Content="{DynamicResource prefs.playback.autoscrollmode.pagescroll}"
+                                   IsChecked="{Binding PlaybackAutoScroll, Converter={x:Static vm:ValueEqualsConverter.Instance}, ConverterParameter=2}"/>
+                    </UniformGrid>
+                  </Border>
+                </StackPanel>
+                <StackPanel Spacing="8">
+                  <TextBlock Classes="fieldLabel" Text="{DynamicResource prefs.playback.lockstarttime}"/>
+                  <Border Classes="segmented">
+                    <UniformGrid Columns="3">
+                      <RadioButton Classes="chip" Content="{DynamicResource prefs.playback.lockstarttime.off}"
+                                   IsChecked="{Binding LockStartTime, Converter={x:Static vm:ValueEqualsConverter.Instance}, ConverterParameter=0}"/>
+                      <RadioButton Classes="chip" Content="{DynamicResource prefs.playback.lockstarttime.on}"
+                                   IsChecked="{Binding LockStartTime, Converter={x:Static vm:ValueEqualsConverter.Instance}, ConverterParameter=1}"/>
+                      <RadioButton Classes="chip" Content="{DynamicResource prefs.playback.lockstarttime.onlycursor}"
+                                   IsChecked="{Binding LockStartTime, Converter={x:Static vm:ValueEqualsConverter.Instance}, ConverterParameter=2}"/>
+                    </UniformGrid>
+                  </Border>
+                </StackPanel>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+
+          <StackPanel Grid.Column="1" Spacing="24">
+            <!-- 节拍器 -->
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <TextBlock Classes="cardTitle" Text="{DynamicResource prefs.playback.metronome}"/>
+                <Grid ColumnDefinitions="Auto,8,Auto,8,*">
+                  <TextBlock Grid.Column="0" Classes="fieldLabel" VerticalAlignment="Center"
+                             Text="{DynamicResource prefs.playback.metronome.volume}"/>
+                  <TextBlock Grid.Column="2" Classes="valueText" MinWidth="28">
+                    <TextBlock.Text>
+                      <MultiBinding StringFormat="{}{0:#0}">
+                        <Binding Path="MetronomeVolume"/>
+                      </MultiBinding>
+                    </TextBlock.Text>
+                  </TextBlock>
+                  <Slider Grid.Column="4" Classes="rowSlider" Minimum="0" Maximum="100"
+                          Value="{Binding MetronomeVolume}"/>
+                </Grid>
+                <Grid ColumnDefinitions="Auto,8,Auto,8,*">
+                  <TextBlock Grid.Column="0" Classes="fieldLabel" VerticalAlignment="Center"
+                             Text="{DynamicResource prefs.playback.metronome.highfrequency}"/>
+                  <TextBlock Grid.Column="2" Classes="valueText" MinWidth="40">
+                    <TextBlock.Text>
+                      <MultiBinding StringFormat="{}{0:#0}">
+                        <Binding Path="MetronomeHighFrequency"/>
+                      </MultiBinding>
+                    </TextBlock.Text>
+                  </TextBlock>
+                  <Slider Grid.Column="4" Classes="rowSlider" Minimum="20" Maximum="5000"
+                          Value="{Binding MetronomeHighFrequency}"/>
+                </Grid>
+                <Grid ColumnDefinitions="Auto,8,Auto,8,*">
+                  <TextBlock Grid.Column="0" Classes="fieldLabel" VerticalAlignment="Center"
+                             Text="{DynamicResource prefs.playback.metronome.lowfrequency}"/>
+                  <TextBlock Grid.Column="2" Classes="valueText" MinWidth="40">
+                    <TextBlock.Text>
+                      <MultiBinding StringFormat="{}{0:#0}">
+                        <Binding Path="MetronomeLowFrequency"/>
+                      </MultiBinding>
+                    </TextBlock.Text>
+                  </TextBlock>
+                  <Slider Grid.Column="4" Classes="rowSlider" Minimum="20" Maximum="3000"
+                          Value="{Binding MetronomeLowFrequency}"/>
+                </Grid>
+                <Button Classes="outlinePill" HorizontalAlignment="Stretch"
+                        Content="{DynamicResource prefs.playback.test}"
+                        Command="{Binding TestMetronome}"/>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </Grid>
+
+        <!-- ══ 音源与素材库页 ══ -->
+        <Grid x:Name="PageLibrary" IsVisible="False" ColumnDefinitions="*,*" ColumnSpacing="24">
+          <StackPanel Grid.Column="0" Spacing="12">
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="cardTitle" Text="{DynamicResource prefs.card.voicebank}"/>
+                  <TextBlock Classes="cardSub" Text="{DynamicResource prefs.card.voicebank.sub}"/>
+                </StackPanel>
+                <Border Classes="folderRow">
+                  <Grid ColumnDefinitions="Auto,12,*,Auto">
+                    <Border Grid.Column="0" Classes="folderIcon">
+                      <Path Data="{StaticResource icon-folder-open}" Width="20" Height="20" Stretch="Uniform"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Fill="{DynamicResource md3.on-tertiary-container}"/>
+                    </Border>
+                    <StackPanel Grid.Column="2" Spacing="4" VerticalAlignment="Center">
+                      <TextBlock Classes="fieldLabel" Foreground="{DynamicResource md3.on-surface}"
+                                 Text="{DynamicResource prefs.paths.singer}"/>
+                      <TextBlock FontSize="11" TextTrimming="CharacterEllipsis"
+                                 Foreground="{DynamicResource md3.on-surface-variant}"
+                                 Text="{Binding SingerPath}"/>
+                    </StackPanel>
+                    <Button Grid.Column="3" Classes="outlinePill" VerticalAlignment="Center"
+                            Content="{DynamicResource prefs.change}" Click="OnChangeSingerFolder"/>
+                  </Grid>
+                </Border>
+                <Border Classes="folderRow">
+                  <Grid ColumnDefinitions="Auto,12,*,Auto">
+                    <Border Grid.Column="0" Classes="folderIcon">
+                      <Path Data="{StaticResource icon-folder-open}" Width="20" Height="20" Stretch="Uniform"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Fill="{DynamicResource md3.on-tertiary-container}"/>
+                    </Border>
+                    <StackPanel Grid.Column="2" Spacing="4" VerticalAlignment="Center">
+                      <TextBlock Classes="fieldLabel" Foreground="{DynamicResource md3.on-surface}"
+                                 Text="{DynamicResource prefs.paths.samples}"/>
+                      <TextBlock FontSize="11" TextTrimming="CharacterEllipsis"
+                                 Foreground="{DynamicResource md3.on-surface-variant}"
+                                 Text="{Binding SamplesPath}"/>
+                    </StackPanel>
+                    <Button Grid.Column="3" Classes="outlinePill" VerticalAlignment="Center"
+                            Content="{DynamicResource prefs.change}" Click="OnChangeSamplesFolder"/>
+                  </Grid>
+                </Border>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+          <StackPanel Grid.Column="1" Spacing="12">
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <TextBlock Classes="cardTitle" Text="{DynamicResource prefs.card.detected}"/>
+                <ItemsControl x:Name="SingerListHost">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:SingerItem">
+                      <Grid ColumnDefinitions="Auto,12,*,Auto" Margin="0,0,0,8">
+                        <Border Grid.Column="0" Width="8" Height="8" CornerRadius="999"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource md3.primary}"/>
+                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                          <TextBlock FontSize="13" Text="{Binding Name}"
+                                     Foreground="{DynamicResource md3.on-surface}"/>
+                          <TextBlock FontSize="11" Text="{Binding SingerTypeText}"
+                                     Foreground="{DynamicResource md3.on-surface-variant}"/>
+                        </StackPanel>
+                        <TextBlock Grid.Column="3" FontSize="11" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource md3.on-surface-variant}"
+                                   Text="{DynamicResource prefs.status.installed}"/>
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </Grid>
+
+        <!-- ══ 外观页 ══ -->
+        <Grid x:Name="PageAppearance" IsVisible="False" ColumnDefinitions="*,*" ColumnSpacing="24">
+          <StackPanel Grid.Column="0" Spacing="12">
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="cardTitle" Text="{DynamicResource prefs.card.appearance}"/>
+                  <TextBlock Classes="cardSub" Text="{DynamicResource prefs.card.appearance.sub}"/>
+                </StackPanel>
+                <StackPanel Spacing="8">
+                  <TextBlock Classes="fieldLabel" Text="{DynamicResource prefs.appearance.theme}"/>
+                  <Border Classes="segmented">
+                    <UniformGrid Columns="2">
+                      <RadioButton Classes="chip" Content="{DynamicResource prefs.appearance.theme.light}"
+                                   IsChecked="{Binding ThemeName, Converter={x:Static vm:ValueEqualsConverter.Instance}, ConverterParameter=Light}"/>
+                      <RadioButton Classes="chip" Content="{DynamicResource prefs.appearance.theme.dark}"
+                                   IsChecked="{Binding ThemeName, Converter={x:Static vm:ValueEqualsConverter.Instance}, ConverterParameter=Dark}"/>
+                    </UniformGrid>
+                  </Border>
+                </StackPanel>
+                <StackPanel Spacing="8">
+                  <TextBlock Classes="fieldLabel" Text="{DynamicResource prefs.field.accent}"/>
+                  <ItemsControl ItemsSource="{Binding AccentSwatches}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="12"/>
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:AccentSwatchViewModel">
+                        <Button Classes="swatch"
+                                Command="{Binding $parent[ItemsControl].DataContext.SelectAccentCommand}"
+                                CommandParameter="{Binding}"
+                                ToolTip.Tip="{Binding Tooltip}"
+                                Background="{Binding Brush}">
+                          <Path Data="{StaticResource icon-check}" Width="16" Height="16" Stretch="Uniform"
+                                Fill="{DynamicResource md3.on-primary}"
+                                IsVisible="{Binding IsSelected}"/>
+                        </Button>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+          <StackPanel Grid.Column="1" Spacing="12">
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <TextBlock Classes="cardTitle" Text="{DynamicResource prefs.migrating}"/>
+                <Button Classes="outlinePill" HorizontalAlignment="Left"
+                        Content="{DynamicResource prefs.openlegacy}" Click="OnOpenLegacy"/>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </Grid>
+
+        <!-- ══ 待迁移页（播放 / 编辑器 / MIDI 设备 / 通用）══ -->
+        <Border x:Name="PagePending" Classes="card" IsVisible="False">
+          <StackPanel Spacing="12">
+            <TextBlock Classes="cardTitle" Text="{DynamicResource prefs.migrating}"/>
+            <TextBlock Classes="cardSub" Text="{DynamicResource prefs.page.sub}"/>
+            <Button Classes="outlinePill" HorizontalAlignment="Left"
+                    Content="{DynamicResource prefs.openlegacy}" Click="OnOpenLegacy"/>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+  </Grid>
+</UserControl>
