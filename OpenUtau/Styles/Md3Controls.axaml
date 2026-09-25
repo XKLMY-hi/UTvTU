@@ -42,9 +42,8 @@
     <Setter Property="FontSize" Value="13"/>
   </Style>
 
-  <!-- ══ 按钮：基础形态 + 变体 + 悬浮/按下，全部写在这一层（应用级 Styles 优先级最高，
-       实测：高于 Suki/Fluent 的 ControlTheme）。只设控件自身属性、不碰模板部件，
-       配合 BrushTransition 让颜色平滑过渡 —— 既统一规范，也不会悬浮闪烁。 ══ -->
+  <!-- ══ 按钮：基础形态 + 变体 + 状态（悬浮/按下/禁用）—— 应用级样式优先级最高（实测），
+       是唯一能稳定生效的位置；状态色同时通过覆盖 Fluent 画刷键落到模板部件上（见 Md3FluentBrushes.axaml） ══ -->
   <Style Selector="Button">
     <Setter Property="CornerRadius" Value="8"/>
     <Setter Property="Padding" Value="14,6"/>
@@ -57,25 +56,13 @@
     <Setter Property="HorizontalContentAlignment" Value="Center"/>
     <Setter Property="VerticalContentAlignment" Value="Center"/>
     <Setter Property="Cursor" Value="Hand"/>
-    <Setter Property="Transitions">
-      <Transitions>
-        <BrushTransition Property="Background" Duration="0:0:0.12"/>
-        <BrushTransition Property="BorderBrush" Duration="0:0:0.12"/>
-        <BrushTransition Property="Foreground" Duration="0:0:0.12"/>
-      </Transitions>
-    </Setter>
   </Style>
   <Style Selector="Button:pointerover">
-    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource md3.outline}"/>
-  </Style>
-  <Style Selector="Button:pressed">
-    <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
   </Style>
   <Style Selector="Button:disabled">
     <Setter Property="Opacity" Value="0.38"/>
   </Style>
-  <!-- 实心胶囊（主操作）：悬浮/按下保持主色，只做轻微明暗，避免"变灰"或闪烁 -->
   <Style Selector="Button.primary">
     <Setter Property="CornerRadius" Value="999"/>
     <Setter Property="Padding" Value="18,6"/>
@@ -84,23 +71,12 @@
     <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
     <Setter Property="FontWeight" Value="Medium"/>
   </Style>
-  <Style Selector="Button.primary:pointerover">
-    <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
-    <Setter Property="Opacity" Value="0.92"/>
-  </Style>
-  <Style Selector="Button.primary:pressed">
-    <Setter Property="Opacity" Value="1"/>
-  </Style>
   <Style Selector="Button.danger">
     <Setter Property="CornerRadius" Value="999"/>
     <Setter Property="Padding" Value="18,6"/>
     <Setter Property="Background" Value="{DynamicResource md3.error}"/>
     <Setter Property="BorderThickness" Value="0"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.on-error}"/>
-  </Style>
-  <Style Selector="Button.danger:pointerover">
-    <Setter Property="Background" Value="{DynamicResource md3.error}"/>
-    <Setter Property="Opacity" Value="0.92"/>
   </Style>
   <Style Selector="Button.linkButton">
     <Setter Property="Background" Value="Transparent"/>
@@ -109,35 +85,18 @@
     <Setter Property="MinHeight" Value="24"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
   </Style>
-  <Style Selector="Button.linkButton:pointerover">
-    <Setter Property="Background" Value="Transparent"/>
-    <Setter Property="Opacity" Value="0.8"/>
-  </Style>
 
-  <!-- ══ 列表项：选中/悬浮走池色（同样只设控件自身属性） ══ -->
+  <!-- ══ 列表项：规格 + 选中/悬浮色（同样只设控件自身属性） ══ -->
   <Style Selector="ListBoxItem">
     <Setter Property="CornerRadius" Value="6"/>
     <Setter Property="Padding" Value="8,4"/>
     <Setter Property="MinHeight" Value="26"/>
     <Setter Property="FontSize" Value="13"/>
     <Setter Property="Background" Value="Transparent"/>
-    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
-    <Setter Property="Transitions">
-      <Transitions>
-        <BrushTransition Property="Background" Duration="0:0:0.12"/>
-        <BrushTransition Property="Foreground" Duration="0:0:0.12"/>
-      </Transitions>
-    </Setter>
-  </Style>
-  <Style Selector="ListBoxItem:pointerover">
-    <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
   </Style>
   <Style Selector="ListBoxItem:selected">
     <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
-  </Style>
-  <Style Selector="ListBoxItem:selected:pointerover">
-    <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
   </Style>
 
   <!-- 文本框 / 下拉 / 复选框 / 单选 / 开关：规格与池色（模板与状态由各控件主题提供） -->

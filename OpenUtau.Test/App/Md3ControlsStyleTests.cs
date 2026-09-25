@@ -49,10 +49,12 @@ namespace OpenUtau.Test.App {
             // 颜色只能来自颜色池
             Assert.DoesNotMatch("#[0-9A-Fa-f]{6}", xaml);
             Assert.DoesNotContain("Plus", xaml.Replace("PlusInfo", ""));
-            // 状态样式（悬浮/按下/选中）必须在同一层（应用级样式优先级最高）
+            // 状态样式与应用级外观同层；模板部件的状态色走 Fluent 画刷覆盖层
             Assert.Contains("Selector=\"Button:pointerover\"", xaml);
             Assert.Contains("Selector=\"ListBoxItem:selected\"", xaml);
-            Assert.Contains("BrushTransition", xaml);
+            string brushes = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "Md3FluentBrushes.axaml"));
+            Assert.Contains("ButtonBackgroundPointerOver", brushes);
+            Assert.Contains("ListBoxItemBackgroundSelected", brushes);
         }
 
         [AvaloniaFact]

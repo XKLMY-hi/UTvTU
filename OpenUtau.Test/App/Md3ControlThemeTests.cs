@@ -70,10 +70,10 @@ namespace OpenUtau.Test.App {
             }
             // 悬浮/按下色：`:pointerover` / `:pressed` 是输入系统管理的伪类，无头环境无法手动置位，
             // 因此这里做静态校验 —— 选择器与池色都必须声明在最后一层样式里。
-            string xaml = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "Md3Controls.axaml"));
-            Assert.Contains("Selector=\"Button:pointerover\"", xaml);
-            Assert.Contains("Selector=\"Button:pressed\"", xaml);
-            Assert.Contains("md3.surface-container-high", xaml);
+            // 状态色 = 覆盖 Fluent 画刷键（模板部件读这些键），断言其落到颜色池
+            ColorPool.Initialize(ColorPool.DefaultSeed, Md3SchemeVariant.TonalSpot, true);
+            Assert.Equal(Role(Md3Role.SurfaceContainerHigh),
+                Assert.IsAssignableFrom<ISolidColorBrush>(Application.Current!.FindResource("ButtonBackgroundPointerOver")).Color);
         }
 
         [AvaloniaFact]
@@ -104,9 +104,9 @@ namespace OpenUtau.Test.App {
                 win.Close();
             }
             // 悬浮色：`:pointerover` 由输入系统管理，无头环境不可置位 → 静态校验选择器与池色存在
-            string xaml = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "Md3Controls.axaml"));
-            Assert.Contains("Selector=\"ListBoxItem:pointerover\"", xaml);
-            Assert.Contains("Selector=\"ListBoxItem:selected\"", xaml);
+            // 选中/悬浮的模板部件色同样走 Fluent 画刷键 → 颜色池
+            Assert.Equal(Role(Md3Role.SecondaryContainer),
+                Assert.IsAssignableFrom<ISolidColorBrush>(Application.Current!.FindResource("ListBoxItemBackgroundSelected")).Color);
         }
 
         [AvaloniaFact]
@@ -123,17 +123,20 @@ namespace OpenUtau.Test.App {
         }
 
         [AvaloniaFact]
-        public void StateStyles_LiveInLastAppStyleLayer() {
-            // 实测结论：应用级 Styles 优先级最高（高于 Suki/Fluent 的 ControlTheme）；
-            // 因此外观与状态一律写在最后一层样式里，且只设控件自身属性（模板部件由主题拥有）。
+        public void AppearanceLivesInAppStyles_AndFluentKeysPointAtPool() {
+            // 实测结论（本轮）：应用级 Styles 是唯一稳定生效的位置 —— 隐式 ControlTheme 会被 FluentTheme 抢先命中，
+            // 显式 Setter Theme 也不生效。因此外观写在 Styles/Md3Controls.axaml，
+            // 模板部件的状态色则通过覆盖 Fluent 画刷键落到颜色池（本文件同时校验两者）。
             string xaml = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "Md3Controls.axaml"));
-            foreach (string sel in new[] {
-                "Button:pointerover", "Button:pressed", "Button.primary", "Button.primary:pointerover",
-                "Button.danger", "Button.linkButton", "ListBoxItem:pointerover", "ListBoxItem:selected",
-            }) {
+            foreach (string sel in new[] { "Button", "Button:pointerover", "Button.primary", "ListBoxItem", "ListBoxItem:selected" }) {
                 Assert.Contains($"Selector=\"{sel}\"", xaml);
             }
-            Assert.Contains("BrushTransition", xaml);   // 颜色过渡由样式提供 → 平滑不闪
+            ColorPool.Initialize(ColorPool.DefaultSeed, Md3SchemeVariant.TonalSpot, true);
+            Application app = Application.Current!;
+            Assert.Equal(Role(Md3Role.SecondaryContainer),
+                Assert.IsAssignableFrom<ISolidColorBrush>(app.FindResource("ListBoxItemBackgroundSelected")).Color);
+            Assert.Equal(Role(Md3Role.SurfaceContainerHighest),
+                Assert.IsAssignableFrom<ISolidColorBrush>(app.FindResource("ButtonBackgroundPointerOver")).Color);
         }
     }
 }
