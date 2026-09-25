@@ -704,6 +704,9 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="sidebar.singers.empty">未找到歌手</system:String>
   <system:String x:Key="sidebar.samples.empty">未找到音频文件。可在偏好设置 → 路径中添加目录</system:String>
   <system:String x:Key="sidebar.library.empty">素材库功能开发中</system:String>
+  <system:String x:Key="sidebar.midi">MIDI</system:String>
+  <system:String x:Key="sidebar.effects">效果器</system:String>
+  <system:String x:Key="view.workspace">工作台</system:String>
 
   <!-- Mix Effects -->
   <system:String x:Key="mixfx.caption">试听效果</system:String>

@@ -269,15 +269,38 @@
    - 本地化**双向补齐**：EN 与 zh-CN 各 923 条、缺口 0；构建 0 错误。
    - `THIRD-PARTY-NOTICES.md` 增「图标」章节（Phosphor MIT 现状 + Lucide ISC 计划替换说明）。
    - **欢迎页按设计稿重做**（`c9d5aba1`，口径见 A8）：左 480 `primary-container` 品牌面板（52 标识 + 快捷入口 6 行 + 版本行）+ 右启动器（30px 标题、2×2 动作卡 104/16/24/48、最近工程行 10/12/48/8）；四入口沿用原欢迎窗能力（新建 / 打开 / 导入音轨 / 模板）；颜色全部取颜色池角色键；新增 2 个结构契约用例，全量 **332 通过**。
-   - **动效令牌层 + 欢迎页试点**（第 3.H 节）：`Md3Motion` / `Md3MotionResources` / `Motion` 附加属性；欢迎页悬停与弹层、欢迎视图淡入淡出已接；`Preferences.Default.ReduceMotion` 为总开关；新增 30 个用例，全量 **363 通过**。
+   - **动效令牌层 + 欢迎页试点**（第 3.H 节）：`Md3Motion` / `Md3MotionResources` / `Motion` 接口；欢迎页悬停与弹层、欢迎视图淡入淡出已接；`Preferences.Default.ReduceMotion` 为总开关；新增 30 个用例，全量 **363 通过**。
+   - **动效口径修正 + 页面级过渡**（第 3.H 节）：删悬停微动效；落地欢迎页交错滑入、欢迎↔编辑器退场/入场、卷帘与混音台面板滑入、侧栏滑入、对话框弹出；全量 **366 通过**。
+   - **主编辑器 S1 外壳**（切分见第 11 节）：顶栏 56（品牌=菜单 / 运输条 40 胶囊 / 时间与速度 40 圆角块 / 右侧 撤销·重做·布局·混音台·设置·轨道高度）、状态条 32、三列骨架（轨头 264 / 编排 / 素材库 296）；老侧栏 240 退役；素材库四页签（音源 / 音频 / MIDI / 效果器）；新增键 `sidebar.midi` / `sidebar.effects` / `view.workspace`（EN 与 zh-CN 各 926 条、缺口 0）；新增 5 个外壳契约用例，全量 **371 通过**。
+3. **等图标真正替换时再做**：`Icons.axaml` 头部署名与 notices 的图标条目一并改为 Lucide ISC——**现在不能改**（当前 55 个图标仍是 Phosphor，改了就是错误署名）。
+
+---
 
 ## 10. 动效接入清单（给后续每屏用）
-1. 容器悬停/状态层：给元素挂 `motion:Motion.Hover="True"`，并在样式里写 `:pointerover` 的目标色（**色变必须有载体**，纯文字变色不可动画）。
-2. 弹层/飞行卡片：内容根元素挂 `motion:Motion.Popup="True"`（每次打开都会跑）。
-3. 元素进入（页内区块、列表整体）：挂 `motion:Motion.Enter="True"`。
-4. 视图级切换：用 `Md3Motion.ViewDuration` + `Md3MotionResources.Easing(Md3Motion.ViewEasing)` 在代码里建 `DoubleTransition(Opacity)`（如 `MainWindow.ShowWelcome/HideWelcome`）。
-5. 绝不写死秒数；新增语义档时**只改 `Md3Motion` 的语义属性**，不要改控件。
-3. **等图标真正替换时再做**：`Icons.axaml` 头部署名与 notices 的图标条目一并改为 Lucide ISC——**现在不能改**（当前 55 个图标仍是 Phosphor，改了就是错误署名）。
+
+> 口径（2026-09-25 用户裁定）：**只做页面/面板级过渡**，不做悬停/按压微动效。
+
+1. **视图出现**：给各段挂 `motion:Motion.Enter="FromBottom|FromLeft|…"` + `motion:Motion.Delay="60"`（交错），由宿主在视图显示时调 `Motion.PlayAll(view)` 起播。
+2. **弹层 / 飞行卡片**：内容根挂 `motion:Motion.Enter="Scale" motion:Motion.AutoPlay="True"`（挂载即播）。
+3. **面板展开**（卷帘、混音台、素材库、分离窗口）：代码里 `Motion.Play(panel, MotionEntrance.FromBottom)`。
+4. **视图切换**：`await Motion.PlayExitAsync(旧视图)` → 隐藏 + `Motion.Reset` → `Motion.Play(新视图, MotionEntrance.Scale)`（见 `MainWindow.ShowWelcome/HideWelcome`）。
+5. **对话框**：`Motion.Play(card, MotionEntrance.Scale)` + 遮罩 `MotionEntrance.Fade`；关闭时 `Motion.PlayExit` + 定时隐藏（带代际号防误关）。
+6. 绝不写死秒数；改数值只动 `Md3Motion` 的语义属性（悬停 short3·standard / 进入 short4·emphasized-decelerate / 离开 short3·emphasized-accelerate / 视图 medium2·emphasized-decelerate）。
+
+---
+
+## 11. 主编辑器切分（设计稿 2-Main-Window，2026-09-25 定）
+
+| # | 切片 | 内容 | 状态 |
+|---|---|---|---|
+| **S1** | **外壳** | 顶栏 56 / 状态条 32 / 三列（轨头 264 · 编排 · 素材库 296）；品牌=菜单；素材库四页签；老侧栏退役 | **已落地** |
+| S2 | 编排区 | 标尺 34（小节号）、轨道行 97、片段圆角卡（圆角 8 / 头 20 / 色条 3 / 名称 9 / 歌词 9 / 音符预览 11×8）、网格线 55、播放头 2px | 待做 |
+| S3 | 轨头 | 行 97、左色条 4、序号 9 + 名称 12 + M/S 22×20 圆角 4、音源行（mic 12 + 名称 10 + 声像 9）、音量行（icon 12 + 滑条 150×12 + 值 9） | 待做 |
+| S4 | 素材库细化 | 搜索框 36 胶囊、音源行 50（缩略图 36 圆角 8 + 名称 12 + meta 9 + 类型徽标）、「N 已安装」计数 | 待做 |
+| S5 | 视图切换 | 顶栏胶囊切换器（A4：容器 36 / 内边距 3；选项 30 / 左右 18 / 文字 11 semibold）+ 卷帘与混音台**视图化**（现在还是停靠行） | 待做 |
+
+- **作废**：素材库「风格 / 声音参数」区（C3——调音在卷帘，不在素材库）。
+- **暂留**：编排区内部仍是旧自绘（`PartsCanvas` / `TickBackground` / `TrackBackground`，旧画笔），S2 连同画笔一起换 md3；卷帘与混音台仍停靠在编排区下方，S5 视图化。
 
 ---
 
@@ -326,3 +349,4 @@ pwsh -NoProfile -File .opencode\design\extract-spec.ps1 -Path <某屏>.html [-Ma
 | 2026-09-25 | 欢迎页细节按用户裁定迭代：品牌面板改**悬浮圆角卡片**（列 480→352、卡 448→320、圆角 28→16，内容仍在 48 基准线）、卡底色 `primary-container`→`surface-container`（与最近工程行同色）、产品显示名全量改 **UTvTU**、最近工程行脱离全局 `ListBoxItem{Height=28}` 隐式覆盖（改 `ScrollViewer`+`ItemsControl`） |
 | 2026-09-25 | **动效令牌层落地**（新增第 3.H 节）：`Md3Motion`（16 时长档 + 6 缓动档 + 总开关 + 语义档）+ `Md3MotionResources` 资源桥 + `Motion` 接口；新增 30 个用例，全量 **363 通过** |
 | 2026-09-25 | **动效口径修正**（用户裁定：只要页面/面板级过渡，不要悬停微动效）：删除 `Motion.Hover`；接口改为 `Enter`（来向）+ `Delay`（交错）+ `AutoPlay`（挂载即播）+ 代码侧 `Play/PlayAll/PlayExit/Reset`；落地欢迎页交错滑入、欢迎↔编辑器退场/入场、卷帘与混音台面板滑入、侧栏滑入、对话框弹出（替换手搓淡入）；全量 **366 通过** |
+| 2026-09-25 | **主编辑器 S1 外壳落地**（第 11 节新增切分表）：顶栏 56（品牌=菜单 MenuFlyout / 运输条 40 胶囊 / 时间与速度 40 圆角块 / 右侧 撤销·重做·布局·混音台·设置·轨道高度）、状态条 32、三列骨架（轨头 264 / 编排 / 素材库 296）；老侧栏 240 退役（项目页信息上顶栏、最近工程留欢迎页）；素材库四页签；新增 `sidebar.midi`/`sidebar.effects`/`view.workspace` 三键（EN/zh 各 926、缺口 0）；新增 5 个外壳契约用例，全量 **371 通过** |

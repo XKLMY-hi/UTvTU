@@ -911,6 +911,9 @@ General
   <system:String x:Key="sidebar.singers.empty">No singers found</system:String>
   <system:String x:Key="sidebar.samples.empty">No audio files found. Add a folder in Preferences → Paths</system:String>
   <system:String x:Key="sidebar.library.empty">Library is under development</system:String>
+  <system:String x:Key="sidebar.midi">MIDI</system:String>
+  <system:String x:Key="sidebar.effects">Effects</system:String>
+  <system:String x:Key="view.workspace">Workspace</system:String>
 
   <!-- Mix Effects (post-processing) -->
   <system:String x:Key="mixfx.caption">Track Polish</system:String>

@@ -6,19 +6,116 @@
         xmlns:c="clr-namespace:OpenUtau.App.Controls"
         xmlns:controls="clr-namespace:OpenUtau.App.Controls"
         xmlns:views="using:OpenUtau.App.Views"
+        xmlns:motion="using:OpenUtau.Theming"
         xmlns:suki="using:SukiUI.Controls"
-        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="650"
+        mc:Ignorable="d" d:DesignWidth="1440" d:DesignHeight="900"
         x:Class="OpenUtau.App.Views.MainWindow"
         Icon="/Assets/open-utau.ico"
         Title="{Binding Title}" MinWidth="300" MinHeight="200" Width="{Binding Width}" Height="{Binding Height}"
         Focusable="True" KeyDown="OnKeyDown" PointerPressed="OnPointerPressed" Closing="WindowClosing"
         SizeChanged="OnWindowSizeChanged"
         DragDrop.AllowDrop="True">
+  <!-- 主窗骨架（对齐设计稿 2-Main-Window）：
+       顶栏 56（品牌=菜单 · 运输条 40 胶囊 · 时间/速度 40 圆角块 · 右侧图标组）
+       / 工作区：左 轨道头 264（表头 34）· 中 编排区 · 右 素材库 296（表头 44 / 页签 40）
+       / 状态条 32。颜色一律取 md3 角色键；编排区、卷帘、混音台的内部绘制仍走旧画笔，按 S2–S5 逐步迁。 -->
   <Window.Styles>
     <Style Selector="Button,ToggleButton">
       <Setter Property="Focusable" Value="False"/>
     </Style>
-    <!-- 阶段 E：顶栏/侧栏图标按钮 -->
+    <!-- 顶栏：圆形图标按钮 36（稿：36×36 圆角 999） -->
+    <Style Selector="Button.topBtn">
+      <Setter Property="Width" Value="36"/>
+      <Setter Property="Height" Value="36"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.topBtn:pointerover">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    </Style>
+    <!-- 顶栏：品牌=菜单触发器（无边框、hover 提亮） -->
+    <Style Selector="Button.brandBtn">
+      <Setter Property="Padding" Value="4,0"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="10"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Button.brandBtn:pointerover">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    </Style>
+    <!-- 顶栏：运输条按钮（40 胶囊内的 36 圆钮） -->
+    <Style Selector="Button.tpBtn">
+      <Setter Property="Width" Value="36"/>
+      <Setter Property="Height" Value="36"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.tpBtn:pointerover">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+    </Style>
+    <Style Selector="ToggleButton.tpBtn">
+      <Setter Property="Width" Value="36"/>
+      <Setter Property="Height" Value="36"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="ToggleButton.tpBtn:pointerover">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+    </Style>
+    <Style Selector="ToggleButton.tpBtn:checked">
+      <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+    </Style>
+    <!-- 顶栏：播放键 = primary 实底圆钮 -->
+    <Style Selector="Button.tpPlay">
+      <Setter Property="Width" Value="36"/>
+      <Setter Property="Height" Value="36"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.tpPlay:pointerover">
+      <Setter Property="Opacity" Value="0.92"/>
+    </Style>
+    <!-- 顶栏：时间 / 速度圆角块 -->
+    <Style Selector="Border.tpChip">
+      <Setter Property="Height" Value="40"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <!-- 素材库：页签胶囊（稿：高 28 / 文字 10） -->
+    <Style Selector="Button.libTab">
+      <Setter Property="Height" Value="28"/>
+      <Setter Property="Padding" Value="14,0"/>
+      <Setter Property="FontSize" Value="10"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.libTab:pointerover">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    </Style>
+    <Style Selector="Button.libTab.selected">
+      <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+    </Style>
+    <!-- 素材库：内容区小图标按钮 -->
     <Style Selector="Button.iconBtn">
       <Setter Property="Width" Value="28"/>
       <Setter Property="Height" Value="28"/>
@@ -29,76 +126,9 @@
       <Setter Property="Cursor" Value="Hand"/>
     </Style>
     <Style Selector="Button.iconBtn:pointerover">
-      <Setter Property="Background" Value="{DynamicResource PlusSurfaceHover}"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
     </Style>
-    <!-- 阶段 E：播放控制按钮（无背景，hover 微亮；主播放键以 accent 色图标区分） -->
-    <Style Selector="Button.playBtn">
-      <Setter Property="Width" Value="30"/>
-      <Setter Property="Height" Value="30"/>
-      <Setter Property="Padding" Value="0"/>
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="CornerRadius" Value="15"/>
-      <Setter Property="Cursor" Value="Hand"/>
-    </Style>
-    <Style Selector="Button.playBtn:pointerover">
-      <Setter Property="Background" Value="{DynamicResource PlusSurfaceHover}"/>
-    </Style>
-    <!-- 节拍器开关：与 playBtn 同尺寸，图标 accent 色表开启态 -->
-    <Style Selector="ToggleButton.metroBtn">
-      <Setter Property="Width" Value="30"/>
-      <Setter Property="Height" Value="30"/>
-      <Setter Property="Padding" Value="0"/>
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="CornerRadius" Value="15"/>
-      <Setter Property="Cursor" Value="Hand"/>
-    </Style>
-    <Style Selector="ToggleButton.metroBtn Path">
-      <Setter Property="Fill" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
-    </Style>
-    <Style Selector="ToggleButton.metroBtn:pointerover">
-      <Setter Property="Background" Value="{DynamicResource PlusSurfaceHover}"/>
-    </Style>
-    <Style Selector="ToggleButton.metroBtn:checked Path">
-      <Setter Property="Fill" Value="{DynamicResource AccentBrush1}"/>
-    </Style>
-    <!-- 阶段 E：侧栏主选项卡（项目/素材库） -->
-    <Style Selector="Button.sideTab">
-      <Setter Property="Height" Value="30"/>
-      <Setter Property="FontSize" Value="12"/>
-      <Setter Property="FontWeight" Value="SemiBold"/>
-      <Setter Property="Padding" Value="0"/>
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="CornerRadius" Value="7"/>
-      <Setter Property="Cursor" Value="Hand"/>
-    </Style>
-    <Style Selector="Button.sideTab:pointerover">
-      <Setter Property="Background" Value="{DynamicResource PlusSurfaceHover}"/>
-    </Style>
-    <Style Selector="Button.sideTab.selected">
-      <Setter Property="Background" Value="{DynamicResource PlusSurfaceControl}"/>
-      <Setter Property="Foreground" Value="{DynamicResource AccentBrush1}"/>
-    </Style>
-    <!-- 阶段 E：素材库子选项卡（歌手/采样/VST） -->
-    <Style Selector="Button.subTab">
-      <Setter Property="Height" Value="24"/>
-      <Setter Property="FontSize" Value="11"/>
-      <Setter Property="Padding" Value="0"/>
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="CornerRadius" Value="5"/>
-      <Setter Property="Cursor" Value="Hand"/>
-    </Style>
-    <Style Selector="Button.subTab:pointerover">
-      <Setter Property="Background" Value="{DynamicResource PlusSurfaceHover}"/>
-    </Style>
-    <Style Selector="Button.subTab.selected">
-      <Setter Property="Background" Value="{DynamicResource PlusSurfaceControl}"/>
-      <Setter Property="Foreground" Value="{DynamicResource AccentBrush1}"/>
-    </Style>
-    <!-- 阶段 E：侧栏列表项 -->
+    <!-- 素材库：列表项 / 卡片 / 小标题（内容细化留 S4，先沿用结构） -->
     <Style Selector="Border.sideItem">
       <Setter Property="Height" Value="44"/>
       <Setter Property="CornerRadius" Value="8"/>
@@ -107,7 +137,7 @@
       <Setter Property="Cursor" Value="Hand"/>
     </Style>
     <Style Selector="Border.sideItem:pointerover">
-      <Setter Property="Background" Value="{DynamicResource PlusSurfaceHover}"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
     </Style>
     <Style Selector="Border.sideItem.small">
       <Setter Property="Height" Value="38"/>
@@ -117,16 +147,15 @@
     </Style>
     <Style Selector="TextBlock.sideHeading">
       <Setter Property="FontSize" Value="11"/>
-      <Setter Property="Opacity" Value="0.45"/>
-      <Setter Property="Margin" Value="10,14,0,6"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+      <Setter Property="Margin" Value="2,4,0,4"/>
     </Style>
-    <!-- 阶段 E：项目信息卡 -->
     <Style Selector="Border.sideCard">
-      <Setter Property="Background" Value="{DynamicResource PlusSurfaceControl}"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
       <Setter Property="CornerRadius" Value="10"/>
       <Setter Property="Padding" Value="12,10"/>
-      <Setter Property="Margin" Value="8,8,8,0"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource PlusBorderSubtle}"/>
+      <Setter Property="Margin" Value="0,8,0,0"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
       <Setter Property="BorderThickness" Value="1"/>
     </Style>
   </Window.Styles>
@@ -139,56 +168,175 @@
   <Border Padding="0">
   <Grid>
     <!-- MainGrid：主内容（overlay 时模糊目标） -->
-    <Grid x:Name="MainGrid" RowDefinitions="40,*,28">
-      <!-- ══════════ 顶栏 40px：菜单 + 播放控制（BPM/拍号/播放按钮）+ 动作 ══════════ -->
-      <Border Grid.Row="0" BorderBrush="{DynamicResource PlusBorderSubtle}" BorderThickness="0,0,0,1">
-        <!-- 双层：底层放左右两翼，播放组放覆盖层——左右翼宽度不等时播放组仍相对窗口真居中 -->
-        <Grid Margin="12,0,12,0">
-          <!-- 底层：左菜单 + 右动作（* 列占满，右动作贴右缘） -->
-          <Grid ColumnDefinitions="Auto,*">
-          <Menu VerticalAlignment="Center" Margin="0,-3,0,0"
-                Opened="OnMainMenuOpened" Closed="OnMainMenuClosed"
-                PointerExited="OnMainMenuPointerLeave">
-              <MenuItem Header="{DynamicResource menu.file}">
-                <MenuItem Header="{DynamicResource menu.file.new}" InputGesture="Ctrl+N" Click="OnMenuNew"/>
-                <MenuItem Header="{DynamicResource menu.file.newfromtemplate}" ItemsSource="{Binding OpenTemplatesMenuItems}" Classes="MenuItemWithSubMenu"/>
-                <MenuItem Header="{DynamicResource menu.file.savetemplate}" Click="OnMenuSaveTemplate"/>
-                <MenuItem Header="-" Height="1"/>
-                <MenuItem Header="{DynamicResource menu.file.open}" InputGesture="Ctrl+O" Click="OnMenuOpen"/>
-                <MenuItem Header="{DynamicResource menu.file.openrecent}" ItemsSource="{Binding OpenRecentMenuItems}" Classes="MenuItemWithSubMenu"/>
-                <MenuItem Header="{DynamicResource menu.file.openprojectlocation}" Click="OnMenuOpenProjectLocation"/>
-                <MenuItem Header="-" Height="1"/>
-                <MenuItem Header="{DynamicResource menu.file.save}" InputGesture="Ctrl+S" Click="OnMenuSave"/>
-                <MenuItem Header="{DynamicResource menu.file.saveas}"  InputGesture="Ctrl+Shift+S" Click="OnMenuSaveAs"/>
-                <MenuItem Header="-" Height="1"/>
-                <MenuItem Header="{DynamicResource menu.file.importtracks}" Click="OnMenuImportTracks"/>
-                <MenuItem Header="{DynamicResource menu.file.importaudio}" Click="OnMenuImportAudio"/>
-                <MenuItem Header="-" Height="1"/>
-                <MenuItem Header="{DynamicResource menu.file.exportaudio}">
-                  <MenuItem Header="{DynamicResource menu.file.render}" InputGesture="Ctrl+Shift+R" Click="OnMenuRender"/>
-                  <Separator/>
-                  <MenuItem Header="{DynamicResource menu.file.exportwav}" Click="OnMenuExportWav"/>
-                  <MenuItem Header="{DynamicResource menu.file.exportwavto}" Click="OnMenuExportWavTo"/>
-                  <MenuItem Header="{DynamicResource menu.file.exportmixdown}" Click="OnMenuExportMixdown"/>
+    <Grid x:Name="MainGrid" RowDefinitions="56,*,32">
+      <!-- ══════════ 顶栏 56：品牌(=菜单) · 运输条 · 时间/速度 · 右侧图标 ══════════ -->
+      <Border Grid.Row="0" Background="{DynamicResource md3.surface}"
+              BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1">
+        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto" Margin="16,0">
+          <!-- 品牌 = 菜单按钮（稿：36 标记 + UTVTU + 分隔线 + 屏名） -->
+          <Button Grid.Column="0" x:Name="AppMenuButton" Classes="brandBtn" Click="OnAppMenuClicked">
+            <Button.Flyout>
+              <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                <MenuItem Header="{DynamicResource menu.file}">
+                  <MenuItem Header="{DynamicResource menu.file.new}" InputGesture="Ctrl+N" Click="OnMenuNew"/>
+                  <MenuItem Header="{DynamicResource menu.file.newfromtemplate}" ItemsSource="{Binding OpenTemplatesMenuItems}" Classes="MenuItemWithSubMenu"/>
+                  <MenuItem Header="{DynamicResource menu.file.savetemplate}" Click="OnMenuSaveTemplate"/>
+                  <MenuItem Header="-" Height="1"/>
+                  <MenuItem Header="{DynamicResource menu.file.open}" InputGesture="Ctrl+O" Click="OnMenuOpen"/>
+                  <MenuItem Header="{DynamicResource menu.file.openrecent}" ItemsSource="{Binding OpenRecentMenuItems}" Classes="MenuItemWithSubMenu"/>
+                  <MenuItem Header="{DynamicResource menu.file.openprojectlocation}" Click="OnMenuOpenProjectLocation"/>
+                  <MenuItem Header="-" Height="1"/>
+                  <MenuItem Header="{DynamicResource menu.file.save}" InputGesture="Ctrl+S" Click="OnMenuSave"/>
+                  <MenuItem Header="{DynamicResource menu.file.saveas}"  InputGesture="Ctrl+Shift+S" Click="OnMenuSaveAs"/>
+                  <MenuItem Header="-" Height="1"/>
+                  <MenuItem Header="{DynamicResource menu.file.importtracks}" Click="OnMenuImportTracks"/>
+                  <MenuItem Header="{DynamicResource menu.file.importaudio}" Click="OnMenuImportAudio"/>
+                  <MenuItem Header="-" Height="1"/>
+                  <MenuItem Header="{DynamicResource menu.file.exportaudio}">
+                    <MenuItem Header="{DynamicResource menu.file.render}" InputGesture="Ctrl+Shift+R" Click="OnMenuRender"/>
+                    <Separator/>
+                    <MenuItem Header="{DynamicResource menu.file.exportwav}" Click="OnMenuExportWav"/>
+                    <MenuItem Header="{DynamicResource menu.file.exportwavto}" Click="OnMenuExportWavTo"/>
+                    <MenuItem Header="{DynamicResource menu.file.exportmixdown}" Click="OnMenuExportMixdown"/>
+                  </MenuItem>
+                  <MenuItem Header="{DynamicResource menu.file.exportproject}">
+                    <MenuItem Header="{DynamicResource menu.file.exportust}" Click="OnMenuExportUst"/>
+                    <MenuItem Header="{DynamicResource menu.file.exportustto}" Click="OnMenuExportUstTo"/>
+                    <MenuItem Header="{DynamicResource menu.file.exportmidi}" Click="OnMenuExportMidi"/>
+                    <MenuItem Header="{DynamicResource menu.file.exportds}" Click="OnMenuExportDsTo"/>
+                  </MenuItem>
+                  <MenuItem Header="{DynamicResource menu.file.openexportlocation}" Click="OnMenuOpenProjectLocation"/>
                 </MenuItem>
-                <MenuItem Header="{DynamicResource menu.file.exportproject}">
-                  <MenuItem Header="{DynamicResource menu.file.exportust}" Click="OnMenuExportUst"/>
-                  <MenuItem Header="{DynamicResource menu.file.exportustto}" Click="OnMenuExportUstTo"/>
-                  <MenuItem Header="{DynamicResource menu.file.exportmidi}" Click="OnMenuExportMidi"/>
-                  <MenuItem Header="{DynamicResource menu.file.exportds}" Click="OnMenuExportDsTo"/>
+                <MenuItem Header="{DynamicResource menu.edit}">
+                  <MenuItem Header="{Binding UndoText}" InputGesture="Ctrl+Z" Command="{Binding Undo}" IsEnabled="{Binding CanUndo}"/>
+                  <MenuItem Header="{Binding RedoText}" InputGesture="Ctrl+Y" Command="{Binding Redo}" IsEnabled="{Binding CanRedo}"/>
                 </MenuItem>
-                <MenuItem Header="{DynamicResource menu.file.openexportlocation}" Click="OnMenuOpenProjectLocation"/>
-              </MenuItem>
-              <MenuItem Header="{DynamicResource menu.edit}">
-                <MenuItem Header="{Binding UndoText}" InputGesture="Ctrl+Z" Command="{Binding Undo}" IsEnabled="{Binding CanUndo}"/>
-                <MenuItem Header="{Binding RedoText}" InputGesture="Ctrl+Y" Command="{Binding Redo}" IsEnabled="{Binding CanRedo}"/>
-              </MenuItem>
-              <MenuItem Header="{DynamicResource menu.project}">
-                <MenuItem Header="{DynamicResource menu.project.expressions}" Click="OnMenuExpressionss"/>
-                <MenuItem Header="{DynamicResource menu.project.remaptimeaxis}" Click="OnMenuRemapTimeaxis"/>
-              </MenuItem>
-              <MenuItem Header="{DynamicResource menu.tools}">
-                <MenuItem Header="{DynamicResource menu.tools.layout}">
+                <MenuItem Header="{DynamicResource menu.project}">
+                  <MenuItem Header="{DynamicResource menu.project.expressions}" Click="OnMenuExpressionss"/>
+                  <MenuItem Header="{DynamicResource menu.project.remaptimeaxis}" Click="OnMenuRemapTimeaxis"/>
+                </MenuItem>
+                <MenuItem Header="{DynamicResource menu.tools}">
+                  <MenuItem Header="{DynamicResource menu.tools.layout}">
+                    <MenuItem Header="{DynamicResource menu.tools.layout.reset}" Click="OnMenuLayoutReset"/>
+                    <MenuItem Header="{DynamicResource menu.tools.layout.vsplit11}" Click="OnMenuLayoutVSplit11"/>
+                    <MenuItem Header="{DynamicResource menu.tools.layout.vsplit12}" Click="OnMenuLayoutVSplit12"/>
+                    <MenuItem Header="{DynamicResource menu.tools.layout.vsplit13}" Click="OnMenuLayoutVSplit13"/>
+                    <MenuItem Header="{DynamicResource menu.tools.layout.hsplit11}" Click="OnMenuLayoutHSplit11"/>
+                    <MenuItem Header="{DynamicResource menu.tools.layout.hsplit12}" Click="OnMenuLayoutHSplit12"/>
+                    <MenuItem Header="{DynamicResource menu.tools.layout.hsplit13}" Click="OnMenuLayoutHSplit13"/>
+                  </MenuItem>
+                  <MenuItem Header="{DynamicResource menu.tools.fullscreen}" InputGesture="F11" Click="OnMenuFullScreen"/>
+                  <MenuItem Header="{Binding ClearCacheHeader}" Click="OnMenuClearCache"/>
+                  <MenuItem Header="{DynamicResource menu.tools.debugwindow}" Click="OnMenuDebugWindow"/>
+                  <MenuItem Header="{DynamicResource menu.tools.mixer}" InputGesture="Ctrl+M" Click="OnMenuMixer"/>
+                  <MenuItem Header="{DynamicResource phoneticassistant.caption}" Click="OnMenuPhoneticAssistant"/>
+                  <MenuItem Header="{DynamicResource menu.tools.singers}" Click="OnMenuSingers"/>
+                  <MenuItem Header="{DynamicResource menu.tools.singer.install}" Click="OnMenuInstallSinger"/>
+                  <MenuItem Header="{DynamicResource menu.tools.wavtoolresampler.install}" Click="OnMenuInstallWavtoolResampler"/>
+                  <MenuItem Header="{DynamicResource menu.tools.packages}" Click="OnMenuPackageManager"/>
+                  <MenuItem Header="{DynamicResource menu.tools.prefs}" Click="OnMenuPreferences"/>
+                </MenuItem>
+                <MenuItem Header="{DynamicResource menu.help}">
+                  <MenuItem Header="{DynamicResource menu.help.wiki}" Click="OnMenuWiki"/>
+                  <MenuItem Header="{DynamicResource menu.help.checkupdate}" Click="OnMenuCheckUpdate"/>
+                  <MenuItem Header="{DynamicResource menu.help.reportissue}" Click="OnMenuReportIssue"/>
+                  <MenuItem Header="{DynamicResource menu.help.logslocation}" Click="OnMenuLogsLocation"/>
+                </MenuItem>
+              </MenuFlyout>
+            </Button.Flyout>
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <Border Width="36" Height="36" CornerRadius="8" VerticalAlignment="Center"
+                      Background="{DynamicResource md3.primary-container}">
+                <Path Data="{StaticResource icon-music}" Width="20" Height="20" Stretch="Uniform"
+                      HorizontalAlignment="Center" VerticalAlignment="Center"
+                      Fill="{DynamicResource md3.on-primary-container}"/>
+              </Border>
+              <TextBlock Text="UTvTU" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"
+                         Foreground="{DynamicResource md3.on-surface}"/>
+              <Border Width="1" Height="20" VerticalAlignment="Center"
+                      Background="{DynamicResource md3.outline-variant}"/>
+              <TextBlock Text="{DynamicResource view.workspace}" FontSize="11" VerticalAlignment="Center"
+                         Foreground="{DynamicResource md3.on-surface-variant}"/>
+            </StackPanel>
+          </Button>
+
+          <!-- 运输条（稿：40 胶囊，内边距 0/10，按钮 36） -->
+          <Border Grid.Column="1" Classes="tpChip" Margin="16,0,0,0" Height="40"
+                  CornerRadius="999" Padding="10,0">
+            <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+              <Button Classes="tpBtn" Command="{Binding PlaybackViewModel.SeekStart}">
+                <Path Data="{StaticResource icon-skip-back}" Width="18" Height="18" Stretch="Uniform"
+                      Fill="{DynamicResource md3.on-surface}"/>
+              </Button>
+              <Button Classes="tpPlay" Click="OnPlayOrPause">
+                <Path Data="{StaticResource icon-play}" Width="18" Height="18" Stretch="Uniform"
+                      Fill="{DynamicResource md3.on-primary}"/>
+              </Button>
+              <Button Classes="tpBtn" Command="{Binding PlaybackViewModel.Pause}">
+                <Path Data="{StaticResource icon-pause}" Width="18" Height="18" Stretch="Uniform"
+                      Fill="{DynamicResource md3.on-surface}"/>
+              </Button>
+              <Button Classes="tpBtn" Command="{Binding PlaybackViewModel.SeekEnd}">
+                <Path Data="{StaticResource icon-skip-forward}" Width="18" Height="18" Stretch="Uniform"
+                      Fill="{DynamicResource md3.on-surface}"/>
+              </Button>
+              <ToggleButton Classes="tpBtn" IsChecked="{Binding PlaybackViewModel.Metronome}"
+                            ToolTip.Tip="{DynamicResource prefs.playback.metronome}">
+                <Path Data="{StaticResource icon-metronome}" Width="18" Height="18" Stretch="Uniform"
+                      Fill="{DynamicResource md3.on-surface}"/>
+              </ToggleButton>
+            </StackPanel>
+          </Border>
+
+          <!-- 播放位置（稿：40 圆角块，内边距 0/14，14px） -->
+          <Border Grid.Column="2" Classes="tpChip" Margin="16,0,0,0" Padding="14,0">
+            <TextBlock Text="{Binding Path=PlaybackViewModel.PlayPosTime, StringFormat={}{0:mm\\:ss\\.fff}}"
+                       FontSize="14" VerticalAlignment="Center"
+                       Foreground="{DynamicResource md3.on-surface}"/>
+          </Border>
+
+          <!-- 速度 / 拍号（稿：同款圆角块，14px） -->
+          <Border Grid.Column="3" Classes="tpChip" Margin="16,0,0,0" Padding="14,0">
+            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+              <TextBlock Background="Transparent" PointerPressed="OnEditBpm" Cursor="Hand"
+                         FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"
+                         Foreground="{DynamicResource md3.primary}">
+                <TextBlock.Text>
+                  <MultiBinding StringFormat="{}{0:#0.00}">
+                    <Binding Path="PlaybackViewModel.Bpm"/>
+                  </MultiBinding>
+                </TextBlock.Text>
+              </TextBlock>
+              <TextBlock Background="Transparent" PointerPressed="OnEditTimeSignature" Cursor="Hand"
+                         FontSize="14" VerticalAlignment="Center"
+                         Foreground="{DynamicResource md3.on-surface}">
+                <TextBlock.Text>
+                  <MultiBinding StringFormat="{}{0} / {1}">
+                    <Binding Path="PlaybackViewModel.BeatPerBar"/>
+                    <Binding Path="PlaybackViewModel.BeatUnit"/>
+                  </MultiBinding>
+                </TextBlock.Text>
+              </TextBlock>
+            </StackPanel>
+          </Border>
+
+          <!-- 右侧：撤销/重做 · 布局 · 混音台 · 设置 · 轨道高度 -->
+          <StackPanel Grid.Column="5" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+            <Button Classes="topBtn" Command="{Binding Undo}" IsEnabled="{Binding CanUndo}"
+                    ToolTip.Tip="{DynamicResource menu.edit.undo}">
+              <Path Data="{StaticResource icon-undo}" Width="18" Height="18" Stretch="Uniform"
+                    Fill="{DynamicResource md3.on-surface}"/>
+            </Button>
+            <Button Classes="topBtn" Command="{Binding Redo}" IsEnabled="{Binding CanRedo}"
+                    ToolTip.Tip="{DynamicResource menu.edit.redo}">
+              <Path Data="{StaticResource icon-redo}" Width="18" Height="18" Stretch="Uniform"
+                    Fill="{DynamicResource md3.on-surface}"/>
+            </Button>
+            <Border Width="1" Height="20" Margin="6,0" VerticalAlignment="Center"
+                    Background="{DynamicResource md3.outline-variant}"/>
+            <Button Classes="topBtn" ToolTip.Tip="{DynamicResource menu.tools.layout}">
+              <Button.Flyout>
+                <MenuFlyout Placement="BottomEdgeAlignedRight">
                   <MenuItem Header="{DynamicResource menu.tools.layout.reset}" Click="OnMenuLayoutReset"/>
                   <MenuItem Header="{DynamicResource menu.tools.layout.vsplit11}" Click="OnMenuLayoutVSplit11"/>
                   <MenuItem Header="{DynamicResource menu.tools.layout.vsplit12}" Click="OnMenuLayoutVSplit12"/>
@@ -196,353 +344,60 @@
                   <MenuItem Header="{DynamicResource menu.tools.layout.hsplit11}" Click="OnMenuLayoutHSplit11"/>
                   <MenuItem Header="{DynamicResource menu.tools.layout.hsplit12}" Click="OnMenuLayoutHSplit12"/>
                   <MenuItem Header="{DynamicResource menu.tools.layout.hsplit13}" Click="OnMenuLayoutHSplit13"/>
-                </MenuItem>
-                <MenuItem Header="{DynamicResource menu.tools.fullscreen}" InputGesture="F11" Click="OnMenuFullScreen"/>
-                <MenuItem Header="{Binding ClearCacheHeader}" Click="OnMenuClearCache"/>
-                <MenuItem Header="{DynamicResource menu.tools.debugwindow}" Click="OnMenuDebugWindow"/>
-                <MenuItem Header="{DynamicResource menu.tools.mixer}" InputGesture="Ctrl+M" Click="OnMenuMixer"/>
-                <MenuItem Header="{DynamicResource phoneticassistant.caption}" Click="OnMenuPhoneticAssistant"/>
-                <MenuItem Header="{DynamicResource menu.tools.singers}" Click="OnMenuSingers"/>
-                <MenuItem Header="{DynamicResource menu.tools.singer.install}" Click="OnMenuInstallSinger"/>
-                <MenuItem Header="{DynamicResource menu.tools.wavtoolresampler.install}" Click="OnMenuInstallWavtoolResampler"/>
-                <MenuItem Header="{DynamicResource menu.tools.packages}" Click="OnMenuPackageManager"/>
-                <MenuItem Header="{DynamicResource menu.tools.prefs}" Click="OnMenuPreferences"/>
-              </MenuItem>
-              <MenuItem Header="{DynamicResource menu.help}">
-                <MenuItem Header="{DynamicResource menu.help.wiki}" Click="OnMenuWiki"/>
-                <MenuItem Header="{DynamicResource menu.help.checkupdate}" Click="OnMenuCheckUpdate"/>
-                <MenuItem Header="{DynamicResource menu.help.reportissue}" Click="OnMenuReportIssue"/>
-                <MenuItem Header="{DynamicResource menu.help.logslocation}" Click="OnMenuLogsLocation"/>
-              </MenuItem>
-            </Menu>
-
-          <!-- 右：动作 + 播放位置 + 缩放 -->
-          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center"
-                      HorizontalAlignment="Right">
-            <StackPanel Orientation="Horizontal" Spacing="4">
-              <Button Classes="iconBtn" Command="{Binding Undo}" IsEnabled="{Binding CanUndo}">
-                <Path Data="{StaticResource icon-undo}" Width="14" Height="14" Stretch="Uniform"
-                      Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
-              </Button>
-              <Button Classes="iconBtn" Command="{Binding Redo}" IsEnabled="{Binding CanRedo}">
-                <Path Data="{StaticResource icon-redo}" Width="14" Height="14" Stretch="Uniform"
-                      Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
-              </Button>
-              <Button Classes="iconBtn" Click="OnMenuPreferences">
-                <Path Data="{StaticResource icon-settings}" Width="15" Height="15" Stretch="Uniform"
-                      Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
-              </Button>
-            </StackPanel>
-            <Border Width="1" Height="18" Background="{DynamicResource PlusBorderSubtle}" Margin="4,0"/>
-            <TextBlock Text="{Binding Path=PlaybackViewModel.PlayPosTime, StringFormat={}{0:mm\\:ss\\.fff}}"
-                       FontSize="12" VerticalAlignment="Center"/>
-            <Border Width="1" Height="18" Background="{DynamicResource PlusBorderSubtle}" Margin="4,0"/>
-            <Border Height="24" VerticalAlignment="Center"
-                    PointerWheelChanged="ViewScalerPointerWheelChanged">
+                </MenuFlyout>
+              </Button.Flyout>
+              <Path Data="{StaticResource icon-layout}" Width="18" Height="18" Stretch="Uniform"
+                    Fill="{DynamicResource md3.on-surface}"/>
+            </Button>
+            <Button Classes="topBtn" Click="OnMenuMixer" ToolTip.Tip="{DynamicResource menu.tools.mixer}">
+              <Path Data="{StaticResource icon-sliders}" Width="18" Height="18" Stretch="Uniform"
+                    Fill="{DynamicResource md3.on-surface}"/>
+            </Button>
+            <Button Classes="topBtn" Click="OnMenuPreferences" ToolTip.Tip="{DynamicResource menu.tools.prefs}">
+              <Path Data="{StaticResource icon-settings}" Width="18" Height="18" Stretch="Uniform"
+                    Fill="{DynamicResource md3.on-surface}"/>
+            </Button>
+            <Border Width="1" Height="20" Margin="6,0" VerticalAlignment="Center"
+                    Background="{DynamicResource md3.outline-variant}"/>
+            <Border Height="24" VerticalAlignment="Center" PointerWheelChanged="ViewScalerPointerWheelChanged">
               <c:ViewScaler Name="VScaler" DataContext="{Binding TracksViewModel}"
                             Value="{Binding TrackHeight}"
                             Min="{Binding TrackHeightMin}" Max="{Binding TrackHeightMax}"/>
             </Border>
           </StackPanel>
-          </Grid>
-
-          <!-- 中：BPM + 拍号 + 播放控制（覆盖层，相对窗口真居中） -->
-          <StackPanel Orientation="Horizontal" Spacing="14"
-                      HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock Background="Transparent" PointerPressed="OnEditBpm" Cursor="Hand"
-                       FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"
-                       Foreground="{DynamicResource AccentBrush1}">
-              <TextBlock.Text>
-                <MultiBinding StringFormat="{}{0:#0.00}">
-                  <Binding Path="PlaybackViewModel.Bpm"/>
-                </MultiBinding>
-              </TextBlock.Text>
-            </TextBlock>
-            <TextBlock Background="Transparent" PointerPressed="OnEditTimeSignature"
-                       Cursor="Hand" FontSize="12" Opacity="0.6" VerticalAlignment="Center">
-              <TextBlock.Text>
-                <MultiBinding StringFormat="{}{0}/{1}">
-                  <Binding Path="PlaybackViewModel.BeatPerBar"/>
-                  <Binding Path="PlaybackViewModel.BeatUnit"/>
-                </MultiBinding>
-              </TextBlock.Text>
-            </TextBlock>
-            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-              <Button Classes="playBtn" Command="{Binding PlaybackViewModel.SeekStart}">
-                <Path Data="{StaticResource icon-skip-back}" Width="12" Height="12" Stretch="Uniform"
-                      Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
-              </Button>
-              <Button Classes="playBtn" Click="OnPlayOrPause">
-                <Path Data="{StaticResource icon-play}" Width="12" Height="12" Stretch="Uniform"
-                      Fill="{DynamicResource AccentBrush1}"/>
-              </Button>
-              <Button Classes="playBtn" Command="{Binding PlaybackViewModel.Pause}">
-                <Path Data="{StaticResource icon-pause}" Width="12" Height="12" Stretch="Uniform"
-                      Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
-              </Button>
-              <Button Classes="playBtn" Command="{Binding PlaybackViewModel.SeekEnd}">
-                <Path Data="{StaticResource icon-skip-forward}" Width="12" Height="12" Stretch="Uniform"
-                      Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
-              </Button>
-              <ToggleButton Classes="metroBtn" IsChecked="{Binding PlaybackViewModel.Metronome}"
-                            ToolTip.Tip="{DynamicResource prefs.playback.metronome}">
-                <Path Data="{StaticResource icon-metronome}" Width="13" Height="13" Stretch="Uniform"/>
-              </ToggleButton>
-            </StackPanel>
-          </StackPanel>
         </Grid>
       </Border>
 
-      <!-- ══════════ 主区：侧栏 + 内容页 ══════════ -->
-      <Grid Grid.Row="1" x:Name="MainLayout" ColumnDefinitions="240,6,*">
-        <!-- ── 左侧栏：项目 / 素材库 双选项卡 ── -->
-        <Border Grid.Column="0" x:Name="SidebarPanel" Background="{DynamicResource PlusSurfaceRaised}"
-                BorderBrush="{DynamicResource PlusBorderSubtle}" BorderThickness="0,0,1,0">
-          <DockPanel>
-            <!-- 折叠按钮 -->
-            <Button DockPanel.Dock="Top" Classes="iconBtn" HorizontalAlignment="Right"
-                    Margin="0,6,6,0" Click="OnToggleSidebar">
-              <Panel>
-                <Path x:Name="SidebarCloseIcon" Data="{StaticResource icon-chevron-left}"
-                      Width="13" Height="13" Stretch="Uniform"
-                      Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
-                <Path x:Name="SidebarOpenIcon" Data="{StaticResource icon-chevron-right}"
-                      Width="13" Height="13" Stretch="Uniform" IsVisible="False"
-                      Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
-              </Panel>
-            </Button>
-            <!-- 主选项卡 + 内容 -->
-            <Grid>
-              <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-              </Grid.RowDefinitions>
-              <Grid Grid.Row="0" ColumnDefinitions="*,*" Margin="8,8,8,0">
-                <Button x:Name="ProjectsTab" Classes="sideTab selected" Click="OnShowProjects"
-                        Content="{DynamicResource sidebar.projects}"/>
-                <Button Grid.Column="1" x:Name="LibraryTab" Classes="sideTab" Click="OnShowLibrary"
-                        Content="{DynamicResource sidebar.library}"/>
-              </Grid>
-
-              <!-- 项目面板：信息卡 + 最近项目 -->
-              <Grid Grid.Row="1" x:Name="ProjectPanel" RowDefinitions="Auto,Auto,*">
-                <Border Classes="sideCard" Grid.Row="0">
-                  <StackPanel>
-                    <TextBlock FontSize="13" FontWeight="SemiBold">
-                      <TextBlock.Text>
-                        <MultiBinding StringFormat="{}{0:#0.00} BPM">
-                          <Binding Path="PlaybackViewModel.Bpm"/>
-                        </MultiBinding>
-                      </TextBlock.Text>
-                    </TextBlock>
-                    <TextBlock FontSize="11" Opacity="0.5" Margin="0,3,0,0">
-                      <TextBlock.Text>
-                        <MultiBinding StringFormat="{}{0}/{1}">
-                          <Binding Path="PlaybackViewModel.BeatPerBar"/>
-                          <Binding Path="PlaybackViewModel.BeatUnit"/>
-                        </MultiBinding>
-                      </TextBlock.Text>
-                    </TextBlock>
-                  </StackPanel>
-                </Border>
-                <TextBlock Classes="sideHeading" Grid.Row="1"
-                           Text="{DynamicResource sidebar.recentprojects}"/>
-                <ListBox Grid.Row="2" Margin="8,0,8,8"
-                         ItemsSource="{Binding RecentFiles}"
-                         Background="Transparent" BorderThickness="0"
-                         IsVisible="{Binding RecentFiles.Count}">
-                  <ListBox.ItemTemplate>
-                    <DataTemplate x:DataType="vm:RecentFileInfo">
-                      <Border Classes="sideItem small" PointerPressed="OnWelcomeRecent">
-                        <Grid ColumnDefinitions="*,Auto" Background="Transparent">
-                          <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock FontSize="12" Text="{Binding Name}"/>
-                            <TextBlock FontSize="9" Opacity="0.4"
-                                       Text="{Binding Directory}" TextTrimming="CharacterEllipsis"/>
-                          </StackPanel>
-                          <Border Grid.Column="1" Background="{DynamicResource AccentBrush1Semi}"
-                                  CornerRadius="4" Padding="5,2" VerticalAlignment="Center">
-                            <TextBlock FontSize="9" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource AccentBrush1}"
-                                       Text="{Binding Format}"/>
-                          </Border>
-                        </Grid>
-                      </Border>
-                    </DataTemplate>
-                  </ListBox.ItemTemplate>
-                </ListBox>
-                <TextBlock Grid.Row="2" Margin="12,12,12,0" FontSize="11" Opacity="0.45"
-                           Text="{DynamicResource welcome.open.description}"
-                           IsVisible="{Binding !RecentFiles.Count}"/>
-              </Grid>
-
-              <!-- 素材库面板：歌手 / 采样 / VST -->
-              <Grid Grid.Row="1" x:Name="LibraryPanel" IsVisible="False" RowDefinitions="Auto,*">
-                <Grid Grid.Row="0" ColumnDefinitions="*,*,*" Margin="8,8,8,0">
-                  <Button x:Name="SingersTab" Classes="subTab selected" Click="OnShowSingers"
-                          Content="{DynamicResource sidebar.singers}"/>
-                  <Button Grid.Column="1" x:Name="SamplesTab" Classes="subTab" Click="OnShowSamples"
-                          Content="{DynamicResource sidebar.samples}"/>
-                  <Button Grid.Column="2" x:Name="VstTab" Classes="subTab" Click="OnShowVst"
-                          Content="{DynamicResource sidebar.vst}"/>
-                </Grid>
-                <!-- 歌手列表（E4：双击新建轨道 / 拖拽到主编辑器） -->
-                <Grid Grid.Row="1" x:Name="SingersPanel" Margin="8,6,8,0" RowDefinitions="Auto,*">
-                  <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,2">
-                    <TextBlock Text="{DynamicResource sidebar.singers}" FontSize="11" Opacity="0.45"
-                               Margin="2,4,0,4" VerticalAlignment="Center"/>
-                    <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24" Click="OnRefreshSingers"
-                            ToolTip.Tip="{DynamicResource sidebar.refresh}">
-                      <Path Data="{StaticResource icon-refresh-cw}" Width="12" Height="12" Stretch="Uniform"
-                            Fill="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-                    </Button>
-                  </Grid>
-                  <ListBox Grid.Row="1" ItemsSource="{Binding Singers}" Background="Transparent"
-                           BorderThickness="0" IsVisible="{Binding HasSingers}">
-                    <ListBox.Styles>
-                      <!-- Suki ListBoxItem 模板固定高度会裁切两行卡片——放开容器高度 -->
-                      <Style Selector="ListBoxItem">
-                        <Setter Property="Padding" Value="0"/>
-                        <Setter Property="MinHeight" Value="64"/>
-                      </Style>
-                    </ListBox.Styles>
-                    <ListBox.ItemTemplate>
-                      <DataTemplate x:DataType="vm:SingerItem">
-                        <Border Classes="sideItem singer" DoubleTapped="OnSingerDoubleTap"
-                                PointerPressed="OnSidebarPointerPressed" PointerMoved="OnSidebarPointerMoved">
-                          <Grid RowDefinitions="*,Auto" Background="Transparent">
-                            <Grid Grid.Row="0" ColumnDefinitions="34,8,*" Background="Transparent">
-                              <Border Grid.Column="0" Width="34" Height="34" CornerRadius="8"
-                                      ClipToBounds="True" Background="{DynamicResource PlusSurfaceControl}"
-                                      VerticalAlignment="Center">
-                                <Panel>
-                                  <Image Source="{Binding Avatar}" Width="34" Height="34" Stretch="UniformToFill"/>
-                                  <TextBlock Text="{Binding AvatarFallback}" FontSize="14" FontWeight="SemiBold"
-                                             Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                                             HorizontalAlignment="Center" VerticalAlignment="Center"
-                                             IsVisible="{Binding ShowAvatarFallback}"/>
-                                </Panel>
-                              </Border>
-                              <TextBlock Grid.Column="2" FontSize="12" VerticalAlignment="Center"
-                                         Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
-                            </Grid>
-                            <TextBlock Grid.Row="1" FontSize="10" Opacity="0.5" Margin="42,0,0,0"
-                                       Text="{Binding SingerTypeText}"/>
-                          </Grid>
-                        </Border>
-                      </DataTemplate>
-                    </ListBox.ItemTemplate>
-                  </ListBox>
-                  <!-- 空状态 -->
-                  <StackPanel Grid.Row="1" IsVisible="{Binding !HasSingers}">
-                    <Border Classes="sideCard" Margin="0,8,0,0">
-                      <StackPanel>
-                        <Path Data="{StaticResource icon-mic}" Width="16" Height="16" Stretch="Uniform"
-                              Fill="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                              HorizontalAlignment="Left" Margin="0,0,0,6"/>
-                        <TextBlock FontSize="11" Opacity="0.55"
-                                   Text="{DynamicResource sidebar.singers.empty}"/>
-                      </StackPanel>
-                    </Border>
-                  </StackPanel>
-                </Grid>
-                <!-- 伴奏库（E4：双击新建轨道 / 拖拽 / 试听） -->
-                <Grid Grid.Row="1" x:Name="SamplesPanel" Margin="8,6,8,0" IsVisible="False" RowDefinitions="Auto,*">
-                  <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,2">
-                    <TextBlock Text="{DynamicResource sidebar.samples}" FontSize="11" Opacity="0.45"
-                               Margin="2,4,0,4" VerticalAlignment="Center"/>
-                    <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24" Click="OnRefreshSamples"
-                            ToolTip.Tip="{DynamicResource sidebar.refresh}">
-                      <Path Data="{StaticResource icon-refresh-cw}" Width="12" Height="12" Stretch="Uniform"
-                            Fill="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-                    </Button>
-                  </Grid>
-                  <ListBox Grid.Row="1" ItemsSource="{Binding Samples}" Background="Transparent"
-                           BorderThickness="0" IsVisible="{Binding HasSamples}">
-                    <ListBox.ItemTemplate>
-                      <DataTemplate x:DataType="vm:SampleItem">
-                        <Border Classes="sideItem small" DoubleTapped="OnSampleDoubleTap"
-                                PointerPressed="OnSidebarPointerPressed" PointerMoved="OnSidebarPointerMoved">
-                          <Grid ColumnDefinitions="26,8,*,Auto,4,Auto" Background="Transparent">
-                            <Border Grid.Column="0" Width="26" Height="26" CornerRadius="6"
-                                    Background="{DynamicResource PlusSurfaceControl}" HorizontalAlignment="Left">
-                              <Path Data="{StaticResource icon-music}" Width="13" Height="13" Stretch="Uniform"
-                                    Fill="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <TextBlock Grid.Column="2" FontSize="12" VerticalAlignment="Center"
-                                       Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
-                            <Border Grid.Column="3" Background="{DynamicResource AccentBrush1Semi}"
-                                    CornerRadius="4" Padding="4,1" VerticalAlignment="Center">
-                              <TextBlock FontSize="9" FontWeight="SemiBold"
-                                         Foreground="{DynamicResource AccentBrush1}"
-                                         Text="{Binding Format}"/>
-                            </Border>
-                            <Button Grid.Column="5" Classes="iconBtn" Width="26" Height="26" Margin="4,0,0,0"
-                                    Click="OnSamplePlay" ToolTip.Tip="{DynamicResource sidebar.play}">
-                              <Panel>
-                                <Path Data="{StaticResource icon-play}" Width="11" Height="11" Stretch="Uniform"
-                                      Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"
-                                      IsVisible="{Binding !IsPreviewing}"/>
-                                <Path Data="{StaticResource icon-stop}" Width="11" Height="11" Stretch="Uniform"
-                                      Fill="{DynamicResource AccentBrush1}"
-                                      IsVisible="{Binding IsPreviewing}"/>
-                              </Panel>
-                            </Button>
-                          </Grid>
-                        </Border>
-                      </DataTemplate>
-                    </ListBox.ItemTemplate>
-                  </ListBox>
-                  <!-- 空状态 -->
-                  <StackPanel Grid.Row="1" IsVisible="{Binding !HasSamples}">
-                    <Border Classes="sideCard" Margin="0,8,0,0">
-                      <StackPanel>
-                        <Path Data="{StaticResource icon-music}" Width="16" Height="16" Stretch="Uniform"
-                              Fill="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                              HorizontalAlignment="Left" Margin="0,0,0,6"/>
-                        <TextBlock FontSize="11" Opacity="0.55" TextWrapping="Wrap"
-                                   Text="{DynamicResource sidebar.samples.empty}"/>
-                      </StackPanel>
-                    </Border>
-                  </StackPanel>
-                </Grid>
-                <!-- VST 乐器音源（占位：未来功能） -->
-                <Grid Grid.Row="1" x:Name="VstPanel" IsVisible="False">
-                  <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-30,0,0">
-                    <Border Width="52" Height="52" CornerRadius="26"
-                            Background="{DynamicResource PlusSurfaceControl}"
-                            HorizontalAlignment="Center" Margin="0,0,0,10">
-                      <Path Data="{StaticResource icon-cpu}" Width="22" Height="22" Stretch="Uniform"
-                            HorizontalAlignment="Center" VerticalAlignment="Center"
-                            Fill="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-                    </Border>
-                    <TextBlock Text="{DynamicResource sidebar.vst}" FontSize="12" FontWeight="SemiBold"
-                               HorizontalAlignment="Center"/>
-                    <TextBlock Text="{DynamicResource sidebar.vst.comingsoon}" FontSize="10" Opacity="0.4"
-                               HorizontalAlignment="Center" Margin="0,3,0,0"/>
-                  </StackPanel>
-                </Grid>
-              </Grid>
+      <!-- ══════════ 工作区：左 轨道头 264 · 中 编排区 · 右 素材库 296 ══════════ -->
+      <Grid Grid.Row="1" x:Name="MainLayout" ColumnDefinitions="264,*,296">
+        <!-- ── 左：轨道头 ── -->
+        <Border Grid.Column="0" Background="{DynamicResource md3.surface}"
+                BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,1,0">
+          <Grid RowDefinitions="34,16,*">
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="12,0">
+              <TextBlock Text="{DynamicResource command.import.track}" FontSize="11" FontWeight="SemiBold"
+                         VerticalAlignment="Center"
+                         Foreground="{DynamicResource md3.on-surface-variant}"/>
+              <Button Grid.Column="1" Classes="topBtn" Width="22" Height="22" Click="OnAddTrack"
+                      ToolTip.Tip="{DynamicResource command.track.add}">
+                <Path Data="{StaticResource icon-plus}" Width="14" Height="14" Stretch="Uniform"
+                      Fill="{DynamicResource md3.on-surface-variant}"/>
+              </Button>
             </Grid>
-          </DockPanel>
+            <c:TrackHeaderCanvas Grid.Row="2" ClipToBounds="True" Background="Transparent"
+                                DataContext="{Binding TracksViewModel}"
+                                TrackHeight="{Binding TrackHeight}"
+                                TrackOffset="{Binding TrackOffset}"
+                                Items="{Binding Tracks}"
+                                PointerWheelChanged="MainPagePointerWheelChanged"/>
+          </Grid>
         </Border>
 
-        <GridSplitter Grid.Column="1" x:Name="SidebarSplitter" Width="6" Background="Transparent"
-                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Cursor="SizeWestEast"/>
-
-        <!-- 侧栏折叠后的浮出打开按钮（贴着编辑区左缘） -->
-        <Button Grid.Column="2" x:Name="SidebarOpenBtn" Classes="iconBtn"
-                HorizontalAlignment="Left" VerticalAlignment="Top" ZIndex="100"
-                Margin="6,6,0,0" IsVisible="False" Click="OnToggleSidebar">
-          <Path Data="{StaticResource icon-chevron-right}" Width="13" Height="13" Stretch="Uniform"
-                Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
-        </Button>
-
-          <!--Main page-->
-          <Grid Grid.Column="2" ColumnDefinitions="300,*,24" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <!-- ── 中：编排区（标尺 34 / 横向滚动 16 / 轨道 / 卷帘 / 混音台）── -->
+        <Grid Grid.Column="1" ColumnDefinitions="*,8">
+          <Grid Grid.Row="0" Grid.Column="0" x:Name="ArrangementArea">
             <Grid.RowDefinitions>
-              <RowDefinition Height="24"/>
+              <RowDefinition Height="34"/>
               <RowDefinition Height="16"/>
               <RowDefinition Height="*" MinHeight="0.01"/>
               <RowDefinition Height="6"/>
@@ -554,7 +409,7 @@
                              MinHeight="{Binding MixerMinHeight}"
                              MaxHeight="{Binding MixerMaxHeight}"/>
             </Grid.RowDefinitions>
-            <ScrollBar Name="HScrollBar" Classes="music" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+            <ScrollBar Name="HScrollBar" Classes="music" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                       Margin="0,2,0,2" Orientation="Horizontal" AllowAutoHide="False"
                       DataContext="{Binding TracksViewModel}"
                       Maximum="{Binding HScrollBarMax, Mode=OneWay}"
@@ -562,15 +417,7 @@
                       ViewportSize="{Binding ViewportTicks}"
                       LargeChange="{Binding ViewportTicks}"
                       SmallChange="{Binding SmallChangeX}" PointerWheelChanged="HScrollPointerWheelChanged"/>
-            <ScrollBar Name="VScrollBar" Classes="music" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                      Margin="4,0,4,0" Orientation="Vertical" AllowAutoHide="False"
-                      DataContext="{Binding TracksViewModel}"
-                      Maximum="{Binding VScrollBarMax, Mode=OneWay}"
-                      Value="{Binding TrackOffset}"
-                      ViewportSize="{Binding ViewportTracks}"
-                      LargeChange="{Binding ViewportTracks}"
-                      SmallChange="{Binding SmallChangeY}" PointerWheelChanged="VScrollPointerWheelChanged"/>
-            <Canvas Name="TimelineCanvas" Grid.Row="0" Grid.Column="1"
+            <Canvas Name="TimelineCanvas" Grid.Row="0" Grid.Column="0"
                     Background="Transparent" ClipToBounds="True"
                     PointerWheelChanged="TimelinePointerWheelChanged"
                     PointerPressed="TimelinePointerPressed"
@@ -595,22 +442,13 @@
                 </ContextMenu>
               </Canvas.ContextMenu>
             </Canvas>
-            <Border Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" Width="1"
-                    BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
-                    BorderThickness="1,0,0,0" IsHitTestVisible="False" ZIndex="10"/>
-            <c:TrackHeaderCanvas Grid.Row="2" Grid.Column="0" ClipToBounds="True" Background="Transparent"
-                                DataContext="{Binding TracksViewModel}"
-                                TrackHeight="{Binding TrackHeight}"
-                                TrackOffset="{Binding TrackOffset}"
-                                Items="{Binding Tracks}"
-                                PointerWheelChanged="MainPagePointerWheelChanged"/>
-            <c:TrackBackground Grid.Row="2" Grid.Column="1" Margin="0" IsHitTestVisible="False"
+            <c:TrackBackground Grid.Row="2" Grid.Column="0" Margin="0" IsHitTestVisible="False"
                               Foreground="{DynamicResource TrackBackgroundAltBrush}"
                               DataContext="{Binding TracksViewModel}"
                               Bounds="{Binding Bounds, Mode=OneWayToSource}"
                               TrackHeight="{Binding TrackHeight}"
                               TrackOffset="{Binding TrackOffset}"/>
-            <c:TickBackground Grid.Row="0" Grid.RowSpan="3" Grid.Column="1" Margin="0" IsHitTestVisible="False"
+            <c:TickBackground Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" Margin="0" IsHitTestVisible="False"
                               Foreground="{DynamicResource TickLineBrush}"
                               Background="{DynamicResource TickLineBrushLow}"
                               Resolution="{Binding PlaybackViewModel.Resolution}"
@@ -619,7 +457,7 @@
                               SnapDiv="{Binding TracksViewModel.SnapDiv}"
                               SnapTicks="{Binding TracksViewModel.SnapTicks}"
                               ShowBar="True"/>
-            <c:PartsCanvas x:Name="partsCanvas" Grid.Row="2" Grid.Column="1" ClipToBounds="True" Background="Transparent"
+            <c:PartsCanvas x:Name="partsCanvas" Grid.Row="2" Grid.Column="0" ClipToBounds="True" Background="Transparent"
                           DataContext="{Binding TracksViewModel}"
                           TickWidth="{Binding TickWidth}"
                           TrackHeight="{Binding TrackHeight}"
@@ -650,9 +488,9 @@
                          IsVisible="{Binding $parent[Window].DataContext.PlaybackViewModel.IsPlaying}"
                          Fill="{DynamicResource AccentBrush2}"/>
               <Rectangle Name="SelectionBox" StrokeThickness="2"
-                        Stroke="{DynamicResource SystemControlForegroundBaseHighBrush}"
-                        Fill="{DynamicResource TickLineBrushLow}" ZIndex="1000"
-                        IsHitTestVisible="False" IsVisible="False"/>
+                         Stroke="{DynamicResource SystemControlForegroundBaseHighBrush}"
+                         Fill="{DynamicResource TickLineBrushLow}" ZIndex="1000"
+                         IsHitTestVisible="False" IsVisible="False"/>
               <c:PartsCanvas.ContextMenu>
                 <ContextMenu Name="PartsContextMenu"
                             Opening="PartsContextMenuOpening"
@@ -691,14 +529,14 @@
                 </ContextMenu>
               </c:PartsCanvas.ContextMenu>
             </c:PartsCanvas>
-            <Border Grid.Row="0" Grid.RowSpan="3" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent"
+            <Border Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent"
                     ClipToBounds="True" IsHitTestVisible="False">
               <Border HorizontalAlignment="Center" VerticalAlignment="Center" Padding="10,5"
                       IsVisible="{Binding TracksViewModel.PlayPosWaitingRendering}" Background="{DynamicResource BackgroundBrushSemi}">
                 <TextBlock Text="{DynamicResource progress.waitingrendering}" FontSize="15"/>
               </Border>
             </Border>
-            <GridSplitter Grid.Row="3" Grid.ColumnSpan="3"
+            <GridSplitter Grid.Row="3" Grid.ColumnSpan="2"
                           Height="6" HorizontalAlignment="Stretch" VerticalAlignment="Center"
                           Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Focusable="False" Cursor="SizeNorthSouth"
                           DragStarted="OnSplitterDragStarted" DragCompleted="OnSplitterDragCompleted"
@@ -708,11 +546,11 @@
                        IsVisible="False" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"
                        FontSize="11" Padding="4,2" HorizontalAlignment="Left"
                        VerticalAlignment="Bottom" Margin="4,0,0,0"/>
-            <Canvas Grid.Row="4" Grid.ColumnSpan="3" x:Name="PianoRollRow" IsVisible="{Binding ShowPianoRoll}">
+            <Canvas Grid.Row="4" Grid.ColumnSpan="2" x:Name="PianoRollRow" IsVisible="{Binding ShowPianoRoll}">
               <ContentControl Name="PianoRollContainer" Width="{Binding $parent[Canvas].Bounds.Width}" Height="{Binding $parent[Canvas].Bounds.Height}"/>
             </Canvas>
             <!-- Mixer resize handle (manual drag) -->
-            <Border Grid.Row="5" Grid.ColumnSpan="3"
+            <Border Grid.Row="5" Grid.ColumnSpan="2"
                     Height="6" HorizontalAlignment="Stretch"
                     Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
                     Cursor="SizeNorthSouth"
@@ -721,21 +559,234 @@
                     PointerReleased="OnMixerSplitterReleased"
                     IsVisible="{Binding ShowMixer}"/>
             <!-- Mixer embedded -->
-            <ContentControl Grid.Row="6" Grid.ColumnSpan="3"
+            <ContentControl Grid.Row="6" Grid.ColumnSpan="2"
                             Name="MixerContainer"
                             IsVisible="{Binding ShowMixer}"/>
           </Grid>
+
+          <!-- 轨道区纵向滚动条 -->
+          <ScrollBar Name="VScrollBar" Grid.Column="1" Classes="music" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                    Margin="0,50,0,0" Orientation="Vertical" AllowAutoHide="False"
+                    DataContext="{Binding TracksViewModel}"
+                    Maximum="{Binding VScrollBarMax, Mode=OneWay}"
+                    Value="{Binding TrackOffset}"
+                    ViewportSize="{Binding ViewportTracks}"
+                    LargeChange="{Binding ViewportTracks}"
+                    SmallChange="{Binding SmallChangeY}" PointerWheelChanged="VScrollPointerWheelChanged"/>
+        </Grid>
+
+        <!-- ── 右：素材库 296（表头 44 / 页签 40 / 内容）── -->
+        <Border Grid.Column="2" Background="{DynamicResource md3.surface}"
+                BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="1,0,0,0">
+          <Grid RowDefinitions="44,40,*">
+            <!-- 表头 -->
+            <Border Grid.Row="0" BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1">
+              <Grid ColumnDefinitions="*,Auto" Margin="12,0">
+              <TextBlock Text="{DynamicResource sidebar.library}" FontSize="11" FontWeight="SemiBold"
+                         VerticalAlignment="Center"
+                         Foreground="{DynamicResource md3.on-surface-variant}"/>
+              <Button Grid.Column="1" Classes="topBtn" Width="26" Height="26" VerticalAlignment="Center"
+                      ToolTip.Tip="{DynamicResource sidebar.refresh}">
+                <Button.Flyout>
+                  <MenuFlyout Placement="BottomEdgeAlignedRight">
+                    <MenuItem Header="{DynamicResource sidebar.refresh}" Click="OnRefreshSingers"/>
+                    <MenuItem Header="{DynamicResource sidebar.refresh}" Click="OnRefreshSamples"/>
+                    <MenuItem Header="{DynamicResource menu.tools.singer.install}" Click="OnMenuInstallSinger"/>
+                    <MenuItem Header="{DynamicResource menu.tools.packages}" Click="OnMenuPackageManager"/>
+                  </MenuFlyout>
+                </Button.Flyout>
+                <Path Data="{StaticResource icon-list}" Width="16" Height="16" Stretch="Uniform"
+                      Fill="{DynamicResource md3.on-surface-variant}"/>
+              </Button>
+              </Grid>
+            </Border>
+
+            <!-- 页签：音源 / 音频 / MIDI / 效果器 -->
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="4" Margin="12,0"
+                        VerticalAlignment="Center">
+              <Button x:Name="SingersTab" Classes="libTab selected" Click="OnShowSingers"
+                      Content="{DynamicResource sidebar.singers}"/>
+              <Button x:Name="SamplesTab" Classes="libTab" Click="OnShowSamples"
+                      Content="{DynamicResource sidebar.samples}"/>
+              <Button x:Name="MidiTab" Classes="libTab" Click="OnShowMidi"
+                      Content="{DynamicResource sidebar.midi}"/>
+              <Button x:Name="EffectsTab" Classes="libTab" Click="OnShowVst"
+                      Content="{DynamicResource sidebar.effects}"/>
+            </StackPanel>
+
+            <!-- 内容：音源 / 音频 / MIDI / 效果器 -->
+            <Grid Grid.Row="2" Margin="12,0,12,0">
+              <!-- 音源（歌手） -->
+              <Grid x:Name="SingersPanel" RowDefinitions="Auto,*">
+                <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,2">
+                  <TextBlock Classes="sideHeading" Text="{DynamicResource sidebar.singers}"/>
+                  <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24" Click="OnRefreshSingers"
+                          ToolTip.Tip="{DynamicResource sidebar.refresh}">
+                    <Path Data="{StaticResource icon-refresh-cw}" Width="12" Height="12" Stretch="Uniform"
+                          Fill="{DynamicResource md3.on-surface-variant}"/>
+                  </Button>
+                </Grid>
+                <ListBox Grid.Row="1" ItemsSource="{Binding Singers}" Background="Transparent"
+                         BorderThickness="0" IsVisible="{Binding HasSingers}">
+                  <ListBox.Styles>
+                    <Style Selector="ListBoxItem">
+                      <Setter Property="Padding" Value="0"/>
+                      <Setter Property="MinHeight" Value="64"/>
+                    </Style>
+                  </ListBox.Styles>
+                  <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:SingerItem">
+                      <Border Classes="sideItem singer" DoubleTapped="OnSingerDoubleTap"
+                              PointerPressed="OnSidebarPointerPressed" PointerMoved="OnSidebarPointerMoved">
+                        <Grid RowDefinitions="*,Auto" Background="Transparent">
+                          <Grid Grid.Row="0" ColumnDefinitions="34,8,*" Background="Transparent">
+                            <Border Grid.Column="0" Width="34" Height="34" CornerRadius="8"
+                                    ClipToBounds="True" Background="{DynamicResource md3.surface-container-high}"
+                                    VerticalAlignment="Center">
+                              <Panel>
+                                <Image Source="{Binding Avatar}" Width="34" Height="34" Stretch="UniformToFill"/>
+                                <TextBlock Text="{Binding AvatarFallback}" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource md3.on-surface-variant}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           IsVisible="{Binding ShowAvatarFallback}"/>
+                              </Panel>
+                            </Border>
+                            <TextBlock Grid.Column="2" FontSize="12" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource md3.on-surface}"
+                                       Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                          </Grid>
+                          <TextBlock Grid.Row="1" FontSize="10" Margin="42,0,0,0"
+                                     Foreground="{DynamicResource md3.on-surface-variant}"
+                                     Text="{Binding SingerTypeText}"/>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ListBox.ItemTemplate>
+                </ListBox>
+                <StackPanel Grid.Row="1" IsVisible="{Binding !HasSingers}">
+                  <Border Classes="sideCard">
+                    <StackPanel>
+                      <Path Data="{StaticResource icon-mic}" Width="16" Height="16" Stretch="Uniform"
+                            Fill="{DynamicResource md3.on-surface-variant}"
+                            HorizontalAlignment="Left" Margin="0,0,0,6"/>
+                      <TextBlock FontSize="11" TextWrapping="Wrap"
+                                 Foreground="{DynamicResource md3.on-surface-variant}"
+                                 Text="{DynamicResource sidebar.singers.empty}"/>
+                    </StackPanel>
+                  </Border>
+                </StackPanel>
               </Grid>
 
-      <!-- ══════════ 状态条 28px：进度文本 + 进度条 + 版本 ══════════ -->
-      <Border Grid.Row="2" BorderBrush="{DynamicResource PlusBorderSubtle}" BorderThickness="0,1,0,0">
-        <Grid ColumnDefinitions="Auto,*,Auto" Margin="12,0,12,0">
-          <TextBlock VerticalAlignment="Center" FontSize="11" Opacity="0.6"
-                     Text="{Binding ProgressText}"/>
+              <!-- 音频（伴奏库） -->
+              <Grid x:Name="SamplesPanel" IsVisible="False" RowDefinitions="Auto,*">
+                <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,2">
+                  <TextBlock Classes="sideHeading" Text="{DynamicResource sidebar.samples}"/>
+                  <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24" Click="OnRefreshSamples"
+                          ToolTip.Tip="{DynamicResource sidebar.refresh}">
+                    <Path Data="{StaticResource icon-refresh-cw}" Width="12" Height="12" Stretch="Uniform"
+                          Fill="{DynamicResource md3.on-surface-variant}"/>
+                  </Button>
+                </Grid>
+                <ListBox Grid.Row="1" ItemsSource="{Binding Samples}" Background="Transparent"
+                         BorderThickness="0" IsVisible="{Binding HasSamples}">
+                  <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:SampleItem">
+                      <Border Classes="sideItem small" DoubleTapped="OnSampleDoubleTap"
+                              PointerPressed="OnSidebarPointerPressed" PointerMoved="OnSidebarPointerMoved">
+                        <Grid ColumnDefinitions="26,8,*,Auto,4,Auto" Background="Transparent">
+                          <Border Grid.Column="0" Width="26" Height="26" CornerRadius="6"
+                                  Background="{DynamicResource md3.surface-container-high}" HorizontalAlignment="Left">
+                            <Path Data="{StaticResource icon-music}" Width="13" Height="13" Stretch="Uniform"
+                                  Fill="{DynamicResource md3.on-surface-variant}"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                          </Border>
+                          <TextBlock Grid.Column="2" FontSize="12" VerticalAlignment="Center"
+                                     Foreground="{DynamicResource md3.on-surface}"
+                                     Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                          <Border Grid.Column="3" Background="{DynamicResource md3.secondary-container}"
+                                  CornerRadius="4" Padding="4,1" VerticalAlignment="Center">
+                            <TextBlock FontSize="9" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource md3.on-secondary-container}"
+                                       Text="{Binding Format}"/>
+                          </Border>
+                          <Button Grid.Column="5" Classes="iconBtn" Width="26" Height="26" Margin="4,0,0,0"
+                                  Click="OnSamplePlay" ToolTip.Tip="{DynamicResource sidebar.play}">
+                            <Panel>
+                              <Path Data="{StaticResource icon-play}" Width="11" Height="11" Stretch="Uniform"
+                                    Fill="{DynamicResource md3.on-surface}"
+                                    IsVisible="{Binding !IsPreviewing}"/>
+                              <Path Data="{StaticResource icon-stop}" Width="11" Height="11" Stretch="Uniform"
+                                    Fill="{DynamicResource md3.primary}"
+                                    IsVisible="{Binding IsPreviewing}"/>
+                            </Panel>
+                          </Button>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ListBox.ItemTemplate>
+                </ListBox>
+                <StackPanel Grid.Row="1" IsVisible="{Binding !HasSamples}">
+                  <Border Classes="sideCard">
+                    <StackPanel>
+                      <Path Data="{StaticResource icon-music}" Width="16" Height="16" Stretch="Uniform"
+                            Fill="{DynamicResource md3.on-surface-variant}"
+                            HorizontalAlignment="Left" Margin="0,0,0,6"/>
+                      <TextBlock FontSize="11" TextWrapping="Wrap"
+                                 Foreground="{DynamicResource md3.on-surface-variant}"
+                                 Text="{DynamicResource sidebar.samples.empty}"/>
+                    </StackPanel>
+                  </Border>
+                </StackPanel>
+              </Grid>
+
+              <!-- MIDI（占位：本页尚未实现） -->
+              <StackPanel x:Name="MidiPanel" IsVisible="False" Spacing="8">
+                <Border Classes="sideCard">
+                  <StackPanel>
+                    <Path Data="{StaticResource icon-music}" Width="16" Height="16" Stretch="Uniform"
+                          Fill="{DynamicResource md3.on-surface-variant}"
+                          HorizontalAlignment="Left" Margin="0,0,0,6"/>
+                    <TextBlock FontSize="11" TextWrapping="Wrap"
+                               Foreground="{DynamicResource md3.on-surface-variant}"
+                               Text="{DynamicResource sidebar.library.empty}"/>
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+
+              <!-- 效果器（插件浏览器：待效果链落地后填充） -->
+              <StackPanel x:Name="VstPanel" IsVisible="False" Spacing="8">
+                <Border Classes="sideCard">
+                  <StackPanel>
+                    <Path Data="{StaticResource icon-sliders}" Width="16" Height="16" Stretch="Uniform"
+                          Fill="{DynamicResource md3.on-surface-variant}"
+                          HorizontalAlignment="Left" Margin="0,0,0,6"/>
+                    <TextBlock FontSize="11" TextWrapping="Wrap"
+                               Foreground="{DynamicResource md3.on-surface-variant}"
+                               Text="{DynamicResource sidebar.library.empty}"/>
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+            </Grid>
+          </Grid>
+        </Border>
+      </Grid>
+
+      <!-- ══════════ 状态条 32：左侧引擎/进度 · 右侧版本 ══════════ -->
+      <Border Grid.Row="2" Background="{DynamicResource md3.surface}"
+              BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,1,0,0">
+        <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,0">
+          <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <Border Width="7" Height="7" CornerRadius="999" VerticalAlignment="Center"
+                    Background="{DynamicResource md3.primary}"/>
+            <TextBlock VerticalAlignment="Center" FontSize="10"
+                       Foreground="{DynamicResource md3.on-surface-variant}"
+                       Text="{Binding ProgressText}"/>
+          </StackPanel>
           <ProgressBar Grid.Column="1" Height="4" VerticalAlignment="Center" Margin="16,0"
                        Minimum="0" Maximum="100" Value="{Binding Progress}"
                        Background="Transparent"/>
-          <TextBlock Grid.Column="2" VerticalAlignment="Center" FontSize="11" Opacity="0.35"
+          <TextBlock Grid.Column="2" VerticalAlignment="Center" FontSize="10"
+                     Foreground="{DynamicResource md3.on-surface-variant}"
                      Text="{Binding AppVersion}"/>
         </Grid>
       </Border>

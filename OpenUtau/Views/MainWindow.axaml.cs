@@ -390,12 +390,9 @@ namespace OpenUtau.App.Views {
             viewModel.RefreshCacheSize();
         }
 
-        void OnMainMenuClosed(object sender, RoutedEventArgs args) {
-            Focus(); // Force unfocus menu for key down events.
-        }
-
-        void OnMainMenuPointerLeave(object sender, PointerEventArgs args) {
-            Focus(); // Force unfocus menu for key down events.
+        /// <summary>品牌按钮 = 应用菜单（MenuFlyout）：点开前刷新「最近打开 / 模板 / 缓存」列表。</summary>
+        void OnAppMenuClicked(object? sender, RoutedEventArgs args) {
+            OnMainMenuOpened(sender!, args);
         }
 
         void OnMenuOpenProjectLocation(object sender, RoutedEventArgs args) {
@@ -896,30 +893,19 @@ namespace OpenUtau.App.Views {
             e.Pointer.Capture(null);
         }
 
-        // ── 阶段 E：侧栏（项目/素材库 双选项卡 + 折叠） ──────────────────
-        private bool _sidebarCollapsed;
+        // ── 素材库（右侧 296：音源 / 音频 / MIDI / 效果器） ──────────────────
 
-        private void OnToggleSidebar(object? sender, RoutedEventArgs e) {
-            _sidebarCollapsed = !_sidebarCollapsed;
-            if (_sidebarCollapsed) {
-                MainLayout.ColumnDefinitions[0].Width = new GridLength(0);
-                MainLayout.ColumnDefinitions[1].Width = new GridLength(0);
-                SidebarSplitter.IsVisible = false;
-                SidebarCloseIcon.IsVisible = false;
-                SidebarOpenIcon.IsVisible = true;
-                SidebarOpenBtn.IsVisible = true; // 浮出打开按钮
-            } else {
-                MainLayout.ColumnDefinitions[0].Width = new GridLength(240);
-                MainLayout.ColumnDefinitions[1].Width = new GridLength(6);
-                SidebarSplitter.IsVisible = true;
-                SidebarCloseIcon.IsVisible = true;
-                SidebarOpenIcon.IsVisible = false;
-                SidebarOpenBtn.IsVisible = false;
-                Motion.Play(SidebarPanel, MotionEntrance.FromLeft);   // 展开时滑入
-            }
+        /// <summary>表头「＋」：新增轨道。</summary>
+        private void OnAddTrack(object? sender, RoutedEventArgs e) {
+            viewModel.TracksViewModel.AddTrack();
         }
 
-        // ── 阶段 E4：侧栏素材库交互 ─────────────────────────
+        /// <summary>页签选中态（同组内互斥）。</summary>
+        private static void SetTabSelected(Button selected, Button[] group) {
+            foreach (var button in group) {
+                button.Classes.Set("selected", button == selected);
+            }
+        }
 
         /// <summary>双击歌手卡片 → 新建轨道添加歌手。</summary>
         private void OnSingerDoubleTap(object? sender, TappedEventArgs e) {
@@ -1002,43 +988,32 @@ namespace OpenUtau.App.Views {
             }
         }
 
-        private void OnShowProjects(object? sender, RoutedEventArgs e) {
-            ProjectPanel.IsVisible = true;
-            LibraryPanel.IsVisible = false;
-            SetSidebarTabSelected(ProjectsTab, new[] { ProjectsTab, LibraryTab });
-        }
-
-        private void OnShowLibrary(object? sender, RoutedEventArgs e) {
-            ProjectPanel.IsVisible = false;
-            LibraryPanel.IsVisible = true;
-            SetSidebarTabSelected(LibraryTab, new[] { ProjectsTab, LibraryTab });
-        }
-
+        /// <summary>素材库页签：音源（歌手）。</summary>
         private void OnShowSingers(object? sender, RoutedEventArgs e) {
-            SingersPanel.IsVisible = true;
-            SamplesPanel.IsVisible = false;
-            VstPanel.IsVisible = false;
-            SetSidebarTabSelected(SingersTab, new[] { SingersTab, SamplesTab, VstTab });
+            ShowLibraryPage(SingersPanel, SingersTab);
         }
 
+        /// <summary>素材库页签：音频（伴奏库）。</summary>
         private void OnShowSamples(object? sender, RoutedEventArgs e) {
-            SingersPanel.IsVisible = false;
-            SamplesPanel.IsVisible = true;
-            VstPanel.IsVisible = false;
-            SetSidebarTabSelected(SamplesTab, new[] { SingersTab, SamplesTab, VstTab });
+            ShowLibraryPage(SamplesPanel, SamplesTab);
         }
 
+        /// <summary>素材库页签：MIDI（占位）。</summary>
+        private void OnShowMidi(object? sender, RoutedEventArgs e) {
+            ShowLibraryPage(MidiPanel, MidiTab);
+        }
+
+        /// <summary>素材库页签：效果器（插件浏览器，待效果链落地）。</summary>
         private void OnShowVst(object? sender, RoutedEventArgs e) {
-            SingersPanel.IsVisible = false;
-            SamplesPanel.IsVisible = false;
-            VstPanel.IsVisible = true;
-            SetSidebarTabSelected(VstTab, new[] { SingersTab, SamplesTab, VstTab });
+            ShowLibraryPage(VstPanel, EffectsTab);
         }
 
-        private static void SetSidebarTabSelected(Button selected, Button[] group) {
-            foreach (var button in group) {
-                button.Classes.Set("selected", button == selected);
-            }
+        private void ShowLibraryPage(Control page, Button tab) {
+            SingersPanel.IsVisible = page == SingersPanel;
+            SamplesPanel.IsVisible = page == SamplesPanel;
+            MidiPanel.IsVisible = page == MidiPanel;
+            VstPanel.IsVisible = page == VstPanel;
+            SetTabSelected(tab, new[] { SingersTab, SamplesTab, MidiTab, EffectsTab });
         }
 
         private void OnSplitterDragStarted(object? sender, Avalonia.Input.VectorEventArgs e) {
