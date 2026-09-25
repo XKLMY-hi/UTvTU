@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -817,16 +817,6 @@ namespace OpenUtau.App.Views {
             bool backToWelcome = WelcomeHost.IsVisible;
             SetChromeForView(backToWelcome ? "view.welcome" : "view.workspace", showTransport: !backToWelcome);
             Motion.Reset(PreferencesHost);
-        }
-
-        /// <summary>旧版设置对话框（未迁移到新偏好页的设置项暂时从这里进入）。</summary>
-        public void ShowLegacyPreferences() {
-            var dataContext = new PreferencesViewModel();
-            var prefs = new PreferencesDialog() {
-                DataContext = dataContext,
-                HostWindow = this,
-            };
-            ShowOverlayContent(prefs, sizeFraction: 0.60, headerTitle: ThemeManager.GetString("prefs.caption"));
         }
 
         /// <summary>恢复默认设置（二次确认 → 重置 → 重开偏好页）。</summary>

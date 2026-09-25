@@ -730,6 +730,7 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="sidebar.effects">效果器</system:String>
   <system:String x:Key="view.workspace">工作台</system:String>
   <system:String x:Key="view.welcome">欢迎</system:String>
+  <system:String x:Key="prefs.midi.empty">本版本尚无 MIDI 设备设置。</system:String>
 
   <!-- Mix Effects -->
   <system:String x:Key="mixfx.caption">试听效果</system:String>

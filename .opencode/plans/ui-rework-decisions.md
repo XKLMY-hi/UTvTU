@@ -357,7 +357,20 @@ Suki 剩下的价值只有 Hosts（对话框/Toast 挂载点）。
 
 **约定**：`Core.PlusInfo.VersionString` 是版本串**唯一来源**（窗口标题 / 状态条 / 偏好版本行共用），不再各处拼格式串。
 
-**待办 P2–P4**：把旧对话框剩下的分组（路径 / 渲染 / 编辑器 / UTAU / DiffSinger / 高级 / 缓存 / VST）逐页搬进卡片体系，然后删掉 `PreferencesDialog` 与「打开旧版设置」入口。
+**P2–P4 已完成（2026-09-25 · 直接映射，绑定沿用同一个 VM）**——旧对话框已删除：
+
+| 新页 | 卡片（来源旧分组） |
+|---|---|
+| 音频 | 音频输出（设备 / 系统默认 / 后端 / 测试） |
+| 播放 | 播放与延迟（自动滚动边界 / 自动滚动 / 暂停时）+ 节拍器（音量 / 高频 / 低频 / 测试） |
+| 音源与素材库 | 位置（音源 / 附加音源 / 伴奏库：打开·更改·重置·重载）+ 扫描选项（安装到附加目录 / 加载深层目录）+ 检测到的音源 |
+| 外观 | 主题与强调色（主题下拉 + 自定义主题编辑/新建 + 6 个种子色板）+ 界面显示（音阶名 / 音轨颜色 / 头像 / 图标 / 幽灵音符 / 悬停辉光 / 播放高亮 / 播放弹跳 / 分离卷帘）+ 语言与排序 |
+| 编辑器 | 歌词助手（类 + 括号）+ 编辑选项（默认 S 曲线 / 记住文件类型 .mid .ust .vsqx）+ 渲染（预渲染 / 线程数与告警 / 跳过静音轨 / 退出清缓存 / ONNX runner 与 GPU） |
+| MIDI 设备 | 空态说明（应用尚无 MIDI 设备设置，不做假控件） |
+| 通用 | UTAU（默认引擎 / oto 编辑器 chips / vLabeler·setParam·Wine 路径）+ DiffSinger（三步数 / 深度 / 张量缓存 / 变体局部音高 / 语言码隐藏）+ 效果器（VST 扫描路径增删 / 插件列表 / 重新扫描 / README·GitHub） |
+
+- 控件映射规则：旧 ``ToggleSwitch`` 行 → 开关行；``ComboBox`` 索引 → **分段 chips**（≤3 项）或 **选择行**（多选项）；``Slider`` 行 → 滑条行；``Button`` → 描边/实心胶囊；路径框 → 文件夹行 + 「打开 / 更改 / 重置」胶囊。
+- 删除：``Views/PreferencesDialog.axaml(.cs)``、``PreferencesDialogProbeTests``、``MainWindow.ShowLegacyPreferences``。
 
 ---
 
@@ -397,6 +410,7 @@ pwsh -NoProfile -File .opencode\design\extract-spec.ps1 -Path <某屏>.html [-Ma
 
 | 日期 | 变更 |
 |---|---|
+| 2026-09-25 | **偏好设置 P2–P4：设置项全部迁移**：7 页卡片化（音频 / 播放 / 音源与素材库 / 外观 / 编辑器 / MIDI 设备 / 通用），旧 `PreferencesDialog`（528 行 Suki SettingsLayout）与其探针测试一并删除；控件统一为 开关行 / 分段 chips / 选择行 / 滑条行 / 胶囊按钮 / 文件夹行；新增 `prefs.midi.empty`（EN/zh 各 949）；全量 **381 通过** |
 | 2026-09-25 | 五轮讨论定稿：A 单窗口 + 可分离、B 效果器统一与链面板、C 卷帘只换皮、D 莫奈动态取色、E 文案走项目现有键、F 图标**由"沿用 Phosphor"改为"全量换 Lucide"**（用户决定） |
 | 2026-09-25 | 执行三项收尾：设计交付包入库 `.opencode/design/`；本地化双向补齐（EN/zh 各 923 条、缺口 0，构建 0 错误）；`THIRD-PARTY-NOTICES` 增「图标」章节。图标署名**留待实际替换时**再改 |
 | 2026-09-25 | **统一颜色池落地**（第 3.G 节）：`OpenUtau.Core/Theming` + `OpenUtau/Theming`，49 角色 × 7 方案 × 对比度档位；对照 Google `material-color-utilities@0.3.0` **6468 格逐位一致**（哈希固定）+ 675 例 HCT 求解一致；角色表与常数表由 `tools/md3-codegen/` 内省生成；新增 13 个用例，全量 **324 通过** |

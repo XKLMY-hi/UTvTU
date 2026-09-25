@@ -81,8 +81,12 @@ namespace OpenUtau.Test.App {
                 }
             }
             Assert.True(missing.Count == 0, "未解析的资源键：" + string.Join(", ", missing));
+            // 视图内自定义的键（如 cultureNameConverter）在同文件声明，不走应用资源
+            var local = Regex.Matches(xaml, "x:Key=\"([^\"]+)\"")
+                .Select(m => m.Groups[1].Value)
+                .ToHashSet(StringComparer.Ordinal);
             var staticMissing = KeysOf(xaml, "StaticResource")
-                .Where(k => !app.TryFindResource(k, out _))
+                .Where(k => !local.Contains(k) && !app.TryFindResource(k, out _))
                 .ToList();
             Assert.True(staticMissing.Count == 0, "未解析的静态键：" + string.Join(", ", staticMissing));
         }
