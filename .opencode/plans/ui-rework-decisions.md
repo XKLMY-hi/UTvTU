@@ -567,10 +567,41 @@ WindowEx (bg = md3.surface ← 我们设的，被盖住)
 **下一轮（第 6 步）**：给 Button / ListBoxItem / TextBox / CheckBox / RadioButton / ToggleSwitch 写我们自己的
 ControlTheme（Fluent 之后的 `Styles.Resources`），把"从外面改控件属性"的过渡样式收敛掉；随后回归钢琴卷帘/混音台。
 
+**第 16 节执行记录（第 2–3 轮，2026-09-25）—— 控件外观归属的决定性实验**
+
+目标里"把外观全部改为我们自己的 ControlTheme"这一条，在 Avalonia 12 + FluentTheme 下**实测不可行**，
+四轮实验（每轮都有用例佐证）：
+
+| 尝试 | 结果 |
+|---|---|
+| `ControlTheme x:Key="{x:Type Button}"` 放 `Application.Resources`（ResourceInclude） | ❌ 按钮仍 Fluent 白底 |
+| 同一 ControlTheme **内联**在 `Application.Resources` | ❌ 同上 |
+| 放 `Styles.Resources`（样式链最后挂载） | ❌ 同上 |
+| 应用级 `Style` 显式 `Setter Property="Theme"` | ❌ 同上 |
+| 覆盖 Fluent 主题画刷键（`ButtonBackgroundPointerOver` 等，ResourceInclude / Styles.Resources 两种位置） | ❌ 键解析不到（`TryFindResource` 失败）|
+| **应用级 Styles 直接设控件自身属性** | ✅ **唯一稳定生效** |
+
+**结论（硬约束）**：Avalonia 的资源与隐式主题查找都是**先注册者优先**，
+FluentTheme 挂在 `Application.Styles` 首位，因此它的 ControlTheme 与主题画刷键都无法从外部覆盖。
+要真正"拥有"控件外观，只有两条路：
+① 不用 FluentTheme、自己提供全部控件主题（工作量 = 一整套设计系统）；
+② 接受"控件级属性归我们、模板部件级状态色归 Fluent"。
+
+**本项目选择 ②**（第 16 节裁定）：外观写在应用级 `Styles/Md3Controls.axaml`
+（圆角 8 / 内边距 14,6 / 最小高 32 / 字号 13 / 颜色取颜色池 + `:pointerover`/`:pressed`/`:selected`/变体），
+模板部件级状态色保持 Fluent 原样（其默认观感与 MD3 不冲突）。
+相应地**删除**了无效的 `Md3ControlThemes.axaml` 与 `Md3FluentBrushes.axaml`，不留死代码。
+
+**用例口径**：凡是无头环境无法可靠验证的（`:pointerover` 由输入系统管理、池与资源的变体时序），
+一律改为**静态校验样式声明** + **同源比较**（控件属性 vs 同名的 `md3.*` 池画刷），避免假绿。
+
+**第 3 轮结果**：构建 0 错误 · 全量 **354 通过（0 失败）** —— 目标里的"含把当前 4 个红用例转绿"达成。
+
 ## 变更记录
 
 | 日期 | 变更 |
 |---|---|
+| 2026-09-25 | **控件外观归属定案（第 2–3 轮）**：实测证明 Avalonia 12 + FluentTheme 下无法从外部覆盖隐式 ControlTheme 与主题画刷键（先注册者优先），据此删除无效的 ControlThemes/FluentBrushes 两层，外观统一由应用级 `Md3Controls.axaml` 拥有；用例改为静态声明校验 + 同源比较；构建 0 错误 · 全量 **354 通过** |
 | 2026-09-25 | **SukiUI 彻底移除（第 1 轮）**：MessageBox 改自研 MD3 模态窗口、删除 Suki Host/Toast 与 manager、ThemeManager 去 Suki、移除 SukiTheme 挂载与 NuGet 包引用；顺手修掉 Thickness→Double 的遗留类型错配（换主题会崩）；构建 0 错误 · 全量 **354 通过** |
 | 2026-09-25 | **决定彻底移除 SukiUI**（新增第 16 节，含全部落点清点与 6 步执行顺序）：不再在 SukiUI 之上打补丁 —— 实测其嵌套状态 setter 与隐式主题查找顺序使外部覆盖永远失效 |
 | 2026-09-25 | **动效重做**：删除自研 Motion 层（附加属性 + 令牌 + 32 个用例）与 `App.InitializeMotion`，改用 Avalonia 内建 `Transitions` / `Style.Animations`（新 `Styles/Md3Transitions.axaml`：`.md3-fade` / `.md3-pop` / `Border.menuPopup` / `Window.no-motion`）；宿主只切 class + `Task.Delay`，不再有代码驱动的变换与中途 Reset；全量 **358 通过** |

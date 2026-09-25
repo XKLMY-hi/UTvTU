@@ -35,8 +35,6 @@
       <ResourceDictionary.MergedDictionaries>
         <ResourceInclude Source="/Colors/Brushes.axaml"/>
         <ResourceInclude Source="/Themes/Plus.Resources.axaml"/>
-    <!-- Fluent 主题画刷键 → 颜色池（CheckBox/RadioButton/ToggleSwitch/Slider/ComboBox/ProgressBar 用 Fluent 模板，状态色取池） -->
-    <ResourceInclude Source="/Styles/Md3FluentBrushes.axaml"/>
     <ResourceInclude Source="/Assets/Icons.axaml"/>
       </ResourceDictionary.MergedDictionaries>
 

@@ -58,7 +58,11 @@
     <Setter Property="Cursor" Value="Hand"/>
   </Style>
   <Style Selector="Button:pointerover">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource md3.outline}"/>
+  </Style>
+  <Style Selector="Button:pressed">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
   </Style>
   <Style Selector="Button:disabled">
     <Setter Property="Opacity" Value="0.38"/>
