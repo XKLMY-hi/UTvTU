@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -185,6 +185,7 @@ namespace OpenUtau.App.Views {
             Motion.Reset(WelcomeHost);
             WelcomeHost.IsVisible = true;
             // 各段按 Motion.Delay 交错滑入（品牌卡自左、启动器自下；时长/缓动走动效令牌）
+            SetChromeForView("view.welcome", showTransport: false);
             Motion.PlayAll(WelcomeHost);
         }
 
@@ -196,6 +197,7 @@ namespace OpenUtau.App.Views {
             await Motion.PlayExitAsync(WelcomeHost);
             WelcomeHost.IsVisible = false;
             Motion.Reset(WelcomeHost);
+            SetChromeForView("view.workspace", showTransport: true);
             Motion.Play(MainGrid, MotionEntrance.Scale);
         }
 
@@ -775,6 +777,15 @@ namespace OpenUtau.App.Views {
 
         void OnMenuPreferences(object sender, RoutedEventArgs args) => ShowPreferences();
 
+        /// <summary>
+        /// 顶栏按视图切内容（三个视图共用同一条 56px 顶栏，与设计稿一致）：
+        /// 欢迎页 / 偏好页只留品牌 + 屏名；工作台才显示运输组与右侧图标组。
+        /// </summary>
+        private void SetChromeForView(string titleKey, bool showTransport) {
+            ScreenTitle[!TextBlock.TextProperty] = new DynamicResourceExtension(titleKey);
+            TransportGroup.IsVisible = showTransport;
+            TopRightCluster.IsVisible = showTransport;
+        }
         /// <summary>偏好设置（全屏视图，设计稿 6-Preferences）。</summary>
         public void ShowPreferences() {
             PreferencesViewModel dataContext;
@@ -792,7 +803,7 @@ namespace OpenUtau.App.Views {
             PreferencesHost.ShowDefaultPage();
             PreferencesHost.IsVisible = true;
             // 顶栏屏名切成「偏好设置」，并亮出「完成」按钮（顶栏在偏好视图之上，不被遮）
-            ScreenTitle[!TextBlock.TextProperty] = new DynamicResourceExtension("prefs.caption");
+            SetChromeForView("prefs.caption", showTransport: false);
             Motion.Play(PreferencesHost, MotionEntrance.Fade);
         }
 
@@ -803,7 +814,8 @@ namespace OpenUtau.App.Views {
             }
             await Motion.PlayExitAsync(PreferencesHost);
             PreferencesHost.IsVisible = false;
-            ScreenTitle[!TextBlock.TextProperty] = new DynamicResourceExtension("view.workspace");
+            bool backToWelcome = WelcomeHost.IsVisible;
+            SetChromeForView(backToWelcome ? "view.welcome" : "view.workspace", showTransport: !backToWelcome);
             Motion.Reset(PreferencesHost);
         }
 

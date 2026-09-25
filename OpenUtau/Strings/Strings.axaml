@@ -936,6 +936,7 @@ General
   <system:String x:Key="sidebar.midi">MIDI</system:String>
   <system:String x:Key="sidebar.effects">Effects</system:String>
   <system:String x:Key="view.workspace">Workspace</system:String>
+  <system:String x:Key="view.welcome">Welcome</system:String>
 
   <!-- Mix Effects (post-processing) -->
   <system:String x:Key="mixfx.caption">Track Polish</system:String>
