@@ -65,6 +65,20 @@ namespace OpenUtau.App.Views {
 
         private void OnOpenLegacy(object? sender, RoutedEventArgs e) => Host?.ShowLegacyPreferences();
 
+        /// <summary>应用：落盘并重新套用主题 / 颜色池（不退出）。</summary>
+        private void OnApplyClicked(object? sender, RoutedEventArgs e) => ApplyPreferences();
+
+        /// <summary>完成：应用并退出。</summary>
+        private void OnDoneClicked(object? sender, RoutedEventArgs e) {
+            ApplyPreferences();
+            Host?.HidePreferences();
+        }
+
+        private static void ApplyPreferences() {
+            Preferences.Save();
+            App.SetTheme();
+        }
+
         private async void OnChangeSingerFolder(object? sender, RoutedEventArgs e) {
             if (Host == null || ViewModel == null) {
                 return;

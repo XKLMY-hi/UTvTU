@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -793,8 +793,6 @@ namespace OpenUtau.App.Views {
             PreferencesHost.IsVisible = true;
             // 顶栏屏名切成「偏好设置」，并亮出「完成」按钮（顶栏在偏好视图之上，不被遮）
             ScreenTitle[!TextBlock.TextProperty] = new DynamicResourceExtension("prefs.caption");
-            PreferencesCloseButton.IsVisible = true;
-            PreferencesCloseDivider.IsVisible = true;
             Motion.Play(PreferencesHost, MotionEntrance.Fade);
         }
 
@@ -806,12 +804,8 @@ namespace OpenUtau.App.Views {
             await Motion.PlayExitAsync(PreferencesHost);
             PreferencesHost.IsVisible = false;
             ScreenTitle[!TextBlock.TextProperty] = new DynamicResourceExtension("view.workspace");
-            PreferencesCloseButton.IsVisible = false;
-            PreferencesCloseDivider.IsVisible = false;
             Motion.Reset(PreferencesHost);
         }
-
-        private void OnPreferencesClose(object? sender, RoutedEventArgs args) => HidePreferences();
 
         /// <summary>旧版设置对话框（未迁移到新偏好页的设置项暂时从这里进入）。</summary>
         public void ShowLegacyPreferences() {

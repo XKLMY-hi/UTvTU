@@ -299,8 +299,9 @@
       </Grid>
     </Border>
 
-    <!-- ══════════ 内容区 ══════════ -->
-    <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+    <!-- ══════════ 内容区（行 0 滚动内容 / 行 1 吸底操作条） ══════════ -->
+    <Grid Grid.Column="1" RowDefinitions="*,Auto">
+    <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
       <StackPanel Margin="32" Spacing="24">
         <!-- 页头 -->
         <StackPanel Spacing="4">
@@ -597,5 +598,15 @@
         </Border>
       </StackPanel>
     </ScrollViewer>
+
+    <!-- 吸底操作条：应用（不退出）/ 完成（应用并退出），右下角对齐 -->
+    <Border Grid.Row="1" Padding="32,12" Background="{DynamicResource md3.surface}"
+            BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,1,0,0">
+      <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right">
+        <Button Classes="outlinePill" Content="{DynamicResource button.apply}" Click="OnApplyClicked"/>
+        <Button Classes="filledPill" MinWidth="88" Content="{DynamicResource prefs.close}" Click="OnDoneClicked"/>
+      </StackPanel>
+    </Border>
+    </Grid>
   </Grid>
 </UserControl>
