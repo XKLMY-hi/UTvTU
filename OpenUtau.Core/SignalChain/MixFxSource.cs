@@ -117,32 +117,42 @@ namespace OpenUtau.Core.SignalChain {
                 ResetEffects();
             }
 
-            EnsureCapacity(count);
-            Array.Clear(scratch, 0, count);
-            int ret = source.Mix(position, scratch, 0, count);
-            hasMixed = true;
-            nextPosition = ret;
-
             // 每个音频块重新取参：旋钮/模块开关在一个块内生效。
             var fx = getFx();
             if (fx != null) {
                 Sync(fx);
             }
             float masterTarget = fx != null && fx.Enabled ? 1f : 0f;
-            if (configured && (masterGain > 0f || masterTarget > 0f)) {
-                bool masterSteady = masterGain == 1f && masterTarget == 1f;
-                if (!masterSteady) {
-                    Array.Copy(scratch, masterDry, count);
-                }
-                RunStage(eq, ref eqGain, applied.EqEnabled, count);
-                RunStage(comp, ref compGain, applied.CompEnabled, count);
-                RunStage(reverb, ref reverbGain, applied.ReverbEnabled, count);
-                if (!masterSteady) {
-                    Crossfade(masterDry, scratch, ref masterGain, masterTarget, count);
-                    if (masterGain == 0f) {
-                        // 完全切断后再清，避免淡出过程中被清空导致咔嗒声。
-                        ResetEffects();
-                    }
+
+            // 快路径：本块没有任何效果参与（从没配过效果，或主开关早已完全关闭）
+            // → 直接把内层源加法混进输出，省掉 scratch 往返（干轨零开销，
+            // 与移植前"干轨直接接 Fader"的行为一致）。开关打开时 masterTarget != 0，
+            // 会走下面的处理路径并做淡入，不会被快路径吞掉。
+            if (!configured || (masterGain == 0f && masterTarget == 0f)) {
+                int passthrough = source.Mix(position, buffer, index, count);
+                hasMixed = true;
+                nextPosition = passthrough;
+                return passthrough;
+            }
+
+            EnsureCapacity(count);
+            Array.Clear(scratch, 0, count);
+            int ret = source.Mix(position, scratch, 0, count);
+            hasMixed = true;
+            nextPosition = ret;
+
+            bool masterSteady = masterGain == 1f && masterTarget == 1f;
+            if (!masterSteady) {
+                Array.Copy(scratch, masterDry, count);
+            }
+            RunStage(eq, ref eqGain, applied.EqEnabled, count);
+            RunStage(comp, ref compGain, applied.CompEnabled, count);
+            RunStage(reverb, ref reverbGain, applied.ReverbEnabled, count);
+            if (!masterSteady) {
+                Crossfade(masterDry, scratch, ref masterGain, masterTarget, count);
+                if (masterGain == 0f) {
+                    // 完全切断后再清，避免淡出过程中被清空导致咔嗒声。
+                    ResetEffects();
                 }
             }
 

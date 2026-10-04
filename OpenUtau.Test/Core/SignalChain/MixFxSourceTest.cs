@@ -336,6 +336,27 @@ namespace OpenUtau.Test.Core.SignalChain {
             Assert.InRange(Peak(wet, wet.Length / 2), 0.35f, 0.45f);
         }
 
+        /// <summary>
+        /// 干轨快路径：没有任何效果参与时，包装器输出必须与内层源逐样本相同
+        /// （直接加法混音进输出，不经过 scratch 往返）——播放中的空转轨零开销。
+        /// </summary>
+        [Fact]
+        public void Live_NoFx_FastPathIsTransparent() {
+            var inner = new SineSource();
+            var noFx = MixFxSource.WrapLive(inner, new UTrack()); // MixFx == null
+            int pos1 = 0;
+            var wrapped = Render(noFx, ref pos1, 4);
+
+            int pos2 = 0;
+            var raw = Render(inner, ref pos2, 4);
+            AssertSamplesEqual(raw, wrapped);
+
+            // 主开关关（已配过效果）同样走快路径
+            var disabled = MixFxSource.WrapLive(inner, new UTrack { MixFx = BrightEq(false) });
+            int pos3 = 0;
+            AssertSamplesEqual(raw, Render(disabled, ref pos3, 4));
+        }
+
         // ── RenderEngine 三态接线 ────────────────────────────────────────
 
         [Fact]
