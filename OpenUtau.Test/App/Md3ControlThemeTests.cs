@@ -79,7 +79,12 @@ namespace OpenUtau.Test.App {
                 Assert.Equal(new Thickness(14, 6, 14, 6), btn.Padding);
                 Assert.Equal(32, btn.MinHeight);
                 Assert.Equal(13, btn.FontSize);
-                Assert.Equal(PoolBrush("md3.primary"), (btn.Foreground as ISolidColorBrush)?.Color);
+                // T9-B 契约更新：base 标签色从 md3.primary 改成 md3.on-surface。
+                // 理由：那个 md3.primary 在转发修复前**从未真正渲染过**（一直被应用级
+                // TextBlock 前景压住，用户实际看到的普通按钮文字就是 on-surface）；
+                // 转发修好后若仍用 primary，全 App 普通按钮标签会一起变 indigo —— 属
+                // 需要用户先过目的视觉决策（MD3 规范确实是 primary），故本轮保持既有观感。
+                Assert.Equal(PoolBrush("md3.on-surface"), (btn.Foreground as ISolidColorBrush)?.Color);
                 Assert.Equal(PoolBrush("md3.outline-variant"), (btn.BorderBrush as ISolidColorBrush)?.Color);
             } finally {
                 win.Close();
@@ -177,6 +182,189 @@ namespace OpenUtau.Test.App {
             }
             // 说明：Fluent 主题键（含画刷）与隐式 ControlTheme 一样无法从外部覆盖（先注册者优先），
             // 故**仍在用 Fluent 模板**的控件（TextBox/ComboBox/ListBox 等）的外观只能写在控件级属性上。
+        }
+
+        // ───────────────────────── T9/T10：文字色转发（渲染层） ─────────────────────────
+
+        /// <summary>渲染出来的内容文本元素：字符串内容由 ContentPresenter 生成（RecognizesAccessKey 下为 AccessText）。</summary>
+        private static TextBlock RenderedContent(Control c) =>
+            c.GetVisualDescendants().OfType<TextBlock>().FirstOrDefault()
+            ?? throw new Xunit.Sdk.XunitException($"{c.GetType().Name} 没有生成内容文本元素");
+
+        /// <summary>WCAG 对比度（相对亮度比），纯计算、不依赖像素。</summary>
+        private static double Contrast(Color a, Color b) {
+            static double Ch(byte v) {
+                double s = v / 255.0;
+                return s <= 0.03928 ? s / 12.92 : Math.Pow((s + 0.055) / 1.055, 2.4);
+            }
+            static double Lum(Color c) => 0.2126 * Ch(c.R) + 0.7152 * Ch(c.G) + 0.0722 * Ch(c.B);
+            double la = Lum(a), lb = Lum(b);
+            return (Math.Max(la, lb) + 0.05) / (Math.Min(la, lb) + 0.05);
+        }
+
+        /// <summary>
+        /// T9：`Button.Foreground` 必须真的转发到**渲染出来的内容文本**（不是只到 ContentPresenter）。
+        ///
+        /// 缺陷背景（像素级实证）：模板的 ContentPresenter 没绑 Foreground，且应用级
+        /// `TextBlock { Foreground = TextFillColorPrimaryBrush }` 会压过继承 ⇒ `^.primary` 的
+        /// `md3.on-primary` 在渲染层从未生效（机架「确定」实测白字叠浅紫，约 1.28:1）。
+        /// 修法两条腿：ContentPresenter 补 `Foreground="{TemplateBinding Foreground}"`，
+        /// 并加 `RecognizesAccessKey="True"`（字符串内容改由 AccessText 承载 ⇒ 不再被 TextBlock
+        /// 规则拦下；这也正是 Fluent 原生 Button 的写法）。
+        /// </summary>
+        [AvaloniaFact]
+        public void Button_ForegroundIsForwardedToRenderedContent_InBothVariants() {
+            bool original = ColorPool.Current.IsDark;
+            try {
+                foreach (bool isDark in new[] { false, true }) {
+                    var cases = new (string Name, string[] Classes, Md3Role Expect)[] {
+                        ("base", Array.Empty<string>(), Md3Role.OnSurface),
+                        ("primary", new[] { "primary" }, Md3Role.OnPrimary),
+                        ("outline", new[] { "outline" }, Md3Role.OnSurface),
+                        ("danger", new[] { "danger" }, Md3Role.Error),
+                    };
+                    foreach (var (name, classes, expect) in cases) {
+                        var btn = new Button { Content = "确定" };
+                        foreach (string cls in classes) {
+                            btn.Classes.Add(cls);
+                        }
+                        var win = Host(btn, isDark);
+                        try {
+                            TextBlock content = RenderedContent(btn);
+                            Assert.Equal("AccessText", content.GetType().Name);          // RecognizesAccessKey 的产物
+                            Assert.Equal((btn.Foreground as ISolidColorBrush)?.Color,
+                                         (content.Foreground as ISolidColorBrush)?.Color); // 转发生效
+                            Assert.Equal(ColorPool.Current.Color(expect),
+                                         (content.Foreground as ISolidColorBrush)?.Color); // 且是该变体的池角色
+                        } finally {
+                            win.Close();
+                        }
+                    }
+
+                    // 缺陷回归守卫：filled primary 的文字绝不能还是 on-surface（原 bug 的现象）
+                    var pill = new Button { Content = "确定", Classes = { "primary" } };
+                    var pillWin = Host(pill, isDark);
+                    try {
+                        Color text = Assert.IsAssignableFrom<ISolidColorBrush>(RenderedContent(pill).Foreground).Color;
+                        Assert.Equal(ColorPool.Current.Color(Md3Role.OnPrimary), text);
+                        Assert.NotEqual(ColorPool.Current.Color(Md3Role.OnSurface), text);
+                    } finally {
+                        pillWin.Close();
+                    }
+
+                    // linkButton：强调色由应用级规则给（不是转发值），TextBlock/AccessText 两种内容元素都要覆盖到
+                    var link = new Button { Content = "打开日志文件夹", Classes = { "linkButton" } };
+                    var linkWin = Host(link, isDark);
+                    try {
+                        TextBlock content = RenderedContent(link);
+                        Assert.Equal(ResourceColor("AccentBrush1"), (content.Foreground as ISolidColorBrush)?.Color);
+                        Assert.NotNull(content.TextDecorations);
+                        Assert.NotEmpty(content.TextDecorations!);
+                    } finally {
+                        linkWin.Close();
+                    }
+                }
+            } finally {
+                ColorPool.SetDark(original);
+            }
+        }
+
+        /// <summary>
+        /// T9-B：标签对比度下限（WCAG 4.5:1），两个池各算一次。数值即报告里的「两池实测对比度」。
+        /// 也是 `Button.danger` 等当前无 XAML 使用者的变体的对比度守卫（headless 覆盖）。
+        /// </summary>
+        [AvaloniaFact]
+        public void Button_LabelContrast_MeetsMinimum_InBothPools() {
+            bool original = ColorPool.Current.IsDark;
+            try {
+                foreach (bool isDark in new[] { false, true }) {
+                    ColorPool.Initialize(ColorPool.DefaultSeed, Md3SchemeVariant.TonalSpot, isDark);
+                    string pool = isDark ? "Dark" : "Light";
+                    Color surface = ColorPool.Current.Color(Md3Role.Surface);
+                    double baseLabel = Contrast(ColorPool.Current.Color(Md3Role.OnSurface), surface);
+                    double filledLabel = Contrast(ColorPool.Current.Color(Md3Role.OnPrimary), ColorPool.Current.Color(Md3Role.Primary));
+                    double dangerLabel = Contrast(ColorPool.Current.Color(Md3Role.Error), surface);
+                    double dangerHoverLabel = Contrast(ColorPool.Current.Color(Md3Role.OnError), ColorPool.Current.Color(Md3Role.Error));
+                    Assert.True(baseLabel >= 4.5, $"{pool} 普通按钮标签对比度不足：{baseLabel:0.00}");
+                    Assert.True(filledLabel >= 4.5, $"{pool} filled primary 标签对比度不足：{filledLabel:0.00}");
+                    Assert.True(dangerLabel >= 4.5, $"{pool} danger 标签对比度不足：{dangerLabel:0.00}");
+                    Assert.True(dangerHoverLabel >= 4.5, $"{pool} danger 悬浮标签对比度不足：{dangerHoverLabel:0.00}");
+                }
+            } finally {
+                ColorPool.SetDark(original);
+            }
+        }
+
+        // ───────────────────────── T10：同类转发收尾 ─────────────────────────
+
+        /// <summary>
+        /// T10-B：`ListBoxItem.Foreground` 必须转发到渲染出来的行文本。
+        /// 缺陷：ContentPresenter 少 Foreground 转发，且应用级 `TextBlock { Foreground }` 压过继承
+        /// ⇒ 选中行的 `md3.on-secondary-container` 在渲染层从不生效（行文字恒为 on-surface）。
+        /// 修法与 Button 不同：列表内容是**数据**（下划线要字面显示），所以不启用
+        /// RecognizesAccessKey，而是在 Md3Controls.axaml 用
+        /// `ListBoxItem TextBlock { Foreground = $parent[ListBoxItem].Foreground }` 转发
+        ///（该层排在 Md3InputThemes 之后，才能压过那条全局 TextBlock 规则）。
+        /// </summary>
+        [AvaloniaFact]
+        public void ListBoxItem_ForegroundIsForwardedToRenderedContent_InBothVariants() {
+            bool original = ColorPool.Current.IsDark;
+            try {
+                foreach (bool isDark in new[] { false, true }) {
+                    foreach (bool selected in new[] { false, true }) {
+                        var item = new ListBoxItem { Content = "预设_名字", IsSelected = selected };
+                        var win = Host(item, isDark);
+                        try {
+                            TextBlock content = RenderedContent(item);
+                            Md3Role expect = selected ? Md3Role.OnSecondaryContainer : Md3Role.OnSurface;
+                            Assert.Equal(ColorPool.Current.Color(expect), (item.Foreground as ISolidColorBrush)?.Color);
+                            Assert.Equal((item.Foreground as ISolidColorBrush)?.Color,
+                                         (content.Foreground as ISolidColorBrush)?.Color);
+                            // 列表内容是数据：保持字面下划线，不引入助记键语义（与 Button 的刻意差异）
+                            Assert.Equal("TextBlock", content.GetType().Name);
+                            Assert.Contains("_", content.Text ?? "");
+                            if (selected) {
+                                // 原 bug 现象守卫：选中行文字不能还是 on-surface
+                                Assert.NotEqual(ColorPool.Current.Color(Md3Role.OnSurface),
+                                    (content.Foreground as ISolidColorBrush)?.Color);
+                            }
+                        } finally {
+                            win.Close();
+                        }
+                    }
+                }
+            } finally {
+                ColorPool.SetDark(original);
+            }
+        }
+
+        /// <summary>T10-B：列表行对比度（WCAG 4.5:1）—— 普通行 on-surface/surface、选中行 on-secondary-container/secondary-container。</summary>
+        [AvaloniaFact]
+        public void ListBoxItem_LabelContrast_MeetsMinimum_InBothPools() {
+            bool original = ColorPool.Current.IsDark;
+            try {
+                foreach (bool isDark in new[] { false, true }) {
+                    ColorPool.Initialize(ColorPool.DefaultSeed, Md3SchemeVariant.TonalSpot, isDark);
+                    string pool = isDark ? "Dark" : "Light";
+                    double normal = Contrast(ColorPool.Current.Color(Md3Role.OnSurface), ColorPool.Current.Color(Md3Role.Surface));
+                    double selected = Contrast(ColorPool.Current.Color(Md3Role.OnSecondaryContainer), ColorPool.Current.Color(Md3Role.SecondaryContainer));
+                    Assert.True(normal >= 4.5, $"{pool} 普通行对比度不足：{normal:0.00}");
+                    Assert.True(selected >= 4.5, $"{pool} 选中行对比度不足：{selected:0.00}");
+                }
+            } finally {
+                ColorPool.SetDark(original);
+            }
+        }
+
+        /// <summary>
+        /// T10-A：渲染窗口主按钮的前景必须走颜色池。T9 修好转发后，固定的 #ffffff 会真的渲染出来，
+        /// 而深色池的 md3.primary 是浅紫（白字只有 ≈1.6:1）⇒ 必须用 md3.on-primary。
+        /// </summary>
+        [AvaloniaFact]
+        public void RenderWindow_AccentButtonUsesPoolForeground() {
+            string xaml = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Views", "RenderWindow.axaml"));
+            Assert.DoesNotContain("PlusBrushTextOnAccent", xaml);
+            Assert.Contains("md3.on-primary", xaml);
         }
     }
 }

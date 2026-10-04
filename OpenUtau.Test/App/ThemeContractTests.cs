@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
@@ -295,7 +295,13 @@ namespace OpenUtau.Test.App {
 
         /// <summary>
         /// 契约（v4.0 · MD3 控件风格层）：默认按钮 = 描边按钮 —— 圆角 8、内边距 14,6、
-        /// 最小高 32、描边 outline-variant、文字 primary；字体仍由 SukiOverrides 收敛为 HarmonyOS 13px。
+        /// 最小高 32、描边 outline-variant、文字 on-surface；字体仍由 SukiOverrides 收敛为 HarmonyOS 13px。
+        ///
+        /// T9-B 契约更新：文字色从 `md3.primary` 改为 `md3.on-surface`。
+        /// 那个 `md3.primary` 在文字转发修复前**从未真正渲染过**（应用级 `TextBlock { Foreground }`
+        /// 一直压着它），用户实际确认的普通按钮观感就是 on-surface；转发修好后若仍保留 primary，
+        /// 全 App 普通按钮标签会一起变 indigo —— 属需要用户先过目的视觉决策，故本轮保持既有观感。
+        /// 要回到 MD3 规范态（outlined 标签 = Primary）只需改 `Md3ControlThemes.axaml` 里 base 的一行。
         /// </summary>
         [AvaloniaFact]
         public void Button_GetsMd3OutlinedStyle() {
@@ -313,8 +319,8 @@ namespace OpenUtau.Test.App {
             // SukiOverrides 收敛层：字体归 Plus 令牌（HarmonyOS 13px）
             Assert.Equal(13, btn.FontSize);
             Assert.Equal("HarmonyOS Sans SC", btn.FontFamily.Name);
-            // MD3：描边走 outline-variant、文字走 primary（同一套颜色池）
-            Assert.Equal(ColorPool.Current.Color(Md3Role.Primary),
+            // MD3：描边走 outline-variant、文字走 on-surface（同一套颜色池）
+            Assert.Equal(ColorPool.Current.Color(Md3Role.OnSurface),
                 Assert.IsAssignableFrom<ISolidColorBrush>(btn.Foreground).Color);
         }
 

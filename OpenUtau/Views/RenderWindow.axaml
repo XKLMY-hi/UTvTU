@@ -40,7 +40,9 @@
       <Setter Property="Height" Value="26"/>
       <Setter Property="Margin" Value="0,0,0,6"/>
     </Style>
-    <!-- 主按钮：accent 实心 + 深色文字（#B0C4DE 浅底白字对比差） -->
+    <!-- 主按钮：accent 实心 + 深色文字（#B0C4DE 浅底白字对比差）。
+         T10-A：前景改用颜色池的 md3.on-primary —— T9 修好 Button 文字转发后，这条前景
+         会**真的渲染**；固定的 #ffffff 在深色池（md3.primary 是浅紫）下只有 ≈1.6:1。 -->
     <Style Selector="Button.renderBtn">
       <Setter Property="Height" Value="34"/>
       <Setter Property="FontSize" Value="13"/>
@@ -48,7 +50,7 @@
       <Setter Property="Padding" Value="24,0"/>
       <Setter Property="CornerRadius" Value="8"/>
       <Setter Property="Background" Value="{DynamicResource AccentBrush1}"/>
-      <Setter Property="Foreground" Value="{DynamicResource PlusBrushTextOnAccent}"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
       <Setter Property="BorderThickness" Value="0"/>
     </Style>
     <Style Selector="Button.renderBtn:pointerover">
@@ -235,10 +237,11 @@
             <Button Grid.Column="3" Classes="renderBtn"
                     Name="StartBtn" Click="OnStartRender">
               <StackPanel Orientation="Horizontal" Spacing="6">
-                <Path Classes="btnIcon" Fill="{DynamicResource PlusBrushTextOnAccent}"
+                <!-- T10-A：图标与文字都跟随池前景（原来是固定 #ffffff，深色池浅紫底上 ≈1.6:1） -->
+                <Path Classes="btnIcon" Fill="{DynamicResource md3.on-primary}"
                       Data="{StaticResource icon-play}"/>
                 <TextBlock Text="{DynamicResource render.start}" FontSize="13" FontWeight="SemiBold"
-                           Foreground="{DynamicResource PlusBrushTextOnAccent}" VerticalAlignment="Center"/>
+                           Foreground="{DynamicResource md3.on-primary}" VerticalAlignment="Center"/>
               </StackPanel>
             </Button>
           </Grid>

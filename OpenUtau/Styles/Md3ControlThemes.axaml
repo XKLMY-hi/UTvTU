@@ -15,7 +15,12 @@
   <Styles.Resources>
     <ControlTheme x:Key="Md3ButtonTheme" TargetType="Button">
       <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+      <!-- 基础标签色（T9-B 决策）：MD3 规范里 outlined 按钮标签应为 md3.primary，
+           但那个取值在"转发修复"之前**从未真正渲染过**（一直被应用级 TextBlock 前景压住），
+           用户这几个月确认的普通按钮观感就是 on-surface ⇒ 本轮保持 on-surface，避免
+           全 App 普通按钮标签一起变 indigo 这种未经预览的大面积视觉变更。
+           要回到 MD3 规范态：把下面这行的 md3.on-surface 改成 md3.primary 即可（一行，无其它副作用）。 -->
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="CornerRadius" Value="8"/>
@@ -43,6 +48,8 @@
             <ContentPresenter Name="PART_ContentPresenter"
                               Content="{TemplateBinding Content}"
                               ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Foreground="{TemplateBinding Foreground}"
+                              RecognizesAccessKey="True"
                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
           </Border>
@@ -124,9 +131,14 @@
                   Background="{TemplateBinding Background}"
                   CornerRadius="{TemplateBinding CornerRadius}"
                   Padding="{TemplateBinding Padding}">
+            <!-- T10-B：与 Button 同一类转发缺失 —— 少了这行，`^:selected` 的
+                 md3.on-secondary-container 到不了内容（渲染层恒为 on-surface）。
+                 列表内容是**数据**而非标签，故不加 RecognizesAccessKey（下划线要保持字面），
+                 改由 Md3Controls.axaml 的 `ListBoxItem TextBlock` 规则把 Item 前景转发给文本。 -->
             <ContentPresenter Name="PART_ContentPresenter"
                               Content="{TemplateBinding Content}"
                               ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Foreground="{TemplateBinding Foreground}"
                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
           </Border>
