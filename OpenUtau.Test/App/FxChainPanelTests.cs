@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -69,6 +70,22 @@ namespace OpenUtau.Test.App {
             win.Measure(new Size(width, height));
             win.Arrange(new Rect(0, 0, width, height));
             Dispatcher.UIThread.RunJobs();
+        }
+
+        /// <summary>
+        /// 等待条件成立，**并每轮 pump 一次 UI dispatcher**。
+        /// 链行重建编组到 UI 线程（<c>Dispatcher.UIThread.Post</c>），所以
+        /// 「命令已执行 / 通知已到」与「行已重建」之间隔着一轮消息循环；
+        /// headless 下没有别的泵，只 <c>Thread.Sleep</c> 会永远等不到。
+        /// </summary>
+        static void PumpUntil(Func<bool> cond, int timeoutMs = 5000) {
+            var sw = Stopwatch.StartNew();
+            while (!cond()) {
+                Assert.True(sw.ElapsedMilliseconds < timeoutMs,
+                    $"PumpUntil 超时（{timeoutMs} ms）—— 条件始终未成立，或重建没有落到 UI 线程");
+                Dispatcher.UIThread.RunJobs();
+                Thread.Sleep(5);
+            }
         }
 
         static T Part<T>(Visual root, string name) where T : Visual =>
@@ -510,6 +527,92 @@ namespace OpenUtau.Test.App {
             }
         }
 
+        // ══════════════════ 线程契约（顺序无关的回归） ══════════════════
+
+        /// <summary>
+        /// 回归（集成树暴露的真缺陷）：链行重建必须编组到 UI 线程。
+        ///
+        /// 复刻的正是抛异常的那条栈：<c>DocManager.Publish</c> 遍历订阅者发生在
+        /// **执行命令的那条线程**上，而 <c>FxChainViewModel.OnNext</c> 会重建绑定到
+        /// <c>ItemsControl</c> 的 <c>ObservableCollection</c>；非 UI 线程直接改它 ⇒
+        /// <c>InvalidOperationException: The calling thread cannot access this object…</c>。
+        ///
+        /// 顺序无关的写法：不依赖 <c>[AvaloniaFact]</c> 的线程偶然性，也不动
+        /// <c>DocManager.mainThread</c> / <c>PostOnUIThread</c> 这些全局状态
+        /// （改它们会波及并行运行的其他集合）。这里在**线程池线程**上直接做
+        /// 「执行命令 + 喂订阅者回调」，断言三件事：
+        ///   ① 后台线程侧不抛异常；
+        ///   ② 线程契约：**触发命令的那条后台线程绝不直接改绑定的集合**
+        ///      （锚在触发线程 id 上，与 Dispatcher 在 headless 会话里的线程身份无关）；
+        ///   ③ 编组后的重建在 UI 侧收敛（pump 一轮消息循环 + 重复 layout 直到容器稳定）。
+        /// 负控已验证：把 <c>Rebuild</c> 的编组去掉后本用例失败（后台线程上 12 次集合变更、
+        /// 视觉树残留 10 个行控件），修回后通过。
+        /// </summary>
+        [AvaloniaFact]
+        public void OffThreadChainCommandAndNotification_DoNotThrow_AndRowsConvergeOnUiThread() {
+            var track = RichTrack(out var project);
+            LoadProject(project);
+            var panel = new FxChainPanel { Track = track };
+            var win = Host(panel);
+            try {
+                Assert.Equal(new[] { "ChainA", "ChainB" },
+                    panel.ViewModel.Rows.Where(r => r.Kind == FxChainItemKind.Vst).Select(r => r.Name));
+
+                // 线程契约的正题：执行命令的那条后台线程，绝不能直接改绑定的
+                // ObservableCollection。判据锚在**触发线程 id** 上——不用
+                // CheckAccess()/IsThreadPoolThread：headless 会话里 dispatcher 的
+                // 线程身份与"刚执行命令的后台线程"不一定可用它们区分。
+                int mutations = 0;
+                int mutationsOnWorkerThread = 0;
+                int workerThreadId = -1;
+                panel.ViewModel.Rows.CollectionChanged += (_, _) => {
+                    mutations++;
+                    if (Thread.CurrentThread.ManagedThreadId == workerThreadId) {
+                        mutationsOnWorkerThread++;
+                    }
+                };
+
+                Exception? workerError = null;
+                var worker = Task.Run(() => {
+                    workerThreadId = Thread.CurrentThread.ManagedThreadId;
+                    try {
+                        var cmd = TrackMixCommands.ReorderVstSlot(track, 0, 1);
+                        cmd.Execute();                          // 模型层：载荷互换 + 异步重载
+                        panel.ViewModel.OnNext(cmd, false);     // = Publish 的非 UI 线程路径
+                        panel.ViewModel.OnNext(new VstSlotChangedNotification(track.TrackNo, 0), false);
+                    } catch (Exception ex) {
+                        workerError = ex;
+                    }
+                });
+                Assert.True(worker.Wait(TimeSpan.FromSeconds(10)), "后台线程未在超时内结束（疑似死锁）");
+                Assert.Null(workerError);
+
+                // ① 数据层已互换（同步部分）
+                Assert.Equal("test:fxchain-b", track.VstSlots[0].PluginUid);
+                Assert.Equal("test:fxchain-a", track.VstSlots[1].PluginUid);
+                // ② 线程契约守卫（确定性，环境无关）
+                Assert.Equal(0, mutationsOnWorkerThread);
+                // ③ 链行在 UI 侧收敛（pump 一轮消息循环）
+                PumpUntil(() => panel.ViewModel.Rows.Count == 5
+                                && panel.ViewModel.Rows[3].Name == "ChainB"
+                                && panel.ViewModel.Rows[4].Name == "ChainA");
+                Assert.True(mutations > 0, "应当发生过链行重建（否则用例没覆盖到）");
+                // 视觉树收敛：集合重建引起的容器回收要**下一轮布局**才落地
+                // （真实应用里下一帧自然发生；headless 需要显式重复 layout 直到稳定）
+                PumpUntil(() => {
+                    Layout(win, 320, 720);
+                    return Rows(panel).Count == 5;
+                });
+                Assert.Equal("ChainB", Part<TextBlock>(Rows(panel)[3], "NameText").Text);
+
+                // UI 线程上的调用仍然同步生效（编组不能把同线程路径变成异步）
+                panel.ViewModel.Rebuild();
+                Assert.Equal("ChainB", panel.ViewModel.Rows[3].Name);
+            } finally {
+                win.Close();
+            }
+        }
+
         // ══════════════════ 颜色池铁律 ══════════════════
 
         [AvaloniaFact]
@@ -640,7 +743,7 @@ namespace OpenUtau.Test.App {
         /// 每个用例用**独占轨道号**：VstPluginManager 是进程单例，异步 Load 任务是
         /// fire-and-forget 的，跨用例共享轨道号会让"卸载时 SaveState 写回"落到别的用例头上。
         /// </summary>
-        [Fact]
+        [AvaloniaFact]
         public void ReorderVstSlot_SwapsPayloads_AndUndoRestoresThem() {
             VstPluginManager.Inst.Bridge = new FakeVstBridge();
             VstPluginManager.Inst.ClearAll();
@@ -680,7 +783,7 @@ namespace OpenUtau.Test.App {
             }
         }
 
-        [Fact]
+        [AvaloniaFact]
         public void MoveRow_ThroughThePanel_MovesThePluginAndUndoPutsItBack() {
             VstPluginManager.Inst.Bridge = new FakeVstBridge();
             VstPluginManager.Inst.ClearAll();
@@ -714,7 +817,7 @@ namespace OpenUtau.Test.App {
             }
         }
 
-        [Fact]
+        [AvaloniaFact]
         public void BuiltInRows_AreNotReorderable_NoModelWrite() {
             VstPluginManager.Inst.Bridge = new FakeVstBridge();
             VstPluginManager.Inst.ClearAll();
