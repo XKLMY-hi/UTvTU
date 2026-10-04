@@ -33,11 +33,12 @@ namespace OpenUtau.Test.App {
         /// <summary>与语言无关的键（路径示例），EN/zh 取值**应当相同**。</summary>
         static readonly string[] LanguageNeutralKeys = { "sidebar.effects.paths.watermark" };
 
-        /// <summary>W4 新增的字符串键（fx-rack 之外的 mx-lib 区块；EN/zh 各一份）。</summary>
+        /// <summary>W4 新增的字符串键（mx-lib 区块）＋ W11 一键标准路径键（mx-paths 区块）。</summary>
         static readonly string[] NewKeys = {
             "sidebar.effects.search", "sidebar.effects.countlabel", "sidebar.effects.scanning",
             "sidebar.effects.empty", "sidebar.effects.nomatch", "sidebar.effects.paths",
             "sidebar.effects.paths.manage", "sidebar.effects.paths.watermark", "sidebar.effects.paths.hint",
+            "sidebar.effects.addstandard",
         };
 
         static VstPluginInfo Info(string uid, string name, string vendor, VstPluginType type, bool isEffect = true) =>
@@ -302,6 +303,182 @@ namespace OpenUtau.Test.App {
             Assert.Contains("Click=\"OnToggleVstPathManager\"", code);
             Assert.Contains("Click=\"OnAddVstPathFromLibrary\"", code);
             Assert.Contains("Click=\"OnRemoveVstPathFromLibrary\"", code);
+            // W11：空态一键加标准路径（同一键在偏好设置 VST 页也有入口）
+            Assert.Contains("Click=\"OnAddStandardVstPathsFromLibrary\"", code);
+            Assert.Contains("{DynamicResource sidebar.effects.addstandard}", code);
+            string prefsXaml = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Views", "PreferencesView.axaml"));
+            Assert.Contains("Click=\"OnAddStandardVstPaths\"", prefsXaml);
+            Assert.Contains("{DynamicResource sidebar.effects.addstandard}", prefsXaml);
+        }
+
+        // ── W11：标准扫描路径播种 + 一键添加 ───────────────────────────────
+
+        /// <summary>
+        /// 假的取目录提供者：把 SpecialFolder 映射到临时目录树；
+        /// 只建两个标准目录（CommonFiles\VST3、ProgramFiles\Common Files\VST3），
+        /// 故意**不建** LocalApplicationData/ProgramFilesX86 那两个 ⇒ 可验证"只播种存在的目录"。
+        /// </summary>
+        sealed class FakeFolders : IDisposable {
+            readonly string root = Path.Combine(Path.GetTempPath(), "utvtu-w11-" + Guid.NewGuid().ToString("N"));
+
+            public FakeFolders() {
+                Directory.CreateDirectory(Path.Combine(root, "CommonFiles", "VST3"));
+                Directory.CreateDirectory(Path.Combine(root, "ProgramFiles", "Common Files", "VST3"));
+            }
+
+            public string Get(Environment.SpecialFolder folder) => folder switch {
+                Environment.SpecialFolder.CommonProgramFiles => Path.Combine(root, "CommonFiles"),
+                Environment.SpecialFolder.ProgramFiles => Path.Combine(root, "ProgramFiles"),
+                Environment.SpecialFolder.ProgramFilesX86 => Path.Combine(root, "MissingX86"),
+                Environment.SpecialFolder.LocalApplicationData => Path.Combine(root, "LocalAppData"),
+                Environment.SpecialFolder.UserProfile => Path.Combine(root, "User"),
+                _ => Path.Combine(root, "Other"),
+            };
+
+            public void Dispose() {
+                try { Directory.Delete(root, true); } catch { /* 清理失败无所谓 */ }
+            }
+        }
+
+        /// <summary>备份/恢复全局 Preferences 的两个字段（用例会写 Preferences.Default 并 Save）。</summary>
+        static void WithVstPathPrefs(Action body) {
+            List<string> paths = Preferences.Default.VstScanPaths?.ToList() ?? new List<string>();
+            bool seeded = Preferences.Default.VstScanPathsSeeded;
+            try {
+                body();
+            } finally {
+                Preferences.Default.VstScanPaths = paths;
+                Preferences.Default.VstScanPathsSeeded = seeded;
+                Preferences.Save();
+            }
+        }
+
+        [AvaloniaFact]
+        public void StandardPaths_AreChosenPerPlatform() {
+            using var folders = new FakeFolders();
+            string root = folders.Get(Environment.SpecialFolder.CommonProgramFiles);
+            root = Path.GetDirectoryName(root)!;      // ...\<root>\CommonFiles → <root>
+
+            var windows = Preferences.StandardVstScanPaths(Preferences.VstPathPlatform.Windows, folders.Get);
+            Assert.Equal(4, windows.Count);                                   // 四个候选（存在与否由播种阶段判）
+            Assert.Contains(Path.Combine(root, "CommonFiles", "VST3"), windows);
+            Assert.Contains(Path.Combine(root, "ProgramFiles", "Common Files", "VST3"), windows);
+            Assert.Contains(Path.Combine(root, "LocalAppData", "Programs", "Common", "VST3"), windows);
+
+            var mac = Preferences.StandardVstScanPaths(Preferences.VstPathPlatform.MacOS, folders.Get);
+            Assert.Contains("/Library/Audio/Plug-Ins/VST3", mac);
+            Assert.Contains(Path.Combine(root, "User", "Library", "Audio", "Plug-Ins", "VST3"), mac);
+
+            var linux = Preferences.StandardVstScanPaths(Preferences.VstPathPlatform.Linux, folders.Get);
+            Assert.Contains(Path.Combine(root, "User", ".vst3"), linux);
+            Assert.Contains("/usr/lib/vst3", linux);
+
+            // 平台判定本身：本机是 Windows
+            Assert.Equal(Preferences.VstPathPlatform.Windows, Preferences.CurrentVstPathPlatform());
+        }
+
+        [AvaloniaFact]
+        public void SeedStandardPaths_IsIdempotent_AndDoesNotResurrect() {
+            WithVstPathPrefs(() => {
+                using var folders = new FakeFolders();
+                Preferences.Default.VstScanPaths = new List<string>();
+                Preferences.Default.VstScanPathsSeeded = false;
+
+                int added = Preferences.SeedStandardVstScanPathsOnce(Preferences.VstPathPlatform.Windows, folders.Get);
+                Assert.Equal(2, added);                                       // 只加真实存在的两个目录
+                List<string> afterFirst = Preferences.Default.VstScanPaths.ToList();
+                Assert.Equal(2, afterFirst.Count);
+                Assert.True(Preferences.Default.VstScanPathsSeeded);
+
+                // 幂等：再播种一次不重复
+                Assert.Equal(-1, Preferences.SeedStandardVstScanPathsOnce(Preferences.VstPathPlatform.Windows, folders.Get));
+                Assert.Equal(afterFirst, Preferences.Default.VstScanPaths.ToList());
+
+                // 用户删掉标准路径 ⇒ 不复活（"已播种"标记已置位）
+                Preferences.Default.VstScanPaths.Clear();
+                Assert.Equal(-1, Preferences.SeedStandardVstScanPathsOnce(Preferences.VstPathPlatform.Windows, folders.Get));
+                Assert.Empty(Preferences.Default.VstScanPaths);
+
+                // 用户主动点按钮 ⇒ 不受标记限制，可以加回来
+                Assert.Equal(2, Preferences.AddStandardVstScanPaths(Preferences.VstPathPlatform.Windows, folders.Get));
+                Assert.Equal(2, Preferences.Default.VstScanPaths.Count);
+            });
+        }
+
+        [AvaloniaFact]
+        public void AddStandardPaths_SkipsMissingDirectories_AndDedupes() {
+            WithVstPathPrefs(() => {
+                using var folders = new FakeFolders();
+                Preferences.Default.VstScanPaths = new List<string>();
+                Assert.Equal(2, Preferences.AddStandardVstScanPaths(Preferences.VstPathPlatform.Windows, folders.Get));
+                Assert.Equal(0, Preferences.AddStandardVstScanPaths(Preferences.VstPathPlatform.Windows, folders.Get)); // 已在列表里
+            });
+        }
+
+        [AvaloniaFact]
+        public void Browser_EnsureFirstScan_SeedsAndScansOnlyWhenEmpty() {
+            WithVstPathPrefs(() => {
+                using var folders = new FakeFolders();
+                Preferences.Default.VstScanPaths = new List<string>();
+                Preferences.Default.VstScanPathsSeeded = false;
+
+                // 空表：应当播种 + 自动首扫（且只扫一次）
+                var plugins = new List<VstPluginInfo>();
+                int scans = 0;
+                using var vm = new PluginBrowserViewModel(
+                    () => plugins,
+                    () => {
+                        scans++;
+                        plugins.Add(Info("uid-a", "Amp", "Acme", VstPluginType.VST3));   // 首扫后有了
+                    });
+                Assert.Empty(vm.Plugins);
+                vm.EnsureFirstScan(Preferences.VstPathPlatform.Windows, folders.Get);
+                vm.EnsureFirstScan(Preferences.VstPathPlatform.Windows, folders.Get);   // 幂等
+                for (int i = 0; i < 200 && scans == 0; i++) {
+                    Dispatcher.UIThread.RunJobs();
+                    System.Threading.Thread.Sleep(5);
+                }
+                Assert.Equal(1, scans);
+                Assert.Equal(2, vm.ScanPaths.Count);        // 播种的标准路径进了页面列表
+                Assert.Equal(2, Preferences.Default.VstScanPaths.Count);
+                for (int i = 0; i < 200 && vm.Plugins.Count == 0; i++) {
+                    Dispatcher.UIThread.RunJobs();
+                    System.Threading.Thread.Sleep(5);
+                }
+                Assert.Single(vm.Plugins);                  // 首扫结果落到列表
+
+                // 缓存里已有插件：不再自动扫
+                int scans2 = 0;
+                using var cached = new PluginBrowserViewModel(() => SamplePlugins(), () => scans2++);
+                cached.EnsureFirstScan(Preferences.VstPathPlatform.Windows, folders.Get);
+                Dispatcher.UIThread.RunJobs();
+                Assert.Equal(0, scans2);
+            });
+        }
+
+        [AvaloniaFact]
+        public async Task Browser_AddStandardPathsAndScan_AddsAndScans() {
+            List<string> backupPaths = Preferences.Default.VstScanPaths?.ToList() ?? new List<string>();
+            bool backupSeeded = Preferences.Default.VstScanPathsSeeded;
+            try {
+                using var folders = new FakeFolders();
+                Preferences.Default.VstScanPaths = new List<string>();
+                Preferences.Default.VstScanPathsSeeded = false;
+
+                int scans = 0;
+                using var vm = new PluginBrowserViewModel(() => SamplePlugins(), () => scans++);
+                int added = await vm.AddStandardPathsAndScanAsync(Preferences.VstPathPlatform.Windows, folders.Get);
+
+                Assert.Equal(2, added);                                     // 两个存在的标准目录
+                Assert.Equal(1, scans);                                     // 顺带重扫
+                Assert.Equal(2, vm.ScanPaths.Count);                        // 页面列表跟着更新
+                Assert.Equal(2, Preferences.Default.VstScanPaths.Count);    // 唯一存储
+                Assert.False(Preferences.Default.VstScanPathsSeeded);       // 用户主动添加不置"已播种"标记
+            } finally {
+                Preferences.Default.VstScanPaths = backupPaths;
+                Preferences.Default.VstScanPathsSeeded = backupSeeded;
+                Preferences.Save();
+            }
         }
 
         // ── 文案 ────────────────────────────────────────────────────────────
