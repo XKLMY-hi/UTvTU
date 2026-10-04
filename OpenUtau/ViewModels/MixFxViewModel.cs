@@ -83,6 +83,12 @@ namespace OpenUtau.App.ViewModels {
 
         public Func<Task<string?>>? AskForName;
 
+        /// <summary>
+        /// 本次打开是否真的动过参数。决定"直接关窗"时要不要把工程标记为已修改
+        /// （未动过参数就关窗 → 不该让用户看到"有未保存改动"）。
+        /// </summary>
+        public bool IsDirty => dirty;
+
         private readonly UTrack track;
         // 窗口打开时轨道的 MixFx 快照；Revert（取消 / ESC）时放回。
         private readonly UMixFx? original;

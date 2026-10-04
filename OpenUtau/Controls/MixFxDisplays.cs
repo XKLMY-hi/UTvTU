@@ -65,19 +65,26 @@ namespace OpenUtau.App.Controls {
             ClipToBounds = true;
         }
 
+        /// <summary>绘图区内边距（左,上,右,下）——曲线/网格/刻度都在这个矩形里。</summary>
+        protected static readonly Thickness PlotPadding = new Thickness(8, 8, 8, 6);
+
+        /// <summary>当前尺寸下的绘图区；<see cref="RenderPlot"/> 收到的就是它。</summary>
+        public Rect PlotRect => new Rect(Bounds.Size).Deflate(PlotPadding);
+
         public sealed override void Render(DrawingContext context) {
             var rect = new Rect(Bounds.Size);
             context.DrawRectangle(Brush(Background, Md3Role.SurfaceContainerLow), null, rect);
-            if (rect.Width < 16 || rect.Height < 16) {
+            Rect plot = PlotRect;
+            if (rect.Width < 16 || rect.Height < 16 || plot.Width < 4 || plot.Height < 4) {
                 return;
             }
             if (!IsEnabled) {
                 using (context.PushOpacity(BypassedOpacity)) {
-                    RenderPlot(context, rect.Deflate(new Thickness(8, 8, 8, 6)));
+                    RenderPlot(context, plot);
                 }
                 return;
             }
-            RenderPlot(context, rect.Deflate(new Thickness(8, 8, 8, 6)));
+            RenderPlot(context, plot);
         }
 
         /// <summary>绘制曲线本体；<paramref name="rect"/> 已去掉内边距。</summary>
@@ -195,38 +202,65 @@ namespace OpenUtau.App.Controls {
             eq = new BiquadEQ(eqSampleRate, eqChannels);
         }
 
-        protected override void RenderPlot(DrawingContext context, Rect rect) {
-            SyncFormat();
-            double X(double f) => rect.Left + Math.Log(f / MinFreq) / Math.Log(MaxFreq / MinFreq) * rect.Width;
-            double Y(double db) => rect.Center.Y - Math.Clamp(db, -RangeDb, RangeDb) / RangeDb * rect.Height / 2;
+        /// <summary>频率 → 绘图区横坐标（20 Hz–20 kHz 对数轴）。</summary>
+        public static double FrequencyToX(double freq, Rect plot) =>
+            plot.Left + Math.Log(freq / MinFreq) / Math.Log(MaxFreq / MinFreq) * plot.Width;
 
+        /// <summary>增益 → 绘图区纵坐标（±15 dB 线性映射，0 dB 落在垂直中心）。</summary>
+        public static double LevelToY(double db, Rect plot) =>
+            plot.Center.Y - Math.Clamp(db, -RangeDb, RangeDb) / RangeDb * plot.Height / 2;
+
+        /// <summary>
+        /// 当前参数下的幅频响应折线（绘图区坐标，对数均匀采样）。
+        /// <see cref="RenderPlot"/> 画的就是这条折线 —— 断言它等于断言屏上的曲线。
+        /// </summary>
+        public Point[] BuildCurvePoints(Rect plot, int count) {
+            SyncFormat();
+            eq.Configure(LowDb, MidFreq, MixFxSource.EqMidQ, MidDb, HighDb);
+            int n = Math.Max(2, count);
+            var points = new Point[n];
+            for (int i = 0; i < n; i++) {
+                double f = MinFreq * Math.Pow(MaxFreq / MinFreq, (double)i / (n - 1));
+                points[i] = new Point(FrequencyToX(f, plot), LevelToY(eq.ResponseDb(f), plot));
+            }
+            return points;
+        }
+
+        protected override void RenderPlot(DrawingContext context, Rect rect) {
             var minor = GridPen(0.35);
             foreach (var f in new[] { 50.0, 200, 500, 2000, 5000 }) {
-                context.DrawLine(minor, new Point(X(f), rect.Top), new Point(X(f), rect.Bottom));
+                context.DrawLine(minor, new Point(FrequencyToX(f, rect), rect.Top),
+                    new Point(FrequencyToX(f, rect), rect.Bottom));
             }
             foreach (var db in new[] { -12.0, -6, 6, 12 }) {
-                context.DrawLine(minor, new Point(rect.Left, Y(db)), new Point(rect.Right, Y(db)));
+                context.DrawLine(minor, new Point(rect.Left, LevelToY(db, rect)),
+                    new Point(rect.Right, LevelToY(db, rect)));
             }
             var major = GridPen(0.7);
             foreach (var (f, label) in new[] { (100.0, "100"), (1000.0, "1k"), (10000.0, "10k") }) {
-                context.DrawLine(major, new Point(X(f), rect.Top), new Point(X(f), rect.Bottom));
-                DrawLabel(context, label, new Point(X(f) + 2, rect.Bottom - 11));
+                double x = FrequencyToX(f, rect);
+                context.DrawLine(major, new Point(x, rect.Top), new Point(x, rect.Bottom));
+                DrawLabel(context, label, new Point(x + 2, rect.Bottom - 11));
             }
-            context.DrawLine(major, new Point(rect.Left, Y(0)), new Point(rect.Right, Y(0)));
-            DrawLabel(context, "+12", new Point(rect.Left, Y(12) - 5));
-            DrawLabel(context, "-12", new Point(rect.Left, Y(-12) - 5));
+            double zeroY = LevelToY(0, rect);
+            context.DrawLine(major, new Point(rect.Left, zeroY), new Point(rect.Right, zeroY));
+            DrawLabel(context, "+12", new Point(rect.Left, LevelToY(12, rect) - 5));
+            DrawLabel(context, "-12", new Point(rect.Left, LevelToY(-12, rect) - 5));
 
-            eq.Configure(LowDb, MidFreq, MixFxSource.EqMidQ, MidDb, HighDb);
-            int n = Math.Max(2, (int)(rect.Width / 2));
-            Point At(int i) {
-                double f = MinFreq * Math.Pow(MaxFreq / MinFreq, (double)i / (n - 1));
-                return new Point(X(f), Y(eq.ResponseDb(f)));
-            }
-            context.DrawGeometry(CurveFill(), null, Polyline(n, At, Y(0)));
-            context.DrawGeometry(null, CurvePen(), Polyline(n, At));
+            var points = BuildCurvePoints(rect, Math.Max(2, (int)(rect.Width / 2)));
+            Point At(int i) => points[i];
+            context.DrawGeometry(CurveFill(), null, Polyline(points.Length, At, zeroY));
+            context.DrawGeometry(null, CurvePen(), Polyline(points.Length, At));
             foreach (var f in new[] { LowShelfHz, MidFreq, HighShelfHz }) {
-                DrawMarker(context, new Point(X(f), Y(eq.ResponseDb(f))));
+                DrawMarker(context, new Point(FrequencyToX(f, rect), LevelToY(ResponseAt(f), rect)));
             }
+        }
+
+        /// <summary>单个频点的响应（dB）——标记点用。</summary>
+        double ResponseAt(double freq) {
+            SyncFormat();
+            eq.Configure(LowDb, MidFreq, MixFxSource.EqMidQ, MidDb, HighDb);
+            return eq.ResponseDb(freq);
         }
     }
 
@@ -249,29 +283,53 @@ namespace OpenUtau.App.Controls {
             AffectsRender<CompCurveDisplay>(ThresholdDbProperty, RatioProperty, MakeupDbProperty);
         }
 
-        protected override void RenderPlot(DrawingContext context, Rect rect) {
-            double X(double db) => rect.Left + (db - InMin) / (InMax - InMin) * rect.Width;
-            double Y(double db) => rect.Bottom - (Math.Clamp(db, OutMin, OutMax) - OutMin) / (OutMax - OutMin) * rect.Height;
-            double Out(double input) => input + SimpleCompressor.CurveGainDb(input, ThresholdDb, Ratio) + MakeupDb;
+        /// <summary>输入电平 → 绘图区横坐标（−60…0 dB 线性轴）。</summary>
+        public static double InputToX(double db, Rect plot) =>
+            plot.Left + (db - InMin) / (InMax - InMin) * plot.Width;
 
+        /// <summary>输出电平 → 绘图区纵坐标（−60…+6 dB 线性轴）。</summary>
+        public static double OutputToY(double db, Rect plot) =>
+            plot.Bottom - (Math.Clamp(db, OutMin, OutMax) - OutMin) / (OutMax - OutMin) * plot.Height;
+
+        /// <summary>静态传输特性：输出 dB = 输入 dB + 压缩增益 + 补偿增益。</summary>
+        public static double TransferDb(double inputDb, double thresholdDb, double ratio, double makeupDb) =>
+            inputDb + SimpleCompressor.CurveGainDb(inputDb, thresholdDb, ratio) + makeupDb;
+
+        /// <summary>
+        /// 当前参数下的传输曲线折线（绘图区坐标）。<see cref="RenderPlot"/> 画的就是它。
+        /// </summary>
+        public Point[] BuildCurvePoints(Rect plot, int count) {
+            int n = Math.Max(2, count);
+            var points = new Point[n];
+            for (int i = 0; i < n; i++) {
+                double input = InMin + (InMax - InMin) * i / (n - 1);
+                points[i] = new Point(InputToX(input, plot),
+                    OutputToY(TransferDb(input, ThresholdDb, Ratio, MakeupDb), plot));
+            }
+            return points;
+        }
+
+        protected override void RenderPlot(DrawingContext context, Rect rect) {
             var minor = GridPen(0.35);
             foreach (var db in new[] { -48.0, -36, -24, -12 }) {
-                context.DrawLine(minor, new Point(X(db), rect.Top), new Point(X(db), rect.Bottom));
-                context.DrawLine(minor, new Point(rect.Left, Y(db)), new Point(rect.Right, Y(db)));
-                DrawLabel(context, db.ToString("0"), new Point(X(db), rect.Bottom - 11), TextAlignment.Center);
+                context.DrawLine(minor, new Point(InputToX(db, rect), rect.Top),
+                    new Point(InputToX(db, rect), rect.Bottom));
+                context.DrawLine(minor, new Point(rect.Left, OutputToY(db, rect)),
+                    new Point(rect.Right, OutputToY(db, rect)));
+                DrawLabel(context, db.ToString("0"), new Point(InputToX(db, rect), rect.Bottom - 11), TextAlignment.Center);
             }
             // 1:1 参考线 + 阈值线
-            context.DrawLine(GridPen(0.7, 3), new Point(X(InMin), Y(InMin)), new Point(X(InMax), Y(InMax)));
-            context.DrawLine(GridPen(1.0, 2), new Point(X(ThresholdDb), rect.Top), new Point(X(ThresholdDb), rect.Bottom));
+            context.DrawLine(GridPen(0.7, 3), new Point(InputToX(InMin, rect), OutputToY(InMin, rect)),
+                new Point(InputToX(InMax, rect), OutputToY(InMax, rect)));
+            context.DrawLine(GridPen(1.0, 2), new Point(InputToX(ThresholdDb, rect), rect.Top),
+                new Point(InputToX(ThresholdDb, rect), rect.Bottom));
 
-            int n = Math.Max(2, (int)(rect.Width / 2));
-            Point At(int i) {
-                double input = InMin + (InMax - InMin) * i / (n - 1);
-                return new Point(X(input), Y(Out(input)));
-            }
-            context.DrawGeometry(CurveFill(0.12), null, Polyline(n, At, rect.Bottom));
-            context.DrawGeometry(null, CurvePen(), Polyline(n, At));
-            DrawMarker(context, new Point(X(ThresholdDb), Y(Out(ThresholdDb))));
+            var points = BuildCurvePoints(rect, Math.Max(2, (int)(rect.Width / 2)));
+            Point At(int i) => points[i];
+            context.DrawGeometry(CurveFill(0.12), null, Polyline(points.Length, At, rect.Bottom));
+            context.DrawGeometry(null, CurvePen(), Polyline(points.Length, At));
+            DrawMarker(context, new Point(InputToX(ThresholdDb, rect),
+                OutputToY(TransferDb(ThresholdDb, ThresholdDb, Ratio, MakeupDb), rect)));
             DrawLabel(context, $"{Ratio:0.0}:1", new Point(rect.Right, rect.Top), TextAlignment.Right, Curve());
         }
     }
@@ -316,11 +374,42 @@ namespace OpenUtau.App.Controls {
                 PreDelayMsProperty, PresetProperty, HighBrushProperty, DryTextProperty);
         }
 
-        protected override void RenderPlot(DrawingContext context, Rect rect) {
+        /// <summary>
+        /// 有效湿声增益 = 预设 Wet × 用户 Wet（与 <c>MixFxSource</c> 里
+        /// <c>reverb.Configure(..., rParams.Wet * userWet, ...)</c> 同源）。
+        /// ≤1e-4 即"干声"：不画衰减包络，屏上只显示 DryText。
+        /// </summary>
+        public double EffectiveWet() {
             double presetWet = FxPresets.Reverb.TryGetValue(Preset ?? FxPresets.Off, out var rp) ? rp.Wet : 0;
-            double wet = presetWet * Math.Clamp(Wet, 0, 2) / FullScaleWet;
-            var (low, high) = Freeverb.DecaySeconds(RoomSize, Damp);
+            return presetWet * Math.Clamp(Wet, 0, 2) / FullScaleWet;
+        }
+
+        /// <summary>全频段 / 高频段 RT60（秒），由混响 DSP 的反馈数学给出。</summary>
+        public (double Low, double High) Decay() => Freeverb.DecaySeconds(RoomSize, Damp);
+
+        /// <summary>
+        /// 衰减包络折线（绘图区坐标）：预延迟前贴在底噪线，之后按 RT60 每倍程掉 60 dB。
+        /// <see cref="RenderPlot"/> 画的就是它。
+        /// </summary>
+        public Point[] BuildEnvelope(double rt60, Rect plot, int count) {
+            double wet = EffectiveWet();
+            double levelDb = wet > 1e-4 ? 20 * Math.Log10(wet) : FloorDb;
             double preDelay = PreDelayMs / 1000;
+            double top = plot.Top + 12;
+            int n = Math.Max(2, count);
+            var points = new Point[n];
+            for (int i = 0; i < n; i++) {
+                double t = Seconds * i / (n - 1);
+                double db = t < preDelay ? FloorDb : levelDb - 60 * (t - preDelay) / rt60;
+                points[i] = new Point(plot.Left + t / Seconds * plot.Width,
+                    top + Math.Clamp(db / FloorDb, 0, 1) * (plot.Bottom - top));
+            }
+            return points;
+        }
+
+        protected override void RenderPlot(DrawingContext context, Rect rect) {
+            double wet = EffectiveWet();
+            var (low, high) = Decay();
             double top = rect.Top + 12;
 
             double X(double t) => rect.Left + t / Seconds * rect.Width;
@@ -337,16 +426,12 @@ namespace OpenUtau.App.Controls {
             }
 
             if (wet > 1e-4) {
-                double levelDb = 20 * Math.Log10(wet);
-                int n = Math.Max(2, (int)(rect.Width / 2));
-                StreamGeometry Envelope(double rt60) => Polyline(n, i => {
-                    double t = Seconds * i / (n - 1);
-                    double db = t < preDelay ? FloorDb : levelDb - 60 * (t - preDelay) / rt60;
-                    return new Point(X(t), Y(db));
-                }, rect.Bottom);
-                context.DrawGeometry(CurveFill(0.35), new Pen(Curve(), 1.5), Envelope(low));
-                context.DrawGeometry(WithOpacity(Brush(HighBrush, Md3Role.Tertiary), 0.55), null, Envelope(high));
-                DrawMarker(context, new Point(X(preDelay), Y(levelDb)));
+                var lowPoints = BuildEnvelope(low, rect, Math.Max(2, (int)(rect.Width / 2)));
+                var highPoints = BuildEnvelope(high, rect, Math.Max(2, (int)(rect.Width / 2)));
+                context.DrawGeometry(CurveFill(0.35), new Pen(Curve(), 1.5), Polyline(lowPoints.Length, i => lowPoints[i], rect.Bottom));
+                context.DrawGeometry(WithOpacity(Brush(HighBrush, Md3Role.Tertiary), 0.55), null,
+                    Polyline(highPoints.Length, i => highPoints[i], rect.Bottom));
+                DrawMarker(context, new Point(X(PreDelayMs / 1000), Y(20 * Math.Log10(wet))));
             }
             DrawLabel(context, wet > 1e-4 ? $"RT60 {low:0.0} s" : DryText,
                 new Point(rect.Right, rect.Top), TextAlignment.Right, Curve());
