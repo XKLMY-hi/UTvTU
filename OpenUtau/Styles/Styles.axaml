@@ -182,11 +182,13 @@
     <Setter Property="Padding" Value="0"/>
     <Setter Property="Cursor" Value="Hand"/>
   </Style>
-  <Style Selector="Button.linkButton TextBlock">
+  <!-- 链接按钮的强调色 + 下划线（T9：Button 模板改为 RecognizesAccessKey=True 后，字符串内容
+       由 AccessText 承载而不是 TextBlock —— 只写 TextBlock 的规则会失效，故两种都列上） -->
+  <Style Selector="Button.linkButton TextBlock, Button.linkButton AccessText">
     <Setter Property="Foreground" Value="{DynamicResource AccentBrush1}"/>
     <Setter Property="TextDecorations" Value="Underline"/>
   </Style>
-  <Style Selector="Button.linkButton:pointerover TextBlock">
+  <Style Selector="Button.linkButton:pointerover TextBlock, Button.linkButton:pointerover AccessText">
     <Setter Property="Foreground" Value="{DynamicResource AccentBrush2}"/>
   </Style>
 
