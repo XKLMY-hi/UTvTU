@@ -31,6 +31,8 @@ public partial class MixerControl : UserControl
     private bool _loggedFirstTick;
     private IDisposable? _selectionSubscription;
     private IDisposable? _visibilitySubscription;
+    /// <summary>右侧效果链面板（宿主装配见构造器；生命周期随本控件，无需窗口侧管理）。</summary>
+    private readonly FxChainPanel chainPanel;
 
     /// <summary>电平定时器是否在跑（挂载 × 可见性；回归测试与诊断用）。</summary>
     internal bool LevelTimerRunning => timerRunning;
@@ -44,6 +46,12 @@ public partial class MixerControl : UserControl
         // 选中轨道 → 通道条选中态（右侧链面板消费 ViewModel.SelectedTrack，见冻结接口 §1.1-2）
         _selectionSubscription = ViewModel.WhenAnyValue(x => x.SelectedTrack)
             .Subscribe(_ => SyncStripSelection());
+
+        // 右侧效果链面板接线（冻结接口 §1.1；控件由 W3 提供，此处只做宿主装配）：
+        // 面板消费 MixerViewModel.SelectedTrack，不反向写；未选轨时显示空态。
+        chainPanel = new FxChainPanel();
+        chainPanel.BindSelection(ViewModel.WhenAnyValue(x => x.SelectedTrack));
+        FxChainHost.Content = chainPanel;
 
         // Forward space to main window
         KeyDown += (_, e) =>
