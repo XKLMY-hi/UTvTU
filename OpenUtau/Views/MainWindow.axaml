@@ -114,7 +114,17 @@
       <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
+    <!-- 视图胶囊选项（决策 A4：容器 36 / 内边距 3；选项 30 / 左右 18 / 文字 11 semibold）
+         ⚠ 本仓按钮尺寸的**通用陷阱**，适用于所有声明 <32 高的 Button 类：
+           · 全局 Md3ButtonTheme 设 MinHeight=32（Styles/Md3ControlThemes.axaml:28），布局取
+             Max(MinHeight, Height) ⇒ 只写 Height="30" 会被顶到 32（本钮修前实测 Bounds=32）；
+           · 应用级 `Button { Margin: 0,4 }`（Styles/Styles.axaml:159）还会外加 8px 竖向 margin；
+           · 容器有硬约束时：Measure 阶段 DesiredSize 会被父夹到可用高度（胶囊内区
+             36−2×3=30），但 **Arrange 仍尊重 MinHeight** ⇒ Bounds 仍 32、在胶囊里上下各溢 1px。
+           因此每个声明 <32 的按钮类都必须在自己的样式里显式压 MinHeight（并清 Margin）。
+           注：Avalonia 类型选择器是**精确匹配**，`Button` 选择器不影响 ToggleButton。 -->
     <Style Selector="Button.viewTab">
+      <Setter Property="MinHeight" Value="30"/>
       <Setter Property="Margin" Value="0"/>
       <Setter Property="HorizontalContentAlignment" Value="Center"/>
       <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -135,11 +145,15 @@
       <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
     </Style>
-    <!-- 素材库：页签胶囊（稿：高 28 / 文字 10） -->
+    <!-- 素材库：页签胶囊（稿：高 28 / 文字 10）
+         ⚠ 同「通用陷阱」：Height=28 必须配 MinHeight=28，否则被全局 Md3ButtonTheme 的
+           MinHeight=32 顶到 32（详见 Button.viewTab 上的说明）。 -->
     <Style Selector="Button.libTab">
+      <Setter Property="MinHeight" Value="28"/>
       <Setter Property="Margin" Value="0"/>
       <Setter Property="HorizontalContentAlignment" Value="Center"/>
-      <Setter Property="VerticalContentAlignment" Value="Center"/>      <Setter Property="Height" Value="28"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="Height" Value="28"/>
       <Setter Property="Padding" Value="14,0"/>
       <Setter Property="FontSize" Value="10"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
