@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -683,14 +683,16 @@ namespace OpenUtau.App.ViewModels {
         ///    `VstPluginRegistry` 的标准目录只在扫描时才参与，所以"从不扫描"的机器
         ///    打开插件浏览器永远空态（W6 实测 32 个 .vst3 一个都看不到）。
         /// 播种/首扫都是懒执行：从不打开该页签的用户不会被写盘、不会被扫描。
+        /// **返回首扫任务**（没触发则 null）：调用方可忽略（UI），测试则 await 它，
+        /// 避免"后台扫描还在跑、用例已结束"的跨用例污染。
         /// </summary>
         /// <param name="platform">测试接缝：目标平台（默认当前平台）。</param>
         /// <param name="folder">测试接缝：取标准目录（默认 Environment.GetFolderPath）。</param>
-        public void EnsureFirstScan(
+        public Task? EnsureFirstScan(
             Preferences.VstPathPlatform? platform = null,
             Func<Environment.SpecialFolder, string>? folder = null) {
             if (initialScanAttempted) {
-                return;
+                return null;
             }
             initialScanAttempted = true;
             if (Preferences.SeedStandardVstScanPathsOnce(platform, folder) > 0) {
@@ -698,8 +700,9 @@ namespace OpenUtau.App.ViewModels {
                 VstLibraryChangedNotification.Publish(VstLibraryChangedNotification.SourceLibrary);
             }
             if (allPlugins.Count == 0) {
-                _ = RescanInBackgroundAsync();
+                return RescanInBackgroundAsync();
             }
+            return null;
         }
 
         /// <summary>
