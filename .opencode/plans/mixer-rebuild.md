@@ -154,7 +154,9 @@
 | W11 插件路径播种 | `bee2ab00`：标准路径播种（幂等/不复活/平台纯函数）+ 注册表空时自动首扫 ⇒ 真机效果器列表 **0 → 15 条** |
 | W12 扫描健壮性 | `10c12774`：尾逗号容错 + 老式 bundle 回退 + 测试宿主补 `vst_probe` + `catch{}` 带日志 ⇒ **总数 24→28 / 效果器 15→17**；**并修掉自己造成的偶发 flake**（双语用例改全局语言 → 直读资源字典） |
 | 终验（Lead，`76281e37`） | `-t:Rebuild` **0 错误**；全量 **538 通过 / 0 失败**，默认 / Dark / **Light ×2** 四次连跑全绿 |
-| W13 复验（fx-verify） | 进行中：崩溃 ≥6 轮 / 几何 6 项 / **D9 真机拖拽**（现 17 条插件）/ 双击 VST 原生 GUI / flake 三变体连跑 / 回归不回退。**这份签名是并入 `plus-develop` 的最后前置** |
+| W13 复验（fx-verify） | **崩溃 0/7 PASS**（W6 时 1/3；7 次 reparent 零异常、日志零 `Unhandled exception`）；**几何 PASS**（M/S **20**、viewTab **30** + 胶囊 36、libTab 28、＋轨道 56×28）；**插件列表 PASS**（17 条 + 徽标正确，日志 `28 plugins (17 effects) … fallback 2 … vst_probe: ok`）；回归抽样无回退；`Styles/**`+`App.axaml` diff 为空。未自动化验证 2 项：**D9 物理拖拽**（Avalonia `DoDragDropAsync` 走 OLE 回路，合成输入进不去 ⇒ 需用户手拖 5 秒）与 **✕ 22×22 像素**（只在 VST 行显示，需先有 VST 行）；另报一条新偶发 `MixFxSourceTest.Mix_SteadyState_DoesNotAllocate`（1/7，Rebuild 后首跑） |
+| 并库后的交界面缺陷（Lead） | 两波合并后测试顺序变化暴露 2 例崩溃：`MixerControl.RebuildStrips → Children.Clear()` 与 `FxChainPanel.set_Track → SetValue` 均在非属主线程被调用。**根因同一条：`Dispatcher.UIThread.CheckAccess()` 在 headless 宿主下误判为 true** ⇒ 判据改为**锚定"所属线程"**（控件挂载时/订阅建立时记录）⇒ **587/0**（`4fb9e2cc`）。另把零分配用例改**双窗口**去掉分层 JIT 偶发（`407325cd`） |
+| 终局（`plus-develop`） | `9dd…`→`407325cd`：构建 **0 错误**；全量 **587 通过 / 0 失败 × 三变体**（默认 / Dark / Light 各一次，全部 exit 0） |
 
 ## 附E. 后续任务登记（本轮不做）
 
