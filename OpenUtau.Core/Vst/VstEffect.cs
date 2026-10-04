@@ -75,9 +75,20 @@ namespace OpenUtau.Core.Vst {
             int frames = count / 2;
             if (frames <= 0) return;
 
-            if (offset == 0 && buffer.Length == count) {
+            // 原地路径的充分条件：offset == 0 且**容量 ≥ count**（不必相等）。
+            // 桥只按 frames 处理 buffer[0 .. frames*2)，不读也不写 count 之后的样本——
+            // 见 runtimes/vst_bridge/src/vst_bridge.cpp:352 vst_process：它只访问
+            // buffer[i*2]、buffer[i*2+1]（i < nf = min(frames, maxBlockSize)），
+            // 且原生侧拿不到托管数组长度。
+            // 此前条件是 `buffer.Length == count`，而 EffectChain 把预分配 4096 的 scratch
+            // （块长 512）直接传进来 ⇒ 条件恒假 ⇒ 恒走下面的复制路径 ⇒ **音频线程每块一次
+            // new float[count]**（W7b 实测 2072 B/块 ≈ 2.7 MiB/s @16 轨）。改成容量比较后
+            // 原地处理，既零分配又省掉一次 count 样本的拷贝。
+            if (offset == 0 && buffer.Length >= count) {
                 _bridge.Process(_handle, buffer, frames);
             } else {
+                // 仅当调用方从大缓冲的中间开始（offset != 0）：桥要求连续缓冲，复制一份。
+                // 产品链路不会走这里（EffectChain 恒以 offset 0 调用），故不为其引入复用状态。
                 float[] slice = new float[count];
                 Array.Copy(buffer, offset, slice, 0, count);
                 _bridge.Process(_handle, slice, frames);
