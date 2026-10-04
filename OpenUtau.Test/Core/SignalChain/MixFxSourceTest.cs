@@ -392,6 +392,29 @@ namespace OpenUtau.Test.Core.SignalChain {
             Assert.Equal(0, allocated);
         }
 
+        [Fact]
+        public void Mix_100msBackendBlock_DoesNotAllocateOnFirstCall() {
+            // 录制（WasapiOut 100ms）与导出（CreateWaveFile16 的 100ms 块）会一次要
+            // 8820 个样本：预分配必须覆盖它，否则音频线程首块就要扩容。
+            int block = AudioSettings.SampleRate / 10 * AudioSettings.Channels;
+            Assert.True(block > 8192, "44.1k 立体声 100ms 的样本数应超过 BlockSize 派生的 8192");
+
+            // 用另一个实例预热同尺寸路径（JIT），被测实例保持"首次调用"
+            var warmTrack = new UTrack { MixFx = BrightEq(true) };
+            var warm = MixFxSource.WrapLive(new SineSource(), warmTrack);
+            var warmBuffer = new float[block];
+            warm.Mix(0, warmBuffer, 0, block);
+
+            var track = new UTrack { MixFx = BrightEq(true) };
+            var source = MixFxSource.WrapLive(new SineSource(), track);
+            var buffer = new float[block];
+            long before = GC.GetAllocatedBytesForCurrentThread();
+            int pos = source.Mix(0, buffer, 0, block);
+            source.Mix(pos, buffer, 0, block);
+            long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+            Assert.Equal(0, allocated);
+        }
+
         // ── seek 清残留 ──────────────────────────────────────────────────
 
         [Fact]

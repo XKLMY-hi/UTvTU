@@ -39,8 +39,10 @@ namespace OpenUtau.Core.SignalChain {
     public partial class MixFxSource : ISignalSource {
         /// <summary>交叉淡化时长（毫秒）。帧数按实际采样率换算（44.1k → 661 帧）。</summary>
         private const double FadeMs = 15.0;
-        /// <summary>scratch 预分配下限（帧）。常规音频后端的块不超过 AudioSettings.BlockSize。</summary>
+        /// <summary>scratch 预分配下限（帧）。</summary>
         private const int MinScratchFrames = 4096;
+        /// <summary>预分配覆盖的后端缓冲时长（1/10 秒 = WASAPI shared 100ms / CreateWaveFile16 块）。</summary>
+        private const int ScratchSecondsDivisor = 10;
 
         private readonly ISignalSource source;
         private readonly Func<UMixFx?> getFx;
@@ -62,8 +64,9 @@ namespace OpenUtau.Core.SignalChain {
         private float reverbGain;
 
         // scratch 缓冲区。内层源按加法混音写零缓冲，故需要私有可写副本。
-        // 构造时按 AudioSettings.BlockSize 预分配；仅在音频后端给出更大块时按 2 的幂
-        // 几何扩容（整个会话 O(log n) 次），稳态每块零分配。
+        // 构造时按 BlockSize 与 1/10 秒取大者预分配（覆盖 miniaudio 设备周期与
+        // WASAPI shared 100ms / CreateWaveFile16 的 100ms 块）；仅当音频后端给出
+        // 更大块时按 2 的幂几何扩容（整个会话 O(log n) 次），稳态每块零分配。
         private float[] scratch;
         private float[] masterDry;
         private float[] stageDry;
@@ -81,7 +84,8 @@ namespace OpenUtau.Core.SignalChain {
             eq = new BiquadEQ(SampleRate, Channels);
             comp = new SimpleCompressor(SampleRate, Channels);
             reverb = new Freeverb(SampleRate, Channels);
-            int capacity = Math.Max(MinScratchFrames, AudioSettings.BlockSize) * Channels;
+            int capacity = Math.Max(MinScratchFrames,
+                Math.Max(AudioSettings.BlockSize, SampleRate / ScratchSecondsDivisor)) * Channels;
             scratch = new float[capacity];
             masterDry = new float[capacity];
             stageDry = new float[capacity];
