@@ -13,8 +13,16 @@
     颜色全部取 md3.* 角色键；本文件不含任何字面量色值。
   -->
   <UserControl.Styles>
-    <!-- M/S：常态底 surface-container-high + 文字 on-surface-variant（spec-digest §9.1） -->
+    <!-- M/S：常态底 surface-container-high + 文字 on-surface-variant（spec-digest §9.1）
+         ⚠ 两处"继承来的几何"必须在这里压掉，否则渲染尺寸 ≠ 规格：
+         · 主题 Md3ButtonTheme 设 MinHeight=32（Styles/Md3ControlThemes.axaml:28），
+           布局取 Max(MinHeight, Height) ⇒ 只写 Height="20" 会**渲染成 32**（W6 真机实测）；
+         · 应用级 `Button { Margin: 0,4 }`（Styles/Styles.axaml:159）给每个按钮外加 8px
+           竖向 margin ⇒ 行高变成 28、行间距被撑成 6+8（规格是 gap 6）。
+         本地 Style setter 优先于 ControlTheme，且本地样式后应用 ⇒ 两个都要显式写。 -->
     <Style Selector="Button.mixerBtn">
+      <Setter Property="MinHeight" Value="20"/>
+      <Setter Property="Margin" Value="0"/>
       <Setter Property="Padding" Value="0"/>
       <Setter Property="BorderThickness" Value="0"/>
       <Setter Property="HorizontalAlignment" Value="Stretch"/>

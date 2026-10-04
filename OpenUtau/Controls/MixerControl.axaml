@@ -17,7 +17,10 @@
     <!-- 工具行：＋轨道（既有入口，保留以免功能回归）+ 轨道数 -->
     <Border Grid.Row="0" Padding="16,8">
       <Grid ColumnDefinitions="Auto,*,Auto">
-        <Button Grid.Column="0" Name="AddTrackBtn" Height="28" CornerRadius="999"
+        <!-- 28 高工具行（设计稿无此元素，spec-digest C-6 自定）：MinHeight 必须显式压到 28，
+             否则全局 Md3ButtonTheme 的 MinHeight=32 会把 Height 顶成 32；Margin 必须清零，
+             否则应用级 `Button { Margin: 0,4 }`（Styles.axaml:159）再撑 8px。 -->
+        <Button Grid.Column="0" Name="AddTrackBtn" Height="28" MinHeight="28" Margin="0" CornerRadius="999"
                 Padding="12,0" FontSize="11" FontWeight="SemiBold"
                 Content="{DynamicResource mixer.addtrack}" Click="OnAddTrackClick"
                 Background="{DynamicResource md3.surface-container-high}"

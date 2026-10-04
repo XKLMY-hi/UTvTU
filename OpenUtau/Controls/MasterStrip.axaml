@@ -16,8 +16,13 @@
     绝不编数（规划 R5、spec-digest §6）——每一项都带 ToolTip 说明来源。
   -->
   <UserControl.Styles>
-    <!-- 主输出静音键（W1b）：与通道条 M 键同语言，仅底/字色走 master 条高一档的底色 -->
+    <!-- 主输出静音键（W1b）：与通道条 M 键同语言，仅底/字色走 master 条高一档的底色。
+         ⚠ 同一组"继承来的几何"陷阱：主题 MinHeight=32（Md3ControlThemes.axaml:28）会把
+         Height="20" 顶成 32（W6 实测 24×31），应用级 `Button { Margin: 0,4 }`
+         （Styles.axaml:159）再给 8px 竖向 margin ⇒ 本地两行都必须显式压掉。 -->
     <Style Selector="Button.masterMuteBtn">
+      <Setter Property="MinHeight" Value="20"/>
+      <Setter Property="Margin" Value="0"/>
       <Setter Property="Padding" Value="0"/>
       <Setter Property="BorderThickness" Value="0"/>
       <Setter Property="HorizontalContentAlignment" Value="Center"/>

@@ -9,6 +9,7 @@ using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using OpenUtau.App.Controls;
 using OpenUtau.App.ViewModels;
 using OpenUtau.Core;
@@ -21,10 +22,14 @@ namespace OpenUtau.Test.App {
     /// <summary>
     /// 混音台几何契约（设计规格 `.opencode/design/spec/Mixer.txt`）。
     ///
-    /// 这里断言的是**属性 / 几何 / 契约**，不是像素：本仓 headless 走 `UseHeadlessDrawing`
-    /// 桩绘制，`RenderTargetBitmap` 是空白位面。XAML 里的每个规格字面量都在这里被逐条锁住，
-    /// 同时 `MixerMetrics` 里的常数也被要求等于同一批设计稿数值 —— 三处（设计稿 / 常数 / XAML）
-    /// 任何一处漂移都会让本文件变红。
+    /// 断言分两层，缺一不可：
+    /// ① **属性层**（`*_MatchesSpec`）：XAML 里的规格字面量与 `MixerMetrics` 常数逐条对齐；
+    /// ② **布局层**（`*_LayoutSizesMatchSpec`）：把控件放进**真宿主窗口**跑一次布局，
+    ///    断言 `Bounds`（实际渲染尺寸）。
+    /// 为什么要第二层（W6 真机像素 FAIL 的教训）：本仓 headless 是桩绘制，**但布局是真跑的**；
+    /// 而全局 `Md3ButtonTheme` 设了 `MinHeight=32`（`Styles/Md3ControlThemes.axaml:28`），
+    /// 布局取 `Max(MinHeight, Height)` ⇒ 只断言属性 `Height == 20` 的用例全绿，真机渲染却是 32。
+    /// 两层都锁住，才能同时防"XAML 写错"与"被主题尺寸顶掉"。
     /// </summary>
     [Collection("Theme")]
     public class MixerGeometryTests {
@@ -81,6 +86,25 @@ namespace OpenUtau.Test.App {
         static Border[] Ticks(Canvas fader) => fader.Children.OfType<Border>()
             .Where(b => b.Name != null && b.Name.StartsWith("FaderTick"))
             .ToArray();
+
+        /// <summary>
+        /// 把控件放进真宿主窗口、跑完布局后执行断言（布局层几何契约的场地）。
+        /// headless 下 `UseHeadlessDrawing` 让绘制变桩，但 <see cref="Layoutable.Bounds"/>
+        /// 是布局计算的真实结果 —— 主题 MinHeight/MinWidth 的顶替只在这一层可见。
+        /// </summary>
+        static void InWindow(Control content, double width, double height, Action body) {
+            var window = new Window { Width = width, Height = height, Content = content };
+            try {
+                window.Show();
+                Dispatcher.UIThread.RunJobs();
+                // 本地样式（MinHeight 覆盖主题）落定后再跑一遍布局：首次测量可能取到中间态
+                content.InvalidateMeasure();
+                Dispatcher.UIThread.RunJobs();
+                body();
+            } finally {
+                window.Close();
+            }
+        }
 
         // ── 规格常数（代码侧唯一事实来源）────────────────────
 
@@ -228,6 +252,55 @@ namespace OpenUtau.Test.App {
             Assert.Null(strip.FindControl<Border>("BusInfo"));
         }
 
+        /// <summary>
+        /// **布局层**几何契约（W10）：真宿主窗口 + 真布局下的实际渲染尺寸。
+        /// 这一层专门抓"属性绿、像素红"—— W6 真机实测 M/S 高 32（主题 MinHeight 顶掉本地 Height），
+        /// 而属性断言全绿。凡是"声明尺寸"的元素，这里都按 `Bounds` 复核一遍。
+        /// </summary>
+        [AvaloniaFact]
+        public void ChannelStrip_LayoutSizesMatchSpec() {
+            var strip = new MixerTrackStrip(new UTrack { TrackNo = 0 });
+            InWindow(strip, 200, 900, () => {
+                Assert.Equal(StripWidth, strip.Bounds.Width);
+
+                // M/S（真机曾渲染 32）：本地 MinHeight 必须压住主题的 32、Margin 必须清零
+                Assert.Equal(ButtonHeight, strip.MuteBtn.MinHeight);
+                Assert.Equal(new Thickness(0), strip.MuteBtn.Margin);
+                Assert.Equal(ButtonHeight, strip.MuteBtn.Bounds.Height);
+                Assert.Equal(ButtonHeight, strip.SoloBtn.Bounds.Height);
+                // 两钮等分行宽：96 − 内边距 16 − 间距 4 = 76 ⇒ 每钮 38
+                Assert.Equal(38, strip.MuteBtn.Bounds.Width, 1);
+                Assert.Equal(38, strip.SoloBtn.Bounds.Width, 1);
+                // M/S 行 = 键高（稿里是 flex 行，无额外高）：无 margin 时行高必须回到 20
+                Assert.Equal(ButtonHeight, strip.MsRow.Bounds.Height);
+
+                Assert.Equal(AccentHeight, strip.AccentBar.Bounds.Height);
+                Assert.Equal(EqWidth, strip.EqDisplay.Bounds.Width);
+                Assert.Equal(EqHeight, strip.EqDisplay.Bounds.Height);
+                Assert.Equal(EqWidth, strip.EqCurve.Bounds.Width);
+                Assert.Equal(EqHeight, strip.EqCurve.Bounds.Height);
+                Assert.Equal(1, strip.EqZeroLine.Bounds.Height);
+
+                Assert.Equal(PanRowHeight, strip.PanRow.Bounds.Height);
+                Assert.Equal(MixerMetrics.PanHitHeight, strip.PanHitArea.Bounds.Height);
+
+                Assert.Equal(FaderWidth, strip.FaderBox.Bounds.Width);
+                Assert.Equal(FaderHeight, strip.FaderBox.Bounds.Height);
+                Assert.Equal(MeterWidth, strip.MeterBar.Bounds.Width);
+                Assert.Equal(FaderHeight, strip.MeterBar.Bounds.Height);
+                Assert.Equal(TrackWidth, strip.FaderTrack.Bounds.Width);
+                Assert.Equal(HandleWidth, strip.FaderHandle.Bounds.Width);
+                Assert.Equal(HandleHeight, strip.FaderHandle.Bounds.Height);
+
+                var ticks = Ticks(strip.FaderBox);
+                Assert.Equal(9, ticks.Length);
+                for (int i = 0; i < ticks.Length; i++) {
+                    Assert.Equal(TickWidths[i], ticks[i].Bounds.Width);
+                    Assert.Equal(1, ticks[i].Bounds.Height);
+                }
+            });
+        }
+
         // ── 主输出条（Mixer.txt:691-736）─────────────────────
 
         [AvaloniaFact]
@@ -341,6 +414,53 @@ namespace OpenUtau.Test.App {
         }
 
         /// <summary>
+        /// **布局层**几何契约（W10）：主输出静音键真机曾渲染 24×**31**（主题 MinHeight=32 顶掉
+        /// 本地 Height=20），这里按布局后的 `Bounds` 复核；顺带把主条全部声明尺寸复核一遍。
+        /// </summary>
+        [AvaloniaFact]
+        public void MasterStrip_LayoutSizesMatchSpec() {
+            var master = new MasterStrip();
+            InWindow(master, 260, 900, () => {
+                Assert.Equal(MasterWidth, master.Bounds.Width);
+
+                // 主输出静音（真机曾 24×31）：MinHeight 压 20 + Margin 清零
+                Assert.Equal(ButtonHeight, master.MuteBtn.MinHeight);
+                Assert.Equal(new Thickness(0), master.MuteBtn.Margin);
+                Assert.Equal(ButtonHeight, master.MuteBtn.Bounds.Height);
+                Assert.Equal(24, master.MuteBtn.Bounds.Width);
+                // 键与名称同行：行高 = 键高（无 margin 撑高）
+                Assert.Equal(ButtonHeight, master.MasterNameRow.Bounds.Height);
+
+                Assert.Equal(AccentHeight, master.MasterAccentBar.Bounds.Height);
+
+                // Bus Info：padding 10×2 + 四行 14 + 三个 gap 8 = 100
+                Assert.Equal(BusPadding * 2 + BusRowHeight * 4 + BusGap * 3, master.BusInfo.Bounds.Height);
+                foreach (var row in new[] {
+                    master.BusRowIntegrated, master.BusRowTruePeak,
+                    master.BusRowLimiter, master.BusRowDither,
+                }) {
+                    Assert.Equal(BusRowHeight, row.Bounds.Height);
+                }
+
+                Assert.Equal(BusFaderWidth, master.FaderBox.Bounds.Width);
+                Assert.Equal(FaderHeight, master.FaderBox.Bounds.Height);
+                Assert.Equal(BusMeterWidth, master.MeterBarL.Bounds.Width);
+                Assert.Equal(BusMeterWidth, master.MeterBarR.Bounds.Width);
+                Assert.Equal(FaderHeight, master.MeterBarL.Bounds.Height);
+                Assert.Equal(TrackWidth, master.FaderTrack.Bounds.Width);
+                Assert.Equal(HandleWidth, master.FaderHandle.Bounds.Width);
+                Assert.Equal(BusHandleHeight, master.FaderHandle.Bounds.Height);
+
+                var ticks = Ticks(master.FaderBox);
+                Assert.Equal(9, ticks.Length);
+                for (int i = 0; i < ticks.Length; i++) {
+                    Assert.Equal(TickWidths[i], ticks[i].Bounds.Width);
+                    Assert.Equal(1, ticks[i].Bounds.Height);
+                }
+            });
+        }
+
+        /// <summary>
         /// 数据诚实（裁定 R5）：综合响度没有实现 ⇒ 占位「—」；限制器 / 抖动显示**当前导出设置的
         /// 状态文本**（关 / 16-bit），不是设计稿里的假数值（-14.0 LUFS / 开 / 24-bit）。
         /// </summary>
@@ -404,6 +524,53 @@ namespace OpenUtau.Test.App {
                 Assert.Equal(new Thickness(16, 16, 8, 16), mixer.TrackStripsPanel.Margin);
                 Assert.Equal(MixerMetrics.AreaGap, mixer.TrackStripsPanel.Spacing);
                 Assert.Equal(Orientation.Horizontal, mixer.TrackStripsPanel.Orientation);
+            } finally {
+                mixer.Shutdown();
+            }
+        }
+
+        /// <summary>
+        /// 「属性绿、像素红」盲区的**金丝雀**（W10 教训固化）：
+        /// 本仓有两条"继承来的几何"会改掉按钮的实际渲染尺寸 ——
+        /// ① 主题 `Md3ButtonTheme.MinHeight=32`（ControlTheme）⇒ 裸 Button 即使 `Height=20` 也渲染 **32**；
+        /// ② 应用级 `Button { Margin: 0,4 }`（`Styles/Styles.axaml:159`）⇒ 每个按钮外加 8px 竖向 margin。
+        /// 混音台三处按钮（M/S、主输出静音、＋轨道）都在**本地**样式里显式压掉这两项；
+        /// 第一条断言故意写得宽松（`> 20`），主题若调整 MinHeight 也不会假红，但"存在干涉"这件事必须为真。
+        /// </summary>
+        [AvaloniaFact]
+        public void ThemeGeometryTraps_AreNeutralizedInMixerButtons() {
+            var bare = new Button { Height = 20, Content = "M", FontSize = 10 };
+            var pinned = new Button {
+                Height = 20, MinHeight = 20, Margin = new Thickness(0),
+                Content = "M", FontSize = 10,
+            };
+            InWindow(new StackPanel { Children = { bare, pinned } }, 200, 200, () => {
+                // 干涉确实存在（裸按钮不会被 Height 限制住）
+                Assert.True(bare.Bounds.Height > 20,
+                    $"主题/应用级几何未干涉裸按钮（实测 {bare.Bounds.Height}）——若主题改了，请同步更新本注释与混音台本地样式");
+                Assert.NotEqual(new Thickness(0), bare.Margin);
+                // 本地两条 setter（MinHeight / Margin）即可完全中和
+                Assert.Equal(20, pinned.Bounds.Height, 1);
+            });
+        }
+
+        /// <summary>
+        /// **布局层**几何契约（W10）：工具行按钮（28）与链宿主（280）的真实布局尺寸。
+        /// 「＋轨道」按钮是本轮复核发现的**同一条主题陷阱第三处**：声明 Height=28，主题
+        /// MinHeight=32 会把它顶到 32（本地 MinHeight/Margin 已压住）。
+        /// </summary>
+        [AvaloniaFact]
+        public void MixerControl_LayoutSizesMatchSpec() {
+            DocManagerTestSetup.RunOnCurrentThread();
+            var mixer = new MixerControl();
+            try {
+                InWindow(mixer, 1400, 800, () => {
+                    Assert.Equal(28, mixer.AddTrackBtn.MinHeight);
+                    Assert.Equal(new Thickness(0), mixer.AddTrackBtn.Margin);
+                    Assert.Equal(28, mixer.AddTrackBtn.Bounds.Height);
+                    Assert.Equal(MixerMetrics.FxChainHostWidth, mixer.FxChainHost.Bounds.Width);
+                    Assert.Equal(MixerMetrics.FxChainDividerWidth, mixer.FxChainDivider.Bounds.Width);
+                });
             } finally {
                 mixer.Shutdown();
             }
