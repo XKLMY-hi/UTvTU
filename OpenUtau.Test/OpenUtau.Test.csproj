@@ -38,6 +38,8 @@
   <ItemGroup>
     <None Include="Usts\**" CopyToOutputDirectory="PreserveNewest" LinkBase="Usts\" />
     <None Include="Files\**" CopyToOutputDirectory="PreserveNewest" LinkBase="Files\" />
+    <!-- W7 音频验收装置：纯文本 .ustxp 测试工程 fixture（Ustxp.Load 读入用） -->
+    <None Include="Fixtures\**" CopyToOutputDirectory="PreserveNewest" LinkBase="Fixtures\" />
     <None Include="Core\Theming\Data\**" CopyToOutputDirectory="PreserveNewest" LinkBase="Core\Theming\Data\" />
     <!-- 视图 XAML 源码：契约测试需要扫描资源键（avares 不保留 .axaml 原文） -->
     <None Include="..\OpenUtau\Views\WelcomeView.axaml" Link="Views\WelcomeView.axaml" CopyToOutputDirectory="PreserveNewest" />
