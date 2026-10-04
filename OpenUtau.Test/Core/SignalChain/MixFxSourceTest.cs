@@ -410,7 +410,21 @@ namespace OpenUtau.Test.Core.SignalChain {
                 position = source.Mix(position, buffer, 0, Block);
             }
             long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
-            Assert.Equal(0, allocated);
+
+            // 双窗口：**分层 JIT 会在执行线程上编译**（首次运行 / `-t:Rebuild` 后最明显），
+            // 那是一次性噪声、会污染第一个窗口（实测 7 次全量里偶发 1 次）。
+            // 第一个窗口只用来让编译与慢路径沉淀，第二个窗口做严格 0 断言 ——
+            // 既保住"零分配"的严格性，又不把 JIT 噪声当成回归。
+            long firstWindow = allocated;
+            before = GC.GetAllocatedBytesForCurrentThread();
+            for (int b = 0; b < 64; b++) {
+                track.MixFx.EqLowDb = (b % 2 == 0) ? 1.0 : 0.0;
+                position = source.Mix(position, buffer, 0, Block);
+            }
+            long steadyWindow = GC.GetAllocatedBytesForCurrentThread() - before;
+
+            Assert.Equal(0, steadyWindow);
+            Assert.True(firstWindow >= steadyWindow, $"首个窗口 {firstWindow} 不应少于稳态窗口 {steadyWindow}");
         }
 
         [Fact]
