@@ -76,7 +76,7 @@ public sealed class FxRackEntry {
 /// 用到的颜色池键：md3.surface-container{,-low,-highest}、md3.secondary-container、
 ///   md3.on-secondary-container、md3.on-surface{,-variant}、md3.outline{,-variant}、
 ///   md3.primary、md3.primary-container、md3.on-primary-container、md3.tertiary-container、
-///   md3.on-tertiary-container + md3.color.*（无：本控件只用画刷键）。
+///   md3.on-tertiary-container（全部为画刷键；本控件不需要 Color，故不用 md3.color.*）。
 ///
 /// 【后续接线点】
 ///   1) 拖拽排序：握把（PART_Grip）当前仅装饰。接线时在行上挂 PointerPressed/Moved 的

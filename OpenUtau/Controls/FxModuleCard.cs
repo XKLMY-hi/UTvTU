@@ -24,16 +24,17 @@ namespace OpenUtau.App.Controls;
 /// 设计要点：
 ///   · 卡片：圆角 16、底色 surface-container、1px outline-variant（沿用 PreferencesView 的卡片语言）；
 ///   · 标题行：[强调色条 3×28] [标题 15px Medium / 副标题 11px] … [状态角标] [电源开关]；
-///   · 强调色条按模块角色取池色（EQ=Tertiary / 压缩=Primary / 混响=Secondary…），
-///     用 <c>md3.color.*</c> 双停靠点渐变淡出到卡片底色（颜色键的用法示范）；
+///   · 强调色条按模块角色取池色（EQ=Primary / 压缩=Tertiary / 混响=Secondary…），旁通时褪色；
+///     刻意用**实色**：代码里造的 GradientStop 没有资源宿主，DynamicResource 停靠点会解析为透明
+///     （md3.color.* 这类颜色键只在 XAML/资源字典里有宿主，用法示范见 ControlGalleryWindow.axaml）；
 ///   · 选中：底色升 surface-container-high、描边 primary；悬停：描边 outline；
 ///   · 旁通（IsBypassed 或电源关）：底色降到 surface-container-low、色条褪成 outline-variant、
 ///     内容区 50% 不透明度 + 状态角标（旁通/关）——形状保留，一眼能看出"还在链上但不过声"；
 ///   · 禁用：50% 不透明度（容器类刻意比 MD3 控件的 38% 亮一档，否则内容完全不可读）。
 ///
-/// 用到的颜色池键：md3.surface-container{,-low,-high}、md3.outline{,-variant}、md3.primary、
-///   md3.on-surface{,-variant}、md3.surface-container-highest + md3.color.{primary,secondary,
-///   tertiary,error,on-error-variant…}（强调色条渐变）。
+/// 用到的颜色池键：md3.surface-container{,-low,-high,-highest}、md3.outline{,-variant}、md3.primary、
+///   md3.on-surface{,-variant}，以及 <see cref="Md3RackKit.BrushKey"/>（Accent 角色 → md3.{primary,
+///   secondary,tertiary,…}）。
 /// 后续接线点：IsPowered 接 UTrack.MixFx.{Eq,Comp,Reverb}Enabled 的双向绑定、
 ///   IsBypassed 接总开关 Enabled=false、PowerToggled 经 DocManager.ExecuteCmd 落库（本轮只读不写）。
 /// </summary>
