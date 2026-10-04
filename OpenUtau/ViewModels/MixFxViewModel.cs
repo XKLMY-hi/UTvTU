@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using OpenUtau.Core;
 using OpenUtau.Core.SignalChain.Effects;
 using OpenUtau.Core.Ustx;
 using OpenUtau.Core.Util;
@@ -16,6 +17,10 @@ namespace OpenUtau.App.ViewModels {
     /// Backing view-model for the per-track Track Polish dialog.
     /// Operates on a single <see cref="UTrack"/>'s <see cref="UMixFx"/> instance.
     /// User presets (full-rack snapshots) live in <see cref="Preferences"/>.
+    ///
+    /// 每一次编辑都**立即写回轨道**，所以播放时旋钮是即时可听的；
+    /// <see cref="Revert"/> 回到窗口打开时的快照（取消 / ESC），
+    /// <see cref="Apply"/> 保留当前状态（确定 / 直接关窗）。
     /// </summary>
     public class MixFxViewModel : ViewModelBase {
         public class PresetOption {
@@ -28,7 +33,7 @@ namespace OpenUtau.App.ViewModels {
             public override string ToString() => Label;
         }
 
-        public string TrackName { get; }
+        [Reactive] public string TrackName { get; set; }
 
         public List<PresetOption> EqPresets { get; }
         public List<PresetOption> CompPresets { get; }
@@ -41,6 +46,11 @@ namespace OpenUtau.App.ViewModels {
         private readonly Preferences.MixFxUserPreset defaultPreset;
 
         [Reactive] public bool Enabled { get; set; }
+        // 模块电源开关（冻结契约：EqEnabled/CompEnabled/ReverbEnabled）。
+        // 旧的 EqBypassed 等是反向别名，仅供旧 ustx 迁移，不做绑定。
+        [Reactive] public bool EqEnabled { get; set; }
+        [Reactive] public bool CompEnabled { get; set; }
+        [Reactive] public bool ReverbEnabled { get; set; }
         [Reactive] public PresetOption? SelectedEq { get; set; }
         [Reactive] public PresetOption? SelectedComp { get; set; }
         [Reactive] public PresetOption? SelectedReverb { get; set; }
@@ -73,8 +83,18 @@ namespace OpenUtau.App.ViewModels {
 
         public Func<Task<string?>>? AskForName;
 
+        /// <summary>
+        /// 本次打开是否真的动过参数。决定"直接关窗"时要不要把工程标记为已修改
+        /// （未动过参数就关窗 → 不该让用户看到"有未保存改动"）。
+        /// </summary>
+        public bool IsDirty => dirty;
+
         private readonly UTrack track;
+        // 窗口打开时轨道的 MixFx 快照；Revert（取消 / ESC）时放回。
+        private readonly UMixFx? original;
         private bool suspendBindings;
+        // 是否真的动过参数（决定关窗时要不要把工程标记为已修改）。
+        private bool dirty;
 
         public MixFxViewModel() : this(null) { }
 
@@ -102,10 +122,14 @@ namespace OpenUtau.App.ViewModels {
             }
 
             // Seed dialog state from track's existing FX, or sensible defaults.
+            original = track?.MixFx;
             var fx = track?.MixFx ?? new UMixFx();
             suspendBindings = true;
             try {
                 Enabled = track?.MixFx?.Enabled ?? false;
+                EqEnabled = fx.EqEnabled;
+                CompEnabled = fx.CompEnabled;
+                ReverbEnabled = fx.ReverbEnabled;
                 SelectedEq = FindOrFirst(EqPresets, fx.EqPreset);
                 SelectedComp = FindOrFirst(CompPresets, fx.CompPreset);
                 SelectedReverb = FindOrFirst(ReverbPresets, fx.ReverbPreset);
@@ -125,15 +149,33 @@ namespace OpenUtau.App.ViewModels {
                 suspendBindings = false;
             }
 
-            // Picking a preset reloads its parameters into the sliders.
-            this.WhenAnyValue(x => x.SelectedEq).Subscribe(opt => { if (opt != null) LoadEqPreset(opt.Key); });
-            this.WhenAnyValue(x => x.SelectedComp).Subscribe(opt => { if (opt != null) LoadCompPreset(opt.Key); });
-            this.WhenAnyValue(x => x.SelectedReverb).Subscribe(opt => { if (opt != null) LoadReverbPreset(opt.Key); });
-            this.WhenAnyValue(x => x.SelectedUserPreset).Subscribe(p => { if (p != null) LoadUserPreset(p); });
+            // Picking a preset reloads its parameters into the knobs.
+            // WhenAnyValue 订阅时会立刻发一次当前值 → 期间挂起绑定，
+            // 否则会把轨道已存的值覆盖成预设值（打开即失真）。
+            suspendBindings = true;
+            try {
+                this.WhenAnyValue(x => x.SelectedEq).Subscribe(opt => { if (opt != null) LoadEqPreset(opt.Key); });
+                this.WhenAnyValue(x => x.SelectedComp).Subscribe(opt => { if (opt != null) LoadCompPreset(opt.Key); });
+                this.WhenAnyValue(x => x.SelectedReverb).Subscribe(opt => { if (opt != null) LoadReverbPreset(opt.Key); });
+                this.WhenAnyValue(x => x.SelectedUserPreset).Subscribe(p => { if (p != null) LoadUserPreset(p); });
+            } finally {
+                suspendBindings = false;
+            }
 
             this.WhenAnyValue(x => x.SelectedUserPreset)
                 .Select(p => p != null && !ReferenceEquals(p, defaultPreset))
                 .ToProperty(this, x => x.CanDeleteSelectedPreset, out canDeleteSelectedPreset);
+
+            // Live preview: any edit replaces the track's MixFx with a fresh
+            // snapshot.  Swapping the reference (rather than mutating it)
+            // means the audio thread never sees a half-updated set.
+            // TrackName 只是窗口标题的同步（轨道重命名），不是音色参数，不参与回写。
+            Changed.Where(e => e.PropertyName != nameof(TrackName)).Subscribe(_ => {
+                if (track != null) {
+                    track.MixFx = BuildUMixFx();
+                }
+                dirty = true;
+            });
 
             ApplyRecommendedCommand = ReactiveCommand.Create(ApplyRecommended);
             SaveUserPresetCommand = ReactiveCommand.CreateFromTask(SaveUserPresetAsync);
@@ -159,6 +201,7 @@ namespace OpenUtau.App.ViewModels {
             var r = FxPresets.Reverb["small_room"];
             return new UMixFx {
                 Enabled = true,
+                EqEnabled = true, CompEnabled = true, ReverbEnabled = true,
                 EqPreset = "vocal_air",
                 EqLowDb = e.LowDb, EqMidFreq = e.MidFreq, EqMidDb = e.MidDb, EqHighDb = e.HighDb,
                 CompPreset = "gentle",
@@ -214,6 +257,9 @@ namespace OpenUtau.App.ViewModels {
             suspendBindings = true;
             try {
                 Enabled = fx.Enabled || Enabled;
+                EqEnabled = fx.EqEnabled;
+                CompEnabled = fx.CompEnabled;
+                ReverbEnabled = fx.ReverbEnabled;
                 SelectedEq = FindOrFirst(EqPresets, fx.EqPreset);
                 SelectedComp = FindOrFirst(CompPresets, fx.CompPreset);
                 SelectedReverb = FindOrFirst(ReverbPresets, fx.ReverbPreset);
@@ -276,6 +322,9 @@ namespace OpenUtau.App.ViewModels {
         public UMixFx BuildUMixFx() {
             return new UMixFx {
                 Enabled = Enabled,
+                EqEnabled = EqEnabled,
+                CompEnabled = CompEnabled,
+                ReverbEnabled = ReverbEnabled,
                 EqPreset = SelectedEq?.Key ?? FxPresets.Off,
                 CompPreset = SelectedComp?.Key ?? FxPresets.Off,
                 ReverbPreset = SelectedReverb?.Key ?? FxPresets.Off,
@@ -286,13 +335,31 @@ namespace OpenUtau.App.ViewModels {
             };
         }
 
-        /// <summary>Commit dialog state back to the track + Preferences.  Called on OK.</summary>
+        /// <summary>撤销实时预览：把轨道恢复成窗口打开时的 <see cref="UMixFx"/>（取消 / ESC）。</summary>
+        public void Revert() {
+            if (track != null) {
+                // UTrack.MixFx 的注解是非空，但语义上 null 就是"无效果"（旧 ustx 即 null），
+                // 所以这里按可空还原打开时的状态。
+                track.MixFx = original!;
+            }
+        }
+
+        /// <summary>保留改动并把工程标记为已修改（确定）。</summary>
         public void Apply() {
             if (track != null) {
                 track.MixFx = BuildUMixFx();
             }
             Preferences.Default.MixFxApplyOnExportMixdown = ApplyOnExportMixdown;
             Preferences.Save();
+            // 确定会具现化 track.MixFx（原本可能为 null），属于模型变更，无条件标记。
+            DocManager.Inst.MarkProjectModified();
+        }
+
+        /// <summary>直接关窗（保留改动）：只有真的动过参数才标记工程已修改。</summary>
+        public void MarkModifiedIfDirty() {
+            if (dirty) {
+                DocManager.Inst.MarkProjectModified();
+            }
         }
     }
 }

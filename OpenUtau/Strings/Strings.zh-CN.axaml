@@ -1274,4 +1274,12 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="fxrack.hint.drag">拖拽排序 · 后续接线</system:String>
   <system:String x:Key="fxrack.empty">本轨道暂无效果模块</system:String>
   <system:String x:Key="fxcard.bypass">旁通</system:String>
+  <!-- fx-ui: effects rack (实时效果机架三面板) -->
+  <system:String x:Key="mixfx.rack.track">轨道</system:String>
+  <system:String x:Key="mixfx.rack.power">电源</system:String>
+  <system:String x:Key="mixfx.rack.power.tip">旁通该轨道的整个效果机架</system:String>
+  <system:String x:Key="mixfx.rack.module.tip">开关此模块</system:String>
+  <system:String x:Key="mixfx.rack.dry">干声</system:String>
+  <system:String x:Key="mixfx.rack.hint">播放中改动实时可听；取消或按 Esc 恢复到打开本窗口时的设置。</system:String>
+  <!-- /fx-ui: effects rack -->
 </ResourceDictionary>

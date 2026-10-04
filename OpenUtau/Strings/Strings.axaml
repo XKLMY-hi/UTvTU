@@ -1143,4 +1143,12 @@ General
   <system:String x:Key="fxrack.hint.drag">Drag to reorder · wired in a later round</system:String>
   <system:String x:Key="fxrack.empty">No effect modules on this track</system:String>
   <system:String x:Key="fxcard.bypass">Bypassed</system:String>
+  <!-- fx-ui: effects rack (实时效果机架三面板) -->
+  <system:String x:Key="mixfx.rack.track">Track</system:String>
+  <system:String x:Key="mixfx.rack.power">Power</system:String>
+  <system:String x:Key="mixfx.rack.power.tip">Bypass the whole rack on this track</system:String>
+  <system:String x:Key="mixfx.rack.module.tip">Turn this module on or off</system:String>
+  <system:String x:Key="mixfx.rack.dry">DRY</system:String>
+  <system:String x:Key="mixfx.rack.hint">Changes are heard live while playing. Cancel or Esc restores the settings from when this window opened.</system:String>
+  <!-- /fx-ui: effects rack -->
 </ResourceDictionary>
