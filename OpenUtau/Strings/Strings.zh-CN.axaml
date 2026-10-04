@@ -1243,4 +1243,13 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="window.maximize">最大化</system:String>
   <system:String x:Key="window.restore">还原</system:String>
   <system:String x:Key="window.close">关闭</system:String>
+
+  <!-- fx-ui: effects rack (实时效果机架三面板) -->
+  <system:String x:Key="mixfx.rack.track">轨道</system:String>
+  <system:String x:Key="mixfx.rack.power">电源</system:String>
+  <system:String x:Key="mixfx.rack.power.tip">旁通该轨道的整个效果机架</system:String>
+  <system:String x:Key="mixfx.rack.module.tip">开关此模块</system:String>
+  <system:String x:Key="mixfx.rack.dry">干声</system:String>
+  <system:String x:Key="mixfx.rack.hint">播放中改动实时可听；取消或按 Esc 恢复到打开本窗口时的设置。</system:String>
+  <!-- /fx-ui: effects rack -->
 </ResourceDictionary>
