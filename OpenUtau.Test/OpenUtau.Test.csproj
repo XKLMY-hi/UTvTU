@@ -55,4 +55,16 @@
     <None Include="..\OpenUtau\Styles\Md3Menus.axaml" Link="Styles\Md3Menus.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Views\MixFxDialog.axaml" Link="Views\MixFxDialog.axaml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+
+  <!-- W12：单文件 .vst3 与「老式 bundle 回退」都走子进程探针（VstProbeProcess 在 <appdir> 下找
+       vst_probe.exe）。测试宿主过去不复制它 ⇒ 扫描链在测试环境里必然空转，所有单文件 VST3
+       都扫不到（会被误读成"这台机器没有插件"）。与主工程 OpenUtau.csproj 的 CopyVstProbe 同款做法。 -->
+  <Target Name="CopyVstProbeToTestOutput" AfterTargets="Build">
+    <MSBuild Projects="..\VstProbe\VstProbe.csproj" Targets="Build" />
+    <!-- 复制 vst_probe 全部产物：apphost 运行需要同目录的 dll + runtimeconfig.json -->
+    <ItemGroup>
+      <VstProbeFiles Include="..\VstProbe\bin\$(Configuration)\net8.0\vst_probe.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(VstProbeFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

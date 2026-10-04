@@ -15,6 +15,7 @@ using OpenUtau.App.Views;
 using OpenUtau.Core;
 using OpenUtau.Core.Util;
 using OpenUtau.Core.Vst;
+using OpenUtau.Test.TestSupport;
 using OpenUtau.Theming;
 using Xunit;
 
@@ -415,14 +416,19 @@ namespace OpenUtau.Test.App {
             });
         }
 
+        /// <summary>
+        /// 空表 ⇒ 播种 + 自动首扫（且只扫一次）；缓存已有插件 ⇒ **不扫**（返回 null，无后台残留）。
+        /// W12：`EnsureFirstScan` 返回首扫任务，用例 await 它 —— 不留"扫描还在跑、用例已结束"的窗口。
+        /// </summary>
         [AvaloniaFact]
-        public void Browser_EnsureFirstScan_SeedsAndScansOnlyWhenEmpty() {
-            WithVstPathPrefs(() => {
+        public async Task Browser_EnsureFirstScan_SeedsAndScansOnlyWhenEmpty() {
+            List<string> backupPaths = Preferences.Default.VstScanPaths?.ToList() ?? new List<string>();
+            bool backupSeeded = Preferences.Default.VstScanPathsSeeded;
+            try {
                 using var folders = new FakeFolders();
                 Preferences.Default.VstScanPaths = new List<string>();
                 Preferences.Default.VstScanPathsSeeded = false;
 
-                // 空表：应当播种 + 自动首扫（且只扫一次）
                 var plugins = new List<VstPluginInfo>();
                 int scans = 0;
                 using var vm = new PluginBrowserViewModel(
@@ -432,28 +438,27 @@ namespace OpenUtau.Test.App {
                         plugins.Add(Info("uid-a", "Amp", "Acme", VstPluginType.VST3));   // 首扫后有了
                     });
                 Assert.Empty(vm.Plugins);
-                vm.EnsureFirstScan(Preferences.VstPathPlatform.Windows, folders.Get);
-                vm.EnsureFirstScan(Preferences.VstPathPlatform.Windows, folders.Get);   // 幂等
-                for (int i = 0; i < 200 && scans == 0; i++) {
-                    Dispatcher.UIThread.RunJobs();
-                    System.Threading.Thread.Sleep(5);
-                }
+                await vm.EnsureFirstScan(Preferences.VstPathPlatform.Windows, folders.Get);
+                Assert.Null(vm.EnsureFirstScan(Preferences.VstPathPlatform.Windows, folders.Get));   // 幂等：第二次不再触发（返回 null）
+
                 Assert.Equal(1, scans);
                 Assert.Equal(2, vm.ScanPaths.Count);        // 播种的标准路径进了页面列表
                 Assert.Equal(2, Preferences.Default.VstScanPaths.Count);
-                for (int i = 0; i < 200 && vm.Plugins.Count == 0; i++) {
-                    Dispatcher.UIThread.RunJobs();
-                    System.Threading.Thread.Sleep(5);
-                }
                 Assert.Single(vm.Plugins);                  // 首扫结果落到列表
+                Assert.False(vm.IsScanning);
 
-                // 缓存里已有插件：不再自动扫
+                // 缓存里已有插件：不再自动扫（返回 null 即"没触发扫描"）
                 int scans2 = 0;
                 using var cached = new PluginBrowserViewModel(() => SamplePlugins(), () => scans2++);
-                cached.EnsureFirstScan(Preferences.VstPathPlatform.Windows, folders.Get);
-                Dispatcher.UIThread.RunJobs();
+                Task? triggered = cached.EnsureFirstScan(Preferences.VstPathPlatform.Windows, folders.Get);
+                Assert.Null(triggered);
                 Assert.Equal(0, scans2);
-            });
+                Assert.Equal(2, cached.Plugins.Count);      // 缓存里的插件照常显示
+            } finally {
+                Preferences.Default.VstScanPaths = backupPaths;
+                Preferences.Default.VstScanPathsSeeded = backupSeeded;
+                Preferences.Save();
+            }
         }
 
         [AvaloniaFact]
@@ -481,42 +486,47 @@ namespace OpenUtau.Test.App {
             }
         }
 
-        // ── 文案 ────────────────────────────────────────────────────────────
+        // ── 文案（W12：直接读资源字典，不再动进程级语言状态）────────────────
 
+        /// <summary>
+        /// 新增键在 EN / zh 两侧都存在且取值不同（取值相同 ⇒ 该键在 zh 缺失、回退成了英文）。
+        /// **不调用 App.SetLanguage**：语言是进程级全局状态，切换窗口期会污染并行用例（集成树里
+        /// 那次"Light 偶发失败"最可能的来源）。直接加载两份字典还顺带断言**键集完全一致**。
+        /// </summary>
         [AvaloniaFact]
         public void EffectsTab_NewKeys_ResolveInBothLanguages() {
-            var en = new Dictionary<string, string>();
-            OpenUtau.App.App.SetLanguage("en-US");
+            ResourceDictionary enDict = StringDictionaryProbe.English();
+            ResourceDictionary zhDict = StringDictionaryProbe.Chinese();
+
+            // 两个语言文件的键集必须完全一致（新增/漏翻会立刻暴露）
+            var enKeys = StringDictionaryProbe.Keys(enDict);
+            var zhKeys = StringDictionaryProbe.Keys(zhDict);
+            var missingInZh = enKeys.Except(zhKeys).OrderBy(k => k, StringComparer.Ordinal).ToList();
+            var missingInEn = zhKeys.Except(enKeys).OrderBy(k => k, StringComparer.Ordinal).ToList();
+            Assert.True(missingInZh.Count == 0, "zh 缺键：" + string.Join(", ", missingInZh));
+            Assert.True(missingInEn.Count == 0, "en 缺键：" + string.Join(", ", missingInEn));
+
             foreach (string key in NewKeys) {
-                Assert.True(ThemeManager.TryGetString(key, out string value), $"EN 缺键：{key}");
-                Assert.NotEqual(key, value);
-                Assert.False(string.IsNullOrWhiteSpace(value), $"EN 空值：{key}");
-                en[key] = value;
-            }
-            OpenUtau.App.App.SetLanguage("zh-CN");
-            try {
-                foreach (string key in NewKeys) {
-                    Assert.True(ThemeManager.TryGetString(key, out string value), $"zh-CN 缺键：{key}");
-                    Assert.NotEqual(key, value);
-                    if (LanguageNeutralKeys.Contains(key)) {
-                        Assert.Equal(en[key], value);   // 路径示例：两语相同（有意为之）
-                    } else {
-                        // 与英文不同 ⇒ zh 字典确实有该键（否则会回退成英文值）
-                        Assert.NotEqual(en[key], value);
-                    }
+                string? en = StringDictionaryProbe.Value(enDict, key);
+                string? zh = StringDictionaryProbe.Value(zhDict, key);
+                Assert.False(string.IsNullOrWhiteSpace(en), $"EN 缺键/空值：{key}");
+                Assert.False(string.IsNullOrWhiteSpace(zh), $"zh-CN 缺键/空值：{key}");
+                if (LanguageNeutralKeys.Contains(key)) {
+                    Assert.Equal(en, zh);      // 路径示例：两语相同（有意为之）
+                } else {
+                    Assert.NotEqual(en, zh);
                 }
-            } finally {
-                OpenUtau.App.App.SetLanguage("en-US");
             }
         }
 
         /// <summary>复用既有键（不新增平行文案）：路径管理按钮与重扫按钮沿用偏好设置那套。</summary>
         [AvaloniaFact]
         public void EffectsTab_ReusesPreferenceKeys() {
-            OpenUtau.App.App.SetLanguage("en-US");
+            ResourceDictionary en = StringDictionaryProbe.English();
+            ResourceDictionary zh = StringDictionaryProbe.Chinese();
             foreach (string key in new[] { "prefs.vst.add", "prefs.vst.remove", "prefs.vst.rescan", "prefs.vst.scanpaths" }) {
-                Assert.True(ThemeManager.TryGetString(key, out string value), $"缺键：{key}");
-                Assert.NotEqual(key, value);
+                Assert.False(string.IsNullOrWhiteSpace(StringDictionaryProbe.Value(en, key)), $"EN 缺键：{key}");
+                Assert.False(string.IsNullOrWhiteSpace(StringDictionaryProbe.Value(zh, key)), $"zh 缺键：{key}");
             }
         }
     }
