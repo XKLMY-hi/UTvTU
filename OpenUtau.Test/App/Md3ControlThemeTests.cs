@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -143,8 +143,17 @@ namespace OpenUtau.Test.App {
             foreach (string sel in new[] { "TextBox", "ComboBox", "CheckBox, RadioButton", "ToggleSwitch", "ListBox", "Slider" }) {
                 Assert.Contains($"Selector=\"{sel}\"", xaml);
             }
+            // 2026-10 契约更新：选择类控件（CheckBox / RadioButton / ToggleSwitch / Slider / ProgressBar）
+            // 不再靠"覆盖 Fluent 画刷键"取巧上色，而是接管**自有 ControlTheme**
+            //（Styles/Md3SelectionThemes.axaml，模板 + 状态色全由我们定义，颜色只取 md3 池角色）。
+            // Md3Controls 里保留的只剩几何规格（字号/最小高度/内边距），状态色不再由 Fluent 决定。
+            string selection = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "Md3SelectionThemes.axaml"));
+            foreach (string type in new[] { "CheckBox", "RadioButton", "ToggleSwitch", "Slider", "ProgressBar" }) {
+                Assert.Contains($"TargetType=\"{type}\"", selection);            // 自有 ControlTheme
+                Assert.Contains($"<Style Selector=\"{type}\">", selection);      // 同文件挂载
+            }
             // 说明：Fluent 主题键（含画刷）与隐式 ControlTheme 一样无法从外部覆盖（先注册者优先），
-            // 因此"模板部件级状态色"仍由 Fluent 决定；我们控制的是控件级属性与规格。
+            // 故**仍在用 Fluent 模板**的控件（TextBox/ComboBox/ListBox 等）的外观只能写在控件级属性上。
         }
     }
 }
