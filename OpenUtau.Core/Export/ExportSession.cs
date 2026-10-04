@@ -22,7 +22,10 @@ namespace OpenUtau.Core.Export {
         public sealed class Options {
             /// <summary>false = 整曲 mixdown；true = 逐轨导出。</summary>
             public bool PerTrack = false;
-            /// <summary>整曲导出是否含效果链（分轨恒为干轨）。</summary>
+            /// <summary>
+            /// 整曲导出是否含效果链（分轨恒为干轨）。true = MixFxMode.Snapshot：
+            /// 建链时克隆一次 UMixFx，导出结果确定、不随导出中的参数改动漂移。
+            /// </summary>
             public bool ApplyMixFx = true;
             /// <summary>分轨导出的轨道过滤（null = 全部轨道）。</summary>
             public System.Collections.Generic.IReadOnlyCollection<int>? TrackFilter;

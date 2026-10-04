@@ -8,8 +8,10 @@ namespace OpenUtau.Core.SignalChain {
     /// then applies a list of IEffect processors in series before additively mixing
     /// into the output.
     ///
-    /// Generalised replacement for the old hardcoded FX chain (EQ → Comp → Reverb).
-    /// Accepts any IEffect[] so VST plugins can be inserted alongside built-in FX.
+    /// 分工（实时效果机架移植后）：内置三件套（EQ/压缩/混响）由
+    /// <see cref="MixFxSource"/> 负责（逐块跟随参数 + 开关交叉淡化），本类**只承载
+    /// VST 效果**，位于内置三件套之后（链序：Fader → MixFxSource → EffectChain(VST)）。
+    /// 此前本类会顺带按 UMixFx 构建内置效果，那会与 MixFxSource 重复处理同一信号。
     /// </summary>
     public class EffectChain : ISignalSource {
         // 采样率/声道取全局 AudioSettings（B 阶段格式显式化）
@@ -70,49 +72,16 @@ namespace OpenUtau.Core.SignalChain {
         // ── Factory helpers ───────────────────────────────────────
 
         /// <summary>
-        /// Build an EffectChain from existing UMixFx (backward compatible).
-        /// Returns the inner source unchanged when no FX are enabled.
+        /// 构建只含 VST 效果的链。无效果时原样返回内层源（零开销）。
+        /// 内置三件套不在此处构建——见类注释的分工说明。
         /// </summary>
-        public static ISignalSource Build(ISignalSource inner, Core.Ustx.UMixFx? fx, IEffect[]? extraEffects = null) {
-            var list = new System.Collections.Generic.List<IEffect>();
-
-            if (fx != null && fx.Enabled) {
-                Log.Information($"[EffectChain] Building chain: Eq={!fx.EqBypassed} Comp={!fx.CompBypassed} Rev={!fx.ReverbBypassed}");
-                if (!fx.EqBypassed) {
-                    var eq = new BiquadEQ(AudioSettings.SampleRate, AudioSettings.Channels);
-                    eq.Configure(fx.EqLowDb, fx.EqMidFreq, 0.707, fx.EqMidDb, fx.EqHighDb);
-                    Log.Information($"[EffectChain] EQ bypassed={eq.IsBypassed} low={fx.EqLowDb} midF={fx.EqMidFreq} mid={fx.EqMidDb} high={fx.EqHighDb}");
-                    if (!eq.IsBypassed) list.Add(eq);
-                }
-                if (!fx.CompBypassed) {
-                    var comp = new SimpleCompressor(AudioSettings.SampleRate, AudioSettings.Channels);
-                    FxPresets.CompParams cParams = FxPresets.Comp.TryGetValue(fx.CompPreset ?? FxPresets.Off, out var cp)
-                        ? cp : FxPresets.Comp[FxPresets.Off];
-                    comp.Configure(fx.CompThresholdDb, fx.CompRatio, cParams.AttackMs, cParams.ReleaseMs, fx.CompMakeupDb);
-                    if (!comp.IsBypassed) list.Add(comp);
-                }
-                if (!fx.ReverbBypassed) {
-                    var reverb = new Freeverb(AudioSettings.SampleRate, AudioSettings.Channels);
-                    FxPresets.ReverbParams rParams = FxPresets.Reverb.TryGetValue(fx.ReverbPreset ?? FxPresets.Off, out var rp)
-                        ? rp : FxPresets.Reverb[FxPresets.Off];
-                    double userWet = Math.Clamp(fx.ReverbWet, 0.0, 2.0);
-                    reverb.Configure(fx.ReverbSize, fx.ReverbDamp, rParams.Width,
-                                     rParams.Wet * userWet, rParams.Dry, fx.ReverbPreDelayMs);
-                    if (!reverb.IsBypassed) list.Add(reverb);
-                }
-            }
-
-            if (extraEffects != null) {
-                foreach (var e in extraEffects)
-                    list.Add(e);
-            }
-
-            if (list.Count == 0) {
-                Log.Information("[EffectChain] No active effects — returning inner source unchanged");
+        public static ISignalSource Build(ISignalSource inner, IEffect[]? effects = null) {
+            if (effects == null || effects.Length == 0) {
+                Log.Information("[EffectChain] No VST effects — returning inner source unchanged");
                 return inner;
             }
-            Log.Information($"[EffectChain] Created with {list.Count} effect(s)");
-            return new EffectChain(inner, list.ToArray());
+            Log.Information($"[EffectChain] Created with {effects.Length} VST effect(s)");
+            return new EffectChain(inner, effects);
         }
     }
 }

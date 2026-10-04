@@ -58,6 +58,26 @@ namespace OpenUtau.Core.Render {
         public WaveMix mix;
     }
 
+    /// <summary>
+    /// 轨道效果（MixFx + VST）的接线模式——取代旧的 <c>applyMixFx:bool</c> 单开关。
+    /// 语义与旧布尔值的对应：<see cref="Off"/> = false，<see cref="Snapshot"/> = true。
+    /// </summary>
+    public enum MixFxMode {
+        /// <summary>干轨：整条效果链都不接（DJ 干声、分轨导出）。</summary>
+        Off = 0,
+        /// <summary>
+        /// 固定快照：建链时把 <c>UTrack.MixFx</c> Clone 一次，导出结果确定、不随
+        /// 导出过程中的参数改动漂移；轨道空转（无 FX / 主开关关 / 模块全透传）时
+        /// 原样透传内层源。
+        /// </summary>
+        Snapshot = 1,
+        /// <summary>
+        /// 实时跟随：逐音频块读取 <c>UTrack.MixFx</c>，播放中调参一个块内可听，
+        /// 不触发重渲染、不重启播放（播放 / 录制混音走这条）。
+        /// </summary>
+        Live = 2,
+    }
+
     public class RenderEngine {
         readonly UProject project;
         readonly int startTick;
@@ -74,13 +94,18 @@ namespace OpenUtau.Core.Render {
             this.cache = cache;
         }
 
-        // for playback or export
+        // for export（离线：固定快照）
         public Tuple<WaveMix, List<Fader>> RenderMixdown(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation, bool wait = false) {
-            return RenderMixdown(uiScheduler, ref cancellation, wait, applyMixFx: true);
+            return RenderMixdown(uiScheduler, ref cancellation, wait, MixFxMode.Snapshot);
         }
 
-        // for playback or export -- explicit MixFx control (export dialog passes false to keep dry stems)
+        // 旧布尔入口（调用点兼容）：true = 导出快照，false = 干轨（分轨/干声导出）。
         public Tuple<WaveMix, List<Fader>> RenderMixdown(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation, bool wait, bool applyMixFx) {
+            return RenderMixdown(uiScheduler, ref cancellation, wait, applyMixFx ? MixFxMode.Snapshot : MixFxMode.Off);
+        }
+
+        /// <summary>离线混音渲染核心（导出/录制共用）。</summary>
+        public Tuple<WaveMix, List<Fader>> RenderMixdown(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation, bool wait, MixFxMode mode) {
             var newCancellation = new CancellationTokenSource();
             var oldCancellation = Interlocked.Exchange(ref cancellation, newCancellation);
             if (oldCancellation != null) {
@@ -94,7 +119,7 @@ namespace OpenUtau.Core.Render {
             // AudioOutput 回调线程已退出（B1 竞态）。Flush 收敛到安全点：
             // StopPlayback / StartPlayback（Stop+drain 后）/ 渲染与导出段尾部。
             var requests = FilterRequests(PrepareRequests(), startMs, endMs);
-            var trackOutputs = BuildTrackOutputs(requests, applyMixFx, faders);
+            var trackOutputs = BuildTrackOutputs(requests, mode, faders);
             var task = Task.Run(async () => {
                 await RenderRequestsAsync(requests, newCancellation, playing: !wait);
             });
@@ -141,7 +166,8 @@ namespace OpenUtau.Core.Render {
 
             var faders = new List<Fader>();
             var requests = FilterRequests(PrepareRequests(), startMs, endMs);
-            var trackOutputs = BuildTrackOutputs(requests, applyMixFx: true, faders);
+            // 播放：内置三件套走实时包装（逐块跟随 UTrack.MixFx），VST 链在其上。
+            var trackOutputs = BuildTrackOutputs(requests, MixFxMode.Live, faders);
 
             // master 峰值由 MasterAdapter.Read 统计（主推子 Scale 应用之后 = 实际输出）
             var master = new MasterAdapter(new WaveMix(trackOutputs));
@@ -163,13 +189,12 @@ namespace OpenUtau.Core.Render {
         }
 
         /// <summary>
-        /// 逐轨构建信号链（WaveMix → Fader → EffectChain/VST → LevelTracker）。
-        /// 同步操作，不含任何渲染。播放与导出共用。
+        /// 逐轨构建信号链（WaveMix → Fader → MixFxSource(内置三件套) → EffectChain(VST) → LevelTracker）。
+        /// 同步操作，不含任何渲染。播放与导出共用，效果接线由 <paramref name="mode"/> 决定。
         /// </summary>
-        private List<ISignalSource> BuildTrackOutputs(RenderPartRequest[] requests, bool applyMixFx, List<Fader> faders) {
-            // Each track is wrapped with its own UMixFx (no global FX bus).
-            // Tracks with MixFx == null or Enabled = false pass through unchanged
-            // (zero-overhead bypass).  All tracks sum into a single mix.
+        private List<ISignalSource> BuildTrackOutputs(RenderPartRequest[] requests, MixFxMode mode, List<Fader> faders) {
+            // 每轨各自持有 UMixFx（没有全局 FX 总线）。Off 时整条效果链不接；
+            // Snapshot/Live 下轨道空转（无 FX / 主开关关 / 模块全透传）原样透传。
             var trackOutputs = new List<ISignalSource>();
             for (int i = 0; i < project.tracks.Count; ++i) {
                 if (trackNo != -1 && trackNo != i) {
@@ -197,7 +222,7 @@ namespace OpenUtau.Core.Render {
 
                 // Collect VST effects — lock-free read from pre-loaded instances
                 var vstEffects = new System.Collections.Generic.List<SignalChain.Effects.IEffect>();
-                if (applyMixFx && track.VstSlots != null) {
+                if (mode != MixFxMode.Off && track.VstSlots != null) {
                     var active = Vst.VstPluginManager.Inst.GetActiveEffects(track.TrackNo);
                     if (active.Count == 0 && track.VstSlots.Any(s => s.IsLoaded && !s.Bypassed)) {
                         // 兜底：槽位有插件但实例未加载（异步加载未触发/未完成/工程
@@ -213,9 +238,7 @@ namespace OpenUtau.Core.Render {
                         vstEffects.Add(fx);
                 }
 
-                ISignalSource trackOut = applyMixFx
-                    ? EffectChain.Build(fader, track.MixFx, vstEffects.ToArray())
-                    : (ISignalSource)fader;
+                ISignalSource trackOut = WrapTrackFx(fader, track, mode, vstEffects.ToArray());
 
                 // LevelTracker wraps the FINAL per-track output (fader + FX),
                 // so the mixer meter shows the actual audible signal.
@@ -224,6 +247,22 @@ namespace OpenUtau.Core.Render {
                 trackOutputs.Add(tracker);
             }
             return trackOutputs;
+        }
+
+        /// <summary>
+        /// 单轨效果接线（可单测的接缝）：内置三件套（EQ/压缩/混响）由
+        /// <see cref="MixFxSource"/> 承载，VST 链在其上，避免同一信号被处理两遍。
+        /// <see cref="MixFxMode.Off"/> 时原样返回（连 VST 也不接，= 旧 applyMixFx:false）。
+        /// </summary>
+        internal static ISignalSource WrapTrackFx(ISignalSource inner, UTrack track, MixFxMode mode,
+                                                  SignalChain.Effects.IEffect[] vstEffects) {
+            if (mode == MixFxMode.Off) {
+                return inner;
+            }
+            ISignalSource fx = mode == MixFxMode.Live
+                ? MixFxSource.WrapLive(inner, track)
+                : MixFxSource.WrapWith(inner, track.MixFx);
+            return EffectChain.Build(fx, vstEffects);
         }
 
         // for export
@@ -494,7 +533,10 @@ namespace OpenUtau.Core.Render {
             return engine.RenderProject(uiScheduler, ref cancellation);
         }
 
-        /// <summary>离线混音渲染（播放/导出共用；导出干轨传 applyMixFx:false）。</summary>
+        /// <summary>
+        /// 离线混音渲染（导出用；固定快照，导出确定）。导出干轨传 applyMixFx:false。
+        /// 播放走 <see cref="RenderProject"/>（MixFxMode.Live）。
+        /// </summary>
         public static Tuple<WaveMix, List<Fader>> RenderMixdown(
             UProject project, TaskScheduler uiScheduler, ref CancellationTokenSource cancellation,
             bool wait = false, bool applyMixFx = true,
