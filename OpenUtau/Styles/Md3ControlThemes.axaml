@@ -7,6 +7,10 @@
        主题在 App.Resources、引用它的样式在另一个 Styles 文件 → 装不上去。
        这里把两者放同一字典，再用应用级 Style 显式 Setter Property="Theme"
        （应用级 Style 优先级已被反复验证为最高）。
+
+       T8 起：**类变体的颜色也在本文件内**（`^.primary` / `^.outline` / `^.danger` 及其
+       悬浮·按下态）。原因：应用级 Style setter 压过 ControlTheme setter —— 变体颜色留在
+       应用级样式里会反过来压住主题（还会在 ContentPresenter 上刷没有圆角的色块）。
        ═══════════════════════════════════════════════════════════════════════ -->
   <Styles.Resources>
     <ControlTheme x:Key="Md3ButtonTheme" TargetType="Button">
@@ -65,6 +69,33 @@
       <Style Selector="^.primary:pointerover">
         <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
         <Setter Property="Opacity" Value="0.92"/>
+      </Style>
+      <!-- 按下反馈（T8-A 收敛）：旧实现由应用级样式在 ContentPresenter 上刷固定色方块，
+           现收归主题 —— 深色池下 primary 是浅色容器，on-primary 才是对比色，文字不再压白。 -->
+      <Style Selector="^.primary:pressed">
+        <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="Opacity" Value="0.85"/>
+      </Style>
+      <!-- 描边按钮：显式用 outline 角色（比基础态的 outline-variant 更实），颜色仍归主题 -->
+      <Style Selector="^.outline">
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource md3.outline}"/>
+      </Style>
+      <!-- 危险按钮（T8-A 收敛）：旧实现用固定 #e53935 / #c62828 / White，现改用 error 角色 -->
+      <Style Selector="^.danger">
+        <Setter Property="Foreground" Value="{DynamicResource md3.error}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource md3.error}"/>
+      </Style>
+      <Style Selector="^.danger:pointerover">
+        <Setter Property="Background" Value="{DynamicResource md3.error}"/>
+        <Setter Property="Foreground" Value="{DynamicResource md3.on-error}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource md3.error}"/>
+      </Style>
+      <Style Selector="^.danger:pressed">
+        <Setter Property="Background" Value="{DynamicResource md3.error}"/>
+        <Setter Property="Foreground" Value="{DynamicResource md3.on-error}"/>
+        <Setter Property="Opacity" Value="0.85"/>
       </Style>
       <Style Selector="^.linkButton">
         <Setter Property="Background" Value="Transparent"/>

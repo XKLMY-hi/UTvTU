@@ -264,6 +264,9 @@
                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Grid>
               </Canvas>
+              <!-- 键盘焦点环（T8-C）：与 CheckBox/RadioButton 同一范式，仅 :focus-visible 出现 -->
+              <Border Name="PART_FocusRing" Grid.Row="1" Grid.Column="0" Margin="-3"
+                      CornerRadius="999" BorderThickness="2" IsHitTestVisible="False"/>
             </Grid>
           </Grid>
         </ControlTemplate>
@@ -354,6 +357,14 @@
       <Style Selector="^:checked /template/ ContentPresenter#PART_OffContentPresenter">
         <Setter Property="Opacity" Value="0"/>
       </Style>
+      <!-- 键盘焦点环（T8-C）-->
+      <Style Selector="^ /template/ Border#PART_FocusRing">
+        <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="Opacity" Value="0"/>
+      </Style>
+      <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+        <Setter Property="Opacity" Value="1"/>
+      </Style>
       <Style Selector="^:disabled">
         <Setter Property="Opacity" Value="0.38"/>
       </Style>
@@ -372,8 +383,7 @@
             <Border>
               <Grid Name="SliderContainer">
                 <Grid Name="HorizontalTemplate" ColumnDefinitions="Auto,Auto,1*" RowDefinitions="15,Auto,15"
-                      MinHeight="20">
-                  <Track Name="PART_Track" Grid.Row="1"
+                      MinHeight="20">                  <Track Name="PART_Track" Grid.Row="1"
                          Minimum="{TemplateBinding Minimum}"
                          Maximum="{TemplateBinding Maximum}"
                          Value="{TemplateBinding Value, Mode=TwoWay}"
@@ -409,6 +419,10 @@
                     </Thumb>
                   </Track>
                 </Grid>
+                <!-- 键盘焦点环（T8-C）：套在整条滑轨上。
+                     不能放进 Thumb 内部 —— ControlTheme 里的选择器只允许一次 /template/ 穿越 -->
+                <Border Name="PART_FocusRing" Margin="-3,-1" CornerRadius="999"
+                        BorderThickness="2" IsHitTestVisible="False"/>
               </Grid>
             </Border>
           </DataValidationErrors>
@@ -429,6 +443,14 @@
         <Setter Property="Width" Value="18"/>
         <Setter Property="Height" Value="18"/>
       </Style>
+      <!-- 键盘焦点环（T8-C）：套在整条滑轨上（Thumb 内部放不了 —— 只允许一次 /template/ 穿越） -->
+      <Style Selector="^ /template/ Border#PART_FocusRing">
+        <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="Opacity" Value="0"/>
+      </Style>
+      <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+        <Setter Property="Opacity" Value="1"/>
+      </Style>
       <Style Selector="^:disabled">
         <Setter Property="Opacity" Value="0.38"/>
       </Style>
@@ -442,38 +464,45 @@
       <Setter Property="MinHeight" Value="6"/>
       <Setter Property="Template">
         <ControlTemplate>
-          <Border Name="ProgressBarRoot"
-                  Background="{TemplateBinding Background}"
-                  CornerRadius="{TemplateBinding CornerRadius}"
-                  ClipToBounds="True">
-            <Panel>
-              <Panel Name="DeterminateRoot">
-                <Border Name="PART_Indicator" HorizontalAlignment="Left"
-                        Background="{TemplateBinding Foreground}"
-                        CornerRadius="{TemplateBinding CornerRadius}"/>
+          <!-- 外层 Panel：焦点环不能画在 ProgressBarRoot 内（那层 ClipToBounds 会把环裁掉） -->
+          <Panel>
+            <Border Name="ProgressBarRoot"
+                    Background="{TemplateBinding Background}"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    ClipToBounds="True">
+              <Panel>
+                <Panel Name="DeterminateRoot">
+                  <Border Name="PART_Indicator" HorizontalAlignment="Left"
+                          Background="{TemplateBinding Foreground}"
+                          CornerRadius="{TemplateBinding CornerRadius}"/>
+                </Panel>
+                <Panel Name="IndeterminateRoot">
+                  <Border Name="IndeterminateProgressBarIndicator" HorizontalAlignment="Left"
+                          Background="{TemplateBinding Foreground}"
+                          CornerRadius="{TemplateBinding CornerRadius}">
+                    <Border.RenderTransform>
+                      <TranslateTransform/>
+                    </Border.RenderTransform>
+                  </Border>
+                  <Border Name="IndeterminateProgressBarIndicator2" HorizontalAlignment="Left"
+                          Background="{TemplateBinding Foreground}"
+                          CornerRadius="{TemplateBinding CornerRadius}">
+                    <Border.RenderTransform>
+                      <TranslateTransform/>
+                    </Border.RenderTransform>
+                  </Border>
+                </Panel>
+                <LayoutTransformControl Name="PART_LayoutTransformControl"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <TextBlock Foreground="{TemplateBinding Foreground}"/>
+                </LayoutTransformControl>
               </Panel>
-              <Panel Name="IndeterminateRoot">
-                <Border Name="IndeterminateProgressBarIndicator" HorizontalAlignment="Left"
-                        Background="{TemplateBinding Foreground}"
-                        CornerRadius="{TemplateBinding CornerRadius}">
-                  <Border.RenderTransform>
-                    <TranslateTransform/>
-                  </Border.RenderTransform>
-                </Border>
-                <Border Name="IndeterminateProgressBarIndicator2" HorizontalAlignment="Left"
-                        Background="{TemplateBinding Foreground}"
-                        CornerRadius="{TemplateBinding CornerRadius}">
-                  <Border.RenderTransform>
-                    <TranslateTransform/>
-                  </Border.RenderTransform>
-                </Border>
-              </Panel>
-              <LayoutTransformControl Name="PART_LayoutTransformControl"
-                                      HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock Foreground="{TemplateBinding Foreground}"/>
-              </LayoutTransformControl>
-            </Panel>
-          </Border>
+            </Border>
+            <!-- 键盘焦点环（T8-C）：进度条默认 Focusable=false（非交互指示器，不该进 Tab 序），
+                 视图显式打开 Focusable 时此环立即生效 -->
+            <Border Name="PART_FocusRing" Margin="-2" CornerRadius="999"
+                    BorderThickness="2" IsHitTestVisible="False"/>
+          </Panel>
         </ControlTemplate>
       </Setter>
       <!-- 定时态：显示 PART_Indicator；不定态：换成两条滚动指示条（动画由控件代码驱动这些部件） -->
@@ -523,6 +552,14 @@
       </Style>
       <Style Selector="^ /template/ LayoutTransformControl#PART_LayoutTransformControl">
         <Setter Property="IsVisible" Value="False"/>
+      </Style>
+      <!-- 键盘焦点环（T8-C）-->
+      <Style Selector="^ /template/ Border#PART_FocusRing">
+        <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="Opacity" Value="0"/>
+      </Style>
+      <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+        <Setter Property="Opacity" Value="1"/>
       </Style>
     </ControlTheme>
 

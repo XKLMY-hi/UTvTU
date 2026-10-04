@@ -34,12 +34,14 @@ namespace OpenUtau.Test.App {
         /// <summary>颜色池当前变体下的角色色（跟随应用实际深浅，避免把变体写死）。</summary>
         private static Color Role(Md3Role role) => ColorPool.Current.Color(role);
 
-        private static WindowEx Host(Control content) {
-            // 与应用当前变体对齐（否则颜色池是深色、而样式引用的是浅色资源，断言必然对不上）
-            ColorPool.Initialize(ColorPool.DefaultSeed, Md3SchemeVariant.TonalSpot, ThemeManager.IsDarkMode);
+        private static WindowEx Host(Control content, bool? isDark = null) {
+            // 与应用当前变体对齐（否则颜色池是深色、而样式引用的是浅色资源，断言必然对不上）；
+            // 传 isDark 时按指定变体建，供「两个变体各断言一次」的确定性用例使用（T8-B）。
+            ColorPool.Initialize(ColorPool.DefaultSeed, Md3SchemeVariant.TonalSpot, isDark ?? ThemeManager.IsDarkMode);
             var win = new WindowEx { Width = 400, Height = 200, Content = content };
             win.Show();
             content.ApplyTemplate();
+            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
             return win;
         }
 
@@ -90,16 +92,37 @@ namespace OpenUtau.Test.App {
             Assert.Contains("Selector=\"^.primary\"", theme);
         }
 
+        /// <summary>
+        /// 主按钮实心胶囊：**两个变体各断言一次**（T8-B）。
+        ///
+        /// 历史坑：断言曾隐含依赖「进程当前深浅色」——浅色池的 on-primary 恰好等于旧的应用级
+        /// 覆盖色 #ffffff，于是浅色下过、深色下挂，表现成看执行顺序的 flaky。
+        /// 现在改为显式遍历 Light/Dark 两个池，并额外钉住「深色池下前景绝不能再是白色」。
+        /// </summary>
         [AvaloniaFact]
-        public void Button_PrimaryVariant_IsFilledPill() {
-            var btn = new Button { Content = "save", Classes = { "primary" } };
-            var win = Host(btn);
+        public void Button_PrimaryVariant_IsFilledPill_InBothVariants() {
+            bool original = ColorPool.Current.IsDark;
             try {
-                Assert.Equal(new CornerRadius(999), btn.CornerRadius);
-                Assert.Equal(PoolBrush("md3.primary"), Bg(btn));
-                Assert.Equal(PoolBrush("md3.on-primary"), (btn.Foreground as ISolidColorBrush)?.Color);
+                foreach (bool isDark in new[] { false, true }) {
+                    var btn = new Button { Content = "save", Classes = { "primary" } };
+                    var win = Host(btn, isDark);
+                    try {
+                        Assert.Equal(isDark, ColorPool.Current.IsDark);
+                        Assert.Equal(new CornerRadius(999), btn.CornerRadius);
+                        Assert.Equal(PoolBrush("md3.primary"), Bg(btn));
+                        Assert.Equal(PoolBrush("md3.on-primary"), (btn.Foreground as ISolidColorBrush)?.Color);
+                        Assert.Equal(ColorPool.Current.Color(Md3Role.Primary), Bg(btn));
+                        Assert.Equal(ColorPool.Current.Color(Md3Role.OnPrimary), (btn.Foreground as ISolidColorBrush)?.Color);
+                        if (isDark) {
+                            // 深色池 on-primary 是深色：若哪天又被固定白色压住，这里必须炸
+                            Assert.NotEqual(Avalonia.Media.Colors.White, (btn.Foreground as ISolidColorBrush)?.Color);
+                        }
+                    } finally {
+                        win.Close();
+                    }
+                }
             } finally {
-                win.Close();
+                ColorPool.SetDark(original);   // 归还全局状态，避免污染后续用例
             }
         }
 

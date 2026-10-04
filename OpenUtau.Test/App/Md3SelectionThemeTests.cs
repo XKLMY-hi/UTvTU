@@ -386,19 +386,70 @@ namespace OpenUtau.Test.App {
 
         // ───────────────────────── 无障碍：键盘焦点环 ─────────────────────────
 
+        /// <summary>
+        /// T8-C：五个选择类控件都必须有**键盘焦点视觉**（fx-verify B11：ToggleSwitch/Slider/ProgressBar
+        /// 原先没有焦点部件，Tab 焦点不可见）。断言到部件属性级，不是文本级。
+        /// </summary>
         [AvaloniaFact]
-        public void CheckBox_KeyboardFocus_ShowsPoolFocusRing() {
-            var box = new CheckBox { Content = "选项" };
-            var win = Host(box);
+        public void KeyboardFocus_ShowsPoolFocusRing_OnAllSelectionControls() {
+            var checkBox = new CheckBox { Content = "勾" };
+            var radio = new RadioButton { Content = "选" };
+            var toggle = new ToggleSwitch { Content = "开关" };
+            var slider = new Slider { Width = 200, Minimum = 0, Maximum = 10, Value = 4 };
+            var bar = new ProgressBar { Width = 200, Minimum = 0, Maximum = 100, Value = 40 };
+            var stack = new StackPanel { Children = { checkBox, radio, toggle, slider, bar } };
+            var win = new WindowEx { Width = 320, Height = 360, Content = stack };
+            win.Show();
+            Dispatcher.UIThread.RunJobs();
             try {
-                var ring = Part<Border>(box, "PART_FocusRing");
-                Assert.Equal(PoolBrush("md3.primary"), (ring.BorderBrush as ISolidColorBrush)?.Color);
-                Assert.Equal(0d, ring.Opacity);              // 鼠标点击不该出现焦点环
-                box.Focus(NavigationMethod.Tab);             // 键盘导航焦点
+                var controls = new Control[] { checkBox, radio, toggle, slider, bar };
+                foreach (Control c in controls) {
+                    c.ApplyTemplate();
+                }
                 Dispatcher.UIThread.RunJobs();
-                Assert.Equal(1d, ring.Opacity);
+
+                // 可达性契约：交互控件默认可聚焦（Tab 能到）；进度条是非交互指示器，默认不进 Tab 序
+                Assert.True(checkBox.Focusable && radio.Focusable && toggle.Focusable && slider.Focusable,
+                    "交互类选择控件默认可聚焦 —— 否则键盘用户到不了");
+                Assert.False(bar.Focusable,
+                    "ProgressBar 默认变为可聚焦 —— 请复核 Tab 序与 ARIA 语义（非交互指示器）");
+
+                // Slider 的焦点环套在整条滑轨上，其余控件直接在模板里的盒/轨道外围
+                Border Ring(Control c) => Part<Border>(c, "PART_FocusRing");
+
+                foreach (Control c in controls) {
+                    if (!c.Focusable) {
+                        // ProgressBar 默认不入 Tab 序（非交互指示器，ARIA 语义如此）；
+                        // 视图显式打开 Focusable 时，焦点环必须立刻可用。
+                        c.Focusable = true;
+                    }
+                    Border ring = Ring(c);
+                    Assert.Equal(PoolBrush("md3.primary"), (ring.BorderBrush as ISolidColorBrush)?.Color);
+                    Assert.Equal(0d, ring.Opacity);            // 未聚焦不显示（鼠标点击也不会亮）
+                    c.Focus(NavigationMethod.Tab);             // 键盘导航焦点
+                    Dispatcher.UIThread.RunJobs();
+                    Assert.True(c.IsFocused, $"{c.GetType().Name} 未能获得键盘焦点");
+                    Assert.Equal(1d, ring.Opacity);
+                }
             } finally {
                 win.Close();
+            }
+        }
+
+        [AvaloniaFact]
+        public void FocusRing_IsDeclaredForEverySelectionTheme() {
+            // 文本级兜底：五个主题都必须自带 :focus-visible 焦点环（配合上面的属性级断言）
+            string xaml = ThemeXaml();
+            foreach (string theme in new[] {
+                "Md3CheckBoxTheme", "Md3RadioButtonTheme", "Md3ToggleSwitchTheme",
+                "Md3SliderTheme", "Md3ProgressBarTheme",
+            }) {
+                int start = xaml.IndexOf($"x:Key=\"{theme}\"", StringComparison.Ordinal);
+                Assert.True(start > 0, $"主题缺失：{theme}");
+                int end = xaml.IndexOf("</ControlTheme>", start, StringComparison.Ordinal);
+                string body = xaml[start..end];
+                Assert.Contains("PART_FocusRing", body);
+                Assert.Contains(":focus-visible", body);
             }
         }
 
