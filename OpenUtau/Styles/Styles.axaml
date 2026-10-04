@@ -300,9 +300,10 @@
     <Setter Property="FontSize" Value="13"/>
     <Setter Property="CornerRadius" Value="4"/>
   </Style>
-  <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource AccentBrush1Semi}"/>
-  </Style>
+  <!-- 选中态配色已由 Md3ListBoxItemTheme 的 ^:selected 拥有（secondary-container + on-secondary-container，
+       实测对比度 7.19:1）。此处曾有应用级补丁 `ListBoxItem:selected /template/ ContentPresenter
+       { Background = AccentBrush1Semi }`，它会在主题胶囊内再叠一层 #A699C3，把选中行局部对比度压到 3.49:1
+       （低于 WCAG AA 正文 4.5:1）——同一类"应用级 /template/ 补丁压过 ControlTheme"的问题，故删除。 -->
   <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrushPointerOver}"/>
   </Style>
