@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Text.RegularExpressions;
 using Avalonia;
 using Avalonia.Controls;
@@ -15,7 +17,9 @@ using OpenUtau.App.Views;
 using OpenUtau.Core;
 using OpenUtau.Core.Theming;
 using OpenUtau.Core.Ustx;
+using OpenUtau.Test.TestSupport;
 using OpenUtau.Theming;
+using ReactiveUI;
 using Xunit;
 
 namespace OpenUtau.Test.App {
@@ -27,6 +31,25 @@ namespace OpenUtau.Test.App {
     /// </summary>
     [Collection("Theme")]
     public class MixFxDialogTests {
+        public MixFxDialogTests() {
+            // 让 DocManager.ExecuteCmd 在测试线程内联执行：否则 mainThread 不匹配会被
+            // PostOnUIThread 延后，断言就变成时序敏感（真机复验"静默丢改动"时正是这个陷阱）。
+            DocManagerTestSetup.RunOnCurrentThread();
+        }
+
+        /// <summary>
+        /// 非空工程（2 轨）——刻意避开 <c>DocManager.ChangesSaved</c> 的
+        /// "tracks.Count &lt;= 1 且 parts.Count == 0 即视为已保存"条款；
+        /// 否则在默认工程（UProject() 自带 1 轨 0 片段）上 ChangesSaved 恒为 true，测不出结论。
+        /// </summary>
+        static UProject NonEmptyProject(out UTrack track) {
+            var project = new UProject { Saved = true };                     // UProject() 自带 1 轨
+            project.tracks.Add(new UTrack("Rack B") { TrackNo = project.tracks.Count });
+            track = project.tracks[0];
+            track.TrackName = "Rack A";
+            return project;
+        }
+
         static void UsePool() =>
             ColorPool.Initialize(ColorPool.DefaultSeed, Md3SchemeVariant.TonalSpot, true);
 
@@ -230,6 +253,92 @@ namespace OpenUtau.Test.App {
             } finally {
                 dialog.Close();
             }
+        }
+
+        // ══════════════════════ D1 端到端：VM → DocManager「工程已修改」链路 ══════════════════════
+
+        /// <summary>
+        /// "静默丢改动"缺陷的正解回归：机架旋钮直接改模型（不进 undo 队列），
+        /// 必须让 <see cref="DocManager"/> 判定工程未保存，否则退出不提示保存、30s autosave 跳过。
+        /// 跨层断言（VM → VM.MarkModifiedIfDirty → DocManager.Project.Saved / ChangesSaved），
+        /// 不依赖任何时序或等待。
+        /// </summary>
+        [AvaloniaFact]
+        public void EndToEnd_RackEdit_MarksProjectUnsaved_ViaDocManager() {
+            UsePool();
+            var project = NonEmptyProject(out var track);
+            DocManager.Inst.ExecuteCmd(new LoadProjectNotification(project));
+            Assert.Same(project, DocManager.Inst.Project);
+            Assert.True(project.Saved);
+            Assert.True(DocManager.Inst.ChangesSaved, "基线：干净的 2 轨工程应判定为已保存");
+
+            var snapshot = new UMixFx { Enabled = true, EqLowDb = 0 };
+            track.MixFx = snapshot;
+            var vm = new MixFxViewModel(track);
+
+            // 对照组 A：完全不动参数 → 不标脏，工程状态原封不动
+            Assert.False(vm.IsDirty);
+            vm.MarkModifiedIfDirty();
+            Assert.True(project.Saved, "未动参数时关窗不应把工程标脏");
+            Assert.True(DocManager.Inst.ChangesSaved);
+
+            // 改一个参数（等价于旋钮写入 VM）→ 实时预览换引用 + dirty
+            vm.EqLowDb = vm.EqLowDb + 3;
+            Assert.True(vm.IsDirty);
+            Assert.NotSame(snapshot, track.MixFx);
+            Assert.Equal(3, track.MixFx!.EqLowDb);
+
+            // 直接关窗路径 → DocManager 必须判定为未保存
+            vm.MarkModifiedIfDirty();
+            Assert.False(project.Saved, "改动后必须把工程标为未保存");
+            Assert.False(DocManager.Inst.ChangesSaved,
+                "改动后 ChangesSaved 必须为 false——否则退出不提示保存、autosave 跳过 → 静默丢改动");
+
+            // 对照组 B：Revert 后引用与取值都回到打开时（取消/ESC 语义在 DocManager 链上仍成立）
+            vm.Revert();
+            Assert.Same(snapshot, track.MixFx);
+            Assert.Equal(0, track.MixFx!.EqLowDb);
+        }
+
+        /// <summary>
+        /// D1 的另一处（本轮修复点）：轨道头 fx 开关是**真实工程变更**（首次开启会创建 UMixFx），
+        /// 必须标脏 + 发 MixFxChangedNotification 刷新轨道头徽标；值未变化时不得空转。
+        /// </summary>
+        [AvaloniaFact]
+        public void EndToEnd_TrackHeaderFxSwitch_MarksProjectUnsaved_AndNotifies() {
+            UsePool();
+            var project = NonEmptyProject(out var track);
+            DocManager.Inst.ExecuteCmd(new LoadProjectNotification(project));
+            Assert.True(project.Saved);
+
+            // 轨道头 VM 构造时会写回 Volume/Pan（也会标脏）→ 构造完把基线复位，单独考察 FX 开关这一条
+            var vm = new TrackHeaderViewModel(track);
+            project.Saved = true;
+            Assert.Null(track.MixFx);
+
+            int notified = 0;
+            using var sub = MessageBus.Current.Listen<MixFxChangedNotification>()
+                .ObserveOn(ImmediateScheduler.Instance)
+                .Subscribe(_ => notified++);
+
+            // 首次开启：创建 UMixFx = 真实工程变更 → 标脏 + 通知
+            vm.MixFxEnabled = true;
+            Assert.NotNull(track.MixFx);
+            Assert.True(track.MixFx!.Enabled);
+            Assert.False(project.Saved, "轨道头开 FX 开关必须把工程标为未保存");
+            Assert.Equal(1, notified);
+
+            // 重复写同一个值：不应再标脏、再通知（防 ManuallyRaise 回环空转）
+            project.Saved = true;
+            vm.MixFxEnabled = true;
+            Assert.True(project.Saved, "重复设置同一值不应再次标脏");
+            Assert.Equal(1, notified);
+
+            // 关闭同样是工程变更
+            vm.MixFxEnabled = false;
+            Assert.False(track.MixFx!.Enabled);
+            Assert.False(project.Saved);
+            Assert.Equal(2, notified);
         }
 
         // ══════════════════════ XAML 契约（把人工自检固化成断言） ══════════════════════
