@@ -185,10 +185,22 @@ namespace OpenUtau.App.ViewModels {
             this.WhenAnyValue(x => x.MixFxEnabled)
                 .Subscribe(enabled => {
                     if (track.MixFx != null) {
+                        // 值没变就直接返回：订阅时会立刻发一次当前值，
+                        // 且 MixFxChangedNotification 会回调 ManuallyRaise() 再读一次模型，
+                        // 不拦就会产生"无变更也标脏 + 再发一次通知"的空转。
+                        if (track.MixFx.Enabled == enabled) {
+                            return;
+                        }
                         track.MixFx.Enabled = enabled;
                     } else if (enabled) {
                         track.MixFx = new UMixFx { Enabled = true };
+                    } else {
+                        return;
                     }
+                    // 与 Volume/Pan/Mute/Solo 同款：模型变更 → 标脏（防退出/autosave 丢改动）+ 刷新轨道头徽标。
+                    // 注意：这里**不**通知 Core 重渲染——实时机架在下一个音频块自行读取 track.MixFx。
+                    DocManager.Inst.MarkProjectModified();
+                    MessageBus.Current.SendMessage(new MixFxChangedNotification(track.TrackNo));
                 });
             this.WhenAnyValue(x => x.IsSelected)
                 .Subscribe(_ => RefreshSelectionStyle());
