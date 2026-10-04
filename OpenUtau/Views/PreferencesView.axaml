@@ -912,6 +912,11 @@
                   <Button Grid.Column="1" Classes="outlinePill" Margin="8,0,0,0" Content="{DynamicResource prefs.vst.add}" Click="OnAddVstPath"/>
                   <Button Grid.Column="2" Classes="outlinePill" Margin="8,0,0,0" Content="{DynamicResource prefs.vst.remove}" Click="OnRemoveVstPath"/>
                 </Grid>
+                <!-- W11：一键补齐平台标准 VST3 目录（与素材库「效果器」空态同一命令），随后自动重扫 -->
+                <Button Classes="outlinePill" HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        Content="{DynamicResource sidebar.effects.addstandard}"
+                        Click="OnAddStandardVstPaths"/>
                 <Grid ColumnDefinitions="*,Auto">
                   <TextBlock Grid.Column="0" Classes="fieldLabel" VerticalAlignment="Center"
                              Text="{Binding VstPluginCount, StringFormat={}{0} plugin(s) found}"/>

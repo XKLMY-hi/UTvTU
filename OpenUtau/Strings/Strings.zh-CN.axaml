@@ -1314,11 +1314,14 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="sidebar.effects.search">搜索插件</system:String>
   <system:String x:Key="sidebar.effects.countlabel">个插件</system:String>
   <system:String x:Key="sidebar.effects.scanning">正在扫描…</system:String>
-  <system:String x:Key="sidebar.effects.empty">尚未扫描到效果器插件。请在下方添加扫描路径后重新扫描。</system:String>
+  <system:String x:Key="sidebar.effects.empty">尚未扫描到效果器插件。点击下方按钮添加标准 VST3 目录并扫描，或手动添加扫描路径。</system:String>
   <system:String x:Key="sidebar.effects.nomatch">没有匹配的插件</system:String>
   <system:String x:Key="sidebar.effects.paths">扫描路径</system:String>
   <system:String x:Key="sidebar.effects.paths.manage">管理插件扫描路径</system:String>
   <system:String x:Key="sidebar.effects.paths.watermark">C:\Path\To\VST\Plugins</system:String>
   <system:String x:Key="sidebar.effects.paths.hint">与「偏好设置 → VST」共用同一份数据：两处改动即时同步。</system:String>
   <!-- /mx-lib -->
+  <!-- ⚠ mx-paths: W11 标准 VST 扫描路径播种 + 一键添加（素材库空态与偏好设置 VST 页共用此键）—— EN/zh 成对 -->
+  <system:String x:Key="sidebar.effects.addstandard">添加标准 VST3 目录并扫描</system:String>
+  <!-- /mx-paths -->
 </ResourceDictionary>

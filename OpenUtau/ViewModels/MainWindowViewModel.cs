@@ -578,6 +578,9 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public bool ShowCount { get; set; }
         [Reactive] public bool IsScanning { get; set; }
 
+        /// <summary>本实例是否已尝试过"首次自动扫描"（每个窗口一次；刷新失败不影响后续手动重扫）。</summary>
+        bool initialScanAttempted;
+
         /// <param name="pluginSource">测试接缝：插件来源（默认读 <c>VstPluginManager.Inst.KnownPlugins</c>）。</param>
         /// <param name="rescanAction">测试接缝：重扫动作（默认 <c>VstPluginManager.Inst.ScanPlugins()</c>）。</param>
         public PluginBrowserViewModel(
@@ -671,6 +674,48 @@ namespace OpenUtau.App.ViewModels {
             } finally {
                 IsScanning = false;
             }
+        }
+
+        /// <summary>
+        /// 页签展开时调用（W11，**第一个真机缺口就在这里**）：
+        /// ① 首次运行播种平台标准 VST3 扫描目录（幂等，用户删掉后不复活）；
+        /// ② 注册表**空**则自动首扫一次 —— 注册表启动只从 Preferences 读缓存，
+        ///    `VstPluginRegistry` 的标准目录只在扫描时才参与，所以"从不扫描"的机器
+        ///    打开插件浏览器永远空态（W6 实测 32 个 .vst3 一个都看不到）。
+        /// 播种/首扫都是懒执行：从不打开该页签的用户不会被写盘、不会被扫描。
+        /// </summary>
+        /// <param name="platform">测试接缝：目标平台（默认当前平台）。</param>
+        /// <param name="folder">测试接缝：取标准目录（默认 Environment.GetFolderPath）。</param>
+        public void EnsureFirstScan(
+            Preferences.VstPathPlatform? platform = null,
+            Func<Environment.SpecialFolder, string>? folder = null) {
+            if (initialScanAttempted) {
+                return;
+            }
+            initialScanAttempted = true;
+            if (Preferences.SeedStandardVstScanPathsOnce(platform, folder) > 0) {
+                SyncScanPaths();
+                VstLibraryChangedNotification.Publish(VstLibraryChangedNotification.SourceLibrary);
+            }
+            if (allPlugins.Count == 0) {
+                _ = RescanInBackgroundAsync();
+            }
+        }
+
+        /// <summary>
+        /// 空态按钮：添加本机标准扫描路径（**用户主动**，不受"已播种"标记限制）并立即重扫。
+        /// 返回新增路径条数（0 = 该平台标准目录都不存在）。
+        /// </summary>
+        public async Task<int> AddStandardPathsAndScanAsync(
+            Preferences.VstPathPlatform? platform = null,
+            Func<Environment.SpecialFolder, string>? folder = null) {
+            int added = Preferences.AddStandardVstScanPaths(platform, folder);
+            if (added > 0) {
+                SyncScanPaths();
+                VstLibraryChangedNotification.Publish(VstLibraryChangedNotification.SourceLibrary);
+            }
+            await RescanInBackgroundAsync();
+            return added;
         }
 
         /// <summary>把 <c>Preferences.Default.VstScanPaths</c> 同步进本 VM（内容相同即不动）。</summary>

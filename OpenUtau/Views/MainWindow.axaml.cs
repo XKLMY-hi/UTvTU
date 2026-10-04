@@ -87,6 +87,10 @@ namespace OpenUtau.App.Views {
             SingersPanel.DataContext = sidebarViewModel;
             SamplesPanel.DataContext = sidebarViewModel;
 
+            // W11：首次运行把平台标准 VST3 目录播种进扫描路径（幂等 + 只此一次；
+            // 用户之后删掉不会被复活）。素材库「效果器」页签与偏好设置 VST 页共用这份数据。
+            Preferences.SeedStandardVstScanPathsOnce();
+
             viewModel.NewProject();
             viewModel.AddTempoChangeCmd = ReactiveCommand.Create<int>(tick => AddTempoChange(tick));
             viewModel.DelTempoChangeCmd = ReactiveCommand.Create<int>(tick => DelTempoChange(tick));
@@ -1165,9 +1169,10 @@ namespace OpenUtau.App.Views {
             ShowLibraryPage(MidiPanel, MidiTab);
         }
 
-        /// <summary>素材库页签：效果器（W4：插件浏览器；展开时只读刷新列表，不触发扫描）。</summary>
+        /// <summary>素材库页签：效果器（W4 浏览器；W11 首次展开会播种标准路径 + 空表自动首扫）。</summary>
         private void OnShowVst(object? sender, RoutedEventArgs e) {
             viewModel.PluginBrowser.RefreshPlugins();
+            viewModel.PluginBrowser.EnsureFirstScan();   // 幂等：只在首次展开时播种/首扫
             ShowLibraryPage(VstPanel, EffectsTab);
         }
 
@@ -1213,6 +1218,14 @@ namespace OpenUtau.App.Views {
         /// <summary>展开/收起「插件扫描路径」面板。</summary>
         private void OnToggleVstPathManager(object? sender, RoutedEventArgs e) {
             VstPathManager.IsVisible = !VstPathManager.IsVisible;
+        }
+
+        /// <summary>
+        /// 空态按钮：把本机标准 VST3 目录加进扫描路径并立即重扫（W11）。
+        /// 用户主动触发 ⇒ 不受"已播种"标记限制；标准目录都不存在时只重扫（0 条新增）。
+        /// </summary>
+        private async void OnAddStandardVstPathsFromLibrary(object? sender, RoutedEventArgs e) {
+            await viewModel.PluginBrowser.AddStandardPathsAndScanAsync();
         }
 
         /// <summary>添加扫描路径（写 Preferences.Default.VstScanPaths + 广播，与偏好设置即时同步）。</summary>
