@@ -1282,4 +1282,9 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="mixfx.rack.dry">干声</system:String>
   <system:String x:Key="mixfx.rack.hint">播放中改动实时可听；取消或按 Esc 恢复到打开本窗口时的设置。</system:String>
   <!-- /fx-ui: effects rack -->
+  <!-- ⚠ mx-view: S5 视图化（A1/A4 顶栏视图胶囊 + A2/A5 分离）—— 新区块集中登记，EN/zh 成对 -->
+  <system:String x:Key="view.pianoroll">钢琴卷帘</system:String>
+  <system:String x:Key="view.mixer">混音台</system:String>
+  <system:String x:Key="view.detach">分离为独立窗口</system:String>
+  <!-- /mx-view -->
 </ResourceDictionary>

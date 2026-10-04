@@ -1151,4 +1151,9 @@ General
   <system:String x:Key="mixfx.rack.dry">DRY</system:String>
   <system:String x:Key="mixfx.rack.hint">Changes are heard live while playing. Cancel or Esc restores the settings from when this window opened.</system:String>
   <!-- /fx-ui: effects rack -->
+  <!-- ⚠ mx-view: S5 视图化（A1/A4 顶栏视图胶囊 + A2/A5 分离）—— 新区块集中登记，EN/zh 成对 -->
+  <system:String x:Key="view.pianoroll">Piano Roll</system:String>
+  <system:String x:Key="view.mixer">Mixer</system:String>
+  <system:String x:Key="view.detach">Open in separate window</system:String>
+  <!-- /mx-view -->
 </ResourceDictionary>
