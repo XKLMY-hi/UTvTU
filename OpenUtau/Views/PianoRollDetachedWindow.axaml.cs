@@ -14,6 +14,7 @@ namespace OpenUtau.App.Views {
     public partial class PianoRollDetachedWindow : WindowEx {
         private readonly PianoRoll pianoRoll;
         private bool released;
+        private bool detached;
         private bool closed;
 
         /// <summary>用户关闭分离窗口时的回调：宿主把控件放回视图区（控件继续存活）。</summary>
@@ -41,7 +42,18 @@ namespace OpenUtau.App.Views {
         public void WindowClosing(object? sender, WindowClosingEventArgs e) {
             Preferences.Default.PianorollWindowSize.Set(Width, Height, Position.X, Position.Y, (int)WindowState);
             Preferences.Save();
-            // 不再取消关闭（旧实现是「隐藏」）：关窗即收回视图区，由 OnClosed 走 ReturnToHost
+            // 不再取消关闭（旧实现是「隐藏」）：关窗即收回视图区，由 OnClosed 走 ReturnToHost。
+            // 趁窗口还活着把控件摘掉并冲洗布局（窗口销毁后再摘就冲洗不到了，见 MainWindow.DetachAndFlush）。
+            DetachControl();
+        }
+
+        /// <summary>摘控件 + 冲洗本窗口挂起布局（幂等）。</summary>
+        private void DetachControl() {
+            if (detached) {
+                return;
+            }
+            detached = true;
+            MainWindow.DetachAndFlush(PianoRollContainer);
         }
 
         public void WindowDeactivated(object sender, EventArgs args) {
@@ -49,12 +61,13 @@ namespace OpenUtau.App.Views {
         }
 
         /// <summary>
-        /// 把控件交回宿主：摘掉 Content → 关窗；不触发收回归位。
+        /// 把控件交回宿主：摘掉 Content（走 <see cref="MainWindow.DetachAndFlush"/>，含旧树布局冲洗，
+        /// 见其注释里的 crash 根因）→ 关窗；不触发收回归位。
         /// 幂等（窗口已关时只清 Content），宿主回收与用户关窗两条路都安全。
         /// </summary>
         public void ReleaseControl() {
             released = true;
-            PianoRollContainer.Content = null;
+            DetachControl();
             if (!closed) {
                 Close();
             }

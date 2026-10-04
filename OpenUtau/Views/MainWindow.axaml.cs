@@ -824,6 +824,25 @@ namespace OpenUtau.App.Views {
             container.Content = control;
         }
 
+        /// <summary>
+        /// 摘下一个视图宿主（分离/收回的唯一出口），并把**旧窗口**的挂起布局就地跑完。
+        ///
+        /// 为什么必须冲洗（task-21，Avalonia 12.1.0 实测复现 + 源码核实 `LayoutManager.cs`）：
+        /// `Content = null` 摘除子树时，Avalonia 会把整棵子树入队到**旧窗口**的 measure 队列并调度一次
+        /// 布局 pass（`_toMeasure=[子树…], _queued=true`）。若随后把这棵子树挂到另一个窗口，旧窗那次
+        /// pass 再跑时 `ExecuteArrangePass` 会走到 `_toArrangeAfterMeasure → InvalidateArrange(control)`，
+        /// 而该控件的 layout root 已经是新窗口 ⇒
+        /// `ArgumentException: Attempt to call InvalidateArrange on wrong LayoutManager`（未处理 → 程序退出）。
+        /// 摘树后立刻 `UpdateLayout()`：此刻子树还没有新家，布局遍历对它是
+        /// `!IsAttachedToVisualTree ⇒ NotVisible`，直接跳过（不会触碰 Invalidate*）⇒ 队列被安全消化，
+        /// 旧窗随后也没有待处理的 pass 了。
+        /// </summary>
+        public static void DetachAndFlush(ContentControl host) {
+            var oldRoot = TopLevel.GetTopLevel(host);
+            host.Content = null;
+            oldRoot?.UpdateLayout();
+        }
+
         /// <summary>顶栏胶囊：工作台 / 钢琴卷帘 / 混音台（Tag = AppSurface 名）。</summary>
         private void OnViewTabClicked(object? sender, RoutedEventArgs args) {
             if (sender is not Control control || control.Tag is not string tag ||
@@ -1001,7 +1020,7 @@ namespace OpenUtau.App.Views {
                 mixerWindow.Activate();
                 return;
             }
-            MixerContainer.Content = null;
+            DetachAndFlush(MixerContainer);
             mixerWindow = new MixerWindow(mixerControl!);
             // 用户关掉分离窗口 = 收回视图区（生命周期：控件不随窗口销毁，见 MixerWindow 注释）
             mixerWindow.ReturnToHost = () => AttachMixerView();
@@ -1948,7 +1967,7 @@ namespace OpenUtau.App.Views {
             if (pianoRoll == null || pianoRollWindow != null) {
                 return;
             }
-            PianoRollContainer.Content = null;
+            DetachAndFlush(PianoRollContainer);
             CreatePianoRollWindow().Show();
             Preferences.Default.DetachPianoRoll = true;
             Preferences.Save();
