@@ -13,6 +13,15 @@ namespace OpenUtau.Core.Vst {
     internal static class VstProbeProcess {
         private static string? _exePath;
 
+        /// <summary>探针可执行文件路径（诊断与日志用；不含存在性判断）。</summary>
+        public static string ExePath => GetExePath();
+
+        /// <summary>
+        /// 探针是否可用（W12）：缺 vst_probe.exe 时**单文件 .vst3** 与**老式 bundle 回退**都不可用
+        /// —— 这是"环境问题"，必须能与"插件解析失败"区分开（否则会被当成"没有插件"）。
+        /// </summary>
+        public static bool IsAvailable => File.Exists(GetExePath());
+
         static string GetExePath() {
             if (_exePath != null && File.Exists(_exePath)) return _exePath;
             var dir = Path.GetDirectoryName(typeof(VstProbeProcess).Assembly.Location) ?? ".";
