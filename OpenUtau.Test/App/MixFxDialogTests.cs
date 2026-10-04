@@ -41,10 +41,17 @@ namespace OpenUtau.Test.App {
         /// 非空工程（2 轨）——刻意避开 <c>DocManager.ChangesSaved</c> 的
         /// "tracks.Count &lt;= 1 且 parts.Count == 0 即视为已保存"条款；
         /// 否则在默认工程（UProject() 自带 1 轨 0 片段）上 ChangesSaved 恒为 true，测不出结论。
+        ///
+        /// TrackNo 用 900+ 的独特值：MessageBus 是全进程共享的，本用例既听也发
+        /// （TrackHeaderViewModel 构造会广播 Volume/Pan），用与其它用例（0/1）不重叠的轨道号
+        /// 才能双向隔离，避免跨测试干扰。
         /// </summary>
+        const int RackTrackNo = 917;
+
         static UProject NonEmptyProject(out UTrack track) {
             var project = new UProject { Saved = true };                     // UProject() 自带 1 轨
-            project.tracks.Add(new UTrack("Rack B") { TrackNo = project.tracks.Count });
+            project.tracks[0].TrackNo = RackTrackNo;
+            project.tracks.Add(new UTrack("Rack B") { TrackNo = RackTrackNo + 1 });
             track = project.tracks[0];
             track.TrackName = "Rack A";
             return project;
@@ -317,7 +324,10 @@ namespace OpenUtau.Test.App {
             Assert.Null(track.MixFx);
 
             int notified = 0;
+            // 按 trackNo 过滤：MessageBus 是全进程共享的，别的用例构造 MixFxDialog 也会发这条
+            // 通知；同一时间窗内撞上就会把计数顶高。断言意图（本轨开关恰好通知一次）不变。
             using var sub = MessageBus.Current.Listen<MixFxChangedNotification>()
+                .Where(e => e.trackNo == track.TrackNo)
                 .ObserveOn(ImmediateScheduler.Instance)
                 .Subscribe(_ => notified++);
 
