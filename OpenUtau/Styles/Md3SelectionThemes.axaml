@@ -1,0 +1,548 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       选择类控件自有 ControlTheme（MD3 语言，2026-10 新控件语言第 2 批）
+
+       覆盖：CheckBox / RadioButton（普通形态）/ ToggleSwitch / Slider / ProgressBar。
+       这批控件此前仍在用 Fluent 原生模板，只是靠 Style 层改尺寸与覆盖 Fluent 画刷键
+       取巧上色；本文件把它们的外观**整体收归自有 ControlTheme**——
+       模板结构、几何、状态色全部由我们定义，颜色只取自颜色池（md3.* 角色）。
+
+       挂载范式（踩过 4 次坑后唯一验证可行的写法）：
+         ControlTheme 与"装主题"的 `Setter Property="Theme"` 的 Style
+         **必须写在同一个 Styles 文件内**（跨字典 StaticResource 解析不到）；
+         应用级 Style 显式设 Theme 优先级最高，能压过 FluentTheme 的隐式主题。
+         见 OpenUtau.Test/App/ControlThemeMountProbeTests.cs。
+
+       ── 新控件语言（选择类）规格 ──────────────────────────────────────────────
+       · 勾选框 CheckBox：18×18 圆角 4 盒；未选 = 2px outline 描边、透明底；
+         选中/半选 = primary 实底无描边 + on-primary 勾/横杠；行高 28、标签间距 8。
+       · 单选框 RadioButton：18×18 圆环（2px outline）；选中 = primary 环 + primary 10px 实心点。
+       · 开关 ToggleSwitch：40×20 全圆角轨道；关 = surface-container-highest 底 + 2px outline 描边 + outline 圆钮；
+         开 = primary 底 + on-primary 圆钮；圆钮位移 20（与轨道同宽的一半，沿用 Fluent 的位移协议）。
+       · 滑条 Slider：4px 全圆角轨道（未选 surface-container-highest / 已选 primary），16px primary 圆钮（悬浮 18px）。
+       · 进度条 ProgressBar：全圆角；轨道 surface-container-highest、指示条 primary；不定态双指示条。
+       · 焦点环：primary 描边环（:focus-visible 才出现，鼠标点击不出现）；禁用：整体 0.38 不透明度。
+
+       ── 为什么保留部分模板部件名（不是照抄 Fluent 外观）──────────────────────
+       模板骨架 = 控件代码后置（Avalonia Slider/ToggleSwitch/ProgressBar）与既有
+       补丁点之间的**契约**，改名字会静默破坏功能，故骨架名保持兼容：
+       · CheckBox 的 `NormalRectangle`/`CheckGlyph`：Styles.axaml 的 `CheckBox.menu`
+         与钢琴卷帘菜单的 `/template/` 补丁按此名把菜单勾号做成"无框 + 轨道强调色"。
+       · ToggleSwitch 的 `SwitchKnobBounds`：钢琴卷帘视图按此名把开态轨道染成轨道强调色。
+       · Slider 的 `PART_Track`/`PART_DecreaseButton`/`PART_IncreaseButton`/`Thumb`：
+           控件代码后置依赖（点击定位、拖动），且 Styles.axaml 的 `.fader` 补丁按此名上色。
+       · ProgressBar 的 `PART_Indicator`/`IndeterminateProgressBarIndicator(2)`：不定态动画由代码驱动这些部件。
+       外观（颜色/几何/状态）全部是我们自己的：下方所有状态色都指向 md3 色池角色。
+
+       色键写法：画笔属性用 `md3.<角色>`（颜色池的画刷投影），需要 Color 处用 `md3.color.<角色>`；
+       两者由 Md3ThemeResources.Install 从同一色池写入（Theming/Md3ThemeResources.cs:34-35）。
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <Styles.Resources>
+
+    <!-- ───────────────────────── CheckBox ───────────────────────── -->
+    <ControlTheme x:Key="Md3CheckBoxTheme" TargetType="CheckBox">
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+      <Setter Property="CornerRadius" Value="4"/>
+      <Setter Property="Padding" Value="8,0,0,0"/>
+      <Setter Property="MinHeight" Value="28"/>
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Name="PART_Root" Background="Transparent">
+            <Grid ColumnDefinitions="Auto,*">
+              <Grid Grid.Column="0" Width="18" Height="18" VerticalAlignment="Center">
+                <!-- 盒：几何由主题样式给（状态色随 :checked/:pointerover 变化） -->
+                <Border Name="NormalRectangle" CornerRadius="{TemplateBinding CornerRadius}"/>
+                <!-- MD3 勾（Material 24dp 勾形）：填充式，沿用 Fluent 的名字与 12px 规格，
+                     使 Styles.axaml `.menu` 与钢琴卷帘菜单的 `/template/ Path#CheckGlyph` 补丁继续生效 -->
+                <Path Name="CheckGlyph"
+                      Data="M9,16.17 4.83,12 3.41,13.41 9,19 21,7 19.59,5.59z"
+                      Width="12" Height="12" Stretch="Uniform"
+                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <!-- 半选横杠 -->
+                <Border Name="IndeterminateDash" Width="10" Height="2" CornerRadius="1"
+                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <!-- 焦点环：外扩 3px 的 primary 描边 -->
+                <Border Name="PART_FocusRing" Margin="-3" CornerRadius="7"
+                        BorderThickness="2" IsHitTestVisible="False"/>
+              </Grid>
+              <ContentPresenter Name="PART_ContentPresenter" Grid.Column="1"
+                                Margin="{TemplateBinding Padding}"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                Foreground="{TemplateBinding Foreground}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                RecognizesAccessKey="True"/>
+            </Grid>
+          </Border>
+        </ControlTemplate>
+      </Setter>
+
+      <!-- 未选：2px outline 描边 -->
+      <Style Selector="^ /template/ Border#NormalRectangle">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource md3.outline}"/>
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="Transitions">
+          <Transitions>
+            <BrushTransition Property="Background" Duration="0:0:0.12"/>
+            <BrushTransition Property="BorderBrush" Duration="0:0:0.12"/>
+          </Transitions>
+        </Setter>
+      </Style>
+      <!-- 选中 / 半选：primary 实底、去描边 -->
+      <Style Selector="^:checked /template/ Border#NormalRectangle">
+        <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+      </Style>
+      <Style Selector="^:indeterminate /template/ Border#NormalRectangle">
+        <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+      </Style>
+      <!-- 悬浮：未选时描边提亮（预告选中）；按下再压一层底色 -->
+      <Style Selector="^:unchecked:pointerover /template/ Border#NormalRectangle">
+        <Setter Property="BorderBrush" Value="{DynamicResource md3.on-surface}"/>
+      </Style>
+      <Style Selector="^:unchecked:pressed /template/ Border#NormalRectangle">
+        <Setter Property="BorderBrush" Value="{DynamicResource md3.on-surface}"/>
+        <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+      </Style>
+      <!-- 勾 / 横杠 -->
+      <Style Selector="^ /template/ Path#CheckGlyph">
+        <Setter Property="Fill" Value="{DynamicResource md3.on-primary}"/>
+        <Setter Property="Opacity" Value="0"/>
+      </Style>
+      <Style Selector="^:checked /template/ Path#CheckGlyph">
+        <Setter Property="Opacity" Value="1"/>
+      </Style>
+      <Style Selector="^ /template/ Border#IndeterminateDash">
+        <Setter Property="Background" Value="{DynamicResource md3.on-primary}"/>
+        <Setter Property="Opacity" Value="0"/>
+      </Style>
+      <Style Selector="^:indeterminate /template/ Border#IndeterminateDash">
+        <Setter Property="Opacity" Value="1"/>
+      </Style>
+      <!-- 焦点环 / 禁用 -->
+      <Style Selector="^ /template/ Border#PART_FocusRing">
+        <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="Opacity" Value="0"/>
+      </Style>
+      <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+        <Setter Property="Opacity" Value="1"/>
+      </Style>
+      <Style Selector="^:disabled">
+        <Setter Property="Opacity" Value="0.38"/>
+      </Style>
+    </ControlTheme>
+
+    <!-- ───────────────────────── RadioButton（普通形态）───────────────────────── -->
+    <ControlTheme x:Key="Md3RadioButtonTheme" TargetType="RadioButton">
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+      <Setter Property="Padding" Value="8,0,0,0"/>
+      <Setter Property="MinHeight" Value="28"/>
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Name="PART_Root" Background="Transparent">
+            <Grid ColumnDefinitions="Auto,*">
+              <Grid Grid.Column="0" Width="18" Height="18" VerticalAlignment="Center">
+                <!-- 外环：沿用水晶卷帘/钢琴卷帘模板的同名部件（RadioButton 普通形态无外部补丁，名字保持一致便于后续改造） -->
+                <Ellipse Name="OuterEllipse" Width="18" Height="18" StrokeThickness="2"/>
+                <!-- 选中实心点 -->
+                <Ellipse Name="CheckGlyph" Width="10" Height="10"/>
+                <!-- 焦点环 -->
+                <Border Name="PART_FocusRing" Margin="-3" CornerRadius="999"
+                        BorderThickness="2" IsHitTestVisible="False"/>
+              </Grid>
+              <ContentPresenter Name="PART_ContentPresenter" Grid.Column="1"
+                                Margin="{TemplateBinding Padding}"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                Foreground="{TemplateBinding Foreground}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                RecognizesAccessKey="True"/>
+            </Grid>
+          </Border>
+        </ControlTemplate>
+      </Setter>
+
+      <Style Selector="^ /template/ Ellipse#OuterEllipse">
+        <Setter Property="Fill" Value="Transparent"/>
+        <Setter Property="Stroke" Value="{DynamicResource md3.outline}"/>
+        <Setter Property="Transitions">
+          <Transitions>
+            <BrushTransition Property="Fill" Duration="0:0:0.12"/>
+            <BrushTransition Property="Stroke" Duration="0:0:0.12"/>
+          </Transitions>
+        </Setter>
+      </Style>
+      <Style Selector="^:checked /template/ Ellipse#OuterEllipse">
+        <Setter Property="Stroke" Value="{DynamicResource md3.primary}"/>
+      </Style>
+      <Style Selector="^:unchecked:pointerover /template/ Ellipse#OuterEllipse">
+        <Setter Property="Stroke" Value="{DynamicResource md3.on-surface}"/>
+      </Style>
+      <Style Selector="^:unchecked:pressed /template/ Ellipse#OuterEllipse">
+        <Setter Property="Stroke" Value="{DynamicResource md3.on-surface}"/>
+        <Setter Property="Fill" Value="{DynamicResource md3.surface-container-highest}"/>
+      </Style>
+      <Style Selector="^ /template/ Ellipse#CheckGlyph">
+        <Setter Property="Fill" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="Opacity" Value="0"/>
+      </Style>
+      <Style Selector="^:checked /template/ Ellipse#CheckGlyph">
+        <Setter Property="Opacity" Value="1"/>
+      </Style>
+      <Style Selector="^ /template/ Border#PART_FocusRing">
+        <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="Opacity" Value="0"/>
+      </Style>
+      <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+        <Setter Property="Opacity" Value="1"/>
+      </Style>
+      <Style Selector="^:disabled">
+        <Setter Property="Opacity" Value="0.38"/>
+      </Style>
+    </ControlTheme>
+
+    <!-- ───────────────────────── ToggleSwitch ───────────────────────── -->
+    <ControlTheme x:Key="Md3ToggleSwitchTheme" TargetType="ToggleSwitch">
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="MinHeight" Value="28"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Grid Name="PART_Root" RowDefinitions="Auto,1*">
+            <ContentPresenter Name="PART_ContentPresenter" Grid.Row="0" Margin="0,0,0,6"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Foreground="{TemplateBinding Foreground}"
+                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                              RecognizesAccessKey="True"/>
+            <Grid Grid.Row="1" ColumnDefinitions="Auto,12,Auto" RowDefinitions="6,Auto,6"
+                  HorizontalAlignment="Left" VerticalAlignment="Top">
+              <!-- 整行状态底（可留给状态层；当前保持透明） -->
+              <Grid Name="SwitchAreaGrid" Grid.Row="0" Grid.Column="0"
+                    Grid.RowSpan="3" Grid.ColumnSpan="3" Margin="0,5,0,5" Background="Transparent"/>
+              <!-- 开 / 关文案（沿用 Fluent 的同名部件，On/OffContent 绑定不变） -->
+              <ContentPresenter Name="PART_OffContentPresenter" Grid.Row="0" Grid.Column="2"
+                                Content="{TemplateBinding OffContent}"
+                                ContentTemplate="{TemplateBinding OffContentTemplate}"
+                                Foreground="{TemplateBinding Foreground}"
+                                HorizontalAlignment="Left" VerticalAlignment="Center"/>
+              <ContentPresenter Name="PART_OnContentPresenter" Grid.Row="0" Grid.Column="2"
+                                Content="{TemplateBinding OnContent}"
+                                ContentTemplate="{TemplateBinding OnContentTemplate}"
+                                Foreground="{TemplateBinding Foreground}"
+                                HorizontalAlignment="Left" VerticalAlignment="Center"/>
+              <!-- 关态轨道 -->
+              <Border Name="OuterBorder" Grid.Row="1" Grid.Column="0" Width="40" Height="20"
+                      CornerRadius="999" BorderThickness="2"/>
+              <!-- 开态轨道（开关切换即两者交叉淡出/淡入） -->
+              <Border Name="SwitchKnobBounds" Grid.Row="1" Grid.Column="0" Width="40" Height="20"
+                      CornerRadius="999" BorderThickness="0"/>
+              <!-- 圆钮：Canvas 宽 = 轨道宽一半 ⇒ 位移 40-20 = 20（沿用 Fluent 的位移协议） -->
+              <Canvas Name="PART_SwitchKnob" Grid.Row="1" Grid.Column="0"
+                      Width="20" Height="20" HorizontalAlignment="Left">
+                <Grid Name="PART_MovingKnobs" Width="20" Height="20">
+                  <Ellipse Name="SwitchKnobOn" Width="14" Height="14"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                  <Ellipse Name="SwitchKnobOff" Width="14" Height="14"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Grid>
+              </Canvas>
+            </Grid>
+          </Grid>
+        </ControlTemplate>
+      </Setter>
+
+      <!-- 关态（默认，含 :indeterminate）：surface-container-highest 底 + outline 描边 -->
+      <Style Selector="^ /template/ Border#OuterBorder">
+        <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource md3.outline}"/>
+        <Setter Property="Opacity" Value="1"/>
+        <Setter Property="Transitions">
+          <Transitions>
+            <BrushTransition Property="Background" Duration="0:0:0.12"/>
+            <BrushTransition Property="BorderBrush" Duration="0:0:0.12"/>
+            <DoubleTransition Property="Opacity" Duration="0:0:0.12"/>
+          </Transitions>
+        </Setter>
+      </Style>
+      <Style Selector="^:checked /template/ Border#OuterBorder">
+        <Setter Property="Opacity" Value="0"/>
+      </Style>
+      <Style Selector="^:pointerover /template/ Border#OuterBorder">
+        <Setter Property="BorderBrush" Value="{DynamicResource md3.on-surface}"/>
+      </Style>
+      <!-- 开态底：primary -->
+      <Style Selector="^ /template/ Border#SwitchKnobBounds">
+        <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="Opacity" Value="0"/>
+        <Setter Property="Transitions">
+          <Transitions>
+            <BrushTransition Property="Background" Duration="0:0:0.12"/>
+            <DoubleTransition Property="Opacity" Duration="0:0:0.12"/>
+          </Transitions>
+        </Setter>
+      </Style>
+      <Style Selector="^:checked /template/ Border#SwitchKnobBounds">
+        <Setter Property="Opacity" Value="1"/>
+      </Style>
+      <!-- 圆钮：关 = outline，开 = on-primary -->
+      <Style Selector="^ /template/ Ellipse#SwitchKnobOff">
+        <Setter Property="Fill" Value="{DynamicResource md3.outline}"/>
+        <Setter Property="Opacity" Value="1"/>
+        <Setter Property="Transitions">
+          <Transitions>
+            <BrushTransition Property="Fill" Duration="0:0:0.12"/>
+            <DoubleTransition Property="Opacity" Duration="0:0:0.12"/>
+          </Transitions>
+        </Setter>
+      </Style>
+      <Style Selector="^:checked /template/ Ellipse#SwitchKnobOff">
+        <Setter Property="Opacity" Value="0"/>
+      </Style>
+      <Style Selector="^ /template/ Ellipse#SwitchKnobOn">
+        <Setter Property="Fill" Value="{DynamicResource md3.on-primary}"/>
+        <Setter Property="Opacity" Value="0"/>
+        <Setter Property="Transitions">
+          <Transitions>
+            <BrushTransition Property="Fill" Duration="0:0:0.12"/>
+            <DoubleTransition Property="Opacity" Duration="0:0:0.12"/>
+          </Transitions>
+        </Setter>
+      </Style>
+      <Style Selector="^:checked /template/ Ellipse#SwitchKnobOn">
+        <Setter Property="Opacity" Value="1"/>
+      </Style>
+      <!-- 圆钮位移（Canvas.Left 与内置位移协议同属性，若控件代码已给本地值则以其为准） -->
+      <Style Selector="^ /template/ Grid#PART_MovingKnobs">
+        <Setter Property="Canvas.Left" Value="0"/>
+        <Setter Property="Transitions">
+          <Transitions>
+            <DoubleTransition Property="Canvas.Left" Duration="0:0:0.15" Easing="CubicEaseOut"/>
+          </Transitions>
+        </Setter>
+      </Style>
+      <Style Selector="^:checked /template/ Grid#PART_MovingKnobs">
+        <Setter Property="Canvas.Left" Value="20"/>
+      </Style>
+      <!-- 开关文案：开态显示 On、关态显示 Off -->
+      <Style Selector="^ /template/ ContentPresenter#PART_OnContentPresenter">
+        <Setter Property="Opacity" Value="0"/>
+      </Style>
+      <Style Selector="^:checked /template/ ContentPresenter#PART_OnContentPresenter">
+        <Setter Property="Opacity" Value="1"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_OffContentPresenter">
+        <Setter Property="Opacity" Value="1"/>
+      </Style>
+      <Style Selector="^:checked /template/ ContentPresenter#PART_OffContentPresenter">
+        <Setter Property="Opacity" Value="0"/>
+      </Style>
+      <Style Selector="^:disabled">
+        <Setter Property="Opacity" Value="0.38"/>
+      </Style>
+    </ControlTheme>
+
+    <!-- ───────────────────────── Slider ───────────────────────── -->
+    <ControlTheme x:Key="Md3SliderTheme" TargetType="Slider">
+      <!-- 已选轨道（Foreground）与未选轨道（Background）：保留 TemplateBinding，
+           使视图级覆盖（如 MixFxDialog 的 Slider Foreground）与全局面板规格继续有效 -->
+      <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+      <Setter Property="MinHeight" Value="20"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <DataValidationErrors>
+            <Border>
+              <Grid Name="SliderContainer">
+                <Grid Name="HorizontalTemplate" ColumnDefinitions="Auto,Auto,1*" RowDefinitions="15,Auto,15"
+                      MinHeight="20">
+                  <Track Name="PART_Track" Grid.Row="1"
+                         Minimum="{TemplateBinding Minimum}"
+                         Maximum="{TemplateBinding Maximum}"
+                         Value="{TemplateBinding Value, Mode=TwoWay}"
+                         IsDirectionReversed="{TemplateBinding IsDirectionReversed}"
+                         Orientation="Horizontal"
+                         Height="16">
+                    <Track.DecreaseButton>
+                      <RepeatButton Name="PART_DecreaseButton" Focusable="False"
+                                    Background="{TemplateBinding Foreground}">
+                        <RepeatButton.Template>
+                          <ControlTemplate>
+                            <Border Height="4" Background="{TemplateBinding Background}" CornerRadius="999"/>
+                          </ControlTemplate>
+                        </RepeatButton.Template>
+                      </RepeatButton>
+                    </Track.DecreaseButton>
+                    <Track.IncreaseButton>
+                      <RepeatButton Name="PART_IncreaseButton" Focusable="False"
+                                    Background="{TemplateBinding Background}">
+                        <RepeatButton.Template>
+                          <ControlTemplate>
+                            <Border Height="4" Background="{TemplateBinding Background}" CornerRadius="999"/>
+                          </ControlTemplate>
+                        </RepeatButton.Template>
+                      </RepeatButton>
+                    </Track.IncreaseButton>
+                    <Thumb Name="thumb" Background="{TemplateBinding Foreground}" BorderThickness="0">
+                      <Thumb.Template>
+                        <ControlTemplate>
+                          <Border Background="{TemplateBinding Background}" CornerRadius="999"/>
+                        </ControlTemplate>
+                      </Thumb.Template>
+                    </Thumb>
+                  </Track>
+                </Grid>
+              </Grid>
+            </Border>
+          </DataValidationErrors>
+        </ControlTemplate>
+      </Setter>
+      <!-- 圆钮尺寸（悬浮微放大，颜色沿用 Foreground） -->
+      <Style Selector="^ /template/ Thumb#thumb">
+        <Setter Property="Width" Value="16"/>
+        <Setter Property="Height" Value="16"/>
+        <Setter Property="Transitions">
+          <Transitions>
+            <DoubleTransition Property="Width" Duration="0:0:0.12"/>
+            <DoubleTransition Property="Height" Duration="0:0:0.12"/>
+          </Transitions>
+        </Setter>
+      </Style>
+      <Style Selector="^:pointerover /template/ Thumb#thumb">
+        <Setter Property="Width" Value="18"/>
+        <Setter Property="Height" Value="18"/>
+      </Style>
+      <Style Selector="^:disabled">
+        <Setter Property="Opacity" Value="0.38"/>
+      </Style>
+    </ControlTheme>
+
+    <!-- ───────────────────────── ProgressBar ───────────────────────── -->
+    <ControlTheme x:Key="Md3ProgressBarTheme" TargetType="ProgressBar">
+      <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="MinHeight" Value="6"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Name="ProgressBarRoot"
+                  Background="{TemplateBinding Background}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  ClipToBounds="True">
+            <Panel>
+              <Panel Name="DeterminateRoot">
+                <Border Name="PART_Indicator" HorizontalAlignment="Left"
+                        Background="{TemplateBinding Foreground}"
+                        CornerRadius="{TemplateBinding CornerRadius}"/>
+              </Panel>
+              <Panel Name="IndeterminateRoot">
+                <Border Name="IndeterminateProgressBarIndicator" HorizontalAlignment="Left"
+                        Background="{TemplateBinding Foreground}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                  <Border.RenderTransform>
+                    <TranslateTransform/>
+                  </Border.RenderTransform>
+                </Border>
+                <Border Name="IndeterminateProgressBarIndicator2" HorizontalAlignment="Left"
+                        Background="{TemplateBinding Foreground}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                  <Border.RenderTransform>
+                    <TranslateTransform/>
+                  </Border.RenderTransform>
+                </Border>
+              </Panel>
+              <LayoutTransformControl Name="PART_LayoutTransformControl"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Foreground="{TemplateBinding Foreground}"/>
+              </LayoutTransformControl>
+            </Panel>
+          </Border>
+        </ControlTemplate>
+      </Setter>
+      <!-- 定时态：显示 PART_Indicator；不定态：换成两条滚动指示条（动画由控件代码驱动这些部件） -->
+      <Style Selector="^ /template/ Panel#DeterminateRoot">
+        <Setter Property="Opacity" Value="1"/>
+      </Style>
+      <Style Selector="^:indeterminate /template/ Panel#DeterminateRoot">
+        <Setter Property="Opacity" Value="0"/>
+      </Style>
+      <Style Selector="^ /template/ Panel#IndeterminateRoot">
+        <Setter Property="Opacity" Value="0"/>
+      </Style>
+      <Style Selector="^:indeterminate /template/ Panel#IndeterminateRoot">
+        <Setter Property="Opacity" Value="1"/>
+      </Style>
+      <Style Selector="^ /template/ Border#IndeterminateProgressBarIndicator">
+        <Setter Property="Width" Value="80"/>
+      </Style>
+      <Style Selector="^ /template/ Border#IndeterminateProgressBarIndicator2">
+        <Setter Property="Width" Value="120"/>
+      </Style>
+      <!-- 不定态滚动由**主题**提供（Fluent 的滚动也是主题动画，接管模板后必须自带）：
+           两条指示条在裁剪过的轨道内错峰扫过 -->
+      <Style Selector="^:indeterminate /template/ Border#IndeterminateProgressBarIndicator">
+        <Style.Animations>
+          <Animation Duration="0:0:1.8" IterationCount="INFINITE" Easing="CubicEaseInOut">
+            <KeyFrame Cue="0%">
+              <Setter Property="TranslateTransform.X" Value="-80"/>
+            </KeyFrame>
+            <KeyFrame Cue="100%">
+              <Setter Property="TranslateTransform.X" Value="320"/>
+            </KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^:indeterminate /template/ Border#IndeterminateProgressBarIndicator2">
+        <Style.Animations>
+          <Animation Duration="0:0:1.8" IterationCount="INFINITE" Easing="CubicEaseInOut" Delay="0:0:0.45">
+            <KeyFrame Cue="0%">
+              <Setter Property="TranslateTransform.X" Value="-180"/>
+            </KeyFrame>
+            <KeyFrame Cue="100%">
+              <Setter Property="TranslateTransform.X" Value="420"/>
+            </KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^ /template/ LayoutTransformControl#PART_LayoutTransformControl">
+        <Setter Property="IsVisible" Value="False"/>
+      </Style>
+    </ControlTheme>
+
+  </Styles.Resources>
+
+  <!-- ══ 装主题：应用级 Style（与上面的 ControlTheme 同文件，StaticResource 必定解析得到）══
+       位置必须在 App.axaml 的 Application.Styles 里、且能压过 FluentTheme 的隐式主题。 -->
+  <Style Selector="CheckBox">
+    <Setter Property="Theme" Value="{StaticResource Md3CheckBoxTheme}"/>
+  </Style>
+  <Style Selector="RadioButton">
+    <Setter Property="Theme" Value="{StaticResource Md3RadioButtonTheme}"/>
+  </Style>
+  <Style Selector="ToggleSwitch">
+    <Setter Property="Theme" Value="{StaticResource Md3ToggleSwitchTheme}"/>
+  </Style>
+  <Style Selector="Slider">
+    <Setter Property="Theme" Value="{StaticResource Md3SliderTheme}"/>
+  </Style>
+  <Style Selector="ProgressBar">
+    <Setter Property="Theme" Value="{StaticResource Md3ProgressBarTheme}"/>
+  </Style>
+</Styles>
