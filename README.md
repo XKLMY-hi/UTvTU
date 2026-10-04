@@ -24,6 +24,21 @@
 
 ## 新增功能
 
+### 🎛️ 实时效果机架（2026-10）
+
+- **边播边调的内置效果机架** — 轨道级 EQ / 压缩 / 混响三面板：每块 = 电源开关 + 曲线屏 + 旋钮组；
+  曲线屏由 DSP 自身数学绘制（`ResponseDb` / `CurveGainDb` / `DecaySeconds`），拖动旋钮曲线实时变形
+- **实时跟随** — 播放中改参数**一个音频块内即可听**，不重渲染、不重启播放；主开关与模块开关做
+  ~15ms 交叉淡化（无爆音），模块关闭后清 DSP 残留状态；导出走固定快照（结果确定、自动跳过空转轨道）
+- **非模态** — 机架不阻塞主窗（可边播边编辑），每轨单窗；ESC / 取消 = 回到打开时设置，关闭 = 保留
+- **内置与 VST 共存** — 链序 `Fader → 内置三件套 → VST 链`，VST 槽机架仍由混音台条带进入
+- **新控件语言** — 自研机架控件家族（电源开关 / 分段选择器 / 参数读数 / 模块面板 / 机架列表）
+  + MD3 旋钮与三块曲线屏；主窗「工具 → 控件陈列室」可一次审阅各控件与各状态
+- **选择类控件自有主题** — CheckBox / RadioButton / ToggleSwitch / Slider / ProgressBar 接入自有
+  `ControlTheme`，键盘焦点环齐备
+- **对比度与外观归属收尾** — 按钮文字色真正转发到渲染层（AccessText）、选中/危险/进度条配色收归
+  ControlTheme；按 WCAG 复核（filled primary 由 1.70:1 → 7.70:1）
+
 ### 🎨 Material Design 3 界面体系（2026-09 重铸）
 
 - **设计稿驱动** — 欢迎页 / 主窗口 / 钢琴卷帘 / 混音台 / VST / 偏好设置六屏按交付稿的
@@ -89,6 +104,27 @@
 - 向后兼容 `.ustx`
 ---
 
+## 2026-10 实时效果机架
+
+在上游 `Redesign Track Polish as a live, non-modal effects rack`（`30d09962`）的思路基础上，**接进 Plus 自己的
+信号链**（不引入上游的传输层重写）：内置三件套由 `MixFxSource` 逐音频块跟随 `UTrack.MixFx`，界面重建为
+MD3 三面板机架。
+
+| 层 | 内容 |
+|---|---|
+| 音频 | `SignalChain/MixFxSource`（逐块跟随 + 交叉淡化 + 位置自愈 + 干轨直通快路径）；`RenderEngine` 三态 `MixFxMode { Off, Snapshot, Live }`；`EffectChain` 收敛为只承载 VST |
+| 数据 | `UMixFx` 新增 `EqEnabled/CompEnabled/ReverbEnabled`（旧 `EqBypassed` 保留为反向别名 ⇒ 旧工程自动迁移、加载幂等） |
+| 界面 | `Views/MixFxDialog`（三面板 · 非模态）、`Controls/Knob`、`Controls/MixFxDisplays`、控件家族五件套 + `Views/ControlGalleryWindow` |
+| 样式 | 补齐"应用级 `/template/` 补丁压过 ControlTheme"的遗留：Button 文字色真正转发（内容走 AccessText）、选中/危险/进度条配色收归主题，并按 WCAG 复核对比度 |
+
+当前基线：构建 **0 错误** · 测试 **438 通过 / 0 失败**（默认 / 深色 / 浅色三变体各跑一遍；
+`OPENUTAU_TEST_THEME=Dark|Light` 可把测试会话钉在指定变体）。
+
+联合作业记录与遗留项见 [`.opencode/plans/effects-rack-adoption.md`](.opencode/plans/effects-rack-adoption.md)；
+独立验证报告（对抗审查 + computer use 像素复测）见 [`.opencode/plans/effects-rack-verify.md`](.opencode/plans/effects-rack-verify.md)。
+
+---
+
 ## 2026-09 UI 重铸
 
 以设计交付稿为基准，把界面重做为统一的 Material Design 3 体系，并移除第三方控件库。
@@ -114,7 +150,8 @@ dotnet build OpenUtau.sln            # 构建（沙箱/离线环境见 AGENTS.md
 dotnet test  OpenUtau.Test\OpenUtau.Test.csproj   # 全量测试
 ```
 
-当前基线：构建 **0 错误** · 测试 **355 通过 / 0 失败**。
+当前基线（随时更新，最新见上节）：构建 **0 错误** · 测试 **438 通过 / 0 失败**
+（本节立项时为 355 通过；其后经 2026-10 效果机架与新控件两轮增至 438）。
 
 设计决策与踩坑记录见 [`.opencode/plans/ui-rework-decisions.md`](.opencode/plans/ui-rework-decisions.md)
 （颜色池与梯度、动效取舍、控件外观归属的实验结论与硬约束、SukiUI 移除的完整清点）。
