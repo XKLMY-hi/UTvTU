@@ -21,13 +21,55 @@ namespace OpenUtau.App.Views {
     /// - 检测到的音源列表由宿主把 <see cref="SidebarViewModel"/> 挂到 <c>SingerListHost</c>
     /// - 需要窗口级动作（文件夹 / 文件选择）时交给 <see cref="Host"/>（MainWindow）
     /// - 设置项与旧 PreferencesDialog **一一对应**（直接映射，绑定沿用同一个 VM）
+    ///
+    /// W4（决策 B6）：插件扫描路径**在素材库与偏好设置两处都有**。两处共用
+    /// <c>Preferences.Default.VstScanPaths</c>（唯一存储，不新增平行字段）：一侧改动即写盘并广播
+    /// <see cref="VstLibraryChangedNotification"/>，另一侧收到后按内容比对同步（相同则不动 ⇒ 防环）。
+    /// 本视图在挂载期间监听广播，卸载即退订。
     /// </summary>
     public partial class PreferencesView : UserControl {
         /// <summary>宿主主窗口；由 MainWindow 注入。</summary>
         public MainWindow? Host { get; set; }
 
+        private IDisposable? vstLibrarySubscription;
+
         public PreferencesView() {
             InitializeComponent();
+        }
+
+        /// <summary>挂载即开始监听插件库变更（另一侧改了扫描路径时同步过来）。</summary>
+        protected override void OnAttachedToVisualTree(Avalonia.VisualTreeAttachmentEventArgs e) {
+            base.OnAttachedToVisualTree(e);
+            vstLibrarySubscription?.Dispose();
+            vstLibrarySubscription = ReactiveUI.MessageBus.Current
+                .Listen<VstLibraryChangedNotification>()
+                .Subscribe(_ => Avalonia.Threading.Dispatcher.UIThread.Post(SyncVstScanPathsFromStore));
+        }
+
+        /// <summary>卸载即退订（避免实例被广播长期持有）。</summary>
+        protected override void OnDetachedFromVisualTree(Avalonia.VisualTreeAttachmentEventArgs e) {
+            base.OnDetachedFromVisualTree(e);
+            vstLibrarySubscription?.Dispose();
+            vstLibrarySubscription = null;
+        }
+
+        /// <summary>
+        /// 从唯一存储（<c>Preferences.Default.VstScanPaths</c>）重载本页的路径列表。
+        /// 内容相同则不动（防"收发互踢"）；直接改 VM 的公开集合会触发它自己的存盘钩子。
+        /// </summary>
+        public void SyncVstScanPathsFromStore() {
+            PreferencesViewModel? vm = ViewModel;
+            if (vm == null) {
+                return;
+            }
+            var store = Preferences.Default.VstScanPaths ?? new System.Collections.Generic.List<string>();
+            if (vm.VstScanPaths.SequenceEqual(store, StringComparer.Ordinal)) {
+                return;
+            }
+            vm.VstScanPaths.Clear();
+            foreach (string path in store) {
+                vm.VstScanPaths.Add(path);
+            }
         }
 
         /// <summary>音源列表数据源。</summary>
@@ -220,16 +262,23 @@ namespace OpenUtau.App.Views {
             if (!string.IsNullOrWhiteSpace(path)) {
                 ViewModel!.AddVstScanPath(path!);
                 NewVstPath.Text = string.Empty;
+                // 广播：素材库「效果器」页签同一份数据即时同步
+                VstLibraryChangedNotification.Publish(VstLibraryChangedNotification.SourcePreferences);
             }
         }
 
         private void OnRemoveVstPath(object? sender, RoutedEventArgs e) {
             if (VstPathsList.SelectedItem is string path) {
                 ViewModel!.RemoveVstScanPath(path);
+                VstLibraryChangedNotification.Publish(VstLibraryChangedNotification.SourcePreferences);
             }
         }
 
-        private void OnRescanVstPlugins(object? sender, RoutedEventArgs e) => ViewModel!.RefreshVstPlugins();
+        private void OnRescanVstPlugins(object? sender, RoutedEventArgs e) {
+            ViewModel!.RefreshVstPlugins();
+            // 广播：素材库页签的列表面向同一注册表，重扫后一起刷新
+            VstLibraryChangedNotification.Publish(VstLibraryChangedNotification.SourcePreferences);
+        }
 
         private void OnOpenReadme(object? sender, RoutedEventArgs e) {
             string path = Path.Combine(PathManager.Inst.RootPath, "README.md");

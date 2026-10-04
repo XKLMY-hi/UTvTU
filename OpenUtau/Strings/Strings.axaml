@@ -1179,4 +1179,15 @@ General
   <system:String x:Key="view.mixer">Mixer</system:String>
   <system:String x:Key="view.detach">Open in separate window</system:String>
   <!-- /mx-view -->
+  <!-- ⚠ mx-lib: W4 素材库「效果器」页签（插件浏览器 + 插件扫描路径管理）—— EN/zh 成对，合并时整块保留 -->
+  <system:String x:Key="sidebar.effects.search">Search plugins</system:String>
+  <system:String x:Key="sidebar.effects.countlabel">plugins</system:String>
+  <system:String x:Key="sidebar.effects.scanning">Scanning…</system:String>
+  <system:String x:Key="sidebar.effects.empty">No effect plugins found. Add a scan path below, then rescan.</system:String>
+  <system:String x:Key="sidebar.effects.nomatch">No plugins match your search</system:String>
+  <system:String x:Key="sidebar.effects.paths">Scan paths</system:String>
+  <system:String x:Key="sidebar.effects.paths.manage">Manage plugin scan paths</system:String>
+  <system:String x:Key="sidebar.effects.paths.watermark">C:\Path\To\VST\Plugins</system:String>
+  <system:String x:Key="sidebar.effects.paths.hint">Shared with Preferences → VST: changes made in either place stay in sync.</system:String>
+  <!-- /mx-lib -->
 </ResourceDictionary>

@@ -1165,9 +1165,66 @@ namespace OpenUtau.App.Views {
             ShowLibraryPage(MidiPanel, MidiTab);
         }
 
-        /// <summary>素材库页签：效果器（插件浏览器，待效果链落地）。</summary>
+        /// <summary>素材库页签：效果器（W4：插件浏览器；展开时只读刷新列表，不触发扫描）。</summary>
         private void OnShowVst(object? sender, RoutedEventArgs e) {
+            viewModel.PluginBrowser.RefreshPlugins();
             ShowLibraryPage(VstPanel, EffectsTab);
+        }
+
+        // ── W4：素材库「效果器」页签（插件浏览器）──────────────────────────────
+        // 拖拽源与歌手/伴奏卡片同款：按下记起点，移动超阈值发起拖拽；
+        // 负载走 W3 冻结契约 FxChainDragData（格式 OpenUtau.FxChainItem），落点由链面板 DropPayload 消费。
+        private Point pluginDragStart;
+        private PointerPressedEventArgs? pluginPressedArgs;
+        private VstPluginItem? pluginDragItem;
+
+        /// <summary>插件行按下：记录起点与待拖拽项。</summary>
+        private void OnPluginPointerPressed(object? sender, PointerPressedEventArgs args) {
+            if (!args.GetCurrentPoint(this).Properties.IsLeftButtonPressed ||
+                sender is not Border { DataContext: VstPluginItem item }) {
+                return;
+            }
+            pluginDragStart = args.GetPosition(this);
+            pluginPressedArgs = args;
+            pluginDragItem = item;
+        }
+
+        /// <summary>插件行移动超过 5px → 拖出（负载 = 插件 UID）。</summary>
+        private async void OnPluginPointerMoved(object? sender, PointerEventArgs args) {
+            if (pluginPressedArgs == null || pluginDragItem == null) {
+                return;
+            }
+            var delta = args.GetPosition(this) - pluginDragStart;
+            if (Math.Abs(delta.X) < 5 && Math.Abs(delta.Y) < 5) {
+                return;
+            }
+            var pressed = pluginPressedArgs;
+            var data = PluginBrowserViewModel.CreatePluginDragData(pluginDragItem);
+            pluginPressedArgs = null;
+            pluginDragItem = null;
+            await DragDrop.DoDragDropAsync(pressed, data, DragDropEffects.Copy);
+        }
+
+        /// <summary>重新扫描插件（后台线程扫描；完成后广播，偏好设置侧计数同步刷新）。</summary>
+        private async void OnRescanVstFromLibrary(object? sender, RoutedEventArgs e) {
+            await viewModel.PluginBrowser.RescanInBackgroundAsync();
+        }
+
+        /// <summary>展开/收起「插件扫描路径」面板。</summary>
+        private void OnToggleVstPathManager(object? sender, RoutedEventArgs e) {
+            VstPathManager.IsVisible = !VstPathManager.IsVisible;
+        }
+
+        /// <summary>添加扫描路径（写 Preferences.Default.VstScanPaths + 广播，与偏好设置即时同步）。</summary>
+        private void OnAddVstPathFromLibrary(object? sender, RoutedEventArgs e) {
+            viewModel.PluginBrowser.AddPathFromInput();
+        }
+
+        /// <summary>移除选中的扫描路径（同上）。</summary>
+        private void OnRemoveVstPathFromLibrary(object? sender, RoutedEventArgs e) {
+            if (VstPathsList.SelectedItem is string path) {
+                viewModel.PluginBrowser.RemoveScanPath(path);
+            }
         }
 
         private void ShowLibraryPage(Control page, Button tab) {
