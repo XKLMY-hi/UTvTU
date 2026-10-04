@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
     <TargetFramework>net8.0-windows</TargetFramework>
   </PropertyGroup>
@@ -46,6 +46,7 @@
     <None Include="..\OpenUtau\App.axaml" Link="App.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Styles\Md3Controls.axaml" Link="Styles\Md3Controls.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Styles\Md3ControlThemes.axaml" Link="Styles\Md3ControlThemes.axaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\OpenUtau\Styles\Md3SelectionThemes.axaml" Link="Styles\Md3SelectionThemes.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Styles\Md3Transitions.axaml" Link="Styles\Md3Transitions.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Controls\TrackHeader.axaml" Link="Controls\TrackHeader.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Styles\Md3Menus.axaml" Link="Styles\Md3Menus.axaml" CopyToOutputDirectory="PreserveNewest" />

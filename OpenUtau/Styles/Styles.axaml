@@ -1,4 +1,4 @@
-﻿<Styles xmlns="https://github.com/avaloniaui"
+<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:OpenUtau.App.Controls">
   <Style>
@@ -573,7 +573,11 @@
       </ControlTemplate>
     </Setter>
   </Style>
-  <Style Selector="Slider:pointerover /template/ RepeatButton#PART_DecreaseButton">
+  <!-- 只给 fader 变体提亮（v4.0 起混合台推子 = AccentBrush1/2 一对）。
+       2026-10 选择类控件自有 ControlTheme 后，这条必须收窄到 `.fader`：
+       普通 Slider 的模板里也有 RepeatButton#PART_DecreaseButton，若不收窄，
+       这条应用级补丁会压住新主题里"已选轨道 = primary"的状态色。 -->
+  <Style Selector="Slider.fader:pointerover /template/ RepeatButton#PART_DecreaseButton">
     <Setter Property="Background" Value="{DynamicResource AccentBrush2}" />
   </Style>
 

@@ -55,6 +55,8 @@
     <StyleInclude Source="/Styles/Md3Transitions.axaml"/>
     <!-- 控件主题（ControlTheme + 装主题的样式同文件，最后挂载）：Button / ListBoxItem -->
     <StyleInclude Source="/Styles/Md3ControlThemes.axaml"/>
+    <!-- 选择类控件自有 ControlTheme（同文件挂载）：CheckBox / RadioButton / ToggleSwitch / Slider / ProgressBar -->
+    <StyleInclude Source="/Styles/Md3SelectionThemes.axaml"/>
   </Application.Styles>
   <NativeMenu.Menu>
     <NativeMenu/>
