@@ -199,6 +199,21 @@ namespace OpenUtau.Test.TestSupport {
             return buffer;
         }
 
+        /// <summary>循环读取一段内存样本的 <see cref="ISignalSource"/>（测试用信号源，加法混音约定）。</summary>
+        public static ISignalSource LoopingSource(float[] interleaved) => new LoopSource(interleaved);
+
+        sealed class LoopSource : ISignalSource {
+            readonly float[] data;
+            public LoopSource(float[] data) => this.data = data;
+            public bool IsReady(int position, int count) => true;
+            public int Mix(int position, float[] buffer, int index, int count) {
+                for (int i = 0; i < count; i++) {
+                    buffer[index + i] += data[(position + i) % data.Length];
+                }
+                return position + count;
+            }
+        }
+
         sealed class AdapterProvider : ISignalSource {
             readonly NAudio.Wave.ISampleProvider provider;
             public AdapterProvider(NAudio.Wave.ISampleProvider provider) => this.provider = provider;
