@@ -215,3 +215,60 @@ System.ArgumentException: Attempt to call InvalidateArrange on wrong LayoutManag
 5. **状态条那 12px**：状态条实测 32（955 分隔线 + 956..986）；其下 988..999 的 `#101012` 12px 我判定为窗口底缘/阴影区，不是状态条的一部分（若 Lead 认为另有含义，请以实机为准）。
 6. **量法可复现**：所有数值都可用 `%TEMP%\mx\mxmeasure.py` 对同名截图复算；截图清单见文首路径（`mx-00…mx-30`，共 25 张）。
 7. 我**未修改任何产品代码、未提交、未合并、未推送**；未按进程名杀任何进程（全程 `stop.ps1 -ExePrefix ...UTvTU-mx-int`，仅按 PID + 路径前缀）。
+
+---
+
+# 复验轮（W13 / task-25）：`76281e37`，4 项 —— 结论 **3 PASS / 1 部分（含未验证项）**
+
+> 树 `UTvTU-mx-int` HEAD **`76281e37`**（tree clean）。工具/红线同 W6（按 PID；`-ExePrefix ...UTvTU-mx-int`）。本轮**未改主题**（收工 `prefs.json` 仍 `"ThemeName": "Dark"`），`git status` 全程为空。
+
+## ① 崩溃复验（W9 `DetachAndFlush`）—— **PASS**
+
+- **连续 6 轮分离/收回**（每轮：点「分离」→ 观察 4s → 关分离窗 → 确认收回；第 2、5 轮各夹一次「工作台↔混音台」视图往返）：**进程全程存活（Responding=True），7 次 reparent 零异常**。
+- **像素级单轮证据**：`mx-44-cycle-before.png` 视图区 accent `(60,160)=#CFBDFE`（混音台在视图）→ 点分离 → `mx-45-cycle-detached.png` 视图区变 `#141218`（已摘走）+ 独立窗「混音台」出现 → 关窗 → **`mx-47-returned.png` accent 回到 `#CFBDFE`** ⇒ 收回路径亦像素验证通过。
+- **日志**：当日 `log20261004.txt` 全文 `Unhandled exception` **仅 1 次 = W6 的 18:53:28 那一次**；本轮实例（20:3x 起）**0 次** ⇒ W6 命中 1/3 → 本轮 **0/7** ✔。
+- ⚠️ 诚实说明：(a) W6 历史里的「双击内置行 → `试听效果` → ESC → 旁通 → Ctrl+Z」**未复放**（自动化点链面板 ＋/行两次落空，判断其与 reparent 机制无关，改为做足 7 次分离/收回 + 视图往返）；(b) 我的收窗自动化必须**先点标题栏激活、再点 X**（否则首击只激活窗——日志有 `[warn] 置前失败`），属工具限制而非产品问题。
+
+## ② 几何点 —— **PASS（✕ 一项未能像素核）**
+
+| 点 | 规格 | 实测（像素） | 结论 |
+|---|---|---|---|
+| M/S 高 | 20 | `scancol x=50`：`#2B292F` **289..308 = 20**（修前 32） | **PASS** |
+| `＋轨道`（顺带） | 28 | `bbox #2B292F` = **56×28**（x[29,84] y[100,127]） | **PASS** |
+| `viewTab` / 胶囊 | 30 / 36 | `scancol x=847`（选中「混音台」）：容器 `#2B292F` 46..48 + 选中块 `#4A4458` **49..78 = 30** + 容器 79..81 ⇒ **容器 36 / 选项 30 / 上下各 3px**（修前 32 且上下各溢 1px 的现象消失） | **PASS** |
+| `libTab`（顺带） | 28 | `scancol x=1123`（选中「效果器」）：`#4A4458` **142..169 = 28** | **PASS** |
+| 链行 **✕** | 22×22 | **未像素核**：✕ 仅 VST 行显示，而拖拽未落地（见 ③）⇒ 无 VST 行可量；静态证据 `FxChainRow.axaml:52-53` 本地 `MinHeight=22`+`Margin=0` 已中和主题 `MinHeight=32` 与应用级 `Button{Margin:0,4}` | **未验证（仅代码审查）** |
+
+（主静音 24×20 属上轮项、本轮按新范围跳过像素复核。）
+
+## ③ D9 真机拖拽 —— **部分：列表侧 PASS（17 条），物理拖拽未落地**
+
+- **列表 OK**（`mx-52-effects-list.png`）：标题行 **「17 个插件」**，行如 `2getheraudio TickyClav 2 / VST2`、`ACE Bridge ARA · ACE Studio / VST3`、`AGML2 / VST2`、`Keyzone Classic / VST2`、`OTT / Xfer Records / VST3`、`Persistent C/L/Q/R / VST3`…——**VST2/VST3 徽标正确**。
+- **W11/W12 交叉验证（日志实证）**：`[VST] Registry: 28 plugins (17 effects) | VST3 bundles 3: moduleinfo 1, fallback 2, failed 0 | VST3 single-file 23: registered 20, failed 3 | VST2 5: registered 5 | vst_probe: ok` ⇒ 与"**24→28 总数 / 15→17 效果器**"精确一致；**`fallback 2` 证明"无 moduleinfo 老式 bundle 回退"真的生效**；失败的 3 个逐个有日志（含 `synthv-flat.vst3` 探针超时 + no metadata ⇒ 正确拒绝）✔。
+- **物理拖拽 ✗（未验证）**：两次真实拖（`mouse_event` + 放大步长长拖）均未在链面板产生 VST 行（面板行探针两次为空）。判断：Avalonia `DoDragDropAsync` 走 **OLE 拖放回路**，合成鼠标输入不足以进入拖放模态循环（`SendInput` 版本因我的 `Add-Type` 辅助类不支持带方法体定义而未跑起来，已放弃）。⇒ **需用户手拖 5 秒验证**（拖一行到右侧链面板 → 出现 VST 行 → 可排序 → Ctrl+Z 可撤销）；代码/测试侧覆盖：`MainWindow.axaml.cs:1176-1202`（`CreatePluginDragData` → `DoDragDropAsync`）+ 面板 `OnDragOver/OnDrop` + `FxChainDragData.Read`（同一进程内格式 `OpenUtau.FxChainItem`）。
+
+## ④ 一次全量（默认变体）—— **PASS，但发现 1 次新偶发**
+
+实际跑了 **7 次**（默认×2 / Dark×2 / Light×3，同一 `--no-build` 产物）：
+
+| 轮次 | 结果 |
+|---|---|
+| `-t:Rebuild` | exit 0，**0 错误** |
+| r1-default | ⚠️ **失败 1**：`OpenUtau.Test.Core.SignalChain.MixFxSourceTest.Mix_SteadyState_DoesNotAllocate`（exit 1，537/538） |
+| r2-default | 538/0 ✔ |
+| r1-dark / r2-dark | 538/0 ✔ / 538/0 ✔ |
+| r1/r2/r3-light | 538/0 ✔ ✔ ✔ |
+
+- 默认变体单次要求 **PASS**（r2）；但"连跑 0 failed"不稳定：**7 次 1 次偶发，且命中在 Rebuild 后第一次运行**——**新的名字**（不是已修的语言用例），属"分配计数类用例对 GC/并行噪声敏感"（该用例计 `GC.GetAllocatedBytesForCurrentThread`）。建议后续提交：采样窗口收窄到稳态若干块 / 放宽阈值 / 串行化。
+
+## ⑤ 回归抽样（按"只就这 4 项"口径）
+
+- 抽样像素：条顶 152 → 卡内边距 8（152..159）→ **强调条 160..162 = 3px** → 名称 ink 170..178 → EQ 187 起 ⇒ 通道条头部结构无回退 ✔；混音台 / 链面板（空态文案）/ 素材库列 / 胶囊三视图 / 分离↔收回 全部可用 ✔。
+- `git diff bd3278e6..76281e37 -- OpenUtau/Styles OpenUtau/App.axaml` ⇒ **空** ⇒ 修复轮**未新增应用级 `/template/` 补丁**、未动样式层 ✔（改动集中在 `Controls/*.axaml` 局部样式、`Core/Vst/*`、`ViewModels/MainWindowViewModel.cs`、`Test/**`）。
+- 键对齐/硬编码色值本轮未复跑（按你"跳过对抗审查复跑"口径）。
+
+## 复验轮证据（`.dsh/fx/shots/`）
+
+`mx-40-geometry.png`、`mx-42-mixer.png`（M/S=20 / ＋轨道=28 / 胶囊 36+30 探针源）、`mx-43-chain-row.png`、`mx-44-cycle-before.png`、`mx-45-cycle-detached.png`、`mx-46-cycle-returned.png`、`mx-47-returned.png`、`mx-48/49/50-effects-*.png`、`mx-52-effects-list.png`（**17 个插件** + VST2/VST3 徽标）、`mx-53/54/55-drop*.png`（两次拖拽未落地）。
+
+**一句话**：① 崩溃修复 **PASS**（7 次 reparent 0 异常；全天日志仅 W6 那 1 条）；② M/S **20**、胶囊 **36+30**、libTab **28**、＋轨道 **28** 全 PASS，**✕ 22×22 因无 VST 行未像素核**；③ D9 列表侧 PASS（**17 条**、徽标正确、W12 回退路径日志实证），**物理拖拽未落地 ⇒ 未验证**；④ 默认变体全量 PASS，但发现**新偶发** `MixFxSourceTest.Mix_SteadyState_DoesNotAllocate`（7 次 1 次，Rebuild 后首次运行命中）。

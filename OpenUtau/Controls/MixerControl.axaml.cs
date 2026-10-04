@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Specialized;
+using System.Threading;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -29,6 +30,8 @@ public partial class MixerControl : UserControl
     private bool shutdown;
     private bool timerRunning;
     private bool _loggedFirstTick;
+    /// <summary>视觉树所属线程（挂载时更新；未挂载时 = 构造线程）。RebuildStrips 的亲和判据。</summary>
+    private Thread uiThread = Thread.CurrentThread;
     private IDisposable? _selectionSubscription;
     private IDisposable? _visibilitySubscription;
     /// <summary>右侧效果链面板（宿主装配见构造器；生命周期随本控件，无需窗口侧管理）。</summary>
@@ -81,6 +84,9 @@ public partial class MixerControl : UserControl
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
         base.OnAttachedToVisualTree(e);
+        // 视觉树所属线程在挂载时确定：RebuildStrips 的线程亲和判据以它为准
+        // （不用 Dispatcher.CheckAccess()——headless 测试宿主下会误判）。
+        uiThread = Thread.CurrentThread;
         attached = true;
         SyncTimer();
     }
@@ -167,6 +173,14 @@ public partial class MixerControl : UserControl
 
     public void RebuildStrips()
     {
+        // 视觉树只能在**它所属的线程**上改：Tracks 的变更通知可能来自别的线程（测试宿主、
+        // 未来的后台路径），与 MixerViewModel.RefreshTracks 的编组构成双保险。
+        // 判据不用 Dispatcher.CheckAccess()——它在 headless 测试宿主下不可靠（实测会误判为 true），
+        // 改为锚定"控件挂载到视觉树时的线程"（未挂载时即构造线程）。
+        if (Thread.CurrentThread != uiThread) {
+            Dispatcher.UIThread.Post(RebuildStrips);
+            return;
+        }
         foreach (var child in TrackStripsPanel.Children)
             if (child is MixerTrackStrip strip) {
                 strip.Selected -= OnStripSelected;

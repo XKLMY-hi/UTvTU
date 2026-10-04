@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -58,11 +59,17 @@ namespace OpenUtau.App.Controls {
         /// 传 null 也可（面板显示"未选择轨道"）。
         /// <c>Track</c> 是 <c>StyledProperty</c>（绑定 / 布局有 UI 线程亲缘）⇒ 宿主若从
         /// 后台线程推值（例如在异步任务里改选中态），这里编组回 UI 线程。
+        ///
+        /// 判据**不用** <c>Dispatcher.UIThread.CheckAccess()</c>：它在 headless 测试宿主下会误判为
+        /// true（实测：命令在测试线程内联派发时它仍返回 true，于是没编组、直接崩在
+        /// <c>SetValue</c> → <c>Dispatcher.VerifyAccess</c>）。改为锚定**订阅建立时的线程**
+        /// （宿主在 UI 线程构造面板并接线），跨线程一律 Post。
         /// </summary>
         public void BindSelection(IObservable<UTrack?> selection) {
             selectionSub?.Dispose();
+            var owner = Thread.CurrentThread;
             selectionSub = selection.Subscribe(t => {
-                if (Dispatcher.UIThread.CheckAccess()) {
+                if (Thread.CurrentThread == owner) {
                     Track = t;
                 } else {
                     Dispatcher.UIThread.Post(() => Track = t);
