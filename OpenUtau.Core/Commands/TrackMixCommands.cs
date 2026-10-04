@@ -16,6 +16,16 @@ namespace OpenUtau.Core {
     }
 
     /// <summary>
+    /// 内置效果链的三个模块（与 DSP 链的固定顺序一致：EQ → 压缩 → 混响）。
+    /// 效果链面板按它给内置伪插件与 VST 槽同一套命令语义（B2）。
+    /// </summary>
+    public enum MixFxModule {
+        Eq,
+        Compressor,
+        Reverb,
+    }
+
+    /// <summary>
     /// Track-scoped convenience helpers.
     /// VST 槽位命令同时驱动实例生命周期（do/undo 触发 LoadEffectAsync/UnloadEffect），
     /// 并靠 VstSlotChangedNotification 让 UI 在异步加载完成后重建行。
@@ -152,6 +162,106 @@ namespace OpenUtau.Core {
             }
 
             public override string ToString() => $"Toggle VST bypass {track.TrackName}[{slotIndex}]";
+        }
+
+        // ── 内置效果链（MixFx）——效果链面板的 B2/B8 落点 ───────────────
+
+        /// <summary>
+        /// 内置模块电源（旁通的反面）：do 写目标值，undo 写回旧值。
+        /// 面板/编辑器一律走它，避免"直接改 fx.EqEnabled"这种不进 undo 队列的写法。
+        /// </summary>
+        public static UCommand SetMixFxModule(UTrack track, MixFxModule module, bool enabled) {
+            bool old = IsModuleEnabled(track.MixFx, module);
+            return new LambdaCommand(
+                () => SetModuleEnabled(track.MixFx, module, enabled),
+                () => SetModuleEnabled(track.MixFx, module, old),
+                $"MixFx {module} on {track.TrackName} = {enabled}");
+        }
+
+        /// <summary>链路总电源（内置段整体通过声 / 旁通）。</summary>
+        public static UCommand SetMixFxEnabled(UTrack track, bool enabled) {
+            bool old = track.MixFx?.Enabled ?? false;
+            return new LambdaCommand(
+                () => { if (track.MixFx != null) track.MixFx.Enabled = enabled; },
+                () => { if (track.MixFx != null) track.MixFx.Enabled = old; },
+                $"MixFx enabled on {track.TrackName} = {enabled}");
+        }
+
+        /// <summary>
+        /// 替换整条内置效果链的模型引用（<paramref name="fx"/> = null 表示回到"未配置效果"）。
+        /// do 捕获旧引用，undo 原样放回 —— 首次把内置模块加进链时用它，
+        /// 保证"加内置效果"和"加 VST 插件"一样可撤销、且不留空 UMixFx。
+        /// </summary>
+        public static UCommand SetMixFx(UTrack track, UMixFx? fx) {
+            UMixFx? old = track.MixFx;
+            return new LambdaCommand(
+                () => track.MixFx = fx,
+                () => track.MixFx = old,
+                $"Set MixFx on {track.TrackName}");
+        }
+
+        /// <summary>
+        /// VST 槽位重排（效果链面板的拖拽/上下移落点）。
+        ///
+        /// 语义 = 把两个槽的**载荷**互换（PluginUid + 参数状态 StateData + Bypassed），
+        /// 然后重载这两个下标上的实例；槽位列表与 SlotIndex 都不动。
+        ///
+        /// 为什么不是"移动列表元素"：实例数组 <c>VstTrackInstances._effects</c> 以**下标**为键
+        /// （<c>LoadAt(index, slot)</c>），每个 <c>VstEffect</c> 又反向持有它构造时的 slot；
+        /// 移动列表元素就必须重排 SlotIndex 并把每个受影响下标全部卸载重载（同样的原生开销 +
+        /// 更多失败面）。互换载荷后重载这 2 个下标，得到完全相同的可听顺序与更小的改动面。
+        ///
+        /// 命令对合：do 与 undo 是同一条操作（交换两次即还原），因此 -Undo 往返天然成立；
+        /// 重排要求"参数状态跟着插件走"，这正是连 StateData 一起交换的原因。
+        /// </summary>
+        public static UCommand ReorderVstSlot(UTrack track, int slotA, int slotB) {
+            void Apply() {
+                var slots = track.VstSlots;
+                if (slots == null || slotA == slotB) return;
+                if (slotA < 0 || slotB < 0 || slotA >= slots.Count || slotB >= slots.Count) return;
+
+                // 1) 状态写回 + 卸载（UnloadEffect 内部 SaveState 写回各自槽；延迟销毁由管理器负责）
+                VstPluginManager.Inst.UnloadEffect(track.TrackNo, slotA);
+                VstPluginManager.Inst.UnloadEffect(track.TrackNo, slotB);
+
+                // 2) 载荷互换（对合操作）
+                var sa = slots[slotA];
+                var sb = slots[slotB];
+                (sa.PluginUid, sb.PluginUid) = (sb.PluginUid, sa.PluginUid);
+                (sa.StateData, sb.StateData) = (sb.StateData, sa.StateData);
+                (sa.Bypassed, sb.Bypassed) = (sb.Bypassed, sa.Bypassed);
+
+                // 3) 下标归一化：SlotIndex 恒等于列表位置（损坏的工程值借此修正；
+                //    它不参与 undo 还原——把损坏状态搬回去没有意义）
+                sa.SlotIndex = slotA;
+                sb.SlotIndex = slotB;
+
+                // 4) 按新载荷重载这两个下标（异步；完成后发通知）
+                LoadAndNotify(track, sa);
+                LoadAndNotify(track, sb);
+            }
+            return new LambdaCommand(Apply, Apply, $"Reorder VST slots {track.TrackName}[{slotA}⇄{slotB}]");
+        }
+
+                /// <summary>
+        /// 读内置模块电源。**模块 ↔ 模型字段的映射只此一处**（效果链面板的静态描述表
+        /// 也走它，避免 App 层再抄一份 switch）。
+        /// </summary>
+        public static bool IsModuleEnabled(UMixFx? fx, MixFxModule module) => module switch {
+            MixFxModule.Eq => fx?.EqEnabled ?? false,
+            MixFxModule.Compressor => fx?.CompEnabled ?? false,
+            MixFxModule.Reverb => fx?.ReverbEnabled ?? false,
+            _ => false,
+        };
+
+        /// <summary>写内置模块电源（<paramref name="fx"/> 为 null 时不做任何事）。</summary>
+        public static void SetModuleEnabled(UMixFx? fx, MixFxModule module, bool value) {
+            if (fx == null) return;
+            switch (module) {
+                case MixFxModule.Eq: fx.EqEnabled = value; break;
+                case MixFxModule.Compressor: fx.CompEnabled = value; break;
+                case MixFxModule.Reverb: fx.ReverbEnabled = value; break;
+            }
         }
 
         // ── helpers ───────────────────────────────────────────────
