@@ -645,8 +645,9 @@ namespace OpenUtau.App.ViewModels {
 
         public void OpenMixFxDialog() {
             if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null) {
-                var rack = new TrackEffectRack(track);
-                rack.Show();
+                // 轨道头 fx 按钮 = 这条轨的实时效果机架（三面板，非模态、每轨单窗）。
+                // VST 槽机架（TrackEffectRack）仍由混音台条带的 FX 按钮进入。
+                MixFxDialog.Open(desktop.MainWindow, track);
             }
         }
     }

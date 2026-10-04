@@ -22,15 +22,9 @@ namespace OpenUtau.App.ViewModels {
                 if (track == null) return;
                 if (Application.Current?.ApplicationLifetime is
                     Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop) {
-                    var existing = desktop.Windows.OfType<Views.MixFxDialog>().FirstOrDefault(w =>
-                        w.DataContext is MixFxViewModel mvm && mvm.TrackName == track.TrackName);
-                    if (existing != null) {
-                        existing.Activate();
-                        return;
-                    }
+                    // 与轨道头同一个入口：每轨单窗、非模态；已开着则聚焦（Open 内部处理）。
+                    Views.MixFxDialog.Open(desktop.MainWindow, track);
                 }
-                var dialog = new Views.MixFxDialog(track);
-                dialog.Show();
             });
 
             if (DocManager.Inst.Project?.tracks != null) {

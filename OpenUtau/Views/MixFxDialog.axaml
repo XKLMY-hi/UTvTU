@@ -2,68 +2,211 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:controls="clr-namespace:OpenUtau.App.Controls"
+        xmlns:vm="using:OpenUtau.App.ViewModels"
+        xmlns:controls="using:OpenUtau.App.Controls"
+        xmlns:c="using:OpenUtau.App.Controls"
         mc:Ignorable="d"
         x:Class="OpenUtau.App.Views.MixFxDialog"
         Icon="/Assets/open-utau.ico"
         Title="{DynamicResource mixfx.caption}"
-        Width="640" Height="540"
+        Width="940" SizeToContent="Height" MinHeight="560"
         WindowStartupLocation="CenterOwner">
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       轨道实时效果机架（三面板：EQ / 压缩 / 混响）
+       ───────────────────────────────────────────────────────────────────────
+       每块 = 电源开关 + 曲线屏 + 旋钮组；曲线由 DSP 自身数学绘制。
+       非模态：主窗仍可操作，旋钮实时可听。
+       确定 = 保留；取消 / ESC = 恢复到打开时的设置；直接关窗 = 保留。
+       MD3 铁律：颜色一律 md3.color.* / md3.* 色池键（无字面量色值）、实色（无玻璃、
+       无模糊）、窗口走 WindowEx 原生装饰；**不引入任何动画**，因此"减少动效"
+       （窗口 .no-motion 类）天然成立。
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <Window.Resources>
+    <!-- 模块强调色：把三个面板区分开，全部来自色池（EQ=primary / 压缩=tertiary / 混响=secondary） -->
+    <SolidColorBrush x:Key="RackAccentEq" Color="{DynamicResource md3.color.primary}"/>
+    <SolidColorBrush x:Key="RackAccentComp" Color="{DynamicResource md3.color.tertiary}"/>
+    <SolidColorBrush x:Key="RackAccentReverb" Color="{DynamicResource md3.color.secondary}"/>
+    <SolidColorBrush x:Key="RackAccentReverbHigh" Color="{DynamicResource md3.color.tertiary}"/>
+  </Window.Resources>
+
   <Window.Styles>
-    <Style Selector="TextBlock.lbl">
-      <Setter Property="VerticalAlignment" Value="Center"/>
+    <!-- ══ 顶部 / 底部栏文字 ══ -->
+    <Style Selector="TextBlock.rackCaption">
       <Setter Property="FontSize" Value="11"/>
-    </Style>
-    <Style Selector="TextBlock.section">
       <Setter Property="FontWeight" Value="SemiBold"/>
-      <Setter Property="FontSize" Value="13"/>
-      <Setter Property="Margin" Value="0,0,0,4"/>
+      <Setter Property="LetterSpacing" Value="1"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
     </Style>
-    <Style Selector="TextBlock.val">
+    <Style Selector="TextBlock.rackTitle">
+      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+    </Style>
+    <Style Selector="TextBlock.hint">
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="LineHeight" Value="16"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+    </Style>
+
+    <!-- ══ MD3 开关（自研模板：模块电源 / 导出开关共用；无过渡动画） ══ -->
+    <Style Selector="ToggleButton.md3switch">
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <StackPanel Orientation="Horizontal" Spacing="8" Background="Transparent">
+            <Border Name="SwitchTrack" Width="36" Height="20" CornerRadius="999"
+                    Background="{DynamicResource md3.surface-container-highest}"
+                    BorderBrush="{DynamicResource md3.outline}" BorderThickness="1"
+                    VerticalAlignment="Center">
+              <Border Name="SwitchThumb" Width="14" Height="14" CornerRadius="999"
+                      Margin="2,0" HorizontalAlignment="Left" VerticalAlignment="Center"
+                      Background="{DynamicResource md3.outline}"/>
+            </Border>
+            <ContentPresenter Content="{TemplateBinding Content}"
+                              VerticalAlignment="Center"
+                              Foreground="{TemplateBinding Foreground}"
+                              FontSize="{TemplateBinding FontSize}"
+                              IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+          </StackPanel>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="ToggleButton.md3switch:checked /template/ Border#SwitchTrack">
+      <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+    </Style>
+    <Style Selector="ToggleButton.md3switch:checked /template/ Border#SwitchThumb">
       <Setter Property="HorizontalAlignment" Value="Right"/>
+      <Setter Property="Background" Value="{DynamicResource md3.on-primary}"/>
+    </Style>
+    <Style Selector="ToggleButton.md3switch:pointerover /template/ Border#SwitchTrack">
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.on-surface-variant}"/>
+    </Style>
+    <Style Selector="ToggleButton.md3switch:disabled">
+      <Setter Property="Opacity" Value="0.38"/>
+    </Style>
+    <!-- 模块开关：无文字，只留开关本体 -->
+    <Style Selector="ToggleButton.md3switch.compact">
+      <Setter Property="Width" Value="36"/>
+      <Setter Property="Height" Value="20"/>
+    </Style>
+
+    <!-- ══ 模块卡片 ══ -->
+    <Style Selector="Border.module">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="16"/>
+      <Setter Property="Padding" Value="16"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    </Style>
+    <Style Selector="Border.accent">
+      <Setter Property="Width" Value="3"/>
+      <Setter Property="Height" Value="16"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="Margin" Value="0,0,8,0"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="TextBlock.moduleTitle">
+      <Setter Property="FontSize" Value="15"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+    </Style>
+    <Style Selector="Border.divider">
+      <Setter Property="Height" Value="1"/>
+      <Setter Property="Background" Value="{DynamicResource md3.outline-variant}"/>
+      <Setter Property="Margin" Value="0,4"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    </Style>
+
+    <!-- ══ 曲线屏：实色凹槽（surface-container-low）+ 内嵌预设选择行 ══ -->
+    <Style Selector="Border.screen">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-low}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="ClipToBounds" Value="True"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    </Style>
+    <Style Selector="ComboBox.preset">
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="CornerRadius" Value="0"/>
+      <Setter Property="BorderThickness" Value="0,1,0,0"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="MinHeight" Value="30"/>
+      <Setter Property="Padding" Value="10,0"/>
+    </Style>
+    <Style Selector="ComboBox.preset:pointerover /template/ Border#Background">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    </Style>
+
+    <!-- ══ 旋钮单元：标签 / 旋钮 / 读数 ══ -->
+    <Style Selector="StackPanel.knobCell">
+      <Setter Property="HorizontalAlignment" Value="Center"/>
+      <Setter Property="Spacing" Value="2"/>
+    </Style>
+    <Style Selector="TextBlock.knobLabel">
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="HorizontalAlignment" Value="Center"/>
+      <Setter Property="TextAlignment" Value="Center"/>
+      <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+    </Style>
+    <Style Selector="TextBlock.knobValue">
       <Setter Property="FontSize" Value="11"/>
       <Setter Property="FontFamily" Value="{DynamicResource PlusFontFamilyMono}"/>
-      <Setter Property="Opacity" Value="0.8"/>
+      <Setter Property="HorizontalAlignment" Value="Center"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     </Style>
-    <Style Selector="Slider">
-      <Setter Property="Margin" Value="0,-2,0,-2"/>
+    <Style Selector="c|Knob">
+      <Setter Property="Width" Value="64"/>
+      <Setter Property="Height" Value="64"/>
+      <Setter Property="Margin" Value="0,2"/>
     </Style>
-    <Style Selector="Border.column">
-      <Setter Property="Padding" Value="10"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}"/>
-      <Setter Property="CornerRadius" Value="8"/>
-      <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
-    </Style>
-    <Style Selector="ComboBox">
-      <Setter Property="CornerRadius" Value="6"/>
-    </Style>
-    <Style Selector="Slider">
-      <Setter Property="Margin" Value="0,-2,0,-2"/>
-      <Setter Property="Foreground" Value="{DynamicResource AccentBrush1}"/>
-      <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseLowBrush}"/>
+    <Style Selector="c|Knob.small">
+      <Setter Property="Width" Value="52"/>
+      <Setter Property="Height" Value="52"/>
     </Style>
   </Window.Styles>
-  <DockPanel LastChildFill="True">
-    <Border>
-      <DockPanel Margin="14" LastChildFill="True">
 
-      <!-- TOP: title + enable + recommended -->
-      <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,0,0,10">
-        <TextBlock Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold"
-                   Text="{Binding TrackName}"/>
-        <CheckBox Grid.Column="1" IsChecked="{Binding Enabled}" VerticalAlignment="Center" Margin="0,0,4,0"/>
-        <TextBlock Grid.Column="2" Classes="lbl" Text="{DynamicResource mixfx.enabled}" Margin="0,0,12,0"/>
-        <Button Grid.Column="3" Content="{DynamicResource mixfx.recommended}"
-                Command="{Binding ApplyRecommendedCommand}"
-                ToolTip.Tip="{DynamicResource mixfx.recommended.tip}"/>
-      </Grid>
+  <DockPanel Margin="16" LastChildFill="True">
 
-      <!-- LIBRARY row -->
-      <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*,Auto,Auto" Margin="0,0,0,10">
-        <TextBlock Grid.Column="0" Classes="lbl" Margin="0,0,8,0"
+    <!-- ══ 顶栏：轨道 + 导出开关 + 默认设置 + 总电源 ══ -->
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto" Margin="0,0,0,14">
+      <TextBlock Grid.Column="0" Classes="rackCaption" Margin="0,0,10,0"
+                 Text="{DynamicResource mixfx.rack.track}"/>
+      <TextBlock Grid.Column="1" Classes="rackTitle" MaxWidth="240"
+                 Text="{Binding TrackName}"/>
+      <ToggleButton Grid.Column="3" Classes="md3switch" Margin="0,0,20,0"
+                    IsChecked="{Binding ApplyOnExportMixdown}"
+                    Content="{DynamicResource mixfx.applyonexport}"/>
+      <Button Grid.Column="4" Margin="0,0,20,0"
+              Content="{DynamicResource mixfx.recommended}"
+              Command="{Binding ApplyRecommendedCommand}"
+              ToolTip.Tip="{DynamicResource mixfx.recommended.tip}"/>
+      <ToggleButton Grid.Column="5" Classes="md3switch"
+                    IsChecked="{Binding Enabled}"
+                    Content="{DynamicResource mixfx.rack.power}"
+                    ToolTip.Tip="{DynamicResource mixfx.rack.power.tip}"/>
+    </Grid>
+
+    <!-- ══ 底栏：说明 + 预设库 + 确定/取消 ══ -->
+    <StackPanel DockPanel.Dock="Bottom" Spacing="10" Margin="0,14,0,0">
+      <TextBlock Classes="hint" Text="{DynamicResource mixfx.rack.hint}"/>
+      <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto">
+        <TextBlock Grid.Column="0" Classes="rackCaption" Margin="0,0,10,0"
                    Text="{DynamicResource mixfx.library}"/>
-        <ComboBox Grid.Column="1" HorizontalAlignment="Stretch"
+        <ComboBox Grid.Column="1" Width="240"
                   ItemsSource="{Binding UserPresets}" SelectedItem="{Binding SelectedUserPreset}"
                   PlaceholderText="{DynamicResource mixfx.library.placeholder}">
           <ComboBox.ItemTemplate>
@@ -72,110 +215,173 @@
             </DataTemplate>
           </ComboBox.ItemTemplate>
         </ComboBox>
-        <Button Grid.Column="2" Margin="6,0,0,0" Content="{DynamicResource mixfx.library.save}"
+        <Button Grid.Column="2" Margin="8,0,0,0" Content="{DynamicResource mixfx.library.save}"
                 Command="{Binding SaveUserPresetCommand}"/>
-        <Button Grid.Column="3" Margin="6,0,0,0" Content="{DynamicResource mixfx.library.delete}"
+        <Button Grid.Column="3" Margin="8,0,0,0" Content="{DynamicResource mixfx.library.delete}"
                 Command="{Binding DeleteUserPresetCommand}"
                 IsEnabled="{Binding CanDeleteSelectedPreset}"/>
+        <Button Grid.Column="5" Content="{DynamicResource button.cancel}"
+                MinWidth="90" Margin="0,0,8,0" Click="OnCancelClicked"/>
+        <Button Grid.Column="6" Classes="primary" Content="{DynamicResource button.ok}"
+                MinWidth="90" Click="OnOkClicked"/>
       </Grid>
+    </StackPanel>
 
-      <!-- BOTTOM: export checkbox + OK/Cancel -->
-      <Grid DockPanel.Dock="Bottom" ColumnDefinitions="Auto,Auto,*,Auto,Auto" Margin="0,10,0,0">
-        <CheckBox Grid.Column="0" IsChecked="{Binding ApplyOnExportMixdown}" VerticalAlignment="Center"/>
-        <TextBlock Grid.Column="1" Classes="lbl" Margin="0,0,12,0" Text="{DynamicResource mixfx.applyonexport}"/>
-        <Button Grid.Column="3" Content="{DynamicResource button.cancel}"
-                MinWidth="70" Margin="0,0,8,0" Click="OnCancelClicked"/>
-        <Button Grid.Column="4" Content="{DynamicResource button.ok}"
-                MinWidth="70" Click="OnOkClicked"/>
-      </Grid>
+    <!-- ══ 三个模块面板 ══ -->
+    <Grid ColumnDefinitions="*,16,*,16,*">
 
-      <!-- BODY: 3 columns side by side -->
-      <Grid ColumnDefinitions="*,8,*,8,*" IsEnabled="{Binding Enabled}">
-
-        <!-- EQ -->
-        <Border Grid.Column="0" Classes="column">
-          <StackPanel Spacing="3">
-            <TextBlock Classes="section" Text="{DynamicResource mixfx.eq}"/>
-            <ComboBox HorizontalAlignment="Stretch" Margin="0,0,0,4"
-                      ItemsSource="{Binding EqPresets}" SelectedItem="{Binding SelectedEq}"/>
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Grid.Column="0" Classes="lbl" Text="{DynamicResource mixfx.eq.low}"/>
-              <TextBlock Grid.Column="1" Classes="val" Text="{Binding EqLowDb, StringFormat={}{0:+0.0;-0.0;0.0}}"/>
-            </Grid>
-            <Slider Minimum="-12" Maximum="12" Value="{Binding EqLowDb}" TickFrequency="0.5"/>
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Grid.Column="0" Classes="lbl" Text="{DynamicResource mixfx.eq.midfreq}"/>
-              <TextBlock Grid.Column="1" Classes="val" Text="{Binding EqMidFreq, StringFormat={}{0:F0} Hz}"/>
-            </Grid>
-            <Slider Minimum="200" Maximum="6000" Value="{Binding EqMidFreq}" TickFrequency="50"/>
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Grid.Column="0" Classes="lbl" Text="{DynamicResource mixfx.eq.mid}"/>
-              <TextBlock Grid.Column="1" Classes="val" Text="{Binding EqMidDb, StringFormat={}{0:+0.0;-0.0;0.0}}"/>
-            </Grid>
-            <Slider Minimum="-12" Maximum="12" Value="{Binding EqMidDb}" TickFrequency="0.5"/>
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Grid.Column="0" Classes="lbl" Text="{DynamicResource mixfx.eq.high}"/>
-              <TextBlock Grid.Column="1" Classes="val" Text="{Binding EqHighDb, StringFormat={}{0:+0.0;-0.0;0.0}}"/>
-            </Grid>
-            <Slider Minimum="-12" Maximum="12" Value="{Binding EqHighDb}" TickFrequency="0.5"/>
+      <!-- ── EQ ── -->
+      <Border Grid.Column="0" Classes="module">
+        <StackPanel Spacing="12">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <Border Grid.Column="0" Classes="accent" Background="{DynamicResource RackAccentEq}"/>
+            <TextBlock Grid.Column="1" Classes="moduleTitle" Text="{DynamicResource mixfx.eq}"/>
+            <ToggleButton Grid.Column="2" Classes="md3switch compact" VerticalAlignment="Center"
+                          IsChecked="{Binding EqEnabled}"
+                          ToolTip.Tip="{DynamicResource mixfx.rack.module.tip}"/>
+          </Grid>
+          <Border Classes="screen">
+            <DockPanel LastChildFill="True">
+              <ComboBox DockPanel.Dock="Bottom" Classes="preset"
+                        ItemsSource="{Binding EqPresets}" SelectedItem="{Binding SelectedEq}"/>
+              <c:EqCurveDisplay Height="132" IsEnabled="{Binding EqEnabled}"
+                                CurveBrush="{DynamicResource RackAccentEq}"
+                                LowDb="{Binding EqLowDb}" MidFreq="{Binding EqMidFreq}"
+                                MidDb="{Binding EqMidDb}" HighDb="{Binding EqHighDb}"/>
+            </DockPanel>
+          </Border>
+          <Grid ColumnDefinitions="*,*,*">
+            <StackPanel Grid.Column="0" Classes="knobCell">
+              <TextBlock Classes="knobLabel" Text="{DynamicResource mixfx.eq.low}"/>
+              <c:Knob Minimum="-12" Maximum="12" DefaultValue="0" Value="{Binding EqLowDb}"
+                      ArcBrush="{DynamicResource RackAccentEq}"/>
+              <TextBlock Classes="knobValue" Text="{Binding EqLowDb, StringFormat={}{0:+0.0;-0.0;0.0} dB}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Classes="knobCell">
+              <TextBlock Classes="knobLabel" Text="{DynamicResource mixfx.eq.mid}"/>
+              <c:Knob Minimum="-12" Maximum="12" DefaultValue="0" Value="{Binding EqMidDb}"
+                      ArcBrush="{DynamicResource RackAccentEq}"/>
+              <TextBlock Classes="knobValue" Text="{Binding EqMidDb, StringFormat={}{0:+0.0;-0.0;0.0} dB}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="2" Classes="knobCell">
+              <TextBlock Classes="knobLabel" Text="{DynamicResource mixfx.eq.high}"/>
+              <c:Knob Minimum="-12" Maximum="12" DefaultValue="0" Value="{Binding EqHighDb}"
+                      ArcBrush="{DynamicResource RackAccentEq}"/>
+              <TextBlock Classes="knobValue" Text="{Binding EqHighDb, StringFormat={}{0:+0.0;-0.0;0.0} dB}"/>
+            </StackPanel>
+          </Grid>
+          <Border Classes="divider"/>
+          <StackPanel Classes="knobCell">
+            <TextBlock Classes="knobLabel" Text="{DynamicResource mixfx.eq.midfreq}"/>
+            <c:Knob Classes="small" Minimum="200" Maximum="6000" DefaultValue="3000"
+                    Value="{Binding EqMidFreq}"
+                    ArcBrush="{DynamicResource RackAccentEq}"/>
+            <TextBlock Classes="knobValue" Text="{Binding EqMidFreq, StringFormat={}{0:F0} Hz}"/>
           </StackPanel>
-        </Border>
+        </StackPanel>
+      </Border>
 
-        <!-- Compressor -->
-        <Border Grid.Column="2" Classes="column">
-          <StackPanel Spacing="3">
-            <TextBlock Classes="section" Text="{DynamicResource mixfx.compressor}"/>
-            <ComboBox HorizontalAlignment="Stretch" Margin="0,0,0,4"
-                      ItemsSource="{Binding CompPresets}" SelectedItem="{Binding SelectedComp}"/>
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Grid.Column="0" Classes="lbl" Text="{DynamicResource mixfx.comp.threshold}"/>
-              <TextBlock Grid.Column="1" Classes="val" Text="{Binding CompThresholdDb, StringFormat={}{0:F1} dB}"/>
-            </Grid>
-            <Slider Minimum="-40" Maximum="0" Value="{Binding CompThresholdDb}" TickFrequency="1"/>
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Grid.Column="0" Classes="lbl" Text="{DynamicResource mixfx.comp.ratio}"/>
-              <TextBlock Grid.Column="1" Classes="val" Text="{Binding CompRatio, StringFormat={}{0:F1}:1}"/>
-            </Grid>
-            <Slider Minimum="1" Maximum="20" Value="{Binding CompRatio}" TickFrequency="0.1"/>
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Grid.Column="0" Classes="lbl" Text="{DynamicResource mixfx.comp.makeup}"/>
-              <TextBlock Grid.Column="1" Classes="val" Text="{Binding CompMakeupDb, StringFormat={}{0:F1} dB}"/>
-            </Grid>
-            <Slider Minimum="0" Maximum="12" Value="{Binding CompMakeupDb}" TickFrequency="0.1"/>
+      <!-- ── 压缩 ── -->
+      <Border Grid.Column="2" Classes="module">
+        <StackPanel Spacing="12">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <Border Grid.Column="0" Classes="accent" Background="{DynamicResource RackAccentComp}"/>
+            <TextBlock Grid.Column="1" Classes="moduleTitle" Text="{DynamicResource mixfx.compressor}"/>
+            <ToggleButton Grid.Column="2" Classes="md3switch compact" VerticalAlignment="Center"
+                          IsChecked="{Binding CompEnabled}"
+                          ToolTip.Tip="{DynamicResource mixfx.rack.module.tip}"/>
+          </Grid>
+          <Border Classes="screen">
+            <DockPanel LastChildFill="True">
+              <ComboBox DockPanel.Dock="Bottom" Classes="preset"
+                        ItemsSource="{Binding CompPresets}" SelectedItem="{Binding SelectedComp}"/>
+              <c:CompCurveDisplay Height="132" IsEnabled="{Binding CompEnabled}"
+                                  CurveBrush="{DynamicResource RackAccentComp}"
+                                  ThresholdDb="{Binding CompThresholdDb}" Ratio="{Binding CompRatio}"
+                                  MakeupDb="{Binding CompMakeupDb}"/>
+            </DockPanel>
+          </Border>
+          <Grid ColumnDefinitions="*,*">
+            <StackPanel Grid.Column="0" Classes="knobCell">
+              <TextBlock Classes="knobLabel" Text="{DynamicResource mixfx.comp.threshold}"/>
+              <c:Knob Minimum="-40" Maximum="0" DefaultValue="0" Value="{Binding CompThresholdDb}"
+                      ArcBrush="{DynamicResource RackAccentComp}"/>
+              <TextBlock Classes="knobValue" Text="{Binding CompThresholdDb, StringFormat={}{0:F1} dB}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Classes="knobCell">
+              <TextBlock Classes="knobLabel" Text="{DynamicResource mixfx.comp.ratio}"/>
+              <c:Knob Minimum="1" Maximum="20" DefaultValue="1" Value="{Binding CompRatio}"
+                      ArcBrush="{DynamicResource RackAccentComp}"/>
+              <TextBlock Classes="knobValue" Text="{Binding CompRatio, StringFormat={}{0:F1}:1}"/>
+            </StackPanel>
+          </Grid>
+          <Border Classes="divider"/>
+          <StackPanel Classes="knobCell">
+            <TextBlock Classes="knobLabel" Text="{DynamicResource mixfx.comp.makeup}"/>
+            <c:Knob Classes="small" Minimum="0" Maximum="12" DefaultValue="0"
+                    Value="{Binding CompMakeupDb}"
+                    ArcBrush="{DynamicResource RackAccentComp}"/>
+            <TextBlock Classes="knobValue" Text="{Binding CompMakeupDb, StringFormat={}{0:F1} dB}"/>
           </StackPanel>
-        </Border>
+        </StackPanel>
+      </Border>
 
-        <!-- Reverb -->
-        <Border Grid.Column="4" Classes="column">
-          <StackPanel Spacing="3">
-            <TextBlock Classes="section" Text="{DynamicResource mixfx.reverb}"/>
-            <ComboBox HorizontalAlignment="Stretch" Margin="0,0,0,4"
-                      ItemsSource="{Binding ReverbPresets}" SelectedItem="{Binding SelectedReverb}"/>
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Grid.Column="0" Classes="lbl" Text="{DynamicResource mixfx.reverb.size}"/>
-              <TextBlock Grid.Column="1" Classes="val" Text="{Binding ReverbSize, StringFormat={}{0:F2}}"/>
-            </Grid>
-            <Slider Minimum="0" Maximum="1" Value="{Binding ReverbSize}" TickFrequency="0.01"/>
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Grid.Column="0" Classes="lbl" Text="{DynamicResource mixfx.reverb.damp}"/>
-              <TextBlock Grid.Column="1" Classes="val" Text="{Binding ReverbDamp, StringFormat={}{0:F2}}"/>
-            </Grid>
-            <Slider Minimum="0" Maximum="1" Value="{Binding ReverbDamp}" TickFrequency="0.01"/>
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Grid.Column="0" Classes="lbl" Text="{DynamicResource mixfx.reverb.wet}"/>
-              <TextBlock Grid.Column="1" Classes="val" Text="{Binding ReverbWet, StringFormat={}{0:F2}}"/>
-            </Grid>
-            <Slider Minimum="0" Maximum="2" Value="{Binding ReverbWet}" TickFrequency="0.01"/>
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Grid.Column="0" Classes="lbl" Text="{DynamicResource mixfx.reverb.predelay}"/>
-              <TextBlock Grid.Column="1" Classes="val" Text="{Binding ReverbPreDelayMs, StringFormat={}{0:F0} ms}"/>
-            </Grid>
-            <Slider Minimum="0" Maximum="200" Value="{Binding ReverbPreDelayMs}" TickFrequency="1"/>
-          </StackPanel>
-        </Border>
+      <!-- ── 混响 ── -->
+      <Border Grid.Column="4" Classes="module">
+        <StackPanel Spacing="12">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <Border Grid.Column="0" Classes="accent" Background="{DynamicResource RackAccentReverb}"/>
+            <TextBlock Grid.Column="1" Classes="moduleTitle" Text="{DynamicResource mixfx.reverb}"/>
+            <ToggleButton Grid.Column="2" Classes="md3switch compact" VerticalAlignment="Center"
+                          IsChecked="{Binding ReverbEnabled}"
+                          ToolTip.Tip="{DynamicResource mixfx.rack.module.tip}"/>
+          </Grid>
+          <Border Classes="screen">
+            <DockPanel LastChildFill="True">
+              <ComboBox DockPanel.Dock="Bottom" Classes="preset"
+                        ItemsSource="{Binding ReverbPresets}" SelectedItem="{Binding SelectedReverb}"/>
+              <c:ReverbCurveDisplay Height="132" IsEnabled="{Binding ReverbEnabled}"
+                                    CurveBrush="{DynamicResource RackAccentReverb}"
+                                    HighBrush="{DynamicResource RackAccentReverbHigh}"
+                                    DryText="{DynamicResource mixfx.rack.dry}"
+                                    RoomSize="{Binding ReverbSize}" Damp="{Binding ReverbDamp}"
+                                    Wet="{Binding ReverbWet}" PreDelayMs="{Binding ReverbPreDelayMs}"
+                                    Preset="{Binding SelectedReverb.Key, FallbackValue={x:Null}}"/>
+            </DockPanel>
+          </Border>
+          <Grid ColumnDefinitions="*,*">
+            <StackPanel Grid.Column="0" Classes="knobCell">
+              <TextBlock Classes="knobLabel" Text="{DynamicResource mixfx.reverb.size}"/>
+              <c:Knob Minimum="0" Maximum="1" DefaultValue="0.3" Value="{Binding ReverbSize}"
+                      ArcBrush="{DynamicResource RackAccentReverb}"/>
+              <TextBlock Classes="knobValue" Text="{Binding ReverbSize, StringFormat={}{0:F2}}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Classes="knobCell">
+              <TextBlock Classes="knobLabel" Text="{DynamicResource mixfx.reverb.damp}"/>
+              <c:Knob Minimum="0" Maximum="1" DefaultValue="0.5" Value="{Binding ReverbDamp}"
+                      ArcBrush="{DynamicResource RackAccentReverb}"/>
+              <TextBlock Classes="knobValue" Text="{Binding ReverbDamp, StringFormat={}{0:F2}}"/>
+            </StackPanel>
+          </Grid>
+          <Border Classes="divider"/>
+          <Grid ColumnDefinitions="*,*">
+            <StackPanel Grid.Column="0" Classes="knobCell">
+              <TextBlock Classes="knobLabel" Text="{DynamicResource mixfx.reverb.predelay}"/>
+              <c:Knob Classes="small" Minimum="0" Maximum="200" DefaultValue="0"
+                      Value="{Binding ReverbPreDelayMs}"
+                      ArcBrush="{DynamicResource RackAccentReverb}"/>
+              <TextBlock Classes="knobValue" Text="{Binding ReverbPreDelayMs, StringFormat={}{0:F0} ms}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Classes="knobCell">
+              <TextBlock Classes="knobLabel" Text="{DynamicResource mixfx.reverb.wet}"/>
+              <c:Knob Classes="small" Minimum="0" Maximum="2" DefaultValue="1" Value="{Binding ReverbWet}"
+                      ArcBrush="{DynamicResource RackAccentReverb}"/>
+              <TextBlock Classes="knobValue" Text="{Binding ReverbWet, StringFormat={}{0:F2}}"/>
+            </StackPanel>
+          </Grid>
+        </StackPanel>
+      </Border>
 
-      </Grid>
-    </DockPanel>
-  </Border>
+    </Grid>
   </DockPanel>
 </controls:WindowEx>
