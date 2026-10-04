@@ -88,6 +88,11 @@
     <Style Selector="ToggleButton.md3switch:pointerover /template/ Border#SwitchTrack">
       <Setter Property="BorderBrush" Value="{DynamicResource md3.on-surface-variant}"/>
     </Style>
+    <!-- 键盘可达性：Tab 到开关时给出明确焦点环（轨道盒尺寸不变，只换描边，无布局位移） -->
+    <Style Selector="ToggleButton.md3switch:focus-visible /template/ Border#SwitchTrack">
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+      <Setter Property="BorderThickness" Value="2"/>
+    </Style>
     <Style Selector="ToggleButton.md3switch:disabled">
       <Setter Property="Opacity" Value="0.38"/>
     </Style>

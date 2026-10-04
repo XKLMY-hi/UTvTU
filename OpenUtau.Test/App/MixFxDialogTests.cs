@@ -281,6 +281,18 @@ namespace OpenUtau.Test.App {
         }
 
         [AvaloniaFact]
+        public void Dialog_KeyboardFocusVisuals_ForOwnControls() {
+            UsePool();
+            string xaml = DialogXaml();
+            // 自研开关（内联模板，不属于 fx-ctl 的主题范围）必须有焦点环
+            Assert.Contains("ToggleButton.md3switch:focus-visible /template/ Border#SwitchTrack", xaml);
+            // 旋钮是键盘可操作的（方向键 / Home / End / PageUp·Down）→ 必须可聚焦
+            Assert.True(new Knob().Focusable, "Knob 必须可聚焦，否则键盘改参不可达");
+            // 曲线屏是纯显示，不参与焦点（没有需要焦点视觉的部件）
+            Assert.False(new EqCurveDisplay().Focusable, "曲线屏是纯显示控件，不应抢焦点");
+        }
+
+        [AvaloniaFact]
         public void DialogXaml_UsesLocalizedKeysForEveryUserVisibleString() {
             string xaml = DialogXaml();
             foreach (string key in new[] {
