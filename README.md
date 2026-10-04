@@ -1,6 +1,7 @@
 # OpenUTAU Plus
 
-**OpenUTAU** 的增强分支 —— 带 DAW 混音台、VST3 效果器插件和侧栏素材库的歌声合成工作站。
+**OpenUTAU** 的增强分支 —— 带 DAW 混音台、VST3 效果器插件与常驻素材库的歌声合成工作站，
+界面为自研 Material Design 3 体系（2026-09 起，已移除第三方控件库）。
 
 基于 [OpenUTAU](https://github.com/openutau/OpenUtau) (MIT License)
 
@@ -8,11 +9,14 @@
 
 ## 界面预览
 
-| 欢迎页 | 主窗口 + 侧栏素材库 |
+> ⚠️ 以下截图拍摄于 **2026-08 阶段**。2026-09 界面已按设计稿重铸为 Material Design 3 体系
+> （详见下方「2026-09 UI 重铸」），截图待更新；当前结构与配色以应用内实际效果为准。
+
+| 欢迎页（旧） | 主窗口 + 侧栏素材库（旧，侧栏已退役） |
 |---|---|
 | ![欢迎页](screenshots/welcome.png) | ![主窗口](screenshots/main-sidebar.png) |
 
-| 混音台 + VST 效果器架 |
+| 混音台 + VST 效果器架（旧） |
 |---|
 | ![混音台与VST架](screenshots/mixer-vstrack.png) |
 
@@ -20,10 +24,26 @@
 
 ## 新增功能
 
-### 🪟 现代化 UI 全面翻新
-- **暖灰暗色主题** — 自定义色板（底色 `#1e1e28` · 表面 `#282838` · 强调色 `#c73a3f`），替换 FluentTheme 默认深色
-- **亚克力 / Mica 窗口模糊** — 全部窗口统一启用，右键设置中切换模糊类型或关闭；Tint 65% 深冷灰
-- **自绘窗口边框** — 按 Avalonia 12 官方 **WindowDrawnDecorations** 规范统一实现（1px 描边 + 阴影分层，图标 + 标题 + Min/Max/Close 标题栏），全部 30+ 窗口统一
+### 🎨 Material Design 3 界面体系（2026-09 重铸）
+
+- **设计稿驱动** — 欢迎页 / 主窗口 / 钢琴卷帘 / 混音台 / VST / 偏好设置六屏按交付稿的
+  HTML 结构、尺寸与色值逐项落地（不再"在旧逻辑上外挂"）
+- **MD3 颜色池** — 整应用角色色由**动态取色种子**生成（HCT/CAM16），支持在偏好设置里换强调色；
+  背景按容器梯度编排（surface → surface-container → …-high → …-highest）+ outline-variant 描边
+- **自有控件主题** — 不再依赖第三方控件库：Button / ListBoxItem / TextBox 使用我们自己的
+  `ControlTheme`（模板 + 悬浮·按下·选中·禁用状态 + 120ms 颜色过渡），其余控件统一走应用级样式层
+- **单窗口视图架构** — 欢迎页 / 主编辑器 / 偏好设置 / 关于共用同一条 56px 顶栏 + 32px 状态条，
+  按视图切换顶栏内容（品牌 · 屏名 · 运输组 · 图标组）
+- **偏好设置全屏化** — 由 60% 覆盖层对话框改为全屏视图：左导航 304 + 卡片内容区（圆角 16 / 内边距 16 /
+  两列卡片），7 个设置页 + 关于页，底部单个「关闭」按钮
+- **动效改用框架内建机制** — 删除自研动效层，改为 `Transitions` / `Style.Animations`
+  （只动 Opacity 与 RenderTransform、不参与布局 ⇒ 不再闪烁错位）
+- **完全移除 SukiUI** — 对话框改自研 MD3 模态窗口；窗口背景、菜单、控件外观全部自有实现
+
+### 🪟 现代化 UI 全面翻新（2026-08 阶段，部分已被上节取代）
+- **暖灰暗色主题**（已由 MD3 颜色池取代） — 自定义色板（底色 `#1e1e28` · 表面 `#282838` · 强调色 `#c73a3f`），替换 FluentTheme 默认深色
+- ~~亚克力 / Mica 窗口模糊~~（**已移除**：窗口交还系统原生装饰，背景改为颜色池 `surface`）
+- ~~自绘窗口边框~~（**已移除**：回归系统原生标题栏/边框/投影/圆角，见上方 2026-09 体系）
 - **HarmonyOS Sans SC 字体** — 四字重（Light/Regular/Medium/Bold），全局应用
 - **Phosphor 图标** — 54 枚 MIT 许可饱满圆润实心矢量图标（HarmonyOS 风），替换 Lucide
 - **8px 统一圆角** — 按钮 / 文本框 / 卡片 / 弹出层全局 8px 圆角 · 32px 控件高度
@@ -42,15 +62,18 @@
 - 新建轨道自动映射混音台、混音台内可新建轨道
 - **Ctrl+M** 内嵌在主窗口 / 分离为独立窗口双模式
 
-### 🗂️ 侧栏素材库
+### 🗂️ 素材库（右侧常驻，2026-09 起取代旧侧栏）
 - 歌手库 — 圆角头像卡片、歌姬类型徽标、双击/拖拽新建轨道
 - 伴奏库 — 格式徽标、独立试听通道（不打断工程播放，可随时终止）
-- 自定义拖拽格式，从侧栏直接拖入编辑器
+- 效果器 — 第四个页签，与轨道效果链联动
+- 自定义拖拽格式，从素材库直接拖入编辑器
 
-### 🎨 SukiUI 主题框架
-- 主题/菜单/浮层由 SukiUI 接管（渐进迁移中）
-- 紧凑顶栏菜单、玻璃浮层对话框（半透明 + BlurEffect）
-- 自绘标题栏显示应用图标（深底 + 主题蓝音符 + 粉唱片环，方案 B 定稿）
+### 🎨 主题与控件体系（2026-09：SukiUI 已完全移除）
+- **颜色池**：`md3.*` 角色色由种子动态生成，换种子即整应用重着色；主题（亮/暗）与颜色池联动
+- **控件主题**：Button / ListBoxItem / TextBox 为自有 `ControlTheme`；输入·容器·开关·滑条等
+  走应用级样式层，规格统一（圆角 8 / 胶囊 999、控件高 32、字号 13、颜色全取颜色池）
+- **对话与通知**：自研 MD3 模态窗口承载全部确认/错误/进度框（不再依赖第三方对话框）
+- **原生窗口**：窗口装饰交还系统（标题栏/边框/投影/圆角），窗口背景取颜色池 `surface`
 
 ### 🔌 VST3 效果器插件支持
 - 加载任意 VST3 音频效果器（压缩器、EQ、混响、延迟等）
@@ -66,12 +89,44 @@
 - 向后兼容 `.ustx`
 ---
 
+## 2026-09 UI 重铸
+
+以设计交付稿为基准，把界面重做为统一的 Material Design 3 体系，并移除第三方控件库。
+
+**落地内容**
+
+| 板块 | 说明 |
+|---|---|
+| 颜色体系 | MD3 颜色池（HCT/CAM16 动态取色）：角色色全量覆盖，背景按容器梯度分档，描边用 outline-variant |
+| 令牌 | 尺寸/圆角/间距/动效令牌集中管理；字体 HarmonyOS Sans SC 四字重 |
+| 窗口 | 回归**系统原生窗口**（标题栏/边框/投影/圆角由系统提供），背景取颜色池 |
+| 视图 | 单窗口三视图：欢迎页 · 主编辑器 · 偏好设置（+ 关于页），共用顶栏与状态条 |
+| 偏好设置 | 全屏卡片式：左导航 7 页 + 关于；设置项与旧实现一一对应，即时生效 |
+| 动效 | 全部改为 Avalonia 内建 `Transitions` / `Style.Animations`（页面级过渡，不做悬浮微动效） |
+| 控件 | 自有 `ControlTheme`（Button / ListBoxItem / TextBox）+ 应用级样式层统一规格 |
+| 依赖 | **SukiUI 完全移除**：包引用、主题挂载、对话框/通知 Host 全部删除，改为自研实现 |
+
+**开发与验证**
+
+```bash
+# 必须使用 .NET SDK 9（Avalonia 12 分析器需要 Roslyn 4.14+；勿加 global.json 钉 8.0.4xx）
+dotnet build OpenUtau.sln            # 构建（沙箱/离线环境见 AGENTS.md 的变通参数）
+dotnet test  OpenUtau.Test\OpenUtau.Test.csproj   # 全量测试
+```
+
+当前基线：构建 **0 错误** · 测试 **355 通过 / 0 失败**。
+
+设计决策与踩坑记录见 [`.opencode/plans/ui-rework-decisions.md`](.opencode/plans/ui-rework-decisions.md)
+（颜色池与梯度、动效取舍、控件外观归属的实验结论与硬约束、SukiUI 移除的完整清点）。
+
+---
+
 ## 2026-08 框架升级：Avalonia 12
 
 - **UI 框架升级至 Avalonia 12.1.0**（原 11.2.4）— 渲染架构重写（复杂界面 FPS 大幅提升）、Skia 3.0 渲染管线、Compiled bindings、官方自绘窗口装饰规范
 - **自绘边框重写** — 按 Avalonia 12 官方 **WindowDrawnDecorations** 规范统一实现（替代 11 时代手搓标题栏）：全窗口 1px 描边 + 阴影分层，最大化自动去边框，标题栏拖拽 / 三按钮 / 全屏悬停栏由官方机制接管
 - **依赖迁移** — `Avalonia.ReactiveUI` → `ReactiveUI.Avalonia`（Rx 兼容线，全部 ViewModel 零改动）、xunit v2 → v3、新增 HarfBuzz 文本整形
-- 为后续引入 UI 组件库（SukiUI 已落地）铺平道路
+- 为自研 MD3 主题与控件体系铺平道路（第三方控件库已于 2026-09 完全移除）
 
 ## 2026-08 音频管线重构
 
@@ -108,8 +163,9 @@ OpenUTAU Plus 的愿景是将 OpenUTAU 从歌声合成编辑器逐步扩展为�
 - ✅ `.ustxp` 项目格式（VST 参数持久化）
 - ✅ 导出带 VST 效果的音频（离线渲染，三路径统一）
 - ✅ 音频管线重构（B1 竞态修复 · VST3 进程外探测 · 异步渲染 + seek 秒开 · 格式显式化）
-- ✅ 现代化 UI 全面翻新（自定义暖灰主题 · 亚克力模糊 · 自绘边框 · Phosphor · HarmonyOS Sans SC · 8px 统一圆角 · SukiUI）
-- ✅ 侧栏素材库（歌手库 + 伴奏库，拖拽建轨 / 独立试听）
+- ✅ MD3 界面体系（颜色池 + 容器梯度 · 自有控件主题 · 单窗口三视图 · 全屏偏好设置 · 内建动效 · **SukiUI 已移除**）
+- ✅ 现代化 UI 翻新（Phosphor 图标 · HarmonyOS Sans SC 四字重 · 统一圆角与控件规格）
+- ✅ 素材库（歌手库 + 伴奏库 + 效果器，拖拽建轨 / 独立试听）
 - 🚧 VST 音源插件支持（加载合成器/采样器作为音源）
 - 🚧 macOS / Linux 跨平台支持
 
@@ -215,7 +271,8 @@ OpenUtau.sln
 │   ├── Views/              # MainWindow、MixerWindow、VstEditorWindow、TrackEffectRack 等
 │   ├── ViewModels/         # MVVM
 │   ├── Controls/           # MixerTrackStrip、PanKnob、MasterStrip 等自定义控件
-│   └── Styles/             # SukiUI 收敛层 / 紧凑菜单
+│   └── Styles/             # MD3 样式层：输入主题 / 菜单 / 控件规格 / 控件主题 / 动效
+│   └── Theming/            # MD3 颜色池门面与主题资源（md3.* 角色色）
 ├── OpenUtau.Core/          # 核心逻辑
 │   ├── Ustx/               # 数据模型
 │   ├── Render/             # 渲染引擎（RenderEngine、PhraseRenderCache、RenderCache）
@@ -253,7 +310,7 @@ dotnet run --project VstTest                  # VST 兼容性测试
 | 层 | 技术 |
 |----|------|
 | 运行时 | .NET 8.0 / C# 12 |
-| UI 框架 | Avalonia 12.1.0 + SukiUI 7.0.2-nightly + ReactiveUI.Avalonia 14.7.1 |
+| UI 框架 | Avalonia 12.1.0 + ReactiveUI.Avalonia 14.7.1（**无第三方控件库**，主题与控件自研） |
 | 音频播放 | NAudio (WASAPI) / MiniAudio |
 | 音频 DSP | NWaves |
 | 信号链 | 自定义 ISignalSource / IEffect 接口（格式由 AudioSettings 统一） |
@@ -275,7 +332,6 @@ dotnet run --project VstTest                  # VST 兼容性测试
 | 库 | 版本 | 许可 | 用途 |
 |----|------|------|------|
 | [Avalonia UI](https://avaloniaui.net/) | 12.1.0 | MIT | 跨平台 UI 框架 |
-| [SukiUI](https://github.com/kikipoulet/SukiUI) | 7.0.2-nightly | MIT | 主题 + 控件库 |
 | [ReactiveUI.Avalonia](https://github.com/reactiveui/ReactiveUI) | 14.7.1 | MIT | MVVM 响应式框架（Avalonia 12 兼容线） |
 | [NAudio](https://github.com/naudio/NAudio) | 2.2.1 | MIT | Windows 音频播放与处理 |
 | [NWaves](https://github.com/ar1st0crat/NWaves) | 0.9.6 | MIT | 音频信号处理 / DSP |
@@ -360,3 +416,7 @@ Phosphor 图标使用 MIT License。
 - Steinberg 提供 VST3 SDK
 - 歌声合成社区
 - 本项目以 **Vibe Coding** 方式开发 —— 使用 DeepSeek V4 Pro AI 辅助编程完成架构设计、代码生成与调试
+
+---
+
+**By XKLMY ︱ 使用 vibe coding（DeepSeek v4.1 Flash）**

@@ -8,7 +8,13 @@ Based on [OpenUTAU](https://github.com/openutau/OpenUtau) (MIT License)
 
 ## What's New
 
-### 🪟 Modern UI Overhaul
+### 🎨 Material Design 3 System (2026-09 rework)
+- Design-pack driven: colours, sizes and structure taken from the delivered specs; MD3 colour pool
+  generated from a dynamic seed, container-tier backgrounds, own control themes
+- Single-window views (welcome / editor / preferences) sharing one app bar and status bar
+- Motion uses Avalonia's built-in Transitions; **the in-house theme system has been removed entirely**
+
+### 🪟 Modern UI Overhaul (2026-08 stage, partly superseded)
 - **Avalonia 12.1** — UI framework upgraded from 11.2.4 (rendering architecture rewrite, Skia 3.0, official drawn-decorations API)
 - **Self-drawn window chrome** — implemented with the official **WindowDrawnDecorations** API (replacing the hand-rolled title bar): 1px border + shadow layering, unified title bar (icon / title / Min / Max / Close) across 30+ windows
 - **Warm-gray dark theme** — custom palette (base `#1e1e28` · surface `#282838` · accent `#c73a3f`)
