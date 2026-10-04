@@ -795,19 +795,137 @@
                 </Border>
               </StackPanel>
 
-              <!-- 效果器（插件浏览器：待效果链落地后填充） -->
-              <StackPanel x:Name="VstPanel" IsVisible="False" Spacing="8">
-                <Border Classes="sideCard">
-                  <StackPanel>
-                    <Path Data="{StaticResource icon-sliders}" Width="14" Height="14" Stretch="Uniform"
-                          Fill="{DynamicResource md3.on-surface-variant}"
-                          HorizontalAlignment="Left" Margin="0,0,0,6"/>
-                    <TextBlock FontSize="11" TextWrapping="Wrap"
+              <!-- 效果器（W4 / 决策 B6：插件浏览器 = 扫描结果 + 搜索 + 拖入效果链面板
+                   + 插件扫描路径管理（与「偏好设置 → VST」共用同一份 Preferences 字段，即时同步）） -->
+              <Grid x:Name="VstPanel" IsVisible="False" RowDefinitions="Auto,Auto,Auto,*"
+                    DataContext="{Binding PluginBrowser}">
+                <!-- 搜索框 36 胶囊 + 重新扫描 -->
+                <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,2,0,6">
+                  <Panel Grid.Column="0" Height="36">
+                    <TextBox x:Name="PluginSearchBox" Height="36" CornerRadius="999" Padding="30,0,10,0"
+                             FontSize="11" VerticalContentAlignment="Center"
+                             Text="{Binding SearchText, Mode=TwoWay}"
+                             Watermark="{DynamicResource sidebar.effects.search}"/>
+                    <Path Data="{StaticResource icon-search}" Width="13" Height="13" Stretch="Uniform"
+                          Fill="{DynamicResource md3.on-surface-variant}" IsHitTestVisible="False"
+                          HorizontalAlignment="Left" VerticalAlignment="Center" Margin="11,0,0,0"/>
+                  </Panel>
+                  <Button Grid.Column="1" Classes="iconBtn" Width="36" Height="36" Margin="6,0,0,0"
+                          Click="OnRescanVstFromLibrary" ToolTip.Tip="{DynamicResource prefs.vst.rescan}">
+                    <Path Data="{StaticResource icon-refresh-cw}" Width="13" Height="13" Stretch="Uniform"
+                          Fill="{DynamicResource md3.on-surface-variant}"/>
+                  </Button>
+                </Grid>
+
+                <!-- 计数 / 扫描中 + 路径管理开关 -->
+                <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,4">
+                  <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4"
+                              IsVisible="{Binding ShowCount}">
+                    <TextBlock Classes="sideHeading" Text="{Binding PluginCount}"/>
+                    <TextBlock Classes="sideHeading" Text="{DynamicResource sidebar.effects.countlabel}"/>
+                  </StackPanel>
+                  <TextBlock Grid.Column="0" Classes="sideHeading" IsVisible="{Binding IsScanning}"
+                             Text="{DynamicResource sidebar.effects.scanning}"/>
+                  <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24"
+                          Click="OnToggleVstPathManager"
+                          ToolTip.Tip="{DynamicResource sidebar.effects.paths.manage}">
+                    <Path Data="{StaticResource icon-folder}" Width="12" Height="12" Stretch="Uniform"
+                          Fill="{DynamicResource md3.on-surface-variant}"/>
+                  </Button>
+                </Grid>
+
+                <!-- 插件扫描路径（折叠面板；与偏好设置同一份数据） -->
+                <Border Grid.Row="2" x:Name="VstPathManager" Classes="sideCard" IsVisible="False"
+                        Margin="0,0,0,6">
+                  <StackPanel Spacing="8">
+                    <TextBlock Classes="sideHeading" Margin="0"
+                               Text="{DynamicResource sidebar.effects.paths}"/>
+                    <ListBox x:Name="VstPathsList" Height="72" Background="Transparent" BorderThickness="0"
+                             ItemsSource="{Binding ScanPaths}"/>
+                    <Grid ColumnDefinitions="*,Auto,Auto">
+                      <TextBox Grid.Column="0" x:Name="LibraryNewVstPath" Height="28" FontSize="11"
+                               VerticalContentAlignment="Center"
+                               Text="{Binding NewPath, Mode=TwoWay}"
+                               Watermark="{DynamicResource sidebar.effects.paths.watermark}"/>
+                      <Button Grid.Column="1" Height="28" Padding="10,0" FontSize="11" Margin="6,0,0,0"
+                              Content="{DynamicResource prefs.vst.add}"
+                              Click="OnAddVstPathFromLibrary"/>
+                      <Button Grid.Column="2" Height="28" Padding="10,0" FontSize="11" Margin="6,0,0,0"
+                              Content="{DynamicResource prefs.vst.remove}"
+                              Click="OnRemoveVstPathFromLibrary"/>
+                    </Grid>
+                    <TextBlock FontSize="10" TextWrapping="Wrap"
                                Foreground="{DynamicResource md3.on-surface-variant}"
-                               Text="{DynamicResource sidebar.library.empty}"/>
+                               Text="{DynamicResource sidebar.effects.paths.hint}"/>
                   </StackPanel>
                 </Border>
-              </StackPanel>
+
+                <!-- 插件列表 + 空态 / 未找到 -->
+                <Grid Grid.Row="3">
+                  <ListBox x:Name="VstPluginList" ItemsSource="{Binding Plugins}" Background="Transparent"
+                           BorderThickness="0" IsVisible="{Binding HasPlugins}">
+                    <ListBox.Styles>
+                      <Style Selector="ListBoxItem">
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="MinHeight" Value="46"/>
+                      </Style>
+                    </ListBox.Styles>
+                    <ListBox.ItemTemplate>
+                      <DataTemplate x:DataType="vm:VstPluginItem">
+                        <!-- 拖拽源：PointerPressed/Moved → FxChainDragData（格式 OpenUtau.FxChainItem） -->
+                        <Border Classes="sideItem" Height="46" ToolTip.Tip="{Binding Path}"
+                                PointerPressed="OnPluginPointerPressed"
+                                PointerMoved="OnPluginPointerMoved">
+                          <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                              <TextBlock Text="{Binding Name}" FontSize="12" TextTrimming="CharacterEllipsis"
+                                         Foreground="{DynamicResource md3.on-surface}"/>
+                              <TextBlock Text="{Binding Vendor}" FontSize="10" Margin="0,1,0,0"
+                                         TextTrimming="CharacterEllipsis"
+                                         IsVisible="{Binding HasVendor}"
+                                         Foreground="{DynamicResource md3.on-surface-variant}"/>
+                            </StackPanel>
+                            <Border Grid.Column="1" CornerRadius="6" Padding="6,2" Margin="6,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Background="{DynamicResource md3.surface-container-high}">
+                              <TextBlock Text="{Binding Badge}" FontSize="9" FontWeight="SemiBold"
+                                         Foreground="{DynamicResource md3.on-surface-variant}"/>
+                            </Border>
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ListBox.ItemTemplate>
+                  </ListBox>
+
+                  <!-- 空态：一个效果器也没扫到 -->
+                  <StackPanel IsVisible="{Binding ShowNoPlugins}">
+                    <Border Classes="sideCard">
+                      <StackPanel>
+                        <Path Data="{StaticResource icon-sliders}" Width="14" Height="14" Stretch="Uniform"
+                              Fill="{DynamicResource md3.on-surface-variant}"
+                              HorizontalAlignment="Left" Margin="0,0,0,6"/>
+                        <TextBlock FontSize="11" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource md3.on-surface-variant}"
+                                   Text="{DynamicResource sidebar.effects.empty}"/>
+                      </StackPanel>
+                    </Border>
+                  </StackPanel>
+
+                  <!-- 未找到：有插件但没匹配上搜索词 -->
+                  <StackPanel IsVisible="{Binding ShowNoMatch}">
+                    <Border Classes="sideCard">
+                      <StackPanel>
+                        <Path Data="{StaticResource icon-search}" Width="14" Height="14" Stretch="Uniform"
+                              Fill="{DynamicResource md3.on-surface-variant}"
+                              HorizontalAlignment="Left" Margin="0,0,0,6"/>
+                        <TextBlock FontSize="11" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource md3.on-surface-variant}"
+                                   Text="{DynamicResource sidebar.effects.nomatch}"/>
+                      </StackPanel>
+                    </Border>
+                  </StackPanel>
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </Border>
