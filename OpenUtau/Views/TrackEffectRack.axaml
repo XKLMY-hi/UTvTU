@@ -3,106 +3,16 @@
         xmlns:controls="clr-namespace:OpenUtau.App.Controls"
         x:Class="OpenUtau.App.Views.TrackEffectRack"
         Icon="/Assets/open-utau.ico"
-        Title="{DynamicResource effects.title}" Width="520" Height="540"
+        Title="{DynamicResource effects.title}" Width="360" Height="560"
         WindowStartupLocation="CenterOwner">
-  <Window.Styles>
-    <Style Selector="TextBlock.header">
-      <Setter Property="FontWeight" Value="SemiBold"/>
-      <Setter Property="FontSize" Value="14"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
-    <!-- Slot row container -->
-    <Style Selector="Border.slotRow">
-      <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="CornerRadius" Value="8"/>
-      <Setter Property="Margin" Value="0,0,0,4"/>
-      <Setter Property="Padding" Value="6,3"/>
-      <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
-    </Style>
-    <Style Selector="Border.slotRow.bypassed">
-      <Setter Property="Opacity" Value="0.45"/>
-    </Style>
-    <Style Selector="Button.removeBtn">
-      <Setter Property="Width" Value="22"/>
-      <Setter Property="Height" Value="22"/>
-      <Setter Property="Margin" Value="4,0,0,0"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
-      <Setter Property="CornerRadius" Value="6"/>
-    </Style>
-    <Style Selector="Button.browseBtn">
-      <Setter Property="Width" Value="22"/>
-      <Setter Property="Height" Value="22"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
-      <Setter Property="CornerRadius" Value="6"/>
-    </Style>
-    <Style Selector="Button.addBtn">
-      <Setter Property="Height" Value="28"/>
-      <Setter Property="FontSize" Value="11"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="HorizontalAlignment" Value="Stretch"/>
-      <Setter Property="CornerRadius" Value="8"/>
-    </Style>
-    <Style Selector="Button.addBtn:pointerover">
-      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush1}"/>
-      <Setter Property="Foreground" Value="{DynamicResource AccentBrush1}"/>
-    </Style>
-    <Style Selector="TextBlock.section">
-      <Setter Property="FontSize" Value="10"/>
-      <Setter Property="FontWeight" Value="SemiBold"/>
-      <Setter Property="Opacity" Value="0.5"/>
-      <Setter Property="Margin" Value="0,8,0,3"/>
-    </Style>
-    <Style Selector="TextBlock.slotName">
-      <Setter Property="FontSize" Value="12"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
-    <Style Selector="TextBlock.empty">
-      <Setter Property="FontSize" Value="11"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
-      <Setter Property="Opacity" Value="0.35"/>
-      <Setter Property="FontStyle" Value="Italic"/>
-    </Style>
-    <Style Selector="TextBlock.typeLabel">
-      <Setter Property="FontSize" Value="8"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
-      <Setter Property="Opacity" Value="0.4"/>
-      <Setter Property="Margin" Value="0,0,4,0"/>
-    </Style>
-    <Style Selector="Slider.param">
-      <Setter Property="Height" Value="20"/>
-      <Setter Property="Margin" Value="4,0"/>
-    </Style>
-  </Window.Styles>
-
-  <DockPanel LastChildFill="True">
-    <Border>
-      <DockPanel Margin="14" LastChildFill="True">
-        <!-- Header: title + export + enable -->
-      <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto,Auto,Auto,Auto" Margin="0,0,0,6">
-        <TextBlock Grid.Column="0" Classes="header" Name="TitleLabel"/>
-        <CheckBox Grid.Column="1" Name="ExportCheck" Margin="0,0,4,0" VerticalAlignment="Center"/>
-        <TextBlock Grid.Column="2" Text="{DynamicResource effects.export}" FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0" Opacity="0.7"/>
-        <ToggleSwitch Grid.Column="3" Name="EnableToggle" OnContent="{DynamicResource effects.on}" OffContent="{DynamicResource effects.off}"/>
-        <TextBlock Grid.Column="4" Text="{DynamicResource effects.enabled}" FontSize="11" VerticalAlignment="Center" Opacity="0.7"/>
-      </Grid>
-
-      <!-- Presets -->
-      <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*,Auto,Auto,Auto" Margin="0,0,0,8">
-        <TextBlock Grid.Column="0" Text="{DynamicResource mixfx.preset}" FontSize="11" VerticalAlignment="Center" Opacity="0.7" Margin="0,0,8,0"/>
-        <ComboBox Grid.Column="1" Name="PresetCombo"/>
-        <Button Grid.Column="2" Name="RecBtn" Content="{DynamicResource mixfx.recommended}" FontSize="10" Margin="6,0,4,0" Padding="6,2"/>
-        <Button Grid.Column="3" Name="SaveBtn" Content="{DynamicResource mixfx.library.save}" FontSize="10" Margin="4,0,4,0" Padding="6,2"/>
-        <Button Grid.Column="4" Name="DelBtn" Content="{DynamicResource mixfx.library.delete}" FontSize="10" Padding="6,2" IsEnabled="False"/>
-      </Grid>
-
-      <!-- Slot list -->
-      <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Spacing="4" Name="SlotList"/>
-      </ScrollViewer>
-    </DockPanel>
-  </Border>
-  </DockPanel>
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       单轨效果链的**分离窗**（原 495 行 VST 槽机架已并入 FxChainPanel）
+       ───────────────────────────────────────────────────────────────────────
+       保留理由（并入而非删除）：
+        1) 混音台通道条的 FX 入口 `Controls/MixerTrackStrip.axaml.cs` 直接 new 本窗口
+           （W1 s 范围的文件）——保留类型与构造函数 = 跨线零编译风险；
+        2) 不切到混音台视图也能看/改某条轨的链（分离窗与面板同一个控件，不存在第二套实现）。
+       内容 = FxChainPanel（同一个控件、同一套命令、同一套编辑器派发）。
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <controls:FxChainPanel Name="Panel"/>
 </controls:WindowEx>

@@ -1,0 +1,82 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:OpenUtau.App.Controls"
+             x:Class="OpenUtau.App.Controls.FxChainPanel"
+             DragDrop.AllowDrop="True">
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       效果链面板（B3/B4/B5/B7）：混音台右侧的链管理面板
+       ───────────────────────────────────────────────────────────────────────
+       · 表头 = **轨道名（无背景）** + 「＋」（B3；轨道名是数据，＋ 是 36×36 圆形图标钮）；
+       · 链行 = FxChainRow（把手·序号·名称·格式徽标·旁通开关，B4）；
+       · 空态一行「从素材库 · 效果器 拖入」（走字符串键，同时接受素材库的拖放）；
+       · 面板**不自带宽度**：宽度由宿主槽决定（冻结契约 §1.1 第 1 条 = 280）。
+         设计稿的 `Effects Panel 300` 只作参考（digest §7.3 C-4 / U-2）。
+       · 底色 = surface-container（§9.1 `Effects Panel`），1px 描边留给宿主分栏线。
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <UserControl.Styles>
+    <Style Selector="TextBlock.chainHeader">
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+    </Style>
+    <Style Selector="Button.addButton">
+      <Setter Property="Width" Value="36"/>
+      <Setter Property="Height" Value="36"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Button.addButton:pointerover">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+    </Style>
+    <Style Selector="TextBlock.chainHint">
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="LineHeight" Value="16"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+    </Style>
+    <!-- 素材库「效果器」拖入悬停：描边升 primary（无动画） -->
+    <Style Selector="Border.chainRoot.dragover">
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+    </Style>
+  </UserControl.Styles>
+
+  <Border Name="ChainRoot" Classes="chainRoot" BorderThickness="1" BorderBrush="Transparent"
+          Background="{DynamicResource md3.surface-container}">
+    <Grid RowDefinitions="Auto,*">
+      <!-- 表头：轨道名（无背景）+ 「＋」 -->
+      <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="12,10,10,8">
+        <TextBlock Name="HeaderName" Classes="chainHeader" Text="{Binding HeaderText}"/>
+        <Button Name="AddButton" Grid.Column="1" Classes="addButton" Content="＋"
+                Click="OnAddClick" ToolTip.Tip="{DynamicResource fxchain.add.tip}"/>
+      </Grid>
+
+      <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                    HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="10,0,10,12" Spacing="6">
+          <ItemsControl Name="RowList" ItemsSource="{Binding Rows}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <c:FxChainRow/>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock Name="EmptyHint" Classes="chainHint" Margin="2,6"
+                     Text="{DynamicResource fxchain.empty}" IsVisible="{Binding ShowEmptyHint}"/>
+          <TextBlock Name="NoTrackHint" Classes="chainHint" Margin="2,6"
+                     Text="{DynamicResource fxchain.notrack}" IsVisible="{Binding !HasTrack}"/>
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+  </Border>
+</UserControl>

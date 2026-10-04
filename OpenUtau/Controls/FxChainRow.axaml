@@ -1,0 +1,150 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="OpenUtau.App.Controls.FxChainRow">
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       效果链的一行（B4）：拖拽把手 · 序号 · 名称 · 格式徽标 · 旁通开关
+       ───────────────────────────────────────────────────────────────────────
+       几何（设计稿无此元素：digest §7.2 B4 / U-1 ⇒ 自定并写进报告 + 契约测试）：
+         行 圆角 12 / 1px outline-variant / 内边距 10,6 / 最小高 44
+         把手 20×20 命中区（Path 14×14）· 序号 16 宽 10px · 名称 12 semibold
+         徽标 圆角 999 / 内边距 6,1 / 9px · 状态角标 高 22 / 圆角 999 / 内边距 10,0
+         旁通开关 34×20 圆角 999 / 内边距 0 3 / 指示点 14×14（= VST-Plugin `Power Toggle`）
+       颜色：开关开 = primary/on-primary，关 = surface-container-highest/on-surface-variant；
+             名称开 = on-surface，关/旁通 = on-surface-variant（digest §9.2 + 验收条目 33）。
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <UserControl.Styles>
+    <Style Selector="TextBlock.rowOrder">
+      <Setter Property="FontSize" Value="10"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="TextAlignment" Value="Center"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+    </Style>
+    <Style Selector="TextBlock.rowName">
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+    </Style>
+    <Style Selector="TextBlock.rowDetail">
+      <Setter Property="FontSize" Value="10"/>
+      <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+    </Style>
+    <Style Selector="TextBlock.rowBadgeText">
+      <Setter Property="FontSize" Value="9"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="TextBlock.rowChipText">
+      <Setter Property="FontSize" Value="9"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+    </Style>
+    <Style Selector="Button.rowIcon">
+      <Setter Property="Width" Value="22"/>
+      <Setter Property="Height" Value="22"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Button.rowIcon:pointerover">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+    </Style>
+
+    <!-- 旁通开关：VST-Plugin `Power Toggle` 34×20 圆角 999 / 内边距 0 3 / 指示点 14×14 -->
+    <Style Selector="ToggleButton.fxPower">
+      <Setter Property="Width" Value="34"/>
+      <Setter Property="Height" Value="20"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Name="PART_Track" Width="34" Height="20" CornerRadius="999"
+                  Background="{DynamicResource md3.surface-container-highest}">
+            <Border Name="PART_Thumb" Width="14" Height="14" CornerRadius="999"
+                    Margin="3,0" HorizontalAlignment="Left" VerticalAlignment="Center"
+                    Background="{DynamicResource md3.on-surface-variant}"/>
+          </Border>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="ToggleButton.fxPower:checked /template/ Border#PART_Track">
+      <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+    </Style>
+    <Style Selector="ToggleButton.fxPower:checked /template/ Border#PART_Thumb">
+      <Setter Property="HorizontalAlignment" Value="Right"/>
+      <Setter Property="Background" Value="{DynamicResource md3.on-primary}"/>
+    </Style>
+
+    <!-- 行状态：悬停描边升 outline；键盘焦点（行内任意部件获得焦点）/ 拖拽中描边升 primary -->
+    <Style Selector="Border.rowRoot:pointerover">
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.outline}"/>
+    </Style>
+    <Style Selector="Border.rowRoot:focus-within">
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+    </Style>
+    <Style Selector="Border.rowRoot.dragging">
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+    </Style>
+  </UserControl.Styles>
+
+  <Border Name="RowRoot" Classes="rowRoot" MinHeight="44"
+          CornerRadius="12" BorderThickness="1" Padding="10,6"
+          Background="{DynamicResource md3.surface-container-high}"
+          BorderBrush="{DynamicResource md3.outline-variant}"
+          PointerPressed="OnRowPointerPressed">
+    <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto">
+      <!-- 拖拽把手（B4）：VST 行可拖；内置行禁用 + tooltip 说明顺序固定 -->
+      <Border Name="GripBox" Grid.Column="0" Width="20" Height="20" Margin="0,0,4,0"
+              Background="Transparent" VerticalAlignment="Center"
+              PointerPressed="OnGripPressed" PointerMoved="OnGripMoved"
+              PointerReleased="OnGripReleased" PointerCaptureLost="OnGripCaptureLost">
+        <Path Name="Grip" Width="14" Height="14" Stretch="Uniform" StrokeThickness="1.5"
+              Data="M3,4 H13 M3,8 H13 M3,12 H13" StrokeLineCap="Round"
+              Stroke="{DynamicResource md3.outline}"/>
+      </Border>
+
+      <!-- 序号（1-based，与 DSP 顺序一致） -->
+      <TextBlock Name="OrderText" Grid.Column="1" Classes="rowOrder" Width="16" Margin="0,0,8,0"
+                 Text="{Binding Order}"/>
+
+      <!-- 名称 + 格式徽标 + 副标题 -->
+      <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="1">
+        <StackPanel Orientation="Horizontal" Spacing="6">
+          <TextBlock Name="NameText" Classes="rowName"/>
+          <Border Name="BadgeChip" CornerRadius="999" Padding="6,1" VerticalAlignment="Center"
+                  Background="{DynamicResource md3.surface-container-highest}">
+            <TextBlock Name="BadgeLabel" Classes="rowBadgeText"
+                       Foreground="{DynamicResource md3.on-surface-variant}"/>
+          </Border>
+        </StackPanel>
+        <TextBlock Name="DetailText" Classes="rowDetail"/>
+      </StackPanel>
+
+      <!-- 状态角标：不过声（旁通 / 模块关 / 总电源关）时出现 -->
+      <Border Name="StateChip" Grid.Column="3" Height="22" CornerRadius="999" Padding="10,0"
+              Margin="6,0,0,0" VerticalAlignment="Center" IsVisible="False"
+              Background="{DynamicResource md3.surface-container-highest}">
+        <TextBlock Name="StateChipText" Classes="rowChipText" Text="{DynamicResource fxcard.bypass}"/>
+      </Border>
+
+      <!-- 旁通开关（电源语义：开 = 该行通过声） -->
+      <ToggleButton Name="PowerToggle" Grid.Column="4" Classes="fxPower" Margin="8,0,2,0"
+                    VerticalAlignment="Center" Click="OnPowerClick"
+                    ToolTip.Tip="{DynamicResource fxchain.power.tip}"/>
+
+      <!-- 移除（仅 VST 槽） -->
+      <Button Name="RemoveButton" Grid.Column="5" Classes="rowIcon" Content="✕"
+              Click="OnRemoveClick" ToolTip.Tip="{DynamicResource fxchain.remove.tip}"/>
+    </Grid>
+  </Border>
+</UserControl>
