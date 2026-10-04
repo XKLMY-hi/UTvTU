@@ -1305,4 +1305,9 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="mixer.bus.tip.limiter">播放与导出链路都没有限制器（没有可开启的实现）。</system:String>
   <system:String x:Key="mixer.bus.tip.dither">导出为 16-bit PCM，未做抖动（ExportSession → WaveFileWriter.CreateWaveFile16）。</system:String>
   <!-- /mx-strip -->
+  <!-- ⚠ mx-view: S5 视图化（A1/A4 顶栏视图胶囊 + A2/A5 分离）—— 新区块集中登记，EN/zh 成对 -->
+  <system:String x:Key="view.pianoroll">钢琴卷帘</system:String>
+  <system:String x:Key="view.mixer">混音台</system:String>
+  <system:String x:Key="view.detach">分离为独立窗口</system:String>
+  <!-- /mx-view -->
 </ResourceDictionary>

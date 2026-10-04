@@ -274,6 +274,8 @@ namespace OpenUtau.Core.Util {
 errors.txt
 ";
             public string RecoveryPath = string.Empty;
+            // S5/A2：钢琴卷帘的**视图级**分离状态（true = 独立窗口，false = 工作区视图）。
+            // 由偏好页开关与卷帘菜单翻转，分离/收回时 MainWindow 会同步写回并落盘。
             public bool DetachPianoRoll = false;
 
             // ----- Mix FX (post-processing) -----
@@ -291,8 +293,12 @@ errors.txt
             public List<string> SampleSearchPaths = new();
 
             // ── Mixer attachment ────────────────────────
+            // DetachMixer = 视图级「分离」状态（S5/A2）：true = 混音台在独立窗口里，
+            // false = 混音台是主窗口工作区的一个视图。随窗口关闭/收回翻回 false 并落盘。
             public bool DetachMixer = false;
-            public WindowSize MixerWindowSize = new WindowSize();
+            // 默认值必须与 MixerWindow.axaml 的 720x480 一致：S5 起窗口关闭时会**恢复**这份尺寸，
+            // 若沿用 WindowSize 的 1200x650 默认，首次分离就会得到一个比设计值大的窗口。
+            public WindowSize MixerWindowSize = new WindowSize { Width = 720, Height = 480 };
 
             // Legacy
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]

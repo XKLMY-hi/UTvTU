@@ -1174,4 +1174,9 @@ General
   <system:String x:Key="mixer.bus.tip.limiter">The playback and export chains have no limiter — there is no implementation to switch on.</system:String>
   <system:String x:Key="mixer.bus.tip.dither">Export writes 16-bit PCM without dither (ExportSession → WaveFileWriter.CreateWaveFile16).</system:String>
   <!-- /mx-strip -->
+  <!-- ⚠ mx-view: S5 视图化（A1/A4 顶栏视图胶囊 + A2/A5 分离）—— 新区块集中登记，EN/zh 成对 -->
+  <system:String x:Key="view.pianoroll">Piano Roll</system:String>
+  <system:String x:Key="view.mixer">Mixer</system:String>
+  <system:String x:Key="view.detach">Open in separate window</system:String>
+  <!-- /mx-view -->
 </ResourceDictionary>

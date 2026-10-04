@@ -79,12 +79,12 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public bool IsDarkMode { get; set; }
         [Reactive] public double Progress { get; set; }
         [Reactive] public string ProgressText { get; set; }
-        [Reactive] public bool ShowPianoRoll { get; set; }
-        [Reactive] public bool ShowMixer { get; set; }
-        [Reactive] public double MixerMaxHeight { get; set; }
-        [Reactive] public double MixerMinHeight { get; set; }
-        [Reactive] public double PianoRollMaxHeight { get; set; }
-        [Reactive] public double PianoRollMinHeight { get; set; }
+        /// <summary>
+        /// S5 视图化：工作区三视图（工作台 / 钢琴卷帘 / 混音台）的切换状态。
+        /// 单一真值 <see cref="ViewSwitcherState.CurrentView"/>，三个 <c>Show*</c> 只翻可见性；
+        /// 卷帘 / 混音台不再有「停靠行」的高度（旧 MixerMinHeight / PianoRollMinHeight 已退役）。
+        /// </summary>
+        public ViewSwitcherState ViewSwitcher { get; } = new ViewSwitcherState();
         public ReactiveCommand<UPart, Unit> PartDeleteCommand { get; set; }
         public ReactiveCommand<int, Unit>? AddTempoChangeCmd { get; set; }
         public ReactiveCommand<int, Unit>? DelTempoChangeCmd { get; set; }
@@ -111,7 +111,6 @@ namespace OpenUtau.App.ViewModels {
             TracksViewModel = new TracksViewModel();
             ClearCacheHeader = string.Empty;
             ProgressText = string.Empty;
-            ShowPianoRoll = false;
             RecentFiles.Clear();
             RecentFiles.AddRange(Preferences.Default.RecentFiles
                 .Select(file => new RecentFileInfo(file))
@@ -142,18 +141,6 @@ namespace OpenUtau.App.ViewModels {
                 TracksViewModel.DeleteSelectedParts();
             });
             DocManager.Inst.AddSubscriber(this);
-
-            this.WhenAnyValue(vm => vm.ShowPianoRoll)
-                .Subscribe(x => {
-                    // 0.01：隐藏时保留可拖拽/双击的极窄行条（上游 #2230）
-                    PianoRollMaxHeight = x ? double.PositiveInfinity : 0.01;
-                    PianoRollMinHeight = x ? ViewConstants.PianoRollMinHeight : 0.01;
-                });
-            this.WhenAnyValue(vm => vm.ShowMixer)
-                .Subscribe(x => {
-                    MixerMaxHeight = x ? 600 : 0;
-                    MixerMinHeight = x ? 120 : 0;
-                });
         }
 
         public void Undo() {
