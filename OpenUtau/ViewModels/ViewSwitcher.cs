@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using ReactiveUI;
 
 namespace OpenUtau.App.ViewModels {
@@ -111,6 +111,7 @@ namespace OpenUtau.App.ViewModels {
                 this.RaisePropertyChanged(nameof(ShowWorkspace));
                 this.RaisePropertyChanged(nameof(ShowPianoRoll));
                 this.RaisePropertyChanged(nameof(ShowMixer));
+                this.RaisePropertyChanged(nameof(ShowLibrary));
                 this.RaisePropertyChanged(nameof(Chrome));
             }
         }
@@ -118,6 +119,16 @@ namespace OpenUtau.App.ViewModels {
         public bool ShowWorkspace => currentView == AppSurface.Workspace;
         public bool ShowPianoRoll => currentView == AppSurface.PianoRoll;
         public bool ShowMixer => currentView == AppSurface.Mixer;
+
+        /// <summary>
+        /// 素材库列（最右 296）的可见性：**工作台与混音台都可见**。
+        ///
+        /// 混音台视图保留素材库列，是为了让「素材库 → 效果器页签 → 拖入右侧链面板」这条
+        /// 决策 B3/B6 的主路径**真实可达**（链面板在混音台视图内）。因此混音台 overlay 只铺
+        /// 前两列（<c>ColumnSpan="2"</c>），把第 3 列让给素材库；通道条区本来就横向滚动，
+        /// 少一列宽不影响可用性。卷帘仍铺满三列（那里不需要插件浏览器）。
+        /// </summary>
+        public bool ShowLibrary => currentView is AppSurface.Workspace or AppSurface.Mixer;
 
         /// <summary>当前视图的顶栏 chrome（见 <see cref="ViewSwitcherPolicy.ChromeFor"/>）。</summary>
         public ViewChrome Chrome => ViewSwitcherPolicy.ChromeFor(currentView);

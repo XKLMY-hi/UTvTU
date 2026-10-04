@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using Avalonia.Headless.XUnit;
@@ -83,12 +83,19 @@ namespace OpenUtau.Test.App {
             Assert.Contains("x:Name=\"MixerContainer\"", xaml);
             Assert.Contains("IsVisible=\"{Binding ViewSwitcher.ShowPianoRoll}\"", xaml);
             Assert.Contains("IsVisible=\"{Binding ViewSwitcher.ShowMixer}\"", xaml);
-            // 视图宿主跨全部三列（设计稿里卷帘/混音台都是整屏；混音台区还是「满宽」）
+            // 视图宿主跨列：卷帘铺满三列；**混音台只铺前两列**——第 3 列留给素材库列，
+            // 这样「素材库 → 效果器页签 → 拖入右侧链面板」这条 B3/B6 主路径才真实可达
+            // （决策偏离：设计稿的混音台是「满宽」，我们让出 296 给素材库；通道条区本就横向滚动）。
             int spanAll = xaml.Split("Grid.Column=\"0\" Grid.ColumnSpan=\"3\"").Length - 1;
-            Assert.True(spanAll >= 2, $"卷帘/混音台宿主应跨三列，实际出现 {spanAll} 次");
-            // 工作台三列随视图显隐（列宽本身不变 ⇒ 几何恒定、无抖动）
+            Assert.True(spanAll >= 1, $"卷帘宿主应跨三列，实际出现 {spanAll} 次");
+            int spanTwo = xaml.Split("Grid.Column=\"0\" Grid.ColumnSpan=\"2\"").Length - 1;
+            Assert.True(spanTwo >= 1, $"混音台宿主应跨前两列，实际出现 {spanTwo} 次");
+            // 素材库列改由 ShowLibrary 控制（工作台 + 混音台都可见；卷帘不显示）
+            Assert.Contains("IsVisible=\"{Binding ViewSwitcher.ShowLibrary}\"", xaml);
+            // 工作台各列随视图显隐（列宽本身不变 ⇒ 几何恒定、无抖动）：
+            // 轨头 + 编排两列走 ShowWorkspace；素材库列走 ShowLibrary（工作台与混音台都可见）
             int workspaceBindings = xaml.Split("IsVisible=\"{Binding ViewSwitcher.ShowWorkspace}\"").Length - 1;
-            Assert.True(workspaceBindings >= 3, $"工作台三列都应随 ShowWorkspace 显隐，实际 {workspaceBindings} 处");
+            Assert.True(workspaceBindings >= 2, $"工作台列应随 ShowWorkspace 显隐，实际 {workspaceBindings} 处");
             // 编排区几何恒定：只有 标尺 34 / 横滚 16 / 内容 * 三行
             Assert.Contains("<RowDefinition Height=\"34\"/>", xaml);
             Assert.Contains("<RowDefinition Height=\"16\"/>", xaml);
@@ -114,22 +121,27 @@ namespace OpenUtau.Test.App {
             Assert.True(switcher.ShowWorkspace);
             Assert.False(switcher.ShowPianoRoll);
             Assert.False(switcher.ShowMixer);
+            // 素材库列：工作台与混音台可见（混音台里要能拖插件进链面板），卷帘不显示
+            Assert.True(switcher.ShowLibrary);
 
             switcher.SwitchTo(AppSurface.PianoRoll);
             Assert.False(switcher.ShowWorkspace);
             Assert.True(switcher.ShowPianoRoll);
             Assert.False(switcher.ShowMixer);
+            Assert.False(switcher.ShowLibrary);
 
             switcher.SwitchTo(AppSurface.Mixer);
             Assert.False(switcher.ShowWorkspace);
             Assert.False(switcher.ShowPianoRoll);
             Assert.True(switcher.ShowMixer);
+            Assert.True(switcher.ShowLibrary);
 
             // 返回路径 = 顶栏胶囊「工作台」（A5：返回走顶栏）
             switcher.SwitchToWorkspace();
             Assert.True(switcher.ShowWorkspace);
             Assert.False(switcher.ShowPianoRoll);
             Assert.False(switcher.ShowMixer);
+            Assert.True(switcher.ShowLibrary);
 
             // overlay 面不许混进工作区切换
             Assert.Throws<ArgumentOutOfRangeException>(() => switcher.SwitchTo(AppSurface.Welcome));

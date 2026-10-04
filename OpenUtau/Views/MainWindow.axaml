@@ -1,4 +1,4 @@
-﻿<controls:WindowEx xmlns="https://github.com/avaloniaui"
+<controls:WindowEx xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -616,9 +616,9 @@
                     SmallChange="{Binding SmallChangeY}" PointerWheelChanged="VScrollPointerWheelChanged"/>
         </Grid>
 
-        <!-- ── 右：素材库 296（表头 44 / 页签 40 / 内容；仅工作台视图）── -->
+        <!-- ── 右：素材库 296（表头 44 / 页签 40 / 内容；工作台与混音台可见 —— 混音台里要能拖插件进链面板）── -->
         <Border Grid.Column="2" Background="{DynamicResource md3.surface-container}"
-                IsVisible="{Binding ViewSwitcher.ShowWorkspace}"
+                IsVisible="{Binding ViewSwitcher.ShowLibrary}"
                 BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="1,0,0,0">
           <Grid RowDefinitions="44,40,*">
             <!-- 表头 -->
@@ -937,8 +937,9 @@
                 IsVisible="{Binding ViewSwitcher.ShowPianoRoll}">
           <ContentControl x:Name="PianoRollContainer" Classes="md3-fade"/>
         </Border>
-        <!-- ── 视图 3/3：混音台（不再停靠在编排区下方；Ctrl+M / 胶囊进入）── -->
-        <Border Grid.Column="0" Grid.ColumnSpan="3" ZIndex="10"
+        <!-- ── 视图 3/3：混音台（不再停靠在编排区下方；Ctrl+M / 胶囊进入）──
+             overlay 只铺前两列：第 3 列留给素材库列，让「素材库 → 效果器 → 拖入链面板」可达（B3/B6）。 -->
+        <Border Grid.Column="0" Grid.ColumnSpan="2" ZIndex="10"
                 Background="{DynamicResource md3.surface}"
                 IsVisible="{Binding ViewSwitcher.ShowMixer}">
           <ContentControl x:Name="MixerContainer" Classes="md3-fade"/>
