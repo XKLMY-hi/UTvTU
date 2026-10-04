@@ -7,6 +7,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Threading;
 using OpenUtau.App.ViewModels;
 using OpenUtau.App.Views;
 using OpenUtau.Core;
@@ -55,10 +56,18 @@ namespace OpenUtau.App.Controls {
         /// <summary>
         /// 冻结契约接线口：把宿主（W1 <c>MixerViewModel</c>）的选中轨道流送进来。
         /// 传 null 也可（面板显示"未选择轨道"）。
+        /// <c>Track</c> 是 <c>StyledProperty</c>（绑定 / 布局有 UI 线程亲缘）⇒ 宿主若从
+        /// 后台线程推值（例如在异步任务里改选中态），这里编组回 UI 线程。
         /// </summary>
         public void BindSelection(IObservable<UTrack?> selection) {
             selectionSub?.Dispose();
-            selectionSub = selection.Subscribe(t => Track = t);
+            selectionSub = selection.Subscribe(t => {
+                if (Dispatcher.UIThread.CheckAccess()) {
+                    Track = t;
+                } else {
+                    Dispatcher.UIThread.Post(() => Track = t);
+                }
+            });
         }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
@@ -150,8 +159,8 @@ namespace OpenUtau.App.Controls {
             var fx = VstPluginManager.Inst.GetEffect(track.TrackNo, slotIndex)
                      ?? await VstPluginManager.Inst.LoadEffectAsync(track.TrackNo, slot);
             if (fx == null) {
-                ShowInfo($"{ThemeManager.GetString("effects.error.load")}\n" +
-                         $"{VstBridge.LastError() ?? ThemeManager.GetString("effects.error.unknown")}");
+                OnUi(() => ShowInfo($"{ThemeManager.GetString("effects.error.load")}\n" +
+                                   $"{VstBridge.LastError() ?? ThemeManager.GetString("effects.error.unknown")}"));
                 return;
             }
             bool opened = false;
@@ -162,7 +171,18 @@ namespace OpenUtau.App.Controls {
             }
             if (!opened) {
                 // 原生 GUI 打不开：退回诊断窗（不丢"打开 GUI / 看插件信息"的能力）
-                new VstEditorWindow(fx).Show();
+                // await 之后的续体正常回到 UI 上下文；这里仍显式编组一次，
+                // 以便将来允许从后台线程调用而不用逐个补编组。
+                OnUi(() => new VstEditorWindow(fx).Show());
+            }
+        }
+
+        /// <summary>UI 线程编组（本派发端接触的全是窗口/控件）。</summary>
+        static void OnUi(Action action) {
+            if (Dispatcher.UIThread.CheckAccess()) {
+                action();
+            } else {
+                Dispatcher.UIThread.Post(action);
             }
         }
 

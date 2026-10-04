@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using Avalonia.Input;
+using Avalonia.Threading;
 using OpenUtau.Core;
 using OpenUtau.Core.Theming;
 using OpenUtau.Core.Ustx;
@@ -342,8 +343,34 @@ namespace OpenUtau.App.ViewModels {
         /// 从模型重投影链行（真实数据，不猜）。内置段存在的判据与渲染管线一致：
         /// <c>MixFx == null</c> = 该轨未配置内置效果 ⇒ 不出内置行；<c>MixFx.Enabled == false</c>
         /// = 整段旁通（行仍在，但标注"不过声"）。**只读**：不写模型、不创建 UMixFx。
+        ///
+        /// **线程契约（必须编组到 UI 线程）**：<see cref="Rows"/> 是绑定到 <c>ItemsControl</c>
+        /// 的 <c>ObservableCollection</c>（有 dispatcher 亲缘），而本方法确实会被后台线程调到：
+        ///   · <c>VstSlotChangedNotification</c> 来自 <c>Task.Run</c> 的异步原生加载
+        ///     （增删槽 / 重排 / 选插件之后）；
+        ///   · <c>MixFxChangedNotification</c> 走全局 MessageBus，发送方线程不定；
+        ///   · <c>DocManager.Publish</c> 就发生在**执行命令的那条线程**上 —— 命令可能由
+        ///     非 UI 线程内联执行（集成树里测试线程内联执行即是此例）。
+        /// 非 UI 线程调用 ⇒ <c>Post</c> 回 UI 线程。
+        ///
+        /// 用 <c>Post</c> 而不是 <c>Invoke</c>：<c>Publish</c> 是在 DocManager 的
+        /// <c>lock (lockObj)</c> 内遍历订阅者的，同步 <c>Invoke</c> 会**持着该锁**去等 UI 线程，
+        /// 而 UI 线程执行命令时也要拿同一把锁 ⇒ 死锁。Post 不阻塞调用方；代价是异步
+        /// （UI 在下一轮消息循环收敛，调用方的"最终状态"断言需 pump 一次 dispatcher）。
         /// </summary>
         public void Rebuild() {
+            if (!Dispatcher.UIThread.CheckAccess()) {
+                // 后台线程（异步加载通知 / Publish 在命令线程上）⇒ 编组回 UI 线程。
+                // 用 Post 而非 Invoke：Publish 持着 DocManager 的 lockObj，同步 Invoke
+                // 会持锁等 UI 线程造成死锁。
+                Dispatcher.UIThread.Post(Rebuild);
+                return;
+            }
+            RebuildCore();
+        }
+
+        /// <summary>链行重投影的实体（**只能在 UI 线程调用**；见 <see cref="Rebuild"/>）。</summary>
+        void RebuildCore() {
             foreach (var row in Rows) {
                 row.Activated -= OnRowActivated;
             }
