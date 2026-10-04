@@ -133,6 +133,7 @@ plus-develop (aac89adc)
 | L6 | 垂直 `Slider` 未实现（Fluent 12 模板同样只有水平；全仓无 `Orientation="Vertical"` 使用） | fx-ctl | 将来需要时补 |
 | L7 | `d30dc489`「内置 resampler 声效随曲线驱动」（Hifisampler 曲线，13 文件 +455） | 勘探 | 独立课题：与效果机架同源但互不依赖 |
 | L8 | 把机架折进「素材库 → 效果器」页签、统一 VST + 内置模块排序 UI（设计决策 B6） | 规划 §8 | 待本轮机架落地并实机确认后再做；fx-rack 的 `FxRackPanel` 已给出只读设计稿与接线点 |
+| L9 | **视图级选中态补丁**：`PianoRollStyles.axaml:40-42` 的 `ListBoxItem:selected /template/ ContentPresenter{SelectedTrackAccentLightBrushSemi}` 会在 `ExpressionsDialog`/`LyricsDialog`/`LyricsReplaceDialog` 三处叠出"轨道强调色内层带"（选中行局部对比度下降）。**非本轮引入、非回归** | fx-verify 第四轮 | 独立小任务清理，或确认"就是要那个观感" |
 
 ## 附B. 执行记录（滚动更新）
 
@@ -155,6 +156,9 @@ plus-develop (aac89adc)
 | 追加提交合并（第二批） | fx-ui 测试隔离（`d0881370`：`MixerTrackStripTest` 两处订阅按 `TrackNo` 过滤 + 自查出 `MixFxDialogTests` 同类隐患，全局监听共 3 处全部处理）→ 集成树 HEAD **`5f3799ae`** |
 | T5 阶段三（像素复测） | **PASS**：机架「确定」与导出窗口主按钮文字 = `#36275D` = `md3.on-primary`，对比度 **7.70:1**（修复前 1.70:1）；普通/描边按钮仍 `md3.on-surface` 14.35:1 未变紫；机架三面板无回退。附带发现：`Styles.axaml:303-305` 的 `ListBoxItem:selected /template/ ContentPresenter{AccentBrush1Semi}` 在主题胶囊内再叠一层 `#A699C3` → 选中行局部对比度 **3.49:1**（同一类"应用级补丁压 ControlTheme"残余） |
 | T11（Lead 收尾） | 删除该 `:selected` 补丁（主题 `^:selected` 已提供 secondary-container / on-secondary-container，7.19:1）；同行 `:pointerover` 补丁**保留**（无缺陷证据，避免再引入未验证的视觉变更），登记为后续候选清理 |
+| T5 阶段四（微复测） | **PASS / FIXED**：干净 `ListBoxItem`（不含视图级模板）Light 选中底 `#E8DEF8` = secondary-container、**整行均匀无内层带**，CR **13.20:1**；Dark `#4A4458`，CR **7.17:1**。**归因更正**（验证者自查）：那层 `#A699C3` 的真正来源是**视图级** `Styles/PianoRollStyles.axaml:40-42`（`SelectedTrackAccentLightBrushSemi`），被 `ExpressionsDialog`/`LyricsDialog`/`LyricsReplaceDialog` include；删应用级那条后该对话框**逐像素不变** ⇒ 本删除修的是**全局**双重绘制，不是那 3 个对话框 |
+| 新增遗留（附A L9） | `PianoRollStyles.axaml:40-42` 的视图级 `ListBoxItem:selected /template/ ContentPresenter` 仍会在上述 3 个对话框里叠出轨道强调色内层带。**非回归**（一直在），需独立小任务清理或确认"就是要那个观感" |
+| 顺带实测 | 偏好设置左导航**不是** `ListBoxItem` 而是 `Button.navItem`：Light 下胶囊 `#E8DEF8` + 文字 `#49454E`(on-surface-variant) → CR ≈ **7.28:1** ✔ |
 
 ### 附A.1 对比度收尾清单（T10-D 只报告未改，归后续）
 

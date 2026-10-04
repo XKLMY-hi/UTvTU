@@ -370,7 +370,7 @@ git -C $r diff 21255585^1 21255585 -- OpenUtau.Test/App/Md3ControlThemeTests.cs 
 > 全程未按进程名杀进程（只用 `launch.ps1` / `stop.ps1` / 精确 PID）。
 > 证据分级：**已验证**（我自己跑/看到）· **仅代码审查**（静态）· **未验证**（未取得证据）。
 
-## 6.0 阶段二总结论（三轮合并，最终）
+## 6.0 阶段二总结论（四轮合并，最终）
 
 | 项 | 结论 | 依据 |
 |---|---|---|
@@ -385,7 +385,9 @@ git -C $r diff 21255585^1 21255585 -- OpenUtau.Test/App/Md3ControlThemeTests.cs 
 | hover 辉光移除 + 8% 加深 | **PASS** | 像素级：填充 (207,189,254)→(192,174,235)，无光晕 |
 | Tab 焦点环 | **部分** | 机架开关环**已验证**；偏好页开关/滑条与 ProgressBar **未验证**（见 §6.2 C） |
 | 主按钮**深色前景**（T9/T10） | **PASS**（第三轮 5f3799ae 复测） | 像素级：`确定` 文字 = **`#36275D` = `md3.on-primary`**，对 `md3.primary` 底 **7.70:1**（旧白字 1.70:1）；导出窗口主按钮同值；普通/描边按钮仍 `on-surface` 14.35:1 —— 见 §6.5 |
-| `ListBoxItem` 选中行文字（T10-B） | **文字 PASS + 1 项登记** | Light 选中行文字实测 `#4D4458` ≈ `md3.on-secondary-container` ✔（此前恒 `on-surface`）；但**局部**对比度实测仅 **3.49:1**（`Styles.axaml:303-305` 旧 `/template/` 补丁在主题胶囊内又刷一层）→ 登记清理项 —— 见 §6.5 D |
+| `ListBoxItem` 双重绘制（`Styles.axaml` 应用级补丁） | **PASS / FIXED**（第四轮 `b763f0da` 微复测） | 干净 `ListBoxItem` 面（调试窗口，无 PianoRollStyles）：Light 选中行底 = **`#E8DEF8` = `secondary-container`，整行均匀、内层 `#A699C3` 消失** ✔；Dark 选中行底 = **`#4A4458` = `secondary-container`**、文字 7.17:1 ✔ —— 见 §6.5 G |
+
+> **⚠️ 第四轮同时更正了我第三轮的一处错误归因**：第三轮把 `#A699C3` 内层带归因为 `Styles.axaml:303-305`（应用级补丁）——**不完整**。真正画出那一层的是**视图级** `Styles/PianoRollStyles.axaml:40-42`（`ListBoxItem:selected /template/ ContentPresenter { Background = SelectedTrackAccentLightBrushSemi }`），而 `Views/ExpressionsDialog.axaml:18` include 了该文件；应用级那条只是**同时**作用。Lead 删掉应用级那条后，我在**同一对话框**复测数值完全不变（`r4-expressions-light.png` 与 r3 逐像素一致）⇒ 该对话框的带子来自它自己的 stylesheet，**仍在**（3 个钢琴卷帘家族对话框同理）→ 登记为后续小任务（与本轮修复无因果，非回归）。 |
 | 旧 `/template/` 补丁无静默回归 | **PASS**（静态 14 处 + 运行时：`.chip`、`.menu` 契约、`.fader`） | 阶段一 §B9 + 偏好页 chip 实测 |
 | 偏好页分段控件文案截断 | **既有问题**（非本轮） | `prefs-light-chips-zoom.png` |
 
@@ -660,3 +662,54 @@ Dark（`prefs-appearance-notab.png`、`prefs-appearance-tab5.png`）与 Light（
 - **主题已还原为 Dark**（用户原值），数值核验：`r3-dark-restored.png` 的背景像素 `#141218` / `#1D1B20`（暗色池 surface）✔。
 - 第三轮证据（`.dsh/fx/shots/`）：`r3-rack-dark.png`（机架 Dark，无回退）、`r3-renderwindow.png`（导出窗口主按钮）、`r3-prefs-light.png`（Light 生效）、`r3-expressions-light.png` + `r3-listbox-light-zoom.png` / `r3-listbox-light-normal-zoom.png`（选中/普通行对照）、`r3-dark-restored.png`（主题还原）、`r3-menu-file.png` / `r3-menu-export.png` / `r3-menu-project.png`（菜单导航留档）。
 - **过程教训（记入流程）**：机架是 `Show(owner)` 的非模态窗且覆盖偏好页内容区，我第一次切换主题的点击落在机架内部，**误把机架「压缩器」预设切成了 Off**（`r3-menu-project.png` 可见）。该改动**未保存、未落盘**（随后用 `stop.ps1` 强关，未写任何工程文件）。后续自动化：**点击遮挡区域前先最小化其它窗口**（本轮已改为先 `SW_MINIMIZE` 机架再操作偏好页）。
+
+---
+
+## 6.6 第四轮：`b763f0da` 微复测（`ListBoxItem` 双重绘制修复）—— **PASS / FIXED**
+
+> 树：`try/fx-core` HEAD `b763f0da`（Lead 已快进 `plus-develop = c7d4d5b2`），exe 2026-10-04 15:37:33，我未跑 dotnet。
+> 目标：`b763f0da` 删除了 `Styles.axaml:303-305` 的应用级 `ListBoxItem:selected /template/ ContentPresenter` 补丁（原处留注释，`:pointerover` 那条保留并登记）。
+
+### A. 为什么换了测量对象（方法论更正）
+
+第三轮我用「项目 → 表情」对话框测的**不是干净面**：`Views/ExpressionsDialog.axaml:18` include 了 `Styles/PianoRollStyles.axaml`，而该文件 **`:40-42` 自己也有**一条同类补丁：
+```xml
+<Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+  <Setter Property="Background" Value="{DynamicResource SelectedTrackAccentLightBrushSemi}"/>
+</Style>
+```
+⇒ 那一层 `#A699C3` 来自**视图级** stylesheet（轨道强调色半透明），应用级那条只是同时作用。**我第三轮的根因归因因此不完整**（已在上文更正）。
+改用**不含 PianoRollStyles 的干净面**：`Views/DebugWindow.axaml:19` 的日志 `ListBox`（该文件无 `StyleInclude`）。
+
+### B. Light 复测（`r4-debugwindow-light-sel.png`）—— PASS
+
+| 量 | 实测值 |
+|---|---|
+| 选中行整行底色（x=900 纵向扫描 y 48–72） | **`#E8DEF8` = `md3.secondary-container`，逐行均一** |
+| 是否有内层深色带（r3 的 `#A699C3`） | **不存在**（该 y 区间 7200/7200 px 全为 `#E8DEF8`）✔ **双重绘制已消除** |
+| 选中行文字 | `#1D1B20`（= `on-surface`，**因为该窗口行模板自带 Foreground**，见 C），对胶囊底 **13.20:1** ✔ 可读 |
+| 未选中行 | 底 `#FDF7FF`（surface）、文字缺省 base，16.20:1 ✔ |
+
+### C. 两个必须说清的口径问题（避免误判）
+
+1. **该窗口的行文字不由 `ListBoxItem.Foreground` 决定**：`DebugWindow.axaml:22` 的行模板写死了
+   `Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"` ⇒ 在这个列表里永远显示 base 前景
+   （Light `#1D1B20`、Dark `#E6E0E9`）。所以「选中行文字 = `on-secondary-container`」这一条的**有效证据仍是第三轮的表达式列表测量**（`#4D4458` ≈ `#4A4458` ✔）；本窗口只能验证**背景层**（那正是本次修复的对象）。
+2. **Lead 建议的「偏好设置左导航」不是 `ListBoxItem`**：`PreferencesView.axaml:292` 等是 `<Button Classes="navItem selected">`。顺手实测（`r4-prefs-light.png`）：选中项胶囊 `#E8DEF8`（`secondary-container`）+ 文字 `#49454E`（`= md3.on-surface-variant`，非 on-secondary-container），**CR ≈ 7.28:1** ✔ 可读（ListBoxItem 修复与其无关）。
+
+### D. Dark 复测（`r4-debugwindow-dark-selected.png`）—— PASS，无异常
+
+（注意：主题切换会让该 ListBox 丢失选中态，我在 Dark 下**重新点选**后再测。）
+
+| 量 | 实测值 |
+|---|---|
+| 选中行底色（y 48–72） | **`#4A4458` = `md3.secondary-container`（Dark 池），整行均一** ✔ 无内层带 |
+| 选中行文字 | `#E6E0E9` = `on-surface`（同 C1 原因），**CR 7.17:1** ✔（池配对参考：on-surface/secondary-container = 7.22:1） |
+| 未选中行 | 底 `#141218`、文字 14.35:1 ✔ |
+
+### E. 第四轮结论
+
+- **`b763f0da` 的修复生效**：在干净 `ListBoxItem` 面上，Light/Dark 两池的选中行都是**单层主题胶囊**，第三轮测到的内层 `#A699C3` 消失 ✔；局部对比度由 3.49:1 回到 **13.20:1（Light）/ 7.17:1（Dark）**（按实际文字色算；若该行文字使用 on-secondary-container 则为 7.19:1）。
+- **遗留登记（非本次修复造成、非回归）**：`Styles/PianoRollStyles.axaml:40-42` 的视图级同类补丁仍在，`ExpressionsDialog` / `LyricsDialog` / `LyricsReplaceDialog` 三个 include 它的窗口里，选中行仍会出现"轨道强调色内层带"（该图 `r4-expressions-light.png` 与第三轮逐像素一致）。建议作为独立小任务清理（或确认那三处的观感就是想要的），**我未改动**。
+- 收工：`stop.ps1` → 「已关闭 PID 16584（…\OpenUtau.exe）」；`Get-Process -Name OpenUtau` 无输出；**主题仍为 Dark**（数值核验 `r4-dark-restored.png` 主色 `#211F24`/`#141218`）。
+- 第四轮证据：`r4-debugwindow-light-sel.png`、`r4-debugwindow-dark-selected.png`、`r4-expressions-light.png`（同一对话框仍带内层带的对照）、`r4-prefs-light.png`（导航为 Button 的实证）、`r4-dark-restored.png`、`r4-debugwindow-light.png`（选中前）。
