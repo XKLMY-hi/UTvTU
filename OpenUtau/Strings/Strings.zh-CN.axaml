@@ -1274,6 +1274,17 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="fxrack.hint.drag">拖拽排序 · 后续接线</system:String>
   <system:String x:Key="fxrack.empty">本轨道暂无效果模块</system:String>
   <system:String x:Key="fxcard.bypass">旁通</system:String>
+  <!-- fx-chain: 混音台右侧效果链面板（B3/B4） -->
+  <system:String x:Key="fxchain.empty">从素材库 · 效果器 拖入</system:String>
+  <system:String x:Key="fxchain.notrack">未选择轨道</system:String>
+  <system:String x:Key="fxchain.add.tip">添加效果器</system:String>
+  <system:String x:Key="fxchain.addvst">浏览 VST 插件…</system:String>
+  <system:String x:Key="fxchain.badge.builtin">内置</system:String>
+  <system:String x:Key="fxchain.power.tip">电源 / 旁通</system:String>
+  <system:String x:Key="fxchain.remove.tip">移除</system:String>
+  <system:String x:Key="fxchain.open.tip">双击打开编辑器</system:String>
+  <system:String x:Key="fxchain.grip.tip">拖拽排序</system:String>
+  <system:String x:Key="fxchain.grip.fixed.tip">内置模块顺序固定（EQ → 压缩 → 混响）</system:String>
   <!-- fx-ui: effects rack (实时效果机架三面板) -->
   <system:String x:Key="mixfx.rack.track">轨道</system:String>
   <system:String x:Key="mixfx.rack.power">电源</system:String>

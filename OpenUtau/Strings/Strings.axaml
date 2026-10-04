@@ -1143,6 +1143,17 @@ General
   <system:String x:Key="fxrack.hint.drag">Drag to reorder · wired in a later round</system:String>
   <system:String x:Key="fxrack.empty">No effect modules on this track</system:String>
   <system:String x:Key="fxcard.bypass">Bypassed</system:String>
+  <!-- fx-chain: 混音台右侧效果链面板（B3/B4） -->
+  <system:String x:Key="fxchain.empty">Drag from Library · Effects</system:String>
+  <system:String x:Key="fxchain.notrack">Select a track</system:String>
+  <system:String x:Key="fxchain.add.tip">Add effect</system:String>
+  <system:String x:Key="fxchain.addvst">Browse VST plugins…</system:String>
+  <system:String x:Key="fxchain.badge.builtin">Built-in</system:String>
+  <system:String x:Key="fxchain.power.tip">Power / bypass</system:String>
+  <system:String x:Key="fxchain.remove.tip">Remove</system:String>
+  <system:String x:Key="fxchain.open.tip">Double-click to open the editor</system:String>
+  <system:String x:Key="fxchain.grip.tip">Drag to reorder</system:String>
+  <system:String x:Key="fxchain.grip.fixed.tip">Built-in order is fixed (EQ → Compressor → Reverb)</system:String>
   <!-- fx-ui: effects rack (实时效果机架三面板) -->
   <system:String x:Key="mixfx.rack.track">Track</system:String>
   <system:String x:Key="mixfx.rack.power">Power</system:String>
