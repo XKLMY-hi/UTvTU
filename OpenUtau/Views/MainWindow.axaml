@@ -236,6 +236,8 @@
                   <MenuItem Header="{DynamicResource menu.tools.fullscreen}" InputGesture="F11" Click="OnMenuFullScreen"/>
                   <MenuItem Header="{Binding ClearCacheHeader}" Click="OnMenuClearCache"/>
                   <MenuItem Header="{DynamicResource menu.tools.debugwindow}" Click="OnMenuDebugWindow"/>
+                  <!-- fx-rack：控件陈列室（MD3 机架控件家族审阅入口） -->
+                  <MenuItem Header="{DynamicResource menu.tools.controlgallery}" Click="OnMenuControlGallery"/>
                   <MenuItem Header="{DynamicResource menu.tools.mixer}" InputGesture="Ctrl+M" Click="OnMenuMixer"/>
                   <MenuItem Header="{DynamicResource phoneticassistant.caption}" Click="OnMenuPhoneticAssistant"/>
                   <MenuItem Header="{DynamicResource menu.tools.singers}" Click="OnMenuSingers"/>
