@@ -1243,4 +1243,35 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="window.maximize">最大化</system:String>
   <system:String x:Key="window.restore">还原</system:String>
   <system:String x:Key="window.close">关闭</system:String>
+
+  <!-- ══════════ fx-rack: control gallery（新增区块；合并时整块保留） ══════════ -->
+  <system:String x:Key="menu.tools.controlgallery">控件陈列室</system:String>
+  <system:String x:Key="controlgallery.title">控件陈列室</system:String>
+  <system:String x:Key="controlgallery.caption">MD3 机架控件家族 —— 新控件语言审阅</system:String>
+  <system:String x:Key="controlgallery.states">状态：默认 · 悬停 · 按下 · 激活 · 禁用 · 旁通</system:String>
+  <system:String x:Key="controlgallery.section.power">电源开关</system:String>
+  <system:String x:Key="controlgallery.section.segmented">分段选择器</system:String>
+  <system:String x:Key="controlgallery.section.readout">参数读数</system:String>
+  <system:String x:Key="controlgallery.section.card">模块面板</system:String>
+  <system:String x:Key="controlgallery.section.rack">机架列表</system:String>
+  <system:String x:Key="controlgallery.note.power">圆形点亮式电源钮（28px）。Tab 聚焦，空格/回车切换，←/→ 直接置关/置开。下方冻结各状态供审阅。</system:String>
+  <system:String x:Key="controlgallery.note.segmented">替代 RadioButton.chip + ValueEqualsConverter 的拼装做法。整组一个 Tab 停靠点，←/→ 移动选择；选中项 = secondary-container 胶囊。</system:String>
+  <system:String x:Key="controlgallery.note.readout">数值 + 单位 + 上下限。向上/向右拖动增大，双击复位，↑/↓ 步进（Shift 精调、PgUp/PgDn 粗调、Home/End 到上下限）。</system:String>
+  <system:String x:Key="controlgallery.note.card">模块容器：强调色条 + 标题 + 电源开关 + 内容区。关电源或旁通后内容压暗并显示状态角标。</system:String>
+  <system:String x:Key="controlgallery.note.rack">内置模块与 VST 槽统一排序，用真实的 UTrack.MixFx / UTrack.VstSlots 数据渲染。只读设计稿：拖拽排序与写入留待后续轮次。</system:String>
+  <system:String x:Key="controlgallery.state.default">默认</system:String>
+  <system:String x:Key="controlgallery.state.hover">悬停</system:String>
+  <system:String x:Key="controlgallery.state.pressed">按下</system:String>
+  <system:String x:Key="controlgallery.state.active">激活</system:String>
+  <system:String x:Key="controlgallery.state.disabled">禁用</system:String>
+  <system:String x:Key="controlgallery.state.bypass">旁通</system:String>
+  <system:String x:Key="controlgallery.demo.note">机架演示用一条临时轨道（名为 “Lead Vocal”）：总开关开、压缩器关、两个 VST 槽（其一为空槽）。不会写回任何数据。</system:String>
+  <system:String x:Key="controlgallery.demo.gain">中频增益</system:String>
+  <system:String x:Key="controlgallery.demo.freq">中频频率</system:String>
+  <system:String x:Key="controlgallery.demo.mix">湿声比例</system:String>
+  <system:String x:Key="fxrack.title">效果机架</system:String>
+  <system:String x:Key="fxrack.readonly">设计稿</system:String>
+  <system:String x:Key="fxrack.hint.drag">拖拽排序 · 后续接线</system:String>
+  <system:String x:Key="fxrack.empty">本轨道暂无效果模块</system:String>
+  <system:String x:Key="fxcard.bypass">旁通</system:String>
 </ResourceDictionary>

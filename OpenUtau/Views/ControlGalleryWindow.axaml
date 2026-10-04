@@ -1,0 +1,248 @@
+<controls:WindowEx xmlns="https://github.com/avaloniaui"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:controls="clr-namespace:OpenUtau.App.Controls"
+                   x:Class="OpenUtau.App.Views.ControlGalleryWindow"
+                   Icon="/Assets/open-utau.ico"
+                   Title="{DynamicResource controlgallery.title}"
+                   Width="1020" Height="820"
+                   MinWidth="720" MinHeight="480"
+                   WindowStartupLocation="CenterScreen">
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       控件陈列室（fx-rack）
+
+       用途：把新控件家族一次性摆出来给用户审阅——每个控件一节，
+       节内分「实时交互示例」与「冻结状态条」两栏。冻结状态条由代码后置填充
+       （枚举 ForcedVisual 不是静态 XAML 值），因此这里只留占位 StackPanel。
+
+       颜色一律走 {DynamicResource md3.*}（颜色池），无任何硬编码色值；
+       文字一律走字符串键（EN/zh 双侧同步）；窗口继承 WindowEx（原生装饰、实色）。
+
+       注意：本窗口不依赖运行中的工程 —— 机架演示用的是代码后置里的一条临时
+       UTrack（真实 UMixFx / VstPluginSlot 数据），空轨道演示展示空态。
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <Window.Resources>
+    <!-- md3.color.*（颜色键）的用法示范：需要 Color 的地方（如画刷的 Color）走颜色键，
+         直接给 Background/BorderBrush 这类画刷属性时用 md3.*（画刷键）。
+         这里沿用 PreferencesView 的既有范式：资源里声明画刷 + 颜色键做 Color。 -->
+    <SolidColorBrush x:Key="GalleryEmblemBrush" Color="{DynamicResource md3.color.tertiary-container}"/>
+  </Window.Resources>
+
+  <Window.Styles>
+    <Style Selector="Border.gallerySection">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="16"/>
+      <Setter Property="Padding" Value="16"/>
+    </Style>
+    <Style Selector="TextBlock.gallerySectionTitle">
+      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+    </Style>
+    <Style Selector="TextBlock.galleryNote">
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="LineHeight" Value="18"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+    </Style>
+    <Style Selector="TextBlock.galleryStripCaption">
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+    </Style>
+  </Window.Styles>
+
+  <DockPanel LastChildFill="True">
+    <!-- 页头 -->
+    <Border DockPanel.Dock="Top"
+            Background="{DynamicResource md3.surface-container}"
+            BorderBrush="{DynamicResource md3.outline-variant}"
+            BorderThickness="0,0,0,1"
+            Padding="20,14">
+      <StackPanel Spacing="6">
+        <StackPanel Orientation="Horizontal" Spacing="10">
+          <Border Width="34" Height="34" CornerRadius="10"
+                  Background="{StaticResource GalleryEmblemBrush}"
+                  VerticalAlignment="Center">
+            <TextBlock Text="FX" FontSize="13" FontWeight="Bold"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Foreground="{DynamicResource md3.on-tertiary-container}"/>
+          </Border>
+          <TextBlock Text="{DynamicResource controlgallery.title}"
+                     FontSize="18" FontWeight="Bold" VerticalAlignment="Center"
+                     Foreground="{DynamicResource md3.on-surface}"/>
+          <Border Width="1" Height="20" VerticalAlignment="Center" Margin="6,0"
+                  Background="{DynamicResource md3.outline-variant}"/>
+          <TextBlock Text="{DynamicResource controlgallery.caption}"
+                     FontSize="12" VerticalAlignment="Center"
+                     Foreground="{DynamicResource md3.on-surface-variant}"/>
+        </StackPanel>
+        <TextBlock Text="{DynamicResource controlgallery.states}"
+                   FontSize="11" Foreground="{DynamicResource md3.on-surface-variant}"/>
+      </StackPanel>
+    </Border>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Margin="20" Spacing="16">
+
+        <!-- ══ 1. 电源开关 ══ -->
+        <Border Classes="gallerySection">
+          <StackPanel Spacing="12">
+            <StackPanel Spacing="4">
+              <TextBlock Classes="gallerySectionTitle" Text="{DynamicResource controlgallery.section.power}"/>
+              <TextBlock Classes="galleryNote" Text="{DynamicResource controlgallery.note.power}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="28">
+              <StackPanel Spacing="6">
+                <controls:Md3PowerSwitch Name="PowerOff"/>
+                <TextBlock Classes="galleryStripCaption" Text="{DynamicResource controlgallery.state.default}"/>
+              </StackPanel>
+              <StackPanel Spacing="6">
+                <controls:Md3PowerSwitch Name="PowerOn" IsChecked="True"/>
+                <TextBlock Classes="galleryStripCaption" Text="{DynamicResource controlgallery.state.active}"/>
+              </StackPanel>
+              <StackPanel Spacing="6">
+                <controls:Md3PowerSwitch Name="PowerDisabled" IsEnabled="False"/>
+                <TextBlock Classes="galleryStripCaption" Text="{DynamicResource controlgallery.state.disabled}"/>
+              </StackPanel>
+            </StackPanel>
+            <StackPanel Spacing="6">
+              <TextBlock Classes="galleryStripCaption" Text="{DynamicResource controlgallery.states}"/>
+              <StackPanel Name="PowerStateStrip" Orientation="Horizontal" Spacing="4"/>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <!-- ══ 2. 分段选择器 ══ -->
+        <Border Classes="gallerySection">
+          <StackPanel Spacing="12">
+            <StackPanel Spacing="4">
+              <TextBlock Classes="gallerySectionTitle" Text="{DynamicResource controlgallery.section.segmented}"/>
+              <TextBlock Classes="galleryNote" Text="{DynamicResource controlgallery.note.segmented}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="20">
+              <controls:Md3SegmentedControl Name="SegmentedLive"/>
+              <controls:Md3SegmentedControl Name="SegmentedCompact" IsCompact="True"/>
+              <controls:Md3SegmentedControl Name="SegmentedDisabled" IsEnabled="False"/>
+            </StackPanel>
+            <StackPanel Spacing="6">
+              <TextBlock Classes="galleryStripCaption" Text="{DynamicResource controlgallery.states}"/>
+              <StackPanel Name="SegmentedStateStrip" Orientation="Horizontal" Spacing="16"/>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <!-- ══ 3. 参数读数 ══ -->
+        <Border Classes="gallerySection">
+          <StackPanel Spacing="12">
+            <StackPanel Spacing="4">
+              <TextBlock Classes="gallerySectionTitle" Text="{DynamicResource controlgallery.section.readout}"/>
+              <TextBlock Classes="galleryNote" Text="{DynamicResource controlgallery.note.readout}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="14">
+              <controls:Md3NumericReadout Name="ReadoutGain"
+                                          Label="{DynamicResource controlgallery.demo.gain}"
+                                          Unit="dB" Minimum="-12" Maximum="12"
+                                          Value="1.5" Step="0.1" ResetValue="0"
+                                          Format="+0.0;-0.0;0.0"/>
+              <controls:Md3NumericReadout Name="ReadoutFreq"
+                                          Label="{DynamicResource controlgallery.demo.freq}"
+                                          Unit="Hz" Minimum="200" Maximum="6000"
+                                          Value="3000" Step="10" ResetValue="3000"
+                                          Format="0"/>
+              <controls:Md3NumericReadout Name="ReadoutMix"
+                                          Label="{DynamicResource controlgallery.demo.mix}"
+                                          Unit="%" Minimum="0" Maximum="100"
+                                          Value="35" Step="1" ResetValue="0"
+                                          Format="0"/>
+              <controls:Md3NumericReadout Name="ReadoutDisabled" IsEnabled="False"
+                                          Label="{DynamicResource controlgallery.demo.mix}"
+                                          Unit="%" Value="35"/>
+            </StackPanel>
+            <StackPanel Spacing="6">
+              <TextBlock Classes="galleryStripCaption" Text="{DynamicResource controlgallery.states}"/>
+              <StackPanel Name="ReadoutStateStrip" Orientation="Horizontal" Spacing="12"/>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <!-- ══ 4. 模块面板 ══ -->
+        <Border Classes="gallerySection">
+          <StackPanel Spacing="12">
+            <StackPanel Spacing="4">
+              <TextBlock Classes="gallerySectionTitle" Text="{DynamicResource controlgallery.section.card}"/>
+              <TextBlock Classes="galleryNote" Text="{DynamicResource controlgallery.note.card}"/>
+            </StackPanel>
+            <Grid ColumnDefinitions="*,*,*">
+              <!-- EQ：开机 + 选中 -->
+              <controls:FxModuleCard Grid.Column="0" Margin="0,0,12,0"
+                                     Title="{DynamicResource mixfx.eq}" Subtitle="vocal_air"
+                                     Accent="Primary" IsSelected="True" IsPowered="True">
+                <controls:FxModuleCard.CardContent>
+                  <StackPanel Spacing="10">
+                    <controls:Md3SegmentedControl Name="EqBandSegmented" IsCompact="True"/>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                      <controls:Md3NumericReadout Label="{DynamicResource controlgallery.demo.gain}"
+                                                  Unit="dB" Minimum="-12" Maximum="12" Value="1.5" Step="0.1" ResetValue="0"
+                                                  Format="+0.0;-0.0;0.0"/>
+                      <controls:Md3NumericReadout Label="{DynamicResource controlgallery.demo.freq}"
+                                                  Unit="Hz" Minimum="200" Maximum="6000" Value="3000" Step="10"
+                                                  Format="0"/>
+                    </StackPanel>
+                  </StackPanel>
+                </controls:FxModuleCard.CardContent>
+              </controls:FxModuleCard>
+
+              <!-- 压缩器：旁通（内容压暗 + 旁通角标） -->
+              <controls:FxModuleCard Grid.Column="1" Margin="0,0,12,0"
+                                     Title="{DynamicResource mixfx.compressor}" Subtitle="gentle"
+                                     Accent="Tertiary" IsPowered="True" IsBypassed="True">
+                <controls:FxModuleCard.CardContent>
+                  <StackPanel Orientation="Horizontal" Spacing="10">
+                    <controls:Md3NumericReadout Unit="dB" Minimum="-40" Maximum="0" Value="-18"
+                                                Step="0.5" Format="0.0"/>
+                    <controls:Md3NumericReadout Unit=":1" Minimum="1" Maximum="20" Value="2"
+                                                Step="0.1" Format="0.0"/>
+                  </StackPanel>
+                </controls:FxModuleCard.CardContent>
+              </controls:FxModuleCard>
+
+              <!-- 混响：电源关（内容压暗 + 关闭角标） -->
+              <controls:FxModuleCard Grid.Column="2"
+                                     Title="{DynamicResource mixfx.reverb}" Subtitle="small_room"
+                                     Accent="Secondary" IsPowered="False">
+                <controls:FxModuleCard.CardContent>
+                  <StackPanel Orientation="Horizontal" Spacing="10">
+                    <controls:Md3NumericReadout Unit="%" Minimum="0" Maximum="100" Value="35" Format="0"/>
+                    <controls:Md3NumericReadout Unit="ms" Minimum="0" Maximum="200" Value="0" Step="1" Format="0"/>
+                  </StackPanel>
+                </controls:FxModuleCard.CardContent>
+              </controls:FxModuleCard>
+            </Grid>
+            <StackPanel Spacing="6">
+              <TextBlock Classes="galleryStripCaption" Text="{DynamicResource controlgallery.states}"/>
+              <StackPanel Name="CardStateStrip" Orientation="Horizontal" Spacing="12"/>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <!-- ══ 5. 机架列表 ══ -->
+        <Border Classes="gallerySection">
+          <StackPanel Spacing="12">
+            <StackPanel Spacing="4">
+              <TextBlock Classes="gallerySectionTitle" Text="{DynamicResource controlgallery.section.rack}"/>
+              <TextBlock Classes="galleryNote" Text="{DynamicResource controlgallery.note.rack}"/>
+            </StackPanel>
+            <TextBlock Classes="galleryNote" Text="{DynamicResource controlgallery.demo.note}"/>
+            <Grid ColumnDefinitions="*,*">
+              <controls:FxRackPanel Grid.Column="0" Name="RackDemoPanel" Margin="0,0,12,0"/>
+              <controls:FxRackPanel Grid.Column="1" Name="RackEmptyPanel"/>
+            </Grid>
+          </StackPanel>
+        </Border>
+
+      </StackPanel>
+    </ScrollViewer>
+  </DockPanel>
+</controls:WindowEx>

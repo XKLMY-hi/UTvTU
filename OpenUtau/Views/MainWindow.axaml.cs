@@ -1089,6 +1089,18 @@ namespace OpenUtau.App.Views {
             window.Show();
         }
 
+        void OnMenuControlGallery(object sender, RoutedEventArgs args) {
+            var desktop = Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
+            if (desktop == null) {
+                return;
+            }
+            var window = desktop.Windows.FirstOrDefault(w => w is ControlGalleryWindow);
+            if (window == null) {
+                window = new ControlGalleryWindow();
+            }
+            window.Show();
+        }
+
         void OnMenuPhoneticAssistant(object sender, RoutedEventArgs args) {
             var desktop = Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
             if (desktop == null) {

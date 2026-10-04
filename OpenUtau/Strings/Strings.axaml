@@ -1112,4 +1112,35 @@ General
   <system:String x:Key="window.maximize">Maximize</system:String>
   <system:String x:Key="window.restore">Restore</system:String>
   <system:String x:Key="window.close">Close</system:String>
+
+  <!-- ══════════ fx-rack: control gallery（新增区块；合并时整块保留） ══════════ -->
+  <system:String x:Key="menu.tools.controlgallery">Control Gallery</system:String>
+  <system:String x:Key="controlgallery.title">Control Gallery</system:String>
+  <system:String x:Key="controlgallery.caption">MD3 rack control family — review of the new control language</system:String>
+  <system:String x:Key="controlgallery.states">States: default · hover · pressed · active · disabled · bypass</system:String>
+  <system:String x:Key="controlgallery.section.power">Power switch</system:String>
+  <system:String x:Key="controlgallery.section.segmented">Segmented control</system:String>
+  <system:String x:Key="controlgallery.section.readout">Numeric readout</system:String>
+  <system:String x:Key="controlgallery.section.card">Module card</system:String>
+  <system:String x:Key="controlgallery.section.rack">Rack panel</system:String>
+  <system:String x:Key="controlgallery.note.power">Round illuminated power button (28px). Tab to focus, Space/Enter to toggle, ←/→ to switch off/on. The row below freezes each state for review.</system:String>
+  <system:String x:Key="controlgallery.note.segmented">Replaces the RadioButton.chip + ValueEqualsConverter assembly. One tab stop for the group; ←/→ moves the selection; selected = secondary-container pill.</system:String>
+  <system:String x:Key="controlgallery.note.readout">Value + unit + range. Drag up/right to increase, double-click to reset, ↑/↓ to step (Shift = fine, PgUp/PgDn = coarse, Home/End = limits).</system:String>
+  <system:String x:Key="controlgallery.note.card">Module container: accent bar + title + power switch + content area. Switching the power off or bypassing dims the content and shows a state chip.</system:String>
+  <system:String x:Key="controlgallery.note.rack">Built-in modules and VST slots in one ordered list, rendered from real UTrack.MixFx / UTrack.VstSlots data. Read-only draft: drag-to-reorder and writes land in a later round.</system:String>
+  <system:String x:Key="controlgallery.state.default">Default</system:String>
+  <system:String x:Key="controlgallery.state.hover">Hover</system:String>
+  <system:String x:Key="controlgallery.state.pressed">Pressed</system:String>
+  <system:String x:Key="controlgallery.state.active">Active</system:String>
+  <system:String x:Key="controlgallery.state.disabled">Disabled</system:String>
+  <system:String x:Key="controlgallery.state.bypass">Bypass</system:String>
+  <system:String x:Key="controlgallery.demo.note">The rack demo uses a throwaway track ("Lead Vocal"): master on, compressor off, two VST slots (one empty). Nothing is written back.</system:String>
+  <system:String x:Key="controlgallery.demo.gain">Mid gain</system:String>
+  <system:String x:Key="controlgallery.demo.freq">Mid freq</system:String>
+  <system:String x:Key="controlgallery.demo.mix">Wet mix</system:String>
+  <system:String x:Key="fxrack.title">Effects Rack</system:String>
+  <system:String x:Key="fxrack.readonly">Design draft</system:String>
+  <system:String x:Key="fxrack.hint.drag">Drag to reorder · wired in a later round</system:String>
+  <system:String x:Key="fxrack.empty">No effect modules on this track</system:String>
+  <system:String x:Key="fxcard.bypass">Bypassed</system:String>
 </ResourceDictionary>
