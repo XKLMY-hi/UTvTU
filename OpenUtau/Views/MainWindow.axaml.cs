@@ -129,19 +129,12 @@ namespace OpenUtau.App.Views {
 
             DocManager.Inst.AddSubscriber(this);
 
-            // 面板过渡：钢琴卷帘 / 混音台展开时自下滑入（时长/缓动一律走动效令牌）
-            viewModel.WhenAnyValue(vm => vm.ShowPianoRoll)
-                .Subscribe(show => {
-                    if (show) {
-                        SetShown(PianoRollRow, true);
-                    }
-                });
-            viewModel.WhenAnyValue(vm => vm.ShowMixer)
-                .Subscribe(show => {
-                    if (show) {
-                        SetShown(MixerContainer, true);
-                    }
-                });
+            // 视图切换（S5）：三个视图同格叠放，切换只翻可见性 + 走一次淡入（不参与布局 ⇒ 无抖动）
+            viewModel.ViewSwitcher.PropertyChanged += (_, args) => {
+                if (args.PropertyName == nameof(ViewSwitcherState.CurrentView)) {
+                    OnCurrentViewChanged(viewModel.ViewSwitcher.CurrentView);
+                }
+            };
 
             // 欢迎视图：命令行带工程文件则直接打开，否则以欢迎页作为初始视图
             var cmdArgs = Environment.GetCommandLineArgs();
@@ -183,7 +176,7 @@ namespace OpenUtau.App.Views {
             WelcomeHost.DataContext = viewModel;
             viewModel.InitProject();          // 恢复状态（HasRecovery/RecoveryString）
             WelcomeHost.IsVisible = true;
-            SetChromeForView("view.welcome", showTransport: false);
+            SetChromeForView(ViewSwitcherPolicy.ChromeFor(AppSurface.Welcome));
             SetShown(WelcomeHost, true);
         }
 
@@ -195,7 +188,9 @@ namespace OpenUtau.App.Views {
             SetShown(WelcomeHost, false);
             await Task.Delay(TransitionMs);
             WelcomeHost.IsVisible = false;
-            SetChromeForView("view.workspace", showTransport: true);
+            // 进编辑器 = 回工作台视图（A6 启动流程不变；欢迎页期间可能已被快捷键切过视图）
+            viewModel.ViewSwitcher.SwitchToWorkspace();
+            SetChromeForView(viewModel.ViewSwitcher.Chrome);
         }
 
         /// <summary>欢迎视图：新建工程。</summary>
@@ -775,14 +770,121 @@ namespace OpenUtau.App.Views {
         void OnMenuPreferences(object sender, RoutedEventArgs args) => ShowPreferences();
 
         /// <summary>
-        /// 顶栏按视图切内容（三个视图共用同一条 56px 顶栏，与设计稿一致）：
-        /// 欢迎页 / 偏好页只留品牌 + 屏名；工作台才显示运输组与右侧图标组。
+        /// 顶栏按视图切内容（工作台 / 卷帘 / 混音台共用同一条 56px 顶栏，与设计稿一致）：
+        /// 欢迎页 / 偏好页只留品牌 + 屏名；三个工作视图显示运输组 + 右侧组 + 胶囊；
+        /// 「分离」只在卷帘 / 混音台出场。策略全在 <see cref="ViewSwitcherPolicy.ChromeFor"/>（可单测）。
         /// </summary>
-        private void SetChromeForView(string titleKey, bool showTransport) {
-            ScreenTitle[!TextBlock.TextProperty] = new DynamicResourceExtension(titleKey);
-            TransportGroup.IsVisible = showTransport;
-            TopRightCluster.IsVisible = showTransport;
+        private void SetChromeForView(ViewChrome chrome) {
+            ScreenTitle[!TextBlock.TextProperty] = new DynamicResourceExtension(chrome.TitleKey);
+            TransportGroup.IsVisible = chrome.ShowTransport;
+            TopRightCluster.IsVisible = chrome.ShowRightCluster;
+            ViewSwitcher.IsVisible = chrome.ShowViewSwitcher;
+            DetachViewButton.IsVisible = chrome.ShowDetachButton;
         }
+
+        // ── S5 视图切换（工作台 / 钢琴卷帘 / 混音台）────────────────────────
+        // 语义：工作台 = 工作区三列；卷帘 / 混音台 = 铺满整行的视图宿主（设计稿里两者都是整屏）。
+        // 切换 = 翻 IsVisible + 一次淡入 + 换顶栏 chrome；列宽与行高都不动 ⇒ 无布局抖动。
+
+        /// <summary>切到某个工作视图（卷帘 / 混音台的宿主控件由调用方保证已就绪）。</summary>
+        private void SwitchToView(AppSurface view) {
+            viewModel.ViewSwitcher.SwitchTo(view);   // 改变 → OnCurrentViewChanged
+        }
+
+        /// <summary>视图变化后的副作用：淡入态、宿主控件就位、焦点、顶栏 chrome。</summary>
+        private void OnCurrentViewChanged(AppSurface view) {
+            // 进入的视图淡入；离开的视图复位（下次再进来才有一次淡入）。工作台是三列，不做淡入。
+            SetShown(PianoRollContainer, view == AppSurface.PianoRoll);
+            SetShown(MixerContainer, view == AppSurface.Mixer);
+            switch (view) {
+                case AppSurface.PianoRoll:
+                    HostInView(PianoRollContainer, pianoRoll, pianoRollWindow != null);
+                    pianoRoll?.Focus();
+                    break;
+                case AppSurface.Mixer:
+                    HostInView(MixerContainer, mixerControl, mixerWindow != null);
+                    break;
+            }
+            // 焦点铁律：卷帘隐藏后焦点可能仍留在它内部的控件上，会把全局快捷键一起吞掉
+            // （OnWindowKeyDown 有 IsKeyboardFocusWithin 早退），故离开卷帘时把焦点收回窗口。
+            if (view != AppSurface.PianoRoll) {
+                Focus();
+            }
+            SetChromeForView(viewModel.ViewSwitcher.Chrome);
+        }
+
+        /// <summary>
+        /// 把控件挂进视图区（幂等）：只有「控件存在 + 未分离 + 还不在这个容器里」才挂。
+        /// 所有进入视图的路径（胶囊 / Ctrl+M / 双击片段 / 关分离窗口）都过这里，避免漏挂空视图。
+        /// </summary>
+        private static void HostInView(ContentControl container, Control? control, bool detached) {
+            if (control == null || detached || ReferenceEquals(container.Content, control)) {
+                return;
+            }
+            container.Content = control;
+        }
+
+        /// <summary>顶栏胶囊：工作台 / 钢琴卷帘 / 混音台（Tag = AppSurface 名）。</summary>
+        private void OnViewTabClicked(object? sender, RoutedEventArgs args) {
+            if (sender is not Control control || control.Tag is not string tag ||
+                !Enum.TryParse<AppSurface>(tag, ignoreCase: true, out var view)) {
+                return;
+            }
+            RequestView(view);
+        }
+
+        /// <summary>
+        /// 进入某个视图（胶囊 / Ctrl+M / 菜单共用）：
+        /// 卷帘沿用 A5「双击片段进入」，未创建过则胶囊不作用；已分离则把独立窗口置前。
+        /// </summary>
+        private void RequestView(AppSurface view) {
+            switch (view) {
+                case AppSurface.PianoRoll:
+                    if (pianoRoll == null) {
+                        return;                     // A5：入口仍是双击片段（胶囊只负责回切）
+                    }
+                    if (pianoRollWindow != null) {
+                        pianoRollWindow.Show();
+                        pianoRollWindow.Activate();
+                        return;
+                    }
+                    SwitchToView(AppSurface.PianoRoll);
+                    break;
+                case AppSurface.Mixer:
+                    if (mixerWindow != null) {
+                        mixerWindow.Show();
+                        mixerWindow.Activate();
+                        return;
+                    }
+                    EnsureMixerControl();
+                    SwitchToView(AppSurface.Mixer);
+                    break;
+                default:
+                    SwitchToView(AppSurface.Workspace);
+                    break;
+            }
+        }
+
+        /// <summary>顶栏「分离」（A2/A5）：把当前视图弹成独立窗口，主窗口落回工作台。</summary>
+        private void OnDetachViewClicked(object? sender, RoutedEventArgs args) {
+            switch (viewModel.ViewSwitcher.CurrentView) {
+                case AppSurface.PianoRoll:
+                    DetachPianoRollView();
+                    break;
+                case AppSurface.Mixer:
+                    DetachMixerView();
+                    break;
+            }
+        }
+
+        /// <summary>被分离的视图正显示着时，视图区落回工作台（别的视图不受打扰）。</summary>
+        private void SwitchAwayIfShowing(AppSurface detachedView) {
+            var fallback = ViewSwitcherPolicy.ViewAfterDetach(detachedView, viewModel.ViewSwitcher.CurrentView);
+            if (fallback != viewModel.ViewSwitcher.CurrentView) {
+                SwitchToView(fallback);
+            }
+        }
+
         /// <summary>偏好设置（全屏视图，设计稿 6-Preferences）。</summary>
         public void ShowPreferences() {
             PreferencesViewModel dataContext;
@@ -800,7 +902,7 @@ namespace OpenUtau.App.Views {
             PreferencesHost.ShowDefaultPage();
             PreferencesHost.IsVisible = true;
             // 顶栏屏名切成「偏好设置」，并亮出「完成」按钮（顶栏在偏好视图之上，不被遮）
-            SetChromeForView("prefs.caption", showTransport: false);
+            SetChromeForView(ViewSwitcherPolicy.ChromeFor(AppSurface.Preferences));
             SetShown(PreferencesHost, true);
         }
 
@@ -813,7 +915,9 @@ namespace OpenUtau.App.Views {
             await Task.Delay(TransitionMs);
             PreferencesHost.IsVisible = false;
             bool backToWelcome = WelcomeHost.IsVisible;
-            SetChromeForView(backToWelcome ? "view.welcome" : "view.workspace", showTransport: !backToWelcome);
+            SetChromeForView(backToWelcome
+                ? ViewSwitcherPolicy.ChromeFor(AppSurface.Welcome)
+                : viewModel.ViewSwitcher.Chrome);
         }
 
         /// <summary>恢复默认设置（二次确认 → 重置 → 重开偏好页）。</summary>
@@ -851,89 +955,104 @@ namespace OpenUtau.App.Views {
             OpenOrToggleMixer();
         }
 
+        /// <summary>Ctrl+M / 工具菜单 / 顶栏按钮 = 「开/关混音台」（决策表见 ViewSwitcherPolicy）。</summary>
         void OpenOrToggleMixer() {
-            if (mixerControl == null) {
-                mixerControl = new MixerControl();
-                if (Preferences.Default.DetachMixer) {
-                    mixerWindow = new MixerWindow(mixerControl);
-                    mixerWindow.Show();
-                } else {
-                    MixerContainer.Content = mixerControl;
-                    viewModel.ShowMixer = true;
-                }
-            } else if (mixerWindow != null) {
-                mixerWindow.Activate();
-            } else {
-                viewModel.ShowMixer = !viewModel.ShowMixer;
+            var action = ViewSwitcherPolicy.DecideMixerOpen(
+                hasControl: mixerControl != null,
+                hasDetachedWindow: mixerWindow != null,
+                detachPreferred: Preferences.Default.DetachMixer,
+                mixerViewActive: viewModel.ViewSwitcher.CurrentView == AppSurface.Mixer);
+            switch (action) {
+                case MixerOpenAction.CreateEmbedded:
+                    EnsureMixerControl();
+                    SwitchToView(AppSurface.Mixer);
+                    break;
+                case MixerOpenAction.CreateDetached:
+                    EnsureMixerControl();
+                    DetachMixerView();
+                    break;
+                case MixerOpenAction.ActivateDetached:
+                    mixerWindow!.Show();
+                    mixerWindow.Activate();
+                    break;
+                case MixerOpenAction.SwitchToMixerView:
+                    SwitchToView(AppSurface.Mixer);
+                    break;
+                case MixerOpenAction.BackToWorkspace:
+                    SwitchToView(AppSurface.Workspace);
+                    break;
             }
         }
 
-        public void SetMixerAttachment() {
-            if (mixerControl == null) return;
-
-            if (Preferences.Default.DetachMixer) {
-                // Detached → Embedded
-                mixerWindow?.ForceClose();
-                mixerWindow = null;
-                MixerContainer.Content = mixerControl;
-                viewModel.ShowMixer = true;
-                Preferences.Default.DetachMixer = false;
-            } else {
-                // Embedded → Detached
-                MixerContainer.Content = null;
-                viewModel.ShowMixer = false;
-                mixerWindow = new MixerWindow(mixerControl);
-                mixerWindow.Show();
-                Preferences.Default.DetachMixer = true;
+        /// <summary>首次使用时才建混音台控件（避免启动开销；与 Ctrl+M 原语义一致）。</summary>
+        private void EnsureMixerControl() {
+            if (mixerControl == null) {
+                mixerControl = new MixerControl();
             }
+        }
+
+        /// <summary>
+        /// 分离混音台（A2/A5）：控件交给独立窗口，偏好置位并落盘；当前正显示混音台视图时让位回工作台。
+        /// </summary>
+        private void DetachMixerView() {
+            EnsureMixerControl();
+            if (mixerWindow != null) {
+                mixerWindow.Show();
+                mixerWindow.Activate();
+                return;
+            }
+            MixerContainer.Content = null;
+            mixerWindow = new MixerWindow(mixerControl!);
+            // 用户关掉分离窗口 = 收回视图区（生命周期：控件不随窗口销毁，见 MixerWindow 注释）
+            mixerWindow.ReturnToHost = () => AttachMixerView();
+            mixerWindow.Show();
+            Preferences.Default.DetachMixer = true;
             Preferences.Save();
+            SwitchAwayIfShowing(AppSurface.Mixer);
+        }
+
+        /// <summary>收回混音台：控件放回视图区容器并切到混音台视图（分离窗口关闭 / 偏好翻转共用）。</summary>
+        private void AttachMixerView() {
+            if (mixerControl == null) {
+                return;
+            }
+            var window = mixerWindow;
+            mixerWindow = null;
+            if (window != null) {
+                window.ReturnToHost = null;
+                window.ReleaseControl();   // 摘 Content → 关窗：**不** Shutdown（控件继续存活）
+            }
+            MixerContainer.Content = mixerControl;
+            Preferences.Default.DetachMixer = false;
+            Preferences.Save();
+            SwitchToView(AppSurface.Mixer);
+        }
+
+        /// <summary>按偏好翻转混音台归属（内部/外部共用的一处收口）。</summary>
+        public void SetMixerAttachment() {
+            if (Preferences.Default.DetachMixer) {
+                AttachMixerView();
+            } else {
+                DetachMixerView();
+            }
         }
 
         void ToggleMixerWindow() {
-            if (mixerControl == null) return;
-            if (mixerWindow != null) {
-                // Close detached window → return to embedded
-                SetMixerAttachment();
-            } else {
-                viewModel.ShowMixer = !viewModel.ShowMixer;
+            // Ctrl+W：切换混音台的贴合/分离（未建控件时先建，并遵循偏好）
+            if (mixerControl == null) {
+                EnsureMixerControl();
+                if (Preferences.Default.DetachMixer) {
+                    DetachMixerView();
+                } else {
+                    SwitchToView(AppSurface.Mixer);
+                }
+                return;
             }
-        }
-
-        // ── Piano roll resize indicator ─────────────────────
-        // Uses DragStarted/DragCompleted on the GridSplitter to show a tooltip.
-        // The TextBlock "ResizeTooltip" is defined in MainWindow.axaml.
-        // ── Mixer manual drag resize ──────────────────────
-        private bool _draggingMixer;
-        private double _mixerDragStartY;
-        private double _mixerStartHeight;
-
-        private void OnMixerSplitterPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
-        {
-            if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed || sender is not Control c) return;
-            _draggingMixer = true;
-            var pt = e.GetPosition(this);
-            _mixerDragStartY = pt.Y;
-            if (c.Parent is Grid g)
-                _mixerStartHeight = g.RowDefinitions[6].ActualHeight; // 阶段 E 新网格：Row6 = 混音器行
-            if (_mixerStartHeight <= 0) _mixerStartHeight = 150;
-            e.Pointer.Capture(c);
-            e.Handled = true;
-        }
-
-        private void OnMixerSplitterMoved(object? sender, Avalonia.Input.PointerEventArgs e)
-        {
-            if (!_draggingMixer || sender is not Control c) return;
-            var pt = e.GetPosition(this);
-            double delta = _mixerDragStartY - pt.Y;
-            double newH = Math.Clamp(_mixerStartHeight + delta, 120, 600);
-            if (c.Parent is Grid g)
-                g.RowDefinitions[6].Height = new GridLength(newH); // 阶段 E 新网格：Row6 = 混音器行
-        }
-
-        private void OnMixerSplitterReleased(object? sender, Avalonia.Input.PointerReleasedEventArgs e)
-        {
-            _draggingMixer = false;
-            e.Pointer.Capture(null);
+            if (mixerWindow != null) {
+                AttachMixerView();
+            } else {
+                DetachMixerView();
+            }
         }
 
         // ── 素材库（右侧 296：音源 / 音频 / MIDI / 效果器） ──────────────────
@@ -1046,9 +1165,66 @@ namespace OpenUtau.App.Views {
             ShowLibraryPage(MidiPanel, MidiTab);
         }
 
-        /// <summary>素材库页签：效果器（插件浏览器，待效果链落地）。</summary>
+        /// <summary>素材库页签：效果器（W4：插件浏览器；展开时只读刷新列表，不触发扫描）。</summary>
         private void OnShowVst(object? sender, RoutedEventArgs e) {
+            viewModel.PluginBrowser.RefreshPlugins();
             ShowLibraryPage(VstPanel, EffectsTab);
+        }
+
+        // ── W4：素材库「效果器」页签（插件浏览器）──────────────────────────────
+        // 拖拽源与歌手/伴奏卡片同款：按下记起点，移动超阈值发起拖拽；
+        // 负载走 W3 冻结契约 FxChainDragData（格式 OpenUtau.FxChainItem），落点由链面板 DropPayload 消费。
+        private Point pluginDragStart;
+        private PointerPressedEventArgs? pluginPressedArgs;
+        private VstPluginItem? pluginDragItem;
+
+        /// <summary>插件行按下：记录起点与待拖拽项。</summary>
+        private void OnPluginPointerPressed(object? sender, PointerPressedEventArgs args) {
+            if (!args.GetCurrentPoint(this).Properties.IsLeftButtonPressed ||
+                sender is not Border { DataContext: VstPluginItem item }) {
+                return;
+            }
+            pluginDragStart = args.GetPosition(this);
+            pluginPressedArgs = args;
+            pluginDragItem = item;
+        }
+
+        /// <summary>插件行移动超过 5px → 拖出（负载 = 插件 UID）。</summary>
+        private async void OnPluginPointerMoved(object? sender, PointerEventArgs args) {
+            if (pluginPressedArgs == null || pluginDragItem == null) {
+                return;
+            }
+            var delta = args.GetPosition(this) - pluginDragStart;
+            if (Math.Abs(delta.X) < 5 && Math.Abs(delta.Y) < 5) {
+                return;
+            }
+            var pressed = pluginPressedArgs;
+            var data = PluginBrowserViewModel.CreatePluginDragData(pluginDragItem);
+            pluginPressedArgs = null;
+            pluginDragItem = null;
+            await DragDrop.DoDragDropAsync(pressed, data, DragDropEffects.Copy);
+        }
+
+        /// <summary>重新扫描插件（后台线程扫描；完成后广播，偏好设置侧计数同步刷新）。</summary>
+        private async void OnRescanVstFromLibrary(object? sender, RoutedEventArgs e) {
+            await viewModel.PluginBrowser.RescanInBackgroundAsync();
+        }
+
+        /// <summary>展开/收起「插件扫描路径」面板。</summary>
+        private void OnToggleVstPathManager(object? sender, RoutedEventArgs e) {
+            VstPathManager.IsVisible = !VstPathManager.IsVisible;
+        }
+
+        /// <summary>添加扫描路径（写 Preferences.Default.VstScanPaths + 广播，与偏好设置即时同步）。</summary>
+        private void OnAddVstPathFromLibrary(object? sender, RoutedEventArgs e) {
+            viewModel.PluginBrowser.AddPathFromInput();
+        }
+
+        /// <summary>移除选中的扫描路径（同上）。</summary>
+        private void OnRemoveVstPathFromLibrary(object? sender, RoutedEventArgs e) {
+            if (VstPathsList.SelectedItem is string path) {
+                viewModel.PluginBrowser.RemoveScanPath(path);
+            }
         }
 
         private void ShowLibraryPage(Control page, Button tab) {
@@ -1057,24 +1233,6 @@ namespace OpenUtau.App.Views {
             MidiPanel.IsVisible = page == MidiPanel;
             VstPanel.IsVisible = page == VstPanel;
             SetTabSelected(tab, new[] { SingersTab, SamplesTab, MidiTab, EffectsTab });
-        }
-
-        private void OnSplitterDragStarted(object? sender, Avalonia.Input.VectorEventArgs e) {
-            var splitter = (Avalonia.Controls.GridSplitter)sender!;
-            var grid = (Grid)splitter.Parent!;
-            UpdateResizeTooltip(grid);
-            ResizeTooltip.IsVisible = true;
-        }
-        private void OnSplitterDragCompleted(object? sender, Avalonia.Input.VectorEventArgs e) {
-            ResizeTooltip.IsVisible = false;
-        }
-        private void UpdateResizeTooltip(Grid grid) {
-            // 阶段 E 新网格：Row1 = 轨道区、Row3 = 钢琴卷帘
-            double trackH = grid.RowDefinitions[2].ActualHeight;
-            double pianoH = grid.RowDefinitions[4].ActualHeight;
-            double total = trackH + pianoH;
-            int pct = total > 0 ? (int)Math.Round(pianoH / total * 100) : 50;
-            ResizeTooltip.Text = $"PR {pct}%";
         }
 
         void OnMenuDebugWindow(object sender, RoutedEventArgs args) {
@@ -1203,12 +1361,59 @@ namespace OpenUtau.App.Views {
         /// <summary>
         /// Global key handler registered via AddHandler(handledEventsToo:true).
         /// Catches Ctrl+M etc. even when piano roll or other children have consumed the event.
+        /// 与 <see cref="OnKeyDown"/> 共用一个映射表 + 同一事件去重（隧道/冒泡两路只会动作一次）。
         /// </summary>
         void OnWindowKeyDown(object? sender, KeyEventArgs args) {
-            if (args.KeyModifiers == cmdKey && args.Key == Key.M) {
-                OnMenuMixer(this, new RoutedEventArgs());
-                args.Handled = true;
+            HandleGlobalShortcut(args);
+        }
+
+        /// <summary>Ctrl 组合的全局快捷键（顶栏之前先处理）。</summary>
+        public enum GlobalShortcut {
+            None,
+            /// <summary>Ctrl+M：开 / 关混音台（见 <see cref="ViewSwitcherPolicy.DecideMixerOpen"/>）。</summary>
+            ToggleMixer,
+            /// <summary>Ctrl+W：切换混音台的贴合 / 分离。</summary>
+            ToggleMixerAttachment,
+            Save,
+        }
+
+        /// <summary>
+        /// 快捷键映射表（纯函数，便于契约测试断言 Ctrl+M 路径）。
+        /// 只认单修饰键等于 <paramref name="cmdKey"/> 的组合。
+        /// </summary>
+        public static GlobalShortcut MapGlobalShortcut(Key key, KeyModifiers modifiers, KeyModifiers cmdKey) {
+            if (modifiers != cmdKey) {
+                return GlobalShortcut.None;
             }
+            return key switch {
+                Key.M => GlobalShortcut.ToggleMixer,
+                Key.W => GlobalShortcut.ToggleMixerAttachment,
+                Key.S => GlobalShortcut.Save,
+                _ => GlobalShortcut.None,
+            };
+        }
+
+        // 同一次按键从隧道 + 冒泡两路到达时只动作一次（AddHandler 两路注册，事件实例相同）
+        private KeyEventArgs? handledShortcutArgs;
+
+        private void HandleGlobalShortcut(KeyEventArgs args) {
+            var shortcut = MapGlobalShortcut(args.Key, args.KeyModifiers, cmdKey);
+            if (shortcut == GlobalShortcut.None || ReferenceEquals(handledShortcutArgs, args)) {
+                return;
+            }
+            handledShortcutArgs = args;
+            switch (shortcut) {
+                case GlobalShortcut.ToggleMixer:
+                    OnMenuMixer(this, new RoutedEventArgs());
+                    break;
+                case GlobalShortcut.ToggleMixerAttachment:
+                    ToggleMixerWindow();
+                    break;
+                case GlobalShortcut.Save:
+                    _ = Save();
+                    break;
+            }
+            args.Handled = true;
         }
 
         void OnKeyDown(object sender, KeyEventArgs args) {
@@ -1222,15 +1427,14 @@ namespace OpenUtau.App.Views {
             }
 
             // Global shortcuts — before focus check
-            if (args.KeyModifiers == cmdKey) {
-                switch (args.Key) {
-                    case Key.M: OnMenuMixer(sender, args); args.Handled = true; return;
-                    case Key.W: ToggleMixerWindow(); args.Handled = true; return;
-                    case Key.S: _ = Save(); args.Handled = true; return;
-                }
+            if (MapGlobalShortcut(args.Key, args.KeyModifiers, cmdKey) != GlobalShortcut.None) {
+                HandleGlobalShortcut(args);
+                args.Handled = true;
+                return;
             }
 
-            if (PianoRollContainer.IsKeyboardFocusWithin) {
+            // 焦点铁律：只有卷帘**正在显示**时才把键盘让给它；切到别的视图后它可能仍持有焦点
+            if (viewModel.ViewSwitcher.ShowPianoRoll && PianoRollContainer.IsKeyboardFocusWithin) {
                 args.Handled = false;
                 return;
             }
@@ -1318,7 +1522,9 @@ namespace OpenUtau.App.Views {
         }
 
         void OnPointerPressed(object? sender, PointerPressedEventArgs args) {
-            if (!PianoRollContainer.IsPointerOver && !args.Handled && args.ClickCount == 1) {
+            // 卷帘正在显示时点它内部不该抢走焦点；其余视图点空白一律把焦点收回窗口
+            bool pianoRollShown = viewModel.ViewSwitcher.ShowPianoRoll && PianoRollContainer.IsPointerOver;
+            if (!pianoRollShown && !args.Handled && args.ClickCount == 1) {
                 this.Focus();
             }
         }
@@ -1703,8 +1909,7 @@ namespace OpenUtau.App.Views {
                     };
 
                     if (Preferences.Default.DetachPianoRoll) {
-                        viewModel.ShowPianoRoll = false;
-                        pianoRollWindow = new(pianoRoll);
+                        pianoRollWindow = CreatePianoRollWindow();
                     } else {
                         PianoRollContainer.Content = pianoRoll;
                     }
@@ -1720,7 +1925,8 @@ namespace OpenUtau.App.Views {
                     pianoRollWindow.Show();
                     pianoRollWindow.Activate();
                 } else {
-                    viewModel.ShowPianoRoll = true;
+                    // S5：卷帘是工作区的一个视图（A5 进入方式不变 = 双击片段）
+                    SwitchToView(AppSurface.PianoRoll);
                     pianoRoll.Focus();
                 }
                 int tick = viewModel.TracksViewModel.PointToTick(args.GetPosition(canvas));
@@ -1729,25 +1935,55 @@ namespace OpenUtau.App.Views {
             }
         }
 
-        /// <summary>按偏好当前值附着/分离钢琴窗（偏好翻转与保存由调用方处理，上游 #2230 语义）。</summary>
+        /// <summary>建卷帘分离窗口：用户关窗 = 收回视图区（控件不随窗口销毁）。</summary>
+        private PianoRollDetachedWindow CreatePianoRollWindow() {
+            var window = new PianoRollDetachedWindow(pianoRoll!);
+            window.ReturnToHost = () => AttachPianoRollView();
+            pianoRollWindow = window;
+            return window;
+        }
+
+        /// <summary>分离钢琴卷帘（A2/A5）：控件交给独立窗口，偏好置位并落盘。</summary>
+        private void DetachPianoRollView() {
+            if (pianoRoll == null || pianoRollWindow != null) {
+                return;
+            }
+            PianoRollContainer.Content = null;
+            CreatePianoRollWindow().Show();
+            Preferences.Default.DetachPianoRoll = true;
+            Preferences.Save();
+            SwitchAwayIfShowing(AppSurface.PianoRoll);   // 正显示卷帘时视图让位回工作台
+        }
+
+        /// <summary>收回钢琴卷帘：控件放回视图区容器并切到卷帘视图（关窗 / 偏好翻转共用）。</summary>
+        private void AttachPianoRollView() {
+            if (pianoRoll == null) {
+                return;
+            }
+            var window = pianoRollWindow;
+            pianoRollWindow = null;
+            if (window != null) {
+                window.ReturnToHost = null;
+                window.ReleaseControl();   // 摘 Content → 关窗（不 Shutdown：PianoRoll 的订阅随控件存活）
+            }
+            PianoRollContainer.Content = pianoRoll;
+            Preferences.Default.DetachPianoRoll = false;
+            Preferences.Save();
+            SwitchToView(AppSurface.PianoRoll);
+        }
+
+        /// <summary>
+        /// 按偏好当前值附着/分离钢琴窗（偏好翻转与保存由调用方处理，上游 #2230 语义）：
+        /// 偏好为真 → 弹独立窗口（视图区让位）；为假 → 收回视图区并切到卷帘视图。
+        /// </summary>
         public void SetPianoRollAttachment() {
             if (pianoRoll == null) {
                 return;
             }
             if (Preferences.Default.DetachPianoRoll) {
-                // 分离：移出容器，打开独立窗口
-                PianoRollContainer.Content = null;
-                viewModel.ShowPianoRoll = false;
-                if (pianoRollWindow == null) {
-                    pianoRollWindow = new(pianoRoll);
-                    pianoRollWindow.Show();
-                }
+                DetachPianoRollView();
             } else {
-                // 内嵌：关闭独立窗口，放回容器
-                pianoRollWindow?.ForceClose();
-                pianoRollWindow = null;
-                PianoRollContainer.Content = pianoRoll;
-                viewModel.ShowPianoRoll = true;
+                AttachPianoRollView();
             }
         }
 
@@ -2306,6 +2542,7 @@ namespace OpenUtau.App.Views {
                 // 关闭前停播（上游 e34dbb43）：否则退出过程中音频回调仍在消费信号链，
                 // 缓存目录刚被清空 / 延迟销毁的 VST handle 可能正被读取 → 退出期崩溃。
                 PlaybackManager.Inst.StopPlayback();
+                ShutdownDetachedViews();
                 Preferences.Default.MainWindowSize.Set(Width, Height, Position.X, Position.Y, (int)WindowState);
                 Preferences.Default.RecoveryPath = string.Empty;
                 Preferences.Save();
@@ -2316,10 +2553,30 @@ namespace OpenUtau.App.Views {
                 if (!t.Result) {
                     return;
                 }
-                pianoRollWindow?.Close();
+                // 分离窗口的收尾统一在 ShutdownDetachedViews（forceClose 分支）里做
                 forceClose = true;
                 Close();
             }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+        /// <summary>
+        /// 退出期收尾：分离窗口走「释放」路径（控件不回收、不改偏好、不触发收回归位），
+        /// 混音台控件在这里彻底 Shutdown —— VU 定时器 + DocManager 订阅的归宿（挂载期一律不动它）。
+        /// </summary>
+        private void ShutdownDetachedViews() {
+            if (pianoRollWindow != null) {
+                var window = pianoRollWindow;
+                pianoRollWindow = null;
+                window.ReturnToHost = null;
+                window.ReleaseControl();
+            }
+            if (mixerWindow != null) {
+                var window = mixerWindow;
+                mixerWindow = null;
+                window.ReturnToHost = null;
+                window.ReleaseControl();
+            }
+            mixerControl?.Shutdown();
         }
 
         private async Task<bool> AskIfSaveAndContinue() {

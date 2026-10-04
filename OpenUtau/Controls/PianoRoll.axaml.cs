@@ -366,8 +366,9 @@ namespace OpenUtau.App.Controls {
         }
 
         void OnHidePianoRoll(object sender, RoutedEventArgs args) {
+            // S5：卷帘是工作区的一个视图，「隐藏卷帘」= 回工作台视图（不再是折叠停靠行）
             if (RootWindow.DataContext is MainWindowViewModel mwvm) {
-                mwvm.ShowPianoRoll = false;
+                mwvm.ViewSwitcher.SwitchToWorkspace();
             }
         }
 
@@ -1605,7 +1606,8 @@ namespace OpenUtau.App.Controls {
                 case Key.F4:
                     if (isAlt) {
                         if (RootWindow is PianoRollDetachedWindow) {
-                            RootWindow.Hide();
+                            // S5：关分离窗口 = 控件收回视图区（由窗口 OnClosed → ReturnToHost 完成）
+                            RootWindow.Close();
                         }
                         return true;
                     }

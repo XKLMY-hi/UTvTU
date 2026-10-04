@@ -1,4 +1,4 @@
-﻿<controls:WindowEx xmlns="https://github.com/avaloniaui"
+<controls:WindowEx xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -104,6 +104,36 @@
       <Setter Property="CornerRadius" Value="8"/>
       <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <!-- 顶栏：视图胶囊（决策 A4 / 设计稿 VST-Plugin Tab Bar 同源规格）
+         容器 高 36 / 内边距 3 / 圆角 full；选项 高 30 / 左右 18 / 文字 11px semibold；同组间距 3 -->
+    <Style Selector="Border.viewSwitch">
+      <Setter Property="Height" Value="36"/>
+      <Setter Property="Padding" Value="3"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Button.viewTab">
+      <Setter Property="Margin" Value="0"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="Height" Value="30"/>
+      <Setter Property="Padding" Value="18,0"/>
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.viewTab:pointerover">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+    </Style>
+    <Style Selector="Button.viewTab.selected">
+      <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
     </Style>
     <!-- 素材库：页签胶囊（稿：高 28 / 文字 10） -->
     <Style Selector="Button.libTab">
@@ -334,7 +364,32 @@
 
           </StackPanel>
 
-          <!-- 右侧：撤销/重做 · 布局 · 混音台 · 设置 · 轨道高度（仅工作台视图显示） -->
+          <!-- 视图胶囊（A1/A4/S5）：工作台 / 钢琴卷帘 / 混音台 —— 同一工作区里互斥显示的三个视图。
+               欢迎页与偏好设置保持 overlay 行为，不进胶囊（ShowViewSwitcher=false）。
+               「分离」是视图级动作（A2/A5：稿里的最小化·最大化·关闭三钮收敛成一个分离按钮）。 -->
+          <StackPanel x:Name="ViewSwitcherGroup" Grid.Column="2" Orientation="Horizontal" Spacing="8"
+                      HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Border x:Name="ViewSwitcher" Classes="viewSwitch">
+              <StackPanel Orientation="Horizontal" Spacing="3">
+                <Button x:Name="ViewTabWorkspace" Classes="viewTab" Tag="workspace"
+                        Classes.selected="{Binding ViewSwitcher.ShowWorkspace}"
+                        Click="OnViewTabClicked" Content="{DynamicResource view.workspace}"/>
+                <Button x:Name="ViewTabPianoRoll" Classes="viewTab" Tag="pianoroll"
+                        Classes.selected="{Binding ViewSwitcher.ShowPianoRoll}"
+                        Click="OnViewTabClicked" Content="{DynamicResource view.pianoroll}"/>
+                <Button x:Name="ViewTabMixer" Classes="viewTab" Tag="mixer"
+                        Classes.selected="{Binding ViewSwitcher.ShowMixer}"
+                        Click="OnViewTabClicked" Content="{DynamicResource view.mixer}"/>
+              </StackPanel>
+            </Border>
+            <Button x:Name="DetachViewButton" Classes="topBtn" Click="OnDetachViewClicked"
+                    ToolTip.Tip="{DynamicResource view.detach}">
+              <Path Data="{StaticResource icon-external-link}" Width="16" Height="16" Stretch="Uniform"
+                    Fill="{DynamicResource md3.on-surface-variant}"/>
+            </Button>
+          </StackPanel>
+
+          <!-- 右侧：撤销/重做 · 布局 · 混音台 · 设置 · 轨道高度（三个工作视图都显示；欢迎/偏好不显示） -->
           <StackPanel x:Name="TopRightCluster" Grid.Column="3" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
             <Button Classes="topBtn" Command="{Binding Undo}" IsEnabled="{Binding CanUndo}"
                     ToolTip.Tip="{DynamicResource menu.edit.undo}">
@@ -382,10 +437,14 @@
         </Grid>
       </Border>
 
-      <!-- ══════════ 工作区：左 轨道头 264 · 中 编排区 · 右 素材库 296 ══════════ -->
+      <!-- ══════════ 工作区：左 轨道头 264 · 中 编排区 · 右 素材库 296 ══════════
+           工作台视图 = 这三列；**钢琴卷帘 / 混音台是铺满整行的视图**（设计稿里两者都是整屏，
+           混音台区还是「满宽」，且 W1 的链面板要占 280）→ 覆盖列而非挤在编排区里。
+           三列的列宽固定、视图宿主只翻 IsVisible ⇒ 切换不参与布局、无抖动。 -->
       <Grid Grid.Row="1" x:Name="MainLayout" ColumnDefinitions="264,*,296">
-        <!-- ── 左：轨道头（面板层） ── -->
+        <!-- ── 左：轨道头（面板层；仅工作台视图） ── -->
         <Border Grid.Column="0" Background="{DynamicResource md3.surface-container}"
+                IsVisible="{Binding ViewSwitcher.ShowWorkspace}"
                 BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,1,0">
           <Grid RowDefinitions="34,16,*">
             <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="12,0">
@@ -407,21 +466,15 @@
           </Grid>
         </Border>
 
-        <!-- ── 中：编排区（标尺 34 / 横向滚动 16 / 轨道 / 卷帘 / 混音台）── -->
-        <Grid Grid.Column="1" ColumnDefinitions="*,8" Background="{DynamicResource md3.surface}">
+        <!-- ── 中：编排区（工作台视图：标尺 34 / 横向滚动 16 / 轨道区）── -->
+        <Grid Grid.Column="1" ColumnDefinitions="*,8" Background="{DynamicResource md3.surface}"
+              IsVisible="{Binding ViewSwitcher.ShowWorkspace}">
           <Grid Grid.Row="0" Grid.Column="0" x:Name="ArrangementArea">
+            <!-- 标尺 34 / 横向滚动 16 / 轨道区（与外壳契约 MainWindowShellTests 同形） -->
             <Grid.RowDefinitions>
               <RowDefinition Height="34"/>
               <RowDefinition Height="16"/>
-              <RowDefinition Height="*" MinHeight="0.01"/>
-              <RowDefinition Height="6"/>
-              <RowDefinition Height="3*"
-                             MinHeight="{Binding PianoRollMinHeight}"
-                             MaxHeight="{Binding PianoRollMaxHeight}"/>
-              <RowDefinition Height="6"/>
-              <RowDefinition Height="*"
-                             MinHeight="{Binding MixerMinHeight}"
-                             MaxHeight="{Binding MixerMaxHeight}"/>
+              <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <ScrollBar Name="HScrollBar" Classes="music" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                       Margin="0,2,0,2" Orientation="Horizontal" AllowAutoHide="False"
@@ -550,32 +603,6 @@
                 <TextBlock Text="{DynamicResource progress.waitingrendering}" FontSize="15"/>
               </Border>
             </Border>
-            <GridSplitter Grid.Row="3" Grid.ColumnSpan="2"
-                          Height="6" HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                          Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Focusable="False" Cursor="SizeNorthSouth"
-                          DragStarted="OnSplitterDragStarted" DragCompleted="OnSplitterDragCompleted"
-                          IsVisible="{Binding ShowPianoRoll}"/>
-            <!-- Resize tooltip indicator -->
-            <TextBlock Grid.Row="3" Grid.Column="0" Name="ResizeTooltip"
-                       IsVisible="False" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"
-                       FontSize="11" Padding="4,2" HorizontalAlignment="Left"
-                       VerticalAlignment="Bottom" Margin="4,0,0,0"/>
-            <Canvas Grid.Row="4" Grid.ColumnSpan="2" Classes="md3-fade" x:Name="PianoRollRow" IsVisible="{Binding ShowPianoRoll}">
-              <ContentControl Name="PianoRollContainer" Width="{Binding $parent[Canvas].Bounds.Width}" Height="{Binding $parent[Canvas].Bounds.Height}"/>
-            </Canvas>
-            <!-- Mixer resize handle (manual drag) -->
-            <Border Grid.Row="5" Grid.ColumnSpan="2"
-                    Height="6" HorizontalAlignment="Stretch"
-                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
-                    Cursor="SizeNorthSouth"
-                    PointerPressed="OnMixerSplitterPressed"
-                    PointerMoved="OnMixerSplitterMoved"
-                    PointerReleased="OnMixerSplitterReleased"
-                    IsVisible="{Binding ShowMixer}"/>
-            <!-- Mixer embedded -->
-            <ContentControl Grid.Row="6" Grid.ColumnSpan="2"
-                            Name="MixerContainer" Classes="md3-fade"
-                            IsVisible="{Binding ShowMixer}"/>
           </Grid>
 
           <!-- 轨道区纵向滚动条 -->
@@ -589,8 +616,9 @@
                     SmallChange="{Binding SmallChangeY}" PointerWheelChanged="VScrollPointerWheelChanged"/>
         </Grid>
 
-        <!-- ── 右：素材库 296（表头 44 / 页签 40 / 内容）── -->
+        <!-- ── 右：素材库 296（表头 44 / 页签 40 / 内容；工作台与混音台可见 —— 混音台里要能拖插件进链面板）── -->
         <Border Grid.Column="2" Background="{DynamicResource md3.surface-container}"
+                IsVisible="{Binding ViewSwitcher.ShowLibrary}"
                 BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="1,0,0,0">
           <Grid RowDefinitions="44,40,*">
             <!-- 表头 -->
@@ -767,21 +795,154 @@
                 </Border>
               </StackPanel>
 
-              <!-- 效果器（插件浏览器：待效果链落地后填充） -->
-              <StackPanel x:Name="VstPanel" IsVisible="False" Spacing="8">
-                <Border Classes="sideCard">
-                  <StackPanel>
-                    <Path Data="{StaticResource icon-sliders}" Width="14" Height="14" Stretch="Uniform"
-                          Fill="{DynamicResource md3.on-surface-variant}"
-                          HorizontalAlignment="Left" Margin="0,0,0,6"/>
-                    <TextBlock FontSize="11" TextWrapping="Wrap"
+              <!-- 效果器（W4 / 决策 B6：插件浏览器 = 扫描结果 + 搜索 + 拖入效果链面板
+                   + 插件扫描路径管理（与「偏好设置 → VST」共用同一份 Preferences 字段，即时同步）） -->
+              <Grid x:Name="VstPanel" IsVisible="False" RowDefinitions="Auto,Auto,Auto,*"
+                    DataContext="{Binding PluginBrowser}">
+                <!-- 搜索框 36 胶囊 + 重新扫描 -->
+                <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,2,0,6">
+                  <Panel Grid.Column="0" Height="36">
+                    <TextBox x:Name="PluginSearchBox" Height="36" CornerRadius="999" Padding="30,0,10,0"
+                             FontSize="11" VerticalContentAlignment="Center"
+                             Text="{Binding SearchText, Mode=TwoWay}"
+                             Watermark="{DynamicResource sidebar.effects.search}"/>
+                    <Path Data="{StaticResource icon-search}" Width="13" Height="13" Stretch="Uniform"
+                          Fill="{DynamicResource md3.on-surface-variant}" IsHitTestVisible="False"
+                          HorizontalAlignment="Left" VerticalAlignment="Center" Margin="11,0,0,0"/>
+                  </Panel>
+                  <Button Grid.Column="1" Classes="iconBtn" Width="36" Height="36" Margin="6,0,0,0"
+                          Click="OnRescanVstFromLibrary" ToolTip.Tip="{DynamicResource prefs.vst.rescan}">
+                    <Path Data="{StaticResource icon-refresh-cw}" Width="13" Height="13" Stretch="Uniform"
+                          Fill="{DynamicResource md3.on-surface-variant}"/>
+                  </Button>
+                </Grid>
+
+                <!-- 计数 / 扫描中 + 路径管理开关 -->
+                <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,4">
+                  <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4"
+                              IsVisible="{Binding ShowCount}">
+                    <TextBlock Classes="sideHeading" Text="{Binding PluginCount}"/>
+                    <TextBlock Classes="sideHeading" Text="{DynamicResource sidebar.effects.countlabel}"/>
+                  </StackPanel>
+                  <TextBlock Grid.Column="0" Classes="sideHeading" IsVisible="{Binding IsScanning}"
+                             Text="{DynamicResource sidebar.effects.scanning}"/>
+                  <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24"
+                          Click="OnToggleVstPathManager"
+                          ToolTip.Tip="{DynamicResource sidebar.effects.paths.manage}">
+                    <Path Data="{StaticResource icon-folder}" Width="12" Height="12" Stretch="Uniform"
+                          Fill="{DynamicResource md3.on-surface-variant}"/>
+                  </Button>
+                </Grid>
+
+                <!-- 插件扫描路径（折叠面板；与偏好设置同一份数据） -->
+                <Border Grid.Row="2" x:Name="VstPathManager" Classes="sideCard" IsVisible="False"
+                        Margin="0,0,0,6">
+                  <StackPanel Spacing="8">
+                    <TextBlock Classes="sideHeading" Margin="0"
+                               Text="{DynamicResource sidebar.effects.paths}"/>
+                    <ListBox x:Name="VstPathsList" Height="72" Background="Transparent" BorderThickness="0"
+                             ItemsSource="{Binding ScanPaths}"/>
+                    <Grid ColumnDefinitions="*,Auto,Auto">
+                      <TextBox Grid.Column="0" x:Name="LibraryNewVstPath" Height="28" FontSize="11"
+                               VerticalContentAlignment="Center"
+                               Text="{Binding NewPath, Mode=TwoWay}"
+                               Watermark="{DynamicResource sidebar.effects.paths.watermark}"/>
+                      <Button Grid.Column="1" Height="28" Padding="10,0" FontSize="11" Margin="6,0,0,0"
+                              Content="{DynamicResource prefs.vst.add}"
+                              Click="OnAddVstPathFromLibrary"/>
+                      <Button Grid.Column="2" Height="28" Padding="10,0" FontSize="11" Margin="6,0,0,0"
+                              Content="{DynamicResource prefs.vst.remove}"
+                              Click="OnRemoveVstPathFromLibrary"/>
+                    </Grid>
+                    <TextBlock FontSize="10" TextWrapping="Wrap"
                                Foreground="{DynamicResource md3.on-surface-variant}"
-                               Text="{DynamicResource sidebar.library.empty}"/>
+                               Text="{DynamicResource sidebar.effects.paths.hint}"/>
                   </StackPanel>
                 </Border>
-              </StackPanel>
+
+                <!-- 插件列表 + 空态 / 未找到 -->
+                <Grid Grid.Row="3">
+                  <ListBox x:Name="VstPluginList" ItemsSource="{Binding Plugins}" Background="Transparent"
+                           BorderThickness="0" IsVisible="{Binding HasPlugins}">
+                    <ListBox.Styles>
+                      <Style Selector="ListBoxItem">
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="MinHeight" Value="46"/>
+                      </Style>
+                    </ListBox.Styles>
+                    <ListBox.ItemTemplate>
+                      <DataTemplate x:DataType="vm:VstPluginItem">
+                        <!-- 拖拽源：PointerPressed/Moved → FxChainDragData（格式 OpenUtau.FxChainItem） -->
+                        <Border Classes="sideItem" Height="46" ToolTip.Tip="{Binding Path}"
+                                PointerPressed="OnPluginPointerPressed"
+                                PointerMoved="OnPluginPointerMoved">
+                          <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                              <TextBlock Text="{Binding Name}" FontSize="12" TextTrimming="CharacterEllipsis"
+                                         Foreground="{DynamicResource md3.on-surface}"/>
+                              <TextBlock Text="{Binding Vendor}" FontSize="10" Margin="0,1,0,0"
+                                         TextTrimming="CharacterEllipsis"
+                                         IsVisible="{Binding HasVendor}"
+                                         Foreground="{DynamicResource md3.on-surface-variant}"/>
+                            </StackPanel>
+                            <Border Grid.Column="1" CornerRadius="6" Padding="6,2" Margin="6,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Background="{DynamicResource md3.surface-container-high}">
+                              <TextBlock Text="{Binding Badge}" FontSize="9" FontWeight="SemiBold"
+                                         Foreground="{DynamicResource md3.on-surface-variant}"/>
+                            </Border>
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ListBox.ItemTemplate>
+                  </ListBox>
+
+                  <!-- 空态：一个效果器也没扫到 -->
+                  <StackPanel IsVisible="{Binding ShowNoPlugins}">
+                    <Border Classes="sideCard">
+                      <StackPanel>
+                        <Path Data="{StaticResource icon-sliders}" Width="14" Height="14" Stretch="Uniform"
+                              Fill="{DynamicResource md3.on-surface-variant}"
+                              HorizontalAlignment="Left" Margin="0,0,0,6"/>
+                        <TextBlock FontSize="11" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource md3.on-surface-variant}"
+                                   Text="{DynamicResource sidebar.effects.empty}"/>
+                      </StackPanel>
+                    </Border>
+                  </StackPanel>
+
+                  <!-- 未找到：有插件但没匹配上搜索词 -->
+                  <StackPanel IsVisible="{Binding ShowNoMatch}">
+                    <Border Classes="sideCard">
+                      <StackPanel>
+                        <Path Data="{StaticResource icon-search}" Width="14" Height="14" Stretch="Uniform"
+                              Fill="{DynamicResource md3.on-surface-variant}"
+                              HorizontalAlignment="Left" Margin="0,0,0,6"/>
+                        <TextBlock FontSize="11" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource md3.on-surface-variant}"
+                                   Text="{DynamicResource sidebar.effects.nomatch}"/>
+                      </StackPanel>
+                    </Border>
+                  </StackPanel>
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
+        </Border>
+
+        <!-- ── 视图 2/3：钢琴卷帘（铺满工作区行；进入仍是双击片段 A5，返回走顶栏胶囊「工作台」）──
+             宿主 Border 只负责「不透明底 + 可见性」；内层 ContentControl 走一次淡入（不参与布局）。 -->
+        <Border Grid.Column="0" Grid.ColumnSpan="3" ZIndex="10"
+                Background="{DynamicResource md3.surface}"
+                IsVisible="{Binding ViewSwitcher.ShowPianoRoll}">
+          <ContentControl x:Name="PianoRollContainer" Classes="md3-fade"/>
+        </Border>
+        <!-- ── 视图 3/3：混音台（不再停靠在编排区下方；Ctrl+M / 胶囊进入）──
+             overlay 只铺前两列：第 3 列留给素材库列，让「素材库 → 效果器 → 拖入链面板」可达（B3/B6）。 -->
+        <Border Grid.Column="0" Grid.ColumnSpan="2" ZIndex="10"
+                Background="{DynamicResource md3.surface}"
+                IsVisible="{Binding ViewSwitcher.ShowMixer}">
+          <ContentControl x:Name="MixerContainer" Classes="md3-fade"/>
         </Border>
       </Grid>
 

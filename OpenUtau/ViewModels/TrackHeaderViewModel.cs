@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -658,7 +658,8 @@ namespace OpenUtau.App.ViewModels {
         public void OpenMixFxDialog() {
             if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null) {
                 // 轨道头 fx 按钮 = 这条轨的实时效果机架（三面板，非模态、每轨单窗）。
-                // VST 槽机架（TrackEffectRack）仍由混音台条带的 FX 按钮进入。
+                // 效果链的**管理入口**已收归混音台右侧链面板（FxChainPanel，决策 B3）：
+                // 内置三件套与 VST 槽在那里同级呈现、双击开各自编辑器。
                 MixFxDialog.Open(desktop.MainWindow, track);
             }
         }

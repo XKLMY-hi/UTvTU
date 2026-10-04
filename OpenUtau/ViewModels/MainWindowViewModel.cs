@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
+using Avalonia.Input;
 using Avalonia.Threading;
 using DynamicData.Binding;
 using OpenUtau.Api;
@@ -11,6 +13,7 @@ using OpenUtau.App.Views;
 using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
 using OpenUtau.Core.Util;
+using OpenUtau.Core.Vst;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
@@ -79,12 +82,17 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public bool IsDarkMode { get; set; }
         [Reactive] public double Progress { get; set; }
         [Reactive] public string ProgressText { get; set; }
-        [Reactive] public bool ShowPianoRoll { get; set; }
-        [Reactive] public bool ShowMixer { get; set; }
-        [Reactive] public double MixerMaxHeight { get; set; }
-        [Reactive] public double MixerMinHeight { get; set; }
-        [Reactive] public double PianoRollMaxHeight { get; set; }
-        [Reactive] public double PianoRollMinHeight { get; set; }
+        /// <summary>
+        /// S5 视图化：工作区三视图（工作台 / 钢琴卷帘 / 混音台）的切换状态。
+        /// 单一真值 <see cref="ViewSwitcherState.CurrentView"/>，三个 <c>Show*</c> 只翻可见性；
+        /// 卷帘 / 混音台不再有「停靠行」的高度（旧 MixerMinHeight / PianoRollMinHeight 已退役）。
+        /// </summary>
+        public ViewSwitcherState ViewSwitcher { get; } = new ViewSwitcherState();
+        /// <summary>
+        /// W4（决策 B6）：素材库「效果器」页签 = 插件浏览器。
+        /// 扫描结果 + 搜索过滤 + 插件扫描路径（与「偏好设置 → VST」共用同一份 Preferences 字段）。
+        /// </summary>
+        public PluginBrowserViewModel PluginBrowser { get; } = new PluginBrowserViewModel();
         public ReactiveCommand<UPart, Unit> PartDeleteCommand { get; set; }
         public ReactiveCommand<int, Unit>? AddTempoChangeCmd { get; set; }
         public ReactiveCommand<int, Unit>? DelTempoChangeCmd { get; set; }
@@ -111,7 +119,6 @@ namespace OpenUtau.App.ViewModels {
             TracksViewModel = new TracksViewModel();
             ClearCacheHeader = string.Empty;
             ProgressText = string.Empty;
-            ShowPianoRoll = false;
             RecentFiles.Clear();
             RecentFiles.AddRange(Preferences.Default.RecentFiles
                 .Select(file => new RecentFileInfo(file))
@@ -142,18 +149,6 @@ namespace OpenUtau.App.ViewModels {
                 TracksViewModel.DeleteSelectedParts();
             });
             DocManager.Inst.AddSubscriber(this);
-
-            this.WhenAnyValue(vm => vm.ShowPianoRoll)
-                .Subscribe(x => {
-                    // 0.01：隐藏时保留可拖拽/双击的极窄行条（上游 #2230）
-                    PianoRollMaxHeight = x ? double.PositiveInfinity : 0.01;
-                    PianoRollMinHeight = x ? ViewConstants.PianoRollMinHeight : 0.01;
-                });
-            this.WhenAnyValue(vm => vm.ShowMixer)
-                .Subscribe(x => {
-                    MixerMaxHeight = x ? 600 : 0;
-                    MixerMinHeight = x ? 120 : 0;
-                });
         }
 
         public void Undo() {
@@ -505,5 +500,258 @@ namespace OpenUtau.App.ViewModels {
         }
 
         #endregion
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  W4（决策 B6）：素材库「效果器」页签 = 插件浏览器 + 插件扫描路径管理（两处同步）
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// 插件浏览器的一行（扫描结果的展示投影）。
+    /// 只读快照：名称 / 厂商 / 类型徽标（与链面板口径一致：VST3、VST2、VST3i…）/ 路径。
+    /// </summary>
+    public class VstPluginItem {
+        /// <summary>插件全局标识 —— 拖入效果链面板的负载来源（<c>FxChainDragData.VstPayload</c>）。</summary>
+        public string Uid { get; init; } = string.Empty;
+        public string Name { get; init; } = string.Empty;
+        public string Vendor { get; init; } = string.Empty;
+        public string Path { get; init; } = string.Empty;
+        /// <summary>类型徽标（VST3 / VST2 / VST3i / VST2i / VST）。</summary>
+        public string Badge { get; init; } = "VST";
+
+        public bool HasVendor => !string.IsNullOrEmpty(Vendor);
+        public bool HasPath => !string.IsNullOrEmpty(Path);
+    }
+
+    /// <summary>
+    /// 插件库变更广播：**插件扫描路径**与**扫描结果**变化时由两处 UI 各发一次，
+    /// 接收侧按内容比对后同步（内容相同即不动 ⇒ 天然防环，不会收发互踢）。
+    ///
+    /// 为什么用 MessageBus：这是"应用级设置"而不是工程文档状态（不走 DocManager 的命令栈），
+    /// 与既有的 PanChangeNotification / SingersRefreshedNotification 同款做法。
+    /// </summary>
+    public sealed class VstLibraryChangedNotification {
+        /// <summary>发起方标识（<see cref="SourceLibrary"/> / <see cref="SourcePreferences"/>）。</summary>
+        public string Source { get; init; } = string.Empty;
+
+        public const string SourceLibrary = "library";
+        public const string SourcePreferences = "prefs";
+
+        /// <summary>广播（两处 UI 共用的唯一入口）。</summary>
+        public static void Publish(string source) =>
+            MessageBus.Current.SendMessage(new VstLibraryChangedNotification { Source = source });
+    }
+
+    /// <summary>
+    /// 素材库「效果器」页签 VM（W4 / B6）。
+    ///
+    /// 数据源：<c>VstPluginManager</c> 的扫描结果（只读投影，不触发扫描；只列**效果器**——乐器进不了效果链）。
+    /// 「重新扫描」把 <c>ScanPlugins()</c> 放后台线程，结果回 UI 线程再动集合
+    /// （本轮 W3 刚踩过"非 UI 线程改绑定集合 → Dispatcher.VerifyAccess"）。
+    /// 扫描路径与「偏好设置 → VST」**共用 <c>Preferences.Default.VstScanPaths</c>**，不新增平行存储；
+    /// 两处各自写盘 + 广播，接收侧 <see cref="SyncScanPaths"/> 按内容比对同步。
+    /// </summary>
+    public class PluginBrowserViewModel : ViewModelBase, IDisposable {
+        readonly Func<IReadOnlyList<VstPluginInfo>> pluginSource;
+        readonly Action rescanAction;
+        readonly IDisposable notificationSubscription;
+        readonly List<VstPluginItem> allPlugins = new();
+        bool disposed;
+
+        /// <summary>按搜索过滤后的列表（页面绑它）。</summary>
+        public ObservableCollection<VstPluginItem> Plugins { get; } = new ObservableCollection<VstPluginItem>();
+        /// <summary>扫描路径（<c>Preferences.Default.VstScanPaths</c> 的镜像；两处同步）。</summary>
+        public ObservableCollection<string> ScanPaths { get; } = new ObservableCollection<string>();
+
+        /// <summary>搜索词（名称 / 厂商 / 徽标 三处包含匹配，忽略大小写）。</summary>
+        [Reactive] public string SearchText { get; set; } = string.Empty;
+        /// <summary>新增路径输入框内容。</summary>
+        [Reactive] public string NewPath { get; set; } = string.Empty;
+        /// <summary>扫描到的效果器总数（过滤前）。</summary>
+        [Reactive] public int PluginCount { get; set; }
+        [Reactive] public bool HasPlugins { get; set; }
+        /// <summary>一个也没扫到（空态）。</summary>
+        [Reactive] public bool ShowNoPlugins { get; set; }
+        /// <summary>有插件但没匹配上（"未找到"提示）。</summary>
+        [Reactive] public bool ShowNoMatch { get; set; }
+        /// <summary>计数行可见（有插件且不在扫描中——扫描中让位给"正在扫描"文案）。</summary>
+        [Reactive] public bool ShowCount { get; set; }
+        [Reactive] public bool IsScanning { get; set; }
+
+        /// <param name="pluginSource">测试接缝：插件来源（默认读 <c>VstPluginManager.Inst.KnownPlugins</c>）。</param>
+        /// <param name="rescanAction">测试接缝：重扫动作（默认 <c>VstPluginManager.Inst.ScanPlugins()</c>）。</param>
+        public PluginBrowserViewModel(
+            Func<IReadOnlyList<VstPluginInfo>>? pluginSource = null,
+            Action? rescanAction = null) {
+            this.pluginSource = pluginSource ?? DefaultPluginSource;
+            this.rescanAction = rescanAction ?? (() => VstPluginManager.Inst.ScanPlugins());
+            SyncScanPaths();
+            RefreshPlugins();
+            this.WhenAnyValue(vm => vm.SearchText).Subscribe(_ => ApplyFilter());
+            this.WhenAnyValue(vm => vm.IsScanning).Subscribe(_ => UpdateFlags());
+            notificationSubscription = MessageBus.Current.Listen<VstLibraryChangedNotification>()
+                .Subscribe(_ => OnLibraryChanged());
+        }
+
+        static IReadOnlyList<VstPluginInfo> DefaultPluginSource() =>
+            VstPluginManager.Inst.KnownPlugins.Values.ToList();
+
+        /// <summary>
+        /// 只读刷新：重投影扫描结果 + 应用过滤（不扫描）。
+        /// 页签展开时调用，保证列表是新的。
+        /// </summary>
+        public void RefreshPlugins() {
+            allPlugins.Clear();
+            try {
+                allPlugins.AddRange(pluginSource()
+                    .Where(info => info.IsEffect)      // 乐器不进效果链
+                    .Select(info => new VstPluginItem {
+                        Uid = info.PluginUid,
+                        Name = string.IsNullOrEmpty(info.PluginName) ? info.PluginUid : info.PluginName,
+                        Vendor = info.Vendor,
+                        Path = info.PluginPath,
+                        Badge = BadgeFor(info.PluginType, info.IsEffect),
+                    })
+                    .OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase));
+            } catch (Exception e) {
+                // 扫描在后台跑时注册表字典可能正在变更（预存在行为）；这里不让 UI 崩
+                Log.Error(e, "Failed to enumerate VST plugins.");
+            }
+            ApplyFilter();
+        }
+
+        /// <summary>类型徽标（与链面板 <c>VstPluginSlot.PluginTypeDisplay</c> 同口径）。</summary>
+        public static string BadgeFor(VstPluginType type, bool isEffect) => type switch {
+            VstPluginType.VST3 => isEffect ? "VST3" : "VST3i",
+            VstPluginType.VST2 => isEffect ? "VST2" : "VST2i",
+            _ => "VST",
+        };
+
+        /// <summary>搜索过滤（<see cref="SearchText"/> 变化与列表刷新时都会走）。</summary>
+        public void ApplyFilter() {
+            string query = (SearchText ?? string.Empty).Trim();
+            Plugins.Clear();
+            foreach (VstPluginItem item in allPlugins) {
+                if (query.Length == 0 || Matches(item, query)) {
+                    Plugins.Add(item);
+                }
+            }
+            UpdateFlags();
+        }
+
+        /// <summary>可见性标志（过滤后统一算，避免三处各写一份判断）。</summary>
+        void UpdateFlags() {
+            PluginCount = allPlugins.Count;
+            HasPlugins = allPlugins.Count > 0;
+            ShowNoPlugins = allPlugins.Count == 0;
+            ShowNoMatch = allPlugins.Count > 0 && Plugins.Count == 0;
+            ShowCount = allPlugins.Count > 0 && !IsScanning;
+        }
+
+        static bool Matches(VstPluginItem item, string query) =>
+            item.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+            item.Vendor.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+            item.Badge.Contains(query, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// 重扫插件（后台线程扫描 → 回 UI 线程刷新 + 广播）。
+        /// 扫描是秒级阻塞（目录遍历 + 读 PE 头），绝不能放 UI 线程。
+        /// </summary>
+        public async Task RescanInBackgroundAsync() {
+            if (IsScanning) {
+                return;
+            }
+            IsScanning = true;
+            try {
+                await Task.Run(rescanAction);   // 只有扫描在后台
+                RefreshPlugins();               // 续体在 UI 线程 ⇒ 动集合安全
+                VstLibraryChangedNotification.Publish(VstLibraryChangedNotification.SourceLibrary);
+            } catch (Exception e) {
+                Log.Error(e, "VST rescan failed.");
+            } finally {
+                IsScanning = false;
+            }
+        }
+
+        /// <summary>把 <c>Preferences.Default.VstScanPaths</c> 同步进本 VM（内容相同即不动）。</summary>
+        public void SyncScanPaths() {
+            List<string> current = Preferences.Default.VstScanPaths ?? new List<string>();
+            if (ScanPaths.SequenceEqual(current, StringComparer.Ordinal)) {
+                return;
+            }
+            ScanPaths.Clear();
+            foreach (string path in current) {
+                ScanPaths.Add(path);
+            }
+        }
+
+        /// <summary>添加扫描路径（写同一份 Preferences 字段 + 存盘 + 广播）。</summary>
+        public bool AddScanPath(string? path) {
+            path = path?.Trim();
+            if (string.IsNullOrEmpty(path) || ScanPaths.Contains(path)) {
+                return false;
+            }
+            WriteScanPaths(ScanPaths.Append(path!));
+            return true;
+        }
+
+        /// <summary>移除扫描路径（同上）。</summary>
+        public bool RemoveScanPath(string? path) {
+            if (string.IsNullOrEmpty(path) || !ScanPaths.Contains(path)) {
+                return false;
+            }
+            WriteScanPaths(ScanPaths.Where(p => p != path));
+            return true;
+        }
+
+        /// <summary>从输入框添加（成功后清空输入；供按钮处理器调用）。</summary>
+        public bool AddPathFromInput() {
+            if (!AddScanPath(NewPath)) {
+                return false;
+            }
+            NewPath = string.Empty;
+            return true;
+        }
+
+        void WriteScanPaths(IEnumerable<string> paths) {
+            var list = paths.ToList();
+            Preferences.Default.VstScanPaths = list;   // 唯一存储（既有字段）
+            Preferences.Save();
+            SyncScanPaths();                            // 本地镜像跟随
+            VstLibraryChangedNotification.Publish(VstLibraryChangedNotification.SourceLibrary);
+        }
+
+        void OnLibraryChanged() {
+            if (disposed) {
+                return;
+            }
+            // 广播可能来自任意线程（例如重扫的后台续体）：非 UI 线程一律编组回来
+            if (Dispatcher.UIThread.CheckAccess()) {
+                SyncScanPaths();
+                RefreshPlugins();
+            } else {
+                Dispatcher.UIThread.Post(() => {
+                    if (!disposed) {
+                        SyncScanPaths();
+                        RefreshPlugins();
+                    }
+                });
+            }
+        }
+
+        /// <summary>
+        /// 插件行的拖拽数据：格式 <c>OpenUtau.FxChainItem</c>（<c>FxChainDragData.Format</c>），
+        /// 负载 = 插件 UID；落点由链面板的 <c>DropPayload</c> 消费（落槽 / 建链，可撤销）。
+        /// </summary>
+        public static DataTransfer CreatePluginDragData(VstPluginItem item) =>
+            FxChainDragData.CreateDataTransfer(FxChainDragData.VstPayload(item.Uid));
+
+        public void Dispose() {
+            if (disposed) {
+                return;
+            }
+            disposed = true;
+            notificationSubscription.Dispose();
+        }
     }
 }
