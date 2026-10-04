@@ -184,7 +184,7 @@ namespace OpenUtau.Test.App {
             // 故**仍在用 Fluent 模板**的控件（TextBox/ComboBox/ListBox 等）的外观只能写在控件级属性上。
         }
 
-        // ───────────────────────── T9：文字色转发（渲染层） ─────────────────────────
+        // ───────────────────────── T9/T10：文字色转发（渲染层） ─────────────────────────
 
         /// <summary>渲染出来的内容文本元素：字符串内容由 ContentPresenter 生成（RecognizesAccessKey 下为 AccessText）。</summary>
         private static TextBlock RenderedContent(Control c) =>
@@ -293,6 +293,78 @@ namespace OpenUtau.Test.App {
             } finally {
                 ColorPool.SetDark(original);
             }
+        }
+
+        // ───────────────────────── T10：同类转发收尾 ─────────────────────────
+
+        /// <summary>
+        /// T10-B：`ListBoxItem.Foreground` 必须转发到渲染出来的行文本。
+        /// 缺陷：ContentPresenter 少 Foreground 转发，且应用级 `TextBlock { Foreground }` 压过继承
+        /// ⇒ 选中行的 `md3.on-secondary-container` 在渲染层从不生效（行文字恒为 on-surface）。
+        /// 修法与 Button 不同：列表内容是**数据**（下划线要字面显示），所以不启用
+        /// RecognizesAccessKey，而是在 Md3Controls.axaml 用
+        /// `ListBoxItem TextBlock { Foreground = $parent[ListBoxItem].Foreground }` 转发
+        ///（该层排在 Md3InputThemes 之后，才能压过那条全局 TextBlock 规则）。
+        /// </summary>
+        [AvaloniaFact]
+        public void ListBoxItem_ForegroundIsForwardedToRenderedContent_InBothVariants() {
+            bool original = ColorPool.Current.IsDark;
+            try {
+                foreach (bool isDark in new[] { false, true }) {
+                    foreach (bool selected in new[] { false, true }) {
+                        var item = new ListBoxItem { Content = "预设_名字", IsSelected = selected };
+                        var win = Host(item, isDark);
+                        try {
+                            TextBlock content = RenderedContent(item);
+                            Md3Role expect = selected ? Md3Role.OnSecondaryContainer : Md3Role.OnSurface;
+                            Assert.Equal(ColorPool.Current.Color(expect), (item.Foreground as ISolidColorBrush)?.Color);
+                            Assert.Equal((item.Foreground as ISolidColorBrush)?.Color,
+                                         (content.Foreground as ISolidColorBrush)?.Color);
+                            // 列表内容是数据：保持字面下划线，不引入助记键语义（与 Button 的刻意差异）
+                            Assert.Equal("TextBlock", content.GetType().Name);
+                            Assert.Contains("_", content.Text ?? "");
+                            if (selected) {
+                                // 原 bug 现象守卫：选中行文字不能还是 on-surface
+                                Assert.NotEqual(ColorPool.Current.Color(Md3Role.OnSurface),
+                                    (content.Foreground as ISolidColorBrush)?.Color);
+                            }
+                        } finally {
+                            win.Close();
+                        }
+                    }
+                }
+            } finally {
+                ColorPool.SetDark(original);
+            }
+        }
+
+        /// <summary>T10-B：列表行对比度（WCAG 4.5:1）—— 普通行 on-surface/surface、选中行 on-secondary-container/secondary-container。</summary>
+        [AvaloniaFact]
+        public void ListBoxItem_LabelContrast_MeetsMinimum_InBothPools() {
+            bool original = ColorPool.Current.IsDark;
+            try {
+                foreach (bool isDark in new[] { false, true }) {
+                    ColorPool.Initialize(ColorPool.DefaultSeed, Md3SchemeVariant.TonalSpot, isDark);
+                    string pool = isDark ? "Dark" : "Light";
+                    double normal = Contrast(ColorPool.Current.Color(Md3Role.OnSurface), ColorPool.Current.Color(Md3Role.Surface));
+                    double selected = Contrast(ColorPool.Current.Color(Md3Role.OnSecondaryContainer), ColorPool.Current.Color(Md3Role.SecondaryContainer));
+                    Assert.True(normal >= 4.5, $"{pool} 普通行对比度不足：{normal:0.00}");
+                    Assert.True(selected >= 4.5, $"{pool} 选中行对比度不足：{selected:0.00}");
+                }
+            } finally {
+                ColorPool.SetDark(original);
+            }
+        }
+
+        /// <summary>
+        /// T10-A：渲染窗口主按钮的前景必须走颜色池。T9 修好转发后，固定的 #ffffff 会真的渲染出来，
+        /// 而深色池的 md3.primary 是浅紫（白字只有 ≈1.6:1）⇒ 必须用 md3.on-primary。
+        /// </summary>
+        [AvaloniaFact]
+        public void RenderWindow_AccentButtonUsesPoolForeground() {
+            string xaml = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Views", "RenderWindow.axaml"));
+            Assert.DoesNotContain("PlusBrushTextOnAccent", xaml);
+            Assert.Contains("md3.on-primary", xaml);
         }
     }
 }

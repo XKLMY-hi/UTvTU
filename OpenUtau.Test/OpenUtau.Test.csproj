@@ -43,6 +43,7 @@
     <None Include="..\OpenUtau\Views\WelcomeView.axaml" Link="Views\WelcomeView.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Views\MainWindow.axaml" Link="Views\MainWindow.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Views\PreferencesView.axaml" Link="Views\PreferencesView.axaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\OpenUtau\Views\RenderWindow.axaml" Link="Views\RenderWindow.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\App.axaml" Link="App.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Styles\Md3Controls.axaml" Link="Styles\Md3Controls.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Styles\Md3ControlThemes.axaml" Link="Styles\Md3ControlThemes.axaml" CopyToOutputDirectory="PreserveNewest" />

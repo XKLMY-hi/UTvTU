@@ -105,4 +105,13 @@
     <Setter Property="CornerRadius" Value="8"/>
     <Setter Property="FontSize" Value="12"/>
   </Style>
+
+  <!-- T10-B：列表项内的文本必须跟随 ListBoxItem.Foreground（选中行 = on-secondary-container，
+       普通行 = on-surface）。本层排在 Md3InputThemes 之后，才能压过那里的
+       `TextBlock { Foreground = TextFillColorPrimaryBrush }`（显式样式 setter 优先于继承，
+       与 T9 的 Button 是同一类问题；Button 走的是 AccessText 路线，列表内容是数据、
+       不适合助记键语义，所以这里用绑定转发）。 -->
+  <Style Selector="ListBoxItem TextBlock">
+    <Setter Property="Foreground" Value="{Binding $parent[ListBoxItem].Foreground}"/>
+  </Style>
 </Styles>
