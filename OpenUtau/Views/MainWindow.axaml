@@ -897,16 +897,20 @@
                     </ListBox.ItemTemplate>
                   </ListBox>
 
-                  <!-- 空态：一个效果器也没扫到 -->
+                  <!-- 空态：一个效果器也没扫到（W11：给「添加标准路径并扫描」出口） -->
                   <StackPanel IsVisible="{Binding ShowNoPlugins}">
                     <Border Classes="sideCard">
-                      <StackPanel>
+                      <StackPanel Spacing="8">
                         <Path Data="{StaticResource icon-sliders}" Width="14" Height="14" Stretch="Uniform"
                               Fill="{DynamicResource md3.on-surface-variant}"
-                              HorizontalAlignment="Left" Margin="0,0,0,6"/>
+                              HorizontalAlignment="Left" Margin="0,0,0,2"/>
                         <TextBlock FontSize="11" TextWrapping="Wrap"
                                    Foreground="{DynamicResource md3.on-surface-variant}"
                                    Text="{DynamicResource sidebar.effects.empty}"/>
+                        <Button Height="28" FontSize="11" Padding="10,0"
+                                HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                Content="{DynamicResource sidebar.effects.addstandard}"
+                                Click="OnAddStandardVstPathsFromLibrary"/>
                       </StackPanel>
                     </Border>
                   </StackPanel>

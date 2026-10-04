@@ -280,6 +280,18 @@ namespace OpenUtau.App.Views {
             VstLibraryChangedNotification.Publish(VstLibraryChangedNotification.SourcePreferences);
         }
 
+        /// <summary>
+        /// W11：一键添加平台标准 VST3 扫描目录（幂等）+ 重扫。
+        /// 与素材库「效果器」空态按钮走**同一份 Core 命令**（<c>Preferences.AddStandardVstScanPaths</c>）：
+        /// 改完把本页列表从唯一存储重载，再广播给素材库侧，最后重扫刷新计数。
+        /// </summary>
+        private void OnAddStandardVstPaths(object? sender, RoutedEventArgs e) {
+            Preferences.AddStandardVstScanPaths();
+            SyncVstScanPathsFromStore();
+            VstLibraryChangedNotification.Publish(VstLibraryChangedNotification.SourcePreferences);
+            ViewModel!.RefreshVstPlugins();
+        }
+
         private void OnOpenReadme(object? sender, RoutedEventArgs e) {
             string path = Path.Combine(PathManager.Inst.RootPath, "README.md");
             if (File.Exists(path)) {
