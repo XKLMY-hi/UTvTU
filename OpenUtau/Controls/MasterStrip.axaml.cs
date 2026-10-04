@@ -33,6 +33,7 @@ public partial class MasterStrip : UserControl {
         FaderBox.AddHandler(PointerCaptureLostEvent, OnFaderCaptureLost,
             RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
         InitBusInfo();
+        UpdateMuteBtn();
         UpdateFaderPosition();
     }
 
@@ -68,6 +69,23 @@ public partial class MasterStrip : UserControl {
 
     private static string FormatDbNumber(double db) =>
         db <= MixerMeter.MinDb ? "-∞" : $"{db:+0.0;-0.0}";
+
+    // ── 主输出静音（W1b：设计稿缺此元素，属有意偏离——见文件头）──
+
+    /// <summary>静音态 → 键外观（error / on-error），与通道条 M 键同一套语义。</summary>
+    private void UpdateMuteBtn() {
+        MuteBtn.Classes.Set("muteOn", PlaybackManager.Inst.MasterMuted);
+    }
+
+    /// <summary>
+    /// 与既有路径一致：直接切 <see cref="PlaybackManager.SetMasterMuted"/>（即时作用于
+    /// masterMix.Scale = 0），不新造通知/命令机制；静音时推子柄落到底（沿用旧行为）。
+    /// </summary>
+    private void OnMuteClick(object? sender, RoutedEventArgs e) {
+        PlaybackManager.Inst.SetMasterMuted(!PlaybackManager.Inst.MasterMuted);
+        UpdateMuteBtn();
+        UpdateFaderPosition();
+    }
 
     // ── 推子 ───────────────────────────────────────────
 

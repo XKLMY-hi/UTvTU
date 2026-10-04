@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
@@ -245,6 +246,9 @@ namespace OpenUtau.Test.App {
             Assert.Equal(MasterNameSize, master.MasterNameLabel.FontSize);
             Assert.Equal(FontWeight.Bold, master.MasterNameLabel.FontWeight);
             Assert.Equal(MasterSubtitleSize, master.MasterSubtitleLabel.FontSize);
+            // W1b：静音键并入名称行（不新增独立行 —— 竖向余量只有 ≈8px）
+            Assert.Equal(7, master.RootGrid.RowDefinitions.Count);
+            Assert.Equal(2, master.MasterNameRow.Children.Count);
 
             // 697-717：Bus Info 四行，每行 14 高（标签 8 / 值 9，两端对齐）
             Assert.Equal(new Thickness(BusPadding), master.BusInfo.Padding);
@@ -295,14 +299,45 @@ namespace OpenUtau.Test.App {
             Assert.Equal(FontWeight.SemiBold, master.MasterPeakLabel.FontWeight);
         }
 
-        /// <summary>spec-digest §8 第 23 条：主输出没有插入区 / EQ 屏 / 声像 / M/S/R。</summary>
+        /// <summary>
+        /// spec-digest §8 第 23 条：主输出没有插入区 / EQ 屏 / 声像 / 独奏 / 录音。
+        /// **唯一有意偏离（W1b / task-17）**：加回主输出静音键——否则 `SetMasterMuted` 没有 UI 入口。
+        /// </summary>
         [AvaloniaFact]
-        public void MasterStrip_HasNoChannelOnlyParts() {
+        public void MasterStrip_HasNoChannelOnlyPartsExceptMute() {
             var master = new MasterStrip();
-            Assert.Null(master.FindControl<Button>("MuteBtn"));
             Assert.Null(master.FindControl<Button>("SoloBtn"));
             Assert.Null(master.FindControl<Control>("EqDisplay"));
             Assert.Null(master.FindControl<Control>("PanRow"));
+            Assert.NotNull(master.FindControl<Button>("MuteBtn"));   // W1b：有意偏离设计稿
+        }
+
+        /// <summary>
+        /// W1b（task-17）：主输出静音 = 通道条 M 键语言（高 20 / 圆角 4 / 10px bold，复用 `mixer.mute` 键），
+        /// 行为与既有 <see cref="PlaybackManager.SetMasterMuted"/> 一致：点击即切换、即时作用于 masterMix。
+        /// </summary>
+        [AvaloniaFact]
+        public void MasterStrip_MuteKeyTogglesPlaybackMute() {
+            var master = new MasterStrip();
+            bool original = PlaybackManager.Inst.MasterMuted;
+            try {
+                Assert.Equal(20, master.MuteBtn.Height);
+                Assert.Equal(new CornerRadius(4), master.MuteBtn.CornerRadius);
+                Assert.Equal(10, master.MuteBtn.FontSize);
+                Assert.Equal(FontWeight.Bold, master.MuteBtn.FontWeight);
+                Assert.Equal(24, master.MuteBtn.Width);
+                Assert.False(master.MuteBtn.Classes.Contains("muteOn"));
+
+                master.MuteBtn.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                Assert.True(PlaybackManager.Inst.MasterMuted);
+                Assert.True(master.MuteBtn.Classes.Contains("muteOn"));
+
+                master.MuteBtn.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                Assert.False(PlaybackManager.Inst.MasterMuted);
+                Assert.False(master.MuteBtn.Classes.Contains("muteOn"));
+            } finally {
+                PlaybackManager.Inst.SetMasterMuted(original);
+            }
         }
 
         /// <summary>
