@@ -150,71 +150,30 @@
     <Setter Property="Foreground" Value="{DynamicResource TextControlForegroundDisabled}" />
   </Style>
 
-  <!-- Button 基础模板已由 PlusTheme ControlTheme 接管（v4.0）。此处仅保留应用级布局与类变体。 -->
+  <!-- Button 基础模板与**类变体颜色**均由 PlusTheme ControlTheme 接管（v4.0 / T8）。
+       此处仅保留应用级布局与几何；变体颜色（primary/outline/danger）在
+       Styles/Md3ControlThemes.axaml 内定义 —— 应用级 setter 会压过主题 setter，
+       旧写法还在 `ContentPresenter#PART_ContentPresenter` 上刷固定色方块，
+       导致主按钮「池色圆角底 + 固定色方块」两层叠色、深色池下白字对比度不足。 -->
   <Style Selector="Button">
     <Setter Property="Margin" Value="0,4"/>
   </Style>
 
-  <!-- Primary (accent) button — v4.0：实心 accent + 透明边框 + hover 辉光 -->
-  <Style Selector="Button.primary">
-    <Setter Property="Foreground" Value="{DynamicResource PlusBrushTextOnAccent}"/>
-    <Setter Property="BorderThickness" Value="1"/>
-    <Setter Property="BorderBrush" Value="Transparent"/>
-  </Style>
-  <Style Selector="Button.primary /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource PlusBrushAccent}"/>
-  </Style>
-  <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource PlusBrushAccentHover}"/>
-    <Setter Property="BoxShadow" Value="{DynamicResource PlusGlowPrimary}"/>
-  </Style>
-  <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource PlusBrushAccentPressed}"/>
-  </Style>
+  <!-- Button.primary / .outline / .danger 的颜色（含悬浮·按下）已移入 ControlTheme：
+       md3.primary · md3.on-primary ／ md3.outline ／ md3.error · md3.on-error -->
 
-  <!-- Outline (border-only) button — v4.0：透明底 + hover 提亮 -->
-  <Style Selector="Button.outline">
-    <Setter Property="BorderThickness" Value="1"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource PlusBrushBorderHover}"/>
-  </Style>
-  <Style Selector="Button.outline /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="Transparent"/>
-  </Style>
-  <Style Selector="Button.outline:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource PlusBrushSurfaceHover}"/>
-  </Style>
-
-  <!-- Danger button — v4.0：语义红描边式，hover 实心 -->
-  <Style Selector="Button.danger">
-    <Setter Property="Foreground" Value="{DynamicResource PlusBrushSemanticDanger}"/>
-    <Setter Property="BorderThickness" Value="1"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource PlusBrushSemanticDanger}"/>
-  </Style>
-  <Style Selector="Button.danger /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="Transparent"/>
-  </Style>
-  <Style Selector="Button.danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource PlusBrushSemanticDanger}"/>
-    <Setter Property="Foreground" Value="White"/>
-    <Setter Property="BoxShadow" Value="{DynamicResource PlusGlowDanger}"/>
-  </Style>
-  <Style Selector="Button.danger:pressed /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="#c62828"/>
-  </Style>
   <Style Selector="Button.clear">
     <Setter Property="BorderThickness" Value="0"/>
     <Setter Property="FontSize" Value="13"/>
     <Setter Property="Height" Value="32"/>
     <Setter Property="Margin" Value="0,4"/>
     <Setter Property="Padding" Value="8,0"/>
-    <Setter Property="Background" Value="Transparent"/>
     <Setter Property="HorizontalContentAlignment" Value="Center"/>
     <Setter Property="VerticalContentAlignment" Value="Center"/>
     <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
   </Style>
-  <Style Selector="Button.clear:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource PlusBrushSurfaceHover}"/>
-  </Style>
+  <!-- .clear 的悬浮底色由 ControlTheme 的 `^:pointerover` 提供（surface-container-high），
+       不再从外部往 ContentPresenter 上刷方块（那会与主题抢同一层且没有圆角） -->
 
   <!-- 链接按钮（MessageBox 错误详情 URL 化，阶段 D 自 MessageBox.axaml 迁出） -->
   <Style Selector="Button.linkButton">
