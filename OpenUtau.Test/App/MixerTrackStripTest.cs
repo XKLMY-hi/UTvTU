@@ -12,14 +12,17 @@ using Xunit;
 namespace OpenUtau.Test.App {
     public class MixerTrackStripTest {
         public MixerTrackStripTest() {
-            // MixerTrackStrip.OnPanSliderValueChanged calls DocManager.Inst.ExecuteCmd;
+            // MixerTrackStrip 的声像写回路径调用 DocManager.Inst.ExecuteCmd；
             // wire it to run inline on the test (UI) thread.
             DocManagerTestSetup.RunOnCurrentThread();
         }
         /// <summary>
-        /// Regression: LoadTrackData re-subscribed PanSlider.PropertyChanged each call
-        /// without unsubscribing, so N refreshes caused one Value change to fire N
-        /// PanChangeNotification messages. The fix (-= before +=) keeps it at one.
+        /// Regression: LoadTrackData re-subscribed the pan handler each call without
+        /// unsubscribing, so N refreshes caused one pan change to fire N
+        /// PanChangeNotification messages. The fix keeps it at one.
+        /// （2026-10 通道条按规格重绘：声像从 PanKnob 旋钮改为设计稿的"行"（拖拽/滚轮/←→ 改值），
+        ///   驱动入口随之由 `PanKnobControl.Value` 变成 `PanValue`；**断言与语义未变**——
+        ///   这个用例守的是"反复 Refresh 后一次改动仍只发一条通知"，与控件外观无关。）
         ///
         /// 订阅按 TrackNo 过滤：MessageBus 是全进程共享的，断言意图（"这一条轨反复 Refresh
         /// 后仍只发一条 Pan 通知"）本来就只针对本轨。不过滤时别的用例只要在同一时间窗内
@@ -42,14 +45,14 @@ namespace OpenUtau.Test.App {
             strip.Refresh();
             strip.Refresh();
 
-            // Changing the knob value should fire exactly one notification.
-            strip.PanKnobControl.Value = 50;
+            // Changing the pan value should fire exactly one notification.
+            strip.PanValue = 50;
             Assert.Equal(1, received);
         }
 
         /// <summary>
-        /// DisposeSubscriptions must detach the ValueChanged handler so no further
-        /// notifications fire after a strip is torn down.
+        /// DisposeSubscriptions must stop the strip from writing pan changes back
+        /// (the mixer calls it when a strip is rebuilt / torn down).
         /// （同样按 TrackNo 过滤，去掉对全局总线的隐式依赖。）
         /// </summary>
         [AvaloniaFact]
@@ -63,12 +66,12 @@ namespace OpenUtau.Test.App {
                 .ObserveOn(ImmediateScheduler.Instance)
                 .Subscribe(_ => received++);
 
-            strip.PanKnobControl.Value = 30;
+            strip.PanValue = 30;
             int beforeDispose = received;
             Assert.Equal(1, beforeDispose);
 
             strip.DisposeSubscriptions();
-            strip.PanKnobControl.Value = 70;  // should produce no new notification
+            strip.PanValue = 70;  // should produce no new notification
             Assert.Equal(beforeDispose, received);
         }
     }

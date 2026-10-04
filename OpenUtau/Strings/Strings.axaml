@@ -1151,4 +1151,16 @@ General
   <system:String x:Key="mixfx.rack.dry">DRY</system:String>
   <system:String x:Key="mixfx.rack.hint">Changes are heard live while playing. Cancel or Esc restores the settings from when this window opened.</system:String>
   <!-- /fx-ui: effects rack -->
+  <!-- ⚠ mx-strip: mixer strip -->
+  <system:String x:Key="mixer.pan">Pan</system:String>
+  <system:String x:Key="mixer.bus.subtitle">Stereo out</system:String>
+  <system:String x:Key="mixer.bus.integrated">Integrated</system:String>
+  <system:String x:Key="mixer.bus.truepeak">True peak</system:String>
+  <system:String x:Key="mixer.bus.limiter">Limiter</system:String>
+  <system:String x:Key="mixer.bus.dither">Dither</system:String>
+  <system:String x:Key="mixer.bus.tip.integrated">No loudness meter in this build — nothing is shown rather than a made-up number.</system:String>
+  <system:String x:Key="mixer.bus.tip.truepeak">Sample peak of the master output (MasterAdapter). Not oversampled, so it is not a true-peak meter.</system:String>
+  <system:String x:Key="mixer.bus.tip.limiter">The playback and export chains have no limiter — there is no implementation to switch on.</system:String>
+  <system:String x:Key="mixer.bus.tip.dither">Export writes 16-bit PCM without dither (ExportSession → WaveFileWriter.CreateWaveFile16).</system:String>
+  <!-- /mx-strip -->
 </ResourceDictionary>

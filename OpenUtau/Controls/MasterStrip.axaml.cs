@@ -3,123 +3,112 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Media;
 using OpenUtau.Core;
 
 namespace OpenUtau.App.Controls;
 
 /// <summary>
-/// 混音台主推子条（E5）：LED 电平表 + 名称 + 静音 + 推子 + 数值。
-/// 音量经 PlaybackManager.ApplyMasterVolume 实时作用于 masterMix（MasterAdapter.Scale）。
+/// 混音台主输出条（设计规格 Mixer.txt:691-736）。音量经
+/// <see cref="PlaybackManager.ApplyMasterVolume"/> 实时作用于 masterMix（MasterAdapter.Scale）。
+///
+/// **Bus Info 四行的数据来源（规划 R5：不许编数）**：
+/// · 综合响度 —— Core 没有 LUFS 计，显示占位「—」（ToolTip 说明原因）；
+/// · 真峰值 —— MasterAdapter 的**样本峰值**（非过采样真峰），如实标 dBFS；
+/// · 限制器 —— 播放/导出链路都没有限制器实现，显示状态文本「关」；
+/// · 抖动 —— 导出固定 16-bit PCM 且不做抖动（ExportSession → CreateWaveFile16），显示「16-bit」。
+///
+/// 双表说明：Core 只提供**全声道单一峰值**（MasterAdapter.ReadAndResetPeakDb），
+/// 没有 L/R 分流 ⇒ 设计稿的双表由同一个真实值驱动（视觉忠实 + 数据诚实，不做假的左右差异）。
 /// </summary>
 public partial class MasterStrip : UserControl {
-    static readonly IBrush LedGreen = new SolidColorBrush(Color.FromRgb(39, 174, 96));
-    static readonly IBrush LedYellow = new SolidColorBrush(Color.FromRgb(251, 192, 45));
-    static readonly IBrush LedRed = new SolidColorBrush(Color.FromRgb(229, 57, 53));
-    private Border[] MeterSegments = Array.Empty<Border>();
-    private double currentSeg;
+    private readonly MixerMeter meter = new MixerMeter();
     private bool isDragging;
     private double masterDb = 0;
 
-    private const double FaderMin = -24, FaderMax = 12, FaderRange = FaderMax - FaderMin;
-
     public MasterStrip() {
         InitializeComponent();
-        BuildMeterSegments();
         FaderBox.SizeChanged += (s, e) => UpdateFaderPosition();
         FaderBox.AddHandler(PointerReleasedEvent, OnFaderReleased,
-            Avalonia.Interactivity.RoutingStrategies.Tunnel | Avalonia.Interactivity.RoutingStrategies.Bubble, true);
+            RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
         FaderBox.AddHandler(PointerCaptureLostEvent, OnFaderCaptureLost,
-            Avalonia.Interactivity.RoutingStrategies.Tunnel | Avalonia.Interactivity.RoutingStrategies.Bubble, true);
-        UpdateMuteBtn();
+            RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
+        InitBusInfo();
         UpdateFaderPosition();
-        UpdateVolValueDisplay(0);
     }
 
-    private void BuildMeterSegments() {
-        MeterSegments = new Border[10];
-        for (int i = 0; i < 10; i++) {
-            var seg = new Border {
-                Height = 3,
-                CornerRadius = new CornerRadius(1.5),
-                Background = i < 6 ? LedGreen : i < 8 ? LedYellow : LedRed,
-                Opacity = 0.18,
-            };
-            LevelMeterPanel.Children.Add(seg);
-            MeterSegments[i] = seg;
-        }
+    /// <summary>
+    /// Bus Info：静态三项（响度占位 / 限制器状态 / 抖动状态）+ 每项来源说明。
+    /// 真峰值行由 <see cref="UpdateLevel"/> 实时写。
+    /// </summary>
+    private void InitBusInfo() {
+        IntegratedValue.Text = "—";
+        ToolTip.SetTip(IntegratedValue, ThemeManager.GetString("mixer.bus.tip.integrated"));
+        LimiterValue.Text = ThemeManager.GetString("button.off");
+        ToolTip.SetTip(LimiterValue, ThemeManager.GetString("mixer.bus.tip.limiter"));
+        DitherValue.Text = "16-bit";
+        ToolTip.SetTip(DitherValue, ThemeManager.GetString("mixer.bus.tip.dither"));
+        ToolTip.SetTip(TruePeakValue, ThemeManager.GetString("mixer.bus.tip.truepeak"));
+        ToolTip.SetTip(MasterPeakLabel, ThemeManager.GetString("mixer.bus.tip.truepeak"));
     }
 
-    /// <summary>主输出电平（TrackLevels.ReadMasterAndReset 数据源，33ms 轮询）。</summary>
+    /// <summary>
+    /// 主输出电平（TrackLevels.ReadMasterAndReset 数据源 = MasterAdapter 采样峰，33ms 轮询）。
+    /// 双表同值（见类型注释）。
+    /// </summary>
     public void UpdateLevel(float rawPeakDb) {
-        float effectiveDb = Math.Clamp(rawPeakDb, -60f, 0f);
-        double ratio = Math.Clamp((effectiveDb + 60) / 60.0, 0, 1);
-        double targetSeg = ratio * MeterSegments.Length;
-        currentSeg = targetSeg >= currentSeg ? targetSeg : Math.Max(targetSeg, currentSeg - 0.67);
-        int lit = (int)Math.Ceiling(currentSeg);
-        for (int i = 0; i < MeterSegments.Length; i++) {
-            MeterSegments[i].Opacity = i < lit ? 1.0 : 0.18;
-        }
+        meter.Push(rawPeakDb);
+        meter.Apply(MeterFillL, MixerMetrics.FaderHeight);
+        meter.Apply(MeterFillR, MixerMetrics.FaderHeight);
+        MasterPeakLabel.Text = FormatDb(meter.PeakDb);
+        TruePeakValue.Text = $"{FormatDbNumber(meter.PeakDb)} dBFS";
     }
 
-    // ── Fader ───────────────────────────────────────────
+    /// <summary>-60dB 及以下显示 -∞（与推子读数同口径）。</summary>
+    private static string FormatDb(double db) => $"{FormatDbNumber(db)} dB";
 
-    private double DbToTop(double db) {
-        double ratio = 1.0 - Math.Clamp((db - FaderMin) / FaderRange, 0, 1);
-        return ratio * (FaderBox.Bounds.Height - ThumbBar.Height);
-    }
-    private double YToDb(double y) {
-        double ratio = 1.0 - Math.Clamp(y / FaderBox.Bounds.Height, 0, 1);
-        return FaderMin + ratio * FaderRange;
-    }
+    private static string FormatDbNumber(double db) =>
+        db <= MixerMeter.MinDb ? "-∞" : $"{db:+0.0;-0.0}";
+
+    // ── 推子 ───────────────────────────────────────────
+
     private void UpdateFaderPosition() {
         if (FaderBox.Bounds.Height <= 0) return;
-        double db = PlaybackManager.Inst.MasterMuted ? FaderMin : masterDb;
-        ThumbBar.Margin = new Thickness(0, DbToTop(Math.Clamp(db, FaderMin, FaderMax)), 0, 0);
-    }
-    private void UpdateVolValueDisplay(double db) {
-        VolValueLabel.Text = db <= -24 ? "-∞ dB" : $"{db:+0.0;-0.0} dB";
-    }
-    private void UpdateMuteBtn() {
-        if (PlaybackManager.Inst.MasterMuted) MuteBtn.Classes.Add("muteOn");
-        else MuteBtn.Classes.Remove("muteOn");
+        double db = PlaybackManager.Inst.MasterMuted ? MixerMetrics.FaderMinDb : masterDb;
+        Canvas.SetTop(FaderHandle,
+            MixerMetrics.FaderTop(db, FaderBox.Bounds.Height, MixerMetrics.MasterHandleHeight));
     }
 
     private void ApplyMasterVolume(double db) {
-        db = Math.Clamp(db, FaderMin, FaderMax);
+        db = Math.Clamp(db, MixerMetrics.FaderMinDb, MixerMetrics.FaderMaxDb);
         masterDb = db;
         PlaybackManager.Inst.ApplyMasterVolume(db);
         DocManager.Inst.ExecuteCmd(new MasterVolumeChangeNotification(db));
         UpdateFaderPosition();
-        UpdateVolValueDisplay(db);
     }
 
-    // ── Mouse ───────────────────────────────────────────
+    // ── 鼠标 ───────────────────────────────────────────
 
     private void OnFaderPressed(object? sender, PointerPressedEventArgs e) {
         isDragging = true;
         e.Pointer.Capture(FaderBox);
-        ApplyMasterVolume(YToDb(e.GetPosition(FaderBox).Y));
+        ApplyMasterVolume(MixerMetrics.FaderTopToDb(e.GetPosition(FaderBox).Y,
+            FaderBox.Bounds.Height, MixerMetrics.MasterHandleHeight));
         e.Handled = true;
     }
+
     private void OnFaderMoved(object? sender, PointerEventArgs e) {
         if (!isDragging) return;
-        ApplyMasterVolume(YToDb(e.GetPosition(FaderBox).Y));
+        ApplyMasterVolume(MixerMetrics.FaderTopToDb(e.GetPosition(FaderBox).Y,
+            FaderBox.Bounds.Height, MixerMetrics.MasterHandleHeight));
         e.Handled = true;
     }
+
     private void OnFaderReleased(object? sender, PointerEventArgs e) {
         isDragging = false;
         e.Pointer.Capture(null);
     }
+
     private void OnFaderCaptureLost(object? sender, PointerCaptureLostEventArgs e) {
         isDragging = false;
-    }
-
-    // ── Buttons ─────────────────────────────────────────
-
-    private void OnMuteClick(object? sender, RoutedEventArgs e) {
-        PlaybackManager.Inst.SetMasterMuted(!PlaybackManager.Inst.MasterMuted);
-        UpdateMuteBtn();
-        UpdateFaderPosition();
     }
 }

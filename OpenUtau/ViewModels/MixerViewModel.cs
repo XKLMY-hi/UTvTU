@@ -15,6 +15,20 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public double MasterVolume { get; set; } = 0;
         [Reactive] public bool HasProject { get; set; }
 
+        /// <summary>
+        /// 当前选中轨道（冻结接口 §1.1-2）：混音台右侧效果链面板消费该属性，
+        /// 链面板不反向写 MixerViewModel。通道条点击/键选经 <see cref="SelectTrack"/> 更新。
+        /// </summary>
+        [Reactive] public UTrack? SelectedTrack { get; set; }
+
+        /// <summary>选中轨道；null = 无选中。同一对象不重复通知。</summary>
+        public void SelectTrack(UTrack? track) {
+            if (ReferenceEquals(SelectedTrack, track)) {
+                return;
+            }
+            SelectedTrack = track;
+        }
+
         public ReactiveCommand<UTrack, Unit> OpenMixFxCommand { get; }
 
         public MixerViewModel() {
@@ -56,12 +70,17 @@ namespace OpenUtau.App.ViewModels {
             var project = DocManager.Inst.Project;
             if (project?.tracks == null) {
                 HasProject = false;
+                SelectTrack(null);
                 return;
             }
             foreach (var t in project.tracks) {
                 Tracks.Add(t);
             }
             HasProject = Tracks.Count > 0;
+            // 轨道删除/重建后，选中项必须仍在列表里；空选中时默认选第一条（链面板有内容可显示）。
+            if (SelectedTrack == null || !Tracks.Contains(SelectedTrack)) {
+                SelectTrack(Tracks.FirstOrDefault());
+            }
         }
 
         public static string FormatVolume(double db) {

@@ -2,33 +2,51 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:c="clr-namespace:OpenUtau.App.Controls"
              x:Class="OpenUtau.App.Controls.MixerControl">
+  <!--
+    混音台（设计规格 Mixer.txt:42 起的 Mixer Area + 691-736 主输出条）。
+    · Mixer Area：内边距 16、通道条间距 8；12×96 + 160 + 12×8 = 1408 ⇒ 横向必然滚动；
+    · 主输出条固定在滚动区之外（沿用上一轮的 E5 决定：主推子不随轨道滚走）；
+    · 右侧 280 宽效果链宿主（规划 §1.1 冻结接口）+ 左侧 1px outline-variant 分隔线，
+      链面板位于滚动区之外（W3 提供内容，本控件只留槽）；
+    · 工具行（＋轨道 / 轨道数）设计稿里没有，属既有功能入口（spec-digest §7.3 C-6），
+      压成一行 28 高；颜色全部走 md3.* 角色键。
+  -->
+  <Grid RowDefinitions="Auto,*"
+        Background="{DynamicResource md3.surface-container-lowest}">
 
-  <Grid RowDefinitions="Auto,*,Auto">
-    <!-- Toolbar: new track -->
-    <Border Grid.Row="0" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
-            BorderThickness="0,0,0,1" Padding="8,4">
-      <Button Content="{DynamicResource mixer.addtrack}" Click="OnAddTrackClick"
-              HorizontalAlignment="Left" FontSize="11" Padding="10,3" CornerRadius="6"/>
+    <!-- 工具行：＋轨道（既有入口，保留以免功能回归）+ 轨道数 -->
+    <Border Grid.Row="0" Padding="16,8">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <Button Grid.Column="0" Name="AddTrackBtn" Height="28" CornerRadius="999"
+                Padding="12,0" FontSize="11" FontWeight="SemiBold"
+                Content="{DynamicResource mixer.addtrack}" Click="OnAddTrackClick"
+                Background="{DynamicResource md3.surface-container-high}"
+                Foreground="{DynamicResource md3.on-surface-variant}"
+                BorderThickness="0"/>
+        <TextBlock Grid.Column="2" Name="StatusText" FontSize="10" VerticalAlignment="Center"
+                   Foreground="{DynamicResource md3.on-surface-variant}"/>
+      </Grid>
     </Border>
 
-    <!-- Track strips area + fixed master strip on the right -->
-    <Grid Grid.Row="1" ColumnDefinitions="*,Auto">
-      <ScrollViewer Grid.Column="0"
-                    HorizontalScrollBarVisibility="Auto"
-                    VerticalScrollBarVisibility="Hidden">
-        <StackPanel Name="TrackStripsPanel" Orientation="Horizontal"
-                    HorizontalAlignment="Left" Margin="4,4,0,4">
-          <!-- Track strips added dynamically -->
+    <!-- Mixer Area（42：内边距 16 / 间距 8 / 横向排列） -->
+    <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto">
+      <ScrollViewer Grid.Column="0" Name="StripsScroll"
+                    HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <StackPanel Name="TrackStripsPanel" Orientation="Horizontal" Spacing="8"
+                    Margin="16,16,8,16" HorizontalAlignment="Left">
+          <!-- 通道条按轨道动态生成 -->
         </StackPanel>
       </ScrollViewer>
-      <!-- 主推子条（E5：右侧固定，不随轨道滚动） -->
-      <c:MasterStrip Grid.Column="1" x:Name="MasterStripControl" Margin="2,4,4,4"/>
-    </Grid>
 
-    <!-- Status bar -->
-    <Border Grid.Row="2" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
-            BorderThickness="0,1,0,0" Padding="8,4">
-      <TextBlock Name="StatusText" FontSize="11" Opacity="0.7"/>
-    </Border>
+      <!-- 主输出条（691：宽 160，固定在最右的滚动区之外） -->
+      <c:MasterStrip Grid.Column="1" x:Name="MasterStripControl" Margin="0,16,16,16"/>
+
+      <!-- 冻结接口 §1.1-1：固定宽 280 的效果链宿主 + 左侧 1px 分隔线（链面板在滚动区之外） -->
+      <Grid Grid.Column="2" ColumnDefinitions="1,280">
+        <Border Grid.Column="0" Name="FxChainDivider" Width="1"
+                Background="{DynamicResource md3.outline-variant}"/>
+        <ContentControl Grid.Column="1" Name="FxChainHost" Width="280"/>
+      </Grid>
+    </Grid>
   </Grid>
 </UserControl>

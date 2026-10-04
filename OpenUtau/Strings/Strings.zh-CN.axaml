@@ -1282,4 +1282,16 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="mixfx.rack.dry">干声</system:String>
   <system:String x:Key="mixfx.rack.hint">播放中改动实时可听；取消或按 Esc 恢复到打开本窗口时的设置。</system:String>
   <!-- /fx-ui: effects rack -->
+  <!-- ⚠ mx-strip: mixer strip -->
+  <system:String x:Key="mixer.pan">声像</system:String>
+  <system:String x:Key="mixer.bus.subtitle">立体声输出</system:String>
+  <system:String x:Key="mixer.bus.integrated">综合响度</system:String>
+  <system:String x:Key="mixer.bus.truepeak">真峰值</system:String>
+  <system:String x:Key="mixer.bus.limiter">限制器</system:String>
+  <system:String x:Key="mixer.bus.dither">抖动</system:String>
+  <system:String x:Key="mixer.bus.tip.integrated">本版本没有响度计：宁可不显示，也不编一个数出来。</system:String>
+  <system:String x:Key="mixer.bus.tip.truepeak">主输出的样本峰值（MasterAdapter 采样峰，未过采样）——不是真峰值计。</system:String>
+  <system:String x:Key="mixer.bus.tip.limiter">播放与导出链路都没有限制器（没有可开启的实现）。</system:String>
+  <system:String x:Key="mixer.bus.tip.dither">导出为 16-bit PCM，未做抖动（ExportSession → WaveFileWriter.CreateWaveFile16）。</system:String>
+  <!-- /mx-strip -->
 </ResourceDictionary>
