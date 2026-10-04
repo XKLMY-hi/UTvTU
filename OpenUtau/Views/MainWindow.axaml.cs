@@ -1191,7 +1191,7 @@ namespace OpenUtau.App.Views {
         /// <summary>素材库页签：效果器（W4 浏览器；W11 首次展开会播种标准路径 + 空表自动首扫）。</summary>
         private void OnShowVst(object? sender, RoutedEventArgs e) {
             viewModel.PluginBrowser.RefreshPlugins();
-            viewModel.PluginBrowser.EnsureFirstScan();   // 幂等：只在首次展开时播种/首扫
+            viewModel.PluginBrowser.EnsureFirstScan();   // 幂等：只在首次展开时播种/首扫（返回的任务由后台自己跑完）
             ShowLibraryPage(VstPanel, EffectsTab);
         }
 
