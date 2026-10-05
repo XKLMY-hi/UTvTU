@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
@@ -472,6 +472,12 @@ namespace OpenUtau.App.Views {
             newNote = notesVm.MaybeAddNote(point, false);
             if (newNote == null) {
                 return;
+            }
+            // 切出来的新音符**继承源音符的表达式**（上游 `59000b1c`）：按 index 升序逐条写入，
+            // 顺序与取值都与源音符一致，撤销即逐条回退。
+            foreach (var exp in note.phonemeExpressions.OrderBy(exp => exp.index)) {
+                DocManager.Inst.ExecuteCmd(new SetNoteExpressionCommand(
+                    project, project.tracks[part.trackNo], part, newNote, exp.abbr, new float?[] { exp.value }));
             }
             DocManager.Inst.ExecuteCmd(new ChangeNoteLyricCommand(part, newNote, NotePresets.Default.SplittedLyric));
         }

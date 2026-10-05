@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
@@ -277,7 +277,11 @@ namespace OpenUtau.App.ViewModels {
                 return null;
             }
             double tick = viewModel.PointToTick(point);
-            var phrase = viewModel.Part.renderPhrases.FirstOrDefault(p => p.end >= tick);
+            // 短语区间是**绝对** tick（带 Part.position 偏移），而 PointToTick 得到的是片段内
+            // 相对 tick ⇒ 不换算会让靠后的片段命中错短语，并算出错的音高下标。
+            // 上游 `e2bad613`（Fix Pitch Overwrite Mode）同口径。
+            double absTick = tick + viewModel.Part.position;
+            var phrase = viewModel.Part.renderPhrases.FirstOrDefault(p => p.end >= absTick);
             if (phrase == null) {
                 phrase = viewModel.Part.renderPhrases.Last();
             }
@@ -285,7 +289,8 @@ namespace OpenUtau.App.ViewModels {
                 return null;
             }
             var curve = phrase.pitchesBeforeDeviation;
-            var pitchIndex = (int)Math.Round((tick - phrase.position + phrase.leading) / 5);
+            int phraseStartRel = phrase.position - viewModel.Part.position;
+            var pitchIndex = (int)Math.Round((tick - phraseStartRel + phrase.leading) / 5.0);
             pitchIndex = Math.Clamp(pitchIndex, 0, curve.Length - 1);
             return curve[pitchIndex];
         }
