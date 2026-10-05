@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
@@ -307,7 +307,12 @@ namespace OpenUtau.App.ViewModels {
 
         #region ICmdSubscriber
 
-        public void OnNext(UCommand cmd, bool isUndo) {
+        readonly OpenUtau.App.UiThreadAffinity affinity = new OpenUtau.App.UiThreadAffinity();
+
+        /// <summary>W25 线程亲和门：`SetUndoState()` 会写绑到菜单/按钮的文案属性。</summary>
+        public void OnNext(UCommand cmd, bool isUndo) => affinity.Post(() => OnNextCore(cmd, isUndo));
+
+        void OnNextCore(UCommand cmd, bool isUndo) {
             if (cmd is ProgressBarNotification progressBarNotification) {
                 if (PianoRollDetached) {
                     Dispatcher.UIThread.InvokeAsync(() => {
