@@ -17,9 +17,8 @@
   <Style Selector="ContextMenu">
     <Setter Property="CornerRadius" Value="8"/>
   </Style>
-  <Style Selector="MenuFlyoutPresenter">
-    <Setter Property="CornerRadius" Value="8"/>
-  </Style>
+  <!-- W31 后续：此处原有 `MenuFlyoutPresenter { CornerRadius=8 }` —— 该属性**模板不读**（圆角真值来自
+       Styles/Md3Menus.axaml 的 `PART_PopupBorder` = 12）⇒ 是死属性，已删，免得日后被误当生效值。 -->
   <!-- W31：此处原有 2 条 `MenuFlyoutPresenter /template/ Border#PART_PopupBorder|Border` 补丁
        （应用级越权改别人的模板部件）→ 已删除，圆角以控件自己的主题 Styles/Md3Menus.axaml
        的 `{x:Type MenuFlyoutPresenter}`（PART_PopupBorder CornerRadius=12）为准。 -->
