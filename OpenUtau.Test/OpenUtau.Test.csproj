@@ -44,6 +44,8 @@
     <!-- 视图 XAML 源码：契约测试需要扫描资源键（avares 不保留 .axaml 原文） -->
     <None Include="..\OpenUtau\Views\WelcomeView.axaml" Link="Views\WelcomeView.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Views\MainWindow.axaml" Link="Views\MainWindow.axaml" CopyToOutputDirectory="PreserveNewest" />
+    <!-- W16 面板系统：分隔条控件的视觉口径（细轨/命中区/hover 主色）按源码契约断言 -->
+    <None Include="..\OpenUtau\Controls\PanelSplitter.axaml" Link="Controls\PanelSplitter.axaml" CopyToOutputDirectory="PreserveNewest" />
     <!-- 窗口源码：S5 视图化的窗口层接线（胶囊 → 切视图、分离/收回）无法 headless 起窗，只能按源码契约断言 -->
     <None Include="..\OpenUtau\Views\MainWindow.axaml.cs" Link="Views\MainWindow.axaml.cs" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Views\PreferencesView.axaml" Link="Views\PreferencesView.axaml" CopyToOutputDirectory="PreserveNewest" />

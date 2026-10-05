@@ -51,6 +51,58 @@ namespace OpenUtau.App.ViewModels {
         }
     }
 
+    /// <summary>
+    /// W16 面板系统：一个可调宽 / 可折叠面板的状态（**所有面板共用的同一套语义**）。
+    ///
+    /// - <see cref="Width"/>：展开时的宽度，XAML 绑面板容器 `Width`，并绑到 `PanelSplitter.Target`（TwoWay）。
+    /// - <see cref="IsCollapsed"/>：折叠态。折叠 = 面板容器 `IsVisible=false` + 列宽 0（不留空白、不留窄条）。
+    /// - <see cref="DefaultWidth"/>/<see cref="MinWidth"/>/<see cref="MaxWidth"/>：设计边界，双击分隔条复位到默认。
+    /// - <see cref="Reset"/>：宽度回默认 + 展开（"重置布局"入口调用）。
+    /// 落盘由 MainWindowViewModel 统一做（订阅 PropertyChanged，映射到 Preferences.Default.PanelLayout）。
+    /// </summary>
+    public sealed class PanelSlot : ViewModelBase {
+        private readonly string key;
+
+        public PanelSlot(string key, double defaultWidth, double minWidth, double maxWidth) {
+            this.key = key;
+            DefaultWidth = defaultWidth;
+            MinWidth = minWidth;
+            MaxWidth = maxWidth;
+            width = defaultWidth;
+        }
+
+        /// <summary>面板标识（诊断/持久化字段映射用）。</summary>
+        public string Key => key;
+
+        public double DefaultWidth { get; set; }
+        public double MinWidth { get; set; }
+        public double MaxWidth { get; set; }
+
+        private double width;
+        public double Width {
+            get => width;
+            set => this.RaiseAndSetIfChanged(ref width, Math.Clamp(value, MinWidth, MaxWidth));
+        }
+
+        private bool isCollapsed;
+        public bool IsCollapsed {
+            get => isCollapsed;
+            set => this.RaiseAndSetIfChanged(ref isCollapsed, value);
+        }
+
+        /// <summary>折叠时占用 0（"不留空白"）；展开时就是 <see cref="Width"/>。</summary>
+        public double EffectiveWidth => isCollapsed ? 0 : width;
+
+        /// <summary>折叠/展开（面板头部 chevron 用）。</summary>
+        public void ToggleCollapse() => IsCollapsed = !IsCollapsed;
+
+        /// <summary>宽度回默认 + 展开。</summary>
+        public void Reset() {
+            Width = DefaultWidth;
+            IsCollapsed = false;
+        }
+    }
+
     public class MainWindowViewModel : ViewModelBase, ICmdSubscriber {
         public string Title => !ProjectSaved
             ? $"{AppVersion}"
@@ -88,6 +140,31 @@ namespace OpenUtau.App.ViewModels {
         /// 卷帘 / 混音台不再有「停靠行」的高度（旧 MixerMinHeight / PianoRollMinHeight 已退役）。
         /// </summary>
         public ViewSwitcherState ViewSwitcher { get; } = new ViewSwitcherState();
+
+        // ── W16 面板系统（可调宽 / 可折叠 / 持久化）────────────────────────────
+        // 一个面板 = 一个 PanelSlot（宽 + 折叠态）+ 一条 PanelSplitter；状态统一写
+        // Preferences.Default.PanelLayout（不新增平行存储），重启恢复。
+        /// <summary>工作台左列：轨道头。默认 248 / min 200 / max 420（理由见 PanelLayoutPreferences）。</summary>
+        public PanelSlot TracksPanel { get; } = new PanelSlot("track-header", 248, 200, 420);
+        /// <summary>工作台右列：素材库（工作台与混音台都可见，见 D9）。默认 272 / min 220 / max 480。</summary>
+        public PanelSlot LibraryPanel { get; } = new PanelSlot("library", 272, 220, 480);
+        /// <summary>左列分隔条可见性（视图可见 + 面板未折叠）；顶栏「布局」flyout 与折叠按钮共用。</summary>
+        public bool TracksPanelVisible => ViewSwitcher.ShowWorkspace && !TracksPanel.IsCollapsed;
+        /// <summary>右列分隔条可见性（工作台/混音台可见 + 面板未折叠）。</summary>
+        public bool LibraryPanelVisible => ViewSwitcher.ShowLibrary && !LibraryPanel.IsCollapsed;
+        /// <summary>是否显示轨头列（顶栏 / 工具菜单的可勾选项，= 未折叠）。</summary>
+        public bool ShowTracksPanel {
+            get => !TracksPanel.IsCollapsed;
+            set => TracksPanel.IsCollapsed = !value;
+        }
+        /// <summary>是否显示素材库列（顶栏 / 工具菜单的可勾选项，= 未折叠）。</summary>
+        public bool ShowLibraryPanel {
+            get => !LibraryPanel.IsCollapsed;
+            set => LibraryPanel.IsCollapsed = !value;
+        }
+        /// <summary>重置面板布局（宽度回默认 + 全部展开），并落盘。</summary>
+        public ReactiveCommand<Unit, Unit>? ResetPanelLayoutCommand { get; private set; }
+
         /// <summary>
         /// W4（决策 B6）：素材库「效果器」页签 = 插件浏览器。
         /// 扫描结果 + 搜索过滤 + 插件扫描路径（与「偏好设置 → VST」共用同一份 Preferences 字段）。
@@ -148,7 +225,80 @@ namespace OpenUtau.App.ViewModels {
             PartDeleteCommand = ReactiveCommand.Create<UPart>(part => {
                 TracksViewModel.DeleteSelectedParts();
             });
+            InitPanelLayout();
             DocManager.Inst.AddSubscriber(this);
+        }
+
+        // ── W16 面板系统：状态装载 / 映射 / 落盘 ─────────────────────────────
+
+        /// <summary>从 Preferences 装载两个面板的宽与折叠态，并订阅其变化（唯一的映射点）。</summary>
+        private void InitPanelLayout() {
+            TracksPanel.DefaultWidth = 248; TracksPanel.MinWidth = 200; TracksPanel.MaxWidth = 420;
+            LibraryPanel.DefaultWidth = 272; LibraryPanel.MinWidth = 220; LibraryPanel.MaxWidth = 480;
+            LoadPanelLayout(Preferences.Default.PanelLayout, TracksPanel, LibraryPanel);
+
+            TracksPanel.PropertyChanged += (_, args) => OnPanelChanged(args.PropertyName, persist: false);
+            LibraryPanel.PropertyChanged += (_, args) => OnPanelChanged(args.PropertyName, persist: false);
+            ViewSwitcher.PropertyChanged += (_, args) => {
+                if (args.PropertyName == nameof(ViewSwitcherState.CurrentView)) {
+                    RaisePanelFlags();
+                }
+            };
+            ResetPanelLayoutCommand = ReactiveCommand.Create(ResetPanelLayout);
+            RaisePanelFlags();
+        }
+
+        /// <summary>Preferences → 面板槽（静态可测：两个面板的映射只有这一处）。</summary>
+        internal static void LoadPanelLayout(Preferences.PanelLayoutPreferences prefs, PanelSlot tracks, PanelSlot library) {
+            tracks.Width = prefs.TrackHeaderWidth;
+            tracks.IsCollapsed = prefs.TrackHeaderCollapsed;
+            library.Width = prefs.LibraryWidth;
+            library.IsCollapsed = prefs.LibraryCollapsed;
+        }
+
+        /// <summary>面板槽 → Preferences 的内存对象（静态可测；不落盘 —— 落盘只发生在拖动结束/折叠/复位）。</summary>
+        internal static void SavePanelLayout(Preferences.PanelLayoutPreferences prefs, PanelSlot tracks, PanelSlot library) {
+            prefs.TrackHeaderWidth = tracks.Width;
+            prefs.TrackHeaderCollapsed = tracks.IsCollapsed;
+            prefs.LibraryWidth = library.Width;
+            prefs.LibraryCollapsed = library.IsCollapsed;
+        }
+
+        private void OnPanelChanged(string? propertyName, bool persist) {
+            ApplyPanelLayoutToPreferences();
+            if (persist || propertyName == nameof(PanelSlot.IsCollapsed)) {
+                PersistPanelLayout();     // 折叠态是单次动作，直接落盘；宽度拖动中只更新内存
+            }
+            if (propertyName == nameof(PanelSlot.IsCollapsed)) {
+                RaisePanelFlags();
+            }
+        }
+
+        /// <summary>把当前面板状态写进 Preferences 的内存对象（不落盘）。</summary>
+        private void ApplyPanelLayoutToPreferences() {
+            SavePanelLayout(Preferences.Default.PanelLayout, TracksPanel, LibraryPanel);
+        }
+
+        /// <summary>拖动结束 / 折叠 / 复位时落盘（拖动过程中不写文件）。</summary>
+        public void PersistPanelLayout() {
+            ApplyPanelLayoutToPreferences();
+            Preferences.Save();
+        }
+
+        /// <summary>重置面板布局：宽度回默认、全部展开，并落盘。</summary>
+        public void ResetPanelLayout() {
+            TracksPanel.Reset();
+            LibraryPanel.Reset();
+            RaisePanelFlags();
+            PersistPanelLayout();
+        }
+
+        /// <summary>面板可见性派生属性统一通知（折叠态或视图变化时）。</summary>
+        public void RaisePanelFlags() {
+            this.RaisePropertyChanged(nameof(TracksPanelVisible));
+            this.RaisePropertyChanged(nameof(LibraryPanelVisible));
+            this.RaisePropertyChanged(nameof(ShowTracksPanel));
+            this.RaisePropertyChanged(nameof(ShowLibraryPanel));
         }
 
         public void Undo() {

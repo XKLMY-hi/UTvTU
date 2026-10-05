@@ -10,7 +10,7 @@
         mc:Ignorable="d" d:DesignWidth="1440" d:DesignHeight="900"
         x:Class="OpenUtau.App.Views.MainWindow"
         Icon="/Assets/open-utau.ico"
-        Title="{Binding Title}" MinWidth="300" MinHeight="200" Width="{Binding Width}" Height="{Binding Height}"
+        Title="{Binding Title}" MinWidth="800" MinHeight="200" Width="{Binding Width}" Height="{Binding Height}"
         Focusable="True" KeyDown="OnKeyDown" PointerPressed="OnPointerPressed" Closing="WindowClosing"
         SizeChanged="OnWindowSizeChanged"
         DragDrop.AllowDrop="True">
@@ -145,6 +145,25 @@
       <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
     </Style>
+    <!-- W16 面板 chrome：面板头部的折叠按钮（一处样式，面板共用）
+         ⚠ 同「通用陷阱」：Height=24 必须配 MinHeight=24，否则被全局 Md3ButtonTheme 的 MinHeight=32 顶高。 -->
+    <Style Selector="Button.panelToggle">
+      <Setter Property="MinHeight" Value="24"/>
+      <Setter Property="Margin" Value="0"/>
+      <Setter Property="Width" Value="24"/>
+      <Setter Property="Height" Value="24"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="7"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Button.panelToggle:pointerover">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    </Style>
     <!-- 素材库：页签胶囊（稿：高 28 / 文字 10）
          ⚠ 同「通用陷阱」：Height=28 必须配 MinHeight=28，否则被全局 Md3ButtonTheme 的
            MinHeight=32 顶到 32（详见 Button.viewTab 上的说明）。 -->
@@ -269,6 +288,12 @@
                 </MenuItem>
                 <MenuItem Header="{DynamicResource menu.tools}">
                   <MenuItem Header="{DynamicResource menu.tools.layout}">
+                    <MenuItem Header="{DynamicResource panel.toggle.tracks}" ToggleType="CheckBox"
+                              IsChecked="{Binding ShowTracksPanel, Mode=TwoWay}"/>
+                    <MenuItem Header="{DynamicResource panel.toggle.library}" ToggleType="CheckBox"
+                              IsChecked="{Binding ShowLibraryPanel, Mode=TwoWay}"/>
+                    <MenuItem Header="{DynamicResource panel.reset}" Click="OnMenuResetPanelLayout"/>
+                    <Separator/>
                     <MenuItem Header="{DynamicResource menu.tools.layout.reset}" Click="OnMenuLayoutReset"/>
                     <MenuItem Header="{DynamicResource menu.tools.layout.vsplit11}" Click="OnMenuLayoutVSplit11"/>
                     <MenuItem Header="{DynamicResource menu.tools.layout.vsplit12}" Click="OnMenuLayoutVSplit12"/>
@@ -420,6 +445,13 @@
             <Button Classes="topBtn" ToolTip.Tip="{DynamicResource menu.tools.layout}">
               <Button.Flyout>
                 <MenuFlyout Placement="BottomEdgeAlignedRight">
+                  <!-- W16 面板系统：折叠/展开开关（面板折叠后仍从这里找回；混音台视图同样可达 —— 顶栏 chrome 三个工作视图都显示） -->
+                  <MenuItem Header="{DynamicResource panel.toggle.tracks}" ToggleType="CheckBox"
+                            IsChecked="{Binding ShowTracksPanel, Mode=TwoWay}"/>
+                  <MenuItem Header="{DynamicResource panel.toggle.library}" ToggleType="CheckBox"
+                            IsChecked="{Binding ShowLibraryPanel, Mode=TwoWay}"/>
+                  <MenuItem Header="{DynamicResource panel.reset}" Click="OnMenuResetPanelLayout"/>
+                  <Separator/>
                   <MenuItem Header="{DynamicResource menu.tools.layout.reset}" Click="OnMenuLayoutReset"/>
                   <MenuItem Header="{DynamicResource menu.tools.layout.vsplit11}" Click="OnMenuLayoutVSplit11"/>
                   <MenuItem Header="{DynamicResource menu.tools.layout.vsplit12}" Click="OnMenuLayoutVSplit12"/>
@@ -451,23 +483,31 @@
         </Grid>
       </Border>
 
-      <!-- ══════════ 工作区：左 轨道头 264 · 中 编排区 · 右 素材库 296 ══════════
-           工作台视图 = 这三列；**钢琴卷帘 / 混音台是铺满整行的视图**（设计稿里两者都是整屏，
-           混音台区还是「满宽」，且 W1 的链面板要占 280）→ 覆盖列而非挤在编排区里。
-           三列的列宽固定、视图宿主只翻 IsVisible ⇒ 切换不参与布局、无抖动。 -->
-      <Grid Grid.Row="1" x:Name="MainLayout" ColumnDefinitions="264,*,296">
-        <!-- ── 左：轨道头（面板层；仅工作台视图） ── -->
-        <Border Grid.Column="0" Background="{DynamicResource md3.surface-container}"
-                IsVisible="{Binding ViewSwitcher.ShowWorkspace}"
+      <!-- ══════════ 工作区（W16 面板系统）：左 轨头 · 分隔条 · 中 编排区 · 分隔条 · 右 素材库 ══════════
+           两列都是 Auto：宽度由面板自己的 Width="{Binding XxxPanel.Width}" 决定（默认值见 PanelLayoutPreferences，
+           拖拽/双击复位由 PanelSplitter 负责），折叠时面板 IsVisible=false ⇒ 列宽 0，不留空白也不留窄条。
+           中央列 `*`（MinWidth=320）保证拖宽面板时不会把编排区挤没。 -->
+      <Grid Grid.Row="1" x:Name="MainLayout" ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+        <!-- ── 左：轨道头（仅工作台视图；面板本体带宽度绑定 + 折叠可见性） ── -->
+        <Border Grid.Column="0" IsVisible="{Binding ViewSwitcher.ShowWorkspace}">
+        <!-- 面板容器：宽与显隐都取自分隔条（夹紧后的有效宽 / 放不下自动折叠），不直接绑 VM 的意图值 -->
+        <Border x:Name="TracksPanelHost" Width="{Binding #TracksPanelSplitter.PanelWidth}"
+                IsVisible="{Binding #TracksPanelSplitter.PanelShown}"
+                Background="{DynamicResource md3.surface-container}"
                 BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,1,0">
           <Grid RowDefinitions="34,16,*">
-            <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="12,0">
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="12,0">
               <TextBlock Text="{DynamicResource command.import.track}" FontSize="11" FontWeight="SemiBold"
                          VerticalAlignment="Center"
                          Foreground="{DynamicResource md3.on-surface-variant}"/>
               <Button Grid.Column="1" Classes="topBtn" Width="22" Height="22" Click="OnAddTrack"
                       ToolTip.Tip="{DynamicResource command.track.add}">
                 <Path Data="{StaticResource icon-plus}" Width="12" Height="12" Stretch="Uniform"
+                      Fill="{DynamicResource md3.on-surface-variant}"/>
+              </Button>
+              <Button Grid.Column="2" Classes="panelToggle" Click="OnCollapseTracksPanel"
+                      ToolTip.Tip="{DynamicResource panel.collapse.tracks}">
+                <Path Data="{StaticResource icon-chevron-left}" Width="12" Height="12" Stretch="Uniform"
                       Fill="{DynamicResource md3.on-surface-variant}"/>
               </Button>
             </Grid>
@@ -479,9 +519,23 @@
                                 PointerWheelChanged="MainPagePointerWheelChanged"/>
           </Grid>
         </Border>
+        </Border>
+
+        <!-- ── 左分隔条（面板在其**左侧** ⇒ Invert=false：向右拖 = 轨头变宽；双击复位 248） ── -->
+        <c:PanelSplitter Grid.Column="1" x:Name="TracksPanelSplitter"
+                         IsVisible="{Binding TracksPanelVisible}"
+                         PanelColumn="0"
+                         Invert="False"
+                         Target="{Binding TracksPanel.Width, Mode=TwoWay}"
+                         Min="{Binding TracksPanel.MinWidth}"
+                         Max="{Binding TracksPanel.MaxWidth}"
+                         DefaultWidth="{Binding TracksPanel.DefaultWidth}"
+                         CenterMin="320"
+                         DragCompleted="OnPanelSplitterDragCompleted"
+                         ToolTip.Tip="{DynamicResource panel.drag.hint}"/>
 
         <!-- ── 中：编排区（工作台视图：标尺 34 / 横向滚动 16 / 轨道区）── -->
-        <Grid Grid.Column="1" ColumnDefinitions="*,8" Background="{DynamicResource md3.surface}"
+        <Grid Grid.Column="2" ColumnDefinitions="*,8" Background="{DynamicResource md3.surface}"
               IsVisible="{Binding ViewSwitcher.ShowWorkspace}">
           <Grid Grid.Row="0" Grid.Column="0" x:Name="ArrangementArea">
             <!-- 标尺 34 / 横向滚动 16 / 轨道区（与外壳契约 MainWindowShellTests 同形） -->
@@ -630,14 +684,29 @@
                     SmallChange="{Binding SmallChangeY}" PointerWheelChanged="VScrollPointerWheelChanged"/>
         </Grid>
 
-        <!-- ── 右：素材库 296（表头 44 / 页签 40 / 内容；工作台与混音台可见 —— 混音台里要能拖插件进链面板）── -->
-        <Border Grid.Column="2" Background="{DynamicResource md3.surface-container}"
-                IsVisible="{Binding ViewSwitcher.ShowLibrary}"
+        <!-- ── 右分隔条（面板在其**右侧** ⇒ Invert=true：向右拖 = 素材库变窄；双击复位 272） ── -->
+        <c:PanelSplitter Grid.Column="3" x:Name="LibraryPanelSplitter"
+                         IsVisible="{Binding LibraryPanelVisible}"
+                         PanelColumn="4"
+                         Invert="True"
+                         Target="{Binding LibraryPanel.Width, Mode=TwoWay}"
+                         Min="{Binding LibraryPanel.MinWidth}"
+                         Max="{Binding LibraryPanel.MaxWidth}"
+                         DefaultWidth="{Binding LibraryPanel.DefaultWidth}"
+                         CenterMin="320"
+                         DragCompleted="OnPanelSplitterDragCompleted"
+                         ToolTip.Tip="{DynamicResource panel.drag.hint}"/>
+
+        <!-- ── 右：素材库 272（表头 44 / 页签 40 / 内容；工作台与混音台可见 —— 混音台里要能拖插件进链面板）── -->
+        <Border Grid.Column="4" IsVisible="{Binding ViewSwitcher.ShowLibrary}">
+        <Border x:Name="LibraryPanelHost" Width="{Binding #LibraryPanelSplitter.PanelWidth}"
+                IsVisible="{Binding #LibraryPanelSplitter.PanelShown}"
+                Background="{DynamicResource md3.surface-container}"
                 BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="1,0,0,0">
           <Grid RowDefinitions="44,40,*">
             <!-- 表头 -->
             <Border Grid.Row="0" BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1">
-              <Grid ColumnDefinitions="*,Auto" Margin="12,0">
+              <Grid ColumnDefinitions="*,Auto,Auto" Margin="12,0">
               <TextBlock Text="{DynamicResource sidebar.library}" FontSize="11" FontWeight="SemiBold"
                          VerticalAlignment="Center"
                          Foreground="{DynamicResource md3.on-surface-variant}"/>
@@ -652,6 +721,11 @@
                   </MenuFlyout>
                 </Button.Flyout>
                 <Path Data="{StaticResource icon-list}" Width="14" Height="14" Stretch="Uniform"
+                      Fill="{DynamicResource md3.on-surface-variant}"/>
+              </Button>
+              <Button Grid.Column="2" Classes="panelToggle" Click="OnCollapseLibraryPanel"
+                      ToolTip.Tip="{DynamicResource panel.collapse.library}">
+                <Path Data="{StaticResource icon-chevron-right}" Width="12" Height="12" Stretch="Uniform"
                       Fill="{DynamicResource md3.on-surface-variant}"/>
               </Button>
               </Grid>
@@ -947,17 +1021,18 @@
             </Grid>
           </Grid>
         </Border>
+        </Border>
 
         <!-- ── 视图 2/3：钢琴卷帘（铺满工作区行；进入仍是双击片段 A5，返回走顶栏胶囊「工作台」）──
              宿主 Border 只负责「不透明底 + 可见性」；内层 ContentControl 走一次淡入（不参与布局）。 -->
-        <Border Grid.Column="0" Grid.ColumnSpan="3" ZIndex="10"
+        <Border Grid.Column="0" Grid.ColumnSpan="5" ZIndex="10"
                 Background="{DynamicResource md3.surface}"
                 IsVisible="{Binding ViewSwitcher.ShowPianoRoll}">
           <ContentControl x:Name="PianoRollContainer" Classes="md3-fade"/>
         </Border>
         <!-- ── 视图 3/3：混音台（不再停靠在编排区下方；Ctrl+M / 胶囊进入）──
-             overlay 只铺前两列：第 3 列留给素材库列，让「素材库 → 效果器 → 拖入链面板」可达（B3/B6）。 -->
-        <Border Grid.Column="0" Grid.ColumnSpan="2" ZIndex="10"
+             overlay 只铺前 4 列：最后 1 列留给素材库列，让「素材库 → 效果器 → 拖入链面板」可达（B3/B6）。 -->
+        <Border Grid.Column="0" Grid.ColumnSpan="4" ZIndex="10"
                 Background="{DynamicResource md3.surface}"
                 IsVisible="{Binding ViewSwitcher.ShowMixer}">
           <ContentControl x:Name="MixerContainer" Classes="md3-fade"/>
