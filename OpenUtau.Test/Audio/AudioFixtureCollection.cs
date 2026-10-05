@@ -1,3 +1,4 @@
+using OpenUtau.Test.TestSupport;
 using Xunit;
 
 namespace OpenUtau.Test.Audio {
@@ -7,7 +8,18 @@ namespace OpenUtau.Test.Audio {
     /// 原因：这些用例会装配产品级全局单例——<c>DocManager.Project</c>/调度器、
     /// <c>PhonemizerRunner</c>、<c>VstPluginManager.Bridge</c>（假 VST）、
     /// <c>ToolsManager</c> 等。并行运行会与仓库里其它共享单例的用例互相干扰。
+    ///
+    /// 集合级 fixture <see cref="AudioGlobalStateGuard"/> 在集合结束时**还原进程级全局
+    /// 线程态**（<c>DocManager.mainThread</c>/<c>mainScheduler</c>）：即使某个用例中途失败，
+    /// 也不会把"主线程是测试线程"这种状态泄漏给之后运行的其它集合（W14 flake 同类根因）。
     /// </summary>
     [CollectionDefinition("AudioFixture", DisableParallelization = true)]
-    public class AudioFixtureCollection { }
+    public class AudioFixtureCollection : ICollectionFixture<AudioGlobalStateGuard> { }
+
+    /// <summary>集合范围的全局态守卫：集合跑完即还原测试改过的进程级字段。</summary>
+    public sealed class AudioGlobalStateGuard : System.IDisposable {
+        public void Dispose() {
+            AudioFixtures.RestoreSchedulers();
+        }
+    }
 }

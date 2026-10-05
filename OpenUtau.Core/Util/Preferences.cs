@@ -463,6 +463,13 @@ errors.txt
             /// 长 VST 名可读且不挤；Min 264 保住名称列 ~99px，Max 480 让最长名+副标题+状态角标全展开。</summary>
             public double MixerChainWidth = 280;
             public bool MixerChainCollapsed = false;
+
+            /// <summary>卷帘底部表达式/曲线区（**行面板**，W20）。默认 150：与接入面板系统前
+            /// `PianoRoll.axaml` 那一行的默认高一致 ⇒ 接入后观感不变；
+            /// 设计边界沿用 `ViewConstants.ExpHeightMin/Max`（132/600）。</summary>
+            public double PianoRollExpHeight = 150;
+            /// <summary>默认展开（折叠是用户主动选择），与轨头/素材库同一口径。</summary>
+            public bool PianoRollExpCollapsed = false;
         }
 
         /// <summary>

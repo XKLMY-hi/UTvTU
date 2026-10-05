@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
@@ -63,6 +63,15 @@ public partial class PanelSplitter : UserControl {
     public static readonly StyledProperty<int> PanelColumnProperty =
         AvaloniaProperty.Register<PanelSplitter, int>(nameof(PanelColumn), -1);
 
+    /// <summary>
+    /// **纵向模式**：被调面板所在的 Grid 行索引（W20 新增）。`≥ 0` 即纵向 ——
+    /// 可用尺寸取宿主**高**、拖动沿 Y、输出改为 <see cref="PanelHeight"/>。
+    /// 默认 -1 = 列模式（列方向的既有行为完全不变）。
+    /// 与 <see cref="PanelColumn"/> 同义：计算"其它固定占用"时排除面板自身那一行。
+    /// </summary>
+    public static readonly StyledProperty<int> PanelRowProperty =
+        AvaloniaProperty.Register<PanelSplitter, int>(nameof(PanelRow), -1);
+
     /// <summary>有效宽低于此值时自动折叠（不留夹缝）。默认 120：轨头卡片要 ≥170 才不折行、
     /// 素材库卡片要 ≥140；低于 120 时任何面板都只剩一条"夹缝"，不如折叠交给中央区。</summary>
     public static readonly StyledProperty<double> CollapseThresholdProperty =
@@ -77,9 +86,13 @@ public partial class PanelSplitter : UserControl {
     public static readonly StyledProperty<double> SelfReservedWidthProperty =
         AvaloniaProperty.Register<PanelSplitter, double>(nameof(SelfReservedWidth), 7);
 
-    /// <summary>【输出】夹紧后的有效宽（面板容器 Width 绑它）。</summary>
+    /// <summary>【输出】夹紧后的有效宽（面板容器 Width 绑它；列模式）。</summary>
     public static readonly StyledProperty<double> PanelWidthProperty =
         AvaloniaProperty.Register<PanelSplitter, double>(nameof(PanelWidth));
+
+    /// <summary>【输出】夹紧后的有效高（面板容器 Height 绑它；纵向模式，W20）。</summary>
+    public static readonly StyledProperty<double> PanelHeightProperty =
+        AvaloniaProperty.Register<PanelSplitter, double>(nameof(PanelHeight));
 
     /// <summary>【输出】面板是否显示（视图可见/未折叠 且 有效宽 ≥ 阈值）。</summary>
     public static readonly StyledProperty<bool> PanelShownProperty =
@@ -113,6 +126,12 @@ public partial class PanelSplitter : UserControl {
         get => GetValue(PanelColumnProperty);
         set => SetValue(PanelColumnProperty, value);
     }
+    public int PanelRow {
+        get => GetValue(PanelRowProperty);
+        set => SetValue(PanelRowProperty, value);
+    }
+    /// <summary>纵向模式（<see cref="PanelRow"/> ≥ 0）：可用尺寸取宿主高、拖动沿 Y。</summary>
+    public bool IsVertical => PanelRow >= 0;
     public double CollapseThreshold {
         get => GetValue(CollapseThresholdProperty);
         set => SetValue(CollapseThresholdProperty, value);
@@ -124,6 +143,10 @@ public partial class PanelSplitter : UserControl {
     public double PanelWidth {
         get => GetValue(PanelWidthProperty);
         private set => SetCurrentValue(PanelWidthProperty, value);
+    }
+    public double PanelHeight {
+        get => GetValue(PanelHeightProperty);
+        private set => SetCurrentValue(PanelHeightProperty, value);
     }
     public bool PanelShown {
         get => GetValue(PanelShownProperty);
@@ -148,15 +171,65 @@ public partial class PanelSplitter : UserControl {
         // 宿主尺寸/兄弟变化都会走到 LayoutUpdated：在此静默重新夹紧（口径 2）
         LayoutUpdated += (_, _) => UpdateEffective();
         this.GetObservable(IsVisibleProperty).Subscribe(_ => UpdateEffective());
+        // 纵向模式在 XAML 加载后才可能被赋值（PanelRow 是绑定/属性设置）⇒ 变化时重排命中区
+        this.GetObservable(PanelRowProperty).Subscribe(_ => {
+            ApplyOrientationVisual();
+            UpdateEffective();
+        });
+        ApplyOrientationVisual();
     }
 
     /// <summary>
-    /// 当前允许的最大有效宽：`可用宽 − 其它固定占用 − 中央最小宽`，**可以跌破 Min**（口径 3-1），
+    /// 命中区/细线的朝向（W20）：列模式保持 XAML 原样的"7px 竖条 + 1px 竖线"；
+    /// 纵向模式换成"7px 横条 + 1px 横线"并改用上下拖拽光标。控件自身在纵向占 7px 高。
+    /// </summary>
+    private void ApplyOrientationVisual() {
+        if (HitArea == null) {
+            return;
+        }
+        var track = HitArea.Child as Border;
+        if (IsVertical) {
+            Width = double.NaN;
+            Height = SelfReservedWidth;
+            HitArea.Width = double.NaN;
+            HitArea.Height = SelfReservedWidth;
+            HitArea.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
+            HitArea.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center;
+            HitArea.Cursor = new Cursor(StandardCursorType.SizeNorthSouth);
+            if (track != null) {
+                track.Width = double.NaN;
+                track.Height = 1;
+                track.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
+                track.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center;
+            }
+        } else {
+            Width = double.NaN;
+            Height = double.NaN;
+            HitArea.Width = SelfReservedWidth;
+            HitArea.Height = double.NaN;
+            HitArea.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center;
+            HitArea.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch;
+            HitArea.Cursor = new Cursor(StandardCursorType.SizeWestEast);
+            if (track != null) {
+                track.Width = 1;
+                track.Height = double.NaN;
+                track.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center;
+                track.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 当前允许的最大有效尺寸：`可用尺寸 − 其它固定占用 − 中央最小尺寸`，**可以跌破 Min**（口径 3-1），
     /// 下限取 0（放不下就该缩到 0 让中央区吃掉，而不是溢出/留夹缝）。
+    /// 尺寸沿**拖拽轴**取：列模式用宽/列占用，纵向模式用高/行占用（W20）。
     /// </summary>
     internal double MaxAllowed() {
-        double available = dragAvailable > 0 ? dragAvailable : AvailableWidth();
-        double reserved = dragReserved > 0 ? dragReserved : ReservedWidth();
+        // 拖拽快照只在**按下拖动期间**生效：拖动中宿主尺寸变化时保持手感稳定；
+        // 拖动结束后必须回到实时值 —— 否则"宿主变小 ⇒ 静默夹紧"会拿旧快照算出一个过大的上限，
+        // 表现为窗口缩小后面板仍保持原尺寸、把中央区挤扁（W20 纵向用例抓到）。
+        double available = dragging && dragAvailable > 0 ? dragAvailable : AvailableSize();
+        double reserved = dragging && dragReserved > 0 ? dragReserved : ReservedSize();
         double dynamic = available > 0 ? available - reserved - CenterMin : Max;
         return Math.Max(0, Math.Min(Max, dynamic));
     }
@@ -165,15 +238,16 @@ public partial class PanelSplitter : UserControl {
     internal double ClampEffective(double intent) => Math.Min(Math.Max(intent, 0), MaxAllowed());
 
     /// <summary>
-    /// 按拖拽位移应用宽度（指针事件与测试共用这一条路径，保证测试覆盖真实逻辑）：
+    /// 按拖拽位移应用尺寸（指针事件与测试共用这一条路径，保证测试覆盖真实逻辑）：
     /// 拖动改的是**意图值** <see cref="Target"/>，同时夹到当前合法上限。
     /// 未处于按下状态时（例如测试直接调用）先就地快照基准，语义与"按下后拖"一致。
+    /// 参数是**沿拖拽轴的位移**（列模式 = X，纵向模式 = Y），因此两种模式共用同一条逻辑。
     /// </summary>
     internal void ApplyDragDelta(double deltaX) {
         if (!dragging) {
             dragStartTarget = Target;
-            dragAvailable = AvailableWidth();
-            dragReserved = ReservedWidth();
+            dragAvailable = AvailableSize();
+            dragReserved = ReservedSize();
         }
         double delta = Invert ? -deltaX : deltaX;
         double max = MaxAllowed();
@@ -189,17 +263,25 @@ public partial class PanelSplitter : UserControl {
     }
 
     /// <summary>
-    /// 唯一的状态收敛点（口径 2 + 3）：夹紧 → 判定是否放得下 → 同时写 <see cref="PanelWidth"/> /
+    /// 唯一的状态收敛点（口径 2 + 3）：夹紧 → 判定是否放得下 → 同时写有效尺寸与
     /// <see cref="PanelShown"/>。**必须一次算完两个输出**：分开写会出现
     /// "夹到 100 → 判为放不下 → 归零 → 下一帧又夹到 100" 的两态振荡（Avalonia 会报无限布局循环）。
-    /// 不变量：结果只依赖 (Target, 布局占用, IsVisible)，不依赖上一次的 PanelWidth/PanelShown。
+    /// 不变量：结果只依赖 (Target, 布局占用, IsVisible)，不依赖上一次的有效值。
+    /// 列模式写 <see cref="PanelWidth"/>；纵向模式写 <see cref="PanelHeight"/>（W20）。
     /// </summary>
     internal void UpdateEffective() {
         double clamped = ClampEffective(Target);
         bool shown = IsVisible && clamped >= CollapseThreshold;
-        double nextWidth = shown ? clamped : 0;
-        if (Math.Abs(PanelWidth - nextWidth) >= 0.5) {
-            PanelWidth = nextWidth;
+        if (IsVertical) {
+            double nextHeight = shown ? clamped : 0;
+            if (Math.Abs(PanelHeight - nextHeight) >= 0.5) {
+                PanelHeight = nextHeight;
+            }
+        } else {
+            double nextWidth = shown ? clamped : 0;
+            if (Math.Abs(PanelWidth - nextWidth) >= 0.5) {
+                PanelWidth = nextWidth;
+            }
         }
         if (PanelShown != shown) {
             PanelShown = shown;
@@ -214,10 +296,10 @@ public partial class PanelSplitter : UserControl {
             return;
         }
         dragging = true;
-        dragStartX = e.GetPosition(this).X;
+        dragStartX = Axis(e.GetPosition(this));
         dragStartTarget = Target;
-        dragAvailable = AvailableWidth();
-        dragReserved = ReservedWidth();
+        dragAvailable = AvailableSize();
+        dragReserved = ReservedSize();
         e.Pointer.Capture(HitArea);
         Classes.Set("dragging", true);
         e.Handled = true;
@@ -227,10 +309,13 @@ public partial class PanelSplitter : UserControl {
         if (!dragging) {
             return;
         }
-        ApplyDragDelta(e.GetPosition(this).X - dragStartX);
+        ApplyDragDelta(Axis(e.GetPosition(this)) - dragStartX);
         UpdateEffective();
         e.Handled = true;
     }
+
+    /// <summary>取沿拖拽轴的坐标：列模式 X，纵向模式 Y。</summary>
+    private double Axis(Point point) => IsVertical ? point.Y : point.X;
 
     private void OnReleased(object? sender, PointerReleasedEventArgs e) {
         if (!dragging) {
@@ -248,7 +333,70 @@ public partial class PanelSplitter : UserControl {
         e.Handled = true;
     }
 
+    private double AvailableSize() => IsVertical ? AvailableHeight() : AvailableWidth();
+
+    private double ReservedSize() => IsVertical ? ReservedHeight() : ReservedWidth();
+
     private double AvailableWidth() => (Parent as Visual)?.Bounds.Width ?? 0;
+
+    private double AvailableHeight() => (Parent as Visual)?.Bounds.Height ?? 0;
+
+    /// <summary>
+    /// 纵向模式的"其它固定占用"（W20；与 <see cref="ReservedWidth"/> 逐条对称）：
+    /// 1. **同向**（纵向）兄弟分隔条各按 <see cref="SelfReservedWidth"/> 恒占位（不看可见性，
+    ///    保证 `CenterMin` = 中央行**净**高）；反向（列模式）兄弟分隔条沿 Y 的 Bounds 无意义 ⇒ 跳过；
+    /// 2. 按 **PanelRow 升序**定优先级：更靠上的行面板用其**当前有效高**（<see cref="PanelHeight"/>）、
+    ///    更靠下的只用其 `Min` ⇒ 依赖单向，天然无环（否则会报 `Infinite layout loop detected`）；
+    /// 3. 非面板的固定单行按其实际 `Bounds.Height` 计入；跨行覆盖层与星号行不计；
+    ///    被兄弟分隔条管理的面板行不重复计入。
+    /// </summary>
+    private double ReservedHeight() {
+        if (Parent is not Grid grid) {
+            return SelfReservedWidth;
+        }
+        int starRow = -1;
+        for (int i = 0; i < grid.RowDefinitions.Count; i++) {
+            if (grid.RowDefinitions[i].Height.IsStar) {
+                starRow = i;
+                break;
+            }
+        }
+        double sum = SelfReservedWidth;
+        var managedRows = new List<int>();
+        foreach (var child in grid.Children) {
+            if (ReferenceEquals(child, this) || child is not PanelSplitter s || !s.IsVertical) {
+                continue;                                     // 反向分隔条不占"行"
+            }
+            sum += s.SelfReservedWidth;                       // 1：同向分隔条恒占位
+            if (s.PanelRow < 0) {
+                continue;
+            }
+            managedRows.Add(s.PanelRow);
+            if (!s.IsVisible) {
+                continue;                                     // 宿主已折叠该面板 ⇒ 不占高
+            }
+            sum += s.PanelRow < PanelRow
+                ? s.PanelHeight                                // 2a：更靠上 ⇒ 用其当前有效高
+                : s.Min;                                       // 2b：更靠下 ⇒ 只按最小高预留
+        }
+        foreach (var child in grid.Children) {
+            if (ReferenceEquals(child, this) || child is not Control c || !c.IsVisible) {
+                continue;
+            }
+            if (c is PanelSplitter) {
+                continue;                                     // 同向已在上面计入；反向不占行
+            }
+            int row = Grid.GetRow(c);
+            if (Grid.GetRowSpan(c) != 1 || row == starRow) {
+                continue;                                     // 跨行覆盖层 / 中央星号行
+            }
+            if (row == PanelRow || managedRows.Contains(row)) {
+                continue;                                     // 我的面板 / 兄弟面板（口径 1 + 去重）
+            }
+            sum += c.Bounds.Height;                           // 3：固定单行（细线等）
+        }
+        return sum;
+    }
 
     /// <summary>
     /// 其它固定占用（**无环口径**，task-28 实测踩过"两面板互相夹紧 → 布局无限循环"）：
@@ -276,8 +424,8 @@ public partial class PanelSplitter : UserControl {
         double sum = SelfReservedWidth;
         var managedColumns = new List<int>();
         foreach (var child in grid.Children) {
-            if (ReferenceEquals(child, this) || child is not PanelSplitter s) {
-                continue;
+            if (ReferenceEquals(child, this) || child is not PanelSplitter s || s.IsVertical) {
+                continue;                                     // 纵向分隔条不占"列"（W20）
             }
             sum += s.SelfReservedWidth;                       // 1：所有分隔条恒占位
             if (s.PanelColumn < 0) {

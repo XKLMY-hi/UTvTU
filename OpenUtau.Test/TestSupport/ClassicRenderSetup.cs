@@ -63,9 +63,17 @@ namespace OpenUtau.Test.TestSupport {
         /// 若把已 Dispose 的 runner 留在全局，后续任何 <c>UProject.ValidateFull</c> 走进
         /// <c>UPart.Validate → PhonemizerRunner.Push</c> 都会 ObjectDisposedException
         /// （实测在全量跑里炸掉 4 个无关用例）。
+        ///
+        /// 同一原则适用于**线程态**：本方法临时把 <c>mainThread</c> 指到当前线程、并把
+        /// <c>PostOnUIThread</c> 换成"丢弃"通道；两者都是进程级全局，Dispose 时必须还原，
+        /// 否则并行执行的其它集合会看到"主线程是别人、通知被静默丢弃"（W14 flake 同类）。
         /// </summary>
         public static PhonemizerSession StartPhonemizer(UProject project) {
             AudioFixtures.EnsureSchedulers(); // mainThread = 当前线程；mainScheduler = 线程池
+            var mainThreadField = typeof(DocManager)
+                .GetField("mainThread", BindingFlags.NonPublic | BindingFlags.Instance)!;
+            var previousMainThread = (Thread?)mainThreadField.GetValue(DocManager.Inst);
+            var previousPost = DocManager.Inst.PostOnUIThread;
             // 响应任务跑在线程池上，ExecuteCmd 会认为"不在主线程"而回调 PostOnUIThread。
             // 这里**丢弃**这类通知：本夹具只关心 SetPhonemizerResponse + Project.Validate
             // 的副作用（它们在 ExecuteCmd 之前已完成）。注意别写成 action => action()——
@@ -77,23 +85,36 @@ namespace OpenUtau.Test.TestSupport {
             var previous = (PhonemizerRunner?)property.GetValue(DocManager.Inst);
             var runner = new PhonemizerRunner(TaskScheduler.Default);
             property.SetValue(DocManager.Inst, runner);
-            return new PhonemizerSession(property, runner, previous);
+            return new PhonemizerSession(property, runner, previous, mainThreadField, previousMainThread, previousPost);
         }
 
         public sealed class PhonemizerSession : IDisposable {
             readonly PropertyInfo property;
             readonly PhonemizerRunner runner;
             readonly PhonemizerRunner? previous;
+            readonly FieldInfo? mainThreadField;
+            readonly Thread? previousMainThread;
+            readonly Action<Action>? previousPost;
 
-            public PhonemizerSession(PropertyInfo property, PhonemizerRunner runner, PhonemizerRunner? previous) {
+            public PhonemizerSession(
+                PropertyInfo property, PhonemizerRunner runner, PhonemizerRunner? previous,
+                FieldInfo? mainThreadField = null, Thread? previousMainThread = null, Action<Action>? previousPost = null) {
                 this.property = property;
                 this.runner = runner;
                 this.previous = previous;
+                this.mainThreadField = mainThreadField;
+                this.previousMainThread = previousMainThread;
+                this.previousPost = previousPost;
             }
 
             public void Dispose() {
                 property.SetValue(DocManager.Inst, previous);
                 runner.Dispose();
+                // 线程态还原（顺序：先还原 PostOnUIThread，再还原 mainThread）
+                if (mainThreadField != null) {
+                    DocManager.Inst.PostOnUIThread = previousPost;
+                    mainThreadField.SetValue(DocManager.Inst, previousMainThread);
+                }
             }
         }
 
