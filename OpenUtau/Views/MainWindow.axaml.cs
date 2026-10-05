@@ -40,6 +40,15 @@ namespace OpenUtau.App.Views {
             OS.IsMacOS() ? KeyModifiers.Meta : KeyModifiers.Control;
         private readonly MainWindowViewModel viewModel;
 
+        // 编排区平滑滚动/缩放（上游 1c43dc2b 的"轨道视图那半"；卷帘侧由 W15 落地同一套
+        // Controls/SmoothViewport）。滚轮一次步进不直接跳到位，而是在 0.18s 内滑过去；
+        // 滑动途中继续滚轮会从当前位置与当前速度续接 ⇒ 连续滚轮是一段连续运动。
+        // 精密触控板的小数 delta 立即生效不滑动；Preferences.ReduceMotion 打开时全部即时到位。
+        private readonly ValueGlide hScroll;
+        private readonly ValueGlide vScroll;
+        private readonly ZoomGlide xZoom;
+        private readonly ValueGlide trackHeight;
+
         private PianoRollDetachedWindow? pianoRollWindow;
         private PianoRoll? pianoRoll;
         private MixerControl? mixerControl;
@@ -86,6 +95,18 @@ namespace OpenUtau.App.Views {
             sidebarViewModel = new SidebarViewModel();
             SingersPanel.DataContext = sidebarViewModel;
             SamplesPanel.DataContext = sidebarViewModel;
+
+            // 编排区平滑滚动/缩放（上游 1c43dc2b）：与卷帘同一套时长（0.18s）与续接语义。
+            // 轨道高按 TrackHeightDelta 逐格步进、格间滑动（上游口径）。
+            var smoothViewport = new SmoothViewport(this);
+            hScroll = smoothViewport.Scroll(HScrollBar);
+            vScroll = smoothViewport.Scroll(VScrollBar);
+            xZoom = smoothViewport.Zoom((position, delta) => viewModel.TracksViewModel.OnXZoomed(position, delta));
+            trackHeight = smoothViewport.Value(
+                () => viewModel.TracksViewModel.TrackHeight,
+                height => viewModel.TracksViewModel.SetTrackHeight(height),
+                () => ViewConstants.TrackHeightMin,
+                () => ViewConstants.TrackHeightMax);
 
             // W11：首次运行把平台标准 VST3 目录播种进扫描路径（幂等 + 只此一次；
             // 用户之后删掉不会被复活）。素材库「效果器」页签与偏好设置 VST 页共用这份数据。
@@ -1734,13 +1755,11 @@ namespace OpenUtau.App.Views {
         }
 
         public void HScrollPointerWheelChanged(object sender, PointerWheelEventArgs args) {
-            var scrollbar = (ScrollBar)sender;
-            scrollbar.Value = Math.Max(scrollbar.Minimum, Math.Min(scrollbar.Maximum, scrollbar.Value - scrollbar.SmallChange * args.Delta.Y));
+            hScroll.By(-HScrollBar.SmallChange * args.Delta.Y, SmoothViewport.IsWheelStep(args.Delta.Y));
         }
 
         public void VScrollPointerWheelChanged(object sender, PointerWheelEventArgs args) {
-            var scrollbar = (ScrollBar)sender;
-            scrollbar.Value = Math.Max(scrollbar.Minimum, Math.Min(scrollbar.Maximum, scrollbar.Value - scrollbar.SmallChange * args.Delta.Y));
+            vScroll.By(-VScrollBar.SmallChange * args.Delta.Y, SmoothViewport.IsWheelStep(args.Delta.Y));
         }
 
         public void TimelinePointerWheelChanged(object sender, PointerWheelEventArgs args) {
@@ -1748,11 +1767,11 @@ namespace OpenUtau.App.Views {
             var position = args.GetCurrentPoint((Visual)sender).Position;
             var size = control.Bounds.Size;
             position = position.WithX(position.X / size.Width).WithY(position.Y / size.Height);
-            viewModel.TracksViewModel.OnXZoomed(position, 0.1 * args.Delta.Y);
+            xZoom.By(position, 0.1 * args.Delta.Y, SmoothViewport.IsWheelStep(args.Delta.Y));
         }
 
         public void ViewScalerPointerWheelChanged(object sender, PointerWheelEventArgs args) {
-            viewModel.TracksViewModel.OnYZoomed(new Point(0, 0.5), 0.1 * args.Delta.Y);
+            trackHeight.By(Math.Sign(args.Delta.Y) * ViewConstants.TrackHeightDelta, SmoothViewport.IsWheelStep(args.Delta.Y));
         }
 
         public void TimelinePointerPressed(object sender, PointerPressedEventArgs args) {
@@ -2050,12 +2069,10 @@ namespace OpenUtau.App.Views {
                     delta = new Vector(delta.Y, delta.X);
                 }
                 if (delta.X != 0) {
-                    HScrollBar.Value = Math.Max(HScrollBar.Minimum,
-                        Math.Min(HScrollBar.Maximum, HScrollBar.Value - HScrollBar.SmallChange * delta.X));
+                    hScroll.By(-HScrollBar.SmallChange * delta.X, SmoothViewport.IsWheelStep(delta.X));
                 }
                 if (delta.Y != 0) {
-                    VScrollBar.Value = Math.Max(VScrollBar.Minimum,
-                        Math.Min(VScrollBar.Maximum, VScrollBar.Value - VScrollBar.SmallChange * delta.Y));
+                    vScroll.By(-VScrollBar.SmallChange * delta.Y, SmoothViewport.IsWheelStep(delta.Y));
                 }
             } else if (args.KeyModifiers == KeyModifiers.Alt) {
                 ViewScalerPointerWheelChanged(VScaler, args);

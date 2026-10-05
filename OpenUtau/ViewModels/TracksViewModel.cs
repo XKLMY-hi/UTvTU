@@ -213,7 +213,14 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public void OnYZoomed(Point position, double delta) {
-            double trackHeight = TrackHeight + Math.Sign(delta) * ViewConstants.TrackHeightDelta;
+            SetTrackHeight(TrackHeight + Math.Sign(delta) * ViewConstants.TrackHeightDelta);
+        }
+
+        /// <summary>
+        /// 轨道高（上游 1c43dc2b 从 OnYZoomed 里拆出来，供平滑滑动复用：滚轮一步 = TrackHeightDelta，
+        /// 步与步之间由 MainWindow 的 ValueGlide 沿 0.18s 曲线滑过去）。
+        /// </summary>
+        public void SetTrackHeight(double trackHeight) {
             trackHeight = Math.Clamp(trackHeight, ViewConstants.TrackHeightMin, ViewConstants.TrackHeightMax);
             trackHeight = Math.Max(trackHeight, TrackCount);
             TrackHeight = trackHeight;
