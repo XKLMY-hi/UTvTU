@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -50,9 +50,27 @@ namespace OpenUtau.App.Controls {
 
         private Window RootWindow => (Window)TopLevel.GetTopLevel(this)!;
 
+        // 平滑滚动/缩放（上游 1c43dc2b，本仓适配版见 SmoothViewport）：
+        // 一次滚轮步进沿 0.18s 的四次曲线滑过去，途中续接；"减少动效"时自动退化为立即设值。
+        private readonly ValueGlide hScroll;
+        private readonly ValueGlide vScroll;
+        private readonly ZoomGlide xZoom;
+        private readonly ZoomGlide yZoom;
+
         public PianoRoll(PianoRollViewModel model) {
             InitializeComponent();
             DataContext = ViewModel = model;
+            var smoothViewport = new SmoothViewport(this);
+            hScroll = smoothViewport.Scroll(HScrollBar);
+            vScroll = smoothViewport.Scroll(VScrollBar);
+            xZoom = smoothViewport.Zoom((position, delta) => ViewModel.NotesViewModel.OnXZoomed(position, delta));
+            yZoom = smoothViewport.Zoom((position, delta) => ViewModel.NotesViewModel.OnYZoomed(position, delta));
+            // 编排区拖动卷帘视口指示条 ⇒ 同步卷帘滚动（上游 9caec1a6；只改视口，不入撤销栈）
+            MessageBus.Current.Listen<PianoRollViewportScrollEvent>()
+                .Subscribe(e => {
+                    ViewModel.NotesViewModel.TickOffset =
+                        Math.Clamp(e.TickOffset, 0, ViewModel.NotesViewModel.HScrollBarMax);
+                });
             ValueTip.IsVisible = false;
             SetPenToolIcon();
             penTool.AddHandler(PointerPressedEvent, OnToolButtonPointerPressed, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
@@ -607,14 +625,13 @@ namespace OpenUtau.App.Controls {
         }
 
         public void HScrollPointerWheelChanged(object sender, PointerWheelEventArgs args) {
-            var scrollbar = (ScrollBar)sender;
-            scrollbar.Value = Math.Max(scrollbar.Minimum, Math.Min(scrollbar.Maximum, scrollbar.Value - scrollbar.SmallChange * args.Delta.Y));
+            // 平滑滚动（上游 1c43dc2b）：整步进滚轮滑过去，精密触控板的小数 delta 立即生效
+            hScroll.By(-HScrollBar.SmallChange * args.Delta.Y, SmoothViewport.IsWheelStep(args.Delta.Y));
             LyricBox?.EndEdit();
         }
 
         public void VScrollPointerWheelChanged(object sender, PointerWheelEventArgs args) {
-            var scrollbar = (ScrollBar)sender;
-            scrollbar.Value = Math.Max(scrollbar.Minimum, Math.Min(scrollbar.Maximum, scrollbar.Value - scrollbar.SmallChange * args.Delta.Y));
+            vScroll.By(-VScrollBar.SmallChange * args.Delta.Y, SmoothViewport.IsWheelStep(args.Delta.Y));
             LyricBox?.EndEdit();
         }
 
@@ -623,12 +640,12 @@ namespace OpenUtau.App.Controls {
             var position = args.GetCurrentPoint((Visual)sender).Position;
             var size = control.Bounds.Size;
             position = position.WithX(position.X / size.Width).WithY(position.Y / size.Height);
-            ViewModel.NotesViewModel.OnXZoomed(position, 0.1 * args.Delta.Y);
+            xZoom.By(position, 0.1 * args.Delta.Y, SmoothViewport.IsWheelStep(args.Delta.Y));
             LyricBox?.EndEdit();
         }
 
         public void ViewScalerPointerWheelChanged(object sender, PointerWheelEventArgs args) {
-            ViewModel.NotesViewModel.OnYZoomed(new Point(0, 0.5), 0.1 * args.Delta.Y);
+            yZoom.By(new Point(0, 0.5), 0.1 * args.Delta.Y, SmoothViewport.IsWheelStep(args.Delta.Y));
             LyricBox?.EndEdit();
         }
 
@@ -807,7 +824,9 @@ namespace OpenUtau.App.Controls {
                         control, ViewModel, this, noteHitInfo.note,
                         fromStart: noteHitInfo.hitResizeAreaFromStart);
                     Cursor = ViewConstants.cursorSizeWE;
-                } else if (args.KeyModifiers == cmdKey && selectedNotes.Count > 1) {
+                } else if (args.KeyModifiers == cmdKey) {
+                    // Ctrl+左键：即使当前只选中一个音符也要能切换选中态
+                    // （上游 `4941bf21` 修掉了早先的 `selectedNotes.Count > 1` 限制）
                     ViewModel.NotesViewModel.ToggleSelectNote(noteHitInfo.note);
                 } else if (args.KeyModifiers == KeyModifiers.Shift && selectedNotes.Count > 0) {
                     ViewModel.NotesViewModel.SelectNotesUntil(noteHitInfo.note);
@@ -1094,7 +1113,10 @@ namespace OpenUtau.App.Controls {
                 Cursor = null;
             }
             var noteHitInfo = ViewModel.NotesViewModel.HitTest.HitTestNote(point);
-            if (noteHitInfo.hitBody && ViewModel?.NotesViewModel?.Part != null) {
+            // 只有**没有**键盘修饰键的双击才弹歌词框：Ctrl/Shift/Alt 双击是选择或移动手势，
+            // 不该顺带开输入框（上游 `4941bf21`）。
+            if (noteHitInfo.hitBody && ViewModel?.NotesViewModel?.Part != null &&
+                args.KeyModifiers == KeyModifiers.None) {
                 var note = noteHitInfo.note;
                 LyricBox?.Show(ViewModel.NotesViewModel.Part, new LyricBoxNote(note), note.lyric);
             }
@@ -1111,16 +1133,14 @@ namespace OpenUtau.App.Controls {
                     delta = new Vector(delta.Y, delta.X);
                 }
                 if (delta.X != 0) {
-                    HScrollBar.Value = Math.Max(HScrollBar.Minimum,
-                        Math.Min(HScrollBar.Maximum, HScrollBar.Value - HScrollBar.SmallChange * delta.X));
+                    hScroll.By(-HScrollBar.SmallChange * delta.X, SmoothViewport.IsWheelStep(delta.X));
                 }
                 if (delta.Y != 0) {
-                    VScrollBar.Value = Math.Max(VScrollBar.Minimum,
-                        Math.Min(VScrollBar.Maximum, VScrollBar.Value - VScrollBar.SmallChange * delta.Y));
+                    vScroll.By(-VScrollBar.SmallChange * delta.Y, SmoothViewport.IsWheelStep(delta.Y));
                 }
             } else if (args.KeyModifiers == KeyModifiers.Alt) {
                 position = position.WithX(position.X / size.Width).WithY(position.Y / size.Height);
-                ViewModel.NotesViewModel.OnYZoomed(position, 0.1 * args.Delta.Y);
+                yZoom.By(position, 0.1 * args.Delta.Y, SmoothViewport.IsWheelStep(args.Delta.Y));
             } else if (args.KeyModifiers == cmdKey) {
                 TimelinePointerWheelChanged(TimelineCanvas, args);
             }
