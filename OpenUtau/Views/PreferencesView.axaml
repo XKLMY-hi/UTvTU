@@ -104,6 +104,10 @@
       <Setter Property="CornerRadius" Value="999"/>
       <Setter Property="Padding" Value="4"/>
     </Style>
+    <!-- W32 复核：选择器命中 **RadioButton**（派生类）⇒ 不吃 `Button` 主题的 MinHeight=32；
+         本样式不声明高度（地板来自它自己的 `Md3RadioButtonTheme.MinHeight=28`，
+         Md3SelectionThemes.axaml:149），容器 40 − 内边距 4×2 = 内高 32 ≥ 28 ⇒ 放得下。
+         规则抓到的 Height="40" 属于上面的 Border.segmented ⇒ 无需中和。 -->
     <Style Selector="RadioButton.chip">
       <Setter Property="Margin" Value="0"/>
       <Setter Property="Padding" Value="0"/>
