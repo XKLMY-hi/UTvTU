@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -408,6 +408,229 @@ namespace OpenUtau.Test.App {
             Assert.Contains("UserControl.dragging Border.panelSplitterTrack", xaml);
             Assert.Contains("{DynamicResource md3.primary}", xaml);
             Assert.Contains("{DynamicResource md3.outline-variant}", xaml);
+        }
+
+        // ══════════════════ 纵向模式（W20：PanelRow ≥ 0） ══════════════════
+        // 与列模式**逐条对称**：意图值/有效值分离、保留尺寸按升序、放不下就折叠、
+        // CenterMin = 中央行**净**高、双击复位、Invert 方向对称。
+        // 列模式的 18 例一条不改，本组只覆盖纵向新增分支。
+
+        private const double ExpDefault = 150;
+        private const double ExpMin = 132;
+        private const double ExpMax = 600;
+        private const double CenterMinHeight = 120;
+        private const double ExpCollapseThreshold = 80;
+        private const double VerticalTopBar = 40;
+
+        private sealed class VerticalFixture : IDisposable {
+            public readonly PanelSlot Exp = new("pianoroll-exp", ExpDefault, ExpMin, ExpMax);
+            public readonly PanelSlot Upper = new("upper", 160, 100, 400);
+            public readonly Border ExpHost = new();
+            public readonly Border UpperHost = new();
+            public readonly Grid Center = new();
+            public readonly PanelSplitter ExpSplitter;
+            public readonly PanelSplitter? UpperSplitter;
+            public readonly Grid Layout;
+            public readonly Window Window;
+
+            /// <param name="withUpper">再加一块**更靠上**的行面板（用于"升序保留"与无环回归）。</param>
+            public VerticalFixture(double width, double height, bool withUpper = false) {
+                // 行：0=顶部固定条 40；[1=上面板；2=上面板分隔条]；*=中央行；4=下面板分隔条；5=下面板
+                Layout = withUpper
+                    ? new Grid { RowDefinitions = new RowDefinitions("40,Auto,Auto,*,Auto,Auto") }
+                    : new Grid { RowDefinitions = new RowDefinitions("40,Auto,*,Auto") };
+                ExpSplitter = MakeRowSplitter(Exp, panelRow: withUpper ? 5 : 3, invert: true);
+                BindRowHost(ExpHost, ExpSplitter);
+                // 顶部固定条：必须是**真实存在的控件** —— 保留尺寸按子控件 Bounds 累加
+                // （与列口径一致），只有 RowDefinitions 里的空行是量不到的。
+                var topBar = new Border { Height = VerticalTopBar };
+                Layout.Children.Add(topBar);
+                Grid.SetRow(topBar, 0);
+                Layout.Children.Add(ExpHost);
+                Grid.SetRow(ExpHost, withUpper ? 5 : 3);
+                Layout.Children.Add(ExpSplitter);
+                Grid.SetRow(ExpSplitter, withUpper ? 4 : 1);
+                Layout.Children.Add(Center);
+                Grid.SetRow(Center, withUpper ? 3 : 2);
+                Grid.SetRowSpan(Center, 1);
+                if (withUpper) {
+                    UpperSplitter = MakeRowSplitter(Upper, panelRow: 1, invert: false);
+                    BindRowHost(UpperHost, UpperSplitter);
+                    Layout.Children.Add(UpperHost);
+                    Grid.SetRow(UpperHost, 1);
+                    Layout.Children.Add(UpperSplitter);
+                    Grid.SetRow(UpperSplitter, 2);
+                }
+                Window = new Window { Width = width, Height = height, Content = Layout };
+                Window.Show();
+                Settle();
+            }
+
+            private static PanelSplitter MakeRowSplitter(PanelSlot slot, int panelRow, bool invert) {
+                var splitter = new PanelSplitter {
+                    PanelRow = panelRow,
+                    Invert = invert,
+                    Min = slot.MinWidth,
+                    Max = slot.MaxWidth,
+                    DefaultWidth = slot.DefaultWidth,
+                    CenterMin = CenterMinHeight,
+                    CollapseThreshold = ExpCollapseThreshold,
+                };
+                // 与产品 XAML 同构：Target ←→ PanelSlot.Width 双向
+                splitter.Bind(PanelSplitter.TargetProperty,
+                    new Binding(nameof(PanelSlot.Width)) { Source = slot, Mode = BindingMode.TwoWay });
+                return splitter;
+            }
+
+            private static void BindRowHost(Border host, PanelSplitter splitter) {
+                host.Bind(Layoutable.HeightProperty, new Binding(nameof(PanelSplitter.PanelHeight)) { Source = splitter });
+                host.Bind(Visual.IsVisibleProperty, new Binding(nameof(PanelSplitter.PanelShown)) { Source = splitter });
+            }
+
+            public void Resize(double width, double height) {
+                Window.Width = width;
+                Window.Height = height;
+                Settle();
+            }
+
+            /// <summary>布局稳定：多跑几轮（两态振荡会在这里暴露成"值一直在变"或直接抛异常）。</summary>
+            public void Settle() {
+                for (int i = 0; i < 3; i++) {
+                    Pump();
+                    Window.UpdateLayout();
+                }
+                Pump();
+            }
+
+            public void Dispose() => Window.Close();
+        }
+
+        [AvaloniaFact]
+        public void Vertical_DragChangesHeight_AndHostShrinkReclampsWithoutRewritingIntent() {
+            using var f = new VerticalFixture(900, 700);
+            Assert.Equal(ExpDefault, f.ExpSplitter.PanelHeight, 1);
+            Assert.Equal(ExpDefault, f.ExpHost.Bounds.Height, 1);
+
+            // Invert=true（面板在分隔条**下方**）⇒ 向下拖变矮、向上拖变高。
+            // 向上 100 ⇒ 150 + 100 = 250（仍在 [Min 132, Max 600] 内，不会被 Min 兜住）
+            f.ExpSplitter.ApplyDragDelta(-100);
+            f.Settle();
+            Assert.Equal(250, f.ExpSplitter.PanelHeight, 1);
+            Assert.Equal(250, f.ExpHost.Bounds.Height, 1);
+            Assert.Equal(250, f.Exp.Width, 1);            // 意图值同步（TwoWay）
+
+            // 宿主变矮 ⇒ 静默重新夹紧有效高（300 − 7 − CenterMin120 = 173），但**不改写意图值**
+            f.Resize(900, 300);
+            Assert.True(f.ExpSplitter.PanelHeight < 250,
+                $"矮宿主下有效高应被夹紧，实际 {f.ExpSplitter.PanelHeight}");
+            Assert.Equal(250, f.Exp.Width, 1);            // 意图值仍是用户拖到的 250
+            Assert.True(f.Center.Bounds.Height >= CenterMinHeight,
+                $"中央行净高必须 ≥ CenterMin，实际 {f.Center.Bounds.Height}");
+
+            // 宿主变高 ⇒ 自动回到意图值
+            f.Resize(900, 700);
+            Assert.Equal(250, f.ExpSplitter.PanelHeight, 1);
+        }
+
+        [AvaloniaFact]
+        public void Vertical_CenterMin_IsNetHeight_SplitterPixelsIncluded() {
+            using var f = new VerticalFixture(900, 480);
+            double total = f.Layout.Bounds.Height;
+            double pieces = VerticalTopBar + f.ExpSplitter.Bounds.Height + f.Center.Bounds.Height + f.ExpSplitter.PanelHeight;
+            // 分隔条 7px 恒占位（不计入任何面板），中央行拿到的是**净**高
+            Assert.Equal(7, f.ExpSplitter.Bounds.Height, 1);
+            Assert.True(f.Center.Bounds.Height >= CenterMinHeight,
+                $"中央行净高必须 ≥ CenterMin，实际 {f.Center.Bounds.Height}");
+            Assert.Equal(total, pieces, 1);
+        }
+
+        [AvaloniaFact]
+        public void Vertical_TooShort_AutoCollapsesInsteadOfLeavingACrack() {
+            // 宿主高度小到"顶部条 + 分隔条 + CenterMin"之后只剩 < 阈值 ⇒ 面板折叠、高度 0
+            using var f = new VerticalFixture(900, 200);
+            Assert.False(f.ExpSplitter.PanelShown, "放不下时应折叠");
+            Assert.Equal(0, f.ExpSplitter.PanelHeight, 1);
+            Assert.False(f.ExpHost.IsVisible);
+            // 不留夹缝：中央行拿走全部剩余高
+            Assert.True(f.Center.Bounds.Height >= CenterMinHeight,
+                $"折叠后中央行应拿到剩余空间，实际 {f.Center.Bounds.Height}");
+            // 高度恢复后自动展开
+            f.Resize(900, 700);
+            Assert.True(f.ExpSplitter.PanelShown);
+            Assert.Equal(ExpDefault, f.ExpSplitter.PanelHeight, 1);
+        }
+
+        [AvaloniaFact]
+        public void Vertical_TwoRowPanels_ReserveAscending_NoLayoutLoop() {
+            // 上面板（PanelRow=1）+ 下面板（PanelRow=5）：按行升序定优先级 ——
+            // 更靠上的用"当前有效高"预留，更靠下的只用 Min 预留 ⇒ 依赖单向、无环。
+            // 若写成互相按当前值夹紧，这里会抛 InvalidOperationException: Infinite layout loop detected。
+            using var f = new VerticalFixture(900, 700, withUpper: true);
+            Assert.NotNull(f.UpperSplitter);
+            f.UpperSplitter!.ApplyDragDelta(40);       // 上面板加高（Invert=false：向下拖变高）
+            f.ExpSplitter.ApplyDragDelta(20);          // 下面板变矮（Invert=true：向下拖变矮）
+            f.Settle();
+
+            double upper1 = f.UpperSplitter.PanelHeight;
+            double lower1 = f.ExpSplitter.PanelHeight;
+            Assert.True(upper1 > 160, $"上面板应被加高，实际 {upper1}");
+            Assert.True(lower1 < ExpDefault + 0.5, $"下面板应变矮，实际 {lower1}");
+
+            // 窄宿主：下面板被夹，上面板仍按当前有效高保留 ⇒ 连续几轮布局后值必须稳定
+            f.Resize(900, 420);
+            double upperA = f.UpperSplitter.PanelHeight;
+            double lowerA = f.ExpSplitter.PanelHeight;
+            f.Settle();
+            f.Settle();
+            Assert.Equal(upperA, f.UpperSplitter.PanelHeight, 1);
+            Assert.Equal(lowerA, f.ExpSplitter.PanelHeight, 1);
+            // 上面板优先于下面板（升序保留）：下面板先被夹到 Min 或折叠
+            Assert.True(f.ExpSplitter.PanelHeight <= lower1 + 0.5,
+                "下面板不应在窄宿主下反而变高");
+            Assert.True(upperA >= f.Upper.MinWidth - 0.5, $"上面板应保留在其 Min 之上，实际 {upperA}");
+        }
+
+        [AvaloniaFact]
+        public void Vertical_DoubleClickReset_ReturnsToDefaultHeight_AndReportsDragCompleted() {
+            using var f = new VerticalFixture(900, 700);
+            f.ExpSplitter.ApplyDragDelta(60);
+            f.Settle();
+            Assert.NotEqual(ExpDefault, f.ExpSplitter.PanelHeight, 1);
+
+            int completed = 0;
+            f.ExpSplitter.DragCompleted += (_, _) => completed++;
+            f.ExpSplitter.ResetToDefault();
+            f.Settle();
+            Assert.Equal(ExpDefault, f.ExpSplitter.PanelHeight, 1);
+            Assert.Equal(1, completed);
+        }
+
+        [AvaloniaFact]
+        public void Vertical_InvertIsSymmetricToColumns() {
+            // Invert=true：面板在分隔条下方 ⇒ 向上拖变高（Y 位移取负）；
+            // Invert=false：面板在分隔条上方 ⇒ 向下拖变高。两者方向严格相反。
+            using var f = new VerticalFixture(900, 700, withUpper: true);
+            double before = f.ExpSplitter.PanelHeight;
+            f.ExpSplitter.ApplyDragDelta(-30);
+            f.Settle();
+            Assert.Equal(before + 30, f.ExpSplitter.PanelHeight, 1);
+
+            double upperBefore = f.UpperSplitter!.PanelHeight;
+            f.UpperSplitter.ApplyDragDelta(30);
+            f.Settle();
+            Assert.Equal(upperBefore + 30, f.UpperSplitter.PanelHeight, 1);
+        }
+
+        [AvaloniaFact]
+        public void Vertical_OrientationVisual_KeepsSevenPixelHitArea() {
+            using var f = new VerticalFixture(900, 700);
+            // 纵向：分隔条自身只占 7px **高**（横条），不再占据整列宽
+            Assert.True(f.ExpSplitter.IsVertical);
+            Assert.Equal(7, f.ExpSplitter.Bounds.Height, 1);
+            Assert.True(f.ExpSplitter.Bounds.Width > 100, "纵向分隔条应铺满宿主宽（横条）");
+            // 列模式不受影响
+            var columnSplitter = new PanelSplitter { PanelColumn = 0 };
+            Assert.False(columnSplitter.IsVertical);
         }
 
         [AvaloniaFact]
