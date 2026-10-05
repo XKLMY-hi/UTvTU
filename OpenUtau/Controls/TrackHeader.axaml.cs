@@ -90,6 +90,28 @@ namespace OpenUtau.App.Controls {
                 ViewModel.IsSingerVisible = trackHeight >= ViewConstants.TrackHeightDelta * 3;
                 ViewModel.IsPhonemizerVisible = trackHeight >= ViewConstants.TrackHeightDelta * 4;
                 ViewModel.IsRendererVisible = true;
+                // 但"恒显"不能变成"溢出"：独立成行需要 name18 + singer16 + phonemizer16 + renderer16
+                // + 音量条 ≈ 90+，低于标准高(105)就放不下 ⇒ 紧凑档把渲染器**内联到名字行右侧**
+                // （同一个按钮，只改 Grid.Row —— 入口仍只有一处），并收紧行高保证卡片内零纵向溢出。
+                // 这条通用契约由 TrackHeaderLayoutTests 的溢出断言长期守住。
+                bool inlineRenderer = trackHeight < ViewConstants.TrackHeightDefault;
+                ViewModel.IsRendererInline = inlineRenderer;
+                Classes.Set("compact", inlineRenderer);
+                // 紧凑档把卡片外层的上下 2px 边距也吃掉：卡片实际高 = 轨道高 − 4，
+                // 最小高 42 只剩 38，内容再省也差 2px（溢出契约断言抓到的）。
+                if (Content is Grid root) {
+                    root.Margin = inlineRenderer ? new Thickness(2, 0, 2, 0) : new Thickness(2, 2, 2, 2);
+                }
+                Grid.SetRow(RendererButton, inlineRenderer ? 0 : 3);
+                RendererButton.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
+                if (inlineRenderer) {
+                    RendererButton.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right;
+                    // 给内联 chip 让位：名字按钮右侧留出 chip 宽度（名字照旧省略号收）
+                    TrackNameButton.Margin = new Thickness(2, 0, 64, 0);
+                } else {
+                    RendererButton.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
+                    TrackNameButton.Margin = new Thickness(2, 0, 0, 0);
+                }
             }
         }
 

@@ -59,6 +59,29 @@
       <Setter Property="Padding" Value="5"/>
       <Setter Property="MinHeight" Value="0"/>
     </Style>
+    <!-- **必须本地压 MinHeight**（踩过 3 次的陷阱，W33 溢出断言又抓到一次）：本控件的
+         `Button.clear` 都声明 Height=16/18，但主题给 Button 的 MinHeight 更大 ⇒ Arrange 按
+         MinHeight 走，行实际高约 32，四行叠下来把音量条挤出卡片 7px（**连最高轨道高都溢出**）。
+         只压 MinHeight，不动各按钮自己的 Margin。 -->
+    <Style Selector="Button.clear">
+      <Setter Property="MinHeight" Value="0"/>
+    </Style>
+    <!-- 紧凑档（轨道高不足以放下"渲染器独立行"时由 code-behind 加 `compact` 类）：
+         只为**塞进最小轨道高、不留纵向溢出**而做的收紧，不是设计稿的密度档位 —
+         等 fx-rack 的设计提案落地后这里会被动作条取代。
+         最小轨道高 42：上边距 3→2、名字行 18→16、音量条行上边距 2→0、下边距 3→2 ⇒ 40 ≤ 42。 -->
+    <Style Selector="UserControl.compact Grid#HeaderContent">
+      <Setter Property="Margin" Value="6,2,4,2"/>
+    </Style>
+    <Style Selector="UserControl.compact Button#TrackNameButton">
+      <Setter Property="Height" Value="16"/>
+    </Style>
+    <Style Selector="UserControl.compact Grid#LevelsRow">
+      <Setter Property="Margin" Value="0"/>
+    </Style>
+    <Style Selector="UserControl.compact Slider.fader">
+      <Setter Property="MinHeight" Value="0"/>
+    </Style>
   </UserControl.Styles>
 
   <UserControl.Resources>
@@ -104,10 +127,10 @@
   <!-- TrackHeader: rounded card -->
   <Grid Margin="2,2,2,2">
     <!-- Main card -->
-    <Border Margin="0" BorderThickness="1" BorderBrush="{Binding HeaderBorderBrush}"
+    <Border Name="MainCard" Margin="0" BorderThickness="1" BorderBrush="{Binding HeaderBorderBrush}"
             CornerRadius="12" PointerPressed="HeaderPointerPressed"
             Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-      <Grid ColumnDefinitions="auto,*,auto" RowDefinitions="*" Margin="6,3,4,3">
+      <Grid Name="HeaderContent" ColumnDefinitions="auto,*,auto" RowDefinitions="*" Margin="6,3,4,3">
 
         <!-- ── Left: Avatar（圆角矩形，竖居中）+ TrackNo badge（右下角不挡头像） ── -->
         <Border Grid.Column="0" VerticalAlignment="Top" Margin="0,2,6,0"
@@ -126,9 +149,9 @@
         </Border>
 
         <!-- ── Center: Track name + singer/phonemizer/renderer + volume/pan ── -->
-        <Grid Grid.Column="1" RowDefinitions="auto,auto,auto,auto,auto">
-          <!-- Row 0: Track name -->
-          <Button Classes="clear" Grid.Row="0" Margin="2,0,0,0" Padding="2,0" Height="18"
+        <Grid Name="ContentRows" Grid.Column="1" RowDefinitions="auto,auto,auto,auto,auto">
+          <!-- Row 0: Track name（紧凑档下渲染器会内联到本行右侧，见 code-behind） -->
+          <Button Name="TrackNameButton" Classes="clear" Grid.Row="0" Margin="2,0,0,0" Padding="2,0" Height="18"
                   HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Focusable="False"
                   FontSize="11" FontWeight="SemiBold"
                   Content="{Binding TrackName}" Click="TrackNameButtonClicked"/>
@@ -158,7 +181,7 @@
                   ToolTip.Tip="{DynamicResource tracks.selectrenderer}" ContextMenu="{StaticResource RendererMenuRes}"/>
 
           <!-- Row 4: Volume + Pan mini sliders -->
-          <Grid Grid.Row="4" ColumnDefinitions="3,*,auto,*,auto" Margin="0,2,0,0">
+          <Grid Name="LevelsRow" Grid.Row="4" ColumnDefinitions="3,*,auto,*,auto" Margin="0,2,0,0">
             <Grid.Styles>
               <Style Selector="Slider, TextBlock, TextBox">
                 <Setter Property="VerticalAlignment" Value="Center"/>

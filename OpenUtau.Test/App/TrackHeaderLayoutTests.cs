@@ -33,7 +33,7 @@ namespace OpenUtau.Test.App {
 
         static void Pump() => Dispatcher.UIThread.RunJobs();
 
-        static (WindowEx win, TrackHeaderCanvas canvas, TrackHeader header, ObservableCollection<UTrack> items) Setup(double trackHeight) {
+        static (WindowEx win, TrackHeaderCanvas canvas, TrackHeader header, ObservableCollection<UTrack> items) Setup(double trackHeight, double width = 240) {
             var track = new UTrack { TrackNo = 0, TrackName = "Lead" };
             // 两个 DirectProperty 的 CLR setter 是私有的（生产里由 MainWindow 的 XAML 绑定驱动）
             // ⇒ 测试同样走绑定，走的是产品同一条赋值路径。
@@ -43,11 +43,11 @@ namespace OpenUtau.Test.App {
             var items = new ObservableCollection<UTrack>();
             canvas.Items = items;   // 先给**空**集合：控件在订阅集合变更后才对"新增"建轨头
             items.Add(track);
-            var win = new WindowEx { Width = 240, Height = trackHeight + 20, Content = canvas };
+            var win = new WindowEx { Width = width, Height = trackHeight + 20, Content = canvas };
             win.Classes.Set("no-motion", true);
             win.Show();
-            win.Measure(new Size(240, trackHeight + 20));
-            win.Arrange(new Rect(0, 0, 240, trackHeight + 20));
+            win.Measure(new Size(width, trackHeight + 20));
+            win.Arrange(new Rect(0, 0, width, trackHeight + 20));
             Pump();
             win.UpdateLayout();
             var header = canvas.GetVisualDescendants().OfType<TrackHeader>().Single();
@@ -137,6 +137,67 @@ namespace OpenUtau.Test.App {
             int count = xaml.Split("RendererButtonClicked").Length - 1;
             Assert.Equal(1, count);
             Assert.Contains("Name=\"RendererButton\"", xaml);
+        }
+
+        /// <summary>
+        /// **永久契约（W33 裁决第 2 条）**：卡片内所有子元素必须完全落在卡片内 ——
+        /// `Bounds.Bottom ≤ 卡片高` 且 `Bounds.Right ≤ 卡片宽`，**任意轨道高（含 TrackHeightMin）
+        /// 与任意面板宽**都成立。它比"某个按钮可见"更能防住以后的重排：这次"渲染器恒显
+        /// ⇒ 纵向溢出 22px"正是被旧的按高裁剪顺手遮住的，只看某个按钮可见根本发现不了。
+        /// 用 `TranslatePoint` 把子元素矩形换算到卡片坐标系再比（不能假设同一父级）。
+        /// </summary>
+        [AvaloniaTheory]
+        // 全卡片契约：设计"放得下三行"的高度区间（标准 105 / 最高 147），含窄列
+        [InlineData(105, 240, false)]
+        [InlineData(105, 160, false)]
+        [InlineData(147, 300, false)]
+        // 最小/中间高度：只对**内容列**（名字/歌手/音素器/渲染器/音量条）要求零溢出 ——
+        // 这是 W33 修的这条链路。头像（44 高 > 最小行 42）与右侧 M/S/FX/⚙ 竖列（≈104 高）
+        // 的溢出是**既有设计**、归 fx-rack 的设计提案（见本用例下方注释与报告）。
+        [InlineData(42, 160, true)]
+        [InlineData(42, 240, true)]
+        [InlineData(63, 160, true)]
+        [InlineData(84, 200, true)]
+        public void EveryChild_StaysInsideTheCard(double trackHeight, double width, bool contentColumnOnly) {
+            var (win, _, header, items) = Setup(trackHeight, width);
+            try {
+                var card = header.FindControl<Border>("MainCard");
+                var content = header.FindControl<Grid>("ContentRows");
+                Assert.NotNull(card);
+                Assert.NotNull(content);
+                var cardSize = card!.Bounds.Size;
+                Assert.True(cardSize.Width > 0 && cardSize.Height > 0, "卡片必须被布局");
+                Visual scope = contentColumnOnly ? (Visual)content! : header;
+                var offenders = new System.Collections.Generic.List<string>();
+                foreach (var child in scope.GetVisualDescendants().OfType<Control>()) {
+                    if (!child.IsVisible) {
+                        continue;
+                    }
+                    // 跳过"包住整张卡片"的容器（Border 的模板 ContentPresenter = 卡片外扩描边，
+                    // 不是内容溢出）
+                    var originProbe = child.TranslatePoint(new Point(0, 0), card);
+                    if (originProbe == null) {
+                        continue;
+                    }
+                    if (new Rect(originProbe.Value, child.Bounds.Size).Contains(new Rect(default, cardSize))) {
+                        continue;
+                    }
+                    var origin = child.TranslatePoint(new Point(0, 0), card);
+                    if (origin == null) {
+                        continue;
+                    }
+                    var rect = new Rect(origin.Value, child.Bounds.Size);
+                    if (rect.Bottom > cardSize.Height + 1 || rect.Right > cardSize.Width + 1) {
+                        offenders.Add($"{child.GetType().Name}({child.Name}) rect={rect} card={cardSize}");
+                    }
+                }
+                Assert.True(offenders.Count == 0,
+                    $"轨道高 {trackHeight} / 宽 {width} 下卡片内有溢出：\n" + string.Join("\n", offenders));
+            } finally {
+                items.Clear();
+                Pump();
+                win.Close();
+            }
         }
 
         static string FindRepoRoot() {

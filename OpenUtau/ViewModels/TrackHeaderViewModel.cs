@@ -44,6 +44,8 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public bool IsSingerVisible { get; set; }
         [Reactive] public bool IsPhonemizerVisible { get; set; }
         [Reactive] public bool IsRendererVisible { get; set; }
+        /// <summary>W33 紧凑档：渲染器内联在名字行右侧（不占独立行），由 code-behind 按轨道高设置。</summary>
+        [Reactive] public bool IsRendererInline { get; set; }
         /// <summary>
         /// 次行的 `⋯` 溢出按钮是否显示（W33）：歌手/音素器被按高裁掉时，仍能从那里进它们的菜单。
         /// **渲染器不再进溢出菜单** —— 它恒可见，避免同一入口两处（用户报的"渲染器被挤掉"）。
