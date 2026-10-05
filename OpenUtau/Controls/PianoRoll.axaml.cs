@@ -65,6 +65,12 @@ namespace OpenUtau.App.Controls {
             vScroll = smoothViewport.Scroll(VScrollBar);
             xZoom = smoothViewport.Zoom((position, delta) => ViewModel.NotesViewModel.OnXZoomed(position, delta));
             yZoom = smoothViewport.Zoom((position, delta) => ViewModel.NotesViewModel.OnYZoomed(position, delta));
+            // 编排区拖动卷帘视口指示条 ⇒ 同步卷帘滚动（上游 9caec1a6；只改视口，不入撤销栈）
+            MessageBus.Current.Listen<PianoRollViewportScrollEvent>()
+                .Subscribe(e => {
+                    ViewModel.NotesViewModel.TickOffset =
+                        Math.Clamp(e.TickOffset, 0, ViewModel.NotesViewModel.HScrollBarMax);
+                });
             ValueTip.IsVisible = false;
             SetPenToolIcon();
             penTool.AddHandler(PointerPressedEvent, OnToolButtonPointerPressed, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
