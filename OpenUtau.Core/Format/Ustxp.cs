@@ -179,18 +179,18 @@ namespace OpenUtau.Core.Format {
                 filePath = Path.ChangeExtension(filePath, LegacyExtension);
             }
             var clean = project.CloneAsTemplate();
-            clean.ustxpVersion = null;                     // Plus 版本标记
-            foreach (var track in clean.tracks) {
-                track.MixFx = null;                        // Plus 混音台效果链
-                track.VstSlots.Clear();                  // Plus VST 插件链
-            }
             clean.FilePath = filePath;
             clean.ustxVersion = Ustx.kUstxVersion;
             clean.BeforeSave();
-            string text = Prune(Yaml.DefaultSerializer.Serialize(clean));
+                   // 不能走 CloneAsTemplate()：那是"另存为模板"，会清空部件。这里保留全部内容，
+            // 只在序列化后的树上摘掉 Plus 专有键（ustxp_version / 每轨 vst_slots、mix_fx）。
+            project.BeforeSave();
+            var tree = UstxYaml.ParseTree(Yaml.DefaultSerializer.Serialize(project));
+            UstxYaml.RemoveKeys(tree, "ustxp_version");
+            UstxYaml.RemoveKeysFromSequence(tree, "tracks", "vst_slots", "mix_fx");
+            string text = Prune(UstxYaml.SerializeTree(tree));
             File.WriteAllText(filePath, text, Encoding.UTF8);
-            clean.Saved = true;
-            clean.AfterSave();
+            project.Saved = true;
             Log.Information($"Exported clean .ustx (no Plus fields): {filePath}");
         }
 
@@ -211,12 +211,20 @@ namespace OpenUtau.Core.Format {
         }
 
         /// <summary>
-        /// 序列化文本 → 树 → 剪掉空集合/null → 文本（W27 第 4 件；导出与保存共用）。
+        /// 噪音清理（W27 第 4 件）：**纯文本**剪掉 `key: []` / `key: {}` / `key: null` 这类空值行。
+        /// 不重新序列化 ⇒ 与主序列化器的格式（含 FlowEmitter 的行内短数组）完全一致、零漂移
+        /// （实测：走"解析成树再序列化"会把 301 行变成 347 行）。
         /// </summary>
         internal static string Prune(string serialized) {
-            var tree = UstxYaml.ParseTree(serialized);
-            UstxYaml.PruneEmpty(tree);
-            return UstxYaml.SerializeTree(tree);
+            var kept = new List<string>();
+            foreach (string line in serialized.Split('\n')) {
+                string trimmed = line.Trim();   // 注意 CRLF：只 TrimStart 会留下 \r，判空失败
+                if (trimmed.EndsWith(": []") || trimmed.EndsWith(": {}") || trimmed.EndsWith(": null")) {
+                    continue;
+                }
+                kept.Add(line);
+            }
+            return string.Join("\n", kept);
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using YamlDotNet.Core;
@@ -51,9 +51,12 @@ namespace OpenUtau.Core.Ustx {
         private static readonly Dictionary<Type, HashSet<string>> KnownKeys = new Dictionary<Type, HashSet<string>>();
         private static readonly object KnownKeysLock = new object();
         private static readonly IDeserializer treeDeserializer = new DeserializerBuilder().Build();
+        // 与 Core.Yaml 的主序列化器**同款**（尤其 FlowEmitter：短数组走行内 [a, b]，
+        // 少了它噪音清理后的行数反而会变多 —— 实测 301 → 347 行就是这么来的）。
         private static readonly ISerializer treeSerializer = new SerializerBuilder()
             .WithNamingConvention(UnderscoredNamingConvention.Instance)
             .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
+            .WithEventEmitter(next => new FlowEmitter(next))
             .DisableAliases()
             .WithQuotingNecessaryStrings()
             .Build();
@@ -261,7 +264,21 @@ namespace OpenUtau.Core.Ustx {
             }
         }
 
-        /// <summary>
+        /// <summary>清掉所有对象的未知键（测试/诊断用：用于隔离"未知键慢路径"与常规保存路径）。</summary>
+        public static void ClearUnknown(UProject project) {
+            if (project is IUnknownYamlHolder p) { p.Unknown = null; }
+            foreach (var track in project.tracks) {
+                if (track is IUnknownYamlHolder t) { t.Unknown = null; }
+            }
+            foreach (var part in AllParts(project)) {
+                if (part is IUnknownYamlHolder ph) { ph.Unknown = null; }
+                if (part is UVoicePart vp) {
+                    foreach (var note in vp.notes) {
+                        if (note is IUnknownYamlHolder n) { n.Unknown = null; }
+                    }
+                }
+            }
+        }        /// <summary>
         /// 噪音清理（W27 第 4 件）：删掉空序列/空映射（`vst_slots: []`、`track_expressions: []` …
         /// 每轨恒写、纯噪音），以及显式 null 的键。语义不变：读回时缺键 = 默认空集合。
         /// </summary>
@@ -294,6 +311,27 @@ namespace OpenUtau.Core.Ustx {
             return removed;
         }
 
+        /// <summary>从 mapping 上摘掉若干键（纯净导出用）。</summary>
+        public static void RemoveKeys(YamlMappingNode mapping, params string[] keys) {
+            foreach (string key in keys) {
+                var hit = mapping.Children.FirstOrDefault(c => string.Equals(c.Key.ToString(), key, StringComparison.Ordinal));
+                if (hit.Key != null) {
+                    mapping.Children.Remove(hit.Key);
+                }
+            }
+        }
+
+        /// <summary>对 mapping 下某个序列的每个元素摘掉若干键（纯净导出用）。</summary>
+        public static void RemoveKeysFromSequence(YamlMappingNode root, string sequenceKey, params string[] keys) {
+            if (Child(root, sequenceKey) is not YamlSequenceNode sequence) {
+                return;
+            }
+            foreach (var child in sequence.Children) {
+                if (child is YamlMappingNode mapping) {
+                    RemoveKeys(mapping, keys);
+                }
+            }
+        }
         private static YamlNode? Child(YamlMappingNode node, string key) {
             foreach (var pair in node.Children) {
                 if (string.Equals(pair.Key.ToString(), key, StringComparison.Ordinal)) {

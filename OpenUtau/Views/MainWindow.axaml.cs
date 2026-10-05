@@ -603,6 +603,26 @@ namespace OpenUtau.App.Views {
             }
         }
 
+        /// <summary>
+        /// W27：另存为**纯净 .ustx** —— 写出原版 OpenUTAU 可直接读、且不含 Plus 专有字段的文件
+        /// （`ustxp_version` / `vst_slots` / `mix_fx` 全部剥离）。这是目前唯一能安全跨软件交付的路径。
+        /// **它不解决"原版重存丢 Plus 字段"**：原版保存时依然会丢掉它不认识的键，
+        /// 那需要侧车文件或容器化格式（审计 A+/B 方案）。
+        /// </summary>
+        async void OnMenuExportCleanUstx(object sender, RoutedEventArgs args) {
+            var project = DocManager.Inst.Project;
+            var file = await FilePicker.SaveFileAboutProject(this, "menu.file.exportcleanustx", FilePicker.USTX);
+            if (string.IsNullOrEmpty(file)) {
+                return;
+            }
+            try {
+                Ustxp.ExportCleanUstx(file, project);
+                DocManager.Inst.ExecuteCmd(new ProgressBarNotification(0,
+                    $"{ThemeManager.GetString("ustxp.exportclean.done")} {file}"));
+            } catch (Exception ex) {
+                DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(ex));
+            }
+        }
         async void OnMenuExportUst(object sender, RoutedEventArgs e) {
             var project = DocManager.Inst.Project;
             if (await WarnToSave(project)) {

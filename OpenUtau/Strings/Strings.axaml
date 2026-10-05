@@ -1203,6 +1203,10 @@ General
   <system:String x:Key="panel.collapse.pianoroll.exp">Collapse or expand the expression panel</system:String>
   <system:String x:Key="panel.drag.hint">Drag to resize · double-click to reset width</system:String>
   <!-- /panel -->
+  <!-- ⚠ ustrxp: W27 格式止血 —— 另存为纯净 .ustx（跨软件交付唯一安全路径）—— EN/zh 成对 -->
+  <system:String x:Key="menu.file.exportcleanustx">Save as Clean .ustx (readable by vanilla OpenUTAU)</system:String>
+  <system:String x:Key="ustxp.exportclean.done">Exported clean .ustx (no Plus fields):</system:String>
+  <!-- /ustrxp -->
   <!-- ⚠ mx-strip: W19 混音台链面板折叠入口（宿主侧 chevron）—— EN/zh 成对 -->
   <system:String x:Key="panel.collapse.fxchain">Collapse effect chain panel</system:String>
   <!-- /mx-strip -->
