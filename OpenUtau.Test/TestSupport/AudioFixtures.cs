@@ -293,12 +293,18 @@ namespace OpenUtau.Test.TestSupport {
         internal static FakeVstHandle InstallFakeVst(int trackNo, string uid, IVstBridge bridge) {
             VstTestSetup.Register(VstTestSetup.MakeEntry(uid));
             var manager = VstPluginManager.Inst;
+            // 取 VST 互斥闸并在句柄 Dispose 时释放（同一线程）：假 VST 的
+            // 「安装 → 渲染 → 卸载」整段独占进程级 VstPluginManager（Bridge + (trackNo,slot)
+            // 实例表），否则并行 collection 的 VST 用例会顶掉本用例的实例或换掉 Bridge
+            // （W23 #3：TrackMixCommandsTest 偶发红正是这一机制）。
+            VstTestSetup.EnterGate();
             var saved = manager.Bridge;
             manager.Bridge = bridge;
             var slot = VstTestSetup.CreateSlot(uid);
             var effect = manager.LoadEffect(trackNo, slot);
             if (effect == null) {
                 manager.Bridge = saved;
+                VstTestSetup.ExitGate();
                 throw new InvalidOperationException($"假 VST 加载失败：{uid}");
             }
             return new FakeVstHandle(manager, saved, trackNo, slot);
@@ -320,29 +326,58 @@ namespace OpenUtau.Test.TestSupport {
             public void Dispose() {
                 manager.UnloadEffect(trackNo, Slot.SlotIndex);
                 manager.Bridge = savedBridge;
+                VstTestSetup.ExitGate();   // 与 InstallFakeVst 的 EnterGate 配对（同一线程）
             }
         }
 
         // ── DocManager 调度器（ExportSession 需要 MainScheduler） ─────────
 
         static bool schedulersReady;
+        static bool schedulerSnapshotTaken;
+        static System.Threading.Thread? savedMainThread;
+        static System.Threading.Tasks.TaskScheduler? savedMainScheduler;
+
+        static FieldInfo MainThreadField => typeof(DocManager)
+            .GetField("mainThread", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        static FieldInfo MainSchedulerField => typeof(DocManager)
+            .GetField("mainScheduler", BindingFlags.NonPublic | BindingFlags.Instance)!;
 
         /// <summary>
         /// <c>RenderEngine</c> 的 fault continuation 需要非 null 的
         /// <c>DocManager.MainScheduler</c>；<c>ExportSession</c> 也走这条路。
         /// 测试里把它接到线程池，并把 <c>mainThread</c> 指到当前线程
         /// （<c>ExecuteCmd</c> 才会就地执行而不是抛 NRE）。
+        ///
+        /// **全局态纪律**：改动前先快照原值，集合结束时由
+        /// <see cref="RestoreSchedulers"/>（经 <c>AudioFixtureCollection</c> 的 collection
+        /// fixture）还原——否则这些进程级字段会泄漏到并行执行的其它集合，
+        /// 让它们的命令投递/就地执行行为随机改变（W14 修复的正是这一类 flake）。
         /// </summary>
         public static void EnsureSchedulers() {
             if (schedulersReady) {
                 return;
             }
-            var t = typeof(DocManager);
-            t.GetField("mainThread", BindingFlags.NonPublic | BindingFlags.Instance)
-                ?.SetValue(DocManager.Inst, System.Threading.Thread.CurrentThread);
-            t.GetField("mainScheduler", BindingFlags.NonPublic | BindingFlags.Instance)
-                ?.SetValue(DocManager.Inst, System.Threading.Tasks.TaskScheduler.Default);
+            if (!schedulerSnapshotTaken) {
+                savedMainThread = (System.Threading.Thread?)MainThreadField.GetValue(DocManager.Inst);
+                savedMainScheduler = (System.Threading.Tasks.TaskScheduler?)MainSchedulerField.GetValue(DocManager.Inst);
+                schedulerSnapshotTaken = true;
+            }
+            MainThreadField.SetValue(DocManager.Inst, System.Threading.Thread.CurrentThread);
+            MainSchedulerField.SetValue(DocManager.Inst, System.Threading.Tasks.TaskScheduler.Default);
             schedulersReady = true;
+        }
+
+        /// <summary>还原 <c>mainThread</c>/<c>mainScheduler</c>（幂等，可重复调用）。</summary>
+        public static void RestoreSchedulers() {
+            if (!schedulerSnapshotTaken) {
+                return;
+            }
+            MainThreadField.SetValue(DocManager.Inst, savedMainThread);
+            MainSchedulerField.SetValue(DocManager.Inst, savedMainScheduler);
+            schedulersReady = false;
+            schedulerSnapshotTaken = false;
+            savedMainThread = null;
+            savedMainScheduler = null;
         }
     }
 }

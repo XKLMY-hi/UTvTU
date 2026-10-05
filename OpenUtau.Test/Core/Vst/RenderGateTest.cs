@@ -46,21 +46,21 @@ namespace OpenUtau.Core.Vst {
 
         [Fact]
         public void TryFlush_RejectedWhileInFlight() {
-            try {
+            // 闸内执行：VstPluginManager/RenderGate 都是进程级全局，collection 只保证同集合串行
+            VstTestSetup.RunExclusive(() => {
                 using var gate = RenderGate.Enter();
                 Assert.False(VstPluginManager.Inst.TryFlushAllPendingDispose());
-            } finally {
-                VstPluginManager.Inst.ClearAll();
-            }
+            });
+            // 不再调 ClearAll()：那是**全表清空**，会把并行 collection 正在用的 VST 实例
+            // 一起卸掉（W23 #3 的机制之一）。本用例不加载任何实例，无需清理。
         }
 
         [Fact]
         public void TryFlush_AllowedWhenIdle() {
-            try {
+            // 同上：闸内保证没有其它 VST 用例的在飞闸门/待销毁实例，断言才稳定
+            VstTestSetup.RunExclusive(() => {
                 Assert.True(VstPluginManager.Inst.TryFlushAllPendingDispose());
-            } finally {
-                VstPluginManager.Inst.ClearAll();
-            }
+            });
         }
 
         [Fact]
