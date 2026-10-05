@@ -8,6 +8,7 @@ using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using OpenUtau.App.Controls;
 using OpenUtau.App.ViewModels;
 using OpenUtau.App;
@@ -631,6 +632,153 @@ namespace OpenUtau.Test.App {
             // 列模式不受影响
             var columnSplitter = new PanelSplitter { PanelColumn = 0 };
             Assert.False(columnSplitter.IsVertical);
+        }
+
+        // ══════════════ 卷帘表达式面板：真实控件接线（W20） ══════════════
+        // 与上面的合成 fixture 不同，这一组直接 new 真实 `PianoRoll` + `PianoRollViewModel`，
+        // 断言**真实 Bounds**：面板高 = 绑定值、折叠后为 0、恢复后回到意图值。
+
+        [AvaloniaFact]
+        public void PianoRoll_ExpPanel_RealControl_BoundsFollowPanelWiring() {
+            OpenUtau.Test.TestSupport.DocManagerTestSetup.RunOnCurrentThread();
+            // 卷帘 VM 构造会读 DocManager.Inst.Plugins（私有 setter）⇒ 用公开的扫描入口把它填上，
+            // 否则 headless 下 Plugins 为 null、VM 构造直接抛 ArgumentNullException（既有可测性缺口）。
+            OpenUtau.Core.DocManager.Inst.SearchAllLegacyPlugins();
+            // 这两个用例会**真实落盘**（Preferences.Save），也会读持久化值 ⇒ 必须先把状态钉成
+            // 已知起点，否则上一次失败跑留下的 "折叠=true" 会让下一次从折叠态开始（测试不是幂等的）。
+            Preferences.Default.PanelLayout.PianoRollExpHeight = 150;
+            Preferences.Default.PanelLayout.PianoRollExpCollapsed = false;
+            Preferences.Default.ShowExpressions = true;
+            Preferences.Save();            var project = new OpenUtau.Core.Ustx.UProject();
+            project.timeAxis.BuildSegments(project);
+            OpenUtau.Core.DocManager.Inst.ExecuteCmd(new OpenUtau.Core.LoadProjectNotification(project));
+
+            var vm = new OpenUtau.App.ViewModels.PianoRollViewModel();
+            var roll = new PianoRoll(vm);
+            var window = new Window { Width = 1000, Height = 760, Content = roll };
+            try {
+                window.Show();
+                SettleWindow(window);
+
+                var splitter = roll.FindControl<PanelSplitter>("ExpPanelSplitter");
+                Assert.NotNull(splitter);
+                Assert.True(splitter!.IsVertical, "卷帘表达式面板必须是纵向模式（PanelRow ≥ 0）");
+                Assert.Equal(5, splitter.PanelRow);
+                Assert.True(splitter.Invert, "面板在分隔条下方 ⇒ Invert=true（向下拖变矮）");
+
+                var canvases = roll.GetVisualDescendants().OfType<ExpressionCanvas>().ToList();
+                Assert.NotEmpty(canvases);
+                Assert.True(splitter.PanelShown, "默认应展开");
+                Assert.Equal(150, splitter.PanelHeight, 1);       // DefaultWidth=150（与接入前一致）
+                Assert.Equal(splitter.PanelHeight, canvases[0].Bounds.Height, 1);
+                Assert.True(canvases[0].IsVisible);
+                var notesCanvas = roll.GetVisualDescendants().OfType<NotesCanvas>().First();
+                double centerBefore = notesCanvas.Bounds.Height;
+
+                // 折叠：不显示 + 高 0（不留夹缝）
+                roll.ExpPanel.ToggleCollapse();
+                SettleWindow(window);
+                Assert.False(splitter.PanelShown, "折叠后 PanelShown 必须为 false");
+                Assert.Equal(0, splitter.PanelHeight, 1);
+                Assert.False(canvases[0].IsVisible);
+                // 不留夹缝：让出的高全给中央画布（面板 150 + 分隔条 7）。
+                // **不能**断言 `splitter.Bounds.Height == 0`：隐藏元素的 Bounds 会保留上次排布值
+                // （W16 配方专门记过这个坑），要看邻居怎么占位。
+                Assert.Equal(centerBefore + 150 + 7, notesCanvas.Bounds.Height, 1);
+
+                // 再展开：回到默认高（意图值未被折叠改写）
+                roll.ExpPanel.ToggleCollapse();
+                SettleWindow(window);
+                Assert.True(splitter.PanelShown);
+                Assert.Equal(150, splitter.PanelHeight, 1);
+                Assert.Equal(splitter.PanelHeight, canvases[0].Bounds.Height, 1);
+            } finally {
+                Preferences.Default.PanelLayout.PianoRollExpHeight = 150;
+                Preferences.Default.PanelLayout.PianoRollExpCollapsed = false;
+                Preferences.Default.ShowExpressions = true;
+                Preferences.Save();
+                window.Close();
+            }
+        }
+
+        [AvaloniaFact]
+        public void PianoRoll_ExpPanel_SharesStateWithShowExpressions_AndPersists() {
+            OpenUtau.Test.TestSupport.DocManagerTestSetup.RunOnCurrentThread();
+            // 卷帘 VM 构造会读 DocManager.Inst.Plugins（私有 setter）⇒ 用公开的扫描入口把它填上，
+            // 否则 headless 下 Plugins 为 null、VM 构造直接抛 ArgumentNullException（既有可测性缺口）。
+            OpenUtau.Core.DocManager.Inst.SearchAllLegacyPlugins();
+            // 这两个用例会**真实落盘**（Preferences.Save），也会读持久化值 ⇒ 必须先把状态钉成
+            // 已知起点，否则上一次失败跑留下的 "折叠=true" 会让下一次从折叠态开始（测试不是幂等的）。
+            Preferences.Default.PanelLayout.PianoRollExpHeight = 150;
+            Preferences.Default.PanelLayout.PianoRollExpCollapsed = false;
+            Preferences.Default.ShowExpressions = true;
+            Preferences.Save();            var project = new OpenUtau.Core.Ustx.UProject();
+            project.timeAxis.BuildSegments(project);
+            OpenUtau.Core.DocManager.Inst.ExecuteCmd(new OpenUtau.Core.LoadProjectNotification(project));
+            var vm = new OpenUtau.App.ViewModels.PianoRollViewModel();
+            var roll = new PianoRoll(vm);
+            var window = new Window { Width = 1000, Height = 760, Content = roll };
+            bool oldShow = Preferences.Default.ShowExpressions;
+            bool oldCollapsed = Preferences.Default.PanelLayout.PianoRollExpCollapsed;
+            double oldHeight = Preferences.Default.PanelLayout.PianoRollExpHeight;
+            try {
+                window.Show();
+                SettleWindow(window);
+                // 折叠态与 ShowExpressions 是**同一状态**：改任一侧，另一侧跟随
+                roll.ExpPanel.IsCollapsed = true;
+                Assert.False(vm.NotesViewModel.ShowExpressions, "面板折叠 ⇒ 表达式视图关闭");
+                vm.NotesViewModel.ShowExpressions = true;
+                Assert.False(roll.ExpPanel.IsCollapsed, "表达式视图打开 ⇒ 面板展开");
+                // 落盘：折叠态与高度都写进 PanelLayout（不新增平行存储）
+                roll.ExpPanel.IsCollapsed = true;
+                Assert.True(Preferences.Default.PanelLayout.PianoRollExpCollapsed);
+                roll.ExpPanel.IsCollapsed = false;
+                Assert.False(Preferences.Default.PanelLayout.PianoRollExpCollapsed);
+                Assert.Equal(roll.ExpPanel.Width, Preferences.Default.PanelLayout.PianoRollExpHeight, 1);
+            } finally {
+                Preferences.Default.ShowExpressions = oldShow;
+                Preferences.Default.PanelLayout.PianoRollExpCollapsed = oldCollapsed;
+                Preferences.Default.PanelLayout.PianoRollExpHeight = oldHeight;
+                Preferences.Save();   // 恢复也要落盘，否则污染后续跑
+                window.Close();
+            }
+        }
+
+        [Fact]
+        public void PianoRoll_ExpPanel_XamlWiringMatchesRecipe() {
+            // 文本契约：接线必须按配方（容器绑 PanelHeight/PanelShown、PanelRow 必填、
+            // 旧的自绘 GridSplitter 不得残留、折叠入口必须在面板**外**才点得回来）
+            string xaml = File.ReadAllText(Path.Combine(FindRepoRoot(), "OpenUtau", "Controls", "PianoRoll.axaml"));
+            Assert.Contains("c:PanelSplitter", xaml);
+            Assert.Contains("x:Name=\"ExpPanelSplitter\"", xaml);
+            Assert.Contains("PanelRow=\"5\"", xaml);
+            Assert.Contains("Invert=\"True\"", xaml);
+            Assert.Contains("CollapseThreshold=\"80\"", xaml);
+            Assert.Contains("#ExpPanelSplitter.PanelHeight", xaml);
+            Assert.Contains("#ExpPanelSplitter.PanelShown", xaml);
+            Assert.Contains("OnExpPanelToggle", xaml);
+            Assert.DoesNotContain("<GridSplitter", xaml);
+            int toggleAt = xaml.IndexOf("Name=\"ExpPanelToggle\"", StringComparison.Ordinal);
+            int panelAt = xaml.IndexOf("x:Name=\"ExpPanelSplitter\"", StringComparison.Ordinal);
+            Assert.True(toggleAt > 0 && panelAt > 0 && toggleAt < panelAt,
+                "折叠入口必须出现在面板之前（工具行），否则面板折叠后无法再打开");
+        }
+
+        private static void SettleWindow(Window window) {
+            for (int i = 0; i < 3; i++) {
+                Pump();
+                window.UpdateLayout();
+            }
+            Pump();
+        }
+
+        private static string FindRepoRoot() {
+            var dir = new DirectoryInfo(AppContext.BaseDirectory);
+            while (dir != null && !File.Exists(Path.Combine(dir.FullName, "OpenUtau.sln"))) {
+                dir = dir.Parent;
+            }
+            Assert.NotNull(dir);
+            return dir!.FullName;
         }
 
         [AvaloniaFact]
