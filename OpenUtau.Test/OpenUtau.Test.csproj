@@ -63,6 +63,9 @@
     <None Include="..\OpenUtau\Controls\TrackHeader.axaml" Link="Controls\TrackHeader.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Styles\Md3Menus.axaml" Link="Styles\Md3Menus.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Views\MixFxDialog.axaml" Link="Views\MixFxDialog.axaml" CopyToOutputDirectory="PreserveNewest" />
+    <!-- W28 命令层契约：EN/zh 显示名键成对断言要扫语言文件原文（avares 不保留 .axaml 原文） -->
+    <None Include="..\OpenUtau\Strings\Strings.axaml" Link="Strings\Strings.axaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\OpenUtau\Strings\Strings.zh-CN.axaml" Link="Strings\Strings.zh-CN.axaml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!-- W12：单文件 .vst3 与「老式 bundle 回退」都走子进程探针（VstProbeProcess 在 <appdir> 下找

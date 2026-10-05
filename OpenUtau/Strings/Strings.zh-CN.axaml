@@ -1341,4 +1341,30 @@ Syntax: prefix,suffix</system:String>-->
   <!-- ⚠ mx-strip: W19 混音台链面板折叠入口（宿主侧 chevron）—— EN/zh 成对 -->
   <system:String x:Key="panel.collapse.fxchain">折叠效果链面板</system:String>
   <!-- /mx-strip -->
+  <!-- ⚠ cmd: W28 命令层（M09）—— 命令显示名 / 分组 / 快捷键总览 —— EN/zh 成对 -->
+  <system:String x:Key="command.track.solopart">独奏选中片段所在轨道</system:String>
+  <system:String x:Key="command.track.mutepart">静音选中片段所在轨道（切换）</system:String>
+  <system:String x:Key="command.view.mixerattach">分离或贴合混音台</system:String>
+  <system:String x:Key="command.playback.playpause">播放 / 暂停</system:String>
+  <system:String x:Key="command.playback.gohome">回到开头</system:String>
+  <system:String x:Key="command.playback.goend">跳到末尾</system:String>
+  <system:String x:Key="command.window.escape">关闭遮罩层（欢迎页 / 偏好设置）</system:String>
+  <system:String x:Key="command.window.quit">退出 UTvTU</system:String>
+  <system:String x:Key="command.shortcutoverview">快捷键总览（只读）</system:String>
+  <system:String x:Key="shortcut.caption">快捷键总览</system:String>
+  <system:String x:Key="shortcut.search">按名称 / 手势 / 命令 id 搜索…</system:String>
+  <system:String x:Key="shortcut.hint">本页由命令注册表生成，只读；手势按当前平台写法显示。改绑与命令面板属后续阶段。</system:String>
+  <system:String x:Key="shortcut.empty">没有匹配的命令。</system:String>
+  <system:String x:Key="shortcut.conflict.none">没有手势冲突</system:String>
+  <system:String x:Key="shortcut.conflict.some">{0} 处手势冲突：{1}</system:String>
+  <system:String x:Key="shortcut.conflict.badge">冲突</system:String>
+  <system:String x:Key="shortcut.scope.window">全局</system:String>
+  <system:String x:Key="shortcut.scope.overlay">仅遮罩</system:String>
+  <system:String x:Key="command.group.file">文件</system:String>
+  <system:String x:Key="command.group.edit">编辑</system:String>
+  <system:String x:Key="command.group.project">项目</system:String>
+  <system:String x:Key="command.group.tools">工具</system:String>
+  <system:String x:Key="command.group.view">视图</system:String>
+  <system:String x:Key="command.group.help">帮助</system:String>
+  <!-- /cmd -->
 </ResourceDictionary>

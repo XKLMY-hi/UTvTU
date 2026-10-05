@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -20,6 +20,7 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using OpenUtau.App.Controls;
 using OpenUtau.App.ViewModels;
+using OpenUtau.App.Commands;
 using OpenUtau.Classic;
 using OpenUtau.Core;
 using OpenUtau.Core.Analysis;
@@ -39,6 +40,9 @@ namespace OpenUtau.App.Views {
         private readonly KeyModifiers cmdKey =
             OS.IsMacOS() ? KeyModifiers.Meta : KeyModifiers.Control;
         private readonly MainWindowViewModel viewModel;
+
+        /// <summary>命令层（W28/M09）：命令处理体统一经注册表作用在窗口上，需要视图模型入口。</summary>
+        internal MainWindowViewModel ViewModel => viewModel;
 
         // 编排区平滑滚动/缩放（上游 1c43dc2b 的"轨道视图那半"；卷帘侧由 W15 落地同一套
         // Controls/SmoothViewport）。滚轮一次步进不直接跳到位，而是在 0.18s 内滑过去；
@@ -371,7 +375,7 @@ namespace OpenUtau.App.Views {
         }
 
         void OnMenuNew(object sender, RoutedEventArgs args) => NewProject();
-        async void NewProject() {
+        internal async void NewProject() {
             if (!DocManager.Inst.ChangesSaved && !await AskIfSaveAndContinue()) {
                 return;
             }
@@ -379,7 +383,7 @@ namespace OpenUtau.App.Views {
         }
 
         void OnMenuOpen(object sender, RoutedEventArgs args) => Open();
-        async void Open() {
+        internal async void Open() {
             if (!DocManager.Inst.ChangesSaved && !await AskIfSaveAndContinue()) {
                 return;
             }
@@ -449,7 +453,7 @@ namespace OpenUtau.App.Views {
         }
 
         async void OnMenuSaveAs(object sender, RoutedEventArgs args) => await SaveAs();
-        async Task SaveAs() {
+        internal async Task SaveAs() {
             var file = await FilePicker.SaveFileAboutProject(
                 this, "menu.file.saveas", FilePicker.USTXP);
             if (!string.IsNullOrEmpty(file)) {
@@ -531,7 +535,7 @@ namespace OpenUtau.App.Views {
             }
         }
 
-        void OnMenuRender(object sender, RoutedEventArgs args) {
+        internal void OnMenuRender(object sender, RoutedEventArgs args) {
             var renderWindow = new RenderWindow();
             renderWindow.ShowDialog(this);
         }
@@ -1001,7 +1005,7 @@ namespace OpenUtau.App.Views {
         /// <summary>选择文件夹（偏好页的「更改」按钮）。</summary>
         public Task<string?> PickFolder(string titleKey) => FilePicker.OpenFolderAboutSinger(this, titleKey);
 
-        void OnMenuFullScreen(object sender, RoutedEventArgs args) {
+        internal void OnMenuFullScreen(object sender, RoutedEventArgs args) {
             this.WindowState = this.WindowState == WindowState.FullScreen
                 ? WindowState.Normal
                 : WindowState.FullScreen;
@@ -1015,7 +1019,7 @@ namespace OpenUtau.App.Views {
             });
         }
 
-        void OnMenuMixer(object sender, RoutedEventArgs args) {
+        internal void OnMenuMixer(object sender, RoutedEventArgs args) {
             OpenOrToggleMixer();
         }
 
@@ -1101,7 +1105,7 @@ namespace OpenUtau.App.Views {
             }
         }
 
-        void ToggleMixerWindow() {
+        internal void ToggleMixerWindow() {
             // Ctrl+W：切换混音台的贴合/分离（未建控件时先建，并遵循偏好）
             if (mixerControl == null) {
                 EnsureMixerControl();
@@ -1482,10 +1486,11 @@ namespace OpenUtau.App.Views {
             if (modifiers != cmdKey) {
                 return GlobalShortcut.None;
             }
-            return key switch {
-                Key.M => GlobalShortcut.ToggleMixer,
-                Key.W => GlobalShortcut.ToggleMixerAttachment,
-                Key.S => GlobalShortcut.Save,
+            // 由注册表投影（不再手写第二张表）
+            return CommandRegistry.Match(key, modifiers, cmdKey)?.Id switch {
+                "tools.mixer" => GlobalShortcut.ToggleMixer,
+                "tools.mixerattach" => GlobalShortcut.ToggleMixerAttachment,
+                "file.save" => GlobalShortcut.Save,
                 _ => GlobalShortcut.None,
             };
         }
@@ -1494,23 +1499,53 @@ namespace OpenUtau.App.Views {
         private KeyEventArgs? handledShortcutArgs;
 
         private void HandleGlobalShortcut(KeyEventArgs args) {
-            var shortcut = MapGlobalShortcut(args.Key, args.KeyModifiers, cmdKey);
-            if (shortcut == GlobalShortcut.None || ReferenceEquals(handledShortcutArgs, args)) {
+            // 注册表分发（含隧道/冒泡去重），不再走手写 switch
+            if (TryExecuteShortcut(args, preFocus: true)) {
+                args.Handled = true;
+            }
+        }
+
+        // ── 命令层（W28 / M09）窗口级处理体 ────────────────────────────────────
+        // 原先是只写在 OnKeyDown 的 switch 里的内联分支；现抽成方法 ⇒ 注册表的处理体
+        // 与键盘分发共用同一份实现（消除"显示一套 / 行为另一套"）。
+
+        /// <summary>播放头跳到工程末尾（原 Key.End 分支，语义不变）。</summary>
+        internal void MovePlayPosToEnd() {
+            var parts = viewModel.TracksViewModel.Parts;
+            if (parts.Count > 0) {
+                viewModel.PlaybackViewModel.MovePlayPos(parts.Max(part => part.End));
+            }
+        }
+
+        /// <summary>独奏当前选中片段所在轨道（原 Shift+S 分支，语义不变）。</summary>
+        internal void SoloSelectedPart() {
+            var selected = viewModel.TracksViewModel.SelectedParts;
+            if (selected.Count == 0 || DocManager.Inst.Project == null) {
                 return;
             }
-            handledShortcutArgs = args;
-            switch (shortcut) {
-                case GlobalShortcut.ToggleMixer:
-                    OnMenuMixer(this, new RoutedEventArgs());
-                    break;
-                case GlobalShortcut.ToggleMixerAttachment:
-                    ToggleMixerWindow();
-                    break;
-                case GlobalShortcut.Save:
-                    _ = Save();
-                    break;
+            var part = selected.First();
+            var track = DocManager.Inst.Project.tracks[part.trackNo];
+            MessageBus.Current.SendMessage(new TracksSoloEvent(part.trackNo, !track.Solo, false));
+        }
+
+        /// <summary>静音当前选中片段所在轨道（原 Shift+M 分支，语义不变）。</summary>
+        internal void MuteSelectedPart() {
+            var selected = viewModel.TracksViewModel.SelectedParts;
+            if (selected.Count == 0) {
+                return;
             }
-            args.Handled = true;
+            var part = selected.First();
+            MessageBus.Current.SendMessage(new TracksMuteEvent(part.trackNo, false));
+        }
+
+        /// <summary>快捷键总览（W28/M09）：数据源 = 命令注册表，只读。</summary>
+        internal void OnMenuShortcutOverview(object? sender, RoutedEventArgs args) {
+            ShortcutOverviewWindow.Open(this);
+        }
+
+        /// <summary>退出应用（原 Alt+F4 分支，语义不变）。</summary>
+        internal void QuitApplication() {
+            (Application.Current?.ApplicationLifetime as IControlledApplicationLifetime)?.Shutdown();
         }
 
         void OnKeyDown(object sender, KeyEventArgs args) {
@@ -1523,9 +1558,8 @@ namespace OpenUtau.App.Views {
                 return;
             }
 
-            // Global shortcuts — before focus check
-            if (MapGlobalShortcut(args.Key, args.KeyModifiers, cmdKey) != GlobalShortcut.None) {
-                HandleGlobalShortcut(args);
+            // ① 全局快捷键（先于焦点检查；隧道 + 冒泡双路只动作一次）——唯一来源：CommandRegistry
+            if (TryExecuteShortcut(args, preFocus: true)) {
                 args.Handled = true;
                 return;
             }
@@ -1536,86 +1570,41 @@ namespace OpenUtau.App.Views {
                 return;
             }
 
-            var tracksVm = viewModel.TracksViewModel;
+            // ② 其余窗口级命令（手势 → 注册表 → 处理体；未命中一律 false ⇒ 不吞按键，与原语义一致）
+            args.Handled = TryExecuteShortcut(args, preFocus: false);
+        }
 
-            if (args.KeyModifiers == KeyModifiers.None) {
-                args.Handled = true;
-                switch (args.Key) {
-                    case Key.Delete: viewModel.TracksViewModel.DeleteSelectedParts(); break;
-                    case Key.Space: PlayOrPause(); break;
-                    case Key.Home: viewModel.PlaybackViewModel.MovePlayPos(0); break;
-                    case Key.End:
-                        if (viewModel.TracksViewModel.Parts.Count > 0) {
-                            int endTick = viewModel.TracksViewModel.Parts.Max(part => part.End);
-                            viewModel.PlaybackViewModel.MovePlayPos(endTick);
-                        }
-                        break;
-                    case Key.F11:
-                        OnMenuFullScreen(this, new RoutedEventArgs());
-                        break;
-                    default:
-                        args.Handled = false;
-                        break;
-                }
-            } else if (args.KeyModifiers == KeyModifiers.Alt) {
-                args.Handled = true;
-                switch (args.Key) {
-                    case Key.F4:
-                        (Application.Current?.ApplicationLifetime as IControlledApplicationLifetime)?.Shutdown();
-                        break;
-                    default:
-                        args.Handled = false;
-                        break;
-                }
-            } else if (args.KeyModifiers == cmdKey) {
-                args.Handled = true;
-                switch (args.Key) {
-                    case Key.A: viewModel.TracksViewModel.SelectAllParts(); break;
-                    case Key.M: OnMenuMixer(sender, new RoutedEventArgs()); break;
-                    case Key.N: NewProject(); break;
-                    case Key.O: Open(); break;
-                    case Key.S: _ = Save(); break;
-                    case Key.Z: viewModel.Undo(); break;
-                    case Key.Y: viewModel.Redo(); break;
-                    case Key.C: tracksVm.CopyParts(); break;
-                    case Key.X: tracksVm.CutParts(); break;
-                    case Key.V: tracksVm.PasteParts(); break;
-                    default:
-                        args.Handled = false;
-                        break;
-                }
-            } else if (args.KeyModifiers == KeyModifiers.Shift) {
-                args.Handled = true;
-                switch (args.Key) {
-                    // solo
-                    case Key.S:
-                        if (viewModel.TracksViewModel.SelectedParts.Count > 0) {
-                            var part = viewModel.TracksViewModel.SelectedParts.First();
-                            var track = DocManager.Inst.Project.tracks[part.trackNo];
-                            MessageBus.Current.SendMessage(new TracksSoloEvent(part.trackNo, !track.Solo, false));
-                        }
-                        break;
-                    // mute
-                    case Key.M:
-                        if (viewModel.TracksViewModel.SelectedParts.Count > 0) {
-                            var part = viewModel.TracksViewModel.SelectedParts.First();
-                            MessageBus.Current.SendMessage(new TracksMuteEvent(part.trackNo, false));
-                        }
-                        break;
-                    default:
-                        args.Handled = false;
-                        break;
-                }
-            } else if (args.KeyModifiers == (cmdKey | KeyModifiers.Shift)) {
-                args.Handled = true;
-                switch (args.Key) {
-                    case Key.Z: viewModel.Redo(); break;
-                    case Key.S: _ = SaveAs(); break;
-                    default:
-                        args.Handled = false;
-                        break;
-                }
+        /// <summary>
+        /// 命令层分发（W28 / M09）：手势 → <see cref="CommandRegistry"/> → 处理体。
+        /// 命中即执行并返回 true（调用方据此置 Handled）；未命中返回 false。
+        /// </summary>
+        /// <param name="preFocus">true = 只走"先于焦点检查"的全局命令（Ctrl+M / Ctrl+W / Ctrl+S）。</param>
+        bool TryExecuteShortcut(KeyEventArgs args, bool preFocus) {
+            var def = CommandRegistry.All.FirstOrDefault(c =>
+                c.PreFocus == preFocus &&
+                c.Scope == CommandScope.Window &&
+                MatchesGesture(c, args.Key, args.KeyModifiers));
+            if (def == null) {
+                return false;
             }
+            if (preFocus) {
+                // 同一次按键从隧道 + 冒泡两路到达时只动作一次（AddHandler 两路注册，事件实例相同）
+                if (ReferenceEquals(handledShortcutArgs, args)) {
+                    return true;
+                }
+                handledShortcutArgs = args;
+            }
+            if (def.CanExecute?.Invoke(this) == false) {
+                return true;   // 命中但当前不可用：按键仍算已处理（与菜单 IsEnabled=false 的观感一致）
+            }
+            def.Execute(this);
+            return true;
+        }
+
+        /// <summary>注册表手势（按平台解析主修饰键后）是否等于本次按键。</summary>
+        bool MatchesGesture(CommandDefinition def, Key key, KeyModifiers modifiers) {
+            var g = CommandRegistry.Resolve(def.Gesture, cmdKey);
+            return g != null && g.Key == key && g.KeyModifiers == modifiers;
         }
 
         void OnPointerPressed(object? sender, PointerPressedEventArgs args) {
@@ -1770,7 +1759,7 @@ namespace OpenUtau.App.Views {
             PlayOrPause();
         }
 
-        void PlayOrPause() {
+        internal void PlayOrPause() {
             viewModel.PlaybackViewModel.PlayOrPause();
         }
 
@@ -2718,7 +2707,7 @@ namespace OpenUtau.App.Views {
             SetShown(OverlayBackdrop, true);
         }
 
-        private void CloseOverlay() {
+        internal void CloseOverlay() {
             if (!OverlayLayer.IsVisible) {
                 return;
             }
