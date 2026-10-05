@@ -42,6 +42,7 @@ namespace OpenUtau.App.Commands {
     /// <param name="Execute">处理体。<c>MainWindow</c> 由分发器传入（窗口级命令都作用在窗口上）。</param>
     /// <param name="CanExecute">启用条件；<c>null</c> = 恒可用。仅用于总览显示与将来的命令面板，**不改变现有分发行为**。</param>
     /// <param name="Scope">作用域。</param>
+    /// <param name="PreFocus">true = 在**焦点检查之前**分发（隧道 + 冒泡都会走；当前只有 Ctrl+M / Ctrl+W / Ctrl+S 三条）。</param>
     /// <param name="Note">备注（总览里显示"为什么没有快捷键"之类）。</param>
     public sealed record CommandDefinition(
         string Id,
@@ -51,6 +52,7 @@ namespace OpenUtau.App.Commands {
         Action<MainWindow> Execute,
         Func<MainWindow, bool>? CanExecute = null,
         CommandScope Scope = CommandScope.Window,
+        bool PreFocus = false,
         string? Note = null);
 
     /// <summary>
@@ -68,8 +70,8 @@ namespace OpenUtau.App.Commands {
         static CommandDefinition Cmd(
             string id, string nameKey, CommandGroup group, KeyGesture? gesture,
             Action<MainWindow> execute, Func<MainWindow, bool>? canExecute = null,
-            CommandScope scope = CommandScope.Window, string? note = null) =>
-            new(id, nameKey, group, gesture, execute, canExecute, scope, note);
+            CommandScope scope = CommandScope.Window, bool preFocus = false, string? note = null) =>
+            new(id, nameKey, group, gesture, execute, canExecute, scope, preFocus, note);
 
         /// <summary>全部窗口级命令。顺序 = 总览里的显示顺序（按分组聚集）。</summary>
         public static readonly IReadOnlyList<CommandDefinition> All = new[] {
@@ -79,7 +81,7 @@ namespace OpenUtau.App.Commands {
             Cmd("file.open", "menu.file.open", CommandGroup.File,
                 new KeyGesture(Key.O, PrimaryModifier), w => w.Open()),
             Cmd("file.save", "menu.file.save", CommandGroup.File,
-                new KeyGesture(Key.S, PrimaryModifier), w => _ = w.Save()),
+                new KeyGesture(Key.S, PrimaryModifier), w => _ = w.Save(), preFocus: true),
             Cmd("file.saveas", "menu.file.saveas", CommandGroup.File,
                 new KeyGesture(Key.S, PrimaryModifier | KeyModifiers.Shift), w => _ = w.SaveAs()),
             Cmd("file.render", "menu.file.render", CommandGroup.File,
@@ -96,7 +98,7 @@ namespace OpenUtau.App.Commands {
             // Ctrl+Shift+Z 是 Redo 的第二手势：注册表显式登记，总览会把它标成"同一命令"的别名而不是冲突
             Cmd("edit.redo.alt", "menu.edit.redo", CommandGroup.Edit,
                 new KeyGesture(Key.Z, PrimaryModifier | KeyModifiers.Shift), w => w.ViewModel.Redo(),
-                w => w.ViewModel.CanRedo, CommandScope.Window, "别名手势（Redo）"),
+                w => w.ViewModel.CanRedo, scope: CommandScope.Window, note: "别名手势（Redo）"),
             Cmd("edit.selectallparts", "menu.edit.selectall", CommandGroup.Edit,
                 new KeyGesture(Key.A, PrimaryModifier), w => w.ViewModel.TracksViewModel.SelectAllParts()),
             Cmd("edit.cutparts", "menu.edit.cut", CommandGroup.Edit,
@@ -117,9 +119,9 @@ namespace OpenUtau.App.Commands {
             // ── Tools ───────────────────────────────────────────────────────────
             Cmd("tools.mixer", "menu.tools.mixer", CommandGroup.Tools,
                 new KeyGesture(Key.M, PrimaryModifier),
-                w => w.OnMenuMixer(w, new Avalonia.Interactivity.RoutedEventArgs())),
+                w => w.OnMenuMixer(w, new Avalonia.Interactivity.RoutedEventArgs()), preFocus: true),
             Cmd("tools.mixerattach", "command.view.mixerattach", CommandGroup.Tools,
-                new KeyGesture(Key.W, PrimaryModifier), w => w.ToggleMixerWindow()),
+                new KeyGesture(Key.W, PrimaryModifier), w => w.ToggleMixerWindow(), preFocus: true),
             Cmd("tools.fullscreen", "menu.tools.fullscreen", CommandGroup.Tools,
                 new KeyGesture(Key.F11),
                 w => w.OnMenuFullScreen(w, new Avalonia.Interactivity.RoutedEventArgs())),
@@ -134,8 +136,8 @@ namespace OpenUtau.App.Commands {
 
             // ── 窗口级杂项 ──────────────────────────────────────────────────────
             Cmd("window.escape", "command.window.escape", CommandGroup.View,
-                new KeyGesture(Key.Escape), w => w.CloseOverlay(), null, CommandScope.Overlay,
-                "遮罩打开时生效（欢迎页 / 偏好设置）"),
+                new KeyGesture(Key.Escape), w => w.CloseOverlay(), canExecute: null, scope: CommandScope.Overlay,
+                note: "遮罩打开时生效（欢迎页 / 偏好设置）"),
             Cmd("window.quit", "command.window.quit", CommandGroup.File,
                 new KeyGesture(Key.F4, KeyModifiers.Alt), w => w.QuitApplication()),
         };

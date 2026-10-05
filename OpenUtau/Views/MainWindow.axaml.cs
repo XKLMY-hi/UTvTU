@@ -20,6 +20,7 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using OpenUtau.App.Controls;
 using OpenUtau.App.ViewModels;
+using OpenUtau.App.Commands;
 using OpenUtau.Classic;
 using OpenUtau.Core;
 using OpenUtau.Core.Analysis;
@@ -1485,10 +1486,11 @@ namespace OpenUtau.App.Views {
             if (modifiers != cmdKey) {
                 return GlobalShortcut.None;
             }
-            return key switch {
-                Key.M => GlobalShortcut.ToggleMixer,
-                Key.W => GlobalShortcut.ToggleMixerAttachment,
-                Key.S => GlobalShortcut.Save,
+            // 由注册表投影（不再手写第二张表）
+            return CommandRegistry.Match(key, modifiers, cmdKey)?.Id switch {
+                "tools.mixer" => GlobalShortcut.ToggleMixer,
+                "tools.mixerattach" => GlobalShortcut.ToggleMixerAttachment,
+                "file.save" => GlobalShortcut.Save,
                 _ => GlobalShortcut.None,
             };
         }
@@ -1497,23 +1499,10 @@ namespace OpenUtau.App.Views {
         private KeyEventArgs? handledShortcutArgs;
 
         private void HandleGlobalShortcut(KeyEventArgs args) {
-            var shortcut = MapGlobalShortcut(args.Key, args.KeyModifiers, cmdKey);
-            if (shortcut == GlobalShortcut.None || ReferenceEquals(handledShortcutArgs, args)) {
-                return;
+            // 注册表分发（含隧道/冒泡去重），不再走手写 switch
+            if (TryExecuteShortcut(args, preFocus: true)) {
+                args.Handled = true;
             }
-            handledShortcutArgs = args;
-            switch (shortcut) {
-                case GlobalShortcut.ToggleMixer:
-                    OnMenuMixer(this, new RoutedEventArgs());
-                    break;
-                case GlobalShortcut.ToggleMixerAttachment:
-                    ToggleMixerWindow();
-                    break;
-                case GlobalShortcut.Save:
-                    _ = Save();
-                    break;
-            }
-            args.Handled = true;
         }
 
         // ── 命令层（W28 / M09）窗口级处理体 ────────────────────────────────────
@@ -1564,9 +1553,8 @@ namespace OpenUtau.App.Views {
                 return;
             }
 
-            // Global shortcuts — before focus check
-            if (MapGlobalShortcut(args.Key, args.KeyModifiers, cmdKey) != GlobalShortcut.None) {
-                HandleGlobalShortcut(args);
+            // ① 全局快捷键（先于焦点检查；隧道 + 冒泡双路只动作一次）——唯一来源：CommandRegistry
+            if (TryExecuteShortcut(args, preFocus: true)) {
                 args.Handled = true;
                 return;
             }
@@ -1577,86 +1565,41 @@ namespace OpenUtau.App.Views {
                 return;
             }
 
-            var tracksVm = viewModel.TracksViewModel;
+            // ② 其余窗口级命令（手势 → 注册表 → 处理体；未命中一律 false ⇒ 不吞按键，与原语义一致）
+            args.Handled = TryExecuteShortcut(args, preFocus: false);
+        }
 
-            if (args.KeyModifiers == KeyModifiers.None) {
-                args.Handled = true;
-                switch (args.Key) {
-                    case Key.Delete: viewModel.TracksViewModel.DeleteSelectedParts(); break;
-                    case Key.Space: PlayOrPause(); break;
-                    case Key.Home: viewModel.PlaybackViewModel.MovePlayPos(0); break;
-                    case Key.End:
-                        if (viewModel.TracksViewModel.Parts.Count > 0) {
-                            int endTick = viewModel.TracksViewModel.Parts.Max(part => part.End);
-                            viewModel.PlaybackViewModel.MovePlayPos(endTick);
-                        }
-                        break;
-                    case Key.F11:
-                        OnMenuFullScreen(this, new RoutedEventArgs());
-                        break;
-                    default:
-                        args.Handled = false;
-                        break;
-                }
-            } else if (args.KeyModifiers == KeyModifiers.Alt) {
-                args.Handled = true;
-                switch (args.Key) {
-                    case Key.F4:
-                        (Application.Current?.ApplicationLifetime as IControlledApplicationLifetime)?.Shutdown();
-                        break;
-                    default:
-                        args.Handled = false;
-                        break;
-                }
-            } else if (args.KeyModifiers == cmdKey) {
-                args.Handled = true;
-                switch (args.Key) {
-                    case Key.A: viewModel.TracksViewModel.SelectAllParts(); break;
-                    case Key.M: OnMenuMixer(sender, new RoutedEventArgs()); break;
-                    case Key.N: NewProject(); break;
-                    case Key.O: Open(); break;
-                    case Key.S: _ = Save(); break;
-                    case Key.Z: viewModel.Undo(); break;
-                    case Key.Y: viewModel.Redo(); break;
-                    case Key.C: tracksVm.CopyParts(); break;
-                    case Key.X: tracksVm.CutParts(); break;
-                    case Key.V: tracksVm.PasteParts(); break;
-                    default:
-                        args.Handled = false;
-                        break;
-                }
-            } else if (args.KeyModifiers == KeyModifiers.Shift) {
-                args.Handled = true;
-                switch (args.Key) {
-                    // solo
-                    case Key.S:
-                        if (viewModel.TracksViewModel.SelectedParts.Count > 0) {
-                            var part = viewModel.TracksViewModel.SelectedParts.First();
-                            var track = DocManager.Inst.Project.tracks[part.trackNo];
-                            MessageBus.Current.SendMessage(new TracksSoloEvent(part.trackNo, !track.Solo, false));
-                        }
-                        break;
-                    // mute
-                    case Key.M:
-                        if (viewModel.TracksViewModel.SelectedParts.Count > 0) {
-                            var part = viewModel.TracksViewModel.SelectedParts.First();
-                            MessageBus.Current.SendMessage(new TracksMuteEvent(part.trackNo, false));
-                        }
-                        break;
-                    default:
-                        args.Handled = false;
-                        break;
-                }
-            } else if (args.KeyModifiers == (cmdKey | KeyModifiers.Shift)) {
-                args.Handled = true;
-                switch (args.Key) {
-                    case Key.Z: viewModel.Redo(); break;
-                    case Key.S: _ = SaveAs(); break;
-                    default:
-                        args.Handled = false;
-                        break;
-                }
+        /// <summary>
+        /// 命令层分发（W28 / M09）：手势 → <see cref="CommandRegistry"/> → 处理体。
+        /// 命中即执行并返回 true（调用方据此置 Handled）；未命中返回 false。
+        /// </summary>
+        /// <param name="preFocus">true = 只走"先于焦点检查"的全局命令（Ctrl+M / Ctrl+W / Ctrl+S）。</param>
+        bool TryExecuteShortcut(KeyEventArgs args, bool preFocus) {
+            var def = CommandRegistry.All.FirstOrDefault(c =>
+                c.PreFocus == preFocus &&
+                c.Scope == CommandScope.Window &&
+                MatchesGesture(c, args.Key, args.KeyModifiers));
+            if (def == null) {
+                return false;
             }
+            if (preFocus) {
+                // 同一次按键从隧道 + 冒泡两路到达时只动作一次（AddHandler 两路注册，事件实例相同）
+                if (ReferenceEquals(handledShortcutArgs, args)) {
+                    return true;
+                }
+                handledShortcutArgs = args;
+            }
+            if (def.CanExecute?.Invoke(this) == false) {
+                return true;   // 命中但当前不可用：按键仍算已处理（与菜单 IsEnabled=false 的观感一致）
+            }
+            def.Execute(this);
+            return true;
+        }
+
+        /// <summary>注册表手势（按平台解析主修饰键后）是否等于本次按键。</summary>
+        bool MatchesGesture(CommandDefinition def, Key key, KeyModifiers modifiers) {
+            var g = CommandRegistry.Resolve(def.Gesture, cmdKey);
+            return g != null && g.Key == key && g.KeyModifiers == modifiers;
         }
 
         void OnPointerPressed(object? sender, PointerPressedEventArgs args) {
