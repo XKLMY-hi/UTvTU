@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,6 +7,7 @@ using OpenUtau.Classic;
 using OpenUtau.Core.Ustx;
 using OpenUtau.Core.Util;
 using Serilog;
+using YamlDotNet.RepresentationModel;
 
 namespace OpenUtau.Core.Format {
     /// <summary>
@@ -50,7 +51,7 @@ namespace OpenUtau.Core.Format {
                 project.ustxpVersion = kUstxpVersion;    // Plus version for Plus-specific tracking
                 project.FilePath = filePath;
                 project.BeforeSave();
-                File.WriteAllText(filePath, Yaml.DefaultSerializer.Serialize(project), Encoding.UTF8);
+                File.WriteAllText(filePath, SerializeForSave(project), Encoding.UTF8);
                 project.Saved = true;
                 project.AfterSave();
                 Preferences.Default.RecoveryPath = string.Empty;
@@ -77,7 +78,7 @@ namespace OpenUtau.Core.Format {
                 project.ustxVersion = Ustx.kUstxVersion;
                 project.ustxpVersion = kUstxpVersion;
                 project.BeforeSave();
-                File.WriteAllText(filePath, Yaml.DefaultSerializer.Serialize(project), Encoding.UTF8);
+                File.WriteAllText(filePath, SerializeForSave(project), Encoding.UTF8);
                 project.AfterSave();
                 Preferences.Default.RecoveryPath = filePath;
                 Preferences.Save();
@@ -88,10 +89,34 @@ namespace OpenUtau.Core.Format {
 
         /// <summary>
         /// Load a project from either .ustxp or .ustx format.
+        ///
+        /// W27（task-37）两处止血：
+        /// - **未知键透传**：文件里我们没建模的键（上游新增字段）收进模型的 <see cref="UnknownYaml"/>，
+        ///   保存时写回（见 <see cref="UstxYaml"/>）。不改成"遇未知键就抛"。
+        /// - **版本墙放宽**：`ustx_version` 比我们新时不再直接抛，改为 warning + 自动 `.bak` + 尽力读；
+        ///   只有**解析失败**才抛（并给出可操作提示），因为"能读一部分"远好于"完全打不开"。
         /// </summary>
         public static UProject Load(string filePath) {
             string text = File.ReadAllText(filePath, Encoding.UTF8);
-            UProject project = Yaml.DefaultDeserializer.Deserialize<UProject>(text);
+            UProject project;
+            YamlMappingNode? tree = null;
+            try {
+                project = Yaml.DefaultDeserializer.Deserialize<UProject>(text)
+                    ?? throw new FileFormatException("Empty project file.");
+            } catch (Exception ex) {
+                throw new MessageCustomizableException(
+                    $"Failed to parse project file: {filePath}",
+                    $"<translate:errors.failed.openproject>:\n{filePath}",
+                    new FileFormatException("Failed to parse project file.", ex));
+            }
+
+            // 未知键：解析一次树，把没建模的键挂到对象上（失败不影响加载）
+            try {
+                tree = UstxYaml.ParseTree(text);
+                UstxYaml.CaptureAll(tree, project, message => Log.Warning($"Unknown key passthrough skipped: {message}"));
+            } catch (Exception ex) {
+                Log.Warning(ex, "Failed to capture unknown keys; the file will still load.");
+            }
 
             // Register default expressions
             Ustx.AddDefaultExpressions(project);
@@ -101,36 +126,25 @@ namespace OpenUtau.Core.Format {
             project.AfterLoad();
             project.ValidateFull();
 
-            // Version check
+            // 版本墙（W27）：比我们新 ⇒ warning + 备份 + 尽力读
             if (project.ustxVersion > Ustx.kUstxVersion) {
-                throw new MessageCustomizableException(
-                    $"Project file is newer than software: {filePath}",
-                    $"<translate:errors.failed.opennewerproject>:\n{filePath}",
-                    new FileFormatException("Project file is newer than software."));
+                Log.Warning(
+                    $"Project file {filePath} is newer than this software " +
+                    $"(file ustx_version={project.ustxVersion}, ours={Ustx.kUstxVersion}). " +
+                    "Attempting best-effort load; unmodeled fields are preserved by unknown-key passthrough. " +
+                    "Backup kept at .bak");
+                BackupOnce(filePath);
             }
 
-            // Apply format migrations (same as Ustx.Load)
-            if (project.ustxVersion < new Version(0, 4)) {
-                MigrateToV04(project);
-            }
-            if (project.ustxVersion < new Version(0, 5)) {
-                MigrateToV05(project);
-            }
-            if (project.ustxVersion < new Version(0, 6)) {
-                MigrateToV06(project);
-            }
-            if (project.ustxVersion < new Version(0, 7)) {
-                MigrateToV07(project);
-            }
-            if (project.ustxVersion < new Version(0, 9)) {
-                MigrateToV09(project);
-            }
+            // 迁移阶梯（一张可查的表，见 UstxMigrations）
+            UstxMigrations.Run(project, UstxMigrations.Kind.Ustx);
 
             // Upgrade USTX base version to latest
             project.ustxVersion = Ustx.kUstxVersion;
 
             // Run Plus-specific migrations if ustxpVersion is present
             if (project.ustxpVersion != null && project.ustxpVersion < kUstxpVersion) {
+                Log.Information($"Upgrading Plus project from {project.ustxpVersion} to {kUstxpVersion}");
                 RunPlusMigrations(project, project.ustxpVersion);
             }
             project.ustxpVersion = kUstxpVersion;
@@ -138,62 +152,78 @@ namespace OpenUtau.Core.Format {
         }
 
         /// <summary>
+        /// 版本比我们新时留一份原始文件（**不覆盖已存在的备份**：第一次打开时的那份最原始，最值得留）。
+        /// </summary>
+        internal static string BackupOnce(string filePath) {
+            string backup = filePath + ".bak";
+            try {
+                if (!File.Exists(backup)) {
+                    File.Copy(filePath, backup, overwrite: false);
+                    Log.Information($"Backup written: {backup}");
+                }
+            } catch (Exception ex) {
+                Log.Warning(ex, $"Failed to write backup for {filePath}");
+            }
+            return backup;
+        }
+
+        /// <summary>
+        /// 「另存为纯净 .ustx」(W27 第 3 件)：写出**上游能直接读、且不含任何 Plus 专有字段**的文件。
+        ///
+        /// 用于"把我的工程交给原版用户/在原版里打开"这条唯一安全的交付路径。
+        /// **它不解决"上游重存丢 Plus 字段"**——上游保存时依然会丢掉 VST 链等它不认识的键；
+        /// 那需要侧车文件或容器化格式（审计 A+/B 方案），不在本轮范围。
+        /// </summary>
+        public static void ExportCleanUstx(string filePath, UProject project) {
+            if (!filePath.EndsWith(LegacyExtension, StringComparison.OrdinalIgnoreCase)) {
+                filePath = Path.ChangeExtension(filePath, LegacyExtension);
+            }
+            var clean = project.CloneAsTemplate();
+            clean.ustxpVersion = null;                     // Plus 版本标记
+            foreach (var track in clean.tracks) {
+                track.MixFx = null;                        // Plus 混音台效果链
+                track.VstSlots.Clear();                  // Plus VST 插件链
+            }
+            clean.FilePath = filePath;
+            clean.ustxVersion = Ustx.kUstxVersion;
+            clean.BeforeSave();
+            string text = Prune(Yaml.DefaultSerializer.Serialize(clean));
+            File.WriteAllText(filePath, text, Encoding.UTF8);
+            clean.Saved = true;
+            clean.AfterSave();
+            Log.Information($"Exported clean .ustx (no Plus fields): {filePath}");
+        }
+
+        /// <summary>
+        /// 保存序列化（W27 第 1 + 4 件）：
+        /// - 有未知键 ⇒ 序列化 → 树 → 把未知键补回 → 剪空集合 → 文本（慢路径，键值原样保留）；
+        /// - 无未知键 ⇒ 只做"剪空集合"（噪音清理），零额外解析。
+        /// </summary>
+        internal static string SerializeForSave(UProject project) {
+            string text = Yaml.DefaultSerializer.Serialize(project);
+            if (!UstxYaml.HasAnyUnknown(project)) {
+                return Prune(text);
+            }
+            var tree = UstxYaml.ParseTree(text);
+            UstxYaml.MergeAll(tree, project);
+            UstxYaml.PruneEmpty(tree);
+            return UstxYaml.SerializeTree(tree);
+        }
+
+        /// <summary>
+        /// 序列化文本 → 树 → 剪掉空集合/null → 文本（W27 第 4 件；导出与保存共用）。
+        /// </summary>
+        internal static string Prune(string serialized) {
+            var tree = UstxYaml.ParseTree(serialized);
+            UstxYaml.PruneEmpty(tree);
+            return UstxYaml.SerializeTree(tree);
+        }
+
+        /// <summary>
         /// Plus-specific format migrations. Called when ustxpVersion is behind.
         /// </summary>
         private static void RunPlusMigrations(UProject project, Version fromVersion) {
             // v1.0 → future: add Plus migrations here
-        }
-
-        private static void MigrateToV04(UProject project) {
-            if (project.expressions.TryGetValue("acc", out var exp) && exp.name == "accent") {
-                project.expressions.Remove("acc");
-                exp.abbr = Ustx.ATK;
-                exp.name = "attack";
-                project.expressions[Ustx.ATK] = exp;
-                project.parts
-                    .Where(part => part is UVoicePart)
-                    .Select(part => part as UVoicePart)
-                    .SelectMany(part => part!.notes)
-                    .SelectMany(note => note.phonemeExpressions)
-                    .Where(pExp => pExp.abbr == "acc")
-                    .ToList()
-                    .ForEach(pExp => pExp.abbr = Ustx.ATK);
-            }
-            project.ValidateFull();
-        }
-
-        private static void MigrateToV05(UProject project) {
-            project.parts
-                .Where(part => part is UVoicePart)
-                .Select(part => part as UVoicePart)
-                .SelectMany(part => part!.notes)
-                .Where(note => note.lyric.StartsWith("..."))
-                .ToList()
-                .ForEach(note => note.lyric = note.lyric.Replace("...", "+"));
-            project.ValidateFull();
-        }
-
-        private static void MigrateToV06(UProject project) {
-#pragma warning disable CS0612
-            project.timeSignatures = new List<UTimeSignature> {
-                new UTimeSignature(0, project.beatPerBar, project.beatUnit) };
-            project.tempos = new List<UTempo> { new UTempo(0, project.bpm) };
-#pragma warning restore CS0612
-            project.ValidateFull();
-        }
-
-        private static void MigrateToV07(UProject project) {
-            var expSelectors = new UProject().expSelectors;
-            if (project.expSelectors.Length < expSelectors.Length) {
-                for (int i = 0; i < project.expSelectors.Length; i++) {
-                    expSelectors[i] = project.expSelectors[i];
-                }
-                project.expSelectors = expSelectors;
-            }
-        }
-
-        private static void MigrateToV09(UProject project) {
-            // Upgrade to USTX v0.9 level
         }
     }
 }

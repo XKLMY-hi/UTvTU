@@ -34,7 +34,11 @@ namespace OpenUtau.Core.Ustx {
         public override string ToString() => $"{beatPerBar}/{beatUnit}@bar{barPosition}";
     }
 
-    public class UProject {
+    public class UProject : IUnknownYamlHolder {
+        /// <summary>W27：文件里我们没建模的键（原样保留，保存时写回）。见 <see cref="UstxYaml"/>。</summary>
+        [YamlIgnore]
+        public UnknownYaml? Unknown { get; set; }
+
         public string name = "New Project";
         public string comment = string.Empty;
         public string outputDir = "Vocal";

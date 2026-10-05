@@ -1,0 +1,130 @@
+name: Probe
+comment: ""
+output_dir: Vocal
+cache_dir: UCache
+ustx_version: "0.10"
+bpm: 120
+beat_per_bar: 4
+beat_unit: 4
+expressions: {}
+exp_selectors:
+- dyn
+- pitd
+- clr
+- eng
+- vel
+- vol
+- atk
+- dec
+- gen
+- bre
+exp_primary: 0
+exp_secondary: 1
+key: 0
+time_signatures:
+- bar_position: 0
+  beat_per_bar: 4
+  beat_unit: 4
+tempos:
+- position: 0
+  bpm: 120
+tracks:
+- phonemizer: OpenUtau.Core.DefaultPhonemizer
+  renderer_settings: {}
+  track_name: Vocal
+  track_color: Blue
+  mute: false
+  solo: false
+  mix_fx:
+    enabled: true
+    eq_enabled: false
+    comp_enabled: true
+    reverb_enabled: true
+    eq_preset: vocal_air
+    comp_preset: gentle
+    reverb_preset: small_room
+    eq_low_db: 3.5
+    eq_mid_freq: 3000
+    eq_mid_db: 1.5
+    eq_high_db: 3
+    comp_threshold_db: -18
+    comp_ratio: 2
+    comp_makeup_db: 2.5
+    reverb_size: 0.3
+    reverb_damp: 0.7
+    reverb_wet: 1
+    reverb_pre_delay_ms: 0
+  volume: 0.8
+  pan: -0.2
+  track_expressions: []
+  voice_color_names:
+  - ""
+- phonemizer: OpenUtau.Core.DefaultPhonemizer
+  renderer_settings: {}
+  track_name: Harmony
+  track_color: Red
+  mute: false
+  solo: false
+  volume: 0
+  pan: 0
+  track_expressions: []
+  voice_color_names:
+  - ""
+voice_parts:
+- duration: 0
+  name: Part A
+  comment: ""
+  track_no: 0
+  position: 0
+  notes:
+  - position: 0
+    duration: 480
+    tone: 60
+    lyric: a
+    pitch:
+      data:
+      - {x: -40, y: 0, shape: io}
+      - {x: 40, y: 0, shape: io}
+      snap_first: true
+    vibrato: {length: 0, period: 175, depth: 25, in: 10, out: 10, shift: 0, drift: 0, vol_link: 0}
+    tuning: 0
+    phoneme_expressions: []
+    phoneme_overrides: []
+  - position: 480
+    duration: 480
+    tone: 62
+    lyric: a
+    pitch:
+      data:
+      - {x: -40, y: 0, shape: io}
+      - {x: 40, y: 0, shape: io}
+      snap_first: true
+    vibrato: {length: 0, period: 175, depth: 25, in: 10, out: 10, shift: 0, drift: 0, vol_link: 0}
+    tuning: 0
+    phoneme_expressions: []
+    phoneme_overrides: []
+  - position: 960
+    duration: 960
+    tone: 64
+    lyric: a
+    pitch:
+      data:
+      - {x: -40, y: 0, shape: io}
+      - {x: 40, y: 0, shape: io}
+      snap_first: true
+    vibrato: {length: 0, period: 175, depth: 25, in: 10, out: 10, shift: 0, drift: 0, vol_link: 0}
+    tuning: 0
+    phoneme_expressions: []
+    phoneme_overrides: []
+  curves: []
+wave_parts:
+- name: track.wav
+  comment: ""
+  track_no: 1
+  position: 0
+  relative_path: backing\track.wav
+  file_duration_ms: 3000
+  skip: 0
+  trim: 100
+  fadein: 10
+  fadeout: 20

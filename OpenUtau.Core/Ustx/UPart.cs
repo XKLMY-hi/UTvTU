@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -14,7 +14,11 @@ using SharpCompress;
 using YamlDotNet.Serialization;
 
 namespace OpenUtau.Core.Ustx {
-    public abstract class UPart {
+    public abstract class UPart : IUnknownYamlHolder {
+        /// <summary>W27：文件里我们没建模的键（原样保留，保存时写回）。见 <see cref="UstxYaml"/>。</summary>
+        [YamlIgnore]
+        public UnknownYaml? Unknown { get; set; }
+
         public string name = "New Part";
         public string comment = string.Empty;
         public int trackNo;

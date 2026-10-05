@@ -10,7 +10,7 @@ using Serilog;
 
 namespace OpenUtau.Core.Format {
     public class Ustx {
-        public static readonly Version kUstxVersion = new Version(0, 9);
+        public static readonly Version kUstxVersion = new Version(0, 10);   // W27：跟上上游（0.1.570.11-alpha 起上游即 0.10）
 
         public const string DYN = "dyn";
         public const string PITD = "pitd";
@@ -94,6 +94,7 @@ namespace OpenUtau.Core.Format {
             return project;
         }
 
+        [Obsolete("W27：本方法全仓无调用方（真入口是 Ustxp.Save）。保留仅为兼容外部调用，勿在新代码里用。")]
         public static void Save(string filePath, UProject project) {
             try {
                 project.ustxVersion = kUstxVersion;
@@ -111,6 +112,7 @@ namespace OpenUtau.Core.Format {
             }
         }
 
+        [Obsolete("W27：本方法全仓无调用方（真入口是 Ustxp.AutoSave）。保留仅为兼容外部调用，勿在新代码里用。")]
         public static void AutoSave(string filePath, UProject project) {
             try {
                 project.ustxVersion = kUstxVersion;
@@ -124,6 +126,7 @@ namespace OpenUtau.Core.Format {
             }
         }
 
+        [Obsolete("W27：本方法全仓无调用方（真入口是 Ustxp.Load）。保留仅为兼容外部调用，勿在新代码里用。")]
         public static UProject Load(string filePath) {
             string text = File.ReadAllText(filePath, Encoding.UTF8);
             UProject project = Yaml.DefaultDeserializer.Deserialize<UProject>(text);
@@ -138,49 +141,9 @@ namespace OpenUtau.Core.Format {
             if (project.ustxVersion < kUstxVersion) {
                 Log.Information($"Upgrading project from {project.ustxVersion} to {kUstxVersion}");
             }
-            if (project.ustxVersion < new Version(0, 4)) {
-                if (project.expressions.TryGetValue("acc", out var exp) && exp.name == "accent") {
-                    project.expressions.Remove("acc");
-                    exp.abbr = ATK;
-                    exp.name = "attack";
-                    project.expressions[ATK] = exp;
-                    project.parts
-                        .Where(part => part is UVoicePart)
-                        .Select(part => part as UVoicePart)
-                        .SelectMany(part => part.notes)
-                        .SelectMany(note => note.phonemeExpressions)
-                        .Where(exp => exp.abbr == "acc")
-                        .ToList()
-                        .ForEach(exp => exp.abbr = ATK);
-                    project.ValidateFull();
-                }
-            }
-            if (project.ustxVersion < new Version(0, 5)) {
-                project.parts
-                    .Where(part => part is UVoicePart)
-                    .Select(part => part as UVoicePart)
-                    .SelectMany(part => part.notes)
-                    .Where(note => note.lyric.StartsWith("..."))
-                    .ToList()
-                    .ForEach(note => note.lyric = note.lyric.Replace("...", "+"));
-                project.ValidateFull();
-            }
-            if (project.ustxVersion < new Version(0, 6)) {
-#pragma warning disable CS0612 // Type or member is obsolete
-                project.timeSignatures = new List<UTimeSignature> { new UTimeSignature(0, project.beatPerBar, project.beatUnit) };
-                project.tempos = new List<UTempo> { new UTempo(0, project.bpm) };
-#pragma warning restore CS0612 // Type or member is obsolete
-                project.ValidateFull();
-            }
-            if (project.ustxVersion < new Version(0, 7)) {
-                var expSelectors = new UProject().expSelectors;
-                if (project.expSelectors.Length < expSelectors.Length) {
-                    for (int i = 0; i < project.expSelectors.Length; i++) {
-                        expSelectors[i] = project.expSelectors[i];
-                    }
-                    project.expSelectors = expSelectors;
-                }
-            }
+            // W27：迁移阶梯收敛到 UstxMigrations 一张表（原先这里是 Ustxp.Load 的重复拷贝）
+            UstxMigrations.Run(project, UstxMigrations.Kind.Ustx);
+
             project.ustxVersion = kUstxVersion;
             return project;
         }
