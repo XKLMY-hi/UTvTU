@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
@@ -178,9 +178,12 @@ namespace OpenUtau.App.Controls {
                 change.Property == TickWidthProperty) {
                 SetPosition();
             }
-            if (change.Property == PianoRollViewTickOffsetProperty ||
-                change.Property == PianoRollViewViewportTicksProperty ||
-                change.Property == SelectedProperty ||
+            // 卷帘视口（TickOffset / ViewportTicks）变化时**本控件不重绘**：这两个属性是
+            // 每个部件都绑定到 PartsCanvas 的，原先各自 InvalidateVisual ⇒ 卷帘每滚一帧
+            // 编排区所有部件都重绘（波形部件还会重建波形）。实际只有"打开的那个部件"
+            // 画卷帘视口高亮，而 PartsCanvas 已经自己失效了它（InvalidatePartViewport()）。
+            // 上游 `96473fa5` 同口径。实测（PartRedrawScopeTests）：滚动一帧的重绘数 3 → 1。
+            if (change.Property == SelectedProperty ||
                 change.Property == TextProperty || 
                 change.Property == FadeInProperty ||
                 change.Property == FadeOutProperty) {
@@ -206,7 +209,14 @@ namespace OpenUtau.App.Controls {
             }
         }
 
+        /// <summary>
+        /// 测试/诊断用：本控件的实际绘制次数（性能类证据靠它，不靠像素）。
+        /// 编排区一次滚动帧里"有几个部件被重绘"就是靠比对各部件的这个计数得出的。
+        /// </summary>
+        internal int RenderCount { get; private set; }
+
         public override void Render(DrawingContext context) {
+            RenderCount++;
             var backgroundBrush = Selected ? ThemeManager.AccentBrush2 : ThemeManager.AccentBrush1;
             // Background
             context.DrawRectangle(backgroundBrush, null, new Rect(1, 0, Width - 1, Height - 1), 4, 4);
