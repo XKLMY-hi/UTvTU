@@ -10,12 +10,19 @@ using ReactiveUI;
 using Xunit;
 
 namespace OpenUtau.Test.App {
-    public class MixerTrackStripTest {
+    public class MixerTrackStripTest : IDisposable {
+        // W24 测试卫生：`mainThread` 是**进程级全局**，xUnit 只保证 collection 内串行 ⇒
+        // 旧式 RunOnCurrentThread()（改了不还）会污染并行 collection 的用例。改用**作用域版**
+        // （构造保存、Dispose 恢复）。⚠ 两个参数的理由见 MixerGeometryTests 里的同类注释。
+        readonly DocManagerTestSetup.ScopedDispatcher dispatcher;
+
         public MixerTrackStripTest() {
             // MixerTrackStrip 的声像写回路径调用 DocManager.Inst.ExecuteCmd；
-            // wire it to run inline on the test (UI) thread.
-            DocManagerTestSetup.RunOnCurrentThread();
+            // 作用域把 mainThread 指到测试线程 ⇒ 命令内联执行（断言不受投递时序影响）。
+            dispatcher = DocManagerTestSetup.EnterScopedDispatcher(nullChannel: true, installScheduler: false);
         }
+
+        public void Dispose() => dispatcher.Dispose();
         /// <summary>
         /// Regression: LoadTrackData re-subscribed the pan handler each call without
         /// unsubscribing, so N refreshes caused one pan change to fire N
