@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -214,14 +214,31 @@ namespace OpenUtau.Core {
             }
         }
 
+        /// <summary>
+        /// 命令统一入口。**命令层统一锚定所属线程**：非主线程调用一律经
+        /// <see cref="PostOnUIThread"/> 投递回 UI 线程，而不是让每个调用点自己包一层
+        /// 调度（上游 832aea2c 是在 7 处渲染回调里逐点包 <c>Task.StartNew(MainScheduler)</c>；
+        /// 那种做法漏一处就复发，且 MainScheduler 为 null 时 StartNew 会直接抛，
+        /// 故此处保留我们的集中口径，只补"投递通道缺失"这一个缺口）。
+        /// </summary>
         public void ExecuteCmd(UCommand cmd) {
             if (mainThread != Thread.CurrentThread) {
                 if (!(cmd is ProgressBarNotification)) {
                     Log.Warning($"{cmd} not on main thread");
                 }
-                PostOnUIThread(() => ExecuteCmd(cmd));
+                if (PostOnUIThread != null) {
+                    PostOnUIThread(() => ExecuteCmd(cmd));
+                } else {
+                    // 无头/测试宿主/启动早期可能还没装投递通道：就地执行，绝不 NRE。
+                    Log.Warning("PostOnUIThread is not set; executing the command inline.");
+                    ExecuteCmdCore(cmd);
+                }
                 return;
             }
+            ExecuteCmdCore(cmd);
+        }
+
+        private void ExecuteCmdCore(UCommand cmd) {
             if (cmd is UNotification) {
                 if (cmd is SaveProjectNotification saveProjectNotif) {
                     if (undoQueue.Count > 0) {
