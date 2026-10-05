@@ -149,8 +149,8 @@
                   ContextRequested="PhonemizerButtonContextRequested"
                   ToolTip.Tip="{Binding Phonemizer}" ContextMenu="{StaticResource PhonemizerMenuRes}"/>
 
-          <!-- Row 3: Renderer -->
-          <Button Classes="clear" Grid.Row="3" Margin="2,0,0,0" Padding="2,0" Height="16"
+          <!-- Row 3: Renderer（W33：**恒可见**，不再按轨道高裁剪；命名供布局测试定位） -->
+          <Button Name="RendererButton" Classes="clear" Grid.Row="3" Margin="2,0,0,0" Padding="2,0" Height="16"
                   FontSize="10" IsVisible="{Binding IsRendererVisible}"
                   HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Focusable="False"
                   Content="{Binding Renderer}" Click="RendererButtonClicked"
@@ -208,10 +208,12 @@
         <!-- ── Right: Mute / Solo / FX / Settings buttons ── -->
         <StackPanel Grid.Column="2" VerticalAlignment="Top" Margin="0,2,0,0" Spacing="1">
 
-          <!-- "⋯" overflow button (compact view when rows hidden) -->
-          <Button Classes="clear" Height="18" Width="17" Padding="0"
+          <!-- "⋯" overflow button（紧凑视图：歌手/音素器被按高裁掉时才出现）。
+               触发条件从 `!IsRendererVisible` 改成 `ShowOverflow`（W33）：渲染器已恒显，
+               若还挂渲染器那个条件就永远不显示了；同时**渲染器兜底项已删除**（同一入口两处呈现是隐患）。 -->
+          <Button Name="OverflowButton" Classes="clear" Height="18" Width="17" Padding="0"
                   Content="⋯" FontSize="12"
-                  VerticalAlignment="Top" IsVisible="{Binding !IsRendererVisible}">
+                  VerticalAlignment="Top" IsVisible="{Binding ShowOverflow}">
             <Button.Flyout>
               <Flyout>
                 <StackPanel Spacing="2">
@@ -225,20 +227,6 @@
                           Content="{Binding PhonemizerTag}" Click="PhonemizerButtonClicked"
                           ContextRequested="PhonemizerButtonContextRequested"
                           ToolTip.Tip="{Binding Phonemizer}" ContextMenu="{StaticResource PhonemizerMenuRes}"/>
-                  <Grid ColumnDefinitions="*,auto" IsVisible="{Binding !IsRendererVisible}">
-                    <Button Grid.Column="0" Classes="clear" Margin="2" Height="18"
-                            HorizontalContentAlignment="Left" Focusable="False"
-                            Content="{Binding Renderer}" Click="RendererButtonClicked"
-                            ContextRequested="RendererButtonContextRequested"
-                            ToolTip.Tip="{DynamicResource tracks.selectrenderer}" ContextMenu="{StaticResource RendererMenuRes}"/>
-                    <Button Grid.Column="1" Margin="2" Padding="0" Height="18" Background="Transparent"
-                            HorizontalAlignment="Right" Click="TrackSettingsButtonClicked"
-                            ToolTip.Tip="{DynamicResource tracks.tracksettings}">
-                      <Path Classes="clear" Width="14" Height="14"
-                            Data="M12 8.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM12 13.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM12 18.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
-                            Fill="{DynamicResource NeutralAccentBrush}"/>
-                    </Button>
-                  </Grid>
                 </StackPanel>
               </Flyout>
             </Button.Flyout>

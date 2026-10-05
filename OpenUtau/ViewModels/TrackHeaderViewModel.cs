@@ -44,6 +44,11 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public bool IsSingerVisible { get; set; }
         [Reactive] public bool IsPhonemizerVisible { get; set; }
         [Reactive] public bool IsRendererVisible { get; set; }
+        /// <summary>
+        /// 次行的 `⋯` 溢出按钮是否显示（W33）：歌手/音素器被按高裁掉时，仍能从那里进它们的菜单。
+        /// **渲染器不再进溢出菜单** —— 它恒可见，避免同一入口两处（用户报的"渲染器被挤掉"）。
+        /// </summary>
+        public bool ShowOverflow => !IsSingerVisible || !IsPhonemizerVisible;
         [Reactive] public bool MixFxEnabled { get; set; }
         [Reactive] public IBrush HeaderBorderBrush { get; set; } = ThemeManager.NeutralAccentBrushSemi;
 
@@ -182,6 +187,9 @@ namespace OpenUtau.App.ViewModels {
                     track.Solo = solo;
                     DocManager.Inst.MarkProjectModified();
                 });
+            // W33：次行 `⋯` 的显隐由"歌手/音素器是否被按高裁掉"派生 ⇒ 两者变了要通知它
+            this.WhenAnyValue(x => x.IsSingerVisible, x => x.IsPhonemizerVisible)
+                .Subscribe(_ => this.RaisePropertyChanged(nameof(ShowOverflow)));
             this.WhenAnyValue(x => x.MixFxEnabled)
                 .Subscribe(enabled => {
                     if (track.MixFx != null) {

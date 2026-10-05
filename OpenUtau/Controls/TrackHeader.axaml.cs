@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
 using Avalonia;
@@ -85,9 +85,11 @@ namespace OpenUtau.App.Controls {
             Canvas.SetLeft(this, 0);
             Canvas.SetTop(this, Offset.Y + (track?.TrackNo ?? 0) * trackHeight);
             if (ViewModel != null) {
+                // W33：渲染器**恒可见**（原先 `>= 5×` 的门槛会让轨道一矮就整行消失 —— 用户报的
+                // "渲染器选择框被挤掉"就是这个）。歌手/音素器的按高裁剪保留。
                 ViewModel.IsSingerVisible = trackHeight >= ViewConstants.TrackHeightDelta * 3;
                 ViewModel.IsPhonemizerVisible = trackHeight >= ViewConstants.TrackHeightDelta * 4;
-                ViewModel.IsRendererVisible = trackHeight >= ViewConstants.TrackHeightDelta * 5;
+                ViewModel.IsRendererVisible = true;
             }
         }
 
