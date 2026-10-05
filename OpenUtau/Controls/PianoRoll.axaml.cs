@@ -57,6 +57,19 @@ namespace OpenUtau.App.Controls {
         private readonly ZoomGlide xZoom;
         private readonly ZoomGlide yZoom;
 
+        /// <summary>
+        /// 表达式/曲线区（**行面板**，W20）。状态写 `Preferences.Default.PanelLayout` 的
+        /// `PianoRollExpHeight` / `PianoRollExpCollapsed`，**不另开存储**
+        /// （`PanelSlot.Width` 在行面板里承载的就是"高"）。
+        /// </summary>
+        public PanelSlot ExpPanel { get; } = new PanelSlot(
+            "pianoroll-exp",
+            Preferences.Default.PanelLayout.PianoRollExpHeight,
+            ViewConstants.ExpHeightMin,
+            ViewConstants.ExpHeightMax);
+
+        private bool syncingExpPanel;
+
         public PianoRoll(PianoRollViewModel model) {
             InitializeComponent();
             DataContext = ViewModel = model;
@@ -71,6 +84,7 @@ namespace OpenUtau.App.Controls {
                     ViewModel.NotesViewModel.TickOffset =
                         Math.Clamp(e.TickOffset, 0, ViewModel.NotesViewModel.HScrollBarMax);
                 });
+            SetupExpPanel();
             ValueTip.IsVisible = false;
             SetPenToolIcon();
             penTool.AddHandler(PointerPressedEvent, OnToolButtonPointerPressed, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
@@ -79,6 +93,74 @@ namespace OpenUtau.App.Controls {
 
         private void PianoRollLayoutUpdated(object? sender, EventArgs e) {
             UpdatePortraitPosition();
+        }
+
+        /// <summary>
+        /// 表达式面板接线（W20）：折叠态与既有的 `ShowExpressions`（L 键 / 齿轮 / 菜单）
+        /// 是**同一个状态、双向同步** —— 否则会出现"面板折叠了但表达式视图还开着"两个各说各话的布尔。
+        /// 持久化只写 `PanelLayout` 一对字段；拖动结束（DragCompleted）才落盘，拖动中只更新内存。
+        /// </summary>
+        private void SetupExpPanel() {
+            // Target / IsVisible 必须绑在**本控件**上：XAML 里的 `{Binding ExpPanel.*}` 会解析到
+            // DataContext（PianoRollViewModel）上，而槽在这里。
+            ExpPanelSplitter.Bind(PanelSplitter.TargetProperty,
+                new Avalonia.Data.Binding(nameof(PanelSlot.Width)) {
+                    Source = ExpPanel,
+                    Mode = Avalonia.Data.BindingMode.TwoWay,
+                });
+            ExpPanelSplitter.Bind(Visual.IsVisibleProperty,
+                new Avalonia.Data.Binding($"!{nameof(PanelSlot.IsCollapsed)}") { Source = ExpPanel });
+            ExpPanel.IsCollapsed = Preferences.Default.PanelLayout.PianoRollExpCollapsed;
+            ViewModel.NotesViewModel.ShowExpressions = !ExpPanel.IsCollapsed;
+            UpdateExpChevron();
+            ExpPanel.PropertyChanged += (_, e) => {
+                if (e.PropertyName == nameof(PanelSlot.IsCollapsed)) {
+                    UpdateExpChevron();
+                }
+                if (e.PropertyName != nameof(PanelSlot.IsCollapsed) || syncingExpPanel) {
+                    return;
+                }
+                syncingExpPanel = true;
+                try {
+                    ViewModel.NotesViewModel.ShowExpressions = !ExpPanel.IsCollapsed;
+                    PersistExpPanel();
+                } finally {
+                    syncingExpPanel = false;
+                }
+            };
+            ViewModel.NotesViewModel.WhenAnyValue(x => x.ShowExpressions)
+                .Subscribe(show => {
+                    if (syncingExpPanel || ExpPanel.IsCollapsed == !show) {
+                        return;
+                    }
+                    syncingExpPanel = true;
+                    try {
+                        ExpPanel.IsCollapsed = !show;
+                        PersistExpPanel();
+                    } finally {
+                        syncingExpPanel = false;
+                    }
+                });
+        }
+
+        /// <summary>折叠入口的箭头方向随折叠态翻转（不需要转换器：两个箭头互斥显示）。</summary>
+        private void UpdateExpChevron() {
+            ExpChevronDown.IsVisible = !ExpPanel.IsCollapsed;
+            ExpChevronUp.IsVisible = ExpPanel.IsCollapsed;
+        }
+
+        private void PersistExpPanel() {
+            Preferences.Default.PanelLayout.PianoRollExpHeight = ExpPanel.Width;
+            Preferences.Default.PanelLayout.PianoRollExpCollapsed = ExpPanel.IsCollapsed;
+            Preferences.Save();
+        }
+
+        /// <summary>拖动表达式面板分隔条结束 ⇒ 落盘（拖动过程中只更新内存）。</summary>
+        private void OnPanelSplitterDragCompleted(object? sender, EventArgs e) => PersistExpPanel();
+
+        /// <summary>工具行上的折叠/展开入口（面板折叠后自身高度为 0，入口必须在面板外才点得回来）。</summary>
+        private void OnExpPanelToggle(object? sender, RoutedEventArgs e) {
+            ExpPanel.ToggleCollapse();
         }
 
         private void UpdatePortraitPosition() {

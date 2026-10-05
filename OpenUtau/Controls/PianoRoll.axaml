@@ -20,9 +20,7 @@
         <RowDefinition Height="24"/>
         <RowDefinition Height="*"/>
         <RowDefinition Height="Auto"/>
-        <RowDefinition Height="150" 
-                       MinHeight="{Binding NotesViewModel.ExpHeightMin}"
-                       MaxHeight="{Binding NotesViewModel.ExpHeightMax}"/>
+        <RowDefinition Height="Auto"/>
         <RowDefinition Height="4"/>
       </Grid.RowDefinitions>
       <Grid.ColumnDefinitions>
@@ -63,7 +61,8 @@
                          PointerPressed="KeyboardPointerPressed"
                          PointerMoved="KeyboardPointerMoved"
                          PointerReleased="KeyboardPointerReleased"/>
-      <Grid Grid.Column="0" Grid.Row="5" IsVisible="{Binding NotesViewModel.ShowExpressions}">
+      <Grid Grid.Column="0" Grid.Row="5" Height="{Binding #ExpPanelSplitter.PanelHeight}"
+            IsVisible="{Binding #ExpPanelSplitter.PanelShown}">
         <Grid.RowDefinitions>
           <RowDefinition Height="*"/>
           <RowDefinition Height="24"/>
@@ -538,6 +537,20 @@
                              ItemsSource="{Binding NotesViewModel.Keys}" KeyDown="OnKeyKeyDown"/>
               </Button.ContextMenu>
             </Button>
+            <!-- 表达式面板折叠入口（W20）：放在**工具行**而不是面板内部 ——
+                 面板折叠后高度为 0、内部控件全隐藏，入口若在里面就再也点不开（UX 死锁）。
+                 两个箭头按折叠态互斥显示，不需要转换器。
+                 （文案沿用既有的 `pianoroll.toggle.expressions`；Strings 不在本任务范围，
+                 缺一个更贴切的 "折叠表达式面板" 键，已记入遗留。） -->
+            <Button Name="ExpPanelToggle" Classes="panelToggle" Margin="0" Padding="0,1" Height="20" Width="20"
+                    Background="Transparent" Click="OnExpPanelToggle"
+                    IsVisible="{Binding NotesViewModel.ShowExpressions}"
+                    ToolTip.Tip="{DynamicResource pianoroll.toggle.expressions}">
+              <Panel Width="14" Height="14">
+                <Path Name="ExpChevronDown" Classes="stroked" Stretch="Uniform" Data="M 3 5 L 7 9 L 11 5"/>
+                <Path Name="ExpChevronUp" Classes="stroked" Stretch="Uniform" Data="M 3 9 L 7 5 L 11 9" IsVisible="False"/>
+              </Panel>
+            </Button>
           </StackPanel>
         </Border>
         <Border Grid.Column="3" Background="Transparent" DoubleTapped="OnHidePianoRoll"/>
@@ -596,18 +609,33 @@
       <c:SpectrumCanvas Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch"
                         VerticalAlignment="Bottom" Margin="0" Height="60"
                         Opacity="0.35" IsHitTestVisible="False" IsVisible="False"/>
-      <GridSplitter Grid.Row="4" Grid.ColumnSpan="3" Height="10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}" IsVisible="{Binding NotesViewModel.ShowExpressions}"
-                    Focusable="False" Cursor="SizeNorthSouth"/>
+      <!-- 表达式区（行面板，W20）：分隔条换成共用 `PanelSplitter` 的**纵向模式**，
+           面板容器（下面两个 ExpressionCanvas + 左侧参数条）绑它的 `PanelHeight`/`PanelShown`。
+           面板在分隔条**下方** ⇒ Invert=True（向下拖变矮）。
+           CenterMin=120 = 中央音符画布的最小净高；CollapseThreshold=80：表达式区要放下
+           24px 的选择器行 + 至少一条参数泳道才有意义，低于 80 只剩夹缝 ⇒ 交给中央区（不留夹缝）。 -->
+      <!-- Target / IsVisible 在 code-behind 里绑到本控件的 `ExpPanel` 槽
+           （XAML 里 `{Binding ExpPanel.*}` 会解析到 DataContext=ViewModel 上，那是拿不到的）。 -->
+      <c:PanelSplitter Grid.Row="4" Grid.ColumnSpan="3" x:Name="ExpPanelSplitter"
+                       PanelRow="5"
+                       Invert="True"
+                       Min="{Binding NotesViewModel.ExpHeightMin}"
+                       Max="{Binding NotesViewModel.ExpHeightMax}"
+                       DefaultWidth="150"
+                       CenterMin="120"
+                       CollapseThreshold="80"
+                       DragCompleted="OnPanelSplitterDragCompleted"/>
       <c:ExpressionCanvas Grid.Row="5" Grid.Column="1" Opacity="{Binding NotesViewModel.ExpShadowOpacity}"
-                          IsVisible="{Binding NotesViewModel.ShowExpressions}"
+                          Height="{Binding #ExpPanelSplitter.PanelHeight}"
+                          IsVisible="{Binding #ExpPanelSplitter.PanelShown}"
                           TickWidth="{Binding NotesViewModel.TickWidth}"
                           TickOffset="{Binding NotesViewModel.TickOffset}"
                           Part="{Binding NotesViewModel.Part}"
                           Key="{Binding NotesViewModel.SecondaryKey}"
                           ShowRealCurve="False"/>
       <c:ExpressionCanvas Grid.Row="5" Grid.Column="1"
-                          IsVisible="{Binding NotesViewModel.ShowExpressions}"
+                          Height="{Binding #ExpPanelSplitter.PanelHeight}"
+                          IsVisible="{Binding #ExpPanelSplitter.PanelShown}"
                           Bounds="{Binding NotesViewModel.ExpBounds, Mode=OneWayToSource}"
                           TickWidth="{Binding NotesViewModel.TickWidth}"
                           TickOffset="{Binding NotesViewModel.TickOffset}"

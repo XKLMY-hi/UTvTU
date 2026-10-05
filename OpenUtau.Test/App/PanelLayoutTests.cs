@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,6 +8,7 @@ using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using OpenUtau.App.Controls;
 using OpenUtau.App.ViewModels;
 using OpenUtau.App;
@@ -408,6 +409,400 @@ namespace OpenUtau.Test.App {
             Assert.Contains("UserControl.dragging Border.panelSplitterTrack", xaml);
             Assert.Contains("{DynamicResource md3.primary}", xaml);
             Assert.Contains("{DynamicResource md3.outline-variant}", xaml);
+        }
+
+        // ══════════════════ 纵向模式（W20：PanelRow ≥ 0） ══════════════════
+        // 与列模式**逐条对称**：意图值/有效值分离、保留尺寸按升序、放不下就折叠、
+        // CenterMin = 中央行**净**高、双击复位、Invert 方向对称。
+        // 列模式的 18 例一条不改，本组只覆盖纵向新增分支。
+
+        private const double ExpDefault = 150;
+        private const double ExpMin = 132;
+        private const double ExpMax = 600;
+        private const double CenterMinHeight = 120;
+        private const double ExpCollapseThreshold = 80;
+        private const double VerticalTopBar = 40;
+
+        private sealed class VerticalFixture : IDisposable {
+            public readonly PanelSlot Exp = new("pianoroll-exp", ExpDefault, ExpMin, ExpMax);
+            public readonly PanelSlot Upper = new("upper", 160, 100, 400);
+            public readonly Border ExpHost = new();
+            public readonly Border UpperHost = new();
+            public readonly Grid Center = new();
+            public readonly PanelSplitter ExpSplitter;
+            public readonly PanelSplitter? UpperSplitter;
+            public readonly Grid Layout;
+            public readonly Window Window;
+
+            /// <param name="withUpper">再加一块**更靠上**的行面板（用于"升序保留"与无环回归）。</param>
+            public VerticalFixture(double width, double height, bool withUpper = false) {
+                // 行：0=顶部固定条 40；[1=上面板；2=上面板分隔条]；*=中央行；4=下面板分隔条；5=下面板
+                Layout = withUpper
+                    ? new Grid { RowDefinitions = new RowDefinitions("40,Auto,Auto,*,Auto,Auto") }
+                    : new Grid { RowDefinitions = new RowDefinitions("40,Auto,*,Auto") };
+                ExpSplitter = MakeRowSplitter(Exp, panelRow: withUpper ? 5 : 3, invert: true);
+                BindRowHost(ExpHost, ExpSplitter);
+                // 顶部固定条：必须是**真实存在的控件** —— 保留尺寸按子控件 Bounds 累加
+                // （与列口径一致），只有 RowDefinitions 里的空行是量不到的。
+                var topBar = new Border { Height = VerticalTopBar };
+                Layout.Children.Add(topBar);
+                Grid.SetRow(topBar, 0);
+                Layout.Children.Add(ExpHost);
+                Grid.SetRow(ExpHost, withUpper ? 5 : 3);
+                Layout.Children.Add(ExpSplitter);
+                Grid.SetRow(ExpSplitter, withUpper ? 4 : 1);
+                Layout.Children.Add(Center);
+                Grid.SetRow(Center, withUpper ? 3 : 2);
+                Grid.SetRowSpan(Center, 1);
+                if (withUpper) {
+                    UpperSplitter = MakeRowSplitter(Upper, panelRow: 1, invert: false);
+                    BindRowHost(UpperHost, UpperSplitter);
+                    Layout.Children.Add(UpperHost);
+                    Grid.SetRow(UpperHost, 1);
+                    Layout.Children.Add(UpperSplitter);
+                    Grid.SetRow(UpperSplitter, 2);
+                }
+                Window = new Window { Width = width, Height = height, Content = Layout };
+                Window.Show();
+                Settle();
+            }
+
+            private static PanelSplitter MakeRowSplitter(PanelSlot slot, int panelRow, bool invert) {
+                var splitter = new PanelSplitter {
+                    PanelRow = panelRow,
+                    Invert = invert,
+                    Min = slot.MinWidth,
+                    Max = slot.MaxWidth,
+                    DefaultWidth = slot.DefaultWidth,
+                    CenterMin = CenterMinHeight,
+                    CollapseThreshold = ExpCollapseThreshold,
+                };
+                // 与产品 XAML 同构：Target ←→ PanelSlot.Width 双向
+                splitter.Bind(PanelSplitter.TargetProperty,
+                    new Binding(nameof(PanelSlot.Width)) { Source = slot, Mode = BindingMode.TwoWay });
+                return splitter;
+            }
+
+            private static void BindRowHost(Border host, PanelSplitter splitter) {
+                host.Bind(Layoutable.HeightProperty, new Binding(nameof(PanelSplitter.PanelHeight)) { Source = splitter });
+                host.Bind(Visual.IsVisibleProperty, new Binding(nameof(PanelSplitter.PanelShown)) { Source = splitter });
+            }
+
+            public void Resize(double width, double height) {
+                Window.Width = width;
+                Window.Height = height;
+                Settle();
+            }
+
+            /// <summary>布局稳定：多跑几轮（两态振荡会在这里暴露成"值一直在变"或直接抛异常）。</summary>
+            public void Settle() {
+                for (int i = 0; i < 3; i++) {
+                    Pump();
+                    Window.UpdateLayout();
+                }
+                Pump();
+            }
+
+            public void Dispose() => Window.Close();
+        }
+
+        [AvaloniaFact]
+        public void Vertical_DragChangesHeight_AndHostShrinkReclampsWithoutRewritingIntent() {
+            using var f = new VerticalFixture(900, 700);
+            Assert.Equal(ExpDefault, f.ExpSplitter.PanelHeight, 1);
+            Assert.Equal(ExpDefault, f.ExpHost.Bounds.Height, 1);
+
+            // Invert=true（面板在分隔条**下方**）⇒ 向下拖变矮、向上拖变高。
+            // 向上 100 ⇒ 150 + 100 = 250（仍在 [Min 132, Max 600] 内，不会被 Min 兜住）
+            f.ExpSplitter.ApplyDragDelta(-100);
+            f.Settle();
+            Assert.Equal(250, f.ExpSplitter.PanelHeight, 1);
+            Assert.Equal(250, f.ExpHost.Bounds.Height, 1);
+            Assert.Equal(250, f.Exp.Width, 1);            // 意图值同步（TwoWay）
+
+            // 宿主变矮 ⇒ 静默重新夹紧有效高（300 − 7 − CenterMin120 = 173），但**不改写意图值**
+            f.Resize(900, 300);
+            Assert.True(f.ExpSplitter.PanelHeight < 250,
+                $"矮宿主下有效高应被夹紧，实际 {f.ExpSplitter.PanelHeight}");
+            Assert.Equal(250, f.Exp.Width, 1);            // 意图值仍是用户拖到的 250
+            Assert.True(f.Center.Bounds.Height >= CenterMinHeight,
+                $"中央行净高必须 ≥ CenterMin，实际 {f.Center.Bounds.Height}");
+
+            // 宿主变高 ⇒ 自动回到意图值
+            f.Resize(900, 700);
+            Assert.Equal(250, f.ExpSplitter.PanelHeight, 1);
+        }
+
+        [AvaloniaFact]
+        public void Vertical_CenterMin_IsNetHeight_SplitterPixelsIncluded() {
+            using var f = new VerticalFixture(900, 480);
+            double total = f.Layout.Bounds.Height;
+            double pieces = VerticalTopBar + f.ExpSplitter.Bounds.Height + f.Center.Bounds.Height + f.ExpSplitter.PanelHeight;
+            // 分隔条 7px 恒占位（不计入任何面板），中央行拿到的是**净**高
+            Assert.Equal(7, f.ExpSplitter.Bounds.Height, 1);
+            Assert.True(f.Center.Bounds.Height >= CenterMinHeight,
+                $"中央行净高必须 ≥ CenterMin，实际 {f.Center.Bounds.Height}");
+            Assert.Equal(total, pieces, 1);
+        }
+
+        [AvaloniaFact]
+        public void Vertical_TooShort_AutoCollapsesInsteadOfLeavingACrack() {
+            // 宿主高度小到"顶部条 + 分隔条 + CenterMin"之后只剩 < 阈值 ⇒ 面板折叠、高度 0
+            using var f = new VerticalFixture(900, 200);
+            Assert.False(f.ExpSplitter.PanelShown, "放不下时应折叠");
+            Assert.Equal(0, f.ExpSplitter.PanelHeight, 1);
+            Assert.False(f.ExpHost.IsVisible);
+            // 不留夹缝：中央行拿走全部剩余高
+            Assert.True(f.Center.Bounds.Height >= CenterMinHeight,
+                $"折叠后中央行应拿到剩余空间，实际 {f.Center.Bounds.Height}");
+            // 高度恢复后自动展开
+            f.Resize(900, 700);
+            Assert.True(f.ExpSplitter.PanelShown);
+            Assert.Equal(ExpDefault, f.ExpSplitter.PanelHeight, 1);
+        }
+
+        [AvaloniaFact]
+        public void Vertical_TwoRowPanels_ReserveAscending_NoLayoutLoop() {
+            // 上面板（PanelRow=1）+ 下面板（PanelRow=5）：按行升序定优先级 ——
+            // 更靠上的用"当前有效高"预留，更靠下的只用 Min 预留 ⇒ 依赖单向、无环。
+            // 若写成互相按当前值夹紧，这里会抛 InvalidOperationException: Infinite layout loop detected。
+            using var f = new VerticalFixture(900, 700, withUpper: true);
+            Assert.NotNull(f.UpperSplitter);
+            f.UpperSplitter!.ApplyDragDelta(40);       // 上面板加高（Invert=false：向下拖变高）
+            f.ExpSplitter.ApplyDragDelta(20);          // 下面板变矮（Invert=true：向下拖变矮）
+            f.Settle();
+
+            double upper1 = f.UpperSplitter.PanelHeight;
+            double lower1 = f.ExpSplitter.PanelHeight;
+            Assert.True(upper1 > 160, $"上面板应被加高，实际 {upper1}");
+            Assert.True(lower1 < ExpDefault + 0.5, $"下面板应变矮，实际 {lower1}");
+
+            // 窄宿主：下面板被夹，上面板仍按当前有效高保留 ⇒ 连续几轮布局后值必须稳定
+            f.Resize(900, 420);
+            double upperA = f.UpperSplitter.PanelHeight;
+            double lowerA = f.ExpSplitter.PanelHeight;
+            f.Settle();
+            f.Settle();
+            Assert.Equal(upperA, f.UpperSplitter.PanelHeight, 1);
+            Assert.Equal(lowerA, f.ExpSplitter.PanelHeight, 1);
+            // 上面板优先于下面板（升序保留）：下面板先被夹到 Min 或折叠
+            Assert.True(f.ExpSplitter.PanelHeight <= lower1 + 0.5,
+                "下面板不应在窄宿主下反而变高");
+            Assert.True(upperA >= f.Upper.MinWidth - 0.5, $"上面板应保留在其 Min 之上，实际 {upperA}");
+        }
+
+        [AvaloniaFact]
+        public void Vertical_DoubleClickReset_ReturnsToDefaultHeight_AndReportsDragCompleted() {
+            using var f = new VerticalFixture(900, 700);
+            f.ExpSplitter.ApplyDragDelta(60);
+            f.Settle();
+            Assert.NotEqual(ExpDefault, f.ExpSplitter.PanelHeight, 1);
+
+            int completed = 0;
+            f.ExpSplitter.DragCompleted += (_, _) => completed++;
+            f.ExpSplitter.ResetToDefault();
+            f.Settle();
+            Assert.Equal(ExpDefault, f.ExpSplitter.PanelHeight, 1);
+            Assert.Equal(1, completed);
+        }
+
+        [AvaloniaFact]
+        public void Vertical_InvertIsSymmetricToColumns() {
+            // Invert=true：面板在分隔条下方 ⇒ 向上拖变高（Y 位移取负）；
+            // Invert=false：面板在分隔条上方 ⇒ 向下拖变高。两者方向严格相反。
+            using var f = new VerticalFixture(900, 700, withUpper: true);
+            double before = f.ExpSplitter.PanelHeight;
+            f.ExpSplitter.ApplyDragDelta(-30);
+            f.Settle();
+            Assert.Equal(before + 30, f.ExpSplitter.PanelHeight, 1);
+
+            double upperBefore = f.UpperSplitter!.PanelHeight;
+            f.UpperSplitter.ApplyDragDelta(30);
+            f.Settle();
+            Assert.Equal(upperBefore + 30, f.UpperSplitter.PanelHeight, 1);
+        }
+
+        [AvaloniaFact]
+        public void Vertical_OrientationVisual_KeepsSevenPixelHitArea() {
+            using var f = new VerticalFixture(900, 700);
+            // 纵向：分隔条自身只占 7px **高**（横条），不再占据整列宽
+            Assert.True(f.ExpSplitter.IsVertical);
+            Assert.Equal(7, f.ExpSplitter.Bounds.Height, 1);
+            Assert.True(f.ExpSplitter.Bounds.Width > 100, "纵向分隔条应铺满宿主宽（横条）");
+            // 列模式不受影响
+            var columnSplitter = new PanelSplitter { PanelColumn = 0 };
+            Assert.False(columnSplitter.IsVertical);
+        }
+
+        // ══════════════ 卷帘表达式面板：真实控件接线（W20） ══════════════
+        // 与上面的合成 fixture 不同，这一组直接 new 真实 `PianoRoll` + `PianoRollViewModel`，
+        // 断言**真实 Bounds**：面板高 = 绑定值、折叠后为 0、恢复后回到意图值。
+
+        [AvaloniaFact]
+        public void PianoRoll_ExpPanel_RealControl_BoundsFollowPanelWiring() {
+            OpenUtau.Test.TestSupport.DocManagerTestSetup.RunOnCurrentThread();
+            // 卷帘 VM 构造会读 DocManager.Inst.Plugins（私有 setter）⇒ 用公开的扫描入口把它填上，
+            // 否则 headless 下 Plugins 为 null、VM 构造直接抛 ArgumentNullException（既有可测性缺口）。
+            OpenUtau.Core.DocManager.Inst.SearchAllLegacyPlugins();
+            // 这两个用例会**真实落盘**（Preferences.Save）也会**替换全局工程** ⇒ 必须先把状态钉成
+            // 已知起点、并在结尾**完整还原**，否则会污染同进程里后续的用例（实测：不还原会让
+            // OpenUtau.Test.Audio.* 的 6~7 个渲染用例在全量跑时失败 —— 单跑却全绿）。
+            var oldProject = OpenUtau.Core.DocManager.Inst.Project;
+            bool oldShowExpressions = Preferences.Default.ShowExpressions;            // 这两个用例会**真实落盘**（Preferences.Save），也会读持久化值 ⇒ 必须先把状态钉成
+            // 已知起点，否则上一次失败跑留下的 "折叠=true" 会让下一次从折叠态开始（测试不是幂等的）。
+            double oldExpHeight = Preferences.Default.PanelLayout.PianoRollExpHeight;
+            bool oldExpCollapsed = Preferences.Default.PanelLayout.PianoRollExpCollapsed;
+            Preferences.Default.PanelLayout.PianoRollExpHeight = 150;
+            Preferences.Default.PanelLayout.PianoRollExpCollapsed = false;
+            Preferences.Default.ShowExpressions = true;
+            Preferences.Save();            var project = new OpenUtau.Core.Ustx.UProject();
+            project.timeAxis.BuildSegments(project);
+            OpenUtau.Core.DocManager.Inst.ExecuteCmd(new OpenUtau.Core.LoadProjectNotification(project));
+
+            var vm = new OpenUtau.App.ViewModels.PianoRollViewModel();
+            var roll = new PianoRoll(vm);
+            var window = new Window { Width = 1000, Height = 760, Content = roll };
+            try {
+                window.Show();
+                SettleWindow(window);
+
+                var splitter = roll.FindControl<PanelSplitter>("ExpPanelSplitter");
+                Assert.NotNull(splitter);
+                Assert.True(splitter!.IsVertical, "卷帘表达式面板必须是纵向模式（PanelRow ≥ 0）");
+                Assert.Equal(5, splitter.PanelRow);
+                Assert.True(splitter.Invert, "面板在分隔条下方 ⇒ Invert=true（向下拖变矮）");
+
+                var canvases = roll.GetVisualDescendants().OfType<ExpressionCanvas>().ToList();
+                Assert.NotEmpty(canvases);
+                Assert.True(splitter.PanelShown, "默认应展开");
+                Assert.Equal(150, splitter.PanelHeight, 1);       // DefaultWidth=150（与接入前一致）
+                Assert.Equal(splitter.PanelHeight, canvases[0].Bounds.Height, 1);
+                Assert.True(canvases[0].IsVisible);
+                var notesCanvas = roll.GetVisualDescendants().OfType<NotesCanvas>().First();
+                double centerBefore = notesCanvas.Bounds.Height;
+
+                // 折叠：不显示 + 高 0（不留夹缝）
+                roll.ExpPanel.ToggleCollapse();
+                SettleWindow(window);
+                Assert.False(splitter.PanelShown, "折叠后 PanelShown 必须为 false");
+                Assert.Equal(0, splitter.PanelHeight, 1);
+                Assert.False(canvases[0].IsVisible);
+                // 不留夹缝：让出的高全给中央画布（面板 150 + 分隔条 7）。
+                // **不能**断言 `splitter.Bounds.Height == 0`：隐藏元素的 Bounds 会保留上次排布值
+                // （W16 配方专门记过这个坑），要看邻居怎么占位。
+                Assert.Equal(centerBefore + 150 + 7, notesCanvas.Bounds.Height, 1);
+
+                // 再展开：回到默认高（意图值未被折叠改写）
+                roll.ExpPanel.ToggleCollapse();
+                SettleWindow(window);
+                Assert.True(splitter.PanelShown);
+                Assert.Equal(150, splitter.PanelHeight, 1);
+                Assert.Equal(splitter.PanelHeight, canvases[0].Bounds.Height, 1);
+            } finally {
+                Preferences.Default.PanelLayout.PianoRollExpHeight = 150;
+                Preferences.Default.PanelLayout.PianoRollExpCollapsed = false;
+                Preferences.Default.ShowExpressions = true;
+                Preferences.Save();
+                window.Close();
+            }
+        }
+
+        [AvaloniaFact]
+        public void PianoRoll_ExpPanel_SharesStateWithShowExpressions_AndPersists() {
+            OpenUtau.Test.TestSupport.DocManagerTestSetup.RunOnCurrentThread();
+            // 卷帘 VM 构造会读 DocManager.Inst.Plugins（私有 setter）⇒ 用公开的扫描入口把它填上，
+            // 否则 headless 下 Plugins 为 null、VM 构造直接抛 ArgumentNullException（既有可测性缺口）。
+            OpenUtau.Core.DocManager.Inst.SearchAllLegacyPlugins();
+            // 这两个用例会**真实落盘**（Preferences.Save）也会**替换全局工程** ⇒ 必须先把状态钉成
+            // 已知起点、并在结尾**完整还原**，否则会污染同进程里后续的用例（实测：不还原会让
+            // OpenUtau.Test.Audio.* 的 6~7 个渲染用例在全量跑时失败 —— 单跑却全绿）。
+            var oldProject = OpenUtau.Core.DocManager.Inst.Project;
+            bool oldShowExpressions = Preferences.Default.ShowExpressions;            // 这两个用例会**真实落盘**（Preferences.Save），也会读持久化值 ⇒ 必须先把状态钉成
+            // 已知起点，否则上一次失败跑留下的 "折叠=true" 会让下一次从折叠态开始（测试不是幂等的）。
+            double oldExpHeight = Preferences.Default.PanelLayout.PianoRollExpHeight;
+            bool oldExpCollapsed = Preferences.Default.PanelLayout.PianoRollExpCollapsed;
+            Preferences.Default.PanelLayout.PianoRollExpHeight = 150;
+            Preferences.Default.PanelLayout.PianoRollExpCollapsed = false;
+            Preferences.Default.ShowExpressions = true;
+            Preferences.Save();            var project = new OpenUtau.Core.Ustx.UProject();
+            project.timeAxis.BuildSegments(project);
+            OpenUtau.Core.DocManager.Inst.ExecuteCmd(new OpenUtau.Core.LoadProjectNotification(project));
+            var vm = new OpenUtau.App.ViewModels.PianoRollViewModel();
+            var roll = new PianoRoll(vm);
+            var window = new Window { Width = 1000, Height = 760, Content = roll };
+            bool oldShow = Preferences.Default.ShowExpressions;
+            bool oldCollapsed = Preferences.Default.PanelLayout.PianoRollExpCollapsed;
+            double oldHeight = Preferences.Default.PanelLayout.PianoRollExpHeight;
+            try {
+                window.Show();
+                SettleWindow(window);
+                // 折叠态与 ShowExpressions 是**同一状态**：改任一侧，另一侧跟随
+                roll.ExpPanel.IsCollapsed = true;
+                Assert.False(vm.NotesViewModel.ShowExpressions, "面板折叠 ⇒ 表达式视图关闭");
+                vm.NotesViewModel.ShowExpressions = true;
+                Assert.False(roll.ExpPanel.IsCollapsed, "表达式视图打开 ⇒ 面板展开");
+                // 落盘：折叠态与高度都写进 PanelLayout（不新增平行存储）
+                roll.ExpPanel.IsCollapsed = true;
+                Assert.True(Preferences.Default.PanelLayout.PianoRollExpCollapsed);
+                roll.ExpPanel.IsCollapsed = false;
+                Assert.False(Preferences.Default.PanelLayout.PianoRollExpCollapsed);
+                Assert.Equal(roll.ExpPanel.Width, Preferences.Default.PanelLayout.PianoRollExpHeight, 1);
+            } finally {
+                Preferences.Default.ShowExpressions = oldShow;
+                Preferences.Default.PanelLayout.PianoRollExpCollapsed = oldCollapsed;
+                Preferences.Default.PanelLayout.PianoRollExpHeight = oldHeight;
+                Preferences.Save();   // 恢复也要落盘，否则污染后续跑
+                window.Close();
+            }
+        }
+
+        [Fact]
+        public void PianoRoll_ExpPanel_XamlWiringMatchesRecipe() {
+            // 文本契约：接线必须按配方（容器绑 PanelHeight/PanelShown、PanelRow 必填、
+            // 旧的自绘 GridSplitter 不得残留、折叠入口必须在面板**外**才点得回来）
+            string xaml = File.ReadAllText(Path.Combine(FindRepoRoot(), "OpenUtau", "Controls", "PianoRoll.axaml"));
+            Assert.Contains("c:PanelSplitter", xaml);
+            Assert.Contains("x:Name=\"ExpPanelSplitter\"", xaml);
+            Assert.Contains("PanelRow=\"5\"", xaml);
+            Assert.Contains("Invert=\"True\"", xaml);
+            Assert.Contains("CollapseThreshold=\"80\"", xaml);
+            Assert.Contains("#ExpPanelSplitter.PanelHeight", xaml);
+            Assert.Contains("#ExpPanelSplitter.PanelShown", xaml);
+            Assert.Contains("OnExpPanelToggle", xaml);
+            Assert.DoesNotContain("<GridSplitter", xaml);
+            int toggleAt = xaml.IndexOf("Name=\"ExpPanelToggle\"", StringComparison.Ordinal);
+            int panelAt = xaml.IndexOf("x:Name=\"ExpPanelSplitter\"", StringComparison.Ordinal);
+            Assert.True(toggleAt > 0 && panelAt > 0 && toggleAt < panelAt,
+                "折叠入口必须出现在面板之前（工具行），否则面板折叠后无法再打开");
+        }
+
+        /// <summary>还原这次用例改过的**全局**状态：工程 + 三个偏好，并落盘。</summary>
+        private static void RestoreGlobalState(OpenUtau.Core.Ustx.UProject? project, bool showExpressions,
+            double expHeight, bool expCollapsed) {
+            Preferences.Default.ShowExpressions = showExpressions;
+            Preferences.Default.PanelLayout.PianoRollExpHeight = expHeight;
+            Preferences.Default.PanelLayout.PianoRollExpCollapsed = expCollapsed;
+            Preferences.Save();
+            if (project != null) {
+                OpenUtau.Core.DocManager.Inst.ExecuteCmd(new OpenUtau.Core.LoadProjectNotification(project));
+            }
+        }
+
+        private static void SettleWindow(Window window) {
+            for (int i = 0; i < 3; i++) {
+                Pump();
+                window.UpdateLayout();
+            }
+            Pump();
+        }
+
+        private static string FindRepoRoot() {
+            var dir = new DirectoryInfo(AppContext.BaseDirectory);
+            while (dir != null && !File.Exists(Path.Combine(dir.FullName, "OpenUtau.sln"))) {
+                dir = dir.Parent;
+            }
+            Assert.NotNull(dir);
+            return dir!.FullName;
         }
 
         [AvaloniaFact]
