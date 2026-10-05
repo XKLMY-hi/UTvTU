@@ -186,6 +186,15 @@ namespace OpenUtau.Api {
         public UProject? project;
         public UTrack? track;
 
+        /// <summary>
+        /// 测试模式开关：由单元测试置 true，让音素化器走**确定性**分支（不做运行时自适应/
+        /// 依赖真实声库状态的取舍），使断言稳定。来自上游 `a8ddc510`（"Obsolete
+        /// OnAsyncInitStarted/Finished; runner reports init progress"）—— 我们当年只摘了该
+        /// 提交的 runner 侧（初始化进度上报），漏了这个成员；上游的 `SyllableBasedPhonemizer`
+        /// 与 `EnVCCVTest` 等都要读它，缺了会 CS0115/CS1061。纯增量成员，无签名破坏。
+        /// </summary>
+        public bool Testing { get; set; } = false;
+
         public virtual void SetUp(Note[][] notes, UProject project, UTrack track) {
             this.project = project;
             this.track = track;
