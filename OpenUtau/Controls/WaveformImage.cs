@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Avalonia;
@@ -96,8 +96,8 @@ namespace OpenUtau.App.Controls {
                             int endSample = Math.Clamp((int)((endMs - leftMs) * 44100 / 1000) * 2, 0, sampleCount);
                             if (endSample > startSample) {
                                 var segment = new ArraySegment<float>(sampleData, startSample, endSample - startSample);
-                                float min = 0.5f + segment.Min() * 0.5f;
-                                float max = 0.5f + segment.Max() * 0.5f;
+                                float min = NormalizePeak(segment.Min());
+                                float max = NormalizePeak(segment.Max());
                                 float yMax = Math.Clamp(max * bitmap.PixelSize.Height, 0, bitmap.PixelSize.Height - 1);
                                 float yMin = Math.Clamp(min * bitmap.PixelSize.Height, 0, bitmap.PixelSize.Height - 1);
                                 DrawPeak(bitmapData, bitmap.PixelSize.Width, i, (int)Math.Round(yMin), (int)Math.Round(yMax));
@@ -135,6 +135,15 @@ namespace OpenUtau.App.Controls {
             }
             return bitmap;
         }
+
+        /// <summary>
+        /// 峰值 → 归一化纵向位置（0 = 图顶，1 = 图底；调用方再乘位图高）。
+        ///
+        /// 屏幕 y 轴向下、音频采样 + 向上 ⇒ 这里必须是**减号**：+1 的采样值画在上半部。
+        /// 我们与上游 merge-base 同源，原先两边都写成了 <c>0.5f + s * 0.5f</c>，
+        /// 表现为整条波形上下镜像（上游 `1437d5e2` 修的正是这个符号）。
+        /// </summary>
+        internal static float NormalizePeak(float sample) => 0.5f - sample * 0.5f;
 
         private void DrawPeak(int[] data, int width, int x, int y1, int y2) {
             const int color = 0x7F7F7F7F;
