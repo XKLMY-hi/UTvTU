@@ -86,8 +86,32 @@
 | W21 主窗侧三项（已并 `454cd327`） | **取**编排区平滑滚动（复用 `ReduceMotion`，四个 glide；上游只给 TimelineCanvas，我们把轨头画布的 Shift/Alt/Cmd 三分支全接上）；**不取** `81637a33`（逐文件核对已由 W15 落地，重复）；**取其实质** `5f14dd89`（我们重构后无该缺陷类 ⇒ 改结构契约断言 + 真机像素：五字形中心同一水平线 y=27.9、节距 40px、偏差 ≤1px） | 默认 **667/667**；真机 A/B 像素对照（平滑 vs `ReduceMotion` 立即到位，最终位置差异 0） |
 | ⚠️ 合并后 7 例确定性红（`169ae3a9` 状态） | 三变体一致 **686/7/693**；栈 = `ExpSelectorViewModel.OnListChange()`（`:98`）在**非属主线程**改绑定集合 ⇒ `Dispatcher.VerifyAccess`。**产品侧潜伏缺陷**（`ICmdSubscriber` 无亲和守卫，与 I1/MixerControl/FxChainPanel 同族）+ **测试侧可达性**（W20 真实控件用例留下仍订阅的 VM 实例） | **已修（W25 `385e68ee`，并入 `c193c110`）**：新增共享助手 `OpenUtau/UiThreadAffinity.cs`（锚定所属线程 + `Post`）并应用到 `ExpSelectorViewModel`/`NotesViewModel`/`PianoRollViewModel`，同时释放测试侧订阅；判据三变体 **695/0/695** |
 | W14 P1-C 第一轮（已并 `20fa4bfd` 前） | 中文 VCV（樗儿音源，`ChineseVCVPhonemizer.cs` +242）、泰语 VCCV（+60/−43）；判重复 1 条（`3602d9a1` 我们已有同款修复）；判回退 1 条（`d397f6c5` 机械摘取会删掉 Plus 的 VCCV 测试钩子 ⇒ 缓做）；**结构性发现**：英文/EN2JA 整链被上游 SBP 基类新增 **~14 个 virtual 成员**挡住（直接取上游插件文件 ⇒ **12 处 CS0115**）⇒ 必须整链一波 | 三变体 **632/0 ×3** + 音素化器专项 239 例全绿 |
-| **终局（`c193c110`）** | W14 四批 + W15 + W16 + W19 + W20 + W21 + W23 + W25 全并 | 构建 **0 错误**；全量 **默认 695 / Dark 695 / Light 695，0 失败** |
+| **终局（`f2b3fa40`）** | W14 四批 + W15 + W16 + W19 + W20 + W21 + W23 + W25 + P2-2 全并 | 构建 **0 错误**；全量 **默认 699 / Dark 699 / Light 699，0 失败** |
+| P2-1 英文/EN2JA 整链（进行中，批准整波） | 步骤 ① `Phonemizer.Testing` 独立提交（Core/Api 一行增量，`732bca93`）② 上游 `89acfe84` SBP Update（22 文件 +2823/−3450；**真三方合并**，Plus 侧 9 行逐行核对保留；红线零命中）。剩余：`994d55a1` → `2c283d2b`(插件) → `d58f6e9c`(先补两数据文件) → `ea676948`(剔除 UI 文件) → `03864bf1` → `37ed7d72` → `d397f6c5` | 每步闸门：编译 0 错误 + 音素化器专项绿（180 → 182）；末尾三变体全量 |
 | 待续波次（已批准，排队中） | **P2-1 英文/EN2JA 整链**（SBP 基类 + 6 插件 + 数据，独立波次，须在绿基线上并）；**P2-2** `2c283d2b` 的 `Core/Api` 部分；`d397f6c5` 排在 SBP 波之后 | — |
+
+## 6. 终局独立抽验（fx-verify，`.opencode/plans/upstream-verify.md` §8）
+
+**结论：2 PASS + 1 部分 + 1 未验证，无 FAIL。** 口径统一为 **当前树 699**（695 是并入 P2-2 之前的数）。
+
+| 项 | 结论 | 证据 |
+|---|---|---|
+| 三变体复跑 | **PASS** | 构建 `-t:Rebuild` **0 错误**；默认/Dark/Light 各 **699/699，0 失败 0 跳过**；W23 修的 Dark/Light 那 1 红与 W25 描述的那类 7 例**一例未现** |
+| 混音台链面板（W19） | **PASS（拖宽/复位）** | 默认面板 run x870..1147=**278**(+1px ⇒ 280) 与 `prefs.MixerChainWidth: 280` 一致；拖宽 278→**308** 且 prefs 立即写 310；双击复位回 **278**/prefs 280；分隔细线 x=865、命中区 7px。❗折叠与重启恢复未点到 chevron ⇒ 仅代码审查 + 同机制（轨头/素材库）已像素验过 |
+| 卷帘表达式区纵向面板（W20） | **仅代码审查 PASS**（像素/交互未验证） | `PanelSplitter` 纵向模式接线、`panel.collapse.pianoroll.exp`（EN/ZH 各 1）、prefs 字段齐备；纵向分隔条落点未能稳定命中 ⇒ **需人手 5 秒**（拖表达式区上边缘 → 双击复位 → 折叠看夹缝） |
+| W20 是否破坏 W15 | **代码审查 PASS + 用例绿** | `SmoothViewport`/`PartControl` 指示条接线未被触碰（diff 只加面板宿主与 chevron）；相关用例在 699 全绿内。真机三项仍未做（交互链需人手） |
+| `UiThreadAffinity` 口径 | **PASS** | 锚定订阅线程 + `Post`（owner 就地、否则 Post）；注释明确"不用 `CheckAccess()`（headless 误判）""不用 `Invoke`（与 DocManager 锁互锁）"；4 个订阅者已接入 |
+| `Styles/**`+`App.axaml` 纪律 | **PASS** | 相对 `6600f417` 的 diff 为空 |
+
+### 6.1 残余风险（登记，建议下一波处理）
+
+| # | 项 | 说明 |
+|---|---|---|
+| R1 | **`ICmdSubscriber` 亲和覆盖不全** | 全仓约 **18 个** `ICmdSubscriber`，仅 4 个过 `UiThreadAffinity`；其余 14 个里 `TracksViewModel`/`PlaybackViewModel`/`CurveViewModel`/`NotePropertiesControl` 的线程相关代码为 0（理论风险而非已复现）。**建议**：给订阅者统一基类/包装（`OnNext` 统一过 affinity）或逐个注明"为何安全" —— 否则同类第 5 次复发只是时间问题 |
+| R2 | 链面板折叠 / 表达式区拖高 | 两条各需人手 5 秒（机制与已验面板同源） |
+| R3 | Audio 组偶发 | 已在 **W26** 专项定性（连跑 ≥6 次 + 确定性化或降级为诊断） |
+| R4 | App 侧测试卫生 | 已在 **W24**（`DocManager` 作用域化 / VST 定点清理 / MessageBus 订阅作用域） |
+| R5 | 面板槽注册表 | 「重置面板布局」目前只覆盖 W16 的两个槽；链面板/卷帘面板靠"双击复位 + chevron"。建议随产品设计文档的"布局预设"一起做 |
 
 ### 5.1 W14 的数值证据（真编译 A/B，W7 装置实测）
 

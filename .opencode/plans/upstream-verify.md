@@ -153,3 +153,55 @@ $env:OPENUTAU_TEST_THEME='Light'; dotnet test ... --no-build
 
 - 我在主树构建时**撞上另一位 teammate 的半成品改动**：`MixerControl.axaml.cs:107-124` 引用 `Preferences.PanelLayoutPreferences.MixerChainWidth/MixerChainCollapsed`，而当时 `Preferences.cs` 还没加这两个字段 ⇒ 我 Dark 那一次 `dotnet test` **编译失败**（不是我的用例、也不是质量回归）；几分钟后 `Preferences.cs:464-465` 补上即恢复 ✔ ⇒ 提醒：共享树上成对改动最好同一次落地。
 - 本轮唯一新增文件 = 本报告；探针测试文件已删除；`git status` 仅剩本报告（未跟踪）。
+
+---
+
+## 8. 终局抽验（W25/W19/W20/W21/W14-P1C 之后）：`7c25065f`（含 `c193c110`）
+
+> 验证点：`plus-develop` HEAD **`7c25065f`**（= Lead 所述 `c193c110` **+1 个 docs 提交**，`git merge-base --is-ancestor c193c110 HEAD` = 0 ⇒ 代码面就是 `c193c110`）。工具/红线同前（按 PID；`-ExePrefix "…\UTvTU\OpenUtau"`，未触碰别人的树）。
+
+### 8.1 三变体复跑 —— **PASS（数字与 Lead 有 +4 差异，已核）**
+
+| 变体 | 通过 | 失败 | 跳过 | 总计 | 退出码 |
+|---|---|---|---|---|---|
+| 默认 | **699** | 0 | 0 | 699 | 0 |
+| Dark | **699** | 0 | 0 | 699 | 0 |
+| Light | **699** | 0 | 0 | 699 | 0 |
+
+- `-t:Rebuild`：**0 错误**。
+- ⚠️ 数字口径：Lead 报 **695**，我实测 **699**（三个变体一致）。差异不是我这边多跑/少跑（总计=通过，**0 跳过**）；最可能是你那次数在 W25 用例落地之前，或统计口径差 4 条。**建议以"当前树 699"为准**再对外宣布。
+- ✅ **我上轮报的 Dark/Light 各 1 红（`DocManagerExecuteCmdThreadingTests.OffThreadCommand_IsPostedToUiThread_NotExecutedInline`）已消失**：Dark/Light 满载并行各 1 次全绿 ⇒ W23 根治确认 ✔（我上轮那 7 例同类（W25 描述的那批）在本轮三变体里**一例未现** ✔）。
+
+### 8.2 真机：混音台右侧链面板（W19）—— **拖宽/复位 PASS（像素+落盘）；折叠与重启未点**
+
+| 检查 | 实测 | 结论 |
+|---|---|---|
+| 默认宽度 | 面板 `#1C2024` run **x870..1147 = 278**（+1px 分隔线 ⇒ **279/280**），与 `prefs.MixerChainWidth: 280` 一致；分隔条 1px 线在 **x=865**（`outline-variant`，命中区 7px） | **PASS** |
+| 拖宽 | 从线位向左拖：**278 → 308**（run x840..1147），`prefs.MixerChainWidth` → **310.0**（落盘 ✔） | **PASS** |
+| 双击复位 | 双击新线位：**308 → 278**（=279/280），`prefs` 回到 **280.0** ✔ | **PASS** |
+| 折叠（无夹缝）/ 重启恢复 | **本轮未点到**链面板 chevron（宿主侧 `Button.panelToggle`，我未定位到坐标）；同套机制（同一 `PanelSplitter` + `PanelWidth/PanelShown` 绑定）的"折叠无夹缝 + 折叠态跨重启恢复"已在 §2（轨头/素材库）用像素+prefs 验过 ⇒ 维持 **仅代码审查（W19 接线）+ 同机制已验** | **未验证（本轮）** |
+| 手感一致 | 与轨头/素材库同一套：1px `outline-variant` 细线 + 7px 命中区 + 双击复位 + 拖动结束落盘 ✔ | **PASS** |
+
+### 8.3 真机：卷帘底部表达式区（W20，纵向面板）—— **代码审查 PASS；像素/交互未验证**
+
+- **代码审查 PASS**：`PanelSplitter` 新增纵向模式（`PanelSplitter.axaml.cs:68` 可用尺寸取宿主高、`:93-95` `PanelHeight`、`:134` `IsVertical => PanelRow >= 0`）；`PianoRoll.axaml:543-547` 折叠 chevron 走新键 **`panel.collapse.pianoroll.exp`**（EN/ZH 各 1 条 ✔）；持久化 `Preferences.PanelLayout.PianoRollExpHeight = 150` + `PianoRollExpCollapsed = false`（`:470/472`）✔。
+- **像素/交互：未验证（我的自动化限制，非产品发现）**：主树真机进了钢琴卷帘视图、能取到面板色 `#262A2E`（y 600..809 段），但我在该区**没能稳定定位纵向分隔条**：按 `y=826` 拖/双击三次，面板与 `prefs`（150/150）**都无变化** ⇒ 落点没命中；受预算限制未再逐像素找线。**建议**：这一条留给用户/下一轮 5 秒手验（拖一下表达式区上边缘、双击复位、折叠看有无夹缝），机制与 8.2 完全同源。
+
+### 8.4 卷帘 W15 行为是否被 W20 破坏 —— **代码审查 PASS + 测试绿；真机像素未做**
+
+- `PianoRoll.axaml.cs:53-67` `SmoothViewport` 接管 h/vScroll 与缩放、`SmoothViewport.cs:87` `ReduceMotion` 立即到位、`PartControl.cs:351-369` 视口指示条拖拽发 `PianoRollViewportScrollEvent`（非命令 ⇒ `Ctrl+Z` 不回退）——**接线未被 W20 改动**（`git diff` 未触及这些行；W20 只加面板宿主与 chevron）。
+- 相关用例在本轮 699 全绿里（`WaveformImageTests` / `PartRedrawScopeTests` 等）✔。
+- 真机三项（波形不抖/平滑滚动/指示条拖拽）仍 **未验证**（同 §7.3：前置条件可满足，交互链未走）。
+
+### 8.5 对抗审查
+
+| 项 | 结论 |
+|---|---|
+| `UiThreadAffinity` 口径是否一致 | **PASS**：`OpenUtau/UiThreadAffinity.cs` = **锚定订阅线程**（`owner = Thread.CurrentThread`，`IsOwner` 比线程）+ `Post`（owner 就地执行、否则 `Dispatcher.UIThread.Post` 异步重入队）；注释明确写了"不用 `CheckAccess()`（headless 误判，踩过两次）""不用 `Invoke`（会与 DocManager 锁互锁）"——**与既定口径逐条一致** ✔；4 个订阅者已接入（`ExpSelectorViewModel:33/100`、`NotesViewModel:1115-1127`、`PianoRollViewModel:310-313`、`PianoRoll.axaml.cs:2203-2206`）✔ |
+| 守卫是否覆盖"回调在后台线程触发"的**所有**路径 | **部分覆盖（登记残余风险）**：全仓 `ICmdSubscriber` 实现约 18 个，仅上述 4 个走 `UiThreadAffinity`；其余 14 个中 **`TracksViewModel` / `PlaybackViewModel` / `CurveViewModel` / `NotePropertiesControl` 的线程相关行数 = 0**（既无 `Dispatcher` 也无 `CheckAccess`/`Post`），理论上仍可能在"后台线程加载工程"时碰到绑定对象（W25 那 7 例就是这一类，且 commit message 自述"同类缺陷第 4 次收口"）。**建议**：要么给订阅者一个统一基类/包装（`OnNext` 统一过 affinity），要么逐个写清"为什么安全"的注释——否则同类第 5 次复发只是时间问题。其余（`MainWindowViewModel`/`MixerViewModel`/`FxChainViewModel`/`SidebarViewModel`）已有 2–6 处线程处理，`FxChainViewModel` 是 `CheckAccess→Post`（W3 的 I1 修法）✔ |
+| `Styles/**` + `App.axaml` 是否仍零改动 | **PASS**：`git diff 6600f417..7c25065f -- OpenUtau/Styles OpenUtau/App.axaml` = **空** ✔ |
+
+### 8.6 收尾状态
+
+- 我的实例已 `stop.ps1 -ExePrefix "…\UTvTU\OpenUtau"`（按 PID 6308）关闭；无残留进程；主题仍 **Dark**（未改）；主树 `git status` 只有 Lead 自己在编辑的 `upstream-triage-2026-10.md`；产品代码零改动；本轮新增截图 `fn-*.png`（12 张）。
+- **给 Lead 的两条收尾建议**：① 对外宣布前把用例数口径统一到 **699**（或说明 695 的来源）；② 链面板/表达式区的**折叠**与**表达式区拖高**这两条未像素验，建议人手 1 分钟补（或下一轮我在有预算时补），其余均为 PASS/仅代码审查。
