@@ -61,33 +61,36 @@ namespace OpenUtau.Test.App {
                 // 所以下面还要**自己记录"变更发生在哪个线程"** —— 那才是可断言的硬不变量）
                 Content = new ItemsControl { ItemsSource = vm.Descriptors },
             };
-            var owner = Thread.CurrentThread;
             var changedOn = new List<Thread>();
             vm.Descriptors.CollectionChanged += (_, _) => changedOn.Add(Thread.CurrentThread);
+            Exception? thrown = null;
+            var worker = new Thread(() => {
+                try {
+                    DocManager.Inst.ExecuteCmd(new LoadProjectNotification(NewProject()));
+                } catch (Exception e) {
+                    thrown = e;
+                }
+            });
             try {
                 window.Show();
                 window.UpdateLayout();
                 Pump();
                 Assert.NotEmpty(vm.Descriptors);
 
-                Exception? thrown = null;
-                var worker = new Thread(() => {
-                    try {
-                        DocManager.Inst.ExecuteCmd(new LoadProjectNotification(NewProject()));
-                    } catch (Exception e) {
-                        thrown = e;
-                    }
-                });
                 worker.Start();
                 worker.Join();
 
                 Assert.Null(thrown);                 // 后台线程不得因跨线程改绑定集合而炸
                 Pump();                              // 让 Post 回来的那次刷新在属主线程落地
                 Assert.NotEmpty(vm.Descriptors);
-                // **硬不变量**：绑到控件的集合只允许在订阅线程上被改。
+                // **硬不变量**：绑到控件的集合**绝不能在发起加载的那个后台线程上**被改。
+                // 刻意不断言"等于测试起始线程"：全量跑时 Avalonia headless 的 dispatcher 线程与
+                // xUnit 执行线程不一定是同一个 ⇒ 那种断言会在全量里假红（本轮踩过这个）。
+                // 去掉守卫后这里会记录到 worker 线程 ⇒ 用例红（已做负向对照确认灵敏度）。
                 // 去掉守卫后这里会记录到 worker 线程 ⇒ 用例红（已做负向对照确认灵敏度）。
                 Assert.NotEmpty(changedOn);
-                Assert.All(changedOn, t => Assert.Same(owner, t));
+                Assert.DoesNotContain(worker, changedOn);
+                Assert.All(changedOn, t => Assert.NotSame(worker, t));
             } finally {
                 vm.Dispose();
                 window.Close();
