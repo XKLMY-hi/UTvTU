@@ -5,9 +5,11 @@ using System.Text.RegularExpressions;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
+using Avalonia.Controls.Primitives;
 using Avalonia.Headless.XUnit;
 using Avalonia.Media;
 using Avalonia.Styling;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using OpenUtau.App;
 using OpenUtau.App.Controls;
@@ -365,6 +367,66 @@ namespace OpenUtau.Test.App {
             string xaml = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Views", "RenderWindow.axaml"));
             Assert.DoesNotContain("PlusBrushTextOnAccent", xaml);
             Assert.Contains("md3.on-primary", xaml);
+        }
+
+        // ───────────────────────── W31：应用级 /template/ 补丁归位 ─────────────────────────
+
+        /// <summary>
+        /// W31 契约：应用级样式表（Styles/Styles.axaml）里**不再有** ControlTheme 之外的 `/template/`
+        /// 选择器（等价于 .dsh/fx/ui-lint.ps1 第 2 条，作为常驻回归守卫）；迁移后的落点必须存在。
+        /// 注释里的说明文字不算（与 lint 的 StripComments 口径一致）。
+        /// </summary>
+        [AvaloniaFact]
+        public void AppLevelStyles_HaveNoTemplatePatches_OutsideControlThemes() {
+            string appLevel = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "Styles.axaml"));
+            string outside = Regex.Replace(appLevel, "<!--.*?-->", "", RegexOptions.Singleline);
+            Assert.DoesNotContain("/template/", outside);
+
+            string selection = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "Md3SelectionThemes.axaml"));
+            Assert.Contains("^.menu /template/ Border#NormalRectangle", selection);        // CheckBox.menu 归位
+            Assert.Contains("^.fader:pointerover /template/ RepeatButton#PART_DecreaseButton", selection); // fader 归位
+            string menus = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "Md3Menus.axaml"));
+            Assert.Contains("PART_PopupBorder", menus);                                     // 菜单浮层圆角归位
+        }
+
+        /// <summary>
+        /// W31：DataGrid 选中行底色改由**主题资源键** `DataGridRowSelectedBackgroundBrush` 承载
+        /// （Colors/Brushes.axaml 池色覆写）。原应用级 `/template/ DataGridFrozenGrid` 补丁已删；
+        /// 探针实证行模板的 DataGridFrozenGrid 只绑该资源键、不绑控件自身 Background。
+        /// </summary>
+        [AvaloniaFact]
+        public void DataGridRow_SelectedBackground_ComesFromPoolKey() {
+            Assert.True(Application.Current!.TryFindResource("DataGridRowSelectedBackgroundBrush", out object? v));
+            var brush = Assert.IsAssignableFrom<ISolidColorBrush>(v);
+            Assert.Equal(ColorPool.Current.Color(Md3Role.Primary), brush.Color);
+            Assert.Equal(0.5, brush.Opacity, 3);
+            Assert.NotEqual(Color.Parse("#0078D7"), brush.Color);   // 不再是 Fluent 的固定蓝
+        }
+
+        /// <summary>
+        /// W31：ToggleButton 接管自有 ControlTheme（Fluent 模板只有一个 ContentPresenter、没有可画背景的
+        /// Border ⇒ 控件级底色原本根本无处渲染）——断言模板根 PART_Root 确实把控件底色画出来。
+        /// </summary>
+        [AvaloniaFact]
+        public void ToggleButton_UsesOwnTheme_AndPaintsControlBackground() {
+            var toggle = new ToggleButton { Content = "t", Classes = { "normal" } };
+            var win = new WindowEx { Width = 300, Height = 120, Content = toggle };
+            win.Show();
+            Dispatcher.UIThread.RunJobs();
+            try {
+                toggle.ApplyTemplate();
+                Dispatcher.UIThread.RunJobs();
+                Assert.NotNull(toggle.Theme);
+                Assert.Equal(typeof(ToggleButton), toggle.Theme!.TargetType);
+                Assert.Equal(ResourceColor("SystemControlBackgroundAltHighBrush"),
+                    (toggle.Background as ISolidColorBrush)?.Color);
+                var root = toggle.GetVisualDescendants().OfType<Border>().FirstOrDefault(b => b.Name == "PART_Root");
+                Assert.NotNull(root);
+                Assert.Equal(ResourceColor("SystemControlBackgroundAltHighBrush"),
+                    (root!.Background as ISolidColorBrush)?.Color);
+            } finally {
+                win.Close();
+            }
         }
     }
 }

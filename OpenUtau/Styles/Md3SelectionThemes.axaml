@@ -140,6 +140,16 @@
       <Style Selector="^:disabled">
         <Setter Property="Opacity" Value="0.38"/>
       </Style>
+      <!-- W31：`.menu` 变体（菜单里的勾号：无框、只显示勾，勾走池主色）。
+           原先是 Styles.axaml 里 `CheckBox.menu` 内的 3 条应用级 /template/ 补丁 → 迁进控件自己的主题。 -->
+      <Style Selector="^.menu /template/ Border#NormalRectangle">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Background" Value="Transparent"/>
+      </Style>
+      <Style Selector="^.menu:checked /template/ Path#CheckGlyph">
+        <Setter Property="Fill" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="Width" Value="12"/>
+      </Style>
     </ControlTheme>
 
     <!-- ───────────────────────── RadioButton（普通形态）───────────────────────── -->
@@ -453,6 +463,11 @@
       </Style>
       <Style Selector="^:disabled">
         <Setter Property="Opacity" Value="0.38"/>
+      </Style>
+      <!-- W31：推子变体（`.fader` 的模板仍在 Styles.axaml，属"控件自身样式"，不是 /template/ 补丁）
+           的悬浮提亮从应用级迁到这里 —— `/template/` 只能出现在控件自己的 ControlTheme 内。 -->
+      <Style Selector="^.fader:pointerover /template/ RepeatButton#PART_DecreaseButton">
+        <Setter Property="Background" Value="{DynamicResource md3.tertiary}"/>
       </Style>
     </ControlTheme>
 

@@ -23,6 +23,15 @@ namespace OpenUtau.App.Views {
         private CancellationTokenSource? _cts;
         private readonly List<(CheckBox cb, Core.Ustx.UTrack track)> _trackChecks = new();
 
+        /// <summary>
+        /// 渲染进度/收尾的 UI 编组。判据用 `UiThreadAffinity`（锚定**本窗口构造时所属线程**）
+        /// 而非 `CheckAccess()`（headless 会误判）或 `Dispatcher.UIThread.Invoke`（同步等待）。
+        /// 这四处全是**从后台渲染任务发起的单向 UI 更新**（进度文案/进度条、失败文案、
+        /// finally 里重新启用开始按钮），没有任何返回值要取回、也没有后续逻辑依赖它们已完成
+        /// ⇒ 一律 `Post` 即可；且同一 dispatcher 队列 FIFO 保证"先失败文案、后启用按钮"的顺序。
+        /// </summary>
+        private readonly UiThreadAffinity ui = new UiThreadAffinity();
+
         public RenderWindow() {
             InitializeComponent();
 
@@ -127,7 +136,7 @@ namespace OpenUtau.App.Views {
                         // ── 录制式混音导出：设备播放驱动，与预览完全同路径 ──
                         //（同一信号链/VST 激活时序——导出的就是预览听到的）
                         await PlaybackManager.Inst.RecordMixdown(project, path, rangeStart, rangeEnd,
-                            new Progress<double>(p => Dispatcher.UIThread.Invoke(() => {
+                            new Progress<double>(p => ui.Post(() => {
                                 if (p >= 1) {
                                     ProgressLabel.Text = ThemeManager.GetString("render.status.done");
                                     ProgressSubLabel.IsVisible = false;
@@ -150,7 +159,7 @@ namespace OpenUtau.App.Views {
                             });
 
                         session.RunAsync(new Progress<ExportSession.ProgressInfo>(info => {
-                            Dispatcher.UIThread.Invoke(() => {
+                            ui.Post(() => {
                                 if (info.Percent >= 1) {
                                     ProgressLabel.Text = ThemeManager.GetString("render.status.done");
                                     ProgressSubLabel.IsVisible = false;
@@ -170,12 +179,12 @@ namespace OpenUtau.App.Views {
                     }
                 } catch (Exception ex) {
                     Log.Error(ex, "[RenderWindow] Render failed");
-                    Dispatcher.UIThread.Invoke(() => {
+                    ui.Post(() => {
                         ProgressLabel.Text = ThemeManager.GetString("render.status.failed");
                         ProgressSubLabel.Text = ex.Message;
                     });
                 } finally {
-                    Dispatcher.UIThread.Invoke(() => StartBtn.IsEnabled = true);
+                    ui.Post(() => StartBtn.IsEnabled = true);
                 }
             }, _cts.Token);
         }

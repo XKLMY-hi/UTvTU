@@ -184,14 +184,14 @@ namespace OpenUtau.App.Controls {
             }
         }
 
-        /// <summary>UI 线程编组（本派发端接触的全是窗口/控件）。</summary>
-        static void OnUi(Action action) {
-            if (Dispatcher.UIThread.CheckAccess()) {
-                action();
-            } else {
-                Dispatcher.UIThread.Post(action);
-            }
-        }
+        readonly UiThreadAffinity affinity = new UiThreadAffinity();
+
+        /// <summary>
+        /// UI 线程编组（本派发端接触的全是窗口/控件）。
+        /// 判据用 `UiThreadAffinity`（锚定**本控件构造时所属线程**）而非 `CheckAccess()`：
+        /// 后者在 headless 测试宿主下会误判为 true（我们已因此踩过两次）。
+        /// </summary>
+        void OnUi(Action action) => affinity.Post(action);
 
         /// <summary>浏览并加载插件（从 TrackEffectRack.BrowsePlugin 迁移；选择结果走命令写槽）。</summary>
         public void BrowsePlugin(UTrack track, int slotIndex) {

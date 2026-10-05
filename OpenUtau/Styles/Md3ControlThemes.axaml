@@ -155,6 +155,54 @@
         <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
       </Style>
     </ControlTheme>
+
+    <!-- ══ W31：ToggleButton 自有主题 ══
+        为什么必须接管：Fluent 的 ToggleButton 模板**只有一个 ContentPresenter**（探针实证：无 Border），
+        所以 `ToggleButton.Background` 根本无处可画 —— 应用级样式里那些"控件级底色"从来没生效过，
+        过去只能靠 `/template/ ContentPresenter#PART_ContentPresenter` 补丁刷内缩方块（L9 同源问题）。
+        本主题给它一个会画背景的 Border#PART_Root（与 Md3ButtonTheme 同构），
+        使控件级状态色（Styles.axaml 的 .normal/.toolbar 与这里的 :checked/:pointerover）真正可见。 -->
+    <ControlTheme x:Key="Md3ToggleButtonTheme" TargetType="ToggleButton">
+      <!-- 只给"能画背景的模板 + 状态色"，**不设** MinHeight/Padding/FontSize/CornerRadius/BorderThickness：
+            本仓既有契约（ButtonMetricsLayoutTests.GeneralRule_…_ButToggleButtonIsNot）要求
+            ToggleButton 不被主题几何顶高 —— 小图标 ToggleButton（工具条/机架行）必须保持原尺寸。
+            几何仍由使用者的应用级/视图级样式给（如 ToggleButton.normal/.toolbar 的 Height=32）。 -->
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Name="PART_Root"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  Padding="{TemplateBinding Padding}">
+            <ContentPresenter Name="PART_ContentPresenter"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Foreground="{TemplateBinding Foreground}"
+                              RecognizesAccessKey="True"
+                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+          </Border>
+        </ControlTemplate>
+      </Setter>
+      <Style Selector="^:pointerover">
+        <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+      </Style>
+      <Style Selector="^:checked">
+        <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+        <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+      </Style>
+      <Style Selector="^:checked:pointerover">
+        <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+        <Setter Property="Opacity" Value="0.92"/>
+      </Style>
+      <Style Selector="^:disabled">
+        <Setter Property="Opacity" Value="0.38"/>
+      </Style>
+    </ControlTheme>
   </Styles.Resources>
 
   <!-- 装主题：应用级 Style（同文件内的 StaticResource 必定解析得到） -->
@@ -163,5 +211,8 @@
   </Style>
   <Style Selector="ListBoxItem">
     <Setter Property="Theme" Value="{StaticResource Md3ListBoxItemTheme}"/>
+  </Style>
+  <Style Selector="ToggleButton">
+    <Setter Property="Theme" Value="{StaticResource Md3ToggleButtonTheme}"/>
   </Style>
 </Styles>

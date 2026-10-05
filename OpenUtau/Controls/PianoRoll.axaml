@@ -9,7 +9,7 @@
         x:Class="OpenUtau.App.Controls.PianoRoll" Focusable="True"
         Background="Transparent" GotFocus="OnPianoRollFocus">
   <UserControl.Styles>
-    <StyleInclude Source="/Styles/PianoRollStyles.axaml"/>
+    <StyleInclude Source="/Controls/PianoRollStyles.axaml"/>
   </UserControl.Styles>
   <Border>
     <!-- 注：窗口装饰已交还系统（原生标题栏），内容不需为标题栏留白，故不再绑 WindowDecorationMargin -->

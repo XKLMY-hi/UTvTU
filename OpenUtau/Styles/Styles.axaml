@@ -17,15 +17,11 @@
   <Style Selector="ContextMenu">
     <Setter Property="CornerRadius" Value="8"/>
   </Style>
-  <Style Selector="MenuFlyoutPresenter">
-    <Setter Property="CornerRadius" Value="8"/>
-  </Style>
-  <Style Selector="MenuFlyoutPresenter /template/ Border#PART_PopupBorder">
-    <Setter Property="CornerRadius" Value="8"/>
-  </Style>
-  <Style Selector="MenuFlyoutPresenter /template/ Border">
-    <Setter Property="CornerRadius" Value="8"/>
-  </Style>
+  <!-- W31 后续：此处原有 `MenuFlyoutPresenter { CornerRadius=8 }` —— 该属性**模板不读**（圆角真值来自
+       Styles/Md3Menus.axaml 的 `PART_PopupBorder` = 12）⇒ 是死属性，已删，免得日后被误当生效值。 -->
+  <!-- W31：此处原有 2 条 `MenuFlyoutPresenter /template/ Border#PART_PopupBorder|Border` 补丁
+       （应用级越权改别人的模板部件）→ 已删除，圆角以控件自己的主题 Styles/Md3Menus.axaml
+       的 `{x:Type MenuFlyoutPresenter}`（PART_PopupBorder CornerRadius=12）为准。 -->
 
   <Style Selector="Window">
     <!-- 字体走 Plus 令牌（Plus.Resources 全局资源，不依赖语言包/继承链；
@@ -62,10 +58,6 @@
     <Setter Property="Height" Value="24"/>
     <Setter Property="Padding" Value="8,2,8,2"/>
   </Style>
-  <Style Selector="MenuItem /template/ Path#PART_ChevronPath">
-    <Setter Property="RenderTransform" Value="Scale(0.75,0.75)"/>
-    <Setter Property="Fill" Value="{DynamicResource PlusBrushTextSecondary}"/>
-  </Style>
   <!-- v4.0：菜单 hover = accent-muted（不再是 Fluent 的白色 overlay） -->
   <Style Selector="MenuItem:pointerover">
     <Setter Property="Background" Value="{DynamicResource PlusBrushAccentMuted}"/>
@@ -75,18 +67,9 @@
     <Setter Property="Background" Value="{DynamicResource PlusBrushAccentMuted}"/>
     <Setter Property="Foreground" Value="{DynamicResource PlusBrushAccent}"/>
   </Style>
-  <Style Selector="MenuItem /template/ TextBlock#PART_InputGestureText">
-    <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutItemForeground}"/>
-  </Style>
-  <Style Selector="MenuItem:selected /template/ TextBlock#PART_InputGestureText">
-    <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutItemForegroundPointerOver}"/>
-  </Style>
-  <Style Selector="MenuItem:pressed /template/ TextBlock#PART_InputGestureText">
-    <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutItemForegroundPressed}"/>
-  </Style>
-  <Style Selector="MenuItem:disabled /template/ TextBlock#PART_InputGestureText">
-    <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutItemForegroundDisabled}"/>
-  </Style>
+  <!-- W31：此处原有 6 条 `MenuItem ... /template/ Path#PART_ChevronPath|TextBlock#PART_InputGestureText`
+       补丁 —— 部件名是 Fluent 的，而本仓 MenuItem 已由 Styles/Md3Menus.axaml 的自有 ControlTheme
+       接管（模板里没有这两个名字）⇒ 从来就不生效，属死代码，删除（视觉零变化）。 -->
   <Style Selector="MenuItem > Separator, ContextMenu > Separator">
     <Setter Property="Background" Value="{DynamicResource SystemControlHighlightBaseMediumHighBrush}" />
     <Setter Property="HorizontalAlignment" Value="Stretch" />
@@ -202,22 +185,24 @@
     <Setter Property="HorizontalContentAlignment" Value="Center"/>
     <Setter Property="VerticalContentAlignment" Value="Center"/>
     <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
-
-    <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}" />
-    </Style>
-    <Style Selector="^:pressed  /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushPointerOver}" />
-    </Style>
-    <Style Selector="^:checked /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushSemi}" />
-    </Style>
-    <Style Selector="^:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}" />
-    </Style>
-    <Style Selector="^:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushPointerOver}" />
-    </Style>
+  </Style>
+  <!-- W31：状态色改在**控件级**（原来是 5 条 `^:state /template/ ContentPresenter#PART_ContentPresenter`
+       补丁 —— 应用级越权改 Fluent 模板部件）。颜色不变（NeutralAccent* 全是池色）；
+       渲染差异：状态底由"内缩方块"变成**铺满按钮并跟随圆角**，正是 L9 那类双层重绘的观感修正。 -->
+  <Style Selector="ToggleButton.normal:pointerover">
+    <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}"/>
+  </Style>
+  <Style Selector="ToggleButton.normal:pressed">
+    <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushPointerOver}"/>
+  </Style>
+  <Style Selector="ToggleButton.normal:checked">
+    <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushSemi}"/>
+  </Style>
+  <Style Selector="ToggleButton.normal:checked:pointerover">
+    <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}"/>
+  </Style>
+  <Style Selector="ToggleButton.normal:checked:pressed">
+    <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushPointerOver}"/>
   </Style>
 
   <Style Selector="ToggleButton.toolbar">
@@ -230,23 +215,25 @@
     <Setter Property="HorizontalContentAlignment" Value="Center"/>
     <Setter Property="VerticalContentAlignment" Value="Center"/>
     <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
+  </Style>
+  <!-- W31：同 .normal（原 5 条 /template/ 补丁 → 控件级状态色） -->
+  <Style Selector="ToggleButton.toolbar:pointerover">
+    <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}"/>
+  </Style>
+  <Style Selector="ToggleButton.toolbar:pressed">
+    <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushPointerOver}"/>
+  </Style>
+  <Style Selector="ToggleButton.toolbar:checked">
+    <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushSemi}"/>
+  </Style>
+  <Style Selector="ToggleButton.toolbar:checked:pointerover">
+    <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}"/>
+  </Style>
+  <Style Selector="ToggleButton.toolbar:checked:pressed">
+    <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushPointerOver}"/>
+  </Style>
 
-    <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}" />
-    </Style>
-    <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushPointerOver}" />
-    </Style>
-    <Style Selector="^:checked /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushSemi}" />
-    </Style>
-    <Style Selector="^:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}" />
-    </Style>
-    <Style Selector="^:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushPointerOver}" />
-    </Style>
-
+  <Style Selector="ToggleButton.toolbar">
     <Style Selector="^ Path.filled">
       <Setter Property="Fill" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
     </Style>
@@ -288,9 +275,10 @@
     <Setter Property="Padding" Value="8,4"/>
     <Setter Property="VerticalContentAlignment" Value="Center"/>
   </Style>
-  <Style Selector="ComboBox /template/ Path#DropDownGlyph">
-    <Setter Property="Fill" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
-  </Style>
+  <!-- W31：此处原有 `ComboBox /template/ Path#DropDownGlyph { Fill }` 补丁 —— Avalonia 12 的
+       ComboBox 模板里箭头是 **PathIcon#DropDownGlyph**（没有叫 DropDownGlyph 的 Path），
+       该补丁早已不匹配任何部件 ⇒ 死代码，删除（视觉零变化；箭头色由 Fluent 主题键
+       ComboBoxDropDownGlyphForeground 决定）。 -->
 
   <Style Selector="ListBoxItem">
     <Setter Property="MinHeight" Value="28"/>
@@ -304,9 +292,9 @@
        实测对比度 7.19:1）。此处曾有应用级补丁 `ListBoxItem:selected /template/ ContentPresenter
        { Background = AccentBrush1Semi }`，它会在主题胶囊内再叠一层 #A699C3，把选中行局部对比度压到 3.49:1
        （低于 WCAG AA 正文 4.5:1）——同一类"应用级 /template/ 补丁压过 ControlTheme"的问题，故删除。 -->
-  <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrushPointerOver}"/>
-  </Style>
+  <!-- W31：`ListBoxItem:pointerover /template/ ContentPresenter` 补丁已删除 ——
+       悬浮底色由 Md3ListBoxItemTheme 的 `^:pointerover` 拥有（surface-container-highest），
+       与上一段选中态同源同因（应用级补丁会在主题胶囊内再叠一层方块）。 -->
 
   <!-- CheckBox 模板已由 PlusTheme ControlTheme 接管（v4.0）；仅保留尺寸与 .menu 变体 -->
   <Style Selector="CheckBox">
@@ -315,20 +303,10 @@
     <Setter Property="FontSize" Value="13" />
   </Style>
 
+  <!-- W31：`.menu` 的"无框只显示勾"外观迁进 Md3SelectionThemes.axaml 的 Md3CheckBoxTheme
+       （`^.menu` 变体）—— 补丁不再从应用级越权改勾选框模板部件；此处只留命中测试开关。 -->
   <Style Selector="CheckBox.menu">
     <Setter Property="IsHitTestVisible" Value="False" />
-    <Style Selector="^:unchecked /template/ Border#NormalRectangle">
-      <Setter Property="BorderThickness" Value="0" />
-      <Setter Property="Background" Value="Transparent"/>
-    </Style>
-    <Style Selector="^:checked /template/ Path#CheckGlyph">
-      <Setter Property="Fill" Value="{DynamicResource AccentBrush1}" />
-      <Setter Property="Width" Value="12" />
-    </Style>
-    <Style Selector="^:checked /template/ Border#NormalRectangle">
-      <Setter Property="BorderThickness" Value="0" />
-      <Setter Property="Background" Value="Transparent"/>
-    </Style>
   </Style>
 
   <Style Selector="DataGridColumnHeader">
@@ -342,9 +320,12 @@
     <Setter Property="MinHeight" Value="28" />
     <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
   </Style>
-  <Style Selector="DataGridRow:selected /template/ DataGridFrozenGrid">
-    <Setter Property="Background" Value="{DynamicResource AccentBrush1Semi}" />
-  </Style>
+  <!-- W31：DataGrid 选中行底色改为**主题资源键覆写**（Colors/Brushes.axaml 里的
+       DataGridRowSelectedBackgroundBrush = 池 primary @50%）—— DataGrid 主题把行背景绑到这个键上，
+       原先的应用级 `DataGridRow:selected /template/ DataGridFrozenGrid` 补丁因此可以删除。
+       注：控件级 `DataGridRow:selected { Background }` 不可行 —— 探针实证行模板的
+       DataGridFrozenGrid 并不绑定控件自身 Background（只绑该资源键）。 -->
+
   <Style Selector="DataGridCell > TextBox">
     <Setter Property="Margin" Value="0"/>
   </Style>
@@ -391,55 +372,9 @@
     <Setter Property="LineHeight" Value="18"/>
   </Style>
 
-  <Style Selector="ScrollBar.music[IsExpanded=True] /template/ Rectangle#TrackRect">
-    <Setter Property="Fill" Value="Transparent" />
-  </Style>
-  <Style Selector="ScrollBar.music[IsExpanded=true] /template/ Thumb.thumb">
-    <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushSemi}" />
-  </Style>
-  <Style Selector="ScrollBar.music[IsExpanded=true] /template/ Thumb.thumb:pointerover">
-    <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}" />
-  </Style>
-  <Style Selector="ScrollBar.music /template/ RepeatButton.line /template/ Border#Root" >
-    <Setter Property="Background" Value="Transparent" />
-  </Style>
-  <Style Selector="ScrollBar.music /template/ RepeatButton.line:pointerover /template/ Border#Root" >
-    <Setter Property="Background" Value="Transparent" />
-  </Style>
-  <Style Selector="ScrollBar.music /template/ RepeatButton.line:pressed /template/ Border#Root" >
-    <Setter Property="Background" Value="Transparent" />
-  </Style>
-  <Style Selector="ScrollBar.music:vertical /template/ RepeatButton.line.up /template/ Path">
-    <Setter Property="Data" Value="M 0 20 L 20 20 L 10 0 Z" />
-  </Style>
-  <Style Selector="ScrollBar.music:vertical /template/ RepeatButton.line.down /template/ Path">
-    <Setter Property="Data" Value="M 0 0 L 20 0 L 10 20 Z" />
-  </Style>
-  <Style Selector="ScrollBar.music:horizontal /template/ RepeatButton.line.up /template/ Path">
-    <Setter Property="Data" Value="M 0 10 L 20 0 L 20 20 Z" />
-  </Style>
-  <Style Selector="ScrollBar.music:horizontal /template/ RepeatButton.line.down /template/ Path">
-    <Setter Property="Data" Value="M 20 10 L 0 0 L 0 20 Z" />
-  </Style>
-  <Style Selector="ScrollBar.music /template/ RepeatButton.line /template/ Viewbox" >
-    <Setter Property="Width" Value="24" />
-    <Setter Property="Height" Value="24" />
-  </Style>
-  <Style Selector="ScrollBar.music /template/ RepeatButton.line /template/ Path#Arrow" >
-    <Setter Property="Width" Value="24" />
-    <Setter Property="Height" Value="24" />
-    <Setter Property="Fill" Value="{DynamicResource NeutralAccentBrushSemi}" />
-  </Style>
-  <Style Selector="ScrollBar.music /template/ RepeatButton.line:pointerover /template/ Path#Arrow" >
-    <Setter Property="Width" Value="24" />
-    <Setter Property="Height" Value="24" />
-    <Setter Property="Fill" Value="{DynamicResource NeutralAccentBrush}" />
-  </Style>
-  <Style Selector="ScrollBar.music /template/ RepeatButton.line:pressed /template/ Path#Arrow" >
-    <Setter Property="Width" Value="24" />
-    <Setter Property="Height" Value="24" />
-    <Setter Property="Fill" Value="{DynamicResource NeutralAccentBrush}" />
-  </Style>
+  <!-- W31：`ScrollBar.music ... /template/ ...`（14 条）整块迁到 Controls/PianoRollStyles.axaml ——
+       它的唯一使用者是钢琴卷帘（Controls/PianoRoll.axaml 里两个 `Classes="music"` 滚动条），
+       按 UI 标准 §0.2 应写在**使用它的控件自己的样式表**里，而不是应用级样式层。 -->
 
   <Style Selector="HeaderedContentControl.groupbox">
     <Setter Property="Margin" Value="5"/>
@@ -535,13 +470,10 @@
       </ControlTemplate>
     </Setter>
   </Style>
-  <!-- 只给 fader 变体提亮（v4.0 起混合台推子 = AccentBrush1/2 一对）。
-       2026-10 选择类控件自有 ControlTheme 后，这条必须收窄到 `.fader`：
-       普通 Slider 的模板里也有 RepeatButton#PART_DecreaseButton，若不收窄，
-       这条应用级补丁会压住新主题里"已选轨道 = primary"的状态色。 -->
-  <Style Selector="Slider.fader:pointerover /template/ RepeatButton#PART_DecreaseButton">
-    <Setter Property="Background" Value="{DynamicResource AccentBrush2}" />
-  </Style>
+  <!-- W31：`.fader` 的悬浮提亮迁进 Md3SelectionThemes.axaml 的 Md3SliderTheme
+       （`^.fader:pointerover /template/ RepeatButton#PART_DecreaseButton`）——
+       `/template/` 只能在控件自己的 ControlTheme 里用。fader 的**模板**仍留在本文件
+       （Template setter 不是 /template/ 补丁），行为不变。 -->
 
   <Style Selector="Expander" >
     <Setter Property="Margin" Value="4,2" />
@@ -549,19 +481,9 @@
     <Setter Property="IsExpanded" Value="True" />
     <Setter Property="MinHeight" Value="32" />
     <Setter Property="Background" Value="Transparent" />
-
-    <Style Selector="^:down /template/ ToggleButton#ExpanderHeader">
-      <Setter Property="Height" Value="32"/>
-      <Setter Property="MinHeight" Value="32"/>
-      <Setter Property="FontWeight" Value="Bold"/>
-    </Style>
-    <Style Selector="^:down /template/ ToggleButton#ExpanderHeader /template/ Border#ExpandCollapseChevronBorder">
-      <Setter Property="Height" Value="20"/>
-    </Style>
-    <Style Selector="^:down /template/ ToggleButton#ExpanderHeader /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Margin" Value="7,0,0,0"/>
-    </Style>
   </Style>
+  <!-- W31：Expander 头部的 3 条 /template/ 调参迁到 Controls/NotePropertiesControl.axaml
+       （全仓只有它用 Expander，4 处）—— 按 UI 标准 §0.2 写在使用者自己的 UserControl.Styles。 -->
 
   <Style Selector="ColorPicker TextBox">
     <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -578,12 +500,9 @@
     <Setter Property="Padding" Value="12,6"/>
     <Setter Property="Background" Value="Transparent"/>
   </Style>
-  <Style Selector="TabItem:selected /template/ Border#PART_SelectedPipe">
-    <Setter Property="Background" Value="{DynamicResource AccentBrush1}"/>
-  </Style>
-  <Style Selector="TabItem:pointerover /template/ Border#PART_LayoutRoot">
-    <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrushPointerOver}"/>
-  </Style>
+  <!-- W31：此处原有 `TabItem:selected|:pointerover /template/ Border#PART_SelectedPipe|PART_LayoutRoot`
+       两条补丁 —— 全仓 `<TabControl` 使用数为 **0**（TabItem 只在旧布局里被 Fluent 模板渲染），
+       属死代码，删除（视觉零变化）。将来若真要用 TabControl，按同一范式给它自己的 ControlTheme。 -->
 
   <!-- RadioButton (global) -->
   <Style Selector="RadioButton">
@@ -608,10 +527,9 @@
     <Setter Property="Margin" Value="2,4"/>
   </Style>
 
-  <!-- ScrollBar thumbs -->
-  <Style Selector="ScrollBar /template/ Thumb.thumb">
-    <Setter Property="CornerRadius" Value="3"/>
-  </Style>
+  <!-- W31：`ScrollBar /template/ Thumb.thumb { CornerRadius=3 }` 已删除 —— 实测探针（headless）
+       显示滚动条 Thumb 的内层 Border CornerRadius = 0，说明该补丁设的 Thumb.CornerRadius
+       并未被 Fluent 模板消费（死代码），删除后视觉零变化。 -->
 
   <!-- ── Window title bar buttons (Edge / Office style) ── -->
   <Style Selector="Button.titleBarBtn">
@@ -624,14 +542,16 @@
     <Setter Property="CornerRadius" Value="0"/>
   </Style>
 
-  <!-- Close button: red hover only (min / max stay flat) -->
-  <Style Selector="Button.titleBarBtn.closeBtn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+  <!-- Close button: red hover only (min / max stay flat).
+       W31：底色改在**控件级**（原来打的是 ContentPresenter）—— titleBarBtn 的 Padding=0，
+       两者几何完全一致；图标 Stroke 保持不变（那是 Path 后代规则，不是 /template/ 补丁）。 -->
+  <Style Selector="Button.titleBarBtn.closeBtn:pointerover">
     <Setter Property="Background" Value="#E81123"/>
   </Style>
   <Style Selector="Button.titleBarBtn.closeBtn:pointerover Path">
     <Setter Property="Stroke" Value="White"/>
   </Style>
-  <Style Selector="Button.titleBarBtn.closeBtn:pressed /template/ ContentPresenter#PART_ContentPresenter">
+  <Style Selector="Button.titleBarBtn.closeBtn:pressed">
     <Setter Property="Background" Value="#BF0F1D"/>
   </Style>
   <Style Selector="Button.titleBarBtn.closeBtn:pressed Path">

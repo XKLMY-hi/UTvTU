@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -919,22 +919,22 @@ namespace OpenUtau.App.ViewModels {
             VstLibraryChangedNotification.Publish(VstLibraryChangedNotification.SourceLibrary);
         }
 
+        readonly UiThreadAffinity affinity = new UiThreadAffinity();
+
         void OnLibraryChanged() {
             if (disposed) {
                 return;
             }
-            // 广播可能来自任意线程（例如重扫的后台续体）：非 UI 线程一律编组回来
-            if (Dispatcher.UIThread.CheckAccess()) {
+            // 广播可能来自任意线程（例如重扫的后台续体）：非 UI 线程一律编组回来。
+            // 判据用 `UiThreadAffinity`（锚定**订阅时所属线程**）而非 `CheckAccess()`：
+            // 后者在 headless 测试宿主下会误判为 true（我们已因此踩过两次）。
+            affinity.Post(() => {
+                if (disposed) {
+                    return;
+                }
                 SyncScanPaths();
                 RefreshPlugins();
-            } else {
-                Dispatcher.UIThread.Post(() => {
-                    if (!disposed) {
-                        SyncScanPaths();
-                        RefreshPlugins();
-                    }
-                });
-            }
+            });
         }
 
         /// <summary>

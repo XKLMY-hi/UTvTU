@@ -66,14 +66,20 @@ namespace OpenUtau.App.ViewModels {
             DocManager.Inst.EndUndoGroup();
         }
 
+        readonly UiThreadAffinity affinity = new UiThreadAffinity();
+
+        /// <summary>刷新通道条（UI 线程亲和，见 <see cref="UiThreadAffinity"/>）。</summary>
         public void RefreshTracks() {
             // 跨线程编组（与链面板同法）：Tracks 变更会让 MixerControl 重建通道条（动视觉树），
             // 而命令通知在测试宿主等场景可能落在非 UI 线程 ⇒ 不编组会抛 Dispatcher.VerifyAccess。
             // 生产路径由 DocManager 的主线程守卫兜住，这里只是把契约显式化。
-            if (!Dispatcher.UIThread.CheckAccess()) {
-                Dispatcher.UIThread.Post(RefreshTracks);
-                return;
-            }
+            // 判据用 `UiThreadAffinity`（锚定**订阅时所属线程**）而非 `CheckAccess()`：
+            // 后者在 headless 测试宿主下会误判为 true（我们已因此踩过两次）；
+            // 投递目标直指 Core，避免入队后再次进入本方法自我循环。
+            affinity.Post(RefreshTracksCore);
+        }
+
+        void RefreshTracksCore() {
             Tracks.Clear();
             var project = DocManager.Inst.Project;
             if (project?.tracks == null) {

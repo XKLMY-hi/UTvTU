@@ -306,6 +306,8 @@
                     <MenuItem Header="{DynamicResource menu.tools.layout.hsplit13}" Click="OnMenuLayoutHSplit13"/>
                   </MenuItem>
                   <MenuItem Header="{DynamicResource menu.tools.fullscreen}" InputGesture="F11" Click="OnMenuFullScreen"/>
+                  <!-- W28 命令层：快捷键总览（只读，数据源 = CommandRegistry） -->
+                  <MenuItem Header="{DynamicResource command.shortcutoverview}" Click="OnMenuShortcutOverview"/>
                   <MenuItem Header="{Binding ClearCacheHeader}" Click="OnMenuClearCache"/>
                   <MenuItem Header="{DynamicResource menu.tools.debugwindow}" Click="OnMenuDebugWindow"/>
                   <!-- fx-rack：控件陈列室（MD3 机架控件家族审阅入口） -->
