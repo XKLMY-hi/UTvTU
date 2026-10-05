@@ -644,21 +644,7 @@ namespace OpenUtau.Test.App {
             // 卷帘 VM 构造会读 DocManager.Inst.Plugins（私有 setter）⇒ 用公开的扫描入口把它填上，
             // 否则 headless 下 Plugins 为 null、VM 构造直接抛 ArgumentNullException（既有可测性缺口）。
             OpenUtau.Core.DocManager.Inst.SearchAllLegacyPlugins();
-            // 这两个用例会**真实落盘**（Preferences.Save）也会**替换全局工程** ⇒ 必须先把状态钉成
-            // 已知起点、并在结尾**完整还原**，否则会污染同进程里后续的用例（实测：不还原会让
-            // OpenUtau.Test.Audio.* 的 6~7 个渲染用例在全量跑时失败 —— 单跑却全绿）。
-            var oldProject = OpenUtau.Core.DocManager.Inst.Project;
-            bool oldShowExpressions = Preferences.Default.ShowExpressions;            // 这两个用例会**真实落盘**（Preferences.Save），也会读持久化值 ⇒ 必须先把状态钉成
-            // 已知起点，否则上一次失败跑留下的 "折叠=true" 会让下一次从折叠态开始（测试不是幂等的）。
-            double oldExpHeight = Preferences.Default.PanelLayout.PianoRollExpHeight;
-            bool oldExpCollapsed = Preferences.Default.PanelLayout.PianoRollExpCollapsed;
-            Preferences.Default.PanelLayout.PianoRollExpHeight = 150;
-            Preferences.Default.PanelLayout.PianoRollExpCollapsed = false;
-            Preferences.Default.ShowExpressions = true;
-            Preferences.Save();            var project = new OpenUtau.Core.Ustx.UProject();
-            project.timeAxis.BuildSegments(project);
-            OpenUtau.Core.DocManager.Inst.ExecuteCmd(new OpenUtau.Core.LoadProjectNotification(project));
-
+            var (oldProject, oldShow, oldHeight, oldCollapsed) = PinGlobalState();
             var vm = new OpenUtau.App.ViewModels.PianoRollViewModel();
             var roll = new PianoRoll(vm);
             var window = new Window { Width = 1000, Height = 760, Content = roll };
@@ -699,10 +685,7 @@ namespace OpenUtau.Test.App {
                 Assert.Equal(150, splitter.PanelHeight, 1);
                 Assert.Equal(splitter.PanelHeight, canvases[0].Bounds.Height, 1);
             } finally {
-                Preferences.Default.PanelLayout.PianoRollExpHeight = 150;
-                Preferences.Default.PanelLayout.PianoRollExpCollapsed = false;
-                Preferences.Default.ShowExpressions = true;
-                Preferences.Save();
+                ReleaseEverything(roll, vm, oldProject, oldShow, oldHeight, oldCollapsed);
                 window.Close();
             }
         }
@@ -710,29 +693,11 @@ namespace OpenUtau.Test.App {
         [AvaloniaFact]
         public void PianoRoll_ExpPanel_SharesStateWithShowExpressions_AndPersists() {
             OpenUtau.Test.TestSupport.DocManagerTestSetup.RunOnCurrentThread();
-            // 卷帘 VM 构造会读 DocManager.Inst.Plugins（私有 setter）⇒ 用公开的扫描入口把它填上，
-            // 否则 headless 下 Plugins 为 null、VM 构造直接抛 ArgumentNullException（既有可测性缺口）。
             OpenUtau.Core.DocManager.Inst.SearchAllLegacyPlugins();
-            // 这两个用例会**真实落盘**（Preferences.Save）也会**替换全局工程** ⇒ 必须先把状态钉成
-            // 已知起点、并在结尾**完整还原**，否则会污染同进程里后续的用例（实测：不还原会让
-            // OpenUtau.Test.Audio.* 的 6~7 个渲染用例在全量跑时失败 —— 单跑却全绿）。
-            var oldProject = OpenUtau.Core.DocManager.Inst.Project;
-            bool oldShowExpressions = Preferences.Default.ShowExpressions;            // 这两个用例会**真实落盘**（Preferences.Save），也会读持久化值 ⇒ 必须先把状态钉成
-            // 已知起点，否则上一次失败跑留下的 "折叠=true" 会让下一次从折叠态开始（测试不是幂等的）。
-            double oldExpHeight = Preferences.Default.PanelLayout.PianoRollExpHeight;
-            bool oldExpCollapsed = Preferences.Default.PanelLayout.PianoRollExpCollapsed;
-            Preferences.Default.PanelLayout.PianoRollExpHeight = 150;
-            Preferences.Default.PanelLayout.PianoRollExpCollapsed = false;
-            Preferences.Default.ShowExpressions = true;
-            Preferences.Save();            var project = new OpenUtau.Core.Ustx.UProject();
-            project.timeAxis.BuildSegments(project);
-            OpenUtau.Core.DocManager.Inst.ExecuteCmd(new OpenUtau.Core.LoadProjectNotification(project));
+            var (oldProject, oldShow, oldHeight, oldCollapsed) = PinGlobalState();
             var vm = new OpenUtau.App.ViewModels.PianoRollViewModel();
             var roll = new PianoRoll(vm);
             var window = new Window { Width = 1000, Height = 760, Content = roll };
-            bool oldShow = Preferences.Default.ShowExpressions;
-            bool oldCollapsed = Preferences.Default.PanelLayout.PianoRollExpCollapsed;
-            double oldHeight = Preferences.Default.PanelLayout.PianoRollExpHeight;
             try {
                 window.Show();
                 SettleWindow(window);
@@ -748,11 +713,53 @@ namespace OpenUtau.Test.App {
                 Assert.False(Preferences.Default.PanelLayout.PianoRollExpCollapsed);
                 Assert.Equal(roll.ExpPanel.Width, Preferences.Default.PanelLayout.PianoRollExpHeight, 1);
             } finally {
-                Preferences.Default.ShowExpressions = oldShow;
-                Preferences.Default.PanelLayout.PianoRollExpCollapsed = oldCollapsed;
-                Preferences.Default.PanelLayout.PianoRollExpHeight = oldHeight;
-                Preferences.Save();   // 恢复也要落盘，否则污染后续跑
+                ReleaseEverything(roll, vm, oldProject, oldShow, oldHeight, oldCollapsed);
                 window.Close();
+            }
+        }
+
+        /// <summary>
+        /// 把这次用例会碰的**全局**状态钉成已知起点，并返回原值供还原：
+        /// 全局工程（`DocManager.Inst.Project`）+ 三个偏好（`ShowExpressions`、
+        /// `PianoRollExpHeight`、`PianoRollExpCollapsed`）。不钉的话上一次跑留下的持久化值会让
+        /// 本次从"折叠态"开始（用例不幂等）。
+        /// </summary>
+        private static (OpenUtau.Core.Ustx.UProject? project, bool show, double height, bool collapsed) PinGlobalState() {
+            var old = (OpenUtau.Core.DocManager.Inst.Project,
+                Preferences.Default.ShowExpressions,
+                Preferences.Default.PanelLayout.PianoRollExpHeight,
+                Preferences.Default.PanelLayout.PianoRollExpCollapsed);
+            Preferences.Default.PanelLayout.PianoRollExpHeight = 150;
+            Preferences.Default.PanelLayout.PianoRollExpCollapsed = false;
+            Preferences.Default.ShowExpressions = true;
+            Preferences.Save();
+            var project = new OpenUtau.Core.Ustx.UProject();
+            project.timeAxis.BuildSegments(project);
+            OpenUtau.Core.DocManager.Inst.ExecuteCmd(new OpenUtau.Core.LoadProjectNotification(project));
+            return old;
+        }
+
+        /// <summary>
+        /// 用例收尾（W25 的关键一半）：**真正释放订阅** + 还原全局状态。
+        /// 只关窗是不够的：真实的 `PianoRoll` 会构造 10 个 `ExpSelectorViewModel`、
+        /// `NotesViewModel`、`CurveViewModel`… 它们各自订阅着 `DocManager`，而这些订阅此前
+        /// 从不退订 ⇒ 后面的 Audio 用例在**后台线程**加载工程时仍会回调到这些"无主"订阅者，
+        /// 撞上跨线程改绑定集合（`Dispatcher.VerifyAccess`）⇒ 那 7 例确定性红。
+        /// `PianoRoll.Dispose()` 会把控件自身 + 两条 MessageBus 订阅 + 可视树里各 DataContext 上的
+        /// 订阅面一起释放（见其 `Unsubscribe()` 的三处清单）。
+        /// </summary>
+        private static void ReleaseEverything(PianoRoll roll,
+            OpenUtau.App.ViewModels.PianoRollViewModel vm,
+            OpenUtau.Core.Ustx.UProject? project, bool show, double height, bool collapsed) {
+            roll.Dispose();
+            vm.NotesViewModel.Unsubscribe();
+            OpenUtau.Core.DocManager.Inst.RemoveSubscriber(vm);
+            Preferences.Default.ShowExpressions = show;
+            Preferences.Default.PanelLayout.PianoRollExpHeight = height;
+            Preferences.Default.PanelLayout.PianoRollExpCollapsed = collapsed;
+            Preferences.Save();
+            if (project != null) {
+                OpenUtau.Core.DocManager.Inst.ExecuteCmd(new OpenUtau.Core.LoadProjectNotification(project));
             }
         }
 
@@ -811,7 +818,7 @@ namespace OpenUtau.Test.App {
             string original = Preferences.Default.Language;
             try {
                 OpenUtau.App.App.SetLanguage("en-US");
-                foreach (string key in new[] { "panel.toggle.tracks", "panel.toggle.library", "panel.reset", "panel.collapse.tracks", "panel.collapse.library", "panel.drag.hint" }) {
+                foreach (string key in new[] { "panel.toggle.tracks", "panel.toggle.library", "panel.reset", "panel.collapse.tracks", "panel.collapse.library", "panel.collapse.pianoroll.exp", "panel.drag.hint" }) {
                     Assert.True(ThemeManager.TryGetString(key, out string value), $"EN 缺键：{key}");
                     Assert.NotEqual(key, value);
                     en[key] = value;
