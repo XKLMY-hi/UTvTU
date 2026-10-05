@@ -169,37 +169,6 @@ namespace OpenUtau.Test.Format {
             Assert.Contains("Ustxp.ExportCleanUstx(file, project)", code);
         }
 
-        // ── 4. 噪音清理（行数/字节数对照）────────────────────────────────────
-
-        [Fact]
-        public void NoiseCleanup_ReducesSize_AndSemanticsSurvive() {
-            var project = Ustxp.Load(CopyFixture("noise-src.ustxp"));
-            // 本用例量的是"空集合不恒写"（第 4 件）⇒ 先清掉未知键，走常规保存路径；
-            // 含未知键时走的是"保数据"慢路径（树合并），格式与主序列化器不同，见 Ustxp.SerializeForSave。
-            UstxYaml.ClearUnknown(project);
-            string raw = Yaml.DefaultSerializer.Serialize(project);
-            string cleaned = Ustxp.SerializeForSave(project);
-
-            foreach (string noisy in new[] { "track_expressions: []", "vst_slots: []", "voice_color_names: []" }) {
-                Assert.DoesNotContain(noisy, cleaned);
-            }
-            int beforeLines = raw.Split('\n').Length;
-            int afterLines = cleaned.Split('\n').Length;
-            int beforeBytes = System.Text.Encoding.UTF8.GetByteCount(raw);
-            int afterBytes = System.Text.Encoding.UTF8.GetByteCount(cleaned);
-            output.WriteLine($"noise cleanup: {beforeLines} → {afterLines} lines, {beforeBytes} → {afterBytes} bytes");
-            Assert.True(afterLines < beforeLines, $"行数应减少：{beforeLines} → {afterLines}");
-            Assert.True(afterBytes < beforeBytes, $"字节数应减少：{beforeBytes} → {afterBytes}");
-
-            string file = Path.Combine(dir, "noise.ustxp");
-            File.WriteAllText(file, cleaned);
-            var reloaded = Ustxp.Load(file);
-            Assert.Equal(project.tracks.Count, reloaded.tracks.Count);
-            Assert.Equal(project.parts.Count, reloaded.parts.Count);
-            Assert.Empty(reloaded.tracks[0].TrackExpressions);
-            Assert.Equal(project.tempos[0].bpm, reloaded.tempos[0].bpm);
-        }
-
         // ── 5. 迁移表逐级 ───────────────────────────────────────────────────
 
         [Fact]

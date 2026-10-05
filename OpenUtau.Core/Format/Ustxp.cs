@@ -188,7 +188,7 @@ namespace OpenUtau.Core.Format {
             var tree = UstxYaml.ParseTree(Yaml.DefaultSerializer.Serialize(project));
             UstxYaml.RemoveKeys(tree, "ustxp_version");
             UstxYaml.RemoveKeysFromSequence(tree, "tracks", "vst_slots", "mix_fx");
-            string text = Prune(UstxYaml.SerializeTree(tree));
+            string text = UstxYaml.SerializeTree(tree);
             File.WriteAllText(filePath, text, Encoding.UTF8);
             project.Saved = true;
             Log.Information($"Exported clean .ustx (no Plus fields): {filePath}");
@@ -202,11 +202,10 @@ namespace OpenUtau.Core.Format {
         internal static string SerializeForSave(UProject project) {
             string text = Yaml.DefaultSerializer.Serialize(project);
             if (!UstxYaml.HasAnyUnknown(project)) {
-                return Prune(text);
+                return text;   // W27 裁决 b：本轮不做噪音剪枝（7 行/151 B 不值得冒数据完整性风险）
             }
             var tree = UstxYaml.ParseTree(text);
             UstxYaml.MergeAll(tree, project);
-            UstxYaml.PruneEmpty(tree);
             return UstxYaml.SerializeTree(tree);
         }
 
@@ -215,18 +214,6 @@ namespace OpenUtau.Core.Format {
         /// 不重新序列化 ⇒ 与主序列化器的格式（含 FlowEmitter 的行内短数组）完全一致、零漂移
         /// （实测：走"解析成树再序列化"会把 301 行变成 347 行）。
         /// </summary>
-        internal static string Prune(string serialized) {
-            var kept = new List<string>();
-            foreach (string line in serialized.Split('\n')) {
-                string trimmed = line.Trim();   // 注意 CRLF：只 TrimStart 会留下 \r，判空失败
-                if (trimmed.EndsWith(": []") || trimmed.EndsWith(": {}") || trimmed.EndsWith(": null")) {
-                    continue;
-                }
-                kept.Add(line);
-            }
-            return string.Join("\n", kept);
-        }
-
         /// <summary>
         /// Plus-specific format migrations. Called when ustxpVersion is behind.
         /// </summary>
