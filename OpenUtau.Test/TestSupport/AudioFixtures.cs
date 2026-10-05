@@ -293,12 +293,18 @@ namespace OpenUtau.Test.TestSupport {
         internal static FakeVstHandle InstallFakeVst(int trackNo, string uid, IVstBridge bridge) {
             VstTestSetup.Register(VstTestSetup.MakeEntry(uid));
             var manager = VstPluginManager.Inst;
+            // 取 VST 互斥闸并在句柄 Dispose 时释放（同一线程）：假 VST 的
+            // 「安装 → 渲染 → 卸载」整段独占进程级 VstPluginManager（Bridge + (trackNo,slot)
+            // 实例表），否则并行 collection 的 VST 用例会顶掉本用例的实例或换掉 Bridge
+            // （W23 #3：TrackMixCommandsTest 偶发红正是这一机制）。
+            VstTestSetup.EnterGate();
             var saved = manager.Bridge;
             manager.Bridge = bridge;
             var slot = VstTestSetup.CreateSlot(uid);
             var effect = manager.LoadEffect(trackNo, slot);
             if (effect == null) {
                 manager.Bridge = saved;
+                VstTestSetup.ExitGate();
                 throw new InvalidOperationException($"假 VST 加载失败：{uid}");
             }
             return new FakeVstHandle(manager, saved, trackNo, slot);
@@ -320,6 +326,7 @@ namespace OpenUtau.Test.TestSupport {
             public void Dispose() {
                 manager.UnloadEffect(trackNo, Slot.SlotIndex);
                 manager.Bridge = savedBridge;
+                VstTestSetup.ExitGate();   // 与 InstallFakeVst 的 EnterGate 配对（同一线程）
             }
         }
 
