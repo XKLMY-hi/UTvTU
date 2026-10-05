@@ -457,6 +457,13 @@ errors.txt
             /// 比设计稿 296 瘦 24px；展开态下卡片与「N 已安装」计数仍完整。</summary>
             public double LibraryWidth = 272;
             public bool LibraryCollapsed = false;
+
+            /// <summary>卷帘底部表达式/曲线区（**行面板**，W20）。默认 150：与接入面板系统前
+            /// `PianoRoll.axaml` 那一行的默认高一致 ⇒ 接入后观感不变；
+            /// 设计边界沿用 `ViewConstants.ExpHeightMin/Max`（132/600）。</summary>
+            public double PianoRollExpHeight = 150;
+            /// <summary>默认展开（折叠是用户主动选择），与轨头/素材库同一口径。</summary>
+            public bool PianoRollExpCollapsed = false;
         }
 
         /// <summary>
