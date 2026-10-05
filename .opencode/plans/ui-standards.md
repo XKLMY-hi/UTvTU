@@ -68,6 +68,8 @@
 3. **真实像素**由验证者用 computer use 量（合成输入触发不了 `:pointerover`，伪类注入对"祖先条件选择器"无效）⇒ 需要 hover/active 证据时，写"仅代码审查 + 交验证者真机"。
 4. **不写像素断言**（headless 桩绘制）；不依赖网络/用户机器上的音源或插件。
 5. **测试不留全局态**：`DocManager` 线程态 / `SingerManager` / VST 单例 / `MessageBus` 订阅 / 语言 / `Preferences` —— 作用域化 + 用后恢复（已有 `EnterScopedDispatcher`、`ScopedSingers`、`WithVstGlobal` 三个现成工具）。
+6. **不要在两棵工作树同时跑测试**：测试夹具（音频伪声库、`%TEMP%\w7-audio-fixture` 之类）是**跨树共享的固定目录**，两个 `dotnet test` 并发会互相踩出一片假红（实测：一次并发跑出现 **56 例失败**、无代码改动复跑即 **744/0**）。**一树一跑**；同理"一树一构建"。
+   推断类结论要标注：那次未取到失败名单 ⇒ 只作最可能归因，不当确证。
 
 ## 6. 提交前自检（评审用）
 
