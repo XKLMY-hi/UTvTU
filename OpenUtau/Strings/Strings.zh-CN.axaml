@@ -1324,4 +1324,12 @@ Syntax: prefix,suffix</system:String>-->
   <!-- ⚠ mx-paths: W11 标准 VST 扫描路径播种 + 一键添加（素材库空态与偏好设置 VST 页共用此键）—— EN/zh 成对 -->
   <system:String x:Key="sidebar.effects.addstandard">添加标准 VST3 目录并扫描</system:String>
   <!-- /mx-paths -->
+  <!-- ⚠ panel: W16 面板系统（可调宽 / 可折叠 / 重置布局）—— EN/zh 成对 -->
+  <system:String x:Key="panel.toggle.tracks">轨道头</system:String>
+  <system:String x:Key="panel.toggle.library">素材库</system:String>
+  <system:String x:Key="panel.reset">重置面板布局</system:String>
+  <system:String x:Key="panel.collapse.tracks">折叠轨道头</system:String>
+  <system:String x:Key="panel.collapse.library">折叠素材库</system:String>
+  <system:String x:Key="panel.drag.hint">拖动调宽 · 双击分隔条恢复默认宽度</system:String>
+  <!-- /panel -->
 </ResourceDictionary>

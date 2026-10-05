@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="7" d:DesignHeight="200"
+             x:Class="OpenUtau.App.Controls.PanelSplitter"
+             Focusable="False">
+  <!-- W16 面板系统：面板分隔条（一处样式，所有面板共用）
+       设计口径：视觉只有 1px 细线（md3.outline-variant），命中区 7px（便于抓取）；
+       hover / 拖拽中细线转为 md3.primary（MD3 的"指针态用主色"）；
+       双击 = 恢复该面板默认宽度。 -->
+  <UserControl.Styles>
+    <Style Selector="Border.panelSplitterTrack">
+      <Setter Property="Width" Value="1"/>
+      <Setter Property="HorizontalAlignment" Value="Center"/>
+      <Setter Property="Background" Value="{DynamicResource md3.outline-variant}"/>
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="Background" Duration="0:0:0.12"/>
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="UserControl:pointerover Border.panelSplitterTrack">
+      <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+    </Style>
+    <Style Selector="UserControl.dragging Border.panelSplitterTrack">
+      <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+    </Style>
+  </UserControl.Styles>
+  <Border x:Name="HitArea" Background="Transparent" Width="7" Cursor="SizeWestEast">
+    <Border Classes="panelSplitterTrack"/>
+  </Border>
+</UserControl>

@@ -1347,6 +1347,30 @@ namespace OpenUtau.App.Views {
             }
         }
 
+        // ── W16 面板系统：面板 chrome 的交互入口 ─────────────────────────────
+        // 拖拽/双击复位由 PanelSplitter 控件自己处理（一处实现，所有面板共用）；
+        // 这里只做"落盘"和"折叠"两件事 —— 接入方按配方加自己的同名处理器即可。
+
+        /// <summary>面板头部 chevron：折叠轨头列。</summary>
+        private void OnCollapseTracksPanel(object? sender, RoutedEventArgs e) {
+            viewModel.TracksPanel.ToggleCollapse();
+        }
+
+        /// <summary>面板头部 chevron：折叠素材库列。</summary>
+        private void OnCollapseLibraryPanel(object? sender, RoutedEventArgs e) {
+            viewModel.LibraryPanel.ToggleCollapse();
+        }
+
+        /// <summary>拖拽结束 / 双击复位 → 落盘（拖动过程中只更新内存，不写文件）。</summary>
+        private void OnPanelSplitterDragCompleted(object? sender, EventArgs e) {
+            viewModel.PersistPanelLayout();
+        }
+
+        /// <summary>「重置面板布局」：宽度回默认 + 全部展开 + 落盘。</summary>
+        private void OnMenuResetPanelLayout(object sender, RoutedEventArgs args) {
+            viewModel.ResetPanelLayout();
+        }
+
         void OnMenuLayoutVSplit11(object sender, RoutedEventArgs args) => LayoutSplit(null, 1.0 / 2);
         void OnMenuLayoutVSplit12(object sender, RoutedEventArgs args) => LayoutSplit(null, 1.0 / 3);
         void OnMenuLayoutVSplit13(object sender, RoutedEventArgs args) => LayoutSplit(null, 1.0 / 4);

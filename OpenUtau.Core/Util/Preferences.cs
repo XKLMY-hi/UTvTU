@@ -275,6 +275,11 @@ namespace OpenUtau.Core.Util {
         public class SerializablePreferences {
             public WindowSize MainWindowSize = new WindowSize();
             public WindowSize PianorollWindowSize = new WindowSize();
+            /// <summary>
+            /// W16 面板系统：可调宽 / 可折叠面板的布局状态（宽 + 折叠态）。
+            /// **不新增平行存储**——面板一律写这里；加新面板就在 <see cref="PanelLayoutPreferences"/> 里加一对字段。
+            /// </summary>
+            public PanelLayoutPreferences PanelLayout = new PanelLayoutPreferences();
             public int UndoLimit = 100;
             public List<string> SingerSearchPaths = new List<string>();
             public string PlaybackDevice = string.Empty;
@@ -430,6 +435,28 @@ errors.txt
             // Legacy
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public int? Theme;
+        }
+
+        /// <summary>
+        /// W16 面板系统：可调宽 / 可折叠面板的持久化状态。
+        ///
+        /// 命名口径：`XxxWidth` = 展开时的宽度（px）；`XxxCollapsed` = 是否折叠（true 时列宽 0、不留空白）。
+        /// **默认值一律"展开"**：素材库是插件浏览器入口（D9「从素材库拖进链面板」是主路径），
+        /// 默认折叠会让这条路径不可发现；折叠是用户主动选择，然后持久化。
+        ///
+        /// 加新面板（例：混音台链面板、卷帘侧栏）：在这里加一对字段 + 在 MainWindowViewModel 里
+        /// `new PanelSlot(...)` 一处 + XAML 里 `<c:PanelSplitter Target="{Binding XxxPanel.Width}"/>` 一行。
+        /// </summary>
+        public class PanelLayoutPreferences {
+            /// <summary>工作台左列（轨道头）。默认 248：内容实测需 ~190-200（音量滑条 150 + 内边距 12×2），
+            /// 248 留约 25% 余量，同时比设计稿 264 瘦 16px 让给编排区。</summary>
+            public double TrackHeaderWidth = 248;
+            public bool TrackHeaderCollapsed = false;
+
+            /// <summary>工作台右列（素材库）。默认 272：34 缩略图 + 12 间距 + 12px 名称在 272 下不折行，
+            /// 比设计稿 296 瘦 24px；展开态下卡片与「N 已安装」计数仍完整。</summary>
+            public double LibraryWidth = 272;
+            public bool LibraryCollapsed = false;
         }
 
         /// <summary>
