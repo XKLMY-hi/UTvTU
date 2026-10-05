@@ -47,10 +47,17 @@ namespace OpenUtau.Test.App {
         // 轨道号取 950+：MessageBus 全进程共享，避开其它用例（0/1/900+）的双向干扰
         const int BaseTrackNo = 950;
 
+        // W24 测试卫生：DocManager 的全局派发字段改用**作用域版**（构造保存 + 确定性通道，
+        // Dispose 原样恢复）；参数取最保守档（nullChannel / installScheduler:false），理由见
+        // MixerGeometryTests 的同类注释。
+        readonly DocManagerTestSetup.ScopedDispatcher dispatcher;
+
         public FxChainPanelTests() {
             // ExecuteCmd 在测试线程内联执行（否则会被 PostOnUIThread 延后 → 断言时序敏感）
-            DocManagerTestSetup.RunOnCurrentThread();
+            dispatcher = DocManagerTestSetup.EnterScopedDispatcher(nullChannel: true, installScheduler: false);
         }
+
+        public void Dispose() => dispatcher.Dispose();
 
         // ── 夹具 ────────────────────────────────────────────────────────────
 
@@ -770,15 +777,20 @@ namespace OpenUtau.Test.App {
     /// （异步加载任务可能跨用例残留），故单独成类并进 <c>VstShared</c> 集合。
     /// </summary>
     [Collection("VstShared")]
-    public class FxChainReorderTests {
+    public class FxChainReorderTests : IDisposable {
         const string UidA = "test:reorder-a";
         const string UidB = "test:reorder-b";
 
+        // W24：同上，全局派发字段作用域化（构造保存、Dispose 恢复）
+        readonly DocManagerTestSetup.ScopedDispatcher dispatcher;
+
         public FxChainReorderTests() {
-            DocManagerTestSetup.RunOnCurrentThread();
+            dispatcher = DocManagerTestSetup.EnterScopedDispatcher(nullChannel: true, installScheduler: false);
             VstTestSetup.Register(VstTestSetup.MakeEntry(UidA, "ReorderA"));
             VstTestSetup.Register(VstTestSetup.MakeEntry(UidB, "ReorderB"));
         }
+
+        public void Dispose() => dispatcher.Dispose();
 
         static void WaitFor(Func<bool> cond, int timeoutMs = 3000) {
             var sw = Stopwatch.StartNew();
@@ -801,15 +813,39 @@ namespace OpenUtau.Test.App {
         }
 
         /// <summary>
+        /// W24：VST **进程级全局态**的定点处置 —— 装假 bridge → 独占闸内跑用例体 →
+        /// finally 只 <c>RemoveTrack(自己那条轨的键)</c> 并还原 <c>Bridge</c>。
+        ///
+        /// 为什么不用 <c>ClearAll()</c>：那是**全表清空**，会把并行 collection 正在用的实例
+        /// 一起卸掉（原 6 处 ClearAll 正是本用例组偶发红的机制之一，fx-core 在 W23 审计里登记）。
+        /// 闸 <see cref="VstTestSetup.RunExclusive"/> 与 <c>TrackMixCommandsTest</c>/<c>RenderGateTest</c>
+        /// 同源：VstPluginManager 的实例表与 Bridge 都是进程级单例，跨 collection 必须互斥。
+        ///
+        /// 注：工程内轨道的 TrackNo 会被 <c>UTrack.Validate</c> 重置为 <c>tracks.IndexOf</c>（单轨工程 ⇒ 0），
+        /// 所以这里无法像裸 <c>new UTrack</c> 那样取 <c>NextTrackNo()</c> 专属键；隔离由"闸 + 只删自己那条轨"保证。
+        /// </summary>
+        static void WithVstGlobal(UTrack track, Action body) {
+            var bridge = new FakeVstBridge();
+            var saved = VstPluginManager.Inst.Bridge;
+            VstTestSetup.RunExclusive(() => {
+                try {
+                    VstPluginManager.Inst.Bridge = bridge;
+                    body();
+                } finally {
+                    VstPluginManager.Inst.RemoveTrack(track.TrackNo);
+                    VstPluginManager.Inst.Bridge = saved;
+                }
+            });
+        }
+
+        /// <summary>
         /// 每个用例用**独占轨道号**：VstPluginManager 是进程单例，异步 Load 任务是
         /// fire-and-forget 的，跨用例共享轨道号会让"卸载时 SaveState 写回"落到别的用例头上。
         /// </summary>
         [AvaloniaFact]
         public void ReorderVstSlot_SwapsPayloads_AndUndoRestoresThem() {
-            VstPluginManager.Inst.Bridge = new FakeVstBridge();
-            VstPluginManager.Inst.ClearAll();
-            try {
-                var track = TwoSlotTrack(out var project, 971);
+            var track = TwoSlotTrack(out var project, 971);
+            WithVstGlobal(track, () => {
                 DocManager.Inst.ExecuteCmd(new LoadProjectNotification(project));
                 var cmd = TrackMixCommands.ReorderVstSlot(track, 0, 1);
 
@@ -839,17 +875,13 @@ namespace OpenUtau.Test.App {
                 Assert.Equal(0, track.VstSlots[0].SlotIndex);
                 Assert.Equal(1, track.VstSlots[1].SlotIndex);
                 WaitFor(() => VstPluginManager.Inst.GetEffect(track.TrackNo, 0)?.Slot?.PluginUid == UidA);
-            } finally {
-                VstPluginManager.Inst.ClearAll();
-            }
+            });
         }
 
         [AvaloniaFact]
         public void MoveRow_ThroughThePanel_MovesThePluginAndUndoPutsItBack() {
-            VstPluginManager.Inst.Bridge = new FakeVstBridge();
-            VstPluginManager.Inst.ClearAll();
-            try {
-                var track = TwoSlotTrack(out var project, 972);
+            var track = TwoSlotTrack(out var project, 972);
+            WithVstGlobal(track, () => {
                 DocManager.Inst.ExecuteCmd(new LoadProjectNotification(project));
                 var vm = new FxChainViewModel();
                 vm.Attach(track);
@@ -873,17 +905,13 @@ namespace OpenUtau.Test.App {
                 } finally {
                     vm.Dispose();
                 }
-            } finally {
-                VstPluginManager.Inst.ClearAll();
-            }
+            });
         }
 
         [AvaloniaFact]
         public void BuiltInRows_AreNotReorderable_NoModelWrite() {
-            VstPluginManager.Inst.Bridge = new FakeVstBridge();
-            VstPluginManager.Inst.ClearAll();
-            try {
-                var track = TwoSlotTrack(out var project, 973);
+            var track = TwoSlotTrack(out var project, 973);
+            WithVstGlobal(track, () => {
                 track.MixFx = new UMixFx { Enabled = true };
                 DocManager.Inst.ExecuteCmd(new LoadProjectNotification(project));
                 var vm = new FxChainViewModel();
@@ -899,9 +927,7 @@ namespace OpenUtau.Test.App {
                 } finally {
                     vm.Dispose();
                 }
-            } finally {
-                VstPluginManager.Inst.ClearAll();
-            }
+            });
         }
     }
 }

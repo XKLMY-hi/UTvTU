@@ -30,12 +30,18 @@ namespace OpenUtau.Test.App {
     /// · XAML 里用到的资源键（md3 色池 + 文案键）全部可解析，且无字面量色值。
     /// </summary>
     [Collection("Theme")]
-    public class MixFxDialogTests {
+    public class MixFxDialogTests : IDisposable {
+        // W24 测试卫生：全局派发字段改用**作用域版**（构造保存、Dispose 恢复）；
+        // 参数取最保守档（不装投递通道 / 不动 mainScheduler），理由见 MixerGeometryTests 的同类注释。
+        readonly DocManagerTestSetup.ScopedDispatcher dispatcher;
+
         public MixFxDialogTests() {
             // 让 DocManager.ExecuteCmd 在测试线程内联执行：否则 mainThread 不匹配会被
             // PostOnUIThread 延后，断言就变成时序敏感（真机复验"静默丢改动"时正是这个陷阱）。
-            DocManagerTestSetup.RunOnCurrentThread();
+            dispatcher = DocManagerTestSetup.EnterScopedDispatcher(nullChannel: true, installScheduler: false);
         }
+
+        public void Dispose() => dispatcher.Dispose();
 
         /// <summary>
         /// 非空工程（2 轨）——刻意避开 <c>DocManager.ChangesSaved</c> 的
