@@ -1,8 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Reflection;
 using System.Threading;
 using OpenUtau.Core;
+using OpenUtau.Test.TestSupport;
 using Xunit;
 
 namespace OpenUtau.Test.Core {
@@ -14,7 +13,11 @@ namespace OpenUtau.Test.Core {
     /// <see cref="DocManager.PostOnUIThread"/> 投递回 UI 线程；通道缺失时（无头/测试宿主/
     /// 启动早期）就地执行并记 warning，绝不 NRE。
     ///
-    /// 与其它会改 DocManager 全局状态的用例串行执行。
+    /// **确定性接线**（W14 flake 修复）：全局线程态一律经
+    /// <see cref="DocManagerTestSetup.EnterScopedDispatcher"/> 注入、作用域结束时恢复；
+    /// 断言只看**本用例自己的哨兵通知**（经自建订阅者计数），不数队列长度——满载并行时
+    /// 别的 collection 的后台命令也经过同一通道，按条数断言必然随机挂（修复前 Dark/Light
+    /// 各红 1 例正是此因）。
     /// </summary>
     [Collection("AudioFixture")]
     public class DocManagerExecuteCmdThreadingTests {
@@ -24,97 +27,110 @@ namespace OpenUtau.Test.Core {
             this.output = output;
         }
 
-        static readonly FieldInfo MainThreadField = typeof(DocManager)
-            .GetField("mainThread", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        /// <summary>哨兵通知：命令被"处理"（Publish 到订阅者）时才计数，免疫其它用例的并发命令。</summary>
+        sealed class SentinelNotification : UNotification {
+            public override string ToString() => "W14 sentinel";
+        }
 
-        /// <summary>在"当前线程 = 主线程"的前提下，从另一线程调用 ExecuteCmd。</summary>
-        static void RunOffThread(Action<Thread> body) {
-            var thread = new Thread(() => body(Thread.CurrentThread));
+        sealed class SentinelCounter : ICmdSubscriber {
+            public int Handled;
+            public void OnNext(UCommand cmd, bool isUndo) {
+                if (cmd is SentinelNotification) {
+                    Handled++;
+                }
+            }
+        }
+
+        static void RunOffThread(Action body) {
+            var thread = new Thread(() => body());
             thread.Start();
             thread.Join();
         }
 
-        [Fact]
-        public void OffThreadCommand_IsPostedToUiThread_NotExecutedInline() {
-            var doc = DocManager.Inst;
-            Thread? savedMain = (Thread?)MainThreadField.GetValue(doc);
-            Action<Action>? savedPost = doc.PostOnUIThread;
-            var queued = new List<Action>();
+        static void WithCounter(Action<SentinelCounter> body) {
+            var counter = new SentinelCounter();
+            DocManager.Inst.AddSubscriber(counter);
             try {
-                MainThreadField.SetValue(doc, Thread.CurrentThread);   // 本测试线程 = 主线程
-                doc.PostOnUIThread = action => queued.Add(action);      // 记录而非执行
-                int playPosBefore = doc.playPosTick;
-
-                RunOffThread(_ => doc.ExecuteCmd(new SetPlayPosTickNotification(4321)));
-
-                output.WriteLine($"投递数={queued.Count}，playPosTick={doc.playPosTick}（应保持 {playPosBefore}）");
-                Assert.Single(queued);                       // 恰好投递一次
-                Assert.Equal(playPosBefore, doc.playPosTick); // 未在后台线程就地执行
-
-                // 主线程上真正执行投递的动作 ⇒ 命令生效（这正是 832aea2c 的意图）
-                queued[0]();
-                output.WriteLine($"在主线程执行投递动作后 playPosTick={doc.playPosTick}");
-                Assert.Equal(4321, doc.playPosTick);
+                body(counter);
             } finally {
-                MainThreadField.SetValue(doc, savedMain);
-                doc.PostOnUIThread = savedPost;
+                DocManager.Inst.RemoveSubscriber(counter);
             }
         }
 
         [Fact]
-        public void OffThreadCommand_WithoutUiChannel_ExecutesInline_WithoutThrowing() {
-            var doc = DocManager.Inst;
-            Thread? savedMain = (Thread?)MainThreadField.GetValue(doc);
-            Action<Action>? savedPost = doc.PostOnUIThread;
-            try {
-                MainThreadField.SetValue(doc, Thread.CurrentThread);
-                doc.PostOnUIThread = null;      // 无头/测试宿主的缺口场景（此前会 NRE）
-                Exception? thrown = null;
+        public void OffThreadCommand_IsPostedToUiThread_NotExecutedInline() {
+            var sentinel = new SentinelNotification();
+            using var scope = DocManagerTestSetup.EnterScopedDispatcher();
+            WithCounter(counter => {
+                RunOffThread(() => DocManager.Inst.ExecuteCmd(sentinel));
 
-                RunOffThread(t => {
+                // 后台线程不得就地执行（生产语义：命令只能在 UI 线程跑）
+                output.WriteLine($"后台调用后：哨兵处理次数={counter.Handled}，投递队列长度={scope.PendingCount}");
+                Assert.Equal(0, counter.Handled);
+                Assert.True(scope.PendingCount >= 1, "命令没有被投递");
+
+                int pumped = scope.PumpAll();   // 在测试线程（=本作用域的"UI 线程"）驱动投递
+                output.WriteLine($"Pump {pumped} 条后：哨兵处理次数={counter.Handled}");
+                Assert.Equal(1, counter.Handled);   // 恰好处理一次（不重复投递、不丢失）
+            });
+        }
+
+        [Fact]
+        public void OffThreadCommand_WithoutUiChannel_ExecutesInline_WithoutThrowing() {
+            var sentinel = new SentinelNotification();
+            using var scope = DocManagerTestSetup.EnterScopedDispatcher(nullChannel: true);
+            WithCounter(counter => {
+                Exception? thrown = null;
+                RunOffThread(() => {
                     try {
-                        doc.ExecuteCmd(new SetPlayPosTickNotification(8765));
+                        DocManager.Inst.ExecuteCmd(sentinel);
                     } catch (Exception e) {
                         thrown = e;
                     }
                 });
 
                 output.WriteLine($"无投递通道时：异常={(thrown == null ? "无" : thrown.GetType().Name)}，" +
-                                 $"playPosTick={doc.playPosTick}");
+                                 $"哨兵处理次数={counter.Handled}");
                 Assert.Null(thrown);                 // 硬化前：NullReferenceException
-                Assert.Equal(8765, doc.playPosTick); // 就地执行，命令不丢
-            } finally {
-                MainThreadField.SetValue(doc, savedMain);
-                doc.PostOnUIThread = savedPost;
-            }
+                Assert.Equal(1, counter.Handled);     // 就地执行，命令不丢
+            });
         }
 
         [Fact]
-        public void OffThreadProgressNotification_DoesNotThrow_AndIsNotLoggedAsUiTouch() {
-            // ProgressBarNotification 在守卫里被豁免了 warning（渲染进度每秒多次），
-            // 但同样必须走投递而不是后台就地执行。
-            var doc = DocManager.Inst;
-            Thread? savedMain = (Thread?)MainThreadField.GetValue(doc);
-            Action<Action>? savedPost = doc.PostOnUIThread;
-            var queued = new List<Action>();
-            try {
-                MainThreadField.SetValue(doc, Thread.CurrentThread);
-                doc.PostOnUIThread = action => queued.Add(action);
-                Exception? thrown = null;
-                RunOffThread(t => {
-                    try {
-                        doc.ExecuteCmd(new ProgressBarNotification(42, "rendering"));
-                    } catch (Exception e) {
-                        thrown = e;
-                    }
-                });
-                output.WriteLine($"进度通知投递数={queued.Count}，异常={(thrown == null ? "无" : thrown.GetType().Name)}");
-                Assert.Null(thrown);
-                Assert.Single(queued);
-            } finally {
-                MainThreadField.SetValue(doc, savedMain);
-                doc.PostOnUIThread = savedPost;
+        public void OffThreadProgressNotification_IsPosted_AndPumpDoesNotThrow() {
+            using var scope = DocManagerTestSetup.EnterScopedDispatcher();
+            Exception? thrown = null;
+            RunOffThread(() => {
+                try {
+                    // 渲染进度每秒多次：守卫里豁免 warning，但仍必须走投递而非后台就地执行
+                    DocManager.Inst.ExecuteCmd(new ProgressBarNotification(42, "rendering"));
+                } catch (Exception e) {
+                    thrown = e;
+                }
+            });
+            output.WriteLine($"进度通知：异常={(thrown == null ? "无" : thrown.GetType().Name)}，" +
+                             $"投递队列长度={scope.PendingCount}");
+            Assert.Null(thrown);
+            Assert.True(scope.PendingCount >= 1);
+            Assert.Null(Record.Exception(() => scope.PumpAll()));
+        }
+
+        [Fact]
+        public void ScopedDispatcher_RestoresGlobalThreadState() {
+            var before = DocManagerTestSetup.Snapshot();
+            using (DocManagerTestSetup.EnterScopedDispatcher()) {
+                var during = DocManagerTestSetup.Snapshot();
+                // 作用域内"主线程"必须是**本测试线程**（确定性），不假设它和进入前的值不同
+                // ——同 collection 的用例可能被 xUnit 复用同一线程（此处原为 NotSame 断言，
+                // 满载并行时因线程复用而挂，是 W14 flake 的一部分）。
+                Assert.Same(Thread.CurrentThread, during.mainThread);
+                Assert.NotNull(during.post);
             }
+            var after = DocManagerTestSetup.Snapshot();
+            output.WriteLine($"恢复检查：mainThread 相同={ReferenceEquals(before.mainThread, after.mainThread)}，" +
+                             $"PostOnUIThread 相同={ReferenceEquals(before.post, after.post)}");
+            Assert.Same(before.mainThread, after.mainThread);
+            Assert.Same(before.post, after.post);
         }
     }
 }
