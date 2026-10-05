@@ -644,8 +644,14 @@ namespace OpenUtau.Test.App {
             // 卷帘 VM 构造会读 DocManager.Inst.Plugins（私有 setter）⇒ 用公开的扫描入口把它填上，
             // 否则 headless 下 Plugins 为 null、VM 构造直接抛 ArgumentNullException（既有可测性缺口）。
             OpenUtau.Core.DocManager.Inst.SearchAllLegacyPlugins();
-            // 这两个用例会**真实落盘**（Preferences.Save），也会读持久化值 ⇒ 必须先把状态钉成
+            // 这两个用例会**真实落盘**（Preferences.Save）也会**替换全局工程** ⇒ 必须先把状态钉成
+            // 已知起点、并在结尾**完整还原**，否则会污染同进程里后续的用例（实测：不还原会让
+            // OpenUtau.Test.Audio.* 的 6~7 个渲染用例在全量跑时失败 —— 单跑却全绿）。
+            var oldProject = OpenUtau.Core.DocManager.Inst.Project;
+            bool oldShowExpressions = Preferences.Default.ShowExpressions;            // 这两个用例会**真实落盘**（Preferences.Save），也会读持久化值 ⇒ 必须先把状态钉成
             // 已知起点，否则上一次失败跑留下的 "折叠=true" 会让下一次从折叠态开始（测试不是幂等的）。
+            double oldExpHeight = Preferences.Default.PanelLayout.PianoRollExpHeight;
+            bool oldExpCollapsed = Preferences.Default.PanelLayout.PianoRollExpCollapsed;
             Preferences.Default.PanelLayout.PianoRollExpHeight = 150;
             Preferences.Default.PanelLayout.PianoRollExpCollapsed = false;
             Preferences.Default.ShowExpressions = true;
@@ -707,8 +713,14 @@ namespace OpenUtau.Test.App {
             // 卷帘 VM 构造会读 DocManager.Inst.Plugins（私有 setter）⇒ 用公开的扫描入口把它填上，
             // 否则 headless 下 Plugins 为 null、VM 构造直接抛 ArgumentNullException（既有可测性缺口）。
             OpenUtau.Core.DocManager.Inst.SearchAllLegacyPlugins();
-            // 这两个用例会**真实落盘**（Preferences.Save），也会读持久化值 ⇒ 必须先把状态钉成
+            // 这两个用例会**真实落盘**（Preferences.Save）也会**替换全局工程** ⇒ 必须先把状态钉成
+            // 已知起点、并在结尾**完整还原**，否则会污染同进程里后续的用例（实测：不还原会让
+            // OpenUtau.Test.Audio.* 的 6~7 个渲染用例在全量跑时失败 —— 单跑却全绿）。
+            var oldProject = OpenUtau.Core.DocManager.Inst.Project;
+            bool oldShowExpressions = Preferences.Default.ShowExpressions;            // 这两个用例会**真实落盘**（Preferences.Save），也会读持久化值 ⇒ 必须先把状态钉成
             // 已知起点，否则上一次失败跑留下的 "折叠=true" 会让下一次从折叠态开始（测试不是幂等的）。
+            double oldExpHeight = Preferences.Default.PanelLayout.PianoRollExpHeight;
+            bool oldExpCollapsed = Preferences.Default.PanelLayout.PianoRollExpCollapsed;
             Preferences.Default.PanelLayout.PianoRollExpHeight = 150;
             Preferences.Default.PanelLayout.PianoRollExpCollapsed = false;
             Preferences.Default.ShowExpressions = true;
@@ -762,6 +774,18 @@ namespace OpenUtau.Test.App {
             int panelAt = xaml.IndexOf("x:Name=\"ExpPanelSplitter\"", StringComparison.Ordinal);
             Assert.True(toggleAt > 0 && panelAt > 0 && toggleAt < panelAt,
                 "折叠入口必须出现在面板之前（工具行），否则面板折叠后无法再打开");
+        }
+
+        /// <summary>还原这次用例改过的**全局**状态：工程 + 三个偏好，并落盘。</summary>
+        private static void RestoreGlobalState(OpenUtau.Core.Ustx.UProject? project, bool showExpressions,
+            double expHeight, bool expCollapsed) {
+            Preferences.Default.ShowExpressions = showExpressions;
+            Preferences.Default.PanelLayout.PianoRollExpHeight = expHeight;
+            Preferences.Default.PanelLayout.PianoRollExpCollapsed = expCollapsed;
+            Preferences.Save();
+            if (project != null) {
+                OpenUtau.Core.DocManager.Inst.ExecuteCmd(new OpenUtau.Core.LoadProjectNotification(project));
+            }
         }
 
         private static void SettleWindow(Window window) {
