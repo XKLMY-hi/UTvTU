@@ -7,6 +7,9 @@
              x:Class="OpenUtau.App.Controls.NotePropertiesControl"
              KeyDown="OnKeyDown" Focusable="True">
   <UserControl.Styles>
+    <!-- W32 复核（ui-lint 第 6 条 WARN = 误报）：本样式只设 Focusable，**没有声明任何高度**；
+         规则在 12 行窗口里抓到的 Height="24" 属于下面的 TextBlock 标题（第 22 行），不是 Button。
+         类型虽是 Button 本尊，但无声明高度可被主题 MinHeight=32 顶掉 ⇒ 无需中和。 -->
     <Style Selector="Button,CheckBox">
       <Setter Property="Focusable" Value="False"/>
     </Style>

@@ -72,7 +72,10 @@
          ✅ 实测无需中和：`Button` 类型选择器**不匹配** ToggleButton（精确类型匹配），
          本钮既拿不到 Md3ButtonTheme 的 MinHeight=32，也不吃应用级 `Button { Margin: 0,4 }`
          —— 去掉这两项中和后探针仍量到 Bounds 34×20 / Margin 0（回归由
-         FxChainPanelTests.RowChrome_RendersAtDeclaredMetrics 守着）。 -->
+         FxChainPanelTests.RowChrome_RendersAtDeclaredMetrics 守着）。
+         W32 复核：类型匹配结论由 ButtonMinHeightAuditTests.ToggleButton_Declared20_
+         IsNotTouchedByButtonTypeSelector 按 Bounds 坐实（ToggleButton MinHeight=0 / 渲染 20）
+         ⇒ ui-lint 第 6 条此处的 WARN 属规则误报（它只看选择器文本里的 "Button"）。 -->
     <Style Selector="ToggleButton.fxPower">
       <Setter Property="Width" Value="34"/>
       <Setter Property="Height" Value="20"/>

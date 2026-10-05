@@ -52,7 +52,10 @@
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
     </Style>
 
-    <!-- ══ MD3 开关（自研模板：模块电源 / 导出开关共用；无过渡动画） ══ -->
+    <!-- ══ MD3 开关（自研模板：模块电源 / 导出开关共用；无过渡动画） ══
+         W32 复核：选择器命中 **ToggleButton**（派生类）⇒ 不吃 `Button` 主题的 MinHeight=32，
+         也不吃应用级 `Button { Margin: 0,4 }`（Avalonia 类型选择器精确匹配）；
+         规则抓到的 Height="20" 是模板内部 Border（开关轨道），不是按钮自身 ⇒ 无需中和。 -->
     <Style Selector="ToggleButton.md3switch">
       <Setter Property="Cursor" Value="Hand"/>
       <Setter Property="FontSize" Value="12"/>

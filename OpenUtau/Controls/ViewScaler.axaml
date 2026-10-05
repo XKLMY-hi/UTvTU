@@ -24,7 +24,11 @@
       <Setter Property="Background" Value="Transparent"/>
     </Style>
   </UserControl.Styles>
-  <Button Margin="0" Padding="0" Width="24" Height="24" Background="Transparent" Focusable="False">
+  <!-- W32：这是**真 Button** ⇒ 吃 `Md3ButtonTheme.MinHeight=32`（Md3ControlThemes.axaml:28），
+       声明 Height=24 会被布局取 Max(32,24)=32 顶掉（改前实测 Bounds 32×24）。按 M/S 同法在本地
+       补 MinHeight=24 中和；Margin=0 用来挡应用级 `Button { Margin: 0,4 }`（Styles.axaml:158）。
+       回归由 ButtonMinHeightAuditTests.ViewScaler_Button_RendersAtDeclared24 按 Bounds 守着。 -->
+  <Button Margin="0" MinHeight="24" Padding="0" Width="24" Height="24" Background="Transparent" Focusable="False">
     <Path Name="Path" Width="16" Height="16" Stroke="{Binding $parent.Foreground}"
           StrokeThickness="1.75" StrokeLineCap="Flat" StrokeJoin="Miter"/>
   </Button>
