@@ -1,22 +1,45 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:c="clr-namespace:OpenUtau.App.Controls"
-             x:Class="OpenUtau.App.Controls.MixerControl">
+             x:Class="OpenUtau.App.Controls.MixerControl"
+             x:Name="MixerRoot">
   <!--
     混音台（设计规格 Mixer.txt:42 起的 Mixer Area + 691-736 主输出条）。
     · Mixer Area：内边距 16、通道条间距 8；12×96 + 160 + 12×8 = 1408 ⇒ 横向必然滚动；
     · 主输出条固定在滚动区之外（沿用上一轮的 E5 决定：主推子不随轨道滚走）；
-    · 右侧 280 宽效果链宿主（规划 §1.1 冻结接口）+ 左侧 1px outline-variant 分隔线，
-      链面板位于滚动区之外（W3 提供内容，本控件只留槽）；
-    · 工具行（＋轨道 / 轨道数）设计稿里没有，属既有功能入口（spec-digest §7.3 C-6），
+    · 右侧效果链宿主：W19 起接入 W16 面板系统（可拖宽 / 可折叠 / 持久化）——
+      原来的固定 "1px 分隔线 + 280" 换成 `PanelSplitter`（视觉仍是 1px outline-variant，
+      命中区 7px），容器宽与显隐改绑 `PanelWidth` / `PanelShown`；链面板仍在横向滚动区之外（R17）；
+    · 工具行（＋轨道 / 轨道数 / 链面板折叠键）设计稿里没有，属既有功能入口（spec-digest §7.3 C-6），
       压成一行 28 高；颜色全部走 md3.* 角色键。
   -->
+  <UserControl.Styles>
+    <!-- 链面板折叠键（宿主侧 chevron，W19）：范式抄 W16 的 Button.panelToggle，但那份样式在
+         MainWindow.axaml 里（分离窗下不生效），所以这里自带一份；MinHeight/Margin 显式压掉，
+         否则被全局 Md3ButtonTheme 的 MinHeight=32 与应用级 Button.Margin=0,4 顶大（W10 教训）。 -->
+    <Style Selector="Button.chainToggle">
+      <Setter Property="Width" Value="24"/>
+      <Setter Property="Height" Value="24"/>
+      <Setter Property="MinHeight" Value="24"/>
+      <Setter Property="Margin" Value="0"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="4"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Button.chainToggle:pointerover">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    </Style>
+  </UserControl.Styles>
+
   <Grid RowDefinitions="Auto,*"
         Background="{DynamicResource md3.surface-container-lowest}">
 
-    <!-- 工具行：＋轨道（既有入口，保留以免功能回归）+ 轨道数 -->
+    <!-- 工具行：＋轨道（既有入口）+ 轨道数 + 链面板折叠键（折叠后仍可展开的唯一入口，必须常驻） -->
     <Border Grid.Row="0" Padding="16,8">
-      <Grid ColumnDefinitions="Auto,*,Auto">
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto">
         <!-- 28 高工具行（设计稿无此元素，spec-digest C-6 自定）：MinHeight 必须显式压到 28，
              否则全局 Md3ButtonTheme 的 MinHeight=32 会把 Height 顶成 32；Margin 必须清零，
              否则应用级 `Button { Margin: 0,4 }`（Styles.axaml:159）再撑 8px。 -->
@@ -28,11 +51,23 @@
                 BorderThickness="0"/>
         <TextBlock Grid.Column="2" Name="StatusText" FontSize="10" VerticalAlignment="Center"
                    Foreground="{DynamicResource md3.on-surface-variant}"/>
+        <Button Grid.Column="3" Name="ChainToggleBtn" Classes="chainToggle" Margin="8,0,0,0"
+                Click="OnToggleChainPanel" ToolTip.Tip="{DynamicResource panel.collapse.fxchain}"
+                DataContext="{Binding #MixerRoot.ChainPanel}">
+          <Panel>
+            <Path Data="{StaticResource icon-chevron-right}" Width="12" Height="12" Stretch="Uniform"
+                  IsVisible="{Binding !IsCollapsed}"
+                  Fill="{DynamicResource md3.on-surface-variant}"/>
+            <Path Data="{StaticResource icon-chevron-left}" Width="12" Height="12" Stretch="Uniform"
+                  IsVisible="{Binding IsCollapsed}"
+                  Fill="{DynamicResource md3.on-surface-variant}"/>
+          </Panel>
+        </Button>
       </Grid>
     </Border>
 
     <!-- Mixer Area（42：内边距 16 / 间距 8 / 横向排列） -->
-    <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto">
+    <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto,Auto">
       <ScrollViewer Grid.Column="0" Name="StripsScroll"
                     HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
         <StackPanel Name="TrackStripsPanel" Orientation="Horizontal" Spacing="8"
@@ -44,12 +79,25 @@
       <!-- 主输出条（691：宽 160，固定在最右的滚动区之外） -->
       <c:MasterStrip Grid.Column="1" x:Name="MasterStripControl" Margin="0,16,16,16"/>
 
-      <!-- 冻结接口 §1.1-1：固定宽 280 的效果链宿主 + 左侧 1px 分隔线（链面板在滚动区之外） -->
-      <Grid Grid.Column="2" ColumnDefinitions="1,280">
-        <Border Grid.Column="0" Name="FxChainDivider" Width="1"
-                Background="{DynamicResource md3.outline-variant}"/>
-        <ContentControl Grid.Column="1" Name="FxChainHost" Width="280"/>
-      </Grid>
+      <!-- W19 面板系统的分隔条（W16 配方）：
+           · PanelColumn=3 ⇒ 计算固定占用时排除链面板自己那列（否则窄窗下一拖就吸附到 Min）；
+           · Invert=True ⇒ 面板在分隔条右侧（向右拖 = 变窄）；
+           · Target=意图值（两向绑定，供持久化）；容器绑 PanelWidth/PanelShown（夹紧后的有效值）；
+           · IsVisible 绑"未折叠"：用户折叠 ⇒ 本控件隐藏 ⇒ PanelShown=false、列宽 0（不留夹缝）。
+           双击 = 复位默认宽；拖动中只改内存，拖完由 DragCompleted 落盘。 -->
+      <c:PanelSplitter Grid.Column="2" x:Name="FxChainSplitter"
+                       DataContext="{Binding #MixerRoot.ChainPanel}"
+                       IsVisible="{Binding !IsCollapsed}"
+                       PanelColumn="3" Invert="True"
+                       Min="264" Max="480" DefaultWidth="280" CenterMin="320"
+                       Target="{Binding Width, Mode=TwoWay}"
+                       DragCompleted="OnChainPanelDragCompleted"
+                       ToolTip.Tip="{DynamicResource panel.drag.hint}"/>
+
+      <!-- 效果链宿主：宽与显隐都取自分隔条（不是 VM 的意图值） -->
+      <ContentControl Grid.Column="3" Name="FxChainHost"
+                      Width="{Binding #FxChainSplitter.PanelWidth}"
+                      IsVisible="{Binding #FxChainSplitter.PanelShown}"/>
     </Grid>
   </Grid>
 </UserControl>

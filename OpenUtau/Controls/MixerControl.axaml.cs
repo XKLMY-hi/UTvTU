@@ -37,12 +37,21 @@ public partial class MixerControl : UserControl
     /// <summary>右侧效果链面板（宿主装配见构造器；生命周期随本控件，无需窗口侧管理）。</summary>
     private readonly FxChainPanel chainPanel;
 
+    /// <summary>
+    /// W19：右侧效果链面板的宽/折叠状态（W16 面板系统 <see cref="PanelSlot"/>）。
+    /// XAML 里 `#MixerRoot.ChainPanel` 把它喂给 `FxChainSplitter`（Target 两向绑定 = 用户意图）
+    /// 与折叠键的图标；面板容器的 `Width`/`IsVisible` 取分隔条的 `PanelWidth`/`PanelShown`（夹紧后的有效值）。
+    /// 状态落 <c>Preferences.Default.PanelLayout.MixerChainWidth/MixerChainCollapsed</c>（不新增平行存储）。
+    /// </summary>
+    public PanelSlot ChainPanel { get; } = new PanelSlot("fx-chain", 280, 264, 480);
+
     /// <summary>电平定时器是否在跑（挂载 × 可见性；回归测试与诊断用）。</summary>
     internal bool LevelTimerRunning => timerRunning;
 
     public MixerControl()
     {
         InitializeComponent();
+        InitChainPanelLayout();
         DataContext = ViewModel = new MixerViewModel();
         RebuildStrips();
         ViewModel.Tracks.CollectionChanged += OnTracksChanged;
@@ -89,6 +98,31 @@ public partial class MixerControl : UserControl
         uiThread = Thread.CurrentThread;
         attached = true;
         SyncTimer();
+    }
+
+    // ── W19：链面板宽 / 折叠的持久化（写 Preferences.Default.PanelLayout 的自己那一段）──
+
+    private void InitChainPanelLayout() {
+        var prefs = Preferences.Default.PanelLayout;
+        ChainPanel.Width = prefs.MixerChainWidth;
+        ChainPanel.IsCollapsed = prefs.MixerChainCollapsed;
+    }
+
+    /// <summary>拖动结束 / 双击复位：此时才落盘（拖动过程只改内存，避免写爆磁盘）。</summary>
+    private void OnChainPanelDragCompleted(object? sender, EventArgs e) => PersistChainPanelLayout();
+
+    /// <summary>折叠键（工具行 chevron；折叠后仍常驻 ⇒ 一定能展开回来）。</summary>
+    private void OnToggleChainPanel(object? sender, Avalonia.Interactivity.RoutedEventArgs e) {
+        ChainPanel.ToggleCollapse();
+        PersistChainPanelLayout();
+    }
+
+    /// <summary>把槽状态写回 Preferences 并落盘（与 W16 同一份存储，不新增字段之外的东西）。</summary>
+    private void PersistChainPanelLayout() {
+        var prefs = Preferences.Default.PanelLayout;
+        prefs.MixerChainWidth = ChainPanel.Width;
+        prefs.MixerChainCollapsed = ChainPanel.IsCollapsed;
+        Preferences.Save();
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e) {

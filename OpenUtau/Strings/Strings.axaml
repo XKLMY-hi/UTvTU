@@ -1201,4 +1201,7 @@ General
   <system:String x:Key="panel.collapse.library">Collapse library</system:String>
   <system:String x:Key="panel.drag.hint">Drag to resize · double-click to reset width</system:String>
   <!-- /panel -->
+  <!-- ⚠ mx-strip: W19 混音台链面板折叠入口（宿主侧 chevron）—— EN/zh 成对 -->
+  <system:String x:Key="panel.collapse.fxchain">Collapse effect chain panel</system:String>
+  <!-- /mx-strip -->
 </ResourceDictionary>
