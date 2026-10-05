@@ -358,15 +358,14 @@ namespace OpenUtau.App.ViewModels {
         /// 而 UI 线程执行命令时也要拿同一把锁 ⇒ 死锁。Post 不阻塞调用方；代价是异步
         /// （UI 在下一轮消息循环收敛，调用方的"最终状态"断言需 pump 一次 dispatcher）。
         /// </summary>
+        readonly UiThreadAffinity affinity = new UiThreadAffinity();
+
         public void Rebuild() {
-            if (!Dispatcher.UIThread.CheckAccess()) {
-                // 后台线程（异步加载通知 / Publish 在命令线程上）⇒ 编组回 UI 线程。
-                // 用 Post 而非 Invoke：Publish 持着 DocManager 的 lockObj，同步 Invoke
-                // 会持锁等 UI 线程造成死锁。
-                Dispatcher.UIThread.Post(Rebuild);
-                return;
-            }
-            RebuildCore();
+            // 后台线程（异步加载通知 / Publish 在命令线程上）⇒ 编组回 UI 线程。
+            // 判据用 `UiThreadAffinity`（锚定**订阅时所属线程**）而非 `CheckAccess()`：
+            // 后者在 headless 测试宿主下会误判为 true（我们已因此踩过两次）；
+            // 投递目标直指 `RebuildCore`，避免入队后再次进入本方法自我循环。
+            affinity.Post(RebuildCore);
         }
 
         /// <summary>链行重投影的实体（**只能在 UI 线程调用**；见 <see cref="Rebuild"/>）。</summary>
