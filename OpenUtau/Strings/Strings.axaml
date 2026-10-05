@@ -1210,4 +1210,14 @@ General
   <!-- ⚠ mx-strip: W19 混音台链面板折叠入口（宿主侧 chevron）—— EN/zh 成对 -->
   <system:String x:Key="panel.collapse.fxchain">Collapse effect chain panel</system:String>
   <!-- /mx-strip -->
+  <!-- ⚠ cmd: W28 命令层（M09）—— 命令显示名 / 分组 / 快捷键总览 —— EN/zh 成对 -->
+  <system:String x:Key="command.track.solopart">Solo the track of the selected part</system:String>
+  <system:String x:Key="command.track.mutepart">Mute toggle for the selected part's track</system:String>
+  <system:String x:Key="command.view.mixerattach">Detach or re-attach the mixer</system:String>
+  <system:String x:Key="command.playback.playpause">Play / pause</system:String>
+  <system:String x:Key="command.playback.gohome">Go to the beginning</system:String>
+  <system:String x:Key="command.playback.goend">Go to the end</system:String>
+  <system:String x:Key="command.window.escape">Close overlay (welcome / preferences)</system:String>
+  <system:String x:Key="command.window.quit">Quit UTvTU</system:String>
+  <!-- /cmd -->
 </ResourceDictionary>
