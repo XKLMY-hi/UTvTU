@@ -125,6 +125,8 @@ namespace OpenUtau.App.Commands {
             Cmd("tools.fullscreen", "menu.tools.fullscreen", CommandGroup.Tools,
                 new KeyGesture(Key.F11),
                 w => w.OnMenuFullScreen(w, new Avalonia.Interactivity.RoutedEventArgs())),
+            Cmd("tools.shortcutoverview", "command.shortcutoverview", CommandGroup.Tools, null,
+                w => ShortcutOverviewWindow.Open(w), note: "只读总览（本表生成，含冲突标记）"),
 
             // ── View / 播放 ─────────────────────────────────────────────────────
             Cmd("playback.playpause", "command.playback.playpause", CommandGroup.View,
@@ -185,15 +187,20 @@ namespace OpenUtau.App.Commands {
         /// <summary>
         /// 冲突 = 同一手势被多个命令占用。**同命令的别名手势不算冲突**（按 Id 去重后再比手势）。
         /// </summary>
-        public static IReadOnlyList<IGrouping<string, CommandDefinition>> Conflicts(KeyModifiers cmdKey) {
+        public static IReadOnlyList<IGrouping<string, CommandDefinition>> Conflicts(KeyModifiers cmdKey) =>
+            Conflicts(All, cmdKey);
+
+        /// <summary>同 <see cref="Conflicts(KeyModifiers)"/>，但作用于任意命令集合（总览的自检与测试用）。</summary>
+        public static IReadOnlyList<IGrouping<string, CommandDefinition>> Conflicts(
+            IReadOnlyList<CommandDefinition> commands, KeyModifiers cmdKey) {
             var seen = new HashSet<string>(StringComparer.Ordinal);
             var unique = new List<CommandDefinition>();
-            foreach (var c in All) {
+            foreach (var c in commands) {
                 var g = Resolve(c.Gesture, cmdKey);
                 if (g == null) {
                     continue;
                 }
-                // 同一 Id 的重复手势（别名指向同一命令体）只算一次
+                // 同一 Id 的重复手势只算一次
                 if (seen.Add(c.Id + "|" + g.Key + "|" + g.KeyModifiers)) {
                     unique.Add(c);
                 }

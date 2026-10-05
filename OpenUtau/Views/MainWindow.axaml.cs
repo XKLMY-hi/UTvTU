@@ -1538,6 +1538,11 @@ namespace OpenUtau.App.Views {
             MessageBus.Current.SendMessage(new TracksMuteEvent(part.trackNo, false));
         }
 
+        /// <summary>快捷键总览（W28/M09）：数据源 = 命令注册表，只读。</summary>
+        internal void OnMenuShortcutOverview(object? sender, RoutedEventArgs args) {
+            ShortcutOverviewWindow.Open(this);
+        }
+
         /// <summary>退出应用（原 Alt+F4 分支，语义不变）。</summary>
         internal void QuitApplication() {
             (Application.Current?.ApplicationLifetime as IControlledApplicationLifetime)?.Shutdown();

@@ -1,0 +1,120 @@
+<controls:WindowEx xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="using:OpenUtau.App.Controls"
+        mc:Ignorable="d"
+        x:Class="OpenUtau.App.Views.ShortcutOverviewWindow"
+        Icon="/Assets/open-utau.ico"
+        Title="{DynamicResource shortcut.caption}"
+        Width="720" Height="600" MinWidth="420"
+        WindowStartupLocation="CenterOwner">
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       快捷键总览（W28 / 产品设计 M11 的只读前置）
+       数据全部来自 OpenUtau/Commands/CommandRegistry.cs（单一事实来源）：
+       本页显示的"名称/手势"与键盘实际分发读的是同一张表 ⇒ 不会再有两套不一致。
+       只读：搜索 + 按分组 + 自动冲突标记；改绑与命令面板属后续阶段。
+       MD3：实色、无玻璃、无动画（颜色一律 md3.* 色池键）。
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <Window.Styles>
+    <Style Selector="TextBlock.groupTitle">
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="LetterSpacing" Value="1"/>
+      <Setter Property="Margin" Value="0,0,0,6"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+    </Style>
+    <Style Selector="TextBlock.rowName">
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+    </Style>
+    <Style Selector="TextBlock.rowGesture">
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="FontFamily" Value="{DynamicResource PlusFontFamilyMono}"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+    </Style>
+    <Style Selector="TextBlock.rowMeta">
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+    </Style>
+    <Style Selector="Border.row">
+      <Setter Property="Padding" Value="10,6"/>
+      <Setter Property="Margin" Value="0,0,0,2"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
+    </Style>
+    <Style Selector="Border.conflictBadge">
+      <Setter Property="Padding" Value="6,2"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="Background" Value="{DynamicResource md3.error-container}"/>
+    </Style>
+    <Style Selector="TextBlock.conflictText">
+      <Setter Property="FontSize" Value="10"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-error-container}"/>
+    </Style>
+    <Style Selector="Border.summary">
+      <Setter Property="Padding" Value="10,6"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    </Style>
+  </Window.Styles>
+
+  <DockPanel Margin="16" LastChildFill="True">
+    <!-- 顶部：标题 + 冲突摘要 -->
+    <Border DockPanel.Dock="Top" Classes="summary" Margin="0,0,0,10">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Grid.Column="0" Classes="rowName" FontWeight="Medium" FontSize="14"
+                   Text="{DynamicResource shortcut.caption}"/>
+        <TextBlock Grid.Column="1" x:Name="ConflictLabel" Classes="rowMeta"/>
+      </Grid>
+    </Border>
+
+    <!-- 搜索 -->
+    <TextBox DockPanel.Dock="Top" x:Name="SearchBox" Margin="0,0,0,10"
+             Watermark="{DynamicResource shortcut.search}"/>
+
+    <!-- 底部提示 -->
+    <TextBlock DockPanel.Dock="Bottom" Classes="rowMeta" Margin="0,10,0,0"
+               TextWrapping="Wrap" Text="{DynamicResource shortcut.hint}"/>
+
+    <!-- 分组列表 -->
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+      <StackPanel>
+        <TextBlock x:Name="EmptyLabel" Classes="rowMeta" IsVisible="False"
+                   Text="{DynamicResource shortcut.empty}"/>
+        <ItemsControl x:Name="GroupsList">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Margin="0,0,0,14">
+                <TextBlock Classes="groupTitle" Text="{Binding Title}"/>
+                <ItemsControl ItemsSource="{Binding Rows}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Border Classes="row">
+                        <Grid ColumnDefinitions="*,Auto,Auto">
+                          <TextBlock Grid.Column="0" Classes="rowName" Text="{Binding Name}"/>
+                          <Border Grid.Column="1" Classes="conflictBadge" Margin="8,0,0,0"
+                                  IsVisible="{Binding IsConflicting}">
+                            <TextBlock Classes="conflictText" Text="{DynamicResource shortcut.conflict.badge}"/>
+                          </Border>
+                          <TextBlock Grid.Column="2" Classes="rowGesture" Margin="12,0,0,0" MinWidth="96"
+                                     TextAlignment="Right" Text="{Binding Gesture}"/>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </ScrollViewer>
+  </DockPanel>
+</controls:WindowEx>

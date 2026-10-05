@@ -1219,5 +1219,21 @@ General
   <system:String x:Key="command.playback.goend">Go to the end</system:String>
   <system:String x:Key="command.window.escape">Close overlay (welcome / preferences)</system:String>
   <system:String x:Key="command.window.quit">Quit UTvTU</system:String>
+  <system:String x:Key="command.shortcutoverview">Shortcut overview (read-only)</system:String>
+  <system:String x:Key="shortcut.caption">Keyboard shortcuts</system:String>
+  <system:String x:Key="shortcut.search">Search by name, gesture or id...</system:String>
+  <system:String x:Key="shortcut.hint">Read-only overview generated from the command registry. Gestures are shown in this platform's writing. Editing key bindings and the command palette come later.</system:String>
+  <system:String x:Key="shortcut.empty">No command matches this search.</system:String>
+  <system:String x:Key="shortcut.conflict.none">No gesture conflicts</system:String>
+  <system:String x:Key="shortcut.conflict.some">{0} gesture conflict(s): {1}</system:String>
+  <system:String x:Key="shortcut.conflict.badge">CONFLICT</system:String>
+  <system:String x:Key="shortcut.scope.window">Window</system:String>
+  <system:String x:Key="shortcut.scope.overlay">Overlay only</system:String>
+  <system:String x:Key="command.group.file">File</system:String>
+  <system:String x:Key="command.group.edit">Edit</system:String>
+  <system:String x:Key="command.group.project">Project</system:String>
+  <system:String x:Key="command.group.tools">Tools</system:String>
+  <system:String x:Key="command.group.view">View</system:String>
+  <system:String x:Key="command.group.help">Help</system:String>
   <!-- /cmd -->
 </ResourceDictionary>
