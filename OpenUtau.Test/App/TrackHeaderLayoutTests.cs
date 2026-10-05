@@ -33,7 +33,7 @@ namespace OpenUtau.Test.App {
 
         static void Pump() => Dispatcher.UIThread.RunJobs();
 
-        static (WindowEx win, TrackHeaderCanvas canvas, TrackHeader header) Setup(double trackHeight) {
+        static (WindowEx win, TrackHeaderCanvas canvas, TrackHeader header, ObservableCollection<UTrack> items) Setup(double trackHeight) {
             var track = new UTrack { TrackNo = 0, TrackName = "Lead" };
             // 两个 DirectProperty 的 CLR setter 是私有的（生产里由 MainWindow 的 XAML 绑定驱动）
             // ⇒ 测试同样走绑定，走的是产品同一条赋值路径。
@@ -51,12 +51,12 @@ namespace OpenUtau.Test.App {
             Pump();
             win.UpdateLayout();
             var header = canvas.GetVisualDescendants().OfType<TrackHeader>().Single();
-            return (win, canvas, header);
+            return (win, canvas, header, items);
         }
 
         [AvaloniaFact]
         public void MinimumTrackHeight_RendererButtonIsVisibleAndLaidOut() {
-            var (win, _, header) = Setup(MinHeight);
+            var (win, canvas, header, items) = Setup(MinHeight);
             try {
                 Assert.NotNull(header.ViewModel);
                 // 矮轨道：歌手/音素器照旧被裁掉（这几条不动）
@@ -72,13 +72,19 @@ namespace OpenUtau.Test.App {
                 // 歌手/音素器被裁掉时 `⋯` 必须露出来，否则它们没有入口
                 Assert.True(header.ViewModel.ShowOverflow, "歌手/音素器被裁掉 ⇒ ⋯ 必须可见");
             } finally {
+                // W33：移除轨道 ⇒ TrackHeaderCanvas.Remove ⇒ header.Dispose ⇒ VM.Dispose，
+                // 从而释放 VM 的 MessageBus 监听。不退订的话这个 VM 会一直挂在 MessageBus 上，
+                // 之后任何 Volume/Pan 广播都会回调到它（实测会把 MixerTrackStripTest 的
+                // “只发一次声像通知”踩红 —— 与 W25 那次同类）。
+                items.Clear();
+                Pump();
                 win.Close();
             }
         }
 
         [AvaloniaFact]
         public void StandardTrackHeight_RendererVisible_AndOverflowHidden() {
-            var (win, _, header) = Setup(StandardHeight);
+            var (win, canvas, header, items) = Setup(StandardHeight);
             try {
                 Assert.True(header.ViewModel!.IsSingerVisible);
                 Assert.True(header.ViewModel.IsPhonemizerVisible);
@@ -87,13 +93,19 @@ namespace OpenUtau.Test.App {
                 Assert.True(renderer!.IsVisible);
                 Assert.True(renderer.Bounds.Width > 0);
             } finally {
+                // W33：移除轨道 ⇒ TrackHeaderCanvas.Remove ⇒ header.Dispose ⇒ VM.Dispose，
+                // 从而释放 VM 的 MessageBus 监听。不退订的话这个 VM 会一直挂在 MessageBus 上，
+                // 之后任何 Volume/Pan 广播都会回调到它（实测会把 MixerTrackStripTest 的
+                // “只发一次声像通知”踩红 —— 与 W25 那次同类）。
+                items.Clear();
+                Pump();
                 win.Close();
             }
         }
 
         [AvaloniaFact]
         public void OverflowFlyout_HasNoRendererEntry() {
-            var (win, _, header) = Setup(MinHeight);
+            var (win, canvas, header, items) = Setup(MinHeight);
             try {
                 var overflow = header.FindControl<Button>("OverflowButton");
                 Assert.NotNull(overflow);
@@ -108,6 +120,12 @@ namespace OpenUtau.Test.App {
                 //   会与同样为 null 的其它内容撞成假阳性 —— 本用例第一版就是这么假红的。）
                 Assert.Equal(2, entries.Count);
             } finally {
+                // W33：移除轨道 ⇒ TrackHeaderCanvas.Remove ⇒ header.Dispose ⇒ VM.Dispose，
+                // 从而释放 VM 的 MessageBus 监听。不退订的话这个 VM 会一直挂在 MessageBus 上，
+                // 之后任何 Volume/Pan 广播都会回调到它（实测会把 MixerTrackStripTest 的
+                // “只发一次声像通知”踩红 —— 与 W25 那次同类）。
+                items.Clear();
+                Pump();
                 win.Close();
             }
         }

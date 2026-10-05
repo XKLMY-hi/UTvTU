@@ -266,6 +266,7 @@ namespace OpenUtau.App.Controls {
 
         public void Dispose() {
             unbinds.ForEach(u => u.Dispose());
+            ViewModel?.Dispose();   // W33：连带释放 VM 的 MessageBus 订阅（此前只解绑属性）
             unbinds.Clear();
         }
     }
