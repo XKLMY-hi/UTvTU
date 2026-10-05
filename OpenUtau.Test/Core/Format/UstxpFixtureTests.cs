@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -34,7 +35,8 @@ namespace OpenUtau.Test.Core.Format {
 
         static string ReadFixture() => File.ReadAllText(FixturePath);
 
-        /// <summary>生成并注册伪声库（幂等）；返回声库 Id。</summary>
+        /// <summary>生成并注册伪声库（幂等）；返回声库 Id。
+        /// **必须**在 <see cref="ScopedSingers"/> 作用域内调用——它写的是进程级全局表。</summary>
         static string RegisterDummySinger() {
             string root = Path.Combine(Path.GetTempPath(), "w7-audio-fixture");
             Directory.CreateDirectory(root);
@@ -45,6 +47,30 @@ namespace OpenUtau.Test.Core.Format {
             var singer = DummyVoicebank.Load(dir);
             SingerManager.Inst.Singers[singer.Id] = singer;
             return singer.Id;
+        }
+
+        // ── 进程级全局态纪律 ────────────────────────────────────────────
+        // `SingerManager.Inst.Singers` 是**进程级**字典：本类此前直接对它增删（`saved` 取到的
+        // 还是**同一个实例**，不是副本），于是断言依赖"此刻全局里有没有 W7DUMMYCV"——与并行
+        // collection 的用例互相踩（W23/W26 观察到的 `Fixture_WithoutVoicebank_ClearsRenderSettings`
+        // 偶发红正是此因）。改为：用例期间**换上一份副本**，用后还原原实例，本类对全局零副作用。
+
+        static readonly PropertyInfo SingersProperty = typeof(SingerManager)
+            .GetProperty("Singers", BindingFlags.Public | BindingFlags.Instance)!;
+        static readonly MethodInfo SingersSetter = SingersProperty.GetSetMethod(nonPublic: true)!;
+
+        sealed class ScopedSingers : IDisposable {
+            readonly Dictionary<string, USinger> original;
+
+            public ScopedSingers() {
+                original = SingerManager.Inst.Singers;
+                SingersSetter.Invoke(SingerManager.Inst,
+                    new object[] { new Dictionary<string, USinger>(original) });
+            }
+
+            public void Dispose() {
+                SingersSetter.Invoke(SingerManager.Inst, new object[] { original });
+            }
         }
 
         [Fact]
@@ -61,6 +87,7 @@ namespace OpenUtau.Test.Core.Format {
 
         [Fact]
         public void Fixture_LoadsWithProductLoader_AllSectionsIntact() {
+            using var singers = new ScopedSingers();   // 全局表换副本，用后还原
             RegisterDummySinger();   // 声库必须在加载前就位，否则渲染器设置会被 Validate 清空
             var project = Ustxp.Load(FixturePath);
             output.WriteLine($"name={project.name} tracks={project.tracks.Count} parts={project.parts.Count} " +
@@ -144,6 +171,7 @@ namespace OpenUtau.Test.Core.Format {
         /// <summary>fixture 的 singer id 能绑定到运行时生成的伪声库（W7-1 ↔ W7-2 联结点）。</summary>
         [Fact]
         public void Fixture_SingerId_BindsToGeneratedDummyVoicebank() {
+            using var singers = new ScopedSingers();   // 全局表换副本，用后还原
             string id = RegisterDummySinger();
             var singer = SingerManager.Inst.Singers[id];
             output.WriteLine($"singer Id={singer.Id} Name={singer.Name}");
@@ -166,9 +194,11 @@ namespace OpenUtau.Test.Core.Format {
         /// </summary>
         [Fact]
         public void Fixture_WithoutVoicebank_ClearsRenderSettings() {
-            var saved = SingerManager.Inst.Singers;
-            SingerManager.Inst.Singers.Remove("W7DUMMYCV");
-            try {
+            // 全程只动**副本**：不再对进程级字典原地 Remove/写回（旧写法里 `saved` 取到的就是
+            // 同一个实例，断言依赖全局瞬时内容 ⇒ 与并行 collection 互相踩，W26 观察到的偶发红）。
+            using var singers = new ScopedSingers();
+            SingerManager.Inst.Singers.Remove("W7DUMMYCV");   // 副本内显式确保"无声库"
+            {
                 var project = Ustxp.Load(FixturePath);
                 var track = project.tracks[0];
                 output.WriteLine($"无声库：Singer.Found={track.Singer?.Found} Name={track.Singer?.Name} " +
@@ -183,9 +213,8 @@ namespace OpenUtau.Test.Core.Format {
                 // Singer 仍是 CreateMissing 占位对象（Found=false），且缺声库那次 Validate
                 // 已把 renderer/resampler/wavtool 字段本身置空，CLSC 之类的显式选择
                 // 无法原地恢复（既有行为，记为观察项）。
-                SingerManager.Inst.Singers["W7DUMMYCV"] = saved.ContainsKey("W7DUMMYCV")
-                    ? saved["W7DUMMYCV"]
-                    : DummyVoicebank.Load(Path.Combine(Path.GetTempPath(), "w7-audio-fixture", DummyVoicebank.FolderName));
+                // 补装声库（只写副本内）：等价于把原来"还原全局"的那一步内联进来。
+                RegisterDummySinger();
                 project.ValidateFull();
                 output.WriteLine($"原地 Validate 后（仅补装声库）：renderer={project.tracks[0].RendererSettings.renderer ?? "(null)"} " +
                                  $"Singer.Found={project.tracks[0].Singer?.Found}");
@@ -195,10 +224,6 @@ namespace OpenUtau.Test.Core.Format {
                                  $"Singer.Found={reloaded.tracks[0].Singer?.Found} Found渲染器={reloaded.tracks[0].RendererSettings.Renderer?.GetType().Name}");
                 Assert.Equal(Renderers.CLASSIC, reloaded.tracks[0].RendererSettings.renderer);
                 Assert.IsType<ClassicRenderer>(reloaded.tracks[0].RendererSettings.Renderer);
-            } finally {
-                if (!saved.ContainsKey("W7DUMMYCV")) {
-                    RegisterDummySinger();
-                }
             }
         }
 

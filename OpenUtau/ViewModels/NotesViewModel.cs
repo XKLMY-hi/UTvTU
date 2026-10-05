@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -1112,7 +1112,21 @@ namespace OpenUtau.App.ViewModels {
             return true;
         }
 
-        public void OnNext(UCommand cmd, bool isUndo) {
+        readonly OpenUtau.App.UiThreadAffinity affinity = new OpenUtau.App.UiThreadAffinity();
+
+        /// <summary>退订（W25）：此前一律只 AddSubscriber、从不 Remove ⇒ 反复构造会越积越多。</summary>
+        public void Unsubscribe() {
+            DocManager.Inst.RemoveSubscriber(this);
+        }
+
+        /// <summary>
+        /// W25 线程亲和门：项目/片段可能在非 UI 线程被加载（后台渲染、测试宿主），而下面这一坨
+        /// 会写大量绑到控件的属性（`TickOffset`/`PrimaryKey`/曲目与音符集合等）⇒ 必须回到订阅线程。
+        /// 口径见 <see cref="OpenUtau.App.UiThreadAffinity"/>（锚定订阅线程 + `Post`，不用 `Invoke`）。
+        /// </summary>
+        public void OnNext(UCommand cmd, bool isUndo) => affinity.Post(() => OnNextCore(cmd, isUndo));
+
+        void OnNextCore(UCommand cmd, bool isUndo) {
             if (cmd is UNotification notif) {
                 if (cmd is LoadPartNotification loadPart) {
                     LoadPart(loadPart.part, loadPart.project);

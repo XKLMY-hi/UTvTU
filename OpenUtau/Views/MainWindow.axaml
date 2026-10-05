@@ -275,6 +275,9 @@
                     <MenuItem Header="{DynamicResource menu.file.exportustto}" Click="OnMenuExportUstTo"/>
                     <MenuItem Header="{DynamicResource menu.file.exportmidi}" Click="OnMenuExportMidi"/>
                     <MenuItem Header="{DynamicResource menu.file.exportds}" Click="OnMenuExportDsTo"/>
+                    <!-- W27：另存为纯净 .ustx（原版可直读、不含 Plus 专有字段）——跨软件交付的唯一安全路径。
+                         注意：它不阻止"原版重存丢 Plus 字段"（那需要侧车/容器，属 A+/B 方案）。 -->
+                    <MenuItem Header="{DynamicResource menu.file.exportcleanustx}" Click="OnMenuExportCleanUstx"/>
                   </MenuItem>
                   <MenuItem Header="{DynamicResource menu.file.openexportlocation}" Click="OnMenuOpenProjectLocation"/>
                 </MenuItem>

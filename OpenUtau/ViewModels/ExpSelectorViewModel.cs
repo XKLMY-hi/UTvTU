@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
@@ -10,7 +10,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace OpenUtau.App.ViewModels {
-    public class ExpSelectorViewModel : ViewModelBase, ICmdSubscriber {
+    public class ExpSelectorViewModel : ViewModelBase, ICmdSubscriber, IDisposable {
         [Reactive] public int Index { get; set; }
         [Reactive] public int SelectedIndex { get; set; }
         [Reactive] public ExpDisMode DisplayMode { get; set; }
@@ -30,6 +30,9 @@ namespace OpenUtau.App.ViewModels {
 
         ObservableCollection<UExpressionDescriptor> descriptors = new ObservableCollection<UExpressionDescriptor>();
         ObservableAsPropertyHelper<string> header;
+        readonly OpenUtau.App.UiThreadAffinity affinity = new OpenUtau.App.UiThreadAffinity();
+        IDisposable? themeSub;
+        bool unsubscribed;
 
         public ExpSelectorViewModel() {
             DocManager.Inst.AddSubscriber(this);
@@ -44,7 +47,7 @@ namespace OpenUtau.App.ViewModels {
                 .Subscribe(tuple => {
                     SetExp(DocManager.Inst.Project.expSelectors[tuple.Item1]);
                 });
-            MessageBus.Current.Listen<ThemeChangedEvent>()
+            themeSub = MessageBus.Current.Listen<ThemeChangedEvent>()
                 .Subscribe(_ => RefreshBrushes());
             TagBrush = ThemeManager.ExpNameBrush;
             Background = ThemeManager.ExpBrush;
@@ -84,6 +87,20 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public void OnNext(UCommand cmd, bool isUndo) {
+            if (!(cmd is LoadProjectNotification ||
+                  cmd is LoadPartNotification ||
+                  cmd is ConfigureExpressionsCommand ||
+                  cmd is SelectExpressionNotification)) {
+                return;
+            }
+            // 项目可能在**非 UI 线程**被加载（后台渲染/测试宿主）⇒ 这里动的是绑到 ItemsControl 的
+            // `Descriptors` 与绑到控件属性的 `SelectedIndex`/`DisplayMode`，跨线程会直接抛
+            // `Dispatcher.VerifyAccess`（W25 那 7 例确定性红的栈顶就是这个位置）。
+            // 口径见 `UiThreadAffinity`：锚定订阅线程 + `Post` 重入队（不用 `Invoke`：会与 DocManager 锁互锁）。
+            affinity.Post(() => OnNextCore(cmd));
+        }
+
+        private void OnNextCore(UCommand cmd) {
             if (cmd is LoadProjectNotification ||
                 cmd is LoadPartNotification ||
                 cmd is ConfigureExpressionsCommand) {
@@ -92,6 +109,22 @@ namespace OpenUtau.App.ViewModels {
                 OnSelectExp((SelectExpressionNotification)cmd);
             }
         }
+
+        /// <summary>
+        /// 退订（关窗/测试释放用）。此前该 VM 一旦构造就**永久**留在 DocManager 的订阅表里：
+        /// 卷帘被分离/重建（`DetachAndFlush` 路径）或 headless 用例反复构造时会越积越多。
+        /// </summary>
+        public void Unsubscribe() {
+            if (unsubscribed) {
+                return;
+            }
+            unsubscribed = true;
+            DocManager.Inst.RemoveSubscriber(this);
+            themeSub?.Dispose();
+            themeSub = null;
+        }
+
+        public void Dispose() => Unsubscribe();
 
         private void OnListChange() {
             var selectedIndex = SelectedIndex;

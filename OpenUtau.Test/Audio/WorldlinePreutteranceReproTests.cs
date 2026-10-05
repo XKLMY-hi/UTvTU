@@ -32,11 +32,9 @@ namespace OpenUtau.Test.Audio {
 
         static string Voicebank() {
             Directory.CreateDirectory(TempRoot);
-            string dir = Path.Combine(TempRoot, DummyVoicebank.FolderName);
-            if (!File.Exists(Path.Combine(dir, "character.txt"))) {
-                dir = DummyVoicebank.Create(TempRoot);
-            }
-            return dir;
+            // **每次都重建**，理由同 `UpstreamPortEvidenceTests.VoicebankWithOto`：
+            // `%TEMP%` 跨分支/跨轮次共享，"存在就复用"会把别的装置版本留下的成品当成自己的。
+            return DummyVoicebank.Create(TempRoot);
         }
 
         /// <summary>WORLDLINE-R 端到端对照（无覆盖）：验证我们树上该渲染器可离线跑通。</summary>

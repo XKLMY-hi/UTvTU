@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
@@ -165,8 +165,15 @@ namespace OpenUtau.App.Controls {
         private Point lastPointerPos;
         private readonly Dictionary<(Color color, byte alpha, int thickness), Pen> glowPens = new();
 
-        private PolylineGeometry polylineGeometry = new PolylineGeometry();
+        // 注意：Avalonia 的绘制是**保留模式**（记录的是几何体对象引用）⇒ 同一次 Render 里
+        // **不能**让多处绘制共用一个 Geometry/Points 实例：后一次赋值会把先前已画出去的图形一起改掉。
+        // 这三条曲线在同一个 pass 里依次绘制（最终音高线 → 弯音线 → 颤音线），必须各用各的实例。
+        private PolylineGeometry polylineGeometry = new PolylineGeometry();   // 弯音线（音高线）
         private Points points = new Points();
+        private readonly PolylineGeometry vibratoGeometry = new PolylineGeometry();   // 颤音线
+        private readonly Points vibratoPoints = new Points();
+        private readonly PolylineGeometry finalPitchGeometry = new PolylineGeometry(); // 最终音高线
+        private readonly Points finalPitchPoints = new Points();
 
         private HashSet<UNote> selectedNotes = new HashSet<UNote>();
         private Geometry pointGeometry;
@@ -745,15 +752,16 @@ namespace OpenUtau.App.Controls {
             float nPeriod = (float)viewModel.Project.timeAxis.TicksBetweenMsPos(note.PositionMs, note.PositionMs + vibrato.period) / note.duration;
             float nPos = vibrato.NormalizedStart;
             var point = vibrato.Evaluate(nPos, nPeriod, note);
-            points.Clear();
-            points.Add(viewModel.TickToneToPoint(point.X, point.Y - 0.5));
+            vibratoPoints.Clear();
+            vibratoPoints.Add(viewModel.TickToneToPoint(point.X, point.Y - 0.5));
             while (nPos < 1) {
                 nPos = Math.Min(1, nPos + nPeriod / 16);
                 point = vibrato.Evaluate(nPos, nPeriod, note);
-                points.Add(viewModel.TickToneToPoint(point.X, point.Y - 0.5));
+                vibratoPoints.Add(viewModel.TickToneToPoint(point.X, point.Y - 0.5));
             }
-            polylineGeometry.Points = points;
-            context.DrawGeometry(null, pen, polylineGeometry);
+            // 独立几何体：与弯音线/最终音高线分开，否则同帧内会互相顶替（保留模式引用语义）
+            vibratoGeometry.Points = vibratoPoints;
+            context.DrawGeometry(null, pen, vibratoGeometry);
         }
 
         private readonly Geometry vibratoIcon = Geometry.Parse("M-6.5 1 L-6 1.5 L-4.5 0 L-2 2.5 L0.5 0 L3 2.5 L6.5 -1 L6 -1.5 L4.5 0 L2 -2.5 L-0.5 0 L-3 -2.5 Z");
@@ -810,14 +818,15 @@ namespace OpenUtau.App.Controls {
                     int pitchStart = phrase.position - phrase.leading - Part.position;
                     int startIdx = (int)Math.Max(0, (leftTick - pitchStart) / 5);
                     int endIdx = (int)Math.Min(phrase.pitches.Length, (rightTick - pitchStart) / 5 + 1);
-                    points.Clear();
+                    finalPitchPoints.Clear();
                     for (int i = startIdx; i < endIdx; ++i) {
                         int t = pitchStart + i * 5;
                         float p = phrase.pitches[i];
-                        points.Add(viewModel.TickToneToPoint(t, p / 100 - 0.5));
+                        finalPitchPoints.Add(viewModel.TickToneToPoint(t, p / 100 - 0.5));
                     }
-                    polylineGeometry.Points = points;
-                    context.DrawGeometry(null, pen, polylineGeometry);
+                    // 独立几何体（同帧内与弯音线/颤音线分开，见字段处注释）
+                    finalPitchGeometry.Points = finalPitchPoints;
+                    context.DrawGeometry(null, pen, finalPitchGeometry);
                 }
             }
         }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using OpenUtau.Api;
@@ -68,7 +68,11 @@ namespace OpenUtau.Core.Ustx {
         }
     }
 
-    public class UTrack {
+    public class UTrack : IUnknownYamlHolder {
+        /// <summary>W27：文件里我们没建模的键（原样保留，保存时写回）。见 <see cref="UstxYaml"/>。</summary>
+        [YamlIgnore]
+        public UnknownYaml? Unknown { get; set; }
+
         public string singer;
         public string phonemizer;
         public URenderSettings RendererSettings { get; set; } = new URenderSettings();

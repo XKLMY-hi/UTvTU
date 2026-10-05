@@ -12,6 +12,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using OpenUtau.App.ViewModels;
 using OpenUtau.App.Views;
 using OpenUtau.Core;
@@ -29,7 +30,7 @@ namespace OpenUtau.App.Controls {
         void UpdateValueTip(string text);
     }
 
-    public partial class PianoRoll : UserControl, IValueTip, ICmdSubscriber {
+    public partial class PianoRoll : UserControl, IValueTip, ICmdSubscriber, IDisposable {
         public MainWindow? MainWindow { get; set; }
         public PianoRollViewModel ViewModel;
 
@@ -79,11 +80,11 @@ namespace OpenUtau.App.Controls {
             xZoom = smoothViewport.Zoom((position, delta) => ViewModel.NotesViewModel.OnXZoomed(position, delta));
             yZoom = smoothViewport.Zoom((position, delta) => ViewModel.NotesViewModel.OnYZoomed(position, delta));
             // 编排区拖动卷帘视口指示条 ⇒ 同步卷帘滚动（上游 9caec1a6；只改视口，不入撤销栈）
-            MessageBus.Current.Listen<PianoRollViewportScrollEvent>()
+            messageSubs.Add(MessageBus.Current.Listen<PianoRollViewportScrollEvent>()
                 .Subscribe(e => {
                     ViewModel.NotesViewModel.TickOffset =
                         Math.Clamp(e.TickOffset, 0, ViewModel.NotesViewModel.HScrollBarMax);
-                });
+                }));
             SetupExpPanel();
             ValueTip.IsVisible = false;
             SetPenToolIcon();
@@ -162,6 +163,48 @@ namespace OpenUtau.App.Controls {
         private void OnExpPanelToggle(object? sender, RoutedEventArgs e) {
             ExpPanel.ToggleCollapse();
         }
+
+        private readonly List<IDisposable> messageSubs = new List<IDisposable>();
+        private bool disposed;
+
+        /// <summary>
+        /// **真正释放订阅**（W25）。此前 `PianoRoll` 一构造就 `AddSubscriber(this)` 且两处
+        /// `MessageBus.Listen` 都不退订 ⇒ 卷帘被分离/重建（`DetachAndFlush` 路径）或 headless
+        /// 用例反复构造时，订阅者会一直留在 DocManager 表里；当**别的**代码在后台线程加载工程时，
+        /// 这些"已无主"的订阅者会被回调，撞上跨线程改绑定集合 ⇒ `Dispatcher.VerifyAccess` 崩溃。
+        ///
+        /// 释放面（三处，缺一不可）：
+        /// 1. 控件自己（`ICmdSubscriber`）；2. 本控件发出的 `MessageBus` 订阅；
+        /// 3. **可视树里各控件的 DataContext**（`ExpSelectorViewModel` ×10、`NotesViewModel`、
+        ///    `CurveViewModel`… 它们各自订阅了 DocManager）+ 本控件的 `ViewModel`（`PianoRollViewModel`）。
+        /// </summary>
+        public void Unsubscribe() {
+            if (disposed) {
+                return;
+            }
+            disposed = true;
+            DocManager.Inst.RemoveSubscriber(this);
+            foreach (var sub in messageSubs) {
+                sub.Dispose();
+            }
+            messageSubs.Clear();
+            ViewModel?.NotesViewModel?.Unsubscribe();
+            if (ViewModel != null) {
+                DocManager.Inst.RemoveSubscriber(ViewModel);
+            }
+            foreach (var control in this.GetVisualDescendants().OfType<Control>()) {
+                switch (control.DataContext) {
+                    case IDisposable disposable:
+                        disposable.Dispose();
+                        break;
+                    case ICmdSubscriber subscriber:
+                        DocManager.Inst.RemoveSubscriber(subscriber);
+                        break;
+                }
+            }
+        }
+
+        public void Dispose() => Unsubscribe();
 
         private void UpdatePortraitPosition() {
             if (PortraitImage.DesiredSize.Width == 0 || PortraitCanvas.Bounds.Width == 0) return;
@@ -338,13 +381,13 @@ namespace OpenUtau.App.Controls {
                     }
                 });
 
-            MessageBus.Current.Listen<PianorollRefreshEvent>()
+            messageSubs.Add(MessageBus.Current.Listen<PianorollRefreshEvent>()
                 .Subscribe(e => {
                     if (e.refreshItem == "Attachment") {
                         MainWindow?.SetPianoRollAttachment();
                         ViewModel.RaisePropertyChanged(nameof(ViewModel.PianoRollDetached));
                     }
-                });
+                }));
 
             DocManager.Inst.AddSubscriber(this);
         }
@@ -2157,7 +2200,12 @@ namespace OpenUtau.App.Controls {
             exps[DocManager.Inst.Project.expPrimary].SelectExp();
         }
 
-        public void OnNext(UCommand cmd, bool isUndo) {
+        readonly OpenUtau.App.UiThreadAffinity affinity = new OpenUtau.App.UiThreadAffinity();
+
+        /// <summary>W25 线程亲和门：下面要动 `RootWindow` 与 Loading 浮层，都是 UI 对象。</summary>
+        public void OnNext(UCommand cmd, bool isUndo) => affinity.Post(() => OnNextCore(cmd, isUndo));
+
+        void OnNextCore(UCommand cmd, bool isUndo) {
             if (cmd is LoadingNotification loadingNotif && loadingNotif.window == typeof(PianoRoll)) {
                 if (loadingNotif.startLoading) {
                     LoadingWindow.BeginLoadingImmediate(RootWindow);

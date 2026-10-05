@@ -42,9 +42,11 @@ namespace OpenUtau.Test.Audio {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);   // oto.ini 走 shift_jis
             Directory.CreateDirectory(TempRoot);
             string source = Path.Combine(TempRoot, DummyVoicebank.FolderName);
-            if (!File.Exists(Path.Combine(source, "character.txt"))) {
-                DummyVoicebank.Create(TempRoot);
-            }
+            // **每次都重建**（不再"存在就复用"）：`%TEMP%` 是跨分支、跨轮次共享的，
+            // 上次留下的成品可能来自**别的装置版本**（采样率/别名频率/oto 格式不同），
+            // 复用会让"频谱/时长/preutter"这类断言的结果随残留物漂移 —— W26 定性的
+            // "失败成员在轮次间漂移"就有这一类贡献。`Create` 本身是全量覆写、幂等。
+            DummyVoicebank.Create(TempRoot);
             string dir = Path.Combine(TempRoot, $"{DummyVoicebank.FolderName}-p{preutter}-o{overlap}");
             Directory.CreateDirectory(dir);
             foreach (string name in new[] { "character.txt" }.Concat(DummyVoicebank.Aliases.Keys.Select(a => a + ".wav"))) {

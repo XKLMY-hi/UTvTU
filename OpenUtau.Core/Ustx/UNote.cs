@@ -8,7 +8,11 @@ using OpenUtau.Core.Util;
 using YamlDotNet.Serialization;
 
 namespace OpenUtau.Core.Ustx {
-    public class UNote : IComparable {
+    public class UNote : IComparable, IUnknownYamlHolder {
+        /// <summary>W27：文件里我们没建模的键（原样保留，保存时写回）。见 <see cref="UstxYaml"/>。</summary>
+        [YamlIgnore]
+        public UnknownYaml? Unknown { get; set; }
+
         static readonly Regex phoneticHintPattern = new Regex(@"\[(.*)\]");
 
         /// <summary>
