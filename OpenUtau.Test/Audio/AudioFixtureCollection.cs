@@ -18,8 +18,21 @@ namespace OpenUtau.Test.Audio {
 
     /// <summary>集合范围的全局态守卫：集合跑完即还原测试改过的进程级字段。</summary>
     public sealed class AudioGlobalStateGuard : System.IDisposable {
+        readonly bool singerWasRegistered;
+
+        public AudioGlobalStateGuard() {
+            // 集合开始前是否已存在 W7 伪声库条目（通常没有；若已有说明是别人装的，不动）
+            singerWasRegistered = OpenUtau.Core.SingerManager.Inst.Singers.ContainsKey(DummyVoicebank.FolderName);
+        }
+
         public void Dispose() {
             AudioFixtures.RestoreSchedulers();
+            // 本集合用例会把伪声库塞进**进程级** SingerManager.Inst.Singers
+            // （UstxpFixtureTests 等）——集合结束若不摘掉，之后运行的用例会看到一个指向
+            // %TEMP% 的假歌手（加载/搜索路径都可能命中）。只摘自己装的那个。
+            if (!singerWasRegistered) {
+                OpenUtau.Core.SingerManager.Inst.Singers.Remove(DummyVoicebank.FolderName);
+            }
         }
     }
 }
