@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -276,6 +276,18 @@ namespace OpenUtau.Core.Ustx {
                         phoneme.overlapDelta = o.overlapDelta;
                         phoneme.attackTimeDelta = o.attackTimeDelta;
                         phoneme.releaseTimeDelta = o.releaseTimeDelta;
+                    }
+                }
+                // 音素化器应当按下标返回递增位置：如果没做到，先报出来，而不是让下面的
+                // "安全处理"静默修好（rawPosition 是用户音素覆盖**之前**的音素化器输出，
+                // 所以这里只会命中音素化器本身的问题，不会误报用户改过的 offset）。
+                // （上游 fe0894d3）
+                for (int i = 0; i < phonemes.Count - 1; ++i) {
+                    if (phonemes[i].rawPosition > phonemes[i + 1].rawPosition) {
+                        Log.Warning("Out-of-order phonemes in part {Part}: {Phoneme} at {Position} comes after {Next} at {NextPosition}.",
+                            name, phonemes[i].rawPhoneme, phonemes[i].rawPosition,
+                            phonemes[i + 1].rawPhoneme, phonemes[i + 1].rawPosition);
+                        break;
                     }
                 }
                 // Safety treatment after phonemizer output and phoneme overrides.

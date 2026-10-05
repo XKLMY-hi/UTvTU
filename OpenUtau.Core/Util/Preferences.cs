@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -247,6 +247,12 @@ namespace OpenUtau.Core.Util {
                         };
                         Default.Theme = null;
                     }
+                    // 历史 prefs 里可能存着空白歌手名（上游 d53af641）：按名查歌手会命中空串，
+                    // 选中/收藏路径再取歌手元数据时崩溃。加载时过滤空白项。
+                    Default.RecentSingers = Default.RecentSingers?
+                        .Where(s => !string.IsNullOrWhiteSpace(s)).ToList() ?? new List<string>();
+                    Default.FavoriteSingers = Default.FavoriteSingers?
+                        .Where(s => !string.IsNullOrWhiteSpace(s)).ToList() ?? new List<string>();
                 } else {
                     Reset();
                 }
