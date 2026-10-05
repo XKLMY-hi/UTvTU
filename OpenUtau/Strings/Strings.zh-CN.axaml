@@ -1330,6 +1330,8 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="panel.reset">重置面板布局</system:String>
   <system:String x:Key="panel.collapse.tracks">折叠轨道头</system:String>
   <system:String x:Key="panel.collapse.library">折叠素材库</system:String>
+  <!-- W20：卷帘底部表达式/曲线区（行面板）。chevron 是**开合切换**，所以文案含"或展开"。 -->
+  <system:String x:Key="panel.collapse.pianoroll.exp">折叠或展开表达式面板</system:String>
   <system:String x:Key="panel.drag.hint">拖动调宽 · 双击分隔条恢复默认宽度</system:String>
   <!-- /panel -->
 </ResourceDictionary>

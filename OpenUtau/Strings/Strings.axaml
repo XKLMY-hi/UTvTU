@@ -1199,6 +1199,8 @@ General
   <system:String x:Key="panel.reset">Reset panel layout</system:String>
   <system:String x:Key="panel.collapse.tracks">Collapse track headers</system:String>
   <system:String x:Key="panel.collapse.library">Collapse library</system:String>
+  <!-- W20：卷帘底部表达式/曲线区（行面板）。chevron 是**开合切换**，所以文案含"或展开"。 -->
+  <system:String x:Key="panel.collapse.pianoroll.exp">Collapse or expand the expression panel</system:String>
   <system:String x:Key="panel.drag.hint">Drag to resize · double-click to reset width</system:String>
   <!-- /panel -->
 </ResourceDictionary>

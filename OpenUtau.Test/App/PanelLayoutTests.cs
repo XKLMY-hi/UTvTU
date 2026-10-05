@@ -811,7 +811,7 @@ namespace OpenUtau.Test.App {
             string original = Preferences.Default.Language;
             try {
                 OpenUtau.App.App.SetLanguage("en-US");
-                foreach (string key in new[] { "panel.toggle.tracks", "panel.toggle.library", "panel.reset", "panel.collapse.tracks", "panel.collapse.library", "panel.drag.hint" }) {
+                foreach (string key in new[] { "panel.toggle.tracks", "panel.toggle.library", "panel.reset", "panel.collapse.tracks", "panel.collapse.library", "panel.collapse.pianoroll.exp", "panel.drag.hint" }) {
                     Assert.True(ThemeManager.TryGetString(key, out string value), $"EN 缺键：{key}");
                     Assert.NotEqual(key, value);
                     en[key] = value;
