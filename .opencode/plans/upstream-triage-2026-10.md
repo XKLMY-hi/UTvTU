@@ -84,7 +84,10 @@
 | W19 混音台链面板接入面板系统（已并 `b83f458d`） | `MixerControl` 列 `*,Auto,Auto,Auto`；五值 `PanelColumn=3/264/480/280/CenterMin=320/Invert=true`；宿主绑 `PanelWidth`/`PanelShown`；折叠入口=宿主侧 chevron（不碰 `FxChainPanel`）；13 例布局断言；真机：拖宽 657→615、折叠后**同位置竖线扫描 0 命中**、重启恢复折叠态与宽度、双击复位 | `%TEMP%\w19shots\` |
 | W20 卷帘行面板（已并 `169ae3a9`，4 提交） | `PanelSplitter` **纵向模式**（列方向零改动、单独提交）+ Preferences 两字段 + 卷帘表达式区接线 + 用例幂等化；`CollapseThreshold=80`（理由：24px 选择器行 + 至少一条泳道）；折叠后空间全给中央画布（+157 实测）；`PanelLayoutTests` 28/28（18 列 + 7 纵向 + 3 真实控件） | Light **672/672**；真机三图交 verify（需 GUI 拖拽输入） |
 | W21 主窗侧三项（已并 `454cd327`） | **取**编排区平滑滚动（复用 `ReduceMotion`，四个 glide；上游只给 TimelineCanvas，我们把轨头画布的 Shift/Alt/Cmd 三分支全接上）；**不取** `81637a33`（逐文件核对已由 W15 落地，重复）；**取其实质** `5f14dd89`（我们重构后无该缺陷类 ⇒ 改结构契约断言 + 真机像素：五字形中心同一水平线 y=27.9、节距 40px、偏差 ≤1px） | 默认 **667/667**；真机 A/B 像素对照（平滑 vs `ReduceMotion` 立即到位，最终位置差异 0） |
-| ⚠️ 合并后 7 例确定性红（`169ae3a9` 状态） | 三变体一致 **686/7/693**；栈 = `ExpSelectorViewModel.OnListChange()`（`:98`）在**非属主线程**改绑定集合 ⇒ `Dispatcher.VerifyAccess`。**产品侧潜伏缺陷**（`ICmdSubscriber` 无亲和守卫，与 I1/MixerControl/FxChainPanel 同族）+ **测试侧可达性**（W20 真实控件用例留下仍订阅的 VM 实例） | 已派 W25（m3-chain）：产品侧按"锚定所属线程 + Post"加守卫 + 审计同类；测试侧释放订阅；判据三变体全量 0 失败 |
+| ⚠️ 合并后 7 例确定性红（`169ae3a9` 状态） | 三变体一致 **686/7/693**；栈 = `ExpSelectorViewModel.OnListChange()`（`:98`）在**非属主线程**改绑定集合 ⇒ `Dispatcher.VerifyAccess`。**产品侧潜伏缺陷**（`ICmdSubscriber` 无亲和守卫，与 I1/MixerControl/FxChainPanel 同族）+ **测试侧可达性**（W20 真实控件用例留下仍订阅的 VM 实例） | **已修（W25 `385e68ee`，并入 `c193c110`）**：新增共享助手 `OpenUtau/UiThreadAffinity.cs`（锚定所属线程 + `Post`）并应用到 `ExpSelectorViewModel`/`NotesViewModel`/`PianoRollViewModel`，同时释放测试侧订阅；判据三变体 **695/0/695** |
+| W14 P1-C 第一轮（已并 `20fa4bfd` 前） | 中文 VCV（樗儿音源，`ChineseVCVPhonemizer.cs` +242）、泰语 VCCV（+60/−43）；判重复 1 条（`3602d9a1` 我们已有同款修复）；判回退 1 条（`d397f6c5` 机械摘取会删掉 Plus 的 VCCV 测试钩子 ⇒ 缓做）；**结构性发现**：英文/EN2JA 整链被上游 SBP 基类新增 **~14 个 virtual 成员**挡住（直接取上游插件文件 ⇒ **12 处 CS0115**）⇒ 必须整链一波 | 三变体 **632/0 ×3** + 音素化器专项 239 例全绿 |
+| **终局（`c193c110`）** | W14 四批 + W15 + W16 + W19 + W20 + W21 + W23 + W25 全并 | 构建 **0 错误**；全量 **默认 695 / Dark 695 / Light 695，0 失败** |
+| 待续波次（已批准，排队中） | **P2-1 英文/EN2JA 整链**（SBP 基类 + 6 插件 + 数据，独立波次，须在绿基线上并）；**P2-2** `2c283d2b` 的 `Core/Api` 部分；`d397f6c5` 排在 SBP 波之后 | — |
 
 ### 5.1 W14 的数值证据（真编译 A/B，W7 装置实测）
 
