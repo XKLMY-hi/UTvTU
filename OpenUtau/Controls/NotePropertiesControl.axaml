@@ -19,6 +19,20 @@
     <Style Selector="Slider.fader">
       <Setter Property="Focusable" Value="True"/>
     </Style>
+    <!-- W31：Expander 头部的 3 条调参自 Styles/Styles.axaml 迁来（全仓只有本控件用 Expander，共 4 处）。
+         按 UI 标准 §0.2：模板部件的调整写在**使用它的控件自己的 UserControl.Styles** 里，
+         不再从应用级样式层越权改别人模板。 -->
+    <Style Selector="Expander:down /template/ ToggleButton#ExpanderHeader">
+      <Setter Property="Height" Value="32"/>
+      <Setter Property="MinHeight" Value="32"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+    <Style Selector="Expander:down /template/ ToggleButton#ExpanderHeader /template/ Border#ExpandCollapseChevronBorder">
+      <Setter Property="Height" Value="20"/>
+    </Style>
+    <Style Selector="Expander:down /template/ ToggleButton#ExpanderHeader /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Margin" Value="7,0,0,0"/>
+    </Style>
   </UserControl.Styles>
 
   <Grid>

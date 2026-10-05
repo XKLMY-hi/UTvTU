@@ -8,7 +8,7 @@
         Icon="/Assets/open-utau.ico"
         Title="{DynamicResource lyricsreplace.replace}">
   <controls:WindowEx.Styles>
-    <StyleInclude Source="/Styles/PianoRollStyles.axaml"/>
+    <StyleInclude Source="/Controls/PianoRollStyles.axaml"/>
   </controls:WindowEx.Styles>
 <DockPanel LastChildFill="True">
       <Border>

@@ -192,4 +192,10 @@
                    Color="{DynamicResource md3.color.on-surface}" />
   <SolidColorBrush x:Key="RadioButtonOuterEllipseStrokePointerOver"
                    Color="{DynamicResource md3.color.outline}" />
+  <!-- W31：DataGrid 选中行 —— DataGrid 主题（包内 Fluent.xaml）把行背景绑到 `DataGridRowSelectedBackgroundBrush`
+       （Fluent 默认 #0078D7 固定蓝）。这里按主题层惯例（同 ComboBoxDropDown*/RadioButton* 的做法）
+       用池色覆写该键，取代原先写在应用级 Styles.axaml 里的
+       `DataGridRow:selected /template/ DataGridFrozenGrid { Background = AccentBrush1Semi }` 补丁。 -->
+  <SolidColorBrush x:Key="DataGridRowSelectedBackgroundBrush"
+                   Color="{DynamicResource md3.color.primary}" Opacity="0.5" />
 </ResourceDictionary>

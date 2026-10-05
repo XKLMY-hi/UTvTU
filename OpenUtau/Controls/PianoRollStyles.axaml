@@ -274,4 +274,62 @@
       <Setter Property="Fill" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
     </Style>
   </Style>
+
+  <!-- ══ W31：本文件从 Styles/ 移到 Controls/ ══
+       它只被钢琴卷帘相关的 4 处视图 StyleInclude（Controls/PianoRoll.axaml、
+       Views/LyricsDialog|ExpressionsDialog|LyricsReplaceDialog），**不是应用级样式层**；
+       放在 Styles/ 会被 UI 标准检查（.dsh/fx/ui-lint.ps1 第 2 条）当成应用级 /template/ 补丁。
+       结构归位后，这里的 /template/ 全部落在"控件自身样式"范围内（标准 §0.2 允许）。 -->
+
+  <!-- 音乐滚动条（`.music` 变体）的 14 条部件调参，W31 自 Styles/Styles.axaml 迁来：
+       唯一使用者是 Controls/PianoRoll.axaml 里两个 Classes="music" 的 ScrollBar。 -->
+  <Style Selector="ScrollBar.music[IsExpanded=True] /template/ Rectangle#TrackRect">
+    <Setter Property="Fill" Value="Transparent" />
+  </Style>
+  <Style Selector="ScrollBar.music[IsExpanded=true] /template/ Thumb.thumb">
+    <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushSemi}" />
+  </Style>
+  <Style Selector="ScrollBar.music[IsExpanded=true] /template/ Thumb.thumb:pointerover">
+    <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}" />
+  </Style>
+  <Style Selector="ScrollBar.music /template/ RepeatButton.line /template/ Border#Root" >
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="ScrollBar.music /template/ RepeatButton.line:pointerover /template/ Border#Root" >
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="ScrollBar.music /template/ RepeatButton.line:pressed /template/ Border#Root" >
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="ScrollBar.music:vertical /template/ RepeatButton.line.up /template/ Path">
+    <Setter Property="Data" Value="M 0 20 L 20 20 L 10 0 Z" />
+  </Style>
+  <Style Selector="ScrollBar.music:vertical /template/ RepeatButton.line.down /template/ Path">
+    <Setter Property="Data" Value="M 0 0 L 20 0 L 10 20 Z" />
+  </Style>
+  <Style Selector="ScrollBar.music:horizontal /template/ RepeatButton.line.up /template/ Path">
+    <Setter Property="Data" Value="M 0 10 L 20 0 L 20 20 Z" />
+  </Style>
+  <Style Selector="ScrollBar.music:horizontal /template/ RepeatButton.line.down /template/ Path">
+    <Setter Property="Data" Value="M 20 10 L 0 0 L 0 20 Z" />
+  </Style>
+  <Style Selector="ScrollBar.music /template/ RepeatButton.line /template/ Viewbox" >
+    <Setter Property="Width" Value="24" />
+    <Setter Property="Height" Value="24" />
+  </Style>
+  <Style Selector="ScrollBar.music /template/ RepeatButton.line /template/ Path#Arrow" >
+    <Setter Property="Width" Value="24" />
+    <Setter Property="Height" Value="24" />
+    <Setter Property="Fill" Value="{DynamicResource NeutralAccentBrushSemi}" />
+  </Style>
+  <Style Selector="ScrollBar.music /template/ RepeatButton.line:pointerover /template/ Path#Arrow" >
+    <Setter Property="Width" Value="24" />
+    <Setter Property="Height" Value="24" />
+    <Setter Property="Fill" Value="{DynamicResource NeutralAccentBrush}" />
+  </Style>
+  <Style Selector="ScrollBar.music /template/ RepeatButton.line:pressed /template/ Path#Arrow" >
+    <Setter Property="Width" Value="24" />
+    <Setter Property="Height" Value="24" />
+    <Setter Property="Fill" Value="{DynamicResource NeutralAccentBrush}" />
+  </Style>
 </Styles>

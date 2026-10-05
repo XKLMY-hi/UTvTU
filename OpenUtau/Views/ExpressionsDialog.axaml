@@ -15,7 +15,7 @@
     <vm:ExpressionsViewModel/>
   </Design.DataContext>
   <controls:WindowEx.Styles>
-    <StyleInclude Source="/Styles/PianoRollStyles.axaml"/>
+    <StyleInclude Source="/Controls/PianoRollStyles.axaml"/>
   </controls:WindowEx.Styles>
 
 <DockPanel LastChildFill="True">
