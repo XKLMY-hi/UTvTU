@@ -509,7 +509,12 @@ namespace OpenUtau.Test.App {
 
         [AvaloniaFact]
         public void MixerControl_ExposesFrozenChainHost() {
-            DocManagerTestSetup.RunOnCurrentThread();
+            // W24：全局派发字段走**作用域版**（Dispose 恢复；旧式 RunOnCurrentThread 已弃用）。
+            // `nullChannel: true` = 不安装投递通道（本类命令都在测试线程内联执行，不需要通道；
+            //   装了通道会在与并行 collection 的作用域重叠时把别人的投递吞掉）；
+            // `installScheduler: false` = 不动 mainScheduler（它是产品路径 RenderEngine/PhonemizerRunner
+            //   读的 TaskScheduler，改了会把并行 Audio 用例的后台装配推到线程池）。
+            using var dispatcher = DocManagerTestSetup.EnterScopedDispatcher(nullChannel: true, installScheduler: false);
             var mixer = new MixerControl();
             try {
                 // §1.1-1（W19 起）：链宿主仍是 ContentControl「FxChainHost」，
@@ -539,7 +544,12 @@ namespace OpenUtau.Test.App {
 
         [AvaloniaFact]
         public void MixerControl_AreaPaddingAndGapMatchSpec() {
-            DocManagerTestSetup.RunOnCurrentThread();
+            // W24：全局派发字段走**作用域版**（Dispose 恢复；旧式 RunOnCurrentThread 已弃用）。
+            // `nullChannel: true` = 不安装投递通道（本类命令都在测试线程内联执行，不需要通道；
+            //   装了通道会在与并行 collection 的作用域重叠时把别人的投递吞掉）；
+            // `installScheduler: false` = 不动 mainScheduler（它是产品路径 RenderEngine/PhonemizerRunner
+            //   读的 TaskScheduler，改了会把并行 Audio 用例的后台装配推到线程池）。
+            using var dispatcher = DocManagerTestSetup.EnterScopedDispatcher(nullChannel: true, installScheduler: false);
             var mixer = new MixerControl();
             try {
                 // 42：Mixer Area 内边距 16 / 通道条间距 8
@@ -583,7 +593,12 @@ namespace OpenUtau.Test.App {
         /// </summary>
         [AvaloniaFact]
         public void MixerControl_LayoutSizesMatchSpec() {
-            DocManagerTestSetup.RunOnCurrentThread();
+            // W24：全局派发字段走**作用域版**（Dispose 恢复；旧式 RunOnCurrentThread 已弃用）。
+            // `nullChannel: true` = 不安装投递通道（本类命令都在测试线程内联执行，不需要通道；
+            //   装了通道会在与并行 collection 的作用域重叠时把别人的投递吞掉）；
+            // `installScheduler: false` = 不动 mainScheduler（它是产品路径 RenderEngine/PhonemizerRunner
+            //   读的 TaskScheduler，改了会把并行 Audio 用例的后台装配推到线程池）。
+            using var dispatcher = DocManagerTestSetup.EnterScopedDispatcher(nullChannel: true, installScheduler: false);
             var mixer = new MixerControl();
             try {
                 InWindow(mixer, 1400, 800, () => {
@@ -745,10 +760,15 @@ namespace OpenUtau.Test.App {
     /// ⇒ 分离/贴合一次后 VU 永久冻结、声像静默失效；定时器则构造即启、隐藏后仍在 30fps 轮询。
     /// </summary>
     [Collection("Theme")]
-    public class MixerStripLifecycleTests {
+    public class MixerStripLifecycleTests : IDisposable {
+        // W24：全局派发字段作用域化（构造保存、Dispose 恢复；参数理由见 MixerControl_* 用例里的注释）
+        readonly DocManagerTestSetup.ScopedDispatcher dispatcher;
+
         public MixerStripLifecycleTests() {
-            DocManagerTestSetup.RunOnCurrentThread();
+            dispatcher = DocManagerTestSetup.EnterScopedDispatcher(nullChannel: true, installScheduler: false);
         }
+
+        public void Dispose() => dispatcher.Dispose();
 
         [AvaloniaFact]
         public void VuAndPan_SurviveReparent() {
@@ -832,16 +852,21 @@ namespace OpenUtau.Test.App {
     /// C 组（拖宽/折叠/重启三张真机截图）不在此文件内。
     /// </summary>
     [Collection("Theme")]
-    public class MixerChainPanelTests {
+    public class MixerChainPanelTests : IDisposable {
         const double Default = 280;   // 面板设计默认宽（与冻结接口一致）
         const double Min = 264;
         const double Max = 480;
         const double CenterMin = 320;
         const double SplitterHit = 7; // PanelSplitter 命中区
 
+        // W24：全局派发字段作用域化（构造保存、Dispose 恢复；参数理由见 MixerControl_* 用例里的注释）
+        readonly DocManagerTestSetup.ScopedDispatcher dispatcher;
+
         public MixerChainPanelTests() {
-            DocManagerTestSetup.RunOnCurrentThread();
+            dispatcher = DocManagerTestSetup.EnterScopedDispatcher(nullChannel: true, installScheduler: false);
         }
+
+        public void Dispose() => dispatcher.Dispose();
 
         /// <summary>起一个真窗口 + 真布局的混音台，跑完 body 后关窗 + Shutdown（body 里改完状态记得 Settle）。</summary>
         static void WithMixer(double width, double height, Action<MixerControl, Window> body) {

@@ -1,3 +1,4 @@
+using System.IO;
 using OpenUtau.Test.TestSupport;
 using Xunit;
 
@@ -32,6 +33,23 @@ namespace OpenUtau.Test.Audio {
             // %TEMP% 的假歌手（加载/搜索路径都可能命中）。只摘自己装的那个。
             if (!singerWasRegistered) {
                 OpenUtau.Core.SingerManager.Inst.Singers.Remove(DummyVoicebank.FolderName);
+            }
+            // **清掉本集合在 %TEMP% 里留下的装置产物**（W26）：`%TEMP%` 跨分支、跨轮次共享，
+            // 残留的伪声库/渲染产物会被**下一次**跑（甚至别的分支的装置）当成自己的成品复用，
+            // 表现就是"失败成员随轮次漂移"。用例内部已改成每次重建，这里再把痕迹擦掉，
+            // 两件事合起来才能保证"同一份代码每一轮的输入完全相同"。
+            CleanupTempRoot(Path.Combine(Path.GetTempPath(), "w14-evidence"));
+            CleanupTempRoot(Path.Combine(Path.GetTempPath(), "w7-audio-fixture"));
+        }
+
+        /// <summary>尽力删除装置临时目录；删不掉（被声库监视器/杀软占用）只记诊断，不算失败。</summary>
+        static void CleanupTempRoot(string path) {
+            try {
+                if (System.IO.Directory.Exists(path)) {
+                    System.IO.Directory.Delete(path, recursive: true);
+                }
+            } catch (System.Exception e) {
+                System.Console.WriteLine($"[W26] 临时装置目录未能清理（不影响用例判定）：{path} — {e.GetType().Name}: {e.Message}");
             }
         }
     }
