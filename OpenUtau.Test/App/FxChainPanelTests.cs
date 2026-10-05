@@ -613,6 +613,67 @@ namespace OpenUtau.Test.App {
             }
         }
 
+        // ══════════════════ 布局层几何（W10 口径：断言 Bounds 而非声明值） ══════════════════
+
+        /// <summary>
+        /// 链行内按钮的**实际渲染尺寸**（<see cref="Layoutable.Bounds"/>）。
+        ///
+        /// 为什么必须按 Bounds 断言：本仓有两处**继承来的几何**在属性层看不出来 ——
+        ///   · <c>Styles/Md3ControlThemes.axaml:28</c> 的 Md3ButtonTheme 设 <c>MinHeight=32</c>，
+        ///     布局取 Max(MinHeight, Height) ⇒ 只声明 <c>Height="22"</c> 的裸按钮会渲染成 32；
+        ///   · <c>Styles/Styles.axaml:159</c> 的应用级 <c>Button { Margin: 0,4 }</c> 再给每个按钮
+        ///     （含 ToggleButton：它派生自 Button）外加 8px 竖向 margin。
+        /// 本地样式里显式写 <c>MinHeight</c> 与 <c>Margin=0</c> 是唯一的中和方式（Style setter
+        /// 优先级高于 ControlTheme），**不动**全局 Md3ButtonTheme / Styles.axaml。
+        ///
+        /// 校准断言：同一宿主里放一个**裸** Button（Height=20、无本地样式），它必须渲染成 32 ——
+        /// 这正是"继承几何"仍在的证据。若哪天主题把 MinHeight 修掉，这行会失败，届时可连同本地
+        /// 中和 Setter 一起评估是否还需要保留。
+        /// </summary>
+        [AvaloniaFact]
+        public void RowChrome_RendersAtDeclaredMetrics_NotInheritedThemeGeometry() {
+            var track = RichTrack(out var project);
+            LoadProject(project);
+            var panel = new FxChainPanel { Track = track };
+            SyncPool();
+            var calibration = new Button { Height = 20, Width = 20, Content = "cal" };
+            var stack = new StackPanel { Children = { panel, calibration } };
+            var win = new WindowEx { Width = 320, Height = 780, Content = stack };
+            win.Classes.Set("no-motion", true);
+            win.Show();
+            Layout(win, 320, 780);
+            try {
+                // 校准：裸按钮被主题 MinHeight=32 顶高（证明断言口径有效）
+                Assert.Equal(32, calibration.Bounds.Height);
+
+                var rows = Rows(panel);
+                // ✕ 移除：声明 22×22 ⇒ Bounds 必须也是 22（本地 MinHeight=22 + Margin=0 中和）
+                var remove = Part<Button>(rows[3], "RemoveButton");
+                Assert.Equal(22, remove.Bounds.Height);
+                Assert.Equal(22, remove.Bounds.Width);
+                Assert.Equal(0, remove.Margin.Top);
+                Assert.Equal(0, remove.Margin.Bottom);
+                // ＋：声明 36×36 ⇒ Bounds 36，且应用级 8px 竖向 margin 已清零
+                var add = Part<Button>(panel, "AddButton");
+                Assert.Equal(36, add.Bounds.Height);
+                Assert.Equal(36, add.Bounds.Width);
+                Assert.Equal(0, add.Margin.Top);
+                Assert.Equal(0, add.Margin.Bottom);
+                // 旁通开关（ToggleButton 派生自 Button，同吃 Button 主题/应用级样式）：
+                // 自带模板固定 34×20 ⇒ Bounds 必须是 20，不被顶到 32
+                var power = Part<ToggleButton>(rows[0], "PowerToggle");
+                Assert.Equal(20, power.Bounds.Height);
+                Assert.Equal(34, power.Bounds.Width);
+                Assert.Equal(0, power.Margin.Top);
+                Assert.Equal(0, power.Margin.Bottom);
+                // 行容器：最小高 44
+                Assert.True(Part<Border>(rows[0], "RowRoot").Bounds.Height >= 44,
+                    $"链行低于声明的最小高：实际 {Part<Border>(rows[0], "RowRoot").Bounds.Height}");
+            } finally {
+                win.Close();
+            }
+        }
+
         // ══════════════════ 颜色池铁律 ══════════════════
 
         [AvaloniaFact]

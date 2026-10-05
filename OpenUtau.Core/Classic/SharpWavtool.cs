@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -54,12 +54,17 @@ namespace OpenUtau.Classic {
                         int length = cutoff >= 0 ? (samples.Length - offset - cutoff) : -cutoff;
                         segment.samples = samples.Skip(offset).Take(length).ToArray();
                     }
-                } else { 
-                    if (!File.Exists(item.outputFile)) {
-                        continue;
-                    }
-                    using (var waveStream = Wave.OpenFile(item.outputFile)) {
-                        segment.samples = Wave.GetSamples(waveStream.ToSampleProvider().ToMono(1, 0));
+                } else {
+                    // 与 resampler/WorldlineRenderer 的缓存**写入**共用同一把 per-path 锁
+                    // （Renderers.GetCacheLock）——否则两个乐句共享同一份 resample 缓存并发
+                    // 渲染时会"文件被另一进程占用"或读到半截文件（上游 5d17f141）。
+                    lock (Renderers.GetCacheLock(item.outputFile)) {
+                        if (!File.Exists(item.outputFile)) {
+                            continue;
+                        }
+                        using (var waveStream = Wave.OpenFile(item.outputFile)) {
+                            segment.samples = Wave.GetSamples(waveStream.ToSampleProvider().ToMono(1, 0));
+                        }
                     }
                 }
                 segments.Add(segment);

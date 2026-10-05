@@ -14,6 +14,7 @@ public partial class MixerWindow : WindowEx
 {
     private MixerControl? _mixerControl;
     private bool _released;
+    private bool _detached;
     private bool _closed;
 
     /// <summary>用户关闭分离窗口时的回调：宿主把控件放回视图区（控件继续存活）。</summary>
@@ -40,17 +41,27 @@ public partial class MixerWindow : WindowEx
     }
 
     /// <summary>
-    /// 把控件交回宿主：摘掉 Content → 关窗；不触发收回归位、不动控件生命周期。
+    /// 把控件交回宿主：摘掉 Content（走 <see cref="MainWindow.DetachAndFlush"/>，含旧树布局冲洗，
+    /// 见其注释里的 crash 根因）→ 关窗；不触发收回归位、不动控件生命周期。
     /// 幂等（窗口已关时只清 Content），宿主回收与用户关窗两条路都安全。
     /// </summary>
     public void ReleaseControl()
     {
         _released = true;
-        MixerContainer.Content = null;
+        DetachControl();
         _mixerControl = null;
         if (!_closed) {
             Close();
         }
+    }
+
+    /// <summary>摘控件 + 冲洗本窗口挂起布局（幂等；窗口已关时冲洗自然失效，只清 Content）。</summary>
+    private void DetachControl() {
+        if (_detached) {
+            return;
+        }
+        _detached = true;
+        MainWindow.DetachAndFlush(MixerContainer);
     }
 
     /// <summary>
@@ -61,6 +72,8 @@ public partial class MixerWindow : WindowEx
     {
         Preferences.Default.MixerWindowSize.Set(Width, Height, Position.X, Position.Y, (int)WindowState);
         Preferences.Save();
+        // 用户关窗：趁窗口还活着把控件摘掉并冲洗布局（窗口销毁后再摘就冲洗不到了）
+        DetachControl();
         base.OnClosing(e);
     }
 

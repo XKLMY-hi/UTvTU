@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using OpenUtau.Core.Render;
@@ -48,6 +49,122 @@ namespace OpenUtau.Core.Util {
 
         public static List<string> GetSingerSearchPaths() {
             return new List<string>(Default.SingerSearchPaths);
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        //  W11：VST 标准扫描路径（首次运行播种 + 一键添加）
+        //
+        //  动机：插件浏览器（素材库「效果器」页签）在新机器上永远空态——Preferences 里
+        //  VstScanPaths 默认空，而用户并不知道标准目录在哪。这里把"平台标准 VST3 目录"
+        //  变成可播种的默认值，并提供**纯函数**（平台与取目录都可注入）以便测试。
+        //  策略：播种只在 VstScanPathsSeeded == false 时发生一次，之后置位并落盘；
+        //  用户删掉标准路径不会被复活（下次启动也不会补回来）。
+        // ═══════════════════════════════════════════════════════════════════════
+
+        /// <summary>路径平台（作为纯参数传入 ⇒ 测试无需真的跑在三个系统上）。</summary>
+        public enum VstPathPlatform {
+            Windows,
+            MacOS,
+            Linux,
+        }
+
+        /// <summary>当前运行平台。</summary>
+        public static VstPathPlatform CurrentVstPathPlatform() =>
+            OperatingSystem.IsWindows() ? VstPathPlatform.Windows
+            : OperatingSystem.IsMacOS() ? VstPathPlatform.MacOS
+            : VstPathPlatform.Linux;
+
+        /// <summary>
+        /// 各平台的**标准 VST3 扫描目录候选**（纯函数；不判存在、不落盘）。
+        /// <paramref name="folder"/> 默认 <c>Environment.GetFolderPath</c>，测试可注入假目录树。
+        /// </summary>
+        public static IReadOnlyList<string> StandardVstScanPaths(
+            VstPathPlatform platform,
+            Func<Environment.SpecialFolder, string>? folder = null) {
+            folder ??= Environment.GetFolderPath;
+            var paths = new List<string>();
+            void AddPath(string? path) {
+                if (!string.IsNullOrWhiteSpace(path)) {
+                    paths.Add(path!);
+                }
+            }
+            // 组合路径用 Path.Combine（平台分隔符正确）；POSIX 字面量直接给整串，
+            // 避免在 Windows 上被拼成 "usr\lib\vst3" 这种混合分隔符（纯函数要保持可跨平台断言）。
+            void AddUnder(string? root, params string[] parts) {
+                if (string.IsNullOrEmpty(root)) {
+                    return;
+                }
+                string path = root!;
+                foreach (string part in parts) {
+                    path = Path.Combine(path, part);
+                }
+                AddPath(path);
+            }
+            switch (platform) {
+                case VstPathPlatform.Windows:
+                    AddUnder(folder(Environment.SpecialFolder.CommonProgramFiles), "VST3");            // %CommonProgramFiles%\VST3
+                    AddUnder(folder(Environment.SpecialFolder.ProgramFiles), "Common Files", "VST3");  // 同一目录的等价写法
+                    AddUnder(folder(Environment.SpecialFolder.ProgramFilesX86), "Common Files", "VST3");
+                    AddUnder(folder(Environment.SpecialFolder.LocalApplicationData), "Programs", "Common", "VST3");
+                    break;
+                case VstPathPlatform.MacOS:
+                    AddPath("/Library/Audio/Plug-Ins/VST3");                                           // 系统级
+                    AddUnder(folder(Environment.SpecialFolder.UserProfile), "Library", "Audio", "Plug-Ins", "VST3");
+                    AddPath("/usr/local/lib/vst3");
+                    break;
+                case VstPathPlatform.Linux:
+                    AddUnder(folder(Environment.SpecialFolder.UserProfile), ".vst3");
+                    AddPath("/usr/lib/vst3");
+                    AddPath("/usr/local/lib/vst3");
+                    break;
+            }
+            // 去重（Windows/macOS 大小写不敏感；Linux 敏感）
+            StringComparer comparer = platform == VstPathPlatform.Linux
+                ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
+            return paths.Distinct(comparer).ToList();
+        }
+
+        /// <summary>
+        /// 把标准路径并入 <c>VstScanPaths</c>：**幂等**，只加"目录真实存在且尚未收录"的。
+        /// 用户主动触发（按钮）时用它；返回新增条数。
+        /// </summary>
+        public static int AddStandardVstScanPaths(
+            VstPathPlatform? platform = null,
+            Func<Environment.SpecialFolder, string>? folder = null) {
+            VstPathPlatform target = platform ?? CurrentVstPathPlatform();
+            StringComparer comparer = target == VstPathPlatform.Linux
+                ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
+            int added = 0;
+            foreach (string path in StandardVstScanPaths(target, folder)) {
+                if (!Directory.Exists(path)) {
+                    continue;   // 只播种真实存在的目录（避免往面板里塞死路径）
+                }
+                if (Default.VstScanPaths.Any(existing => comparer.Equals(existing, path))) {
+                    continue;
+                }
+                Default.VstScanPaths.Add(path);
+                added++;
+            }
+            if (added > 0) {
+                Save();
+            }
+            return added;
+        }
+
+        /// <summary>
+        /// **首次运行播种**：仅当 <c>VstScanPathsSeeded == false</c> 时执行一次，然后置位并落盘。
+        /// 返回新增条数；<c>-1</c> 表示本次跳过（已播种过 ⇒ 用户删掉的路径不会被复活）。
+        /// </summary>
+        public static int SeedStandardVstScanPathsOnce(
+            VstPathPlatform? platform = null,
+            Func<Environment.SpecialFolder, string>? folder = null) {
+            if (Default.VstScanPathsSeeded) {
+                return -1;
+            }
+            Default.VstScanPathsSeeded = true;
+            int added = AddStandardVstScanPaths(platform, folder);
+            Save();     // 标记本身也要落盘（即使一条路径都没加）
+            return added;
         }
 
         public static void SetSingerSearchPaths(List<string> paths) {
@@ -130,6 +247,12 @@ namespace OpenUtau.Core.Util {
                         };
                         Default.Theme = null;
                     }
+                    // 历史 prefs 里可能存着空白歌手名（上游 d53af641）：按名查歌手会命中空串，
+                    // 选中/收藏路径再取歌手元数据时崩溃。加载时过滤空白项。
+                    Default.RecentSingers = Default.RecentSingers?
+                        .Where(s => !string.IsNullOrWhiteSpace(s)).ToList() ?? new List<string>();
+                    Default.FavoriteSingers = Default.FavoriteSingers?
+                        .Where(s => !string.IsNullOrWhiteSpace(s)).ToList() ?? new List<string>();
                 } else {
                     Reset();
                 }
@@ -152,6 +275,11 @@ namespace OpenUtau.Core.Util {
         public class SerializablePreferences {
             public WindowSize MainWindowSize = new WindowSize();
             public WindowSize PianorollWindowSize = new WindowSize();
+            /// <summary>
+            /// W16 面板系统：可调宽 / 可折叠面板的布局状态（宽 + 折叠态）。
+            /// **不新增平行存储**——面板一律写这里；加新面板就在 <see cref="PanelLayoutPreferences"/> 里加一对字段。
+            /// </summary>
+            public PanelLayoutPreferences PanelLayout = new PanelLayoutPreferences();
             public int UndoLimit = 100;
             public List<string> SingerSearchPaths = new List<string>();
             public string PlaybackDevice = string.Empty;
@@ -287,6 +415,10 @@ errors.txt
 
             // OpenUTAU Plus: VST plugin scan paths
             public List<string> VstScanPaths = new();
+            // OpenUTAU Plus (W11): 「标准扫描路径已播种」标记。
+            // 只在**首次运行**把平台标准 VST3 目录并入 VstScanPaths；置位后永不再自动加，
+            // 因此用户手动删掉标准路径不会被复活（播种是"建议默认值"，不是每次启动补齐）。
+            public bool VstScanPathsSeeded = false;
             // OpenUTAU Plus: cached VST registry (avoids re-scan on restart)
             public List<VstCachedEntry> VstCachedPlugins = new();
             // OpenUTAU Plus: backing track (BGM) library scan paths
@@ -303,6 +435,28 @@ errors.txt
             // Legacy
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public int? Theme;
+        }
+
+        /// <summary>
+        /// W16 面板系统：可调宽 / 可折叠面板的持久化状态。
+        ///
+        /// 命名口径：`XxxWidth` = 展开时的宽度（px）；`XxxCollapsed` = 是否折叠（true 时列宽 0、不留空白）。
+        /// **默认值一律"展开"**：素材库是插件浏览器入口（D9「从素材库拖进链面板」是主路径），
+        /// 默认折叠会让这条路径不可发现；折叠是用户主动选择，然后持久化。
+        ///
+        /// 加新面板（例：混音台链面板、卷帘侧栏）：在这里加一对字段 + 在 MainWindowViewModel 里
+        /// `new PanelSlot(...)` 一处 + XAML 里 `<c:PanelSplitter Target="{Binding XxxPanel.Width}"/>` 一行。
+        /// </summary>
+        public class PanelLayoutPreferences {
+            /// <summary>工作台左列（轨道头）。默认 248：内容实测需 ~190-200（音量滑条 150 + 内边距 12×2），
+            /// 248 留约 25% 余量，同时比设计稿 264 瘦 16px 让给编排区。</summary>
+            public double TrackHeaderWidth = 248;
+            public bool TrackHeaderCollapsed = false;
+
+            /// <summary>工作台右列（素材库）。默认 272：34 缩略图 + 12 间距 + 12px 名称在 272 下不折行，
+            /// 比设计稿 296 瘦 24px；展开态下卡片与「N 已安装」计数仍完整。</summary>
+            public double LibraryWidth = 272;
+            public bool LibraryCollapsed = false;
         }
 
         /// <summary>

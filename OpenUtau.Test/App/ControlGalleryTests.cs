@@ -19,6 +19,7 @@ using OpenUtau.Core.Theming;
 using OpenUtau.Core.Util;
 using OpenUtau.Core.Ustx;
 using OpenUtau.Core.Vst;
+using OpenUtau.Test.TestSupport;
 using OpenUtau.Theming;
 using Xunit;
 
@@ -657,25 +658,28 @@ namespace OpenUtau.Test.App {
 
         // ── 8. 文案与入口 ───────────────────────────────────────────────────
 
+        /// <summary>
+        /// W12 改造：直接读两份语言资源字典，**不再调用 App.SetLanguage**——
+        /// 语言是进程级全局状态，切换窗口期会污染并行用例（集成树出现过一次 Light 偶发失败）。
+        /// 现在顺带断言两语言文件**键集完全一致**。
+        /// </summary>
         [AvaloniaFact]
         public void NewStrings_ResolveInBothLanguages() {
-            var en = new Dictionary<string, string>();
-            OpenUtau.App.App.SetLanguage("en-US");
+            ResourceDictionary enDict = StringDictionaryProbe.English();
+            ResourceDictionary zhDict = StringDictionaryProbe.Chinese();
+
+            var enKeys = StringDictionaryProbe.Keys(enDict);
+            var zhKeys = StringDictionaryProbe.Keys(zhDict);
+            Assert.True(enKeys.SetEquals(zhKeys),
+                "EN/zh 键集不一致：zh 缺 " + string.Join(", ", enKeys.Except(zhKeys)) +
+                "；en 缺 " + string.Join(", ", zhKeys.Except(enKeys)));
+
             foreach (string key in NewKeys) {
-                Assert.True(ThemeManager.TryGetString(key, out string value), $"EN 缺键：{key}");
-                Assert.NotEqual(key, value);
-                en[key] = value;
-            }
-            OpenUtau.App.App.SetLanguage("zh-CN");
-            try {
-                foreach (string key in NewKeys) {
-                    Assert.True(ThemeManager.TryGetString(key, out string value), $"zh-CN 缺键：{key}");
-                    Assert.NotEqual(key, value);
-                    // 与英文不同 ⇒ zh 字典确实有该键（否则会回退到 en-US 的值）
-                    Assert.NotEqual(en[key], value);
-                }
-            } finally {
-                OpenUtau.App.App.SetLanguage("en-US");
+                string? en = StringDictionaryProbe.Value(enDict, key);
+                string? zh = StringDictionaryProbe.Value(zhDict, key);
+                Assert.False(string.IsNullOrWhiteSpace(en), $"EN 缺键：{key}");
+                Assert.False(string.IsNullOrWhiteSpace(zh), $"zh-CN 缺键：{key}");
+                Assert.NotEqual(en, zh);
             }
         }
 

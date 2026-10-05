@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OpenUtau.Api;
@@ -168,10 +168,14 @@ namespace OpenUtau.Core.Ustx {
             RendererSettings.Validate(this);
             if (project.expressions.TryGetValue(Format.Ustx.CLR, out var descriptor)) {
                 if (VoiceColorExp == null && Singer != null && Singer.Found && Singer.Loaded) {
-                    VoiceColorExp = descriptor.Clone();
+                    // 声库没有子库色时不要建 CLR 表达式：options 空数组 + max = -1 会让
+                    // 之后所有按 CLR 取值/绘制的路径越界或除零（上游 0e74b8d2 崩溃修复）。
                     var colors = Singer.Subbanks.Select(subbank => subbank.Color).ToHashSet();
-                    VoiceColorExp.options = colors.OrderBy(c => c).ToArray();
-                    VoiceColorExp.max = VoiceColorExp.options.Length - 1;
+                    if (colors.Count > 0) {
+                        VoiceColorExp = descriptor.Clone();
+                        VoiceColorExp.options = colors.OrderBy(c => c).ToArray();
+                        VoiceColorExp.max = VoiceColorExp.options.Length - 1;
+                    }
                 }
             }
         }

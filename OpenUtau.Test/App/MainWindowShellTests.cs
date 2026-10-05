@@ -20,8 +20,13 @@ namespace OpenUtau.Test.App {
             string xaml = ReadXaml();
             // 三行骨架：顶栏 56 / 工作区 / 状态条 32
             Assert.Contains("RowDefinitions=\"56,*,32\"", xaml);
-            // 三列骨架：轨道头 264 / 编排区 / 素材库 296
-            Assert.Contains("ColumnDefinitions=\"264,*,296\"", xaml);
+            // 工作区五列骨架（W16 面板系统）：左面板 / 分隔条 / 中央 / 分隔条 / 右面板。
+            // 面板宽**不再写死在列定义里**，而是来自绑定（宽度与折叠态可调、可持久化）——
+            // 所以这里断言"列宽来自绑定"，以后调默认值不会再假红（默认值见 PanelLayoutPreferences）。
+            Assert.Contains("x:Name=\"MainLayout\" ColumnDefinitions=\"Auto,Auto,*,Auto,Auto\"", xaml);
+            Assert.Contains("Width=\"{Binding #TracksPanelSplitter.PanelWidth}\"", xaml);
+            Assert.Contains("Width=\"{Binding #LibraryPanelSplitter.PanelWidth}\"", xaml);
+            Assert.Contains("IsVisible=\"{Binding #LibraryPanelSplitter.PanelShown}\"", xaml);
             // 素材库内部：表头 44 / 页签 40 / 内容
             Assert.Contains("RowDefinitions=\"44,40,*\"", xaml);
             // 编排区标尺 34（与轨道头表头同高）

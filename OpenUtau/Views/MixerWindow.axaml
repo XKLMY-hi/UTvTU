@@ -9,7 +9,7 @@
         Icon="/Assets/open-utau.ico"
         Title="{DynamicResource menu.tools.mixer}"
         Width="720" Height="480"
-        MinWidth="400" MinHeight="360"
+        MinWidth="640" MinHeight="360"
         WindowStartupLocation="CenterScreen">
 
   <DockPanel LastChildFill="True">

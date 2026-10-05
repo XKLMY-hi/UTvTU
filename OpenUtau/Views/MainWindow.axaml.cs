@@ -87,6 +87,10 @@ namespace OpenUtau.App.Views {
             SingersPanel.DataContext = sidebarViewModel;
             SamplesPanel.DataContext = sidebarViewModel;
 
+            // W11：首次运行把平台标准 VST3 目录播种进扫描路径（幂等 + 只此一次；
+            // 用户之后删掉不会被复活）。素材库「效果器」页签与偏好设置 VST 页共用这份数据。
+            Preferences.SeedStandardVstScanPathsOnce();
+
             viewModel.NewProject();
             viewModel.AddTempoChangeCmd = ReactiveCommand.Create<int>(tick => AddTempoChange(tick));
             viewModel.DelTempoChangeCmd = ReactiveCommand.Create<int>(tick => DelTempoChange(tick));
@@ -824,6 +828,25 @@ namespace OpenUtau.App.Views {
             container.Content = control;
         }
 
+        /// <summary>
+        /// 摘下一个视图宿主（分离/收回的唯一出口），并把**旧窗口**的挂起布局就地跑完。
+        ///
+        /// 为什么必须冲洗（task-21，Avalonia 12.1.0 实测复现 + 源码核实 `LayoutManager.cs`）：
+        /// `Content = null` 摘除子树时，Avalonia 会把整棵子树入队到**旧窗口**的 measure 队列并调度一次
+        /// 布局 pass（`_toMeasure=[子树…], _queued=true`）。若随后把这棵子树挂到另一个窗口，旧窗那次
+        /// pass 再跑时 `ExecuteArrangePass` 会走到 `_toArrangeAfterMeasure → InvalidateArrange(control)`，
+        /// 而该控件的 layout root 已经是新窗口 ⇒
+        /// `ArgumentException: Attempt to call InvalidateArrange on wrong LayoutManager`（未处理 → 程序退出）。
+        /// 摘树后立刻 `UpdateLayout()`：此刻子树还没有新家，布局遍历对它是
+        /// `!IsAttachedToVisualTree ⇒ NotVisible`，直接跳过（不会触碰 Invalidate*）⇒ 队列被安全消化，
+        /// 旧窗随后也没有待处理的 pass 了。
+        /// </summary>
+        public static void DetachAndFlush(ContentControl host) {
+            var oldRoot = TopLevel.GetTopLevel(host);
+            host.Content = null;
+            oldRoot?.UpdateLayout();
+        }
+
         /// <summary>顶栏胶囊：工作台 / 钢琴卷帘 / 混音台（Tag = AppSurface 名）。</summary>
         private void OnViewTabClicked(object? sender, RoutedEventArgs args) {
             if (sender is not Control control || control.Tag is not string tag ||
@@ -1001,7 +1024,7 @@ namespace OpenUtau.App.Views {
                 mixerWindow.Activate();
                 return;
             }
-            MixerContainer.Content = null;
+            DetachAndFlush(MixerContainer);
             mixerWindow = new MixerWindow(mixerControl!);
             // 用户关掉分离窗口 = 收回视图区（生命周期：控件不随窗口销毁，见 MixerWindow 注释）
             mixerWindow.ReturnToHost = () => AttachMixerView();
@@ -1165,9 +1188,10 @@ namespace OpenUtau.App.Views {
             ShowLibraryPage(MidiPanel, MidiTab);
         }
 
-        /// <summary>素材库页签：效果器（W4：插件浏览器；展开时只读刷新列表，不触发扫描）。</summary>
+        /// <summary>素材库页签：效果器（W4 浏览器；W11 首次展开会播种标准路径 + 空表自动首扫）。</summary>
         private void OnShowVst(object? sender, RoutedEventArgs e) {
             viewModel.PluginBrowser.RefreshPlugins();
+            viewModel.PluginBrowser.EnsureFirstScan();   // 幂等：只在首次展开时播种/首扫（返回的任务由后台自己跑完）
             ShowLibraryPage(VstPanel, EffectsTab);
         }
 
@@ -1213,6 +1237,14 @@ namespace OpenUtau.App.Views {
         /// <summary>展开/收起「插件扫描路径」面板。</summary>
         private void OnToggleVstPathManager(object? sender, RoutedEventArgs e) {
             VstPathManager.IsVisible = !VstPathManager.IsVisible;
+        }
+
+        /// <summary>
+        /// 空态按钮：把本机标准 VST3 目录加进扫描路径并立即重扫（W11）。
+        /// 用户主动触发 ⇒ 不受"已播种"标记限制；标准目录都不存在时只重扫（0 条新增）。
+        /// </summary>
+        private async void OnAddStandardVstPathsFromLibrary(object? sender, RoutedEventArgs e) {
+            await viewModel.PluginBrowser.AddStandardPathsAndScanAsync();
         }
 
         /// <summary>添加扫描路径（写 Preferences.Default.VstScanPaths + 广播，与偏好设置即时同步）。</summary>
@@ -1313,6 +1345,30 @@ namespace OpenUtau.App.Views {
                 pianoRollWindow.Width = 1024;
                 pianoRollWindow.Height = 576;
             }
+        }
+
+        // ── W16 面板系统：面板 chrome 的交互入口 ─────────────────────────────
+        // 拖拽/双击复位由 PanelSplitter 控件自己处理（一处实现，所有面板共用）；
+        // 这里只做"落盘"和"折叠"两件事 —— 接入方按配方加自己的同名处理器即可。
+
+        /// <summary>面板头部 chevron：折叠轨头列。</summary>
+        private void OnCollapseTracksPanel(object? sender, RoutedEventArgs e) {
+            viewModel.TracksPanel.ToggleCollapse();
+        }
+
+        /// <summary>面板头部 chevron：折叠素材库列。</summary>
+        private void OnCollapseLibraryPanel(object? sender, RoutedEventArgs e) {
+            viewModel.LibraryPanel.ToggleCollapse();
+        }
+
+        /// <summary>拖拽结束 / 双击复位 → 落盘（拖动过程中只更新内存，不写文件）。</summary>
+        private void OnPanelSplitterDragCompleted(object? sender, EventArgs e) {
+            viewModel.PersistPanelLayout();
+        }
+
+        /// <summary>「重置面板布局」：宽度回默认 + 全部展开 + 落盘。</summary>
+        private void OnMenuResetPanelLayout(object sender, RoutedEventArgs args) {
+            viewModel.ResetPanelLayout();
         }
 
         void OnMenuLayoutVSplit11(object sender, RoutedEventArgs args) => LayoutSplit(null, 1.0 / 2);
@@ -1948,7 +2004,7 @@ namespace OpenUtau.App.Views {
             if (pianoRoll == null || pianoRollWindow != null) {
                 return;
             }
-            PianoRollContainer.Content = null;
+            DetachAndFlush(PianoRollContainer);
             CreatePianoRollWindow().Show();
             Preferences.Default.DetachPianoRoll = true;
             Preferences.Save();

@@ -22,6 +22,12 @@
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     </Style>
     <Style Selector="Button.addButton">
+      <!-- ⚠ 同「继承几何」陷阱：主题 Md3ButtonTheme 的 MinHeight=32（Styles/Md3ControlThemes.axaml:28）
+           对 36 高的钮本身无害，但应用级 `Button { Margin: 0,4 }`（Styles/Styles.axaml:159）
+           会给它外加 8px 竖向 margin ⇒ 表头行被撑高、间距被撑坏。Margin 必须清零；
+           MinHeight 与声明一致，避免日后把按钮改小（<32）时再被顶掉。 -->
+      <Setter Property="MinHeight" Value="36"/>
+      <Setter Property="Margin" Value="0"/>
       <Setter Property="Width" Value="36"/>
       <Setter Property="Height" Value="36"/>
       <Setter Property="Padding" Value="0"/>

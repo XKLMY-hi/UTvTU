@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using NWaves.Signals;
@@ -134,6 +135,14 @@ namespace OpenUtau.App.Controls {
         public readonly UPart part;
         private readonly PartsCanvas partsCanvas;
         private readonly Pen notePen = new Pen(Brushes.White, 3);
+        // 卷帘视口指示条（上游 9caec1a6；把手尺寸常量与命中区一起定义在下方）
+        private static readonly IBrush viewportFill = new SolidColorBrush(Color.FromArgb(28, 255, 255, 255));
+        private static readonly IPen viewportPen = new Pen(Brushes.White, 2);
+        private const double GripDot = 2;
+        private const double GripGap = 3;
+        private bool draggingViewport;
+        private double viewportDragStartX;
+        private double viewportDragStartOffset;
         private readonly Pen fadePen = new Pen(Brushes.White);
         private List<IDisposable> unbinds = new List<IDisposable>();
         private WriteableBitmap? bitmap;
@@ -178,9 +187,12 @@ namespace OpenUtau.App.Controls {
                 change.Property == TickWidthProperty) {
                 SetPosition();
             }
-            if (change.Property == PianoRollViewTickOffsetProperty ||
-                change.Property == PianoRollViewViewportTicksProperty ||
-                change.Property == SelectedProperty ||
+            // 卷帘视口（TickOffset / ViewportTicks）变化时**本控件不重绘**：这两个属性是
+            // 每个部件都绑定到 PartsCanvas 的，原先各自 InvalidateVisual ⇒ 卷帘每滚一帧
+            // 编排区所有部件都重绘（波形部件还会重建波形）。实际只有"打开的那个部件"
+            // 画卷帘视口高亮，而 PartsCanvas 已经自己失效了它（InvalidatePartViewport()）。
+            // 上游 `96473fa5` 同口径。实测（PartRedrawScopeTests）：滚动一帧的重绘数 3 → 1。
+            if (change.Property == SelectedProperty ||
                 change.Property == TextProperty || 
                 change.Property == FadeInProperty ||
                 change.Property == FadeOutProperty) {
@@ -206,7 +218,14 @@ namespace OpenUtau.App.Controls {
             }
         }
 
+        /// <summary>
+        /// 测试/诊断用：本控件的实际绘制次数（性能类证据靠它，不靠像素）。
+        /// 编排区一次滚动帧里"有几个部件被重绘"就是靠比对各部件的这个计数得出的。
+        /// </summary>
+        internal int RenderCount { get; private set; }
+
         public override void Render(DrawingContext context) {
+            RenderCount++;
             var backgroundBrush = Selected ? ThemeManager.AccentBrush2 : ThemeManager.AccentBrush1;
             // Background
             context.DrawRectangle(backgroundBrush, null, new Rect(1, 0, Width - 1, Height - 1), 4, 4);
@@ -238,20 +257,19 @@ namespace OpenUtau.App.Controls {
                         context.DrawLine(notePen, start, end);
                     }
                 }
-                // Highlight
-                if (voicePart == partsCanvas.PianoRollOpenPart && pianoRollViewViewportTicks > 0) {
-                    const double inset = 1;
-                    double innerWidth = Math.Max(0, Width - 2 * inset);
-                    double innerHeight = Math.Max(0, Height - 2 * inset);
-
-                    double vpLeft = Math.Max(0, pianoRollViewTickOffset * tickWidth);
-                    double vpRight = Math.Min(innerWidth, (pianoRollViewTickOffset + pianoRollViewViewportTicks) * tickWidth);
-
-                    if (vpRight > vpLeft + 1) {
-                        var vpRect = new Rect(inset + vpLeft, inset, vpRight - vpLeft, innerHeight);
-                        var vpFill = new SolidColorBrush(Color.FromArgb(28, 255, 255, 255));
-                        var vpPen = new Pen(Brushes.White, 2);
-                        context.DrawRectangle(vpFill, vpPen, new RoundedRect(vpRect, new CornerRadius(3)));
+                // Highlight：卷帘视口指示条 + 中间的可拖拽把手（上游 9caec1a6）
+                if (PianoRollViewportRect() is Rect vpRect) {
+                    context.DrawRectangle(viewportFill, viewportPen, new RoundedRect(vpRect, new CornerRadius(3)));
+                    if (GripRect(vpRect) is Rect grip) {
+                        // 3×3 点阵把手
+                        for (int column = 0; column < 3; ++column) {
+                            for (int row = 0; row < 3; ++row) {
+                                var center = new Point(
+                                    grip.X + GripDot / 2 + column * (GripDot + GripGap),
+                                    grip.Y + GripDot / 2 + row * (GripDot + GripGap));
+                                context.DrawEllipse(Brushes.White, null, center, GripDot / 2, GripDot / 2);
+                            }
+                        }
                     }
                 }
             } else if (part is UWavePart wavePart) {
@@ -282,6 +300,93 @@ namespace OpenUtau.App.Controls {
                     context.DrawLine(fadePen, new Point(Width - 1, Height - 2), new Point(FadeOut, 2));
                 }
             }
+        }
+
+        /// <summary>
+        /// 卷帘的可见区间落在本部件内的那一段（仅当卷帘正打开本部件时）。
+        /// </summary>
+        private Rect? PianoRollViewportRect() {
+            if (part is not UVoicePart || part != partsCanvas.PianoRollOpenPart || pianoRollViewViewportTicks <= 0) {
+                return null;
+            }
+            const double inset = 1;
+            double innerWidth = Math.Max(0, Width - 2 * inset);
+            double innerHeight = Math.Max(0, Height - 2 * inset);
+            double vpLeft = Math.Max(0, pianoRollViewTickOffset * tickWidth);
+            double vpRight = Math.Min(innerWidth, (pianoRollViewTickOffset + pianoRollViewViewportTicks) * tickWidth);
+            if (vpRight <= vpLeft + 1) {
+                return null;
+            }
+            return new Rect(inset + vpLeft, inset, vpRight - vpLeft, innerHeight);
+        }
+
+        /// <summary>指示条正中的拖拽把手（放不下就不给）。</summary>
+        private static Rect? GripRect(Rect viewport) {
+            const double width = 3 * GripDot + 2 * GripGap;
+            const double height = 3 * GripDot + 2 * GripGap;
+            if (viewport.Width < width + 6 || viewport.Height < height + 6) {
+                return null;
+            }
+            return new Rect(
+                Math.Round(viewport.Center.X - width / 2),
+                Math.Round(viewport.Center.Y - height / 2),
+                width, height);
+        }
+
+        /// <summary>点（本控件坐标）是否落在卷帘视口指示条的拖拽把手上。</summary>
+        public bool HitPianoRollViewportHandle(Point point) {
+            return PianoRollViewportRect() is Rect vpRect
+                && GripRect(vpRect) is Rect grip
+                && grip.Inflate(new Thickness(6, 8)).Contains(point);
+        }
+
+        // ── 拖拽指示条滚动卷帘（上游 9caec1a6）────────────────────────────
+        // 上游把拖拽入口放在 MainWindow 的部件指针状态机里（布局线文件）⇒ 这里改为
+        // **本控件自带指针处理**：命中把手即捕获指针，拖出的位移经 MessageBus 交给卷帘
+        // （PianoRoll 侧钳制后写入 NotesViewModel.TickOffset）。只改视口，不入撤销栈。
+        protected override void OnPointerMoved(PointerEventArgs e) {
+            base.OnPointerMoved(e);
+            var point = e.GetPosition(this);
+            if (draggingViewport) {
+                double deltaTicks = tickWidth > 0 ? (point.X - viewportDragStartX) / tickWidth : 0;
+                MessageBus.Current.SendMessage(new PianoRollViewportScrollEvent(viewportDragStartOffset + deltaTicks));
+                e.Handled = true;
+                return;
+            }
+            Cursor = HitPianoRollViewportHandle(point) ? HandCursors.Grab : null;
+        }
+
+        protected override void OnPointerPressed(PointerPressedEventArgs e) {
+            base.OnPointerPressed(e);
+            if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) {
+                return;
+            }
+            if (!HitPianoRollViewportHandle(e.GetPosition(this))) {
+                return;
+            }
+            draggingViewport = true;
+            viewportDragStartX = e.GetPosition(this).X;
+            viewportDragStartOffset = partsCanvas.PianoRollViewTickOffset;
+            Cursor = HandCursors.Grabbing;
+            e.Pointer.Capture(this);
+            e.Handled = true;   // 别让编排区的画布指针处理把这次按下当成"点部件"
+        }
+
+        protected override void OnPointerReleased(PointerReleasedEventArgs e) {
+            base.OnPointerReleased(e);
+            if (!draggingViewport) {
+                return;
+            }
+            draggingViewport = false;
+            Cursor = null;
+            e.Pointer.Capture(null);
+            e.Handled = true;
+        }
+
+        protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e) {
+            base.OnPointerCaptureLost(e);
+            draggingViewport = false;
+            Cursor = null;
         }
 
         private WriteableBitmap GetBitmap(double width) {

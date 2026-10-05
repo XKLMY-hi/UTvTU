@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -11,6 +11,22 @@ using OpenUtau.Core.Ustx;
 using ReactiveUI;
 
 namespace OpenUtau.App.Controls {
+    /// <summary>
+    /// 请求把卷帘的水平滚动偏移设到该 tick 位置（编排区拖拽卷帘视口指示条时发出）。
+    ///
+    /// 为什么走消息而不是直接引用：拖拽把手在 `PartControl`（编排区），视口状态在
+    /// `NotesViewModel`（卷帘）—— 上游把这条链路接在 `MainWindow.axaml.cs` 的指针状态机里，
+    /// 那是布局线的文件。改成一条进程内消息后，两边各自处理自己的一半：
+    /// `PartControl` 发"我想滚到哪"，`PianoRoll` 收下后按自己的上限钳制并写入 VM。
+    /// 只改视口，不产生撤销步骤。
+    /// </summary>
+    public class PianoRollViewportScrollEvent {
+        public readonly double TickOffset;
+        public PianoRollViewportScrollEvent(double tickOffset) {
+            TickOffset = tickOffset;
+        }
+    }
+
     class PartsCanvas : Canvas {
         public static readonly DirectProperty<PartsCanvas, double> TickWidthProperty =
             AvaloniaProperty.RegisterDirect<PartsCanvas, double>(

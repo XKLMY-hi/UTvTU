@@ -1183,11 +1183,22 @@ General
   <system:String x:Key="sidebar.effects.search">Search plugins</system:String>
   <system:String x:Key="sidebar.effects.countlabel">plugins</system:String>
   <system:String x:Key="sidebar.effects.scanning">Scanning…</system:String>
-  <system:String x:Key="sidebar.effects.empty">No effect plugins found. Add a scan path below, then rescan.</system:String>
+  <system:String x:Key="sidebar.effects.empty">No effect plugins found yet. Use the button below to add the standard VST3 folders and scan, or add a scan path manually.</system:String>
   <system:String x:Key="sidebar.effects.nomatch">No plugins match your search</system:String>
   <system:String x:Key="sidebar.effects.paths">Scan paths</system:String>
   <system:String x:Key="sidebar.effects.paths.manage">Manage plugin scan paths</system:String>
   <system:String x:Key="sidebar.effects.paths.watermark">C:\Path\To\VST\Plugins</system:String>
   <system:String x:Key="sidebar.effects.paths.hint">Shared with Preferences → VST: changes made in either place stay in sync.</system:String>
   <!-- /mx-lib -->
+  <!-- ⚠ mx-paths: W11 标准 VST 扫描路径播种 + 一键添加（素材库空态与偏好设置 VST 页共用此键）—— EN/zh 成对 -->
+  <system:String x:Key="sidebar.effects.addstandard">Add standard VST3 folders &amp; scan</system:String>
+  <!-- /mx-paths -->
+  <!-- ⚠ panel: W16 面板系统（可调宽 / 可折叠 / 重置布局）—— EN/zh 成对 -->
+  <system:String x:Key="panel.toggle.tracks">Track headers</system:String>
+  <system:String x:Key="panel.toggle.library">Library</system:String>
+  <system:String x:Key="panel.reset">Reset panel layout</system:String>
+  <system:String x:Key="panel.collapse.tracks">Collapse track headers</system:String>
+  <system:String x:Key="panel.collapse.library">Collapse library</system:String>
+  <system:String x:Key="panel.drag.hint">Drag to resize · double-click to reset width</system:String>
+  <!-- /panel -->
 </ResourceDictionary>

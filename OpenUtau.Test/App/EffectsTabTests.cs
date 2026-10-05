@@ -15,6 +15,7 @@ using OpenUtau.App.Views;
 using OpenUtau.Core;
 using OpenUtau.Core.Util;
 using OpenUtau.Core.Vst;
+using OpenUtau.Test.TestSupport;
 using OpenUtau.Theming;
 using Xunit;
 
@@ -33,11 +34,12 @@ namespace OpenUtau.Test.App {
         /// <summary>与语言无关的键（路径示例），EN/zh 取值**应当相同**。</summary>
         static readonly string[] LanguageNeutralKeys = { "sidebar.effects.paths.watermark" };
 
-        /// <summary>W4 新增的字符串键（fx-rack 之外的 mx-lib 区块；EN/zh 各一份）。</summary>
+        /// <summary>W4 新增的字符串键（mx-lib 区块）＋ W11 一键标准路径键（mx-paths 区块）。</summary>
         static readonly string[] NewKeys = {
             "sidebar.effects.search", "sidebar.effects.countlabel", "sidebar.effects.scanning",
             "sidebar.effects.empty", "sidebar.effects.nomatch", "sidebar.effects.paths",
             "sidebar.effects.paths.manage", "sidebar.effects.paths.watermark", "sidebar.effects.paths.hint",
+            "sidebar.effects.addstandard",
         };
 
         static VstPluginInfo Info(string uid, string name, string vendor, VstPluginType type, bool isEffect = true) =>
@@ -302,44 +304,229 @@ namespace OpenUtau.Test.App {
             Assert.Contains("Click=\"OnToggleVstPathManager\"", code);
             Assert.Contains("Click=\"OnAddVstPathFromLibrary\"", code);
             Assert.Contains("Click=\"OnRemoveVstPathFromLibrary\"", code);
+            // W11：空态一键加标准路径（同一键在偏好设置 VST 页也有入口）
+            Assert.Contains("Click=\"OnAddStandardVstPathsFromLibrary\"", code);
+            Assert.Contains("{DynamicResource sidebar.effects.addstandard}", code);
+            string prefsXaml = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Views", "PreferencesView.axaml"));
+            Assert.Contains("Click=\"OnAddStandardVstPaths\"", prefsXaml);
+            Assert.Contains("{DynamicResource sidebar.effects.addstandard}", prefsXaml);
         }
 
-        // ── 文案 ────────────────────────────────────────────────────────────
+        // ── W11：标准扫描路径播种 + 一键添加 ───────────────────────────────
+
+        /// <summary>
+        /// 假的取目录提供者：把 SpecialFolder 映射到临时目录树；
+        /// 只建两个标准目录（CommonFiles\VST3、ProgramFiles\Common Files\VST3），
+        /// 故意**不建** LocalApplicationData/ProgramFilesX86 那两个 ⇒ 可验证"只播种存在的目录"。
+        /// </summary>
+        sealed class FakeFolders : IDisposable {
+            readonly string root = Path.Combine(Path.GetTempPath(), "utvtu-w11-" + Guid.NewGuid().ToString("N"));
+
+            public FakeFolders() {
+                Directory.CreateDirectory(Path.Combine(root, "CommonFiles", "VST3"));
+                Directory.CreateDirectory(Path.Combine(root, "ProgramFiles", "Common Files", "VST3"));
+            }
+
+            public string Get(Environment.SpecialFolder folder) => folder switch {
+                Environment.SpecialFolder.CommonProgramFiles => Path.Combine(root, "CommonFiles"),
+                Environment.SpecialFolder.ProgramFiles => Path.Combine(root, "ProgramFiles"),
+                Environment.SpecialFolder.ProgramFilesX86 => Path.Combine(root, "MissingX86"),
+                Environment.SpecialFolder.LocalApplicationData => Path.Combine(root, "LocalAppData"),
+                Environment.SpecialFolder.UserProfile => Path.Combine(root, "User"),
+                _ => Path.Combine(root, "Other"),
+            };
+
+            public void Dispose() {
+                try { Directory.Delete(root, true); } catch { /* 清理失败无所谓 */ }
+            }
+        }
+
+        /// <summary>备份/恢复全局 Preferences 的两个字段（用例会写 Preferences.Default 并 Save）。</summary>
+        static void WithVstPathPrefs(Action body) {
+            List<string> paths = Preferences.Default.VstScanPaths?.ToList() ?? new List<string>();
+            bool seeded = Preferences.Default.VstScanPathsSeeded;
+            try {
+                body();
+            } finally {
+                Preferences.Default.VstScanPaths = paths;
+                Preferences.Default.VstScanPathsSeeded = seeded;
+                Preferences.Save();
+            }
+        }
 
         [AvaloniaFact]
-        public void EffectsTab_NewKeys_ResolveInBothLanguages() {
-            var en = new Dictionary<string, string>();
-            OpenUtau.App.App.SetLanguage("en-US");
-            foreach (string key in NewKeys) {
-                Assert.True(ThemeManager.TryGetString(key, out string value), $"EN 缺键：{key}");
-                Assert.NotEqual(key, value);
-                Assert.False(string.IsNullOrWhiteSpace(value), $"EN 空值：{key}");
-                en[key] = value;
-            }
-            OpenUtau.App.App.SetLanguage("zh-CN");
+        public void StandardPaths_AreChosenPerPlatform() {
+            using var folders = new FakeFolders();
+            string root = folders.Get(Environment.SpecialFolder.CommonProgramFiles);
+            root = Path.GetDirectoryName(root)!;      // ...\<root>\CommonFiles → <root>
+
+            var windows = Preferences.StandardVstScanPaths(Preferences.VstPathPlatform.Windows, folders.Get);
+            Assert.Equal(4, windows.Count);                                   // 四个候选（存在与否由播种阶段判）
+            Assert.Contains(Path.Combine(root, "CommonFiles", "VST3"), windows);
+            Assert.Contains(Path.Combine(root, "ProgramFiles", "Common Files", "VST3"), windows);
+            Assert.Contains(Path.Combine(root, "LocalAppData", "Programs", "Common", "VST3"), windows);
+
+            var mac = Preferences.StandardVstScanPaths(Preferences.VstPathPlatform.MacOS, folders.Get);
+            Assert.Contains("/Library/Audio/Plug-Ins/VST3", mac);
+            Assert.Contains(Path.Combine(root, "User", "Library", "Audio", "Plug-Ins", "VST3"), mac);
+
+            var linux = Preferences.StandardVstScanPaths(Preferences.VstPathPlatform.Linux, folders.Get);
+            Assert.Contains(Path.Combine(root, "User", ".vst3"), linux);
+            Assert.Contains("/usr/lib/vst3", linux);
+
+            // 平台判定本身：本机是 Windows
+            Assert.Equal(Preferences.VstPathPlatform.Windows, Preferences.CurrentVstPathPlatform());
+        }
+
+        [AvaloniaFact]
+        public void SeedStandardPaths_IsIdempotent_AndDoesNotResurrect() {
+            WithVstPathPrefs(() => {
+                using var folders = new FakeFolders();
+                Preferences.Default.VstScanPaths = new List<string>();
+                Preferences.Default.VstScanPathsSeeded = false;
+
+                int added = Preferences.SeedStandardVstScanPathsOnce(Preferences.VstPathPlatform.Windows, folders.Get);
+                Assert.Equal(2, added);                                       // 只加真实存在的两个目录
+                List<string> afterFirst = Preferences.Default.VstScanPaths.ToList();
+                Assert.Equal(2, afterFirst.Count);
+                Assert.True(Preferences.Default.VstScanPathsSeeded);
+
+                // 幂等：再播种一次不重复
+                Assert.Equal(-1, Preferences.SeedStandardVstScanPathsOnce(Preferences.VstPathPlatform.Windows, folders.Get));
+                Assert.Equal(afterFirst, Preferences.Default.VstScanPaths.ToList());
+
+                // 用户删掉标准路径 ⇒ 不复活（"已播种"标记已置位）
+                Preferences.Default.VstScanPaths.Clear();
+                Assert.Equal(-1, Preferences.SeedStandardVstScanPathsOnce(Preferences.VstPathPlatform.Windows, folders.Get));
+                Assert.Empty(Preferences.Default.VstScanPaths);
+
+                // 用户主动点按钮 ⇒ 不受标记限制，可以加回来
+                Assert.Equal(2, Preferences.AddStandardVstScanPaths(Preferences.VstPathPlatform.Windows, folders.Get));
+                Assert.Equal(2, Preferences.Default.VstScanPaths.Count);
+            });
+        }
+
+        [AvaloniaFact]
+        public void AddStandardPaths_SkipsMissingDirectories_AndDedupes() {
+            WithVstPathPrefs(() => {
+                using var folders = new FakeFolders();
+                Preferences.Default.VstScanPaths = new List<string>();
+                Assert.Equal(2, Preferences.AddStandardVstScanPaths(Preferences.VstPathPlatform.Windows, folders.Get));
+                Assert.Equal(0, Preferences.AddStandardVstScanPaths(Preferences.VstPathPlatform.Windows, folders.Get)); // 已在列表里
+            });
+        }
+
+        /// <summary>
+        /// 空表 ⇒ 播种 + 自动首扫（且只扫一次）；缓存已有插件 ⇒ **不扫**（返回 null，无后台残留）。
+        /// W12：`EnsureFirstScan` 返回首扫任务，用例 await 它 —— 不留"扫描还在跑、用例已结束"的窗口。
+        /// </summary>
+        [AvaloniaFact]
+        public async Task Browser_EnsureFirstScan_SeedsAndScansOnlyWhenEmpty() {
+            List<string> backupPaths = Preferences.Default.VstScanPaths?.ToList() ?? new List<string>();
+            bool backupSeeded = Preferences.Default.VstScanPathsSeeded;
             try {
-                foreach (string key in NewKeys) {
-                    Assert.True(ThemeManager.TryGetString(key, out string value), $"zh-CN 缺键：{key}");
-                    Assert.NotEqual(key, value);
-                    if (LanguageNeutralKeys.Contains(key)) {
-                        Assert.Equal(en[key], value);   // 路径示例：两语相同（有意为之）
-                    } else {
-                        // 与英文不同 ⇒ zh 字典确实有该键（否则会回退成英文值）
-                        Assert.NotEqual(en[key], value);
-                    }
-                }
+                using var folders = new FakeFolders();
+                Preferences.Default.VstScanPaths = new List<string>();
+                Preferences.Default.VstScanPathsSeeded = false;
+
+                var plugins = new List<VstPluginInfo>();
+                int scans = 0;
+                using var vm = new PluginBrowserViewModel(
+                    () => plugins,
+                    () => {
+                        scans++;
+                        plugins.Add(Info("uid-a", "Amp", "Acme", VstPluginType.VST3));   // 首扫后有了
+                    });
+                Assert.Empty(vm.Plugins);
+                await vm.EnsureFirstScan(Preferences.VstPathPlatform.Windows, folders.Get);
+                Assert.Null(vm.EnsureFirstScan(Preferences.VstPathPlatform.Windows, folders.Get));   // 幂等：第二次不再触发（返回 null）
+
+                Assert.Equal(1, scans);
+                Assert.Equal(2, vm.ScanPaths.Count);        // 播种的标准路径进了页面列表
+                Assert.Equal(2, Preferences.Default.VstScanPaths.Count);
+                Assert.Single(vm.Plugins);                  // 首扫结果落到列表
+                Assert.False(vm.IsScanning);
+
+                // 缓存里已有插件：不再自动扫（返回 null 即"没触发扫描"）
+                int scans2 = 0;
+                using var cached = new PluginBrowserViewModel(() => SamplePlugins(), () => scans2++);
+                Task? triggered = cached.EnsureFirstScan(Preferences.VstPathPlatform.Windows, folders.Get);
+                Assert.Null(triggered);
+                Assert.Equal(0, scans2);
+                Assert.Equal(2, cached.Plugins.Count);      // 缓存里的插件照常显示
             } finally {
-                OpenUtau.App.App.SetLanguage("en-US");
+                Preferences.Default.VstScanPaths = backupPaths;
+                Preferences.Default.VstScanPathsSeeded = backupSeeded;
+                Preferences.Save();
+            }
+        }
+
+        [AvaloniaFact]
+        public async Task Browser_AddStandardPathsAndScan_AddsAndScans() {
+            List<string> backupPaths = Preferences.Default.VstScanPaths?.ToList() ?? new List<string>();
+            bool backupSeeded = Preferences.Default.VstScanPathsSeeded;
+            try {
+                using var folders = new FakeFolders();
+                Preferences.Default.VstScanPaths = new List<string>();
+                Preferences.Default.VstScanPathsSeeded = false;
+
+                int scans = 0;
+                using var vm = new PluginBrowserViewModel(() => SamplePlugins(), () => scans++);
+                int added = await vm.AddStandardPathsAndScanAsync(Preferences.VstPathPlatform.Windows, folders.Get);
+
+                Assert.Equal(2, added);                                     // 两个存在的标准目录
+                Assert.Equal(1, scans);                                     // 顺带重扫
+                Assert.Equal(2, vm.ScanPaths.Count);                        // 页面列表跟着更新
+                Assert.Equal(2, Preferences.Default.VstScanPaths.Count);    // 唯一存储
+                Assert.False(Preferences.Default.VstScanPathsSeeded);       // 用户主动添加不置"已播种"标记
+            } finally {
+                Preferences.Default.VstScanPaths = backupPaths;
+                Preferences.Default.VstScanPathsSeeded = backupSeeded;
+                Preferences.Save();
+            }
+        }
+
+        // ── 文案（W12：直接读资源字典，不再动进程级语言状态）────────────────
+
+        /// <summary>
+        /// 新增键在 EN / zh 两侧都存在且取值不同（取值相同 ⇒ 该键在 zh 缺失、回退成了英文）。
+        /// **不调用 App.SetLanguage**：语言是进程级全局状态，切换窗口期会污染并行用例（集成树里
+        /// 那次"Light 偶发失败"最可能的来源）。直接加载两份字典还顺带断言**键集完全一致**。
+        /// </summary>
+        [AvaloniaFact]
+        public void EffectsTab_NewKeys_ResolveInBothLanguages() {
+            ResourceDictionary enDict = StringDictionaryProbe.English();
+            ResourceDictionary zhDict = StringDictionaryProbe.Chinese();
+
+            // 两个语言文件的键集必须完全一致（新增/漏翻会立刻暴露）
+            var enKeys = StringDictionaryProbe.Keys(enDict);
+            var zhKeys = StringDictionaryProbe.Keys(zhDict);
+            var missingInZh = enKeys.Except(zhKeys).OrderBy(k => k, StringComparer.Ordinal).ToList();
+            var missingInEn = zhKeys.Except(enKeys).OrderBy(k => k, StringComparer.Ordinal).ToList();
+            Assert.True(missingInZh.Count == 0, "zh 缺键：" + string.Join(", ", missingInZh));
+            Assert.True(missingInEn.Count == 0, "en 缺键：" + string.Join(", ", missingInEn));
+
+            foreach (string key in NewKeys) {
+                string? en = StringDictionaryProbe.Value(enDict, key);
+                string? zh = StringDictionaryProbe.Value(zhDict, key);
+                Assert.False(string.IsNullOrWhiteSpace(en), $"EN 缺键/空值：{key}");
+                Assert.False(string.IsNullOrWhiteSpace(zh), $"zh-CN 缺键/空值：{key}");
+                if (LanguageNeutralKeys.Contains(key)) {
+                    Assert.Equal(en, zh);      // 路径示例：两语相同（有意为之）
+                } else {
+                    Assert.NotEqual(en, zh);
+                }
             }
         }
 
         /// <summary>复用既有键（不新增平行文案）：路径管理按钮与重扫按钮沿用偏好设置那套。</summary>
         [AvaloniaFact]
         public void EffectsTab_ReusesPreferenceKeys() {
-            OpenUtau.App.App.SetLanguage("en-US");
+            ResourceDictionary en = StringDictionaryProbe.English();
+            ResourceDictionary zh = StringDictionaryProbe.Chinese();
             foreach (string key in new[] { "prefs.vst.add", "prefs.vst.remove", "prefs.vst.rescan", "prefs.vst.scanpaths" }) {
-                Assert.True(ThemeManager.TryGetString(key, out string value), $"缺键：{key}");
-                Assert.NotEqual(key, value);
+                Assert.False(string.IsNullOrWhiteSpace(StringDictionaryProbe.Value(en, key)), $"EN 缺键：{key}");
+                Assert.False(string.IsNullOrWhiteSpace(StringDictionaryProbe.Value(zh, key)), $"zh 缺键：{key}");
             }
         }
     }

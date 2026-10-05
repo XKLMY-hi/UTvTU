@@ -38,10 +38,14 @@
   <ItemGroup>
     <None Include="Usts\**" CopyToOutputDirectory="PreserveNewest" LinkBase="Usts\" />
     <None Include="Files\**" CopyToOutputDirectory="PreserveNewest" LinkBase="Files\" />
+    <!-- W7 音频验收装置：纯文本 .ustxp 测试工程 fixture（Ustxp.Load 读入用） -->
+    <None Include="Fixtures\**" CopyToOutputDirectory="PreserveNewest" LinkBase="Fixtures\" />
     <None Include="Core\Theming\Data\**" CopyToOutputDirectory="PreserveNewest" LinkBase="Core\Theming\Data\" />
     <!-- 视图 XAML 源码：契约测试需要扫描资源键（avares 不保留 .axaml 原文） -->
     <None Include="..\OpenUtau\Views\WelcomeView.axaml" Link="Views\WelcomeView.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Views\MainWindow.axaml" Link="Views\MainWindow.axaml" CopyToOutputDirectory="PreserveNewest" />
+    <!-- W16 面板系统：分隔条控件的视觉口径（细轨/命中区/hover 主色）按源码契约断言 -->
+    <None Include="..\OpenUtau\Controls\PanelSplitter.axaml" Link="Controls\PanelSplitter.axaml" CopyToOutputDirectory="PreserveNewest" />
     <!-- 窗口源码：S5 视图化的窗口层接线（胶囊 → 切视图、分离/收回）无法 headless 起窗，只能按源码契约断言 -->
     <None Include="..\OpenUtau\Views\MainWindow.axaml.cs" Link="Views\MainWindow.axaml.cs" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Views\PreferencesView.axaml" Link="Views\PreferencesView.axaml" CopyToOutputDirectory="PreserveNewest" />
@@ -55,4 +59,16 @@
     <None Include="..\OpenUtau\Styles\Md3Menus.axaml" Link="Styles\Md3Menus.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Views\MixFxDialog.axaml" Link="Views\MixFxDialog.axaml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+
+  <!-- W12：单文件 .vst3 与「老式 bundle 回退」都走子进程探针（VstProbeProcess 在 <appdir> 下找
+       vst_probe.exe）。测试宿主过去不复制它 ⇒ 扫描链在测试环境里必然空转，所有单文件 VST3
+       都扫不到（会被误读成"这台机器没有插件"）。与主工程 OpenUtau.csproj 的 CopyVstProbe 同款做法。 -->
+  <Target Name="CopyVstProbeToTestOutput" AfterTargets="Build">
+    <MSBuild Projects="..\VstProbe\VstProbe.csproj" Targets="Build" />
+    <!-- 复制 vst_probe 全部产物：apphost 运行需要同目录的 dll + runtimeconfig.json -->
+    <ItemGroup>
+      <VstProbeFiles Include="..\VstProbe\bin\$(Configuration)\net8.0\vst_probe.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(VstProbeFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

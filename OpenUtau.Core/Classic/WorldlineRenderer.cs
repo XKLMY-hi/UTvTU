@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -23,11 +23,13 @@ namespace OpenUtau.Classic {
         readonly double frameMs;
         byte[]? vocoderBytes;
 
-        /// <summary>按缓存文件路径串行化读写（上游 9138af6e 同款修复）。同一乐句可能被
+        /// <summary>按缓存文件路径串行化读写（上游 9138af6e/5d17f141 同款修复，统一用
+        /// <see cref="Renderers.GetCacheLock"/> 的进程级 per-path 锁表）。同一乐句可能被
         /// 多个渲染任务同时认领（并行短语渲染 / 批 2 后台继续 / 导出与播放并发），而缓存
         /// 文件按短语 hash 命名——不加锁会"读到半截文件"（samples 为空 → 重复合成）或
-        /// 读写交错（读到损坏数据）。</summary>
-        static readonly ConcurrentDictionary<string, object> cacheFileLocks = new();
+        /// 读写交错（读到损坏数据）。用共享锁表还让 SharpWavtool 的缓存读取与
+        /// ClassicRenderer/resampler 的写入互斥（此前两边各用一把锁，等于没锁）。</summary>
+        static object CacheLock(string path) => Renderers.GetCacheLock(path);
 
         public WorldlineRenderer(int version) {
             if (version != 1 && version != 2) {
@@ -81,7 +83,7 @@ namespace OpenUtau.Classic {
                 phrase.AddCacheFile(wavPath);
                 string progressInfo = $"Track {trackNo + 1}: {this} {string.Join(" ", phrase.phones.Select(p => p.phoneme))}";
                 progress.Complete(0, progressInfo);
-                var cacheLock = cacheFileLocks.GetOrAdd(wavPath, _ => new object());
+                var cacheLock = CacheLock(wavPath);
                 lock (cacheLock) {
                     if (File.Exists(wavPath)) {
                         using (var waveStream = Wave.OpenFile(wavPath)) {

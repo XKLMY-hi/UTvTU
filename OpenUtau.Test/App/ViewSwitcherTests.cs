@@ -76,20 +76,21 @@ namespace OpenUtau.Test.App {
         [AvaloniaFact]
         public void Views_CoverWorkspaceRow_DockedRowsRetired() {
             string xaml = Xaml();
-            // 工作台 = 三列（轨头 264 / 编排 / 素材库 296），列宽固定；两个整行视图宿主铺满这三列
-            Assert.Contains("x:Name=\"MainLayout\" ColumnDefinitions=\"264,*,296\"", xaml);
+            // 工作台 = 五列（W16 面板系统：左面板 / 分隔条 / 编排 / 分隔条 / 右面板）；
+            // 面板列宽来自绑定（Auto + 面板 Width），中央星号列吃掉剩余 ⇒ 两个整行视图宿主铺满这五列
+            Assert.Contains("x:Name=\"MainLayout\" ColumnDefinitions=\"Auto,Auto,*,Auto,Auto\"", xaml);
             Assert.Contains("x:Name=\"ArrangementArea\"", xaml);
             Assert.Contains("x:Name=\"PianoRollContainer\"", xaml);
             Assert.Contains("x:Name=\"MixerContainer\"", xaml);
             Assert.Contains("IsVisible=\"{Binding ViewSwitcher.ShowPianoRoll}\"", xaml);
             Assert.Contains("IsVisible=\"{Binding ViewSwitcher.ShowMixer}\"", xaml);
-            // 视图宿主跨列：卷帘铺满三列；**混音台只铺前两列**——第 3 列留给素材库列，
+            // 视图宿主跨列：卷帘铺满五列；**混音台只铺前四列**——最后一列留给素材库列，
             // 这样「素材库 → 效果器页签 → 拖入右侧链面板」这条 B3/B6 主路径才真实可达
-            // （决策偏离：设计稿的混音台是「满宽」，我们让出 296 给素材库；通道条区本就横向滚动）。
-            int spanAll = xaml.Split("Grid.Column=\"0\" Grid.ColumnSpan=\"3\"").Length - 1;
-            Assert.True(spanAll >= 1, $"卷帘宿主应跨三列，实际出现 {spanAll} 次");
-            int spanTwo = xaml.Split("Grid.Column=\"0\" Grid.ColumnSpan=\"2\"").Length - 1;
-            Assert.True(spanTwo >= 1, $"混音台宿主应跨前两列，实际出现 {spanTwo} 次");
+            // （决策偏离：设计稿的混音台是「满宽」，我们让出素材库列给插件浏览器；通道条区本就横向滚动）。
+            int spanAll = xaml.Split("Grid.Column=\"0\" Grid.ColumnSpan=\"5\"").Length - 1;
+            Assert.True(spanAll >= 1, $"卷帘宿主应跨五列，实际出现 {spanAll} 次");
+            int spanTwo = xaml.Split("Grid.Column=\"0\" Grid.ColumnSpan=\"4\"").Length - 1;
+            Assert.True(spanTwo >= 1, $"混音台宿主应跨前四列，实际出现 {spanTwo} 次");
             // 素材库列改由 ShowLibrary 控制（工作台 + 混音台都可见；卷帘不显示）
             Assert.Contains("IsVisible=\"{Binding ViewSwitcher.ShowLibrary}\"", xaml);
             // 工作台各列随视图显隐（列宽本身不变 ⇒ 几何恒定、无抖动）：
