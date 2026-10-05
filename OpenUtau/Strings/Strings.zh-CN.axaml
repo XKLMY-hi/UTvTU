@@ -1332,4 +1332,7 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="panel.collapse.library">折叠素材库</system:String>
   <system:String x:Key="panel.drag.hint">拖动调宽 · 双击分隔条恢复默认宽度</system:String>
   <!-- /panel -->
+  <!-- ⚠ mx-strip: W19 混音台链面板折叠入口（宿主侧 chevron）—— EN/zh 成对 -->
+  <system:String x:Key="panel.collapse.fxchain">折叠效果链面板</system:String>
+  <!-- /mx-strip -->
 </ResourceDictionary>

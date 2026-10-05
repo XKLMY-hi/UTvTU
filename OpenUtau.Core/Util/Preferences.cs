@@ -457,6 +457,12 @@ errors.txt
             /// 比设计稿 296 瘦 24px；展开态下卡片与「N 已安装」计数仍完整。</summary>
             public double LibraryWidth = 272;
             public bool LibraryCollapsed = false;
+
+            /// <summary>混音台右侧效果链面板（W19 接入）。默认 280：链行解剖实测固定件 136
+            /// （把手 24 + 序号 24 + 旁通 44 + 移除 22 + 内边距/边框 22）⇒ 280 给"名称+徽标"列约 115px，
+            /// 长 VST 名可读且不挤；Min 264 保住名称列 ~99px，Max 480 让最长名+副标题+状态角标全展开。</summary>
+            public double MixerChainWidth = 280;
+            public bool MixerChainCollapsed = false;
         }
 
         /// <summary>
