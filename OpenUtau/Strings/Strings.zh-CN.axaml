@@ -1382,5 +1382,7 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="welcome.import.description">从音频文件加入一条轨道</system:String>
   <system:String x:Key="welcome.template.description">从已保存的模板开始</system:String>
   <system:String x:Key="welcome.template.tip">选择模板</system:String>
+  <system:String x:Key="welcome.recent.empty">还没有最近工程 —— 用下面的“新建工程”开始一个。</system:String>
+  <system:String x:Key="welcome.template.empty">暂无模板。</system:String>
   <!-- /welcome -->
 </ResourceDictionary>

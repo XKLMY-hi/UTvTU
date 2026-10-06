@@ -208,39 +208,11 @@
             </ItemsControl.ItemTemplate>
           </ItemsControl>
 
-          <!-- 标语 + 描述 -->
-          <TextBlock Classes="headline" Margin="0,24,0,0" Text="{DynamicResource welcome.brand.headline}"/>
-          <TextBlock Margin="0,12,0,0" FontSize="15" LineHeight="23" TextWrapping="Wrap"
-                     Foreground="{DynamicResource md3.on-surface-variant}"
-                     Text="{DynamicResource welcome.brand.description}"/>
+          <!-- 文案已删（用户裁决：工作台内嵌视图不做营销）：大标语 / 描述段 / 能力行 -->
 
-          <!-- 能力行 ×3（稿的 Features：18 图标 + 14 文案） -->
-          <StackPanel Margin="0,24,0,0" Spacing="12">
-            <StackPanel Orientation="Horizontal" Spacing="12">
-              <Path Data="{StaticResource icon-equalizer}" Width="18" Height="18" Stretch="Uniform"
-                    VerticalAlignment="Center" Fill="{DynamicResource md3.on-surface-variant}"/>
-              <TextBlock FontSize="14" VerticalAlignment="Center"
-                         Foreground="{DynamicResource md3.on-surface-variant}"
-                         Text="{DynamicResource welcome.feature.voicebank}"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Spacing="12">
-              <Path Data="{StaticResource icon-pencil}" Width="18" Height="18" Stretch="Uniform"
-                    VerticalAlignment="Center" Fill="{DynamicResource md3.on-surface-variant}"/>
-              <TextBlock FontSize="14" VerticalAlignment="Center"
-                         Foreground="{DynamicResource md3.on-surface-variant}"
-                         Text="{DynamicResource welcome.feature.lyrics}"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Spacing="12">
-              <Path Data="{StaticResource icon-layout}" Width="18" Height="18" Stretch="Uniform"
-                    VerticalAlignment="Center" Fill="{DynamicResource md3.on-surface-variant}"/>
-              <TextBlock FontSize="14" VerticalAlignment="Center"
-                         Foreground="{DynamicResource md3.on-surface-variant}"
-                         Text="{DynamicResource welcome.feature.host}"/>
-            </StackPanel>
-          </StackPanel>
 
           <!-- Plus 保留：快捷入口（降级到第三层；10px 小标题 + 32 高行） -->
-          <TextBlock Classes="caption" Margin="0,28,0,6" FontSize="10"
+          <TextBlock Classes="caption" Margin="0,24,0,6" FontSize="10"
                      Text="{DynamicResource welcome.quicklinks}"/>
           <StackPanel>
             <Button Classes="welcome linkRow" Click="OnWiki">
@@ -333,8 +305,7 @@
       <StackPanel Grid.Row="0" Spacing="6">
         <TextBlock Text="{DynamicResource welcome.start}" FontSize="30"
                    Foreground="{DynamicResource md3.on-surface}"/>
-        <TextBlock Text="{DynamicResource welcome.greeting.sub}" FontSize="15"
-                   Foreground="{DynamicResource md3.on-surface-variant}"/>
+
       </StackPanel>
 
       <!-- 动作卡 2×2（稿 2 张 + Plus 的 导入轨道 / 模板；同卡片几何） -->
@@ -391,7 +362,7 @@
         </Button>
 
         <Button Grid.Row="1" Grid.Column="1" Classes="welcome actionCard" Margin="8,16,0,0"
-                IsVisible="{Binding TemplateFiles.Count}" Click="OnShowTemplates"
+                Click="OnShowTemplates"
                 ToolTip.Tip="{DynamicResource welcome.template.tip}">
           <FlyoutBase.AttachedFlyout>
             <Flyout Placement="BottomEdgeAlignedLeft"
@@ -399,6 +370,10 @@
               <Border Background="{DynamicResource md3.surface-container-high}"
                       BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="1"
                       CornerRadius="12" Padding="6" MinWidth="240" MaxHeight="320">
+                  <StackPanel>
+                    <TextBlock Classes="caption" Margin="10,8,10,6" FontSize="12"
+                               Text="{DynamicResource welcome.template.empty}"
+                               IsVisible="{Binding !TemplateFiles.Count}"/>
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled">
                   <ItemsControl ItemsSource="{Binding TemplateFiles}">
                     <ItemsControl.ItemTemplate>
@@ -415,7 +390,8 @@
                       </DataTemplate>
                     </ItemsControl.ItemTemplate>
                   </ItemsControl>
-                </ScrollViewer>
+                  </ScrollViewer>
+                  </StackPanel>
               </Border>
             </Flyout>
           </FlyoutBase.AttachedFlyout>
@@ -505,7 +481,7 @@
         </ScrollViewer>
 
         <TextBlock Grid.Row="2" Margin="4,4,0,0" FontSize="12"
-                   Text="{DynamicResource welcome.open.description}"
+                   Text="{DynamicResource welcome.recent.empty}"
                    Foreground="{DynamicResource md3.on-surface-variant}"
                    IsVisible="{Binding !RecentFiles.Count}"/>
       </Grid>

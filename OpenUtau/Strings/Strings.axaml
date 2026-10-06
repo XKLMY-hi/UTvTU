@@ -1251,5 +1251,7 @@ General
   <system:String x:Key="welcome.import.description">Add a track from an audio file</system:String>
   <system:String x:Key="welcome.template.description">Start from a saved template</system:String>
   <system:String x:Key="welcome.template.tip">Pick a template</system:String>
+  <system:String x:Key="welcome.recent.empty">No recent projects yet — start one with New project below.</system:String>
+  <system:String x:Key="welcome.template.empty">No templates yet.</system:String>
   <!-- /welcome -->
 </ResourceDictionary>

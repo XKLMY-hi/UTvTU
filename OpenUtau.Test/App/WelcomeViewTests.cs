@@ -7,6 +7,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using OpenUtau.App;
 using OpenUtau.App.Views;
@@ -69,7 +70,8 @@ namespace OpenUtau.Test.App {
             Assert.Contains("md3.surface-container", xaml);
             Assert.DoesNotContain("md3.primary-container", xaml);
             // 字号阶梯（稿值抽查）
-            foreach (int size in new[] { 34, 30, 26, 18, 15, 14, 13, 12, 11 }) {
+            // 34px 英雄字号已按用户裁决删除（营销文案整块移除）⇒ 阶梯最高 30（右栏标题）
+            foreach (int size in new[] { 30, 26, 18, 15, 14, 13, 12, 11 }) {
                 // 属性形态或样式 Setter 形态都算（两种在本页都有使用）
                 Assert.True(xaml.Contains($"FontSize=\"{size}\"", StringComparison.Ordinal)
                     || xaml.Contains($"<Setter Property=\"FontSize\" Value=\"{size}\"/>", StringComparison.Ordinal),
@@ -102,6 +104,49 @@ namespace OpenUtau.Test.App {
             Assert.Equal(1.0, bars.Max(b => b.Opacity), 3);
             Assert.All(bars, b => Assert.InRange(b.Opacity, 0.4, 1.0));
             Assert.All(bars, b => Assert.InRange(b.Height, 18, 132));
+        }
+
+        /// <summary>
+        /// **布局层**断言：4 张动作卡在两个窗口尺寸下都真的渲染（`IsVisible` 且 `Bounds` 非零）。
+        /// 上一轮"第 4 张卡（模板）没渲染"就是因为只断言了 `Click=` 处理器在座、没断言可见性与尺寸
+        /// —— 当时模板卡带 `IsVisible="{Binding TemplateFiles.Count}"`，本机无模板 ⇒ 2×2 网格留洞。
+        /// </summary>
+        [AvaloniaTheory]
+        [InlineData(1226.0, 699.0)]
+        [InlineData(1000.0, 660.0)]
+        public void WelcomeView_FourActionCards_AreLaidOut(double width, double height) {
+            UsePool();
+            var view = new WelcomeView();
+            var window = new Window { Width = width, Height = height, Content = view };
+            window.Show();
+            try {
+                Dispatcher.UIThread.RunJobs();
+                var cards = Buttons(view).Where(b => HasClass(b, "actionCard")).ToList();
+                Assert.Equal(4, cards.Count);
+                for (int i = 0; i < cards.Count; i++) {
+                    Button card = cards[i];
+                    Assert.True(card.IsVisible, $"{width}x{height}: 第 {i + 1} 张动作卡不可见");
+                    Assert.True(card.Bounds.Width > 0 && card.Bounds.Height > 0,
+                        $"{width}x{height}: 第 {i + 1} 张动作卡无尺寸（{card.Bounds.Width}x{card.Bounds.Height}）");
+                }
+            } finally {
+                window.Close();
+            }
+        }
+
+        /// <summary>空态文案必须是专用键（此前复用 `welcome.open.description` ⇒ 空态显示"打开本地项目"）。</summary>
+        [AvaloniaFact]
+        public void WelcomeView_EmptyState_UsesItsOwnKey() {
+            string xaml = ReadXaml("WelcomeView.axaml");
+            Assert.Contains("welcome.recent.empty", xaml);
+            Assert.Contains("welcome.template.empty", xaml);
+            // 只针对**空态元素**：其 Text= 必须是专用键（动作卡副标题用 welcome.open.description 是合理的）
+            var emptyState = Regex.Match(xaml,
+                "Text=\"\\{DynamicResource (welcome\\.[A-Za-z0-9_.]+)\\}\"[\\s\\S]{0,200}?IsVisible=\"\\{Binding !RecentFiles\\.Count\\}\"");
+            Assert.True(emptyState.Success, "找不到最近工程的空态元素");
+            Assert.Equal("welcome.recent.empty", emptyState.Groups[1].Value);
+            // 模板卡不得再按"有无模板"隐藏（否则留洞）
+            Assert.DoesNotContain("IsVisible=\"{Binding TemplateFiles.Count}\"", xaml);
         }
 
         // ══════════════════════ 键盘可达（本轮缺陷修复） ══════════════════════
