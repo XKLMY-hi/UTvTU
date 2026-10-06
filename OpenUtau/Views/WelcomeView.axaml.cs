@@ -24,9 +24,8 @@ namespace OpenUtau.App.Views {
 
         public WelcomeView() {
             InitializeComponent();
-            // 几何波形：26 根柱（设计稿逐值），纯装饰、无业务状态 ⇒ 由美术数据直接喂；
-            // 高度按可用空间弹性取值（132…200），柱高等比缩放 ⇒ 不变形
-            WaveformBars.ItemsSource = WelcomeArt.Scaled(WaveformBars.Height);
+            // 波形：真实包络几何（资源字典 welcome-waveform），纯装饰、无业务状态；
+            // 高度按可用空间弹性取值（132…200），缩放口径见 XAML 注释（时基 → 宽 / 幅度 → 高）
             MidHost.SizeChanged += (_, _) => ApplyWaveformHeight();   // 响应式：窗口变高变矮都重算
             // 已安装音源：**真实**数据；取不到就整段隐藏（不编数）
             var singers = WelcomeArt.InstalledSingers();
@@ -69,7 +68,6 @@ namespace OpenUtau.App.Views {
                 return;
             }
             WaveformBars.Height = target;
-            WaveformBars.ItemsSource = WelcomeArt.Scaled(target);
         }
 
         // ── 工程动作 ──

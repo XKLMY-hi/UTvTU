@@ -37,6 +37,132 @@
     <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
   </Style>
 
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       W46 悬浮工具轨（Figma 式）：容器圆角 12 / 按钮 36×36 圆角 8 / 间距 4，
+       悬停 = md3.primary 12% 叠加（在 surface-container-highest 上可辨识），
+       选中 = md3.primary-container 底 + md3.on-primary-container 图标，
+       按下 = 轻微不透明度；分组分隔线挂在音高组首项（.pitchGroup）顶部。
+       颜色一律取 md3.* 池键（无字面量）；工具 tooltip 沿用既有字符串键（零新增翻译）。
+       ══════════════════════════════════════════════════════════════════════════ -->
+  <Style Selector="Border.toolRail">
+    <Setter Property="CornerRadius" Value="12"/>
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="Padding" Value="4"/>
+  </Style>
+
+  <Style Selector="ListBox.toolRail">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Padding" Value="0"/>
+  </Style>
+
+  <Style Selector="ListBoxItem.railTool">
+    <Setter Property="Width" Value="36"/>
+    <Setter Property="Height" Value="36"/>
+    <Setter Property="MinWidth" Value="36"/>
+    <Setter Property="MinHeight" Value="36"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="ContextFlyout" Value="{Binding $self.(FlyoutBase.AttachedFlyout)}"/>
+    <Style Selector="^:pointerover /template/ Border#PART_HoverOverlay">
+      <Setter Property="Opacity" Value="0.12"/>
+    </Style>
+    <Style Selector="^:pressed /template/ Border#PART_HoverOverlay">
+      <Setter Property="Opacity" Value="0.16"/>
+    </Style>
+    <Style Selector="^:pressed">
+      <Setter Property="Opacity" Value="0.85"/>
+    </Style>
+    <Style Selector="^:selected /template/ Border#PART_LayoutRoot">
+      <Setter Property="Background" Value="{DynamicResource md3.primary-container}"/>
+    </Style>
+    <Style Selector="^:selected /template/ Path.filled">
+      <Setter Property="Fill" Value="{DynamicResource md3.on-primary-container}"/>
+    </Style>
+    <Style Selector="^:selected /template/ Ellipse.stroked">
+      <Setter Property="Stroke" Value="{DynamicResource md3.on-primary-container}"/>
+    </Style>
+    <Style Selector="^:selected /template/ Path.stroked">
+      <Setter Property="Stroke" Value="{DynamicResource md3.on-primary-container}"/>
+    </Style>
+    <Style Selector="^:not(:selected) Path.filled">
+      <Setter Property="Fill" Value="{DynamicResource md3.on-surface-variant}"/>
+    </Style>
+    <Style Selector="^:not(:selected) Ellipse.stroked">
+      <Setter Property="StrokeThickness" Value="2"/>
+      <Setter Property="Stroke" Value="{DynamicResource md3.on-surface-variant}"/>
+    </Style>
+    <Style Selector="^:not(:selected) Path.stroked">
+      <Setter Property="StrokeThickness" Value="2"/>
+      <Setter Property="Stroke" Value="{DynamicResource md3.on-surface-variant}"/>
+    </Style>
+    <Style Selector="^.hasSubTool /template/ Path#PART_SubToolArrow">
+      <Setter Property="Opacity" Value="0.7"/>
+    </Style>
+    <Style Selector="^.hasSubTool:pointerover /template/ Path#PART_SubToolArrow">
+      <Setter Property="Opacity" Value="1.0"/>
+    </Style>
+    <!-- 分组分隔线：音高组首项在顶部留 8px 并在其顶部画 1px 线（上 4 / 下 8，Figma 式） -->
+    <Style Selector="^.pitchGroup">
+      <Setter Property="Margin" Value="0,8,0,0"/>
+    </Style>
+    <Style Selector="^.pitchGroup /template/ Border#PART_GroupSep">
+      <Setter Property="IsVisible" Value="True"/>
+    </Style>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="PART_LayoutRoot"
+                CornerRadius="8"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                ClipToBounds="True">
+          <Grid>
+            <Border Name="PART_HoverOverlay" CornerRadius="8" Opacity="0"
+                    Background="{DynamicResource md3.primary}"/>
+            <Grid Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center">
+              <Path Name="PART_ToolIcon" Classes="filled">
+                <Path.RenderTransform>
+                  <TransformGroup>
+                    <ScaleTransform ScaleX=".82" ScaleY=".82"/>
+                    <TranslateTransform X="-1" Y="-1"/>
+                  </TransformGroup>
+                </Path.RenderTransform>
+              </Path>
+              <Path Name="PART_SubToolArrow"
+                  Data="M 0,4 L 4,4 L 4,0 Z"
+                  Classes="filled"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Bottom"
+                  Margin="0,0,-2,-2"
+                  Opacity="0">
+               <Path.RenderTransform>
+                   <ScaleTransform ScaleX="0.9" ScaleY="0.9"/>
+               </Path.RenderTransform>
+            </Path>
+            </Grid>
+            <Border Name="PART_GroupSep" Height="1" Width="28" IsVisible="False"
+                    HorizontalAlignment="Center" VerticalAlignment="Top"
+                    Background="{DynamicResource md3.outline-variant}"/>
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^ FlyoutPresenter">
+      <Setter Property="Padding" Value="4"/>
+      <Setter Property="MinWidth" Value="0"/>
+      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+  </Style>
+
   <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource SelectedTrackAccentLightBrushSemi}"/>
   </Style>
@@ -71,14 +197,14 @@
     <Style Selector="^.hasSubTool:pointerover /template/ Path#PART_SubToolArrow">
         <Setter Property="Opacity" Value="1.0" />
     </Style>
-    <Style Selector="^ Path.filled">
+    <Style Selector="^:not(:selected) Path.filled">
         <Setter Property="Fill" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
     </Style>
-    <Style Selector="^ Ellipse.stroked">
+    <Style Selector="^:not(:selected) Ellipse.stroked">
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="Stroke" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
     </Style>
-    <Style Selector="^ Path.stroked">
+    <Style Selector="^:not(:selected) Path.stroked">
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="Stroke" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
     </Style>

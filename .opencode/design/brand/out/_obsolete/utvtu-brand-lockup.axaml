@@ -1,3 +1,13 @@
+<!-- ============================================================================
+     [已废弃 / DERIVED-OBSOLETE] 不得作为消费来源
+     本文件属“派生研究”时代（光学补偿 / 描摹重建）的产物，几何口径已过时：
+       - brand-wordmark 是旧版描摹字标（1418 字符），不是产品定稿；
+       - brand-brace-flipx、brand-v-chevron-stroke、brand-wordmark-monoline
+         三条键已不在产品键集，不进接入；
+       - 产品侧现用键（brand-mark / brand-brace / brand-v-chevron / brand-wordmark）
+         一律取自 .opencode/design/brand/extracted/ 下的规范化提取件。
+     唯一权威来源 = .opencode/design/brand/extracted/ ；本文件仅存历史，请勿接入。
+     ============================================================================ -->
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <!-- ════════════════════════════════════════════════════════════════════════════════

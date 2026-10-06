@@ -1,8 +1,19 @@
 # UTvTU 横向商标（锁定）资产（W39）
 
+> ## ⚠️ 历史文档（2026-10 补注，先读这段）
+> **本文档属"派生时代"**（描摹 / 光学补偿口径）。**几何来源已改为 `.opencode/design/brand/extracted/**`**
+> （用户设计稿的**提取**件 + 规范化形态；单一来源声明见 `extracted/EXTRACT-MANIFEST.md` 顶部）。
+> 文中提到的 **`out/utvtu-brand-lockup.axaml` 仅存历史**：该文件已移入 `out/_obsolete/` 并在文件头标注废弃，
+> **不得作为消费来源**（其 `brand-wordmark` 是旧版描摹字标，且含 `brand-brace-flipx` /
+> `brand-v-chevron-stroke` / `brand-wordmark-monoline` 三条已不在产品键集的键）。
+> 本文的**量测口径、对比结论与实测数字仍可查阅**（作为历史与对比），但**新的接线/取几何请一律取
+> `extracted/`**：`wordmark-ut.svg`（U/T 四段）、`wordmark-v-stroke.svg`（切角 v 描边）、
+> `v-chevron.svg`、`brace-open.svg`、`mark*.svg`。
+
 > 作者：fx-rack · 基线 `plus-develop` @ `2c3e5583` · **本卡只出资产与清单，不接主树**
 > 资产：`.opencode/design/brand/out/`（+ 对比图副本 `.dsh/fx/shots/`）· 生成器：`_lockup.py`（可重跑，复用 `_generate.py`）
 > 对比图：`brand-lockup-sheet.png`（3 锁定 × 3 finish）· `brand-lockup-ladder.png`（尺寸阶梯）· `brand-wordmark-compare.png`（轮廓 vs 单线）
+
 
 ---
 
@@ -16,7 +27,7 @@
   - 实测字干宽 **20.66 单位**（= cap 的 20.7%，Roboto Bold 的典型字干）；源图 cap = 547px、墨迹宽 2064px。
   - 逐字包围盒（归一化 x1,y1,x2,y2）：U `0,0,76.6,100` · T `81.72,0,163.07,100` · **v `158.14,25.78,213.53,99.82`**（x-height 25.78 → 74.2 单位，几何切角，与标志的嘴同语言 ✔）· T `214.08,0,295.61,100` · U `300.73,0,377.33,100`
   - ⚠ 注意 v 的 bbox 与左右 T 有 5 单位的**视觉重叠**（切角张开的缘故），不是错误。
-- 产出：`utvtu-wordmark.svg` / `-mono.svg`（`currentColor`）/ `utvtu-brand-lockup.axaml` 里的 **`brand-wordmark` StreamGeometry**（`Fill` 填充；`Width = cap×3.7733`、`Height = cap`、`Stretch=Uniform`）。
+- 产出：`utvtu-wordmark.svg` / `-mono.svg`（`currentColor`）/ `utvtu-brand-lockup.axaml` 里的 **`brand-wordmark` StreamGeometry**（**已废弃**：见文首说明，改取 `extracted/`；`Fill` 填充；`Width = cap×3.7733`、`Height = cap`、`Stretch=Uniform`）。
 
 ### A′. 轮廓 vs 自绘单线（对比结论，见 `brand-wordmark-compare.png` 与实测）
 | cap | 描摹轮廓（用户版） | 自绘单线（我的备选） |
@@ -92,7 +103,7 @@ PNG 规格：`@1x` = cap 24px、`@2x` = cap 48px（按需放大时建议直接�
 
 ## 附 · 交付物与数据
 - SVG：`utvtu-wordmark.svg`、`utvtu-wordmark-mono.svg`、`utvtu-wordmark-monoline.svg`、`utvtu-lockup-{signature,display,short}-{ink,reversed,branded}.svg`（9）
-- XAML：`utvtu-brand-lockup.axaml`（`brand-wordmark` / `brand-wordmark-monoline` StreamGeometry + 用法注释）；标志/括号几何见 `utvtu-brand-geometry.axaml`
+- XAML：`utvtu-brand-lockup.axaml`（`brand-wordmark` / `brand-wordmark-monoline` StreamGeometry + 用法注释）—— **已废弃**：文件已移入 `out/_obsolete/`，XAML 几何请从 `extracted/` 现取；标志/括号几何见 `utvtu-brand-geometry.axaml`
 - PNG：9 锁定 × `@1x/@2x` = 18；对比图 3 张（sheet / ladder / compare）
 - 数据：`brand-lockup-metrics.json`（字标归一化几何、逐 cap 轮廓/单线度量）
 - 过程 bug（已修，记录）：闭合轮廓 RDP 需从最远点切开（否则退化弦把整条压成 2 点）；组合图曾在 8× 画布上用 1× 坐标（内容缩到角落）。

@@ -111,6 +111,12 @@ public partial class MixerControl : UserControl
     /// <summary>拖动结束 / 双击复位：此时才落盘（拖动过程只改内存，避免写爆磁盘）。</summary>
     private void OnChainPanelDragCompleted(object? sender, EventArgs e) => PersistChainPanelLayout();
 
+    /// <summary>折叠处边缘标签的展开请求（W44 ②）：展开回**持久化宽度**并落盘。</summary>
+    private void OnRevealChainPanel(object? sender, EventArgs e) {
+        ChainPanel.IsCollapsed = false;
+        PersistChainPanelLayout();
+    }
+
     /// <summary>折叠键（工具行 chevron；折叠后仍常驻 ⇒ 一定能展开回来）。</summary>
     private void OnToggleChainPanel(object? sender, Avalonia.Interactivity.RoutedEventArgs e) {
         ChainPanel.ToggleCollapse();
