@@ -64,6 +64,7 @@
     <None Include="..\.opencode\design\brand\extracted\mark.svg" Link="brand\extracted\mark.svg" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\.opencode\design\brand\extracted\brace-open.svg" Link="brand\extracted\brace-open.svg" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\.opencode\design\brand\extracted\v-chevron.svg" Link="brand\extracted\v-chevron.svg" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\.opencode\design\brand\extracted\wordmark-ut.svg" Link="brand\extracted\wordmark-ut.svg" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Styles\Md3ControlThemes.axaml" Link="Styles\Md3ControlThemes.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Styles\Md3SelectionThemes.axaml" Link="Styles\Md3SelectionThemes.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Styles\Md3Transitions.axaml" Link="Styles\Md3Transitions.axaml" CopyToOutputDirectory="PreserveNewest" />
