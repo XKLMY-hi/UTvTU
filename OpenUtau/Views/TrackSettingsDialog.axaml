@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         x:Class="OpenUtau.App.Views.TrackSettingsDialog"
-        Icon="/Assets/open-utau.ico"
+        Icon="/Assets/brand/utvtu.ico"
         Title="{DynamicResource dialogs.tracksettings.caption}"
         Width="360" SizeToContent="Height" WindowStartupLocation="CenterOwner" CanResize="False">
 <DockPanel LastChildFill="True">

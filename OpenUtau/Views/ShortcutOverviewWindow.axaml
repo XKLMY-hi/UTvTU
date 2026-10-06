@@ -5,7 +5,7 @@
         xmlns:controls="using:OpenUtau.App.Controls"
         mc:Ignorable="d"
         x:Class="OpenUtau.App.Views.ShortcutOverviewWindow"
-        Icon="/Assets/open-utau.ico"
+        Icon="/Assets/brand/utvtu.ico"
         Title="{DynamicResource shortcut.caption}"
         Width="720" Height="600" MinWidth="420"
         WindowStartupLocation="CenterOwner">

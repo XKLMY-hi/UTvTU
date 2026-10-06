@@ -1,0 +1,17 @@
+<svg
+                        data-pencil-name="Brace close"
+                        viewBox="-2 -2 28 48"
+                        preserveAspectRatio="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="box-border w-[14.116px] h-[24.198px] [transform:scaleX(-1)] [transform-origin:top_left] absolute left-[14.116px] top-0 overflow-visible"
+                      >
+                        <path
+                          d="M20 4 H14 Q10 4 10 8 V18 Q10 22 4 22 Q10 22 10 26 V36 Q10 40 14 40 H20"
+                          fill="none"
+                          stroke="#5A44E0"
+                          stroke-width="4.033"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          vector-effect="non-scaling-stroke"
+                        ></path>
+                      </svg>

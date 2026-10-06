@@ -1,0 +1,110 @@
+{
+ "chosen_delta": 0.0,
+ "grid": {
+  "delta_0": [
+   {
+    "cap": 14,
+    "components": 2,
+    "min_gap_px": 8.0,
+    "stroke_px": 3
+   },
+   {
+    "cap": 16,
+    "components": 3,
+    "min_gap_px": 2.0,
+    "stroke_px": 3
+   },
+   {
+    "cap": 20,
+    "components": 4,
+    "min_gap_px": 2.0,
+    "stroke_px": 4
+   },
+   {
+    "cap": 28,
+    "components": 4,
+    "min_gap_px": 2.0,
+    "stroke_px": 6
+   }
+  ],
+  "delta_1": [
+   {
+    "cap": 14,
+    "components": 2,
+    "min_gap_px": 8.0,
+    "stroke_px": 3
+   },
+   {
+    "cap": 16,
+    "components": 2,
+    "min_gap_px": 9.0,
+    "stroke_px": 3
+   },
+   {
+    "cap": 20,
+    "components": 4,
+    "min_gap_px": 2.0,
+    "stroke_px": 4
+   },
+   {
+    "cap": 28,
+    "components": 3,
+    "min_gap_px": 2.0,
+    "stroke_px": 6
+   }
+  ],
+  "delta_2": [
+   {
+    "cap": 14,
+    "components": 2,
+    "min_gap_px": 8.0,
+    "stroke_px": 3
+   },
+   {
+    "cap": 16,
+    "components": 2,
+    "min_gap_px": 9.0,
+    "stroke_px": 4
+   },
+   {
+    "cap": 20,
+    "components": 2,
+    "min_gap_px": 12.0,
+    "stroke_px": 4
+   },
+   {
+    "cap": 28,
+    "components": 3,
+    "min_gap_px": 2.0,
+    "stroke_px": 6
+   }
+  ],
+  "delta_3": [
+   {
+    "cap": 14,
+    "components": 2,
+    "min_gap_px": 8.0,
+    "stroke_px": 3
+   },
+   {
+    "cap": 16,
+    "components": 2,
+    "min_gap_px": 10.0,
+    "stroke_px": 4
+   },
+   {
+    "cap": 20,
+    "components": 2,
+    "min_gap_px": 12.0,
+    "stroke_px": 4
+   },
+   {
+    "cap": 28,
+    "components": 2,
+    "min_gap_px": 17.0,
+    "stroke_px": 6
+   }
+  ]
+ },
+ "note": "v 换成源切角 v 后，把两侧 T 向外移 chosen_delta 单位（cap=100 空间）"
+}

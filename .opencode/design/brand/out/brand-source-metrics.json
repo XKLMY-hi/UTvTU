@@ -1,0 +1,70 @@
+{
+ "source": {
+  "mark": "M8 13 H24 M16 13 V29 M40 13 H56 M48 13 V29 M27 25 L32 35 L37 25 M9 41 V44 Q9 51 16 51 Q23 51 23 44 V41 M55 41 V44 Q55 51 48 51 Q41 51 41 44 V41",
+  "brace": "M20 4 H14 Q10 4 10 8 V18 Q10 22 4 22 Q10 22 10 26 V36 Q10 40 14 40 H20",
+  "v_fill": "M0 0 L4.5 14 L9 0",
+  "v_stroke": "M1.54 1.54 L4.5 12.46 L7.46 1.54"
+ },
+ "brace_new": {
+  "ink_wh_px": [
+   235,
+   448
+  ],
+  "ink_w_over_h": 0.525,
+  "stroke_px": 64,
+  "ink_h_norm": 100.0,
+  "ink_w_norm": 52.5,
+  "stroke_norm": 14.3,
+  "stroke_over_h": 0.1429,
+  "arm_norm": 35.9,
+  "arm_over_stroke": 2.52,
+  "nub_norm": 45.1,
+  "nub_over_stroke": 3.16
+ },
+ "mark_new": {
+  "ink_wh_px": [
+   448,
+   368
+  ],
+  "ink_w_over_h": 1.217,
+  "stroke_px": 64,
+  "ink_h_norm": 100.0,
+  "ink_w_norm": 121.7,
+  "stroke_norm": 17.4,
+  "stroke_over_h": 0.1739,
+  "arm_norm": 121.7,
+  "arm_over_stroke": 7.0,
+  "nub_norm": 93.2,
+  "nub_over_stroke": 5.36
+ },
+ "old_brace": {
+  "ink_wh_px": [
+   144,
+   368
+  ],
+  "ink_w_over_h": 0.391,
+  "stroke_px": 101,
+  "ink_w_norm": 39.1,
+  "stroke_norm": 27.4,
+  "stroke_over_h": 0.2745,
+  "arm_norm": 37.5,
+  "arm_over_stroke": 1.37,
+  "nub_norm": 23.0,
+  "nub_over_stroke": 0.84
+ },
+ "wordmark_sanity": {
+  "bbox": [
+   0.0,
+   0.0,
+   377.33,
+   100.0
+  ],
+  "w": 377.33,
+  "h": 100.0,
+  "cap": 100.0
+ },
+ "overlay_iou": {
+  "brace": 0.406,
+  "mark": 0.533
+ }
+}

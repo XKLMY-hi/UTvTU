@@ -1,0 +1,197 @@
+{
+ "optical_on_source_geometry": {
+  "stroke_8.0": {
+   "16": {
+    "components": 2,
+    "ink_pct": 39.06,
+    "min_gap_px": 2.0,
+    "stroke_px": 2
+   },
+   "24": {
+    "components": 3,
+    "ink_pct": 37.33,
+    "min_gap_px": 2.0,
+    "stroke_px": 3
+   },
+   "32": {
+    "components": 5,
+    "ink_pct": 36.82,
+    "min_gap_px": 2.0,
+    "stroke_px": 4
+   },
+   "48": {
+    "components": 5,
+    "ink_pct": 33.98,
+    "min_gap_px": 2.83,
+    "stroke_px": 6
+   },
+   "64": {
+    "components": 5,
+    "ink_pct": 34.13,
+    "min_gap_px": 3.61,
+    "stroke_px": 8
+   }
+  },
+  "stroke_7.0": {
+   "16": {
+    "components": 3,
+    "ink_pct": 32.81,
+    "min_gap_px": 2.0,
+    "stroke_px": 2
+   },
+   "24": {
+    "components": 5,
+    "ink_pct": 29.51,
+    "min_gap_px": 2.24,
+    "stroke_px": 3
+   },
+   "32": {
+    "components": 5,
+    "ink_pct": 28.52,
+    "min_gap_px": 2.24,
+    "stroke_px": 4
+   },
+   "48": {
+    "components": 5,
+    "ink_pct": 31.12,
+    "min_gap_px": 3.0,
+    "stroke_px": 6
+   },
+   "64": {
+    "components": 5,
+    "ink_pct": 30.22,
+    "min_gap_px": 4.0,
+    "stroke_px": 8
+   }
+  },
+  "stroke_6.5": {
+   "16": {
+    "components": 5,
+    "ink_pct": 31.25,
+    "min_gap_px": 2.0,
+    "stroke_px": 2
+   },
+   "24": {
+    "components": 5,
+    "ink_pct": 27.43,
+    "min_gap_px": 2.24,
+    "stroke_px": 3
+   },
+   "32": {
+    "components": 5,
+    "ink_pct": 27.15,
+    "min_gap_px": 2.83,
+    "stroke_px": 4
+   },
+   "48": {
+    "components": 5,
+    "ink_pct": 28.04,
+    "min_gap_px": 4.0,
+    "stroke_px": 5
+   },
+   "64": {
+    "components": 5,
+    "ink_pct": 25.78,
+    "min_gap_px": 5.0,
+    "stroke_px": 6
+   }
+  },
+  "stroke_6.0": {
+   "16": {
+    "components": 5,
+    "ink_pct": 25.39,
+    "min_gap_px": 2.0,
+    "stroke_px": 2
+   },
+   "24": {
+    "components": 5,
+    "ink_pct": 25.0,
+    "min_gap_px": 2.83,
+    "stroke_px": 3
+   },
+   "32": {
+    "components": 5,
+    "ink_pct": 26.17,
+    "min_gap_px": 2.83,
+    "stroke_px": 3
+   },
+   "48": {
+    "components": 5,
+    "ink_pct": 24.74,
+    "min_gap_px": 4.24,
+    "stroke_px": 5
+   },
+   "64": {
+    "components": 5,
+    "ink_pct": 24.98,
+    "min_gap_px": 5.0,
+    "stroke_px": 6
+   }
+  },
+  "stroke_5.5": {
+   "16": {
+    "components": 5,
+    "ink_pct": 25.0,
+    "min_gap_px": 2.0,
+    "stroke_px": 2
+   },
+   "24": {
+    "components": 5,
+    "ink_pct": 22.74,
+    "min_gap_px": 2.83,
+    "stroke_px": 2
+   },
+   "32": {
+    "components": 5,
+    "ink_pct": 24.9,
+    "min_gap_px": 2.83,
+    "stroke_px": 3
+   },
+   "48": {
+    "components": 5,
+    "ink_pct": 21.53,
+    "min_gap_px": 4.47,
+    "stroke_px": 4
+   },
+   "64": {
+    "components": 5,
+    "ink_pct": 23.24,
+    "min_gap_px": 5.83,
+    "stroke_px": 6
+   }
+  },
+  "stroke_5.0": {
+   "16": {
+    "components": 5,
+    "ink_pct": 22.27,
+    "min_gap_px": 2.0,
+    "stroke_px": 2
+   },
+   "24": {
+    "components": 5,
+    "ink_pct": 21.88,
+    "min_gap_px": 2.83,
+    "stroke_px": 2
+   },
+   "32": {
+    "components": 5,
+    "ink_pct": 21.09,
+    "min_gap_px": 3.61,
+    "stroke_px": 3
+   },
+   "48": {
+    "components": 5,
+    "ink_pct": 21.22,
+    "min_gap_px": 4.47,
+    "stroke_px": 4
+   },
+   "64": {
+    "components": 5,
+    "ink_pct": 21.17,
+    "min_gap_px": 6.0,
+    "stroke_px": 6
+   }
+  }
+ },
+ "note": "旧 brand-metrics.json 是在错误几何上测的，作废"
+}

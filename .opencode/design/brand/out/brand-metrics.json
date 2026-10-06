@@ -1,0 +1,1045 @@
+{
+ "geometry_units": {
+  "grid": 64,
+  "stroke": 8.0,
+  "unit_px_at_384": 6.0,
+  "mark_ink_bbox_units": [
+   4,
+   9,
+   60,
+   55
+  ]
+ },
+ "variants": {
+  "ORIG_8": {
+   "label": "原版基线：笔宽 = 尺寸÷8（8 单位）",
+   "expected_components": 5,
+   "metrics": [
+    {
+     "size": 16,
+     "components": 1,
+     "component_px": [
+      100
+     ],
+     "ink_pct": 39.06,
+     "min_gap_px": 0.0,
+     "stroke_px": 2,
+     "legible": false
+    },
+    {
+     "size": 24,
+     "components": 2,
+     "component_px": [
+      193,
+      42
+     ],
+     "ink_pct": 40.8,
+     "min_gap_px": 2.0,
+     "stroke_px": 3,
+     "legible": true
+    },
+    {
+     "size": 32,
+     "components": 4,
+     "component_px": [
+      191,
+      72,
+      72,
+      56
+     ],
+     "ink_pct": 38.18,
+     "min_gap_px": 2.0,
+     "stroke_px": 4,
+     "legible": true
+    },
+    {
+     "size": 48,
+     "components": 4,
+     "component_px": [
+      415,
+      157,
+      157,
+      121
+     ],
+     "ink_pct": 36.89,
+     "min_gap_px": 2.83,
+     "stroke_px": 6,
+     "legible": true
+    },
+    {
+     "size": 64,
+     "components": 4,
+     "component_px": [
+      732,
+      284,
+      284,
+      218
+     ],
+     "ink_pct": 37.06,
+     "min_gap_px": 3.61,
+     "stroke_px": 8,
+     "legible": true
+    }
+   ]
+  },
+  "OC_A6": {
+   "label": "光学补偿 A：笔宽 ÷10.7（6 单位）",
+   "expected_components": 5,
+   "metrics": [
+    {
+     "size": 16,
+     "components": 4,
+     "component_px": [
+      36,
+      14,
+      14,
+      9
+     ],
+     "ink_pct": 28.52,
+     "min_gap_px": 2.0,
+     "stroke_px": 2,
+     "legible": true
+    },
+    {
+     "size": 24,
+     "components": 4,
+     "component_px": [
+      71,
+      30,
+      30,
+      24
+     ],
+     "ink_pct": 26.91,
+     "min_gap_px": 2.83,
+     "stroke_px": 3,
+     "legible": true
+    },
+    {
+     "size": 32,
+     "components": 4,
+     "component_px": [
+      138,
+      52,
+      52,
+      42
+     ],
+     "ink_pct": 27.73,
+     "min_gap_px": 2.83,
+     "stroke_px": 3,
+     "legible": true
+    },
+    {
+     "size": 48,
+     "components": 5,
+     "component_px": [
+      142,
+      142,
+      116,
+      116,
+      88
+     ],
+     "ink_pct": 26.22,
+     "min_gap_px": 3.0,
+     "stroke_px": 4,
+     "legible": true
+    },
+    {
+     "size": 64,
+     "components": 5,
+     "component_px": [
+      270,
+      270,
+      200,
+      200,
+      163
+     ],
+     "ink_pct": 26.93,
+     "min_gap_px": 3.0,
+     "stroke_px": 6,
+     "legible": true
+    }
+   ]
+  },
+  "OC_B6_sp": {
+   "label": "光学补偿 B：6 单位 + 字距微增（v 收 2、U 下移 2）",
+   "expected_components": 5,
+   "metrics": [
+    {
+     "size": 16,
+     "components": 4,
+     "component_px": [
+      36,
+      15,
+      15,
+      11
+     ],
+     "ink_pct": 30.08,
+     "min_gap_px": 2.0,
+     "stroke_px": 2,
+     "legible": true
+    },
+    {
+     "size": 24,
+     "components": 4,
+     "component_px": [
+      71,
+      34,
+      34,
+      23
+     ],
+     "ink_pct": 28.12,
+     "min_gap_px": 2.83,
+     "stroke_px": 3,
+     "legible": true
+    },
+    {
+     "size": 32,
+     "components": 4,
+     "component_px": [
+      138,
+      52,
+      52,
+      38
+     ],
+     "ink_pct": 27.34,
+     "min_gap_px": 3.0,
+     "stroke_px": 3,
+     "legible": true
+    },
+    {
+     "size": 48,
+     "components": 5,
+     "component_px": [
+      142,
+      142,
+      118,
+      118,
+      84
+     ],
+     "ink_pct": 26.22,
+     "min_gap_px": 3.0,
+     "stroke_px": 5,
+     "legible": true
+    },
+    {
+     "size": 64,
+     "components": 5,
+     "component_px": [
+      270,
+      270,
+      200,
+      200,
+      152
+     ],
+     "ink_pct": 26.66,
+     "min_gap_px": 3.0,
+     "stroke_px": 6,
+     "legible": true
+    }
+   ]
+  },
+  "OC_C5_sp": {
+   "label": "★光学补偿 C（推荐 ≤32px）：5 单位 + 字距再增（v 收 4、U 下移 3）",
+   "expected_components": 5,
+   "metrics": [
+    {
+     "size": 16,
+     "components": 4,
+     "component_px": [
+      32,
+      11,
+      11,
+      7
+     ],
+     "ink_pct": 23.83,
+     "min_gap_px": 2.0,
+     "stroke_px": 2,
+     "legible": true
+    },
+    {
+     "size": 24,
+     "components": 5,
+     "component_px": [
+      32,
+      32,
+      26,
+      26,
+      17
+     ],
+     "ink_pct": 23.09,
+     "min_gap_px": 3.0,
+     "stroke_px": 2,
+     "legible": true
+    },
+    {
+     "size": 32,
+     "components": 5,
+     "component_px": [
+      58,
+      58,
+      44,
+      44,
+      29
+     ],
+     "ink_pct": 22.75,
+     "min_gap_px": 3.0,
+     "stroke_px": 3,
+     "legible": true
+    },
+    {
+     "size": 48,
+     "components": 5,
+     "component_px": [
+      130,
+      130,
+      98,
+      98,
+      66
+     ],
+     "ink_pct": 22.66,
+     "min_gap_px": 3.0,
+     "stroke_px": 4,
+     "legible": true
+    },
+    {
+     "size": 64,
+     "components": 5,
+     "component_px": [
+      225,
+      224,
+      172,
+      172,
+      119
+     ],
+     "ink_pct": 22.27,
+     "min_gap_px": 3.0,
+     "stroke_px": 6,
+     "legible": true
+    }
+   ]
+  },
+  "OC_D6_v": {
+   "label": "对照 D：6 单位 + 只拉 v↔T 干缝隙",
+   "expected_components": 5,
+   "metrics": [
+    {
+     "size": 16,
+     "components": 4,
+     "component_px": [
+      36,
+      14,
+      14,
+      11
+     ],
+     "ink_pct": 29.3,
+     "min_gap_px": 2.0,
+     "stroke_px": 2,
+     "legible": true
+    },
+    {
+     "size": 24,
+     "components": 4,
+     "component_px": [
+      71,
+      30,
+      30,
+      20
+     ],
+     "ink_pct": 26.22,
+     "min_gap_px": 2.24,
+     "stroke_px": 3,
+     "legible": true
+    },
+    {
+     "size": 32,
+     "components": 4,
+     "component_px": [
+      138,
+      52,
+      52,
+      37
+     ],
+     "ink_pct": 27.25,
+     "min_gap_px": 2.83,
+     "stroke_px": 3,
+     "legible": true
+    },
+    {
+     "size": 48,
+     "components": 5,
+     "component_px": [
+      142,
+      142,
+      116,
+      116,
+      80
+     ],
+     "ink_pct": 25.87,
+     "min_gap_px": 3.0,
+     "stroke_px": 4,
+     "legible": true
+    },
+    {
+     "size": 64,
+     "components": 5,
+     "component_px": [
+      270,
+      270,
+      200,
+      200,
+      145
+     ],
+     "ink_pct": 26.49,
+     "min_gap_px": 3.0,
+     "stroke_px": 6,
+     "legible": true
+    }
+   ]
+  }
+ },
+ "contrast": [
+  {
+   "label": "Primary 标志 / 浅底",
+   "fg": "#5A44E0",
+   "bg": "#FCF8FF",
+   "ratio": 5.99,
+   "pass_4_5": true,
+   "pass_3_0": true,
+   "note": "标志主色"
+  },
+  {
+   "label": "Primary 标志 / 浅卡片",
+   "fg": "#5A44E0",
+   "bg": "#F3EEFB",
+   "ratio": 5.52,
+   "pass_4_5": true,
+   "pass_3_0": true,
+   "note": "卡片上"
+  },
+  {
+   "label": "Primary 标志 / 深底",
+   "fg": "#C4B4FF",
+   "bg": "#131218",
+   "ratio": 10.04,
+   "pass_4_5": true,
+   "pass_3_0": true,
+   "note": "深色主题"
+  },
+  {
+   "label": "Primary 标志 / 深卡片",
+   "fg": "#C4B4FF",
+   "bg": "#1F1D26",
+   "ratio": 8.97,
+   "pass_4_5": true,
+   "pass_3_0": true,
+   "note": "深色卡片"
+  },
+  {
+   "label": "反白标志 / Primary 底",
+   "fg": "#FFFFFF",
+   "bg": "#5A44E0",
+   "ratio": 6.29,
+   "pass_4_5": true,
+   "pass_3_0": true,
+   "note": "主图标 finish"
+  },
+  {
+   "label": "反白标志 / Ink 底",
+   "fg": "#FFFFFF",
+   "bg": "#0D0B14",
+   "ratio": 19.53,
+   "pass_4_5": true,
+   "pass_3_0": true,
+   "note": "Ink·dark finish"
+  },
+  {
+   "label": "深紫标志 / Tonal 底",
+   "fg": "#1B0B5E",
+   "bg": "#E5DEFF",
+   "ratio": 12.92,
+   "pass_4_5": true,
+   "pass_3_0": true,
+   "note": "Tonal finish"
+  },
+  {
+   "label": "深色 Tonal 标志 / 深 Tonal 底",
+   "fg": "#E5DEFF",
+   "bg": "#4029C6",
+   "ratio": 6.9,
+   "pass_4_5": true,
+   "pass_3_0": true,
+   "note": "深色 Tonal"
+  },
+  {
+   "label": "on-surface / surface（浅）",
+   "fg": "#1C1B22",
+   "bg": "#FCF8FF",
+   "ratio": 16.28,
+   "pass_4_5": true,
+   "pass_3_0": true,
+   "note": "正文"
+  },
+  {
+   "label": "on-surface / surface（深）",
+   "fg": "#E7E1E9",
+   "bg": "#131218",
+   "ratio": 14.5,
+   "pass_4_5": true,
+   "pass_3_0": true,
+   "note": "正文"
+  },
+  {
+   "label": "Accent teal / 浅底",
+   "fg": "#00A892",
+   "bg": "#FCF8FF",
+   "ratio": 2.85,
+   "pass_4_5": false,
+   "pass_3_0": false,
+   "note": "图案点缀（不进 UI）"
+  },
+  {
+   "label": "Accent teal / 深底",
+   "fg": "#3FDCC4",
+   "bg": "#131218",
+   "ratio": 10.86,
+   "pass_4_5": true,
+   "pass_3_0": true,
+   "note": "图案点缀（不进 UI）"
+  }
+ ],
+ "appendix_simplified": {
+  "A_TvT": {
+   "label": "附录①A 去泪滴 TvT",
+   "metrics": [
+    {
+     "size": 16,
+     "components": 1,
+     "component_px": [
+      64
+     ],
+     "ink_pct": 25.0,
+     "min_gap_px": 0.0,
+     "stroke_px": 2,
+     "legible": false
+    },
+    {
+     "size": 24,
+     "components": 1,
+     "component_px": [
+      152
+     ],
+     "ink_pct": 26.39,
+     "min_gap_px": 0.0,
+     "stroke_px": 4,
+     "legible": false
+    },
+    {
+     "size": 32,
+     "components": 2,
+     "component_px": [
+      191,
+      56
+     ],
+     "ink_pct": 24.12,
+     "min_gap_px": 2.0,
+     "stroke_px": 4,
+     "legible": true
+    },
+    {
+     "size": 48,
+     "components": 2,
+     "component_px": [
+      415,
+      121
+     ],
+     "ink_pct": 23.26,
+     "min_gap_px": 3.0,
+     "stroke_px": 6,
+     "legible": true
+    },
+    {
+     "size": 64,
+     "components": 2,
+     "component_px": [
+      732,
+      218
+     ],
+     "ink_pct": 23.19,
+     "min_gap_px": 4.0,
+     "stroke_px": 8,
+     "legible": true
+    }
+   ]
+  },
+  "B_single_eye": {
+   "label": "附录①B 只留 v + 单 T",
+   "metrics": [
+    {
+     "size": 16,
+     "components": 1,
+     "component_px": [
+      41
+     ],
+     "ink_pct": 16.02,
+     "min_gap_px": 0.0,
+     "stroke_px": 3,
+     "legible": false
+    },
+    {
+     "size": 24,
+     "components": 1,
+     "component_px": [
+      86
+     ],
+     "ink_pct": 14.93,
+     "min_gap_px": 0.0,
+     "stroke_px": 4,
+     "legible": false
+    },
+    {
+     "size": 32,
+     "components": 1,
+     "component_px": [
+      153
+     ],
+     "ink_pct": 14.94,
+     "min_gap_px": 0.0,
+     "stroke_px": 4,
+     "legible": false
+    },
+    {
+     "size": 48,
+     "components": 1,
+     "component_px": [
+      328
+     ],
+     "ink_pct": 14.24,
+     "min_gap_px": 0.0,
+     "stroke_px": 6,
+     "legible": false
+    },
+    {
+     "size": 64,
+     "components": 2,
+     "component_px": [
+      366,
+      218
+     ],
+     "ink_pct": 14.26,
+     "min_gap_px": 2.24,
+     "stroke_px": 8,
+     "legible": true
+    }
+   ]
+  },
+  "C_TvT_one_tear": {
+   "label": "附录①C TvT + 中轴单泪",
+   "metrics": [
+    {
+     "size": 16,
+     "components": 2,
+     "component_px": [
+      50,
+      32
+     ],
+     "ink_pct": 32.03,
+     "min_gap_px": 2.0,
+     "stroke_px": 2,
+     "legible": true
+    },
+    {
+     "size": 24,
+     "components": 2,
+     "component_px": [
+      107,
+      69
+     ],
+     "ink_pct": 30.56,
+     "min_gap_px": 2.0,
+     "stroke_px": 4,
+     "legible": true
+    },
+    {
+     "size": 32,
+     "components": 1,
+     "component_px": [
+      337
+     ],
+     "ink_pct": 32.91,
+     "min_gap_px": 0.0,
+     "stroke_px": 4,
+     "legible": false
+    },
+    {
+     "size": 48,
+     "components": 1,
+     "component_px": [
+      843
+     ],
+     "ink_pct": 36.59,
+     "min_gap_px": 0.0,
+     "stroke_px": 9,
+     "legible": false
+    },
+    {
+     "size": 64,
+     "components": 1,
+     "component_px": [
+      1712
+     ],
+     "ink_pct": 41.8,
+     "min_gap_px": 0.0,
+     "stroke_px": 16,
+     "legible": false
+    }
+   ]
+  },
+  "TA_current": {
+   "label": "附录②A 对照：U 在竖干正下方",
+   "metrics": [
+    {
+     "size": 16,
+     "components": 1,
+     "component_px": [
+      100
+     ],
+     "ink_pct": 39.06,
+     "min_gap_px": 0.0,
+     "stroke_px": 2,
+     "legible": false
+    },
+    {
+     "size": 24,
+     "components": 2,
+     "component_px": [
+      193,
+      42
+     ],
+     "ink_pct": 40.8,
+     "min_gap_px": 2.0,
+     "stroke_px": 3,
+     "legible": true
+    },
+    {
+     "size": 32,
+     "components": 4,
+     "component_px": [
+      191,
+      72,
+      72,
+      56
+     ],
+     "ink_pct": 38.18,
+     "min_gap_px": 2.0,
+     "stroke_px": 4,
+     "legible": true
+    },
+    {
+     "size": 48,
+     "components": 4,
+     "component_px": [
+      415,
+      157,
+      157,
+      121
+     ],
+     "ink_pct": 36.89,
+     "min_gap_px": 2.83,
+     "stroke_px": 6,
+     "legible": true
+    },
+    {
+     "size": 64,
+     "components": 4,
+     "component_px": [
+      732,
+      284,
+      284,
+      218
+     ],
+     "ink_pct": 37.06,
+     "min_gap_px": 3.61,
+     "stroke_px": 8,
+     "legible": true
+    }
+   ]
+  },
+  "TB_outer_drop": {
+   "label": "附录②B 移到外眼角（滴形）",
+   "metrics": [
+    {
+     "size": 16,
+     "components": 1,
+     "component_px": [
+      141
+     ],
+     "ink_pct": 55.08,
+     "min_gap_px": 0.0,
+     "stroke_px": 4,
+     "legible": false
+    },
+    {
+     "size": 24,
+     "components": 1,
+     "component_px": [
+      343
+     ],
+     "ink_pct": 59.55,
+     "min_gap_px": 0.0,
+     "stroke_px": 6,
+     "legible": false
+    },
+    {
+     "size": 32,
+     "components": 2,
+     "component_px": [
+      590,
+      56
+     ],
+     "ink_pct": 63.09,
+     "min_gap_px": 2.0,
+     "stroke_px": 9,
+     "legible": true
+    },
+    {
+     "size": 48,
+     "components": 2,
+     "component_px": [
+      1522,
+      121
+     ],
+     "ink_pct": 71.31,
+     "min_gap_px": 3.0,
+     "stroke_px": 15,
+     "legible": true
+    },
+    {
+     "size": 64,
+     "components": 2,
+     "component_px": [
+      3022,
+      218
+     ],
+     "ink_pct": 79.1,
+     "min_gap_px": 2.83,
+     "stroke_px": 22,
+     "legible": true
+    }
+   ]
+  },
+  "TC_connector": {
+   "label": "附录②C 维持位置 + 细连接线",
+   "metrics": [
+    {
+     "size": 16,
+     "components": 1,
+     "component_px": [
+      112
+     ],
+     "ink_pct": 43.75,
+     "min_gap_px": 0.0,
+     "stroke_px": 3,
+     "legible": false
+    },
+    {
+     "size": 24,
+     "components": 1,
+     "component_px": [
+      251
+     ],
+     "ink_pct": 43.58,
+     "min_gap_px": 0.0,
+     "stroke_px": 4,
+     "legible": false
+    },
+    {
+     "size": 32,
+     "components": 2,
+     "component_px": [
+      351,
+      56
+     ],
+     "ink_pct": 39.75,
+     "min_gap_px": 2.0,
+     "stroke_px": 4,
+     "legible": true
+    },
+    {
+     "size": 48,
+     "components": 2,
+     "component_px": [
+      771,
+      121
+     ],
+     "ink_pct": 38.72,
+     "min_gap_px": 2.83,
+     "stroke_px": 6,
+     "legible": true
+    },
+    {
+     "size": 64,
+     "components": 4,
+     "component_px": [
+      802,
+      284,
+      284,
+      218
+     ],
+     "ink_pct": 38.77,
+     "min_gap_px": 2.0,
+     "stroke_px": 8,
+     "legible": true
+    }
+   ]
+  },
+  "T32_optical": {
+   "label": "附录 32px 光学档（TvT 扩距 + 单泪）",
+   "metrics": [
+    {
+     "size": 16,
+     "components": 3,
+     "component_px": [
+      38,
+      22,
+      12
+     ],
+     "ink_pct": 28.12,
+     "min_gap_px": 2.0,
+     "stroke_px": 3,
+     "legible": true
+    },
+    {
+     "size": 24,
+     "components": 3,
+     "component_px": [
+      92,
+      52,
+      28
+     ],
+     "ink_pct": 29.86,
+     "min_gap_px": 3.0,
+     "stroke_px": 3,
+     "legible": true
+    },
+    {
+     "size": 32,
+     "components": 3,
+     "component_px": [
+      168,
+      94,
+      45
+     ],
+     "ink_pct": 29.98,
+     "min_gap_px": 3.0,
+     "stroke_px": 4,
+     "legible": true
+    },
+    {
+     "size": 48,
+     "components": 3,
+     "component_px": [
+      492,
+      204,
+      108
+     ],
+     "ink_pct": 34.9,
+     "min_gap_px": 3.0,
+     "stroke_px": 9,
+     "legible": true
+    },
+    {
+     "size": 64,
+     "components": 3,
+     "component_px": [
+      1111,
+      356,
+      182
+     ],
+     "ink_pct": 40.26,
+     "min_gap_px": 3.61,
+     "stroke_px": 15,
+     "legible": true
+    }
+   ]
+  },
+  "T16_twoeyes": {
+   "label": "附录 16px 两 T",
+   "metrics": [
+    {
+     "size": 16,
+     "components": 2,
+     "component_px": [
+      21,
+      19
+     ],
+     "ink_pct": 15.62,
+     "min_gap_px": 3.0,
+     "stroke_px": 2,
+     "legible": true
+    },
+    {
+     "size": 24,
+     "components": 2,
+     "component_px": [
+      46,
+      46
+     ],
+     "ink_pct": 15.97,
+     "min_gap_px": 3.0,
+     "stroke_px": 4,
+     "legible": true
+    },
+    {
+     "size": 32,
+     "components": 2,
+     "component_px": [
+      80,
+      80
+     ],
+     "ink_pct": 15.62,
+     "min_gap_px": 3.0,
+     "stroke_px": 4,
+     "legible": true
+    },
+    {
+     "size": 48,
+     "components": 2,
+     "component_px": [
+      180,
+      180
+     ],
+     "ink_pct": 15.62,
+     "min_gap_px": 3.0,
+     "stroke_px": 6,
+     "legible": true
+    },
+    {
+     "size": 64,
+     "components": 2,
+     "component_px": [
+      318,
+      318
+     ],
+     "ink_pct": 15.53,
+     "min_gap_px": 5.0,
+     "stroke_px": 8,
+     "legible": true
+    }
+   ]
+  }
+ },
+ "outputs": {
+  "sheets": [
+   "brand-optical-compensation-light.png",
+   "brand-optical-compensation-dark.png",
+   "appendix-variants-light.png",
+   "brand-icon-ladder.png"
+  ],
+  "shots": {
+   "brand-optical-compensation-light.png": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.dsh\\fx\\shots\\brand-brand-optical-compensation-light.png",
+   "brand-optical-compensation-dark.png": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.dsh\\fx\\shots\\brand-brand-optical-compensation-dark.png",
+   "appendix-variants-light.png": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.dsh\\fx\\shots\\brand-appendix-variants-light.png",
+   "brand-icon-ladder.png": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.dsh\\fx\\shots\\brand-brand-icon-ladder.png"
+  }
+ }
+}

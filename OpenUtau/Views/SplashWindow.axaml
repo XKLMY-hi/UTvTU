@@ -5,43 +5,63 @@
         mc:Ignorable="d" Width="400" Height="180"
         x:Class="OpenUtau.App.Views.SplashWindow"
         Title="UTvTU"
-        Icon="/Assets/open-utau.ico"
+        Icon="/Assets/brand/utvtu.ico"
         CanResize="False"
         WindowDecorations="None"
         Background="Transparent"
         WindowStartupLocation="CenterScreen">
-  <!-- ══ W40：启动徽标 = 品牌锁定 `{ 脸 UTvTU }` ══
-       · 底色/描边按 UI 标准走 md3.* 令牌（原为 Suki 时代键 SystemRegionBrush / PlusBrushBorderDefault）
-       · 标志与括号用**矢量**（`brand-mark` / `brand-brace`，见 Assets/Icons.axaml；64 网格、描边 = 尺寸÷8），
-         96px 级尺寸下比位图锐；字标暂用文字（Roboto 字标轮廓由 W39 重出后替换为几何）
-       · **几何当前是占位**：W39 正在按源几何重出（括号尖部、笔画与墨迹高），就绪后只替换 Icons.axaml 里两条 Data
-       · 视觉尺寸按 W39 实测阶梯：启动窗用完整锁定、cap=28（括号墨迹 ≈1.2×cap，标志墨迹高 = cap）
-       · 颜色：应用内变体 —— 括号 md3.primary（跟随色池）、字标 md3.on-surface；
-         品牌物料（图标/闪屏/安装包）用固定 brand.primary 的切换待 W39 的 brand.* 令牌落地后一行改动 -->
+  <!-- ══ W40：启动窗 = 签名锁定 { 脸 UTvTU }（cap 28，舒适档） ══
+       · 底色/描边走 md3.* 令牌（原为 Suki 时代键 SystemRegionBrush / PlusBrushBorderDefault）
+       · 括号/标志用**纯提取件源几何**、描边渲染（见 Assets/Icons.axaml 与
+         .opencode/design/brand/extracted/）：括号 brand-brace、标志 brand-mark（64 网格、描边 = 尺寸÷8）
+       · 右括号 = 同一条 brace 路径 + ScaleX(-1)：这正是设计稿 `extracted/brace-close.svg` 的做法
+         （transform: scaleX(-1)、origin top_left），不预烘焙镜像几何、更不手绘
+       · 尺寸（W39f 对齐规则）：括号墨迹高 = 1.2×cap、标志墨迹高 = cap、间距 = 0.42×cap
+         （cap = 28 ⇒ 括号墨迹高 33.6、标志墨迹高 28、间距 11.8；括号按实测下沉 2.3px 对齐 cap 带）
+       · 取色：应用内 —— 括号 md3.primary（跟随色池）、标志/字标 md3.on-surface
+       · 字标已接**真矢量**：U/T 用 `brand-wordmark`（Fill；源 = extracted/wordmark-ut.svg，
+         已按 EvenOdd 重划）、切角 v 用 `brand-v-chevron` **单独描边**（v 是自交单环，描边不经填充规则）。
+         不接任何描摹/派生版字标（`out/` 已标 derived，不作产品用）。 -->
   <Border CornerRadius="12" Background="{DynamicResource md3.surface-container}"
           BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="1">
     <Grid RowDefinitions="*,Auto">
-      <!-- 锁定行：{ 脸 UTvTU }（Viewbox 里按 64 单位网格摆放，缩放到目标墨迹高） -->
-      <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="6"
-                  HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Viewbox Width="49" Height="49" Stretch="Uniform">
+      <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center"
+                  VerticalAlignment="Center">
+        <!-- { 括号：路径 28×48、墨迹高 36 ⇒ 描边=6；缩放到墨迹高 1.2×28 = 33.6 -->
+        <Viewbox Width="23.5" Height="40.3" Stretch="Uniform" Margin="0,2.3,0,0">
           <Path Name="BraceLeft" Data="{StaticResource brand-brace}"
-                Stroke="{DynamicResource md3.primary}" StrokeThickness="7.3"
-                StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
+                Stroke="{DynamicResource md3.primary}" StrokeThickness="6"
+                StrokeLineCap="Round" StrokeJoin="Round" Width="28" Height="48"/>
         </Viewbox>
-        <Viewbox Width="43" Height="43" Stretch="Uniform">
+        <!-- 脸：64 网格、描边=8；缩放到墨迹高 = cap = 28；间距 0.42×cap = 11.8 -->
+        <Viewbox Width="41.7" Height="41.7" Stretch="Uniform" Margin="11.8,0,11.8,0">
           <Path Name="BrandMark" Data="{StaticResource brand-mark}"
-                Stroke="{DynamicResource md3.primary}" StrokeThickness="8"
+                Stroke="{DynamicResource md3.on-surface}" StrokeThickness="8"
                 StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
         </Viewbox>
-        <TextBlock Name="Wordmark" Text="UTvTU" FontSize="39" FontWeight="Bold"
-                   Foreground="{DynamicResource md3.on-surface}"
-                   VerticalAlignment="Center" Margin="4,0,4,2"/>
-        <Viewbox Width="49" Height="49" Stretch="Uniform">
+        <!-- 字标：U/T 用 brand-wordmark（**Fill**，轮廓几何）；切角 v 用 brand-v-chevron **单独描边**
+             （v 的填充轮廓是自交单环，EvenOdd 会填出贯穿细缝 ⇒ 描边不经填充规则，从根上避开）。
+             cap = 28 ⇒ 缩放 = 28 / 277.4707 = 0.100912，字标框 = 1032.4137 × 0.100912 = 105.6 × 28；
+             v 元素框 9.31 × 14.53（= 中心线 91 × 142 × 缩放）、描边 6.24（= 61 × 缩放，源 non-scaling-stroke）、
+             左缘 47.38、底距 3.15 ⇒ Canvas.Top = 28 − 14.53 − 3.15 = 10.32 -->
+        <Canvas Width="105.6" Height="28" VerticalAlignment="Center" Margin="0,0,11.8,0">
+          <Path Name="Wordmark" Data="{StaticResource brand-wordmark}"
+                Fill="{DynamicResource md3.on-surface}"
+                Width="105.6" Height="28" Stretch="Uniform"/>
+          <!-- v 只描边：Avalonia 里"无填充"是**不写 Fill**（写 Fill="none" 会在 XAML 载入时抛
+               Invalid brush string: 'none' —— 真机跑出来的坑） -->
+          <Path Name="WordmarkV" Data="{StaticResource brand-v-chevron}"
+                Stroke="{DynamicResource md3.on-surface}" StrokeThickness="6.24"
+                StrokeLineCap="Round" StrokeJoin="Round"
+                Width="9.31" Height="14.53" Stretch="Uniform"
+                Canvas.Left="47.38" Canvas.Top="10.32"/>
+        </Canvas>
+        <!-- } ：brace-open 源路径 + scaleX(-1)（= 设计稿 brace-close.svg 的 transform 语义） -->
+        <Viewbox Width="23.5" Height="40.3" Stretch="Uniform" Margin="0,2.3,0,0">
           <Path Name="BraceRight" Data="{StaticResource brand-brace}"
-                Stroke="{DynamicResource md3.primary}" StrokeThickness="7.3"
-                StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"
-                RenderTransform="scale(-1,1)" RenderTransformOrigin="50%,50%"/>
+                Stroke="{DynamicResource md3.primary}" StrokeThickness="6"
+                StrokeLineCap="Round" StrokeJoin="Round" Width="28" Height="48"
+                RenderTransform="scaleX(-1)" RenderTransformOrigin="50%,50%"/>
         </Viewbox>
       </StackPanel>
       <ProgressBar Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"

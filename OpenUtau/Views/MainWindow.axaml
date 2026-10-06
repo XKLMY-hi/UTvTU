@@ -9,7 +9,7 @@
         xmlns:motion="using:OpenUtau.Theming"
         mc:Ignorable="d" d:DesignWidth="1440" d:DesignHeight="900"
         x:Class="OpenUtau.App.Views.MainWindow"
-        Icon="/Assets/open-utau.ico"
+        Icon="/Assets/brand/utvtu.ico"
         Title="{Binding Title}" MinWidth="800" MinHeight="200" Width="{Binding Width}" Height="{Binding Height}"
         Focusable="True" KeyDown="OnKeyDown" PointerPressed="OnPointerPressed" Closing="WindowClosing"
         SizeChanged="OnWindowSizeChanged"

@@ -7,15 +7,31 @@
         Width="400" Height="320">
   <!-- 自适应布局（修复：原版 Row0 固定 Margin 136 定位 logo，高度变化时与版本号重叠） -->
   <Grid RowDefinitions="Auto,Auto,Auto,*,Auto,Auto">
-    <Image Grid.Row="0" Margin="0,24,0,0" Width="96" Height="96"
-           HorizontalAlignment="Center"
-           Source="/Assets/open-utau.ico"/>
-    <Image Grid.Row="1" Height="16" Margin="0,8,0,0"
-           HorizontalAlignment="Center"
-           Source="/Assets/logotype.png" IsVisible="{Binding !IsDarkMode}"/>
-    <Image Grid.Row="1" Height="16" Margin="0,8,0,0"
-           HorizontalAlignment="Center"
-           Source="/Assets/logotype-w.png" IsVisible="{Binding IsDarkMode}"/>
+    <!-- W40：logo 与字标改矢量（提取件几何、无派生）——
+         原 /Assets/open-utau.ico（96 位图）+ logotype.png / logotype-w.png（深浅色两张位图，靠 IsVisible 切）
+         统一成"标志 + 字标"，颜色走 md3.* 令牌 ⇒ 不再需要深浅色两份位图。
+         此处语义是**字标位**（原来放的就是 logotype 字标图），故用 brand-wordmark（U/T，Fill）
+         + brand-v-chevron 单独描边补齐切角 v（U/T 键不含 v，v 是自交单环只能描边）。
+         尺寸：cap 16 ⇒ 缩放 = 16 / 277.4707 = 0.057663；字标 = 1032.4137 × 0.057663 = 59.53 × 16；
+         v = 中心线 91×142 单元 → 元素框 5.25×8.19、描边 61 → 3.52、
+             左缘 463.011 × 0.057663 = 26.70、顶 100.711 × 0.057663 = 5.81 -->
+    <Viewbox Grid.Row="0" Margin="0,24,0,0" Width="96" Height="96"
+             HorizontalAlignment="Center" Stretch="Uniform">
+      <Path Data="{StaticResource brand-mark}"
+            Stroke="{DynamicResource md3.primary}" StrokeThickness="8"
+            StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
+    </Viewbox>
+    <Canvas Grid.Row="1" Margin="0,8,0,0" Width="59.53" Height="16"
+            HorizontalAlignment="Center">
+      <Path Data="{StaticResource brand-wordmark}"
+            Fill="{DynamicResource md3.on-surface}"
+            Width="59.53" Height="16" Stretch="Uniform"/>
+      <Path Data="{StaticResource brand-v-chevron}"
+            Stroke="{DynamicResource md3.on-surface}" StrokeThickness="3.52"
+            StrokeLineCap="Round" StrokeJoin="Round"
+            Width="5.25" Height="8.19" Stretch="Uniform"
+            Canvas.Left="26.70" Canvas.Top="5.81"/>
+    </Canvas>
     <TextBlock Grid.Row="2" Margin="0,8,0,0" TextAlignment="Center"
                Text="{Binding AppVersion}"/>
     <TextBlock Grid.Row="3" Margin="40,14,40,0" TextAlignment="Center"

@@ -1,0 +1,49 @@
+{
+ "source": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.opencode\\design\\brand\\sections\\02-wordmark.png",
+ "crop_box": [
+  140,
+  269,
+  2224,
+  1676
+ ],
+ "source_cap_px": 1407,
+ "outputs": {
+  "1x": {
+   "path": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.opencode\\design\\brand\\extracted\\wordmark-alpha@1x.png",
+   "size": [
+    148,
+    100
+   ],
+   "cap": 100
+  },
+  "2x": {
+   "path": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.opencode\\design\\brand\\extracted\\wordmark-alpha@2x.png",
+   "size": [
+    296,
+    200
+   ],
+   "cap": 200
+  },
+  "4x": {
+   "path": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.opencode\\design\\brand\\extracted\\wordmark-alpha@4x.png",
+   "size": [
+    592,
+    400
+   ],
+   "cap": 400
+  }
+ },
+ "corners_alpha": [
+  0,
+  0,
+  0,
+  0
+ ],
+ "edge_max_alpha": 0,
+ "semi_transparent_px": 0,
+ "tints": {
+  "ink": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.opencode\\design\\brand\\extracted\\_selftest-wordmark-ink.png",
+  "white": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.opencode\\design\\brand\\extracted\\_selftest-wordmark-white.png",
+  "brand": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.opencode\\design\\brand\\extracted\\_selftest-wordmark-brand.png"
+ }
+}
