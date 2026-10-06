@@ -34,7 +34,7 @@
   <system:String x:Key="dialogs.about.message">
     OpenUtaus Ziel ist es eine quelloffene Bearbeitungsumgebung für die UTAU Community mit einer modernen Benutzererfahrung und intelligenter phonologischer Unterstützung zu sein. Besuchen Sie uns auf Github.
   </system:String>
-  <system:String x:Key="dialogs.exitsave.caption">UTvTU schließen</system:String>
+  <system:String x:Key="dialogs.exitsave.caption">OpenUtau schließen</system:String>
   <system:String x:Key="dialogs.exitsave.message">Das aktuelle Projekt beinhaltet nicht gespeicherte Änderungen. Möchten Sie es speichern?</system:String>
   <system:String x:Key="dialogs.export.caption">Exportieren</system:String>
   <system:String x:Key="dialogs.export.savefirst">Projekt Datei als erstes speichern</system:String>
