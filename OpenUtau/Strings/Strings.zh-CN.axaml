@@ -1350,6 +1350,9 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="command.track.solopart">独奏选中片段所在轨道</system:String>
   <system:String x:Key="command.track.mutepart">静音选中片段所在轨道（切换）</system:String>
   <system:String x:Key="command.view.mixerattach">分离或贴合混音台</system:String>
+  <system:String x:Key="command.view.gotoworkspace">切换到工作台</system:String>
+  <system:String x:Key="command.view.gotopiano">切换到钢琴卷帘</system:String>
+  <system:String x:Key="command.view.gotomixer">切换到混音台</system:String>
   <system:String x:Key="command.playback.playpause">播放 / 暂停</system:String>
   <system:String x:Key="command.playback.gohome">回到开头</system:String>
   <system:String x:Key="command.playback.goend">跳到末尾</system:String>

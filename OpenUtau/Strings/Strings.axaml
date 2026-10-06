@@ -1219,6 +1219,9 @@ General
   <system:String x:Key="command.track.solopart">Solo the track of the selected part</system:String>
   <system:String x:Key="command.track.mutepart">Mute toggle for the selected part's track</system:String>
   <system:String x:Key="command.view.mixerattach">Detach or re-attach the mixer</system:String>
+  <system:String x:Key="command.view.gotoworkspace">Switch to Workspace</system:String>
+  <system:String x:Key="command.view.gotopiano">Switch to Piano Roll</system:String>
+  <system:String x:Key="command.view.gotomixer">Switch to Mixer</system:String>
   <system:String x:Key="command.playback.playpause">Play / pause</system:String>
   <system:String x:Key="command.playback.gohome">Go to the beginning</system:String>
   <system:String x:Key="command.playback.goend">Go to the end</system:String>

@@ -128,6 +128,20 @@ namespace OpenUtau.App.Commands {
             Cmd("tools.shortcutoverview", "command.shortcutoverview", CommandGroup.Tools, null,
                 w => ShortcutOverviewWindow.Open(w), note: "只读总览（本表生成，含冲突标记）"),
 
+            // ── 视图切换（W48）：与顶栏胶囊**同源**（同一条 ViewSwitcher.SwitchTo）
+            //    ✅ 已接线（W47 落地后复核）：MainWindow.HandleGlobalShortcut → TryExecuteShortcut 已是纯注册表分发
+            //    （按 PreFocus + Scope==Window + 手势匹配直接 def.Execute(this)），手写 switch 与
+            //    MapGlobalShortcut 白名单都不在生产路径 ⇒ 本三条**零改动即生效**，MainWindow.axaml.cs 一行未碰。
+            Cmd("view.workspace", "command.view.gotoworkspace", CommandGroup.View,
+                new KeyGesture(Key.D1, PrimaryModifier),
+                w => w.ViewModel.ViewSwitcher.SwitchTo(AppSurface.Workspace)),
+            Cmd("view.pianoroll", "command.view.gotopiano", CommandGroup.View,
+                new KeyGesture(Key.D2, PrimaryModifier),
+                w => w.ViewModel.ViewSwitcher.SwitchTo(AppSurface.PianoRoll)),
+            Cmd("view.mixer", "command.view.gotomixer", CommandGroup.View,
+                new KeyGesture(Key.D3, PrimaryModifier),
+                w => w.ViewModel.ViewSwitcher.SwitchTo(AppSurface.Mixer)),
+
             // ── View / 播放 ─────────────────────────────────────────────────────
             Cmd("playback.playpause", "command.playback.playpause", CommandGroup.View,
                 new KeyGesture(Key.Space), w => w.PlayOrPause()),
