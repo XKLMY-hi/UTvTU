@@ -83,6 +83,7 @@ Lead 写下规格**不等于规格成立**。以下三条都是本会话真实�
    - **"无填充" = 不写 `Fill` 属性**；`Fill`/`Stroke` 的值只能是**颜色池键**或省略；
    - **能用对象形式就别用字符串形式**：`RenderTransform` 用 `<Path.RenderTransform><ScaleTransform ScaleX="-1"/></Path.RenderTransform>`，不要 `RenderTransform="scale(-1,1)"`；
    - **凡改过此类属性 ⇒ 必须真机启动一次**（按 PID 起停）才算验过，headless 绿不作数。
+   - **悬空 `StaticResource` 同族**：`UpdaterDialog.axaml:22` 引用了已删除的 `brand-wordmark-interim-monoline`（1 引用 / 0 定义）—— **构建 0 错误、全量 770/770 全绿**，只有**实例化该视图**时才在 XAML 载入抛异常（本 fork 更新检查已禁用 ⇒ 长期潜伏）。**纪律：新增/删除资源键时必须全仓扫引用**（防漂移用例要扫 `*.axaml`/`*.cs` 的全部 `brand-*` 引用，而不是只看定义文件）。
 
 > 落地方式：**任何"必须用 X 模式"的规格，附一条最小验证**（能否加载？默认值？换写法还行吗？）。本会话三次纠正（presamp / 字体内嵌 / U-T EvenOdd 安全）**全部来自执行者的实测**，不是来自 Lead 的复查 —— 这就是要求"先验前提再执行"的原因。
 
