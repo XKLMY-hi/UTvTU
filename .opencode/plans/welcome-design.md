@@ -208,3 +208,19 @@ Avalonia **不认 SVG 的 `none` 关键字**：`Fill="none"` 会抛 `Invalid bru
 且 4 条 path 的 transform 语义不一致（要靠"哪条落得进 viewBox"来猜）。
 ⇒ m1-strip 正在**规范化**（展平 transform + 转标准 `M/L/C/Z`，几何不变并带采样偏差自证）。
 **在 fx-ctl 逐字重取键之前，单处 `Data=` 不切** —— 否则白做一轮。
+---
+
+## W38 追加六：品牌几何的**单一来源**改判（推翻本文件前几节的"冻结文件"口径）
+
+**改判**：`out/utvtu-brand-lockup.axaml` 是**派生时代**的产物（光学补偿 / 描摹），**已废弃**
+（移入 `out/_obsolete/` + 弃用注释；`out/brand-frozen-manifest.md` 的"几何已冻结，消费方必须重取"
+改为"**本目录为派生研究，消费方一律取 `extracted/`**"）。
+
+- ⇒ **本文件前几节里凡写"冻结文件 `out/utvtu-brand-lockup.axaml`"的地方，一律改读
+  `extracted/`（如 `extracted/wordmark-ut.svg`）**；`out/` 不再是权威。
+- **自证口径**：把产品键与提取件的路径串**去掉全部空白**后比对 —— 实测 **2104 = 2104** ✓
+  （先前看到的 2390 / 2393 / 1418 三个数字：2390 + 3 个分隔空格 = 2393 ✓ 同源；
+  1418 是 `out/` 里的**旧版**字标 ⇒ 正是"两个来源并存"造成的误导）。
+- **`Icons.axaml` 就是定稿、不需要改**（4 键：`brand-mark` / `brand-brace` /
+  `brand-v-chevron` / `brand-wordmark`）。
+- 生产纪律据此定：**单一来源 = `extracted/`**；`out/` 只作研究留档，**不得作为接入参照**。
