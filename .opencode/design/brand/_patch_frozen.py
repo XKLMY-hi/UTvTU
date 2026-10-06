@@ -1,3 +1,6 @@
+# [已废弃 / DERIVED-OBSOLETE] 本脚本属`派生时代`（光学补偿 / 描摹重建）的产物：它生成的 out/** 资产
+# （含 utvtu-brand-lockup.axaml = 旧版描摹字标）**已废弃，不得作为消费来源**；重跑只为复现历史。
+# 唯一权威来源 = .opencode/design/brand/extracted/**（提取 + 规范化；见其 EXTRACT-MANIFEST.md 顶部声明）。
 import io, os, re
 p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_frozen.py")
 s = io.open(p, encoding="utf-8").read()
@@ -20,7 +23,7 @@ inject = '''
             .replace('{L.wm_path_d(L.MONO and []) if False else ""}', "")
             .replace("{{", "{").replace("}}", "}"))
 '''
-anchor = '    io.open(os.path.join(OUT, "utvtu-brand-lockup.axaml"), "w", encoding="utf-8").write(head)'
+anchor = '    io.open(os.path.join(OUT, "utvtu-brand-lockup.axaml"), "w", encoding="utf-8").write(head)'  # 已废弃
 s = s.replace(anchor, inject + anchor, 1)
 io.open(p, "w", encoding="utf-8").write(s)
 print("patched")

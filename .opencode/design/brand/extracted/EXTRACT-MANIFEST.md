@@ -1,8 +1,17 @@
 # EXTRACT-MANIFEST — UTvTU 品牌 HTML 纯提取（W42）
 
+> ## ✅ 单一来源声明（2026-10）
+> **产品几何的唯一权威来源 = 本目录（`.opencode/design/brand/extracted/**`）**。
+> `../out/` **是派生物、已废弃**（光学补偿 / 描摹重建 / 早期变体时代）：其 `utvtu-brand-lockup.axaml`
+> 已移入 `out/_obsolete/` 并在文件头标注废弃，`out/brand-frozen-manifest.md` 的原"几何已冻结、消费方必须
+> 重取本目录"口径**已作废** ⇒ **消费方一律取本目录**，不要再从 `out/` 取几何。
+> 产品侧现状已核对：`OpenUtau/**` **零引用** `out/`（`Icons.axaml` / `SplashWindow.axaml` 等均引用
+> `extracted/**`）。
+>
 > **来源**：`utvtu-brand-tailwind.html`（用户设计稿，几何权威源）。**本目录只做提取，不做任何改动**：
 > 不改比例 / 不改字距 / 不做笔宽补偿 / 不描摹 / 不合并拆分组件 / 不"顺手优化"。
 > `../out/` 目录内的资产此前做过二次创作（光学补偿、字距重排、描摹重建），**标记为 derived/派生，不作产品用**。
+
 
 ## 统计
 - 具名 SVG 组件（`data-pencil-name`）：**107** 个 → `extracted/*.svg`（A 类，逐字）
