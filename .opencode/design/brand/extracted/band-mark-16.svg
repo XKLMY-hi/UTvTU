@@ -1,0 +1,17 @@
+<svg
+                  data-pencil-name="Band mark 16"
+                  viewBox="0 0 64 64"
+                  preserveAspectRatio="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="box-border w-[48px] shrink-0 h-[48px] overflow-visible"
+                >
+                  <path
+                    d="M8 13 H24 M16 13 V29 M40 13 H56 M48 13 V29 M27 25 L32 35 L37 25 M9 41 V44 Q9 51 16 51 Q23 51 23 44 V41 M55 41 V44 Q55 51 48 51 Q41 51 41 44 V41"
+                    fill="none"
+                    stroke="#00A892"
+                    stroke-width="6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    vector-effect="non-scaling-stroke"
+                  ></path>
+                </svg>
