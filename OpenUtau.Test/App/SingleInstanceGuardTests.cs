@@ -19,7 +19,38 @@ namespace OpenUtau.Test.App {
     /// </summary>
     public class SingleInstanceGuardTests {
         const string PlusA = @"G:\builds\plus-a\OpenUtau.exe";
-        const string PlusB = @"D:\other\plus-b\OpenUtau.exe";   // 同名、不同路径（例如原版 OpenUTAU）
+        const string PlusB = @"D:\other\plus-b\OpenUtau.exe";   // 同名、不同路径（例如原版 OpenUTAU）        /// <summary>
+        /// 姊妹用例（钉住另一种语义）：锁正被**活着的持有者**持有时 ⇒ TryClaim 必须 false 且 wasAbandoned=false。
+        /// 独立线程 + 独立 GUID 命名互斥体 ⇒ 不依赖全局状态、不依赖用例顺序。
+        /// </summary>
+        [Fact]
+        public void HeldMutex_IsNotAcquirable_AndNotAbandoned() {
+            string path = UniqueExePath("held");
+            string name = SingleInstanceGuard.MutexNameFor(path);
+            using var ready = new ManualResetEventSlim(false);
+            using var release = new ManualResetEventSlim(false);
+            Mutex? holderMutex = null;
+            var holder = new Thread(() => {
+                holderMutex = new Mutex(initiallyOwned: false, name);
+                holderMutex.WaitOne();
+                ready.Set();
+                release.Wait(TimeSpan.FromSeconds(10));
+                holderMutex.ReleaseMutex();
+            });
+            holder.Start();
+            try {
+                Assert.True(ready.Wait(TimeSpan.FromSeconds(10)), "持有者线程未就绪");
+                Assert.False(SingleInstanceGuard.TryClaim(out var claimed, path, out bool wasAbandoned),
+                    "锁被活着的持有者持有 ⇒ 不应取得");
+                Assert.Null(claimed);
+                Assert.False(wasAbandoned);
+            } finally {
+                release.Set();
+                holder.Join(TimeSpan.FromSeconds(10));
+                holderMutex?.Dispose();
+            }
+        }
+
 
         static string UniqueExePath(string tag) =>
             Path.Combine(Path.GetTempPath(), $"w41-{tag}-{Guid.NewGuid():N}", "OpenUtau.exe");
@@ -94,11 +125,25 @@ namespace OpenUtau.Test.App {
             holder.Start();
             holder.Join();
 
-            Assert.True(SingleInstanceGuard.TryClaim(out var claimed, path, out bool wasAbandoned));
+                        // 稳定性加固：宿主线程**退出**到"锁被内核标记为遗弃"之间有极小时序窗口（全量跑、机器负载高时更明显）
+            // ⇒ 有界轮询到"可获取"为止；断言仍是**遗弃语义**，不是放宽成"随便能拿到"。
+            bool claimedOk = false, abandoned = false;
+            Mutex? claimed = null;
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            while (sw.ElapsedMilliseconds < 3000) {
+                if (SingleInstanceGuard.TryClaim(out var claimedTry, path, out bool wasAbandoned)) {
+                    claimedOk = true;
+                    claimed = claimedTry;
+                    abandoned = wasAbandoned;
+                    break;
+                }
+                Thread.Sleep(25);
+            }
+            Assert.True(claimedOk, "3s 内未取得（原持有者线程应已退出并把锁遗弃）");
             Assert.NotNull(claimed);
             if (OS.IsWindows()) {
                 // Windows 上命名互斥体有明确遗弃语义；非 Windows 的命名内核对象不同，只要求"能拿到"
-                Assert.True(wasAbandoned);
+                Assert.True(abandoned, "Windows 上应判定为「遗弃锁接管」");
             }
             claimed!.Dispose();
             leaked!.Dispose();
