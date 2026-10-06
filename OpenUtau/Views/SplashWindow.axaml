@@ -11,15 +11,17 @@
         Background="Transparent"
         WindowStartupLocation="CenterScreen">
   <!-- ══ W40：启动窗 = 签名锁定 { 脸 UTvTU }（cap 28，舒适档） ══
-       · 底色/描边改 md3.* 令牌（原为 Suki 时代键 SystemRegionBrush / PlusBrushBorderDefault）
-       · 三件全用**冻结版源几何、描边渲染**（见 Assets/Icons.axaml）：
-         括号 brand-brace / brand-brace-flipx（程序化镜像，不手绘）、标志 brand-mark（描边 = 尺寸÷8）、
-         字标 brand-wordmark-interim-monoline（描边 = cap×0.125）
-       · 尺寸按 W39f 对齐规则：括号墨迹高 = 1.2×cap、标志墨迹高 = cap、部件间距 = 0.42×cap
-         （此处 cap = 28 ⇒ 括号墨迹高 33.6、标志墨迹高 28、间距 11.8；括号按实测下沉 2.3px 对齐 cap 带）
-       · 取色：应用内 —— 括号 md3.primary（跟随色池）、标志与字标 md3.on-surface
-       · ⚠ 字标暂用单线替代：冻结版 brand-wordmark 的切角 v 坐标错位（已报 fx-rack 重出），
-         重出后把下面 Wordmark 的 Data 换成 brand-wordmark（Fill）即可，布局不用动 -->
+       · 底色/描边走 md3.* 令牌（原为 Suki 时代键 SystemRegionBrush / PlusBrushBorderDefault）
+       · 括号/标志用**纯提取件源几何**、描边渲染（见 Assets/Icons.axaml 与
+         .opencode/design/brand/extracted/）：括号 brand-brace、标志 brand-mark（64 网格、描边 = 尺寸÷8）
+       · 右括号 = 同一条 brace 路径 + ScaleX(-1)：这正是设计稿 `extracted/brace-close.svg` 的做法
+         （transform: scaleX(-1)、origin top_left），不预烘焙镜像几何、更不手绘
+       · 尺寸（W39f 对齐规则）：括号墨迹高 = 1.2×cap、标志墨迹高 = cap、间距 = 0.42×cap
+         （cap = 28 ⇒ 括号墨迹高 33.6、标志墨迹高 28、间距 11.8；括号按实测下沉 2.3px 对齐 cap 带）
+       · 取色：应用内 —— 括号 md3.primary（跟随色池）、标志/字标 md3.on-surface
+       · ⚠ 字标暂用**文字占位**：用户设计稿的字标是 PDF 矢量，fx-rack 正在提取
+         `extracted/wordmark-outline.svg`；到位后把下面 TextBlock 换成 Path（Fill）即可，布局不动。
+         在此之前**不接**任何描摹/派生版字标（`out/` 已标 derived，不作产品用）。 -->
   <Border CornerRadius="12" Background="{DynamicResource md3.surface-container}"
           BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="1">
     <Grid RowDefinitions="*,Auto">
@@ -37,17 +39,16 @@
                 Stroke="{DynamicResource md3.on-surface}" StrokeThickness="8"
                 StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
         </Viewbox>
-        <!-- 字标：单线替代（大写高 93.8、宽 401.8）；缩放到 cap=28 -->
-        <Viewbox Width="126" Height="30" Stretch="Uniform" Margin="0,0,11.8,0">
-          <Path Name="Wordmark" Data="{StaticResource brand-wordmark-interim-monoline}"
-                Stroke="{DynamicResource md3.on-surface}" StrokeThickness="11.725"
-                StrokeLineCap="Round" StrokeJoin="Round" Width="401.8" Height="93.8"/>
-        </Viewbox>
-        <!-- } ：冻结版程序化镜像几何（brand-brace-flipx），不要 RenderTransform、不要手绘 -->
+        <!-- 字标：PDF 轮廓到位前用文字占位（cap ≈ 28 ⇒ FontSize 39，加粗贴近 Roboto Bold 观感） -->
+        <TextBlock Name="WordmarkText" Text="UTvTU" FontSize="39" FontWeight="Bold"
+                   Foreground="{DynamicResource md3.on-surface}"
+                   VerticalAlignment="Center" Margin="0,0,11.8,2"/>
+        <!-- } ：brace-open 源路径 + scaleX(-1)（= 设计稿 brace-close.svg 的 transform 语义） -->
         <Viewbox Width="23.5" Height="40.3" Stretch="Uniform" Margin="0,2.3,0,0">
-          <Path Name="BraceRight" Data="{StaticResource brand-brace-flipx}"
+          <Path Name="BraceRight" Data="{StaticResource brand-brace}"
                 Stroke="{DynamicResource md3.primary}" StrokeThickness="6"
-                StrokeLineCap="Round" StrokeJoin="Round" Width="28" Height="48"/>
+                StrokeLineCap="Round" StrokeJoin="Round" Width="28" Height="48"
+                RenderTransform="scaleX(-1)" RenderTransformOrigin="50%,50%"/>
         </Viewbox>
       </StackPanel>
       <ProgressBar Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"

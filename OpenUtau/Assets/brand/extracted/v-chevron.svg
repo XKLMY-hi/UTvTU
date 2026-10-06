@@ -1,0 +1,17 @@
+<svg
+                    data-pencil-name="v / Chevron"
+                    viewBox="0 0 9 14"
+                    preserveAspectRatio="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="box-border w-[91px] h-[142px] shrink-0 overflow-visible"
+                  >
+                    <path
+                      d="M0 0 L4.5 14 L9 0"
+                      fill="none"
+                      stroke="#1C1B22"
+                      stroke-width="61"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      vector-effect="non-scaling-stroke"
+                    ></path>
+                  </svg>
