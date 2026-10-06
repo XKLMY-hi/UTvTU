@@ -387,5 +387,78 @@ namespace OpenUtau.Test.App {
             Assert.True(overlayAt > centerAt,
                 "快捷展开 overlay 必须声明在中央区**之后**（否则被不透明中央区盖住：看不见也点不到）");
         }
+
+        /// <summary>
+        /// ② 混音台链面板那处 overlay 的契约（W44 ②）：链面板在分隔条右侧 ⇒ 标签必须
+        /// `AnchorRight=True`（贴右缘、向左展开），且**声明在混音区之后**（z 序 = 声明顺序；
+        /// 通道条滚动区不透明，声明在它前面会被盖住 ⇒ 看不见也命中不到）。
+        /// </summary>
+        [Fact]
+        public void MixerControl_DeclaresChainRevealTab_AfterTheStrips_AnchoredRight() {
+            string xaml = File.ReadAllText(Path.Combine(FindRepoRoot(), "OpenUtau", "Controls", "MixerControl.axaml"));
+            int tabAt = xaml.IndexOf("x:Name=\"ChainRevealTab\"", StringComparison.Ordinal);
+            int stripsAt = xaml.IndexOf("Name=\"StripsScroll\"", StringComparison.Ordinal);
+            Assert.True(tabAt > 0, "找不到链面板的快捷展开标签");
+            Assert.True(stripsAt > 0, "找不到混音区通道条滚动区");
+            Assert.True(tabAt > stripsAt, "链面板 overlay 必须声明在通道条滚动区**之后**（否则被盖住：看不见也点不到）");
+            Assert.Contains("AnchorRight=\"True\"", xaml);
+            Assert.Contains("ExpandRequested=\"OnRevealChainPanel\"", xaml);
+            Assert.Contains("ZIndex=\"10\"", xaml);
+        }
+
+        /// <summary>
+        /// ② 贴右缘（右列面板）的几何与展开：折叠时 14×48、右边缘距宿主右缘 8（Margin），
+        /// 点它 ⇒ 恢复**持久化宽度**并展开。
+        /// </summary>
+        [AvaloniaFact]
+        public void AnchorRightTab_SitsAtRightEdge_AndExpandsToPersistedWidth() {
+            var slot = new PanelSlot("fx-chain", 280, 264, 480);
+            var splitter = new PanelSplitter {
+                PanelColumn = 0, Invert = true,
+                Min = slot.MinWidth, Max = slot.MaxWidth, DefaultWidth = slot.DefaultWidth,
+                CenterMin = 320,
+            };
+            splitter.Bind(PanelSplitter.TargetProperty,
+                new Avalonia.Data.Binding(nameof(PanelSlot.Width)) { Source = slot, Mode = Avalonia.Data.BindingMode.TwoWay });
+            splitter.Bind(Visual.IsVisibleProperty, new Avalonia.Data.Binding("!IsCollapsed") { Source = slot });
+            var tab = new PanelRevealTab { AnchorRight = true };
+            tab.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right;
+            tab.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
+            tab.Margin = new Thickness(8);
+            tab.Bind(Visual.IsVisibleProperty, new Avalonia.Data.Binding("IsCollapsed") { Source = slot });
+            tab.ExpandRequested += (_, _) => slot.IsCollapsed = false;
+            var overlay = new Panel();
+            overlay.Children.Add(tab);
+            var layout = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto") };
+            Grid.SetColumn(overlay, 0);
+            Grid.SetColumn(splitter, 1);
+            layout.Children.Add(overlay);
+            layout.Children.Add(splitter);
+            var window = new Window { Width = 900, Height = 300, Content = layout };
+            try {
+                window.Show();
+                for (int i = 0; i < 3; i++) {
+                    Pump();
+                    window.UpdateLayout();
+                }
+                slot.Width = 320;              // 与默认 280 区分，验证"回持久化值"
+                slot.IsCollapsed = true;
+                Pump();
+                window.UpdateLayout();
+                Assert.True(tab.IsVisible);
+                Assert.Equal(14, tab.Bounds.Width, 1);
+                Assert.Equal(48, tab.Bounds.Height, 1);
+                Assert.Equal(overlay.Bounds.Width - 8, tab.Bounds.Right, 1);   // 贴右缘
+                var button = tab.GetVisualDescendants().OfType<Button>().Single();
+                button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                Pump();
+                window.UpdateLayout();
+                Assert.False(slot.IsCollapsed);
+                Assert.Equal(320, splitter.PanelWidth, 1);                     // 回持久化宽度
+                Assert.False(tab.IsVisible);
+            } finally {
+                window.Close();
+            }
+        }
     }
 }

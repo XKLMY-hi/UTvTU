@@ -129,9 +129,9 @@ namespace OpenUtau.App.Commands {
                 w => ShortcutOverviewWindow.Open(w), note: "只读总览（本表生成，含冲突标记）"),
 
             // ── 视图切换（W48）：与顶栏胶囊**同源**（同一条 ViewSwitcher.SwitchTo）
-            //    ⚠ 接线待办（第二步）：MainWindow.MapGlobalShortcut 目前是**硬编码白名单**投影，
-            //    新命令会被 Match 命中后落到 GlobalShortcut.None ⇒ 还需补 3 个枚举成员 + 3 行映射
-            //    + 3 处分发；等 fx-ctl 的 W47 落地后再动 MainWindow.axaml.cs（避免两写者改同一文件）。
+            //    ✅ 已接线（W47 落地后复核）：MainWindow.HandleGlobalShortcut → TryExecuteShortcut 已是纯注册表分发
+            //    （按 PreFocus + Scope==Window + 手势匹配直接 def.Execute(this)），手写 switch 与
+            //    MapGlobalShortcut 白名单都不在生产路径 ⇒ 本三条**零改动即生效**，MainWindow.axaml.cs 一行未碰。
             Cmd("view.workspace", "command.view.gotoworkspace", CommandGroup.View,
                 new KeyGesture(Key.D1, PrimaryModifier),
                 w => w.ViewModel.ViewSwitcher.SwitchTo(AppSurface.Workspace)),

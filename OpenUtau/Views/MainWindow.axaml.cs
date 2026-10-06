@@ -18,6 +18,7 @@ using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using OpenUtau.App.Controls;
 using OpenUtau.App.ViewModels;
 using OpenUtau.App.Commands;
@@ -1469,9 +1470,59 @@ namespace OpenUtau.App.Views {
         /// Global key handler registered via AddHandler(handledEventsToo:true).
         /// Catches Ctrl+M etc. even when piano roll or other children have consumed the event.
         /// 与 <see cref="OnKeyDown"/> 共用一个映射表 + 同一事件去重（隧道/冒泡两路只会动作一次）。
+        ///
+        /// W47 收窄：这里**只**分发 <see cref="CommandRegistry"/> 里 `PreFocus = true` 的命令
+        /// （当前仅 Ctrl+M / Ctrl+W / Ctrl+S 三条），并且先过 <see cref="ShouldYieldShortcutToFocus"/> —— 
+        /// 焦点在文本输入或会自己处理激活键的控件上时一律不参与，避免"隧道路径比控件更早拿到按键"。
+        /// `handledEventsToo: true` 仍然**必须保留**：卷帘/文本框等子控件会把 Ctrl 组合标记为已处理，
+        /// 只看未处理的冒泡事件会漏掉这些全局键；但"已处理也再收"的风险已由上面的两条收窄约束住。
         /// </summary>
         void OnWindowKeyDown(object? sender, KeyEventArgs args) {
             HandleGlobalShortcut(args);
+        }
+
+        /// <summary>
+        /// W47 焦点让位策略：窗口级快捷键**不该**抢走焦点控件的标准键语义。
+        /// 返回 true = 本次按键完全交给焦点控件，窗口级命令（含全局键表）不参与。
+        ///
+        /// 规则（按优先级）：
+        /// ① 带 Ctrl/Alt/Win 的组合键是**命令手势** ⇒ 永不让位（Ctrl+S / Ctrl+Shift+R / Ctrl+M … 照旧）；
+        /// ② 焦点在文本输入类（<see cref="TextBox"/> 及其宿主，如 NumericUpDown 内层）⇒ **一律让位**
+        ///    —— 空格必须能输入，不能变成播放，其它键同理；
+        /// ③ 焦点在会消费标准激活键的交互控件（Button/ToggleButton/CheckBox/RadioButton 同族 + MenuItem +
+        ///    ComboBox）且按键是 Space/Enter ⇒ 让位，激活由控件自己处理（可访问性基线）。
+        /// 其余情况（焦点在画布/窗口本身等）⇒ 不让位，窗口级命令照常（空格仍播放）。
+        /// </summary>
+        public static bool ShouldYieldShortcutToFocus(IInputElement? focused, Key key, KeyModifiers modifiers) {
+            if ((modifiers & (KeyModifiers.Control | KeyModifiers.Alt | KeyModifiers.Meta)) != 0) {
+                return false;
+            }
+            if (focused == null) {
+                return false;
+            }
+            if (FindSelfOrAncestor<TextBox>(focused) != null) {
+                return true;
+            }
+            if (key != Key.Space && key != Key.Enter) {
+                return false;
+            }
+            return FindSelfOrAncestor<Button>(focused) != null      // 含 ToggleButton/CheckBox/RadioButton
+                || FindSelfOrAncestor<MenuItem>(focused) != null
+                || FindSelfOrAncestor<ComboBox>(focused) != null;
+        }
+
+        static T? FindSelfOrAncestor<T>(IInputElement element) where T : class {
+            if (element is T self) {
+                return self;
+            }
+            if (element is Visual visual) {
+                foreach (var ancestor in visual.GetVisualAncestors()) {
+                    if (ancestor is T hit) {
+                        return hit;
+                    }
+                }
+            }
+            return null;
         }
 
         /// <summary>Ctrl 组合的全局快捷键（顶栏之前先处理）。</summary>
@@ -1505,6 +1556,10 @@ namespace OpenUtau.App.Views {
         private KeyEventArgs? handledShortcutArgs;
 
         private void HandleGlobalShortcut(KeyEventArgs args) {
+            // W47：隧道路径同样先做焦点让位判定（对 Ctrl 组合是空操作，纯为把规则收在一处）
+            if (ShouldYieldShortcutToFocus(FocusManager?.GetFocusedElement(), args.Key, args.KeyModifiers)) {
+                return;
+            }
             // 注册表分发（含隧道/冒泡去重），不再走手写 switch
             if (TryExecuteShortcut(args, preFocus: true)) {
                 args.Handled = true;
@@ -1561,6 +1616,13 @@ namespace OpenUtau.App.Views {
                     CloseOverlay();
                 }
                 args.Handled = true;
+                return;
+            }
+
+            // W47 焦点让位（可访问性）：焦点在文本输入上时不吞任何按键；在 Button/ToggleButton/
+            // CheckBox/RadioButton/MenuItem/ComboBox 上时不吞 Space/Enter ⇒ 激活键语义还给控件。
+            // 不置 Handled：让焦点控件继续处理（窗口级命令本轮完全不参与）。
+            if (ShouldYieldShortcutToFocus(FocusManager?.GetFocusedElement(), args.Key, args.KeyModifiers)) {
                 return;
             }
 

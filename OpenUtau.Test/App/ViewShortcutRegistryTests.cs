@@ -64,6 +64,19 @@ namespace OpenUtau.Test.App {
             }
         }
 
+        [Fact]
+        public void ViewCommands_AreResolvedByTheRegistryDispatchPath() {
+            // W47 之后窗口级分发 = 纯注册表（HandleGlobalShortcut → TryExecuteShortcut）
+            foreach (var (id, key, _) in Expected) {
+                var hit = CommandRegistry.Match(key, CommandRegistry.PrimaryModifier, CommandRegistry.PrimaryModifier);
+                Assert.NotNull(hit);
+                Assert.Equal(id, hit!.Id);
+                Assert.Equal(CommandScope.Window, hit.Scope);
+                Assert.False(hit.PreFocus);
+                Assert.Null(CommandRegistry.Match(key,
+                    CommandRegistry.PrimaryModifier | KeyModifiers.Shift, CommandRegistry.PrimaryModifier));
+            }
+        }
         static HashSet<string> KeysOf(string fileName) {
             var dir = new DirectoryInfo(AppContext.BaseDirectory);
             while (dir != null && !Directory.Exists(Path.Combine(dir.FullName, "OpenUtau", "Strings"))) {
