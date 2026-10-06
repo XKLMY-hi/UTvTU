@@ -623,7 +623,19 @@
                        PointerReleased="PhonemeCanvasPointerReleased"/>
       <!-- 频谱条：音素带位置（比曲线编辑器高一点），z 序在音素带之上、35% 透明——
            音素文字依然清晰，视觉上是音素显示下方的动态背景层。仅播放时显示 -->
-      <c:SpectrumCanvas Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch"
+      <!-- 折叠处「快捷展开」（W34 ①）：表达式区在**下方**（行方向面板）⇒ 标签横向 48×14 贴这一行
+           **左下角**、悬停**向上**展开；无背景 Panel ⇒ 只有标签可命中，不吃布局。 -->
+      <Panel Grid.Row="3" Grid.Column="1" IsHitTestVisible="True">
+        <c:PanelRevealTab x:Name="ExpRevealTab"
+                          HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="8"
+                          IsVisible="False"
+                          AnchorBottom="True"
+                          GlyphData="{StaticResource icon-chevron-up}"
+                          PanelLabel="{DynamicResource panel.toggle.pianoroll.exp}"
+                          Hint="{DynamicResource panel.collapse.pianoroll.exp}"
+                          HintSuffix="{DynamicResource panel.expand.hint}"
+                          ExpandRequested="OnExpRevealRequested"/>
+      </Panel>      <c:SpectrumCanvas Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch"
                         VerticalAlignment="Bottom" Margin="0" Height="60"
                         Opacity="0.35" IsHitTestVisible="False" IsVisible="False"/>
       <!-- 表达式区（行面板，W20）：分隔条换成共用 `PanelSplitter` 的**纵向模式**，

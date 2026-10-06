@@ -5,9 +5,15 @@
              mc:Ignorable="d" d:DesignWidth="14" d:DesignHeight="48"
              x:Class="OpenUtau.App.Controls.PanelRevealTab"
              Width="14" Height="48">
-  <!-- 折叠面板的「快捷展开」边缘竖标签（W34 / 设计稿 §8，候选 1）。
+  <!-- 折叠面板的「快捷展开」边缘标签（W34 / 设计稿 §8 候选 1）。
        默认 14×48 圆角 8 只显示面板字形；悬停/聚焦展开到 92×48 圆角 999 显示面板名。
-       它由宿主放在**零测量的 Canvas** 里（分隔条那一列）⇒ 完全 overlay、不吃布局、不留夹缝。
+
+       ⚠ 两处**真机踩过的坑**（headless 断言曾全绿但真机看不见/点不到，务必保留这段说明）：
+       1) **z 序**：宿主必须把它放在**最后声明**（或显式 `ZIndex`）—— 中央区是不透明的
+          `Background=md3.surface`，声明在它前面的 overlay 会被整块盖住：既看不见、也命中不到。
+       2) **背景不能挂在 Button 上**：本仓按钮主题把背景画在模板的
+          `ContentPresenter#PART_ContentPresenter` 上（同目录 `fxButton` 就是为此打的补丁），
+          所以容器一律画在**内层 `Border.revealChrome`** 上，Button 自己保持透明。
        硬约束：描边元素**不写 Fill**（`Fill="none"` 在 Avalonia 非法，真机启动即退）。 -->
   <UserControl.Styles>
     <Style Selector="Button.revealTab">
@@ -17,42 +23,74 @@
       <Setter Property="MinHeight" Value="0"/>
       <Setter Property="Margin" Value="0"/>
       <Setter Property="Padding" Value="0"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="ClipToBounds" Value="False"/>
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+      <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+    </Style>
+    <!-- 容器（真正的可见件）：默认竖胶囊 -->
+    <Style Selector="Border.revealChrome">
+      <Setter Property="Width" Value="14"/>
+      <Setter Property="Height" Value="48"/>
       <Setter Property="CornerRadius" Value="8"/>
       <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="ClipToBounds" Value="False"/>
-      <Setter Property="HorizontalContentAlignment" Value="Center"/>
-      <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
-    <!-- 悬停/聚焦：展开到 92 宽、胶囊圆角、主色底 -->
-    <Style Selector="Button.revealTab:pointerover">
+    <!-- 悬停/聚焦：展开到 92 宽、胶囊圆角、主色底（改容器，不改 Button） -->
+    <Style Selector="Button.revealTab:pointerover Border.revealChrome">
       <Setter Property="Width" Value="92"/>
       <Setter Property="CornerRadius" Value="999"/>
       <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
       <Setter Property="BorderThickness" Value="0"/>
     </Style>
-    <Style Selector="Button.revealTab:focus">
+    <Style Selector="Button.revealTab:focus Border.revealChrome">
       <Setter Property="Width" Value="92"/>
       <Setter Property="CornerRadius" Value="999"/>
       <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
       <Setter Property="BorderThickness" Value="0"/>
     </Style>
-    <Style Selector="Button.revealTab:focus-visible">
-      <Setter Property="Width" Value="92"/>
-      <Setter Property="CornerRadius" Value="999"/>
-      <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
-      <Setter Property="BorderThickness" Value="1"/>
+    <Style Selector="Button.revealTab:focus-visible Border.revealChrome">
+      <Setter Property="BorderThickness" Value="2"/>
       <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
     </Style>
-    <Style Selector="Button.revealTab:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+    <!-- 行方向（卷帘表达式区）：横向 48×14，悬停/聚焦改**高度** ⇒ 向上生长 -->
+    <!-- 行方向（卷帘表达式区）：横向 48×14，悬停/聚焦改**高度** ⇒ 向上生长。
+         Button 自身也要跟着改尺寸：命中区以 Button 为准（只改内层 Border 会出现
+         "看得见 48 宽、命中区仍 14 宽"的半修）。 -->
+    <Style Selector="Button.revealTab.horizontal">
+      <Setter Property="Width" Value="48"/>
+      <Setter Property="Height" Value="14"/>
     </Style>
-    <Style Selector="Button.revealTab:focus /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+    <Style Selector="Button.revealTab.horizontal:pointerover">
+      <Setter Property="Width" Value="48"/>
+      <Setter Property="Height" Value="48"/>
     </Style>
-    <!-- 常态字形色 / 展开态用 on-primary -->
-    <Style Selector="Button.revealTab Path.revealGlyph">
+    <Style Selector="Button.revealTab.horizontal:focus">
+      <Setter Property="Width" Value="48"/>
+      <Setter Property="Height" Value="48"/>
+    </Style>
+    <Style Selector="Button.revealTab.horizontal Border.revealChrome">
+      <Setter Property="Width" Value="48"/>
+      <Setter Property="Height" Value="14"/>
+    </Style>
+    <Style Selector="Button.revealTab.horizontal:pointerover Border.revealChrome">
+      <Setter Property="Width" Value="48"/>
+      <Setter Property="Height" Value="48"/>
+    </Style>
+    <Style Selector="Button.revealTab.horizontal:focus Border.revealChrome">
+      <Setter Property="Width" Value="48"/>
+      <Setter Property="Height" Value="48"/>
+    </Style>
+    <!-- 字形 14×14 居中（容器只有 14 宽，14 已是上限） -->
+    <Style Selector="Path.revealGlyph">
+      <Setter Property="Width" Value="14"/>
+      <Setter Property="Height" Value="14"/>
+      <Setter Property="Stretch" Value="Uniform"/>
+      <Setter Property="HorizontalAlignment" Value="Center"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
       <Setter Property="Stroke" Value="{DynamicResource md3.on-surface-variant}"/>
       <Setter Property="StrokeThickness" Value="1.6"/>
       <Setter Property="StrokeLineCap" Value="Round"/>
@@ -64,12 +102,13 @@
     <Style Selector="Button.revealTab:focus Path.revealGlyph">
       <Setter Property="Stroke" Value="{DynamicResource md3.on-primary}"/>
     </Style>
-    <Style Selector="Button.revealTab TextBlock.revealLabel">
+    <Style Selector="TextBlock.revealLabel">
       <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
       <Setter Property="FontSize" Value="11"/>
       <Setter Property="IsVisible" Value="False"/>
       <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
       <Setter Property="Margin" Value="4,0,0,0"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
     <Style Selector="Button.revealTab:pointerover TextBlock.revealLabel">
       <Setter Property="IsVisible" Value="True"/>
@@ -77,18 +116,23 @@
     <Style Selector="Button.revealTab:focus TextBlock.revealLabel">
       <Setter Property="IsVisible" Value="True"/>
     </Style>
-    <Style Selector="Button.revealTab:pointerover Path.revealGlyph">
-      <Setter Property="Margin" Value="0"/>
+    <Style Selector="Button.revealTab.horizontal TextBlock.revealLabel">
+      <Setter Property="Margin" Value="0,4,0,0"/>
     </Style>
   </UserControl.Styles>
 
+  <!-- TabIndex=0：让标签在该 Tab 范围内**排在最前** ⇒ 折叠后按一次 Tab 就能到它（纯键盘路径，
+       不依赖鼠标 hover）；`Button` 原生支持 Enter/Space 激活。 -->
   <Button Name="TabButton" Classes="revealTab" Click="OnTabClicked"
+          KeyboardNavigation.TabIndex="0"
           ToolTip.Tip="{Binding Hint, RelativeSource={RelativeSource AncestorType=UserControl}}">
-    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-      <Path Classes="revealGlyph" Width="10" Height="10" Stretch="Uniform"
-            Data="{Binding GlyphData, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-      <TextBlock Classes="revealLabel"
-                 Text="{Binding PanelLabel, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-    </StackPanel>
+    <Border Name="Chrome" Classes="revealChrome">
+      <Panel>
+        <Path Classes="revealGlyph"
+              Data="{Binding GlyphData, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+        <TextBlock Classes="revealLabel"
+                   Text="{Binding PanelLabel, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+      </Panel>
+    </Border>
   </Button>
 </UserControl>

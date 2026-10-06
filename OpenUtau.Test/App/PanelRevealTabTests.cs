@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -9,6 +10,7 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using OpenUtau.App.Controls;
 using OpenUtau.App.ViewModels;
+using OpenUtau.Core.Util;
 using Xunit;
 
 namespace OpenUtau.Test.App {
@@ -142,6 +144,169 @@ namespace OpenUtau.Test.App {
             f.Tab.ExpandRequested += (_, _) => fired++;
             button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             Assert.Equal(1, fired);                            // 点击确实抛出展开请求
+        }
+
+        /// <summary>
+        /// ① 行方向（卷帘表达式区）的**横向变体**：48×14 胶囊（不是 14×48 竖条）、贴宿主**下缘**，
+        /// 悬停/聚焦改成**高度**展开（向上生长）。位置由宿主 `VerticalAlignment=Bottom` 决定。
+        /// </summary>
+        [AvaloniaFact]
+        public void HorizontalVariant_Is48x14_AndGrowsUpward() {
+            var tab = new PanelRevealTab { AnchorBottom = true };
+            var host = new Panel { Height = 200, Width = 200 };
+            host.Children.Add(tab);
+            tab.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left;
+            tab.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Bottom;
+            tab.Margin = new Thickness(8);
+            var window = new Window { Width = 220, Height = 220, Content = host };
+            try {
+                window.Show();
+                for (int i = 0; i < 3; i++) {
+                    Pump();
+                    window.UpdateLayout();
+                }
+                Assert.Equal(48, tab.Bounds.Width, 1);
+                Assert.Equal(14, tab.Bounds.Height, 1);
+                Assert.Equal(200 - 8, tab.Bounds.Bottom, 1);   // 贴下缘（Margin 8）
+                string xaml = File.ReadAllText(Path.Combine(FindRepoRoot(), "OpenUtau", "Controls", "PanelRevealTab.axaml"));
+                Assert.Contains("Button.revealTab.horizontal:pointerover", xaml);
+                int hoverBlock = xaml.IndexOf("Button.revealTab.horizontal:pointerover", StringComparison.Ordinal);
+                Assert.Contains("Height", xaml.Substring(hoverBlock, 400));   // 展开的是高度 ⇒ 向上生长
+            } finally {
+                window.Close();
+            }
+        }
+
+        /// <summary>
+        /// ① 卷帘集成：表达式区（行方向）折叠时，**左下角**出现横向标签；点它 ⇒ 面板展开。
+        /// 用真实 `PianoRoll` 宿主，断言真实 `Bounds`。
+        /// </summary>
+        [AvaloniaFact]
+        public void PianoRoll_ExpPanelCollapsed_ShowsHorizontalTabAtBottomLeft() {
+            OpenUtau.Test.TestSupport.DocManagerTestSetup.RunOnCurrentThread();
+            OpenUtau.Core.DocManager.Inst.SearchAllLegacyPlugins();
+            var project = new OpenUtau.Core.Ustx.UProject();
+            project.timeAxis.BuildSegments(project);
+            OpenUtau.Core.DocManager.Inst.ExecuteCmd(new OpenUtau.Core.LoadProjectNotification(project));
+            var vm = new PianoRollViewModel();
+            var roll = new PianoRoll(vm);
+            var window = new Window { Width = 1000, Height = 760, Content = roll };
+            bool oldCollapsed = Preferences.Default.PanelLayout.PianoRollExpCollapsed;
+            try {
+                roll.ExpPanel.IsCollapsed = true;
+                window.Show();
+                for (int i = 0; i < 3; i++) {
+                    Pump();
+                    window.UpdateLayout();
+                }
+                var tab = roll.FindControl<PanelRevealTab>("ExpRevealTab");
+                Assert.NotNull(tab);
+                Assert.True(tab!.IsVisible, "表达式区折叠时左下角标签必须可见");
+                Assert.Equal(48, tab.Bounds.Width, 1);
+                Assert.Equal(14, tab.Bounds.Height, 1);
+                Assert.True(tab.Bounds.X < roll.Bounds.Width / 3, $"标签应在左侧，实际 X={tab.Bounds.X}");
+                Assert.True(tab.Bounds.Bottom > roll.Bounds.Height * 0.5, $"标签应贴下缘，实际 Bottom={tab.Bounds.Bottom}");
+                var button = tab.GetVisualDescendants().OfType<Button>().Single();
+                button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                Pump();
+                Assert.False(roll.ExpPanel.IsCollapsed, "点击标签必须把表达式面板展开");
+                Assert.False(tab.IsVisible, "展开后标签必须隐藏");
+            } finally {
+                Preferences.Default.PanelLayout.PianoRollExpCollapsed = oldCollapsed;
+                roll.Dispose();
+                window.Close();
+            }
+        }
+
+        static string FindRepoRoot() {
+            var dir = new DirectoryInfo(AppContext.BaseDirectory);
+            while (dir != null && !File.Exists(Path.Combine(dir.FullName, "OpenUtau.sln"))) {
+                dir = dir.Parent;
+            }
+            Assert.NotNull(dir);
+            return dir!.FullName;
+        }
+
+        /// <summary>
+        /// 真机 FAIL 的**防复发断言组**（W44 复验）：只断"`Bounds` 是 14×48"是不够的 ——
+        /// 真机上它被不透明的中央区盖住 ⇒ 看不见、`InputHitTest` 也命不中。一次钉四件事：
+        /// ① 标签**中心点**的命中测试落在标签子树内；② 容器背景画刷**非空**（不是只有命中区）；
+        /// ③ 字形渲染尺寸 14×14；④ 聚焦即刻展开到 92×48 + `TabIndex=0`（键盘可达）。
+        /// 宿主按**生产同形**搭：不透明中央区**先声明**、overlay **后声明**。
+        /// </summary>
+        [AvaloniaFact]
+        public void Tab_IsHitTestable_HasChrome_AndExpandsOnFocus() {
+            var slot = new PanelSlot("track-header", 300, 200, 420) { IsCollapsed = true };
+            var opaqueCenter = new Border { Background = Avalonia.Media.Brushes.Black };   // 模拟不透明中央区
+            var overlay = new Panel();
+            var tab = new PanelRevealTab();
+            tab.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left;
+            tab.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
+            tab.Margin = new Thickness(8);
+            tab.Bind(Visual.IsVisibleProperty, new Avalonia.Data.Binding("IsCollapsed") { Source = slot });
+            overlay.Children.Add(tab);
+            var root = new Grid();
+            root.Children.Add(opaqueCenter);   // 先声明 = 画在下面
+            root.Children.Add(overlay);        // 后声明 = 画在上面（生产里的正确顺序）
+            var window = new Window { Width = 400, Height = 300, Content = root };
+            try {
+                window.Show();
+                for (int i = 0; i < 3; i++) {
+                    Pump();
+                    window.UpdateLayout();
+                }
+                var button = tab.GetVisualDescendants().OfType<Button>().Single();
+                var chrome = tab.GetVisualDescendants().OfType<Border>().First(b => b.Classes.Contains("revealChrome"));
+                var glyph = tab.GetVisualDescendants().OfType<Avalonia.Controls.Shapes.Path>()
+                    .First(p => p.Classes.Contains("revealGlyph"));
+
+                var center = tab.TranslatePoint(new Point(tab.Bounds.Width / 2, tab.Bounds.Height / 2), window);
+                Assert.NotNull(center);
+                var hit = window.InputHitTest(center!.Value);
+                Assert.NotNull(hit);
+                Assert.True(hit is Visual hitVisual && IsWithin(hitVisual, tab), $"标签中心点命中的是 {hit!.GetType().Name}，不是标签自身/子元素");
+                Assert.NotNull(chrome.Background);
+                // 字形尺寸：断**声明值**（样式给出的 14×14）而不是 Bounds —— 本主题下 `Path` 在
+                // Panel 里 Arrange 后 Bounds 仍可能报 0（实测），而"字形偏小/半渲染"的回归
+                // 是从样式取值这里进来的。容器 14 宽 ⇒ 14 已是上限（规格：18–20 字形放 36 容器）。
+                Assert.Equal(14, glyph.Width, 1);
+                Assert.Equal(14, glyph.Height, 1);
+                Assert.True(button.Focusable);
+                Assert.Equal(0, KeyboardNavigation.GetTabIndex(button));
+                button.Focus();
+                Pump();
+                window.UpdateLayout();
+                Assert.True(button.IsFocused, "标签按钮必须能拿到焦点（键盘路径的前提）");
+                Assert.Equal(92, chrome.Bounds.Width, 1);          // 聚焦态 = 92×48
+                Assert.Equal(48, chrome.Bounds.Height, 1);
+            } finally {
+                window.Close();
+            }
+        }
+
+        static bool IsWithin(Visual candidate, Visual ancestor) {
+            for (Visual? v = candidate; v != null; v = v.GetVisualParent()) {
+                if (ReferenceEquals(v, ancestor)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// **z 序契约**（真机 FAIL 的根因护栏）：MainWindow 里这段 overlay 必须声明在**中央区之后**
+        /// —— z 序 = 声明顺序，中央区不透明 ⇒ 声明在它前面就会被整块盖住，也就命中不到。
+        /// 当时缺的正是这一条：`Bounds` 断言全绿，真机却看不见。
+        /// </summary>
+        [Fact]
+        public void MainWindow_DeclaresRevealOverlay_AfterTheOpaqueCenter() {
+            string xaml = File.ReadAllText(Path.Combine(FindRepoRoot(), "OpenUtau", "Views", "MainWindow.axaml"));
+            int overlayAt = xaml.IndexOf("x:Name=\"TracksRevealTab\"", StringComparison.Ordinal);
+            int centerAt = xaml.IndexOf("x:Name=\"ArrangementArea\"", StringComparison.Ordinal);
+            Assert.True(overlayAt > 0, "找不到快捷展开标签");
+            Assert.True(centerAt > 0, "找不到中央编排区");
+            Assert.True(overlayAt > centerAt,
+                "快捷展开 overlay 必须声明在中央区**之后**（否则被不透明中央区盖住：看不见也点不到）");
         }
     }
 }

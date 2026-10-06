@@ -21,6 +21,10 @@ namespace OpenUtau.App.Controls {
     /// 同时在 code-behind 里补偿 `Canvas.Left`，所以两个方向都不会把窗口撑出界。
     /// </summary>
     public partial class PanelRevealTab : UserControl {
+        /// <summary>行方向面板（卷帘表达式区）：横向 48×14 胶囊、贴**下缘**、悬停向上展开。</summary>
+        public static readonly StyledProperty<bool> AnchorBottomProperty =
+            AvaloniaProperty.Register<PanelRevealTab, bool>(nameof(AnchorBottom));
+
         public static readonly StyledProperty<bool> AnchorRightProperty =
             AvaloniaProperty.Register<PanelRevealTab, bool>(nameof(AnchorRight));
 
@@ -43,6 +47,10 @@ namespace OpenUtau.App.Controls {
         public static readonly StyledProperty<Geometry?> GlyphDataProperty =
             AvaloniaProperty.Register<PanelRevealTab, Geometry?>(nameof(GlyphData));
 
+        public bool AnchorBottom {
+            get => GetValue(AnchorBottomProperty);
+            set => SetValue(AnchorBottomProperty, value);
+        }
         public bool AnchorRight {
             get => GetValue(AnchorRightProperty);
             set => SetValue(AnchorRightProperty, value);
@@ -65,12 +73,17 @@ namespace OpenUtau.App.Controls {
         }
 
         private const double CollapsedWidth = 14;
+        private const double CollapsedHeight = 14;
         private const double ExpandedWidth = 92;
         private const double SplitterWidth = 7;
 
         public PanelRevealTab() {
             InitializeComponent();
             Width = CollapsedWidth;
+            // `AnchorBottom` 在 XAML/对象初始化器里是**构造之后**才赋值的 ⇒ 必须响应变化，
+            // 否则横向变体会停在竖条的 14×48（本用例第一版就是这么假红的）。
+            this.GetObservable(AnchorBottomProperty).Subscribe(_ => ApplyOrientation());
+            ApplyOrientation();
             this.GetObservable(HintProperty).Subscribe(_ => UpdateTooltip());
             this.GetObservable(HintSuffixProperty).Subscribe(_ => UpdateTooltip());
             TabButton.PropertyChanged += (_, e) => {
@@ -85,6 +98,18 @@ namespace OpenUtau.App.Controls {
             TabButton.PointerExited += (_, _) => SyncCanvasOffset();
             TabButton.GotFocus += (_, _) => SyncCanvasOffset();
             TabButton.LostFocus += (_, _) => SyncCanvasOffset();
+        }
+
+        /// <summary>
+        /// 方向档：竖条（左/右列面板）14×48 r8；横向（行方向面板）48×14 r8。
+        /// 横向档给按钮挂 `horizontal` 类，样式表里那一档的悬停/聚焦改的是**高度** ⇒ 向上生长。
+        /// </summary>
+        private void ApplyOrientation() {
+            bool horizontal = AnchorBottom;
+            Width = horizontal ? 48 : CollapsedWidth;
+            Height = horizontal ? CollapsedHeight : 48;
+            TabButton.Classes.Set("horizontal", horizontal);
+            SyncCanvasOffset();
         }
 
         /// <summary>把标签自身的宽度同步进 code-behind 自己的 Width（样式改了按钮宽，但控件宽要跟上）。</summary>
