@@ -22,3 +22,11 @@
 
 ## 六、收尾
 11. 我的实例已 `stop.ps1 -ProcessId 3256` 关闭；`-List` 复核 **主树 0 残留**、**全部 OpenUtau 进程 0**；**主题 Dark 原样**；未改产品代码；本轮证据 `w49-2-ws.png`、`w49-3-ctrl2.png`（均标为"无效轮"）。
+
+## 七、给 #2（headless 断言）的锚点表（只读摘录，供 m1-strip 一一对应；也是我后续只读复核的基准）
+12. **容器** `Border.toolRail`（`PianoRollStyles.axaml:47-53`）：`CornerRadius=12`、`Background={DynamicResource md3.surface-container-highest}`、`BorderBrush={DynamicResource md3.outline-variant}`、`BorderThickness=1`、`Padding=4`；同段注释（`:44`）明写"**分组分隔线挂在音高组首项（`.pitchGroup`）顶部**"、"按下 = 轻微不透明度"、颜色一律取 `md3.*` 池键。
+13. **列表** `ListBox.toolRail`（`:55-59`）：`Background=Transparent`、`BorderThickness=0`、`Padding=0`；**间距** 在 `PianoRoll.axaml:211` 的 `StackPanel Orientation="Vertical" Spacing="4"`。
+14. **按钮** `ListBoxItem.railTool`（`:61-71`）：`Width/Height/MinWidth/MinHeight = 36`、`CornerRadius=8`、`Background=Transparent`、`BorderThickness=0`、`Margin=0`、`Padding=0`；**hover** = `/template/ Border#PART_HoverOverlay` 的 `Opacity=0.12`（`:72-74`）、**pressed** = `0.16` + 控件 `Opacity=0.85`（`:75-79`）—— 与卡片"hover = primary 12% 叠加"一致。
+15. **无投影**：以上三处**均无 `BoxShadow` setter** ⇒ 断言可直接判 `BoxShadow == null`。
+16. **元素锚点**：容器在 `PianoRoll.axaml:203-207`（`ToolRailLayer` Grid `Row=3/Col=1`；`Margin="12"`；`MaxHeight={Binding #ToolRailLayer.Bounds.Height}`；内层 `ScrollViewer VerticalScrollBarVisibility="Auto"`）；**10 项**在 `:215/216/234/235/236/237/238/239/240/241`（`:236` 带 `pitchGroup` = 分隔线首项）；笔浮层 `:216-232`（`Flyout Placement="Right" ShowMode="Transient"`）。
+17. **"无滚动条 + 末项不裁"的 headless 判据**：`ScrollViewer.Extent.Height <= Viewport.Height` + 第 10 个 `ListBoxItem` 的 `Bounds.Bottom <= 容器下端`。⚠ 本仓 headless 渲染是 **stub**（`Path.Bounds` 报 0）⇒ **像素级 hover/选中/描边只能由用户目视**，别把 stub 当"验过"。
