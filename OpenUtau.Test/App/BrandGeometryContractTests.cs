@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Avalonia.VisualTree;
 using Xunit;
 
 namespace OpenUtau.Test.App {
@@ -112,6 +113,78 @@ namespace OpenUtau.Test.App {
                 .ToArray();
             string[] dupes = keys.GroupBy(k => k).Where(g => g.Count() > 1).Select(g => g.Key).ToArray();
             Assert.True(dupes.Length == 0, "Icons.axaml 里品牌几何键重复：" + string.Join(", ", dupes));
+        }
+
+        /// <summary>
+        /// 全仓引用扫描：任何 `{StaticResource brand-*}` / `{DynamicResource brand-*}` 引用都必须在
+        /// `Icons.axaml` 里有定义。**悬空引用 = 红**（W40 真出过：`UpdaterDialog.axaml` 引用了已删的
+        /// `brand-wordmark-interim-monoline`，只扫 `Icons.axaml` 的用例拦不住 —— 一旦实例化该控件就在
+        /// XAML 载入时抛异常，属"潜伏的崩溃"）；引用非提取件键同样是红（定义集由上面几条用例钉死为提取件）。
+        ///
+        /// 说明：这里扫的是**源码树**（不是测试产物目录）—— 只有源码树才有全部 `.axaml`；
+        /// 产物目录只链了少量副本。根目录由 `OpenUtau.sln` 定位。
+        /// </summary>
+        [Fact]
+        public void EveryBrandResourceReference_HasADefinition() {
+            string root = FindRepoRoot();
+            string[] sources = Directory
+                .EnumerateFiles(Path.Combine(root, "OpenUtau"), "*.axaml", SearchOption.AllDirectories)
+                .Concat(Directory.EnumerateFiles(Path.Combine(root, "OpenUtau"), "*.cs", SearchOption.AllDirectories))
+                .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}")
+                            && !f.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}"))
+                .ToArray();
+            Assert.True(sources.Length > 100, $"源码树扫描异常，只找到 {sources.Length} 个文件（root={root}）");
+
+            var defined = ProductKeys().Keys.ToHashSet();
+            var dangling = new List<string>();
+            foreach (string f in sources) {
+                foreach (Match m in Regex.Matches(File.ReadAllText(f),
+                             @"(?:StaticResource|DynamicResource)\s+(brand-[A-Za-z0-9\-]+)")) {
+                    string key = m.Groups[1].Value;
+                    if (!defined.Contains(key)) {
+                        dangling.Add($"{Path.GetRelativePath(root, f)} → {key}");
+                    }
+                }
+            }
+            Assert.True(dangling.Count == 0,
+                "品牌几何**悬空引用**（引用了 Icons.axaml 里没有的键；若是派生键请改用提取件键）：\n"
+                + string.Join("\n", dangling.Distinct()));
+        }
+
+        private static string FindRepoRoot() {
+            var dir = new DirectoryInfo(AppContext.BaseDirectory);
+            while (dir != null) {
+                if (File.Exists(Path.Combine(dir.FullName, "OpenUtau.sln"))) {
+                    return dir.FullName;
+                }
+                dir = dir.Parent;
+            }
+            throw new InvalidOperationException("找不到仓库根（OpenUtau.sln）");
+        }
+
+        /// <summary>
+        /// 真实载入回归：`UpdaterDialog` 的 XAML 一旦有**悬空 `StaticResource`** 或非法 brush
+        /// （如 `Fill="none"`），构造时 `InitializeComponent()` 就抛 ⇒ 本用例把"潜伏崩溃"变红灯。
+        /// （fx-verify 独立验收时就是靠这条路径确认 W40 那处悬空引用会炸。）
+        /// </summary>
+        [Avalonia.Headless.XUnit.AvaloniaFact]
+        public void UpdaterDialog_LoadsWithoutDanglingBrandResource() {
+            var dialog = new OpenUtau.App.Views.UpdaterDialog();
+            var win = new OpenUtau.App.Controls.WindowEx {
+                Width = 400, Height = 320, Content = dialog,
+            };
+            win.Show();
+            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+            try {
+                dialog.ApplyTemplate();
+                Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+                Assert.NotNull(dialog.Content);
+                var v = dialog.GetVisualDescendants().OfType<Avalonia.Controls.Shapes.Path>()
+                    .Select(p => p.Data).ToList();
+                Assert.True(v.Count >= 3, $"UpdaterDialog 里品牌矢量数异常：{v.Count}");
+            } finally {
+                win.Close();
+            }
         }
     }
 }
