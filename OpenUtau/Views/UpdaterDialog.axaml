@@ -9,7 +9,8 @@
   <Grid RowDefinitions="Auto,Auto,Auto,*,Auto,Auto">
     <!-- W40：logo 与字标改矢量（源几何 verbatim、描边渲染）——
          原 /Assets/open-utau.ico（96 位图）+ logotype.png / logotype-w.png（深浅色两张位图，靠 IsVisible 切）
-         统一成"标志 + 单线字标"，颜色走 md3.* 令牌 ⇒ 不再需要深浅色两份位图 -->
+         统一成"标志 + 单线字标"，颜色走 md3.* 令牌 ⇒ 不再需要深浅色两份位图。
+         字标用 interim 键：冻结版 brand-wordmark 的切角 v 坐标错位（已报 fx-rack），重出后换回 -->
     <Viewbox Grid.Row="0" Margin="0,24,0,0" Width="96" Height="96"
              HorizontalAlignment="Center" Stretch="Uniform">
       <Path Data="{StaticResource brand-mark}"
@@ -18,7 +19,7 @@
     </Viewbox>
     <Viewbox Grid.Row="1" Margin="0,8,0,0" Height="16"
              HorizontalAlignment="Center" Stretch="Uniform">
-      <Path Data="{StaticResource brand-wordmark-monoline}"
+      <Path Data="{StaticResource brand-wordmark-interim-monoline}"
             Stroke="{DynamicResource md3.on-surface}" StrokeThickness="11.725"
             StrokeLineCap="Round" StrokeJoin="Round" Width="401.8" Height="93.8"/>
     </Viewbox>

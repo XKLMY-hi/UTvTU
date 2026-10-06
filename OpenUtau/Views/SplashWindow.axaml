@@ -43,11 +43,15 @@
                 Stroke="{DynamicResource md3.on-surface}" StrokeThickness="11.725"
                 StrokeLineCap="Round" StrokeJoin="Round" Width="401.8" Height="93.8"/>
         </Viewbox>
-        <!-- } ：冻结版程序化镜像几何（brand-brace-flipx），不要 RenderTransform、不要手绘 -->
+        <!-- } ：⚠ 冻结版 brand-brace-flipx 有缺陷（已报 fx-rack）：它把 x′=24−x **和** y′=24−y
+             一起做了 ⇒ 实际是绕 (12,12) 的 180° 旋转（源 (20,4) → (4,20)），渲染出来是倒扣的括号。
+             正确镜像应保持 y 不变（(20,4) → (4,4)）。重出前这里用源路径 + scale(-1,1) 代替，
+             重出后把 Data 换成 brand-brace-flipx、去掉 RenderTransform 即可。 -->
         <Viewbox Width="23.5" Height="40.3" Stretch="Uniform" Margin="0,2.3,0,0">
-          <Path Name="BraceRight" Data="{StaticResource brand-brace-flipx}"
+          <Path Name="BraceRight" Data="{StaticResource brand-brace}"
                 Stroke="{DynamicResource md3.primary}" StrokeThickness="6"
-                StrokeLineCap="Round" StrokeJoin="Round" Width="28" Height="48"/>
+                StrokeLineCap="Round" StrokeJoin="Round" Width="28" Height="48"
+                RenderTransform="scale(-1,1)" RenderTransformOrigin="50%,50%"/>
         </Viewbox>
       </StackPanel>
       <ProgressBar Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"
