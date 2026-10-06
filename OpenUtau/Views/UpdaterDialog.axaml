@@ -7,15 +7,21 @@
         Width="400" Height="320">
   <!-- 自适应布局（修复：原版 Row0 固定 Margin 136 定位 logo，高度变化时与版本号重叠） -->
   <Grid RowDefinitions="Auto,Auto,Auto,*,Auto,Auto">
-    <Image Grid.Row="0" Margin="0,24,0,0" Width="96" Height="96"
-           HorizontalAlignment="Center"
-           Source="/Assets/open-utau.ico"/>
-    <Image Grid.Row="1" Height="16" Margin="0,8,0,0"
-           HorizontalAlignment="Center"
-           Source="/Assets/logotype.png" IsVisible="{Binding !IsDarkMode}"/>
-    <Image Grid.Row="1" Height="16" Margin="0,8,0,0"
-           HorizontalAlignment="Center"
-           Source="/Assets/logotype-w.png" IsVisible="{Binding IsDarkMode}"/>
+    <!-- W40：logo 与字标改矢量（源几何 verbatim、描边渲染）——
+         原 /Assets/open-utau.ico（96 位图）+ logotype.png / logotype-w.png（深浅色两张位图，靠 IsVisible 切）
+         统一成"标志 + 单线字标"，颜色走 md3.* 令牌 ⇒ 不再需要深浅色两份位图 -->
+    <Viewbox Grid.Row="0" Margin="0,24,0,0" Width="96" Height="96"
+             HorizontalAlignment="Center" Stretch="Uniform">
+      <Path Data="{StaticResource brand-mark}"
+            Stroke="{DynamicResource md3.primary}" StrokeThickness="8"
+            StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
+    </Viewbox>
+    <Viewbox Grid.Row="1" Margin="0,8,0,0" Height="16"
+             HorizontalAlignment="Center" Stretch="Uniform">
+      <Path Data="{StaticResource brand-wordmark-monoline}"
+            Stroke="{DynamicResource md3.on-surface}" StrokeThickness="11.725"
+            StrokeLineCap="Round" StrokeJoin="Round" Width="401.8" Height="93.8"/>
+    </Viewbox>
     <TextBlock Grid.Row="2" Margin="0,8,0,0" TextAlignment="Center"
                Text="{Binding AppVersion}"/>
     <TextBlock Grid.Row="3" Margin="40,14,40,0" TextAlignment="Center"

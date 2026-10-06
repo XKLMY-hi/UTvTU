@@ -6,7 +6,7 @@
         xmlns:controls="clr-namespace:OpenUtau.App.Controls"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenUtau.App.Views.DebugWindow"
-        Icon="/Assets/open-utau.ico"
+        Icon="/Assets/brand/utvtu.ico"
         Title="{DynamicResource menu.tools.debugwindow}" Closed="OnClosed">
   <Window.Resources>
     <vm:LogEventConverter x:Key="logEventConverter"/>

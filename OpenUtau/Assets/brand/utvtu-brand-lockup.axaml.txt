@@ -1,0 +1,74 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- ════════════════════════════════════════════════════════════════════════════════
+       UTvTU 品牌几何 · 冻结版（W39f）—— 一个文件给全，**实现者只接这一个文件**
+
+       ① 几何来源（**权威源，verbatim**）：`.opencode/design/brand/utvtu-brand-tailwind.html`
+          · 标志 viewBox="0 0 64 64"     ← M8 13 H24 M16 13 V29 M40 13 H56 M48 13 V29
+                                          M27 25 L32 35 L37 25
+                                          M9 41 V44 Q9 51 16 51 Q23 51 23 44 V41
+                                          M55 41 V44 Q55 51 48 51 Q41 51 41 44 V41
+          · 括号 viewBox="-2 -2 28 48"  ← M20 4 H14 Q10 4 10 8 V18 Q10 22 4 22 Q10 22 10 26 V36 Q10 40 14 40 H20
+          · 切角 v 填充 viewBox="0 0 9 14" ← M0 0 L4.5 14 L9 0 ／ 描边 ← M1.54 1.54 L4.5 12.46 L7.46 1.54
+          · 字标 brand-wordmark = **描摹的 U/T 轮廓 + 源切角 v**（仓库/系统无 Roboto，字体导出不可行；
+            字距 delta=0，W39d 实测最优）
+
+       ② 铁律：**禁止从 PNG 描摹**（拿不到 HTML 才退化并标注来源）；**禁止"描边→填充"式转换**
+          （品牌括号就是被它弄坏的：偏移 ±笔画/2 后脊区与尖区重叠、尖被吞）。
+
+       ③ **XAML 一律描边渲染**：Path + Stroke + StrokeThickness + StrokeLineCap/Join=Round。
+          · 标志：StrokeThickness = 显示尺寸 ÷ 8（64 网格内为 8）
+          · 括号：StrokeThickness = 括号墨迹高 ÷ 6（本路径下为 6）
+          · 切角 v：小尺寸用 brand-v-chevron（填充），大尺寸可用 brand-v-chevron-stroke（描边，厚 2.2@9×14）
+          · 字标：**Fill**（轮廓几何，不是描边）
+
+       ④ 尺寸阶梯（源几何实测）：≥28px 完整锁定（舒适）· 24–27px 完整但紧排 · 14–23px 去括号 · <14px 只留标志
+          （标志自身：÷8 原版 ≥32px 5/5 域；16–24px 用光学补偿档 = 笔宽 6 单位 ≈ 尺寸÷10.7，16px 起 5/5 域）
+
+       ⑤ 取色两套：**品牌物料**括号固定 `brand.primary`（浅 #5A44E0／深 #C4B4FF）、标志/字标 `brand.ink` 或反白；
+          **应用内**括号 `md3.primary`、字标 `md3.on-surface`（跟随用户色池）。teal `brand.accent` 只进图案/印刷。
+       ════════════════════════════════════════════════════════════════════════════════ -->
+
+  <!-- 标志（脸）：viewBox 0 0 64 64，描边 8（= 尺寸÷8），StrokeLineCap/Join=Round -->
+  <StreamGeometry x:Key="brand-mark">M8 13 H24 M16 13 V29 M40 13 H56 M48 13 V29 M27 25 L32 35 L37 25 M9 41 V44 Q9 51 16 51 Q23 51 23 44 V41 M55 41 V44 Q55 51 48 51 Q41 51 41 44 V41</StreamGeometry>
+
+  <!-- 括号 { ：viewBox -2 -2 28 48，描边 6（= 墨迹高÷6） -->
+  <StreamGeometry x:Key="brand-brace">M20 4 H14 Q10 4 10 8 V18 Q10 22 4 22 Q10 22 10 26 V36 Q10 40 14 40 H20</StreamGeometry>
+  <!-- 括号 } ：同一几何**程序化镜像**（x' = 24 − x，等价 SVG translate(24,0) scale(-1,1)）—— 不要手绘 -->
+  <StreamGeometry x:Key="brand-brace-flipx">M4 20 H10 Q14 20 14 16 V6 Q14 2 20 2 Q14 2 14 -2 V-12 Q14 -16 10 -16 H20</StreamGeometry>
+
+  <!-- 切角 v（源路径 verbatim）：填充版 viewBox 0 0 9 14 -->
+  <StreamGeometry x:Key="brand-v-chevron">M0 0 L4.5 14 L9 0</StreamGeometry>
+  <!-- 切角 v 描边版（同一 viewBox），StrokeThickness = 2.2 × (字标 x 高 / 14) -->
+  <StreamGeometry x:Key="brand-v-chevron-stroke">M1.54 1.54 L4.5 12.46 L7.46 1.54</StreamGeometry>
+
+  <!-- 字标 UTvTU = 描摹 U/T 轮廓 + 源切角 v。归一化：**大写高 cap = 100 单位、基线 y = 100、左缘 x = 0**，
+       总宽 1226.68 单位。用 Fill 填充：
+         <Path Data="{StaticResource brand-wordmark}" Fill="{DynamicResource md3.on-surface}"
+               Width="{cap * {(max(p[0] for l in S.WM for p in l['pts'])) / 100:.4f}}" Height="{cap}" Stretch="Uniform"/> -->
+  <StreamGeometry x:Key="brand-wordmark">M0.00,0.00 L20.48,0.18 L20.48,69.10 L21.02,72.76 L21.94,75.87 L23.22,78.43 L26.69,82.27 L29.62,83.91 L31.63,84.64 L34.00,85.19 L37.66,85.56 L41.50,85.37 L45.16,84.64 L47.53,83.73 L49.73,82.45 L51.74,80.62 L53.38,78.43 L54.48,76.23 L55.39,73.49 L56.12,68.37 L56.12,0.00 L76.60,0.18 L76.60,67.82 L76.23,72.39 L75.69,75.50 L74.22,80.44 L71.48,85.92 L68.92,89.40 L65.63,92.69 L61.61,95.61 L56.12,98.35 L50.82,100.00 L25.78,100.00 L19.20,97.81 L13.53,94.70 L8.78,90.68 L4.94,85.74 L2.74,81.54 L1.46,77.88 L0.55,73.86 L0.00,69.10 L0.00,0.00 Z M81.72,0.00 L163.07,0.00 L163.07,16.09 L132.36,16.27 L132.36,100.00 L112.07,100.00 L112.07,16.27 L81.72,16.09 L81.72,0.00 Z M966.32,289.00 L1096.50,694.00 L1226.68,289.00 Z M214.26,0.00 L295.61,0.18 L295.61,16.09 L264.90,16.27 L264.90,100.00 L244.42,100.00 L244.42,16.27 L214.26,16.09 L214.26,0.00 Z M300.91,0.00 L321.21,0.18 L321.21,68.92 L321.76,72.76 L322.49,75.32 L323.77,78.06 L325.05,79.89 L327.24,82.08 L328.52,83.00 L332.36,84.64 L334.73,85.19 L338.39,85.56 L342.23,85.37 L345.89,84.64 L348.26,83.73 L350.46,82.45 L352.65,80.44 L354.11,78.43 L355.39,75.87 L356.31,72.76 L356.86,68.74 L356.86,0.18 L377.33,0.18 L377.33,68.56 L376.78,73.67 L375.32,79.52 L372.58,85.37 L369.65,89.40 L366.18,92.87 L362.34,95.61 L356.86,98.35 L351.55,100.00 L326.51,100.00 L321.21,98.35 L314.81,95.06 L309.69,90.86 L305.67,85.74 L303.66,81.90 L302.38,78.43 L301.46,74.77 L300.73,68.92 L300.91,0.00 Z</StreamGeometry>
+
+  <!-- 单线备选字标（实验用，不进接入清单）：StrokeThickness = cap × 0.125，圆头圆接 -->
+  <StreamGeometry x:Key="brand-wordmark-monoline"></StreamGeometry>
+
+  <!-- ══ 三式锁定（组合放置：cap 为唯一驱动值，全部按 cap=100 给出坐标，实际缩放 = cap/100）══
+       对齐规则：标志墨迹高 = cap；括号墨迹高 = 1.2 × cap；所有部件**居中对齐大写带**（字标基线 = cap 基线）；
+       部件间距 = 0.42 × cap（单位空间里即 42）。
+
+       signature = { 脸 UTvTU }（主签名：关于页/安装包/物料页脚）
+       <Canvas Width="{W}" Height="{132}" ClipToBounds="False">
+         <Path Data="{StaticResource brand-brace}" Stroke="{DynamicResource brand.primary}"
+               StrokeThickness="6" StrokeLineCap="Round" StrokeJoin="Round"
+               Width="22" Height="46.8" Stretch="Uniform"
+               Canvas.Left="0" Canvas.Top="37.6"
+               RenderTransform="translate(...)"/>  ... 见 brand-lockup.md §B（数值表）
+         <Path Data="{StaticResource brand-mark}" ... Width="56" Height="100" Stretch="Uniform" Canvas.Left="58" Canvas.Top="11"/>
+         <Path Data="{StaticResource brand-wordmark}" Fill="..." Width="377.33" Height="100" Stretch="Uniform" Canvas.Left="156" Canvas.Top="11"/>
+         <Path Data="{StaticResource brand-brace-flipx}" ... Canvas.Left="575.3" Canvas.Top="37.6"/>
+       </Canvas>
+       display   = { UTvTU }（显示级：欢迎页头/闪屏副标）→ 同上，去掉 brand-mark 一项
+       short     = { 脸 }（短式：顶栏/状态栏）→ 同上，去掉 brand-wordmark 一项
+       （精确左偏移请由实现按 cap 驱动计算：brace_w = 22×(cap/42)、mark_w = 56×(cap/45)、word_w = 3.7733×cap、
+         间距 = 0.42×cap；这样任意 cap 都不会错位。）
+       ═════════════════════════════════════════════════════════════════════════════════ -->
+</ResourceDictionary>

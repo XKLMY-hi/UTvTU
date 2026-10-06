@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         x:Class="OpenUtau.App.Views.SliderDialog"
-        Icon="/Assets/open-utau.ico"
+        Icon="/Assets/brand/utvtu.ico"
         Title="UTvTU" Height="120" Width="300" WindowStartupLocation="CenterOwner">
 <DockPanel LastChildFill="True">
       <Border>

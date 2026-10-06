@@ -27,7 +27,7 @@
     <!-- 字体走 Plus 令牌（Plus.Resources 全局资源，不依赖语言包/继承链；
          裸 $Default 在部分设备上 Skia 解析失败会崩溃） -->
     <Setter Property="FontFamily" Value="{DynamicResource PlusFontFamily}"/>
-    <Setter Property="Icon" Value="/Assets/open-utau.ico"/>
+    <Setter Property="Icon" Value="/Assets/brand/utvtu.ico"/>
     <!-- 跟随主题色渐变背景（顶部 base → 底部 accent 注入） -->
     <Setter Property="Background" Value="{DynamicResource PlusBrushWindowBackground}"/>
   </Style>

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="380" d:DesignHeight="260"
         x:Class="OpenUtau.App.Views.DsScriptExportDialog"
-        Icon="/Assets/open-utau.ico"
+        Icon="/Assets/brand/utvtu.ico"
         Title="{DynamicResource dialogs.exportds.caption}"
         WindowStartupLocation="CenterOwner"
         SizeToContent="Height" Width="380" CanResize="False">

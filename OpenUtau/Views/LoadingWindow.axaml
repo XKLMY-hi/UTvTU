@@ -6,13 +6,17 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenUtau.App.Views.LoadingWindow" SizeToContent="WidthAndHeight" CanResize="False"
         Title="UTvTU" MinWidth="300" MinHeight="150"
-        Icon="/Assets/open-utau.ico"
+        Icon="/Assets/brand/utvtu.ico"
         WindowStartupLocation="CenterScreen">
 
     <Grid>
-        <Image Margin="20" Width="80" Height="80"
-           VerticalAlignment="Top" HorizontalAlignment="Center"
-           Source="/Assets/OpenUtau.png"/>
+        <!-- W40：旧位图 /Assets/OpenUtau.png → 矢量品牌标志（源几何 verbatim、描边渲染；64 网格描边=尺寸÷8） -->
+        <Viewbox Margin="20" Width="80" Height="80"
+                 VerticalAlignment="Top" HorizontalAlignment="Center" Stretch="Uniform">
+            <Path Data="{StaticResource brand-mark}"
+                  Stroke="{DynamicResource md3.primary}" StrokeThickness="8"
+                  StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
+        </Viewbox>
         <TextBlock Margin="0,110,0,10" Grid.Row="0"  HorizontalAlignment="Center" VerticalAlignment="Center" Name="Text" TextWrapping="Wrap" MaxWidth="560"> Loading... </TextBlock>
     </Grid>
 </controls:WindowEx>

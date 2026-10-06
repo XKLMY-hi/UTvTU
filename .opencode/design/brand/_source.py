@@ -318,23 +318,53 @@ def overlay_iou(ref_crop, mine_img, path):
 # 字标：保留描摹的 U/T，**切角 v 换用源路径**
 # ══════════════════════════════════════════════════════════════════
 def wordmark_letters_with_source_v():
+    """字标：保留描摹的 U/T 轮廓，**切角 v 换用源路径**。
+    对齐规则：v 按**归一化空间的实测 bbox**（cap=100）贴合高度、水平居中 ——
+    早期版本误用源像素 bbox（bbox_px）⇒ v 被放大到 6.9× 的另一套尺度，整体 bbox 崩到 1226×694。"""
     letters = [dict(l) for l in L.WORDMARK]
-    vbox = letters[2]["bbox_px"]        # 归一化 bbox（x1,y1,x2,y2）
-    bx0, by0, bx1, by1 = vbox
-    w, h = bx1 - bx0, by1 - by0
-    v = parse_path(V_FILL_D)            # 源：填充切角 v（9×14）
-    sc = h / 14.0
-    ox = bx0 + (w - 9 * sc) / 2.0
-    oy = by0
-    letters[2]["pts"] = [(ox + p[0] * sc, oy + p[1] * sc) for p in v[0]]
-    letters[2]["bbox_px"] = [ox, oy, ox + 9 * sc, by1]
+    xs = [p[0] for p in letters[2]["pts"]]
+    ys = [p[1] for p in letters[2]["pts"]]
+    bx0, bx1, by0, by1 = min(xs), max(xs), min(ys), max(ys)
+    v = parse_path(V_FILL_D)                      # 源：填充切角 v（9×14）
+    sc = (by1 - by0) / 14.0                       # 只按高度贴合（同一尺度的归一化空间）
+    ox = bx0 + ((bx1 - bx0) - 9 * sc) / 2.0       # 水平居中
+    letters[2]["pts"] = [(ox + q[0] * sc, by0 + q[1] * sc) for q in v[0]]
+    letters[2]["bbox_px"] = [ox, by0, ox + 9 * sc, by1]   # 保持"归一化"语义，别再塞源像素
     return letters
+
+
+def assert_wordmark_sane(letters, expect_w=None, tol=1.5):
+    """★健全性断言（防复发）：合成几何后校验 ① 子路径同一坐标尺度 ② 整体 bbox 在预期范围。
+    这次的故障正是"数值看着对、几何整体崩了" —— 只输出指标 JSON 不够，必须 fail loud。"""
+    boxes = []
+    for l in letters:
+        xs = [q[0] for q in l["pts"]]
+        ys = [q[1] for q in l["pts"]]
+        boxes.append((min(xs), min(ys), max(xs), max(ys)))
+    x0 = min(b[0] for b in boxes); y0 = min(b[1] for b in boxes)
+    x1 = max(b[2] for b in boxes); y1 = max(b[3] for b in boxes)
+    w, h = x1 - x0, y1 - y0
+    cap = max(b[3] - b[1] for b in boxes)
+    # ① 同一尺度：任何子路径不得超出"整体 bbox + 2 单位"，且 v 的高度不得超过 cap
+    for i, b in enumerate(boxes):
+        assert b[0] >= x0 - 2 and b[1] >= y0 - 2 and b[2] <= x1 + 2 and b[3] <= y1 + 2, \
+            f"子路径 {i} 超出整体 bbox：{b} vs {(x0, y0, x1, y1)}（坐标系混用？）"
+        assert b[3] - b[1] <= cap + 2, f"子路径 {i} 高度 {b[3]-b[1]:.1f} 超过 cap {cap:.1f}（尺度不一致？）"
+    # ② 整体 bbox 落在预期范围（U/T 轮廓决定，v 只在其内）
+    ut = [b for i, b in enumerate(boxes) if i != 2]
+    utw = max(b[2] for b in ut) - min(b[0] for b in ut)
+    assert 90 <= cap <= 110, f"字标 cap 异常：{cap:.1f}（预期 ≈100）"
+    assert w <= utw + 2, f"整体宽 {w:.1f} 超过 U/T 宽 {utw:.1f}（v 跑出尺度了）"
+    if expect_w is not None:
+        assert abs(w - expect_w) <= tol, f"整体宽 {w:.2f} 偏离预期 {expect_w:.2f}±{tol}"
+    return {"bbox": [round(v, 2) for v in (x0, y0, x1, y1)], "w": round(w, 2), "h": round(h, 2), "cap": round(cap, 2)}
 
 
 # ══════════════════════════════════════════════════════════════════
 # 锁定组装（cap 驱动：标志墨迹高 = cap；括号墨迹 = 1.2×cap；间距 0.42×cap）
 # ══════════════════════════════════════════════════════════════════
 WM = wordmark_letters_with_source_v()
+WM_SANITY = assert_wordmark_sane(WM, expect_w=377.33)
 
 
 def mark_ink(cap):
@@ -450,6 +480,7 @@ def main():
     if ref_mark:
         io["mark"] = overlay_iou(ref_mark, render_stroke(MARK_SUBS, MARK_BOX, MARK_SW, 400, "#000000"),
                                  os.path.join(OUT, "brand-verify-mark-overlay.png"))
+    table["wordmark_sanity"] = WM_SANITY
     table["overlay_iou"] = io
 
     # ── 源几何资产（描边语义，verbatim d）──

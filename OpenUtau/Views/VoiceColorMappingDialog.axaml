@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" MinWidth="280" MinHeight="240" Width="420" Height="380"
         x:Class="OpenUtau.App.Views.VoiceColorMappingDialog"
-        Icon="/Assets/open-utau.ico"
+        Icon="/Assets/brand/utvtu.ico"
         Title="{DynamicResource dialogs.voicecolorremapping}"
         WindowStartupLocation="CenterOwner">
 <DockPanel LastChildFill="True">
