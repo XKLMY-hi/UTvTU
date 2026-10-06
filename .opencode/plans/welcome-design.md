@@ -190,3 +190,21 @@
   （那会让 EvenOdd 下的重叠区被挖空）；
 - 字标用 **`Fill`**（轮廓几何，非描边）；括号与 v 用 **`Stroke`**；v 的 `Fill=none`。
 - 四元素布局与 cap 公式见「追加三」（v 元素框 7.98×12.45 @40.61/2.70、括号 28.80/4.80/12.57、间距 10.08）。
+---
+
+## W38 追加五：两条**真机级**忌（构建 0 错误 + headless 全绿都拦不住）
+
+### ① 绝不写 `Fill="none"`
+Avalonia **不认 SVG 的 `none` 关键字**：`Fill="none"` 会抛 `Invalid brush string: 'none'`
+⇒ **整机启动即退**（fx-ctl 真机首跑踩到，位置 `SplashWindow.axaml:51`）。
+- ⇒ 描边元素**直接省略 `Fill` 属性**（默认即不填充），**不要写 `Fill="none"`**；
+- 本卡自查（2026-10-07）：`OpenUtau/**/*.axaml` 里 `Fill="none"` **零命中**，
+  `(Fill|Stroke)="(none|transparent)"` 亦**零命中** ✓；
+- 教训：这类"渲染期字符串解析"错误**编译期与 headless 测试都发现不了** ⇒
+  凡涉及 `Fill/Stroke` 字面量，只允许用**颜色池键**（`{DynamicResource md3.*}`）或省略。
+
+### ② 字标键未规范化前**不切**
+`wordmark-ut.svg` 的 `d` 是 **PDF 内容流语法**（`x y m`、**操作数在前**）而**不是 SVG 语法**，
+且 4 条 path 的 transform 语义不一致（要靠"哪条落得进 viewBox"来猜）。
+⇒ m1-strip 正在**规范化**（展平 transform + 转标准 `M/L/C/Z`，几何不变并带采样偏差自证）。
+**在 fx-ctl 逐字重取键之前，单处 `Data=` 不切** —— 否则白做一轮。
