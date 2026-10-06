@@ -110,7 +110,10 @@ namespace OpenUtau.Test.App {
         [AvaloniaFact]
         public void CommandRegistry_KeepsGlobalAndWindowShortcuts() {
             var preFocus = CommandRegistry.All.Where(c => c.PreFocus).Select(c => c.Id).OrderBy(x => x).ToArray();
-            Assert.Equal(new[] { "file.save", "tools.mixer", "tools.mixerattach" }, preFocus);
+            // W48：三条视图切换也必须在第一趟 —— 第二趟(:1642)位于「卷帘显示 + 卷帘持有焦点」守卫(:1636)之后，
+            // 而那正是 Ctrl+1/Ctrl+3（从卷帘切回工作台/混音台）要生效的场景。
+            Assert.Equal(new[] { "file.save", "tools.mixer", "tools.mixerattach",
+                "view.mixer", "view.pianoroll", "view.workspace" }, preFocus);
             Assert.Equal("playback.playpause", SpaceCommandId());
             var all = CommandRegistry.All.Select(c => c.Id).ToArray();
             Assert.Contains("file.render", all);          // 导出仍在命令表内
