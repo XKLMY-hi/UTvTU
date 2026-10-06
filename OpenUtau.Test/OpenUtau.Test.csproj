@@ -65,6 +65,10 @@
     <None Include="..\.opencode\design\brand\extracted\brace-open.svg" Link="brand\extracted\brace-open.svg" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\.opencode\design\brand\extracted\v-chevron.svg" Link="brand\extracted\v-chevron.svg" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\.opencode\design\brand\extracted\wordmark-ut.svg" Link="brand\extracted\wordmark-ut.svg" CopyToOutputDirectory="PreserveNewest" />
+    <!-- W38：欢迎页波形几何防漂移契约 —— 应用侧资源字典 vs 生成器产物的 `loudness:` 行逐字比对。
+         基准 = 生成器产物 .opencode/design/welcome-waveform/waveform-b.xaml（单一来源，可重生成）。 -->
+    <None Include="..\OpenUtau\Assets\WelcomeWaveform.axaml" Link="Assets\WelcomeWaveform.axaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\.opencode\design\welcome-waveform\waveform-b.xaml" Link="waveform\waveform-b.xaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Styles\Md3ControlThemes.axaml" Link="Styles\Md3ControlThemes.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Styles\Md3SelectionThemes.axaml" Link="Styles\Md3SelectionThemes.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Styles\Md3Transitions.axaml" Link="Styles\Md3Transitions.axaml" CopyToOutputDirectory="PreserveNewest" />
