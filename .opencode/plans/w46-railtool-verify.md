@@ -1,0 +1,11 @@
+# W46 悬浮工具轨 · 视觉复核 · fx-verify · 主树 `97d177ac`
+
+1. **本轮结论：我的真机像素集 = 未验证（没能自己采到）**。原因链：启动被**单实例规则**拒绝（主树已有实例 **PID 4964**，与我同 exe 路径）；改用该实例后其窗口为 **1239×769**，与我的坐标假设（1400 宽、胶囊在 image 856）不符 ⇒ 我连点 6 个候选位置切“钢琴卷帘”均未命中（探针在 `x275..345,y95..600` 只读到画布底 `#0B0F12` / 排列区 `#181C20`，**无 `#36343A` 轨道容器**），预算耗尽。**我没有停掉 PID 4964**（可能是别的 agent 的实例，按纪律不动），也**未改主题**（本轮全程 Dark）。
+2. **静态（代码）PASS**：`PianoRoll.axaml:203-211` 工具轨 = `Border.toolRail`，`HorizontalAlignment=Left / VerticalAlignment=Top / **Margin="12"**`，样式口径见 `:199` 注释“**圆角 12 / md3.surface-container-highest / 1px md3.outline-variant（不加投影）**”；`ListBox.toolRail` + `StackPanel Spacing="4"`（间距 4）；容器宽 = 按钮 36 ⇒ **36 宽、36×36、圆角 8、间距 4** 与卡片一致（按钮样式类 `railTool`）。
+3. **静态 10 工具与顺序 PASS**：`selection → pen（hasSubTool）→ eraser → knife → [pitchGroup 起 1px 分隔] → pitchPoint → drawPitch → pitchLine → pitchSCurve → pitchSineWave → pitchSmoothen` —— 共 **10** 个（`:215/216/234/235/236/237/238/239/240/241`），绘制类与音高类之间以 `pitchGroup` 起分隔 ✔。
+4. **笔的子工具浮层 PASS（代码）**：`:216-232` `ListBoxItem.hasSubTool.penTool` + `FlyoutBase.AttachedFlyout` → `Flyout Placement="Right" ShowMode="Transient"`（**向右弹出** ✔）。
+5. **作者自述偏离（第 5 项）—— 算术 PASS / 真机待证**：`:206 MaxHeight="{Binding #ToolRailLayer.Bounds.Height}"` + `:207 ScrollViewer VerticalScrollBarVisibility="Auto"` ⇒ 内容高 ≈ 10×36 + 9×4 = **396**（+分隔与内边距 ≈ 400–420）；本机实例的卷帘层可用高约 600 ⇒ **正常窗口下不应出现滚动条、末尾工具不应被裁**（这是算术推断，**需真机确认**）。
+6. **次级证据（作者深色图 `%TEMP%\w46shots\w46-2-selected.png`，非我自采）**：可见工具轨为**竖排悬浮**窄容器（画布左上角，约 x≈93..120），**首个（选择）工具呈紫色 `primary-container` 底 + 浅色图标 = 选中态** ✔，其下依次 画笔/橡皮/刀 + **一条分隔线** + 后续音高类工具 ✔，容器有细边框与圆角外观 ✔；但该图**叠着教程弹窗**（"选择工具/框选/笔工具/通用…"）⇒ **不能从该图可靠读尺寸数字**，故只作“形态与三态存在”的目视佐证。
+7. **未验证清单（我这次没拿到）**：① 距画布左上 **12**、容器圆角 12 / 边框 1px / 无投影 的**像素**核对；② 按钮 **36×36 / 间距 4 / 分隔线 1px** 的像素核对；③ **三态像素**（悬停 primary 12% 叠加、选中 primary-container+on-primary-container、笔浮层向右）**深色 + 浅色各一组**（浅色那张作者点错按钮，我做不了）；④ 零布局影响（加轨后画布 Bounds 不变、轨外点击不被吃）；⑤ 正常尺寸下**无滚动条 + 末尾工具不被裁**的真机确认；⑥ 顶栏品牌 `标志+UTvTU+分隔线+视图名`（本卡第 6 项：我在**上一轮** `pr-30-ws.png` 已见 `{标记} UTVTU | 工作台` 结构 ✔，但 **v 的放大切片仍未取**）。
+8. **要继续只需要一件事**：给我“可停/可重启主树实例”的许可（我会：stop 4964 → 以 (100,60,1400,880) 启动 → Ctrl+N 建工程 → 胶囊切卷帘 → 采集 ①②③⑤⑥）**或**让持有 4964 的人把它留在已知尺寸。许可到手后我这三条大约 2 个动作就能出数字。
+9. **纪律回顾**：hwnd 取 `shot_pid.py --list` ✔；未按进程名杀 ✔；未触碰他人实例 ✔；主题未改（Dark 原样）✔；未改产品代码 ✔；本轮无新截图（探针图 `w46-try.png` 为失败的视图尝试，可忽略）。
