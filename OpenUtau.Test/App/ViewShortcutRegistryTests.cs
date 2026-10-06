@@ -66,13 +66,14 @@ namespace OpenUtau.Test.App {
 
         [Fact]
         public void ViewCommands_AreResolvedByTheRegistryDispatchPath() {
-            // W47 之后窗口级分发 = 纯注册表（HandleGlobalShortcut → TryExecuteShortcut）
+            // W47 之后窗口级分发 = 纯注册表；视图切换走**第一趟**（preFocus:true, :1630），
+            // 因为第二趟(:1642)位于「卷帘显示 + 卷帘持有焦点」守卫(:1636)之后 —— 那正是 Ctrl+1/3 要生效的场景。
             foreach (var (id, key, _) in Expected) {
                 var hit = CommandRegistry.Match(key, CommandRegistry.PrimaryModifier, CommandRegistry.PrimaryModifier);
                 Assert.NotNull(hit);
                 Assert.Equal(id, hit!.Id);
                 Assert.Equal(CommandScope.Window, hit.Scope);
-                Assert.False(hit.PreFocus);
+                Assert.True(hit.PreFocus, "视图切换必须走第一趟（第二趟被卷帘焦点守卫 :1636 挡掉）");
                 Assert.Null(CommandRegistry.Match(key,
                     CommandRegistry.PrimaryModifier | KeyModifiers.Shift, CommandRegistry.PrimaryModifier));
             }
