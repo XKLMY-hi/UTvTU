@@ -1,0 +1,94 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="14" d:DesignHeight="48"
+             x:Class="OpenUtau.App.Controls.PanelRevealTab"
+             Width="14" Height="48">
+  <!-- 折叠面板的「快捷展开」边缘竖标签（W34 / 设计稿 §8，候选 1）。
+       默认 14×48 圆角 8 只显示面板字形；悬停/聚焦展开到 92×48 圆角 999 显示面板名。
+       它由宿主放在**零测量的 Canvas** 里（分隔条那一列）⇒ 完全 overlay、不吃布局、不留夹缝。
+       硬约束：描边元素**不写 Fill**（`Fill="none"` 在 Avalonia 非法，真机启动即退）。 -->
+  <UserControl.Styles>
+    <Style Selector="Button.revealTab">
+      <Setter Property="Width" Value="14"/>
+      <Setter Property="Height" Value="48"/>
+      <Setter Property="MinWidth" Value="0"/>
+      <Setter Property="MinHeight" Value="0"/>
+      <Setter Property="Margin" Value="0"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="ClipToBounds" Value="False"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <!-- 悬停/聚焦：展开到 92 宽、胶囊圆角、主色底 -->
+    <Style Selector="Button.revealTab:pointerover">
+      <Setter Property="Width" Value="92"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+      <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="Button.revealTab:focus">
+      <Setter Property="Width" Value="92"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+      <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="Button.revealTab:focus-visible">
+      <Setter Property="Width" Value="92"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+    </Style>
+    <Style Selector="Button.revealTab:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+    </Style>
+    <Style Selector="Button.revealTab:focus /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+    </Style>
+    <!-- 常态字形色 / 展开态用 on-primary -->
+    <Style Selector="Button.revealTab Path.revealGlyph">
+      <Setter Property="Stroke" Value="{DynamicResource md3.on-surface-variant}"/>
+      <Setter Property="StrokeThickness" Value="1.6"/>
+      <Setter Property="StrokeLineCap" Value="Round"/>
+      <Setter Property="StrokeJoin" Value="Round"/>
+    </Style>
+    <Style Selector="Button.revealTab:pointerover Path.revealGlyph">
+      <Setter Property="Stroke" Value="{DynamicResource md3.on-primary}"/>
+    </Style>
+    <Style Selector="Button.revealTab:focus Path.revealGlyph">
+      <Setter Property="Stroke" Value="{DynamicResource md3.on-primary}"/>
+    </Style>
+    <Style Selector="Button.revealTab TextBlock.revealLabel">
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="IsVisible" Value="False"/>
+      <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+      <Setter Property="Margin" Value="4,0,0,0"/>
+    </Style>
+    <Style Selector="Button.revealTab:pointerover TextBlock.revealLabel">
+      <Setter Property="IsVisible" Value="True"/>
+    </Style>
+    <Style Selector="Button.revealTab:focus TextBlock.revealLabel">
+      <Setter Property="IsVisible" Value="True"/>
+    </Style>
+    <Style Selector="Button.revealTab:pointerover Path.revealGlyph">
+      <Setter Property="Margin" Value="0"/>
+    </Style>
+  </UserControl.Styles>
+
+  <Button Name="TabButton" Classes="revealTab" Click="OnTabClicked"
+          ToolTip.Tip="{Binding Hint, RelativeSource={RelativeSource AncestorType=UserControl}}">
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+      <Path Classes="revealGlyph" Width="10" Height="10" Stretch="Uniform"
+            Data="{Binding GlyphData, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+      <TextBlock Classes="revealLabel"
+                 Text="{Binding PanelLabel, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+    </StackPanel>
+  </Button>
+</UserControl>
