@@ -543,27 +543,11 @@
              铺在中央列之上（Panel 无背景 ⇒ 自身不吃点击，只有标签可命中），
              标签 14×48 圆角 8，悬停/聚焦展开到 92×48 显示面板名；
              左列标签贴左边、向右展开；右列标签贴右边、向左展开（与面板头 chevron 镜像）。
-             不参与面板列测量 ⇒ 不吃布局、不留夹缝，`PanelSplitter` 五值一行未改。 ── -->
-        <Panel Grid.Column="2" IsHitTestVisible="True">
-          <c:PanelRevealTab x:Name="TracksRevealTab"
-                            HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8"
-                            IsVisible="{Binding ShowTracksRevealTab}"
-                            AnchorRight="False"
-                            GlyphData="{StaticResource icon-list}"
-                            PanelLabel="{DynamicResource panel.toggle.tracks}"
-                            Hint="{DynamicResource panel.expand.tracks}"
-                            HintSuffix="{DynamicResource panel.expand.hint}"
-                            ExpandRequested="OnRevealTracksPanel"/>
-          <c:PanelRevealTab x:Name="LibraryRevealTab"
-                            HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8"
-                            IsVisible="{Binding ShowLibraryRevealTab}"
-                            AnchorRight="True"
-                            GlyphData="{StaticResource icon-folder-open}"
-                            PanelLabel="{DynamicResource panel.toggle.library}"
-                            Hint="{DynamicResource panel.expand.library}"
-                            HintSuffix="{DynamicResource panel.expand.hint}"
-                            ExpandRequested="OnRevealLibraryPanel"/>
-        </Panel>
+             不参与面板列测量 ⇒ 不吃布局、不留夹缝，`PanelSplitter` 五值一行未改。
+             ⚠ **必须声明在中央区之后**（本文件靠后处）并带 `ZIndex`：z 序 = 声明顺序，而中央区是
+             不透明的 `Background=md3.surface`，声明在它前面的 overlay 会被整块盖住（真机表现：
+             标签既看不见、也命中不到 —— W44 验收 FAIL 的根因）。 ── -->
+        <!-- 实际声明位置在本文件靠后（MainLayout 末尾），见那里的同名注释 -->
 
         <!-- ── 中：编排区（工作台视图：标尺 34 / 横向滚动 16 / 轨道区）── -->
         <Grid Grid.Column="2" ColumnDefinitions="*,8" Background="{DynamicResource md3.surface}"
@@ -1068,6 +1052,32 @@
                 IsVisible="{Binding ViewSwitcher.ShowMixer}">
           <ContentControl x:Name="MixerContainer" Classes="md3-fade"/>
         </Border>
+        <!-- ── 折叠处「快捷展开」边缘标签（W34 / 设计稿 §8）：**overlay**。
+             ⚠ **必须声明在 MainLayout 的最后**：z 序 = 声明顺序，而中央区/混音台覆盖层都是不透明的
+             （`Background=md3.surface`）—— 之前把这段放在中央区**之前**，标签被整块盖住：真机上
+             既看不见、`InputHitTest` 也命不中（W44 验收 FAIL 的根因）。这里再加 `ZIndex` 双保险。
+             标签 14×48 圆角 8，悬停/聚焦展开 92×48 显名；左列标签贴左、右列贴右（与面板头 chevron 镜像）。
+             无背景 Panel ⇒ 自身不吃点击，只有标签可命中；不参与面板列测量 ⇒ 零布局占用。 ── -->
+        <Panel Grid.Column="2" ZIndex="10" IsHitTestVisible="True">
+          <c:PanelRevealTab x:Name="TracksRevealTab"
+                            HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8"
+                            IsVisible="{Binding ShowTracksRevealTab}"
+                            AnchorRight="False"
+                            GlyphData="{StaticResource icon-list}"
+                            PanelLabel="{DynamicResource panel.toggle.tracks}"
+                            Hint="{DynamicResource panel.expand.tracks}"
+                            HintSuffix="{DynamicResource panel.expand.hint}"
+                            ExpandRequested="OnRevealTracksPanel"/>
+          <c:PanelRevealTab x:Name="LibraryRevealTab"
+                            HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8"
+                            IsVisible="{Binding ShowLibraryRevealTab}"
+                            AnchorRight="True"
+                            GlyphData="{StaticResource icon-folder-open}"
+                            PanelLabel="{DynamicResource panel.toggle.library}"
+                            Hint="{DynamicResource panel.expand.library}"
+                            HintSuffix="{DynamicResource panel.expand.hint}"
+                            ExpandRequested="OnRevealLibraryPanel"/>
+        </Panel>
       </Grid>
 
       <!-- ══════════ 状态条 32：左侧引擎/进度 · 右侧版本 ══════════ -->

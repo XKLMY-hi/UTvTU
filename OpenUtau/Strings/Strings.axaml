@@ -1205,6 +1205,7 @@ General
   <!-- W34：折叠处「快捷展开」边缘标签（悬停显名复用上面的 panel.toggle.*，这里只加 tooltip 三件） -->
   <system:String x:Key="panel.expand.tracks">Expand track headers</system:String>
   <system:String x:Key="panel.expand.library">Expand library</system:String>
+  <system:String x:Key="panel.toggle.pianoroll.exp">Expressions</system:String>
   <system:String x:Key="panel.expand.hint">Click to expand · drag the splitter to resize</system:String>
   <!-- /panel -->
   <!-- ⚠ ustrxp: W27 格式止血 —— 另存为纯净 .ustx（跨软件交付唯一安全路径）—— EN/zh 成对 -->
