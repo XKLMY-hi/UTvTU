@@ -34,7 +34,7 @@
   <system:String x:Key="dialogs.about.message">
     OpenUtau wil een open-source bewerkingsomgeving zijn voor de UTAU-gemeenschap, met een moderne gebruikerservaring en intelligente fonologische ondersteuning. Bezoek ons op Github.
   </system:String>
-  <system:String x:Key="dialogs.exitsave.caption">OpenUtau afsluiten</system:String>
+  <system:String x:Key="dialogs.exitsave.caption">UTvTU afsluiten</system:String>
   <system:String x:Key="dialogs.exitsave.message">Het huidige project bevat niet-opgeslagen wijzigingen. Wilt u het opslaan?</system:String>
   <system:String x:Key="dialogs.export.caption">Exporteren</system:String>
   <system:String x:Key="dialogs.export.savefirst">Sla het projectbestand eerst op</system:String>
@@ -51,7 +51,7 @@
   <system:String x:Key="dialogs.messagebox.yes">Ja</system:String>
   <system:String x:Key="dialogs.noresampler.caption">Geen resampler</system:String>
   <system:String x:Key="dialogs.noresampler.message">Geen resampler! Zet je favoriete resampler exe of dll in de Resamplers map en kies het in Voorkeuren!</system:String>
-  <system:String x:Key="dialogs.recovery">OpenUtau is abnormaal beëindigd. Wilt u uw project herstellen?</system:String>
+  <system:String x:Key="dialogs.recovery">UTvTU is abnormaal beëindigd. Wilt u uw project herstellen?</system:String>
   <system:String x:Key="dialogs.recovery.caption">Project herstellen</system:String>
   <system:String x:Key="dialogs.remaptimeaxis.message">Met deze tool verandert u het tempo van het project zonder dat de daadwerkelijke positie en duur (in seconden) van de noten verandert.
   Nieuwe BPM:</system:String>
