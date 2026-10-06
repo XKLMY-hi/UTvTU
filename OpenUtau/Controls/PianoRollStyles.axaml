@@ -90,14 +90,14 @@
     <Style Selector="^:selected /template/ Path.stroked">
       <Setter Property="Stroke" Value="{DynamicResource md3.on-primary-container}"/>
     </Style>
-    <Style Selector="^ Path.filled">
+    <Style Selector="^:not(:selected) Path.filled">
       <Setter Property="Fill" Value="{DynamicResource md3.on-surface-variant}"/>
     </Style>
-    <Style Selector="^ Ellipse.stroked">
+    <Style Selector="^:not(:selected) Ellipse.stroked">
       <Setter Property="StrokeThickness" Value="2"/>
       <Setter Property="Stroke" Value="{DynamicResource md3.on-surface-variant}"/>
     </Style>
-    <Style Selector="^ Path.stroked">
+    <Style Selector="^:not(:selected) Path.stroked">
       <Setter Property="StrokeThickness" Value="2"/>
       <Setter Property="Stroke" Value="{DynamicResource md3.on-surface-variant}"/>
     </Style>
@@ -197,14 +197,14 @@
     <Style Selector="^.hasSubTool:pointerover /template/ Path#PART_SubToolArrow">
         <Setter Property="Opacity" Value="1.0" />
     </Style>
-    <Style Selector="^ Path.filled">
+    <Style Selector="^:not(:selected) Path.filled">
         <Setter Property="Fill" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
     </Style>
-    <Style Selector="^ Ellipse.stroked">
+    <Style Selector="^:not(:selected) Ellipse.stroked">
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="Stroke" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
     </Style>
-    <Style Selector="^ Path.stroked">
+    <Style Selector="^:not(:selected) Path.stroked">
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="Stroke" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
     </Style>

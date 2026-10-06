@@ -4,7 +4,9 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Headless.XUnit;
+using Avalonia.Controls.Shapes;
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using OpenUtau.App.Controls;
@@ -200,6 +202,131 @@ namespace OpenUtau.Test.App {
             .OrderBy(i => i.Bounds.Y)
             .ToArray();
 
+        [AvaloniaFact]
+        public void ToolRail_ContainerIsStyledWithoutShadow() {
+            var (window, _, rail, _, scope) = Fixture();
+            try {
+                Assert.Equal(new CornerRadius(12), rail.CornerRadius);
+                Assert.Equal(new Thickness(1), rail.BorderThickness);
+                Assert.NotNull(rail.Background);
+                Assert.True(rail.BoxShadow.Count == 0, $"容器不得有投影，实际 {rail.BoxShadow.Count} 条");
+            } finally {
+                Close(window, scope);
+            }
+        }
+
+        [AvaloniaFact]
+        public void ToolRail_DividerSitsBetweenGroupsAndIsAtLeastOnePixel() {
+            var (window, _, _, list, scope) = Fixture();
+            try {
+                var items = Items(list);
+                var sep = items[4].GetVisualDescendants().OfType<Border>()
+                    .First(b => b.Name == "PART_GroupSep");
+                Assert.True(sep.IsVisible, "音高组首项应有 1px 分隔线");
+                Assert.True(sep.Bounds.Height >= 1, $"分隔线高应 ≥1，实际 {sep.Bounds.Height}");
+                foreach (var i in new[] { 0, 1, 2, 3, 5, 6, 7, 8, 9 }) {
+                    var s = items[i].GetVisualDescendants().OfType<Border>()
+                        .FirstOrDefault(b => b.Name == "PART_GroupSep");
+                    Assert.True(s == null || !s.IsVisible, $"第 {i} 项不应有分隔线");
+                }
+            } finally {
+                Close(window, scope);
+            }
+        }
+
+        [AvaloniaFact]
+        public void ToolRail_AtNormalWindowSize_HasNoScrollbarAndTenthToolFits() {
+            // 正常窗口尺寸（1000×900）：轨应完整放下 ⇒ 不出现滚动条、第 10 个工具不被裁。
+            var scope = DocManagerTestSetup.EnterScopedDispatcher(nullChannel: true, installScheduler: false);
+            OpenUtau.Core.DocManager.Inst.SearchAllLegacyPlugins();
+            var roll = new PianoRoll(new PianoRollViewModel());
+            var window = new Window { Width = 1000, Height = 900, Content = roll };
+            window.Show();
+            Settle(window);
+            try {
+                var rail = roll.GetVisualDescendants().OfType<Border>().First(b => b.Name == "ToolRail");
+                var list = rail.GetVisualDescendants().OfType<ListBox>().First();
+                var sv = rail.GetVisualDescendants().OfType<ScrollViewer>().First();
+                var items = Items(list);
+                Assert.Equal(10, items.Length);
+                Assert.True(sv.Extent.Height <= sv.Viewport.Height + 0.5,
+                    $"正常尺寸下不应出现滚动条：Extent={sv.Extent.Height} Viewport={sv.Viewport.Height}");
+                Assert.True(items[^1].Bounds.Bottom <= rail.Bounds.Bottom + 1,
+                    $"第 10 个工具被裁：item.Bottom={items[^1].Bounds.Bottom} rail.Bottom={rail.Bounds.Bottom}");
+            } finally {
+                Close(window, scope);
+            }
+        }
+        // ⚠ 两条口径（验证者点名的）：
+        // ① **headless 渲染是 stub**（`Path.Bounds` 实测报 0）⇒ 本文件只断**布局与属性**；
+        //    hover/选中/描边的**实际像素**（观感、颜色叠出来的样子）**只能"由用户目视确认"**，
+        //    这里不断言像素，也**不**当作"验过"。
+        // ② 「距画布左上 12」的参照物 = 实现里 `Margin="12"` 挂的那个 Grid 单元 `ToolRailLayer`
+        //    ⇒ 断的是"轨相对 ToolRailLayer 左上 = (12,12)"（对窗口/画布根取 12 会与实现口径不符）。
+        [AvaloniaFact]
+        public void ToolRail_MarginTwelveIsMeasuredAgainstItsGridCell() {
+            var (window, roll, rail, _, scope) = Fixture();
+            try {
+                var layer = roll.GetVisualDescendants().OfType<Grid>()
+                    .First(g => g.Name == "ToolRailLayer");
+                var railPt = rail.TranslatePoint(new Point(0, 0), roll);
+                var layerPt = layer.TranslatePoint(new Point(0, 0), roll);
+                Assert.NotNull(railPt);
+                Assert.NotNull(layerPt);
+                Assert.Equal(12, railPt!.Value.X - layerPt!.Value.X, 3);
+                Assert.Equal(12, railPt.Value.Y - layerPt.Value.Y, 3);
+                // 同一单元 ⇒ 与"相对画布左上 12"互为交叉校验（两条都成立）
+                var canvas = roll.GetVisualDescendants().OfType<NotesCanvas>().First();
+                var canvasPt = canvas.TranslatePoint(new Point(0, 0), roll);
+                Assert.NotNull(canvasPt);
+                Assert.Equal(12, railPt.Value.X - canvasPt!.Value.X, 3);
+            } finally {
+                Close(window, scope);
+            }
+        }
+
+        [AvaloniaFact]
+        public void ToolRail_HoverPressedSelectedStatesComeFromThemeTokens() {
+            var (window, roll, rail, list, scope) = Fixture();
+            try {
+                var item = Items(list)[0];
+                var layoutRoot = item.GetVisualDescendants().OfType<Border>()
+                    .First(b => b.Name == "PART_LayoutRoot");
+                var overlay = item.GetVisualDescendants().OfType<Border>()
+                    .First(b => b.Name == "PART_HoverOverlay");
+                var icon = item.GetVisualDescendants().OfType<Path>().First(p => p.Name == "PART_ToolIcon");
+                var pseudo = (IPseudoClasses)item.Classes;
+
+                Assert.Equal(0, overlay.Opacity, 3);                       // 静止：叠加层不可见
+                pseudo.Set(":pointerover", true);
+                Settle(window);
+                Assert.Equal(0.12, overlay.Opacity, 3);                    // 悬停 = primary 12% 叠加
+                Assert.Equal("md3.primary", overlay.Background is ISolidColorBrush b0 ? "md3.primary" : "?");
+                pseudo.Set(":pressed", true);
+                Settle(window);
+                Assert.Equal(0.16, overlay.Opacity, 3);                    // 按下 = 16% + 轻微不透明度
+                Assert.True(item.Opacity < 1.0, $"按下应有不透明度变化，实际 {item.Opacity}");
+                pseudo.Set(":pressed", false);
+                pseudo.Set(":pointerover", false);
+                Settle(window);
+                Assert.Equal(0, overlay.Opacity, 3);
+
+                // 选中 = md3.primary-container 底 + md3.on-primary-container 图标（断的是令牌绑定，不是像素）
+                pseudo.Set(":selected", true);
+                Settle(window);
+                var pc = (roll.TryFindResource("md3.primary-container", out var pcRes) ? pcRes : null) as ISolidColorBrush;
+                Assert.True(pc != null, "取不到 md3.primary-container");
+                Assert.True(layoutRoot.Background is ISolidColorBrush bg && bg.Color == pc!.Color,
+                    $"选中底应为 md3.primary-container，实际 {(layoutRoot.Background as ISolidColorBrush)?.Color}");
+                var op = (roll.TryFindResource("md3.on-primary-container", out var opRes) ? opRes : null) as ISolidColorBrush;
+                Assert.True(op != null, "取不到 md3.on-primary-container");
+                Assert.True(icon.Fill is ISolidColorBrush fg && fg.Color == op!.Color,
+                    $"选中图标应为 md3.on-primary-container，实际 {(icon.Fill as ISolidColorBrush)?.Color}");
+                pseudo.Set(":selected", false);
+            } finally {
+                Close(window, scope);
+            }
+        }
         static bool IsInside(Visual ancestor, Visual node) =>
             node == ancestor || ancestor.GetVisualDescendants().Contains(node);
     }
