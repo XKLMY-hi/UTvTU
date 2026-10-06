@@ -1,6 +1,7 @@
 using System;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 
@@ -98,6 +99,16 @@ namespace OpenUtau.App.Controls {
             TabButton.PointerExited += (_, _) => SyncCanvasOffset();
             TabButton.GotFocus += (_, _) => SyncCanvasOffset();
             TabButton.LostFocus += (_, _) => SyncCanvasOffset();
+            // Enter 由 `Button` 自身的标准语义走 `Click`（实测有效）；**Space 在本仓主题/宿主下会被吞**
+            // （真机与 headless 都复现：Tab 能放大 = 焦点没问题，按 Space 不展开）。
+            // 这里把 Space 显式**并入同一个 OnTabClicked** —— 不新开激活路径，鼠标 / Enter / Space
+            // 最终都收敛到同一处（W44 复验 FAIL 的最小修法）。
+            TabButton.KeyDown += (_, e) => {
+                if (e.Key == Key.Space) {
+                    OnTabClicked(TabButton, new RoutedEventArgs());
+                    e.Handled = true;
+                }
+            };
         }
 
         /// <summary>
