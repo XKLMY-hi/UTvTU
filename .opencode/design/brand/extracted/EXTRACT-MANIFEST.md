@@ -150,4 +150,24 @@ FillRule；消费侧 `Path` 也没有 per-use FillRule。而 PDF 里字标**两�
   stroke_px / empty_runs / touching_pairs），**不含**字标宽与 v 定位 ⇒ 定位数字只能取 PDF 提取值（上表）。
 - v 的"填充版 / 修绕向版"**不需要**（描边路线已从根上绕开自交）。
 
+### A″-1 · **表示已规范化**（W43 二次追加；几何未改）
+
+问题（fx-ctl 接线时发现）：`wordmark-*.svg` 里的 `d` 原是 **PDF 内容流语法**（`x y m` / 6 数 `c` / `h`，
+操作数在前），且 U 靠自身 `matrix`、T 靠顶层 `g` ⇒ **不是合法 SVG**，任何 SVG 渲染器都会解析错或报错。
+
+已做（脚本 `_w43_normalize_svg.py`，只改表示）：
+1. **展平**：`g`/`matrix` 全部乘进坐标 ⇒ 三个文件里 `matrix(` = 0、`<g ` = 0，坐标即 viewBox 坐标；
+2. **语法**：所有 `d` 改为标准 SVG（`M/L/C/Z`，绝对坐标、参数按 SVG 顺序）⇒ 可直接逐字对拷进
+   `Icons.axaml` 的 Geometry 字符串（fx-ctl 的防漂移用例可回到"逐字一致"）；
+3. **自证（硬数字）**：逐子路径每段曲线取 64 点比较"展平前（按真实变换）vs 展平后（解析 `d`）"⇒
+   最大偏差 **6.91e-07 单位**（ut 件 **5.69e-07**，阈值 0.01）；`d` 的非 SVG 命令数 = **0**（10 条 path 全过
+   命令/参数个数校验）；展平前后**逐像素渲染差异 = 0 px**（`wordmark-normalized-selfproof.png`）；
+   整体墨迹 bbox = **(0, 0) .. (1032.4137, 277.4707)**，与源 viewBox 偏差 **0.0000**；
+4. **其它提取件审计**：`extracted/` 里其余 **93 个 `.svg` / 93 条 `d` 全部合法**（来自 HTML，本来就是
+   SVG 语法；例：`v-chevron.svg` 的 `d = "M0 0 L4.5 14 L9 0"`）⇒ 无需规范化。
+
+**管线顺序（重要）**：`_w43_type3_wordmark.py extract` → `_w43_split.py` → **`_w43_normalize_svg.py` 必须最后跑**
+（前两者按 PDF 语法写文件；规范化后才是可交付形态）。
+
+
 
