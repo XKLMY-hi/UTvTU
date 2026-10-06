@@ -7,7 +7,7 @@
         xmlns:c="using:OpenUtau.App.Controls"
         mc:Ignorable="d"
         x:Class="OpenUtau.App.Views.MixFxDialog"
-        Icon="/Assets/open-utau.ico"
+        Icon="/Assets/brand/utvtu.ico"
         Title="{DynamicResource mixfx.caption}"
         Width="940" SizeToContent="Height" MinHeight="560"
         WindowStartupLocation="CenterOwner">

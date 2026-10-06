@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" MinWidth="260" MinHeight="240" Width="380" Height="340"
         x:Class="OpenUtau.App.Views.PasteParamDialog"
-        Icon="/Assets/open-utau.ico"
+        Icon="/Assets/brand/utvtu.ico"
         Title="{DynamicResource context.note.pasteparameters}"
         WindowStartupLocation="CenterOwner">
 <DockPanel LastChildFill="True">

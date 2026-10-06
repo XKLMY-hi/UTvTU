@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" MinWidth="260" MinHeight="220" Width="400" Height="320"
         x:Class="OpenUtau.App.Views.LyricsReplaceDialog"  WindowStartupLocation="CenterOwner"
-        Icon="/Assets/open-utau.ico"
+        Icon="/Assets/brand/utvtu.ico"
         Title="{DynamicResource lyricsreplace.replace}">
   <controls:WindowEx.Styles>
     <StyleInclude Source="/Controls/PianoRollStyles.axaml"/>
