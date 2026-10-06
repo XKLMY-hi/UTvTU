@@ -110,8 +110,11 @@ namespace OpenUtau.Test.App {
         [AvaloniaFact]
         public void CommandRegistry_KeepsGlobalAndWindowShortcuts() {
             var preFocus = CommandRegistry.All.Where(c => c.PreFocus).Select(c => c.Id).OrderBy(x => x).ToArray();
-            // W48：三条视图切换也必须在第一趟 —— 第二趟(:1642)位于「卷帘显示 + 卷帘持有焦点」守卫(:1636)之后，
-            // 而那正是 Ctrl+1/Ctrl+3（从卷帘切回工作台/混音台）要生效的场景。
+            // W48：三条视图切换必须在**第一趟**（隧道 OnWindowKeyDown，Tunnel|Bubble + handledEventsToo:true）：
+            // ① 根本原因：冒泡 OnKeyDown（XAML，**未注册 handledEventsToo**）收不到已被控件标 Handled 的键 ⇒
+            //    只要焦点控件把 Ctrl+1/2/3 标了 Handled，第二趟就永不执行（工作台里同样成立）；
+            // ② 叠加原因：第二趟(:1642)还在「卷帘显示 + 卷帘持有焦点」守卫(:1636)之后，
+            //    而那正是 Ctrl+1/Ctrl+3（从卷帘切回工作台/混音台）要生效的场景。
             Assert.Equal(new[] { "file.save", "tools.mixer", "tools.mixerattach",
                 "view.mixer", "view.pianoroll", "view.workspace" }, preFocus);
             Assert.Equal("playback.playpause", SpaceCommandId());
