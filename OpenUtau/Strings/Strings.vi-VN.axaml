@@ -51,7 +51,7 @@
   <system:String x:Key="dialogs.messagebox.yes">Có</system:String>
   <system:String x:Key="dialogs.noresampler.caption">Chưa có resampler</system:String>
   <system:String x:Key="dialogs.noresampler.message">Chưa có resampler! Thêm resampler định dạng EXE hoặc DLL vào thư mục Resamplers và chọn trong Tuỳ chỉnh!</system:String>
-  <system:String x:Key="dialogs.recovery">OpenUtau đột ngột bị tắt. Bạn có muốn phục hồi dữ liệu?</system:String>
+  <system:String x:Key="dialogs.recovery">UTvTU đột ngột bị tắt. Bạn có muốn phục hồi dữ liệu?</system:String>
   <system:String x:Key="dialogs.recovery.caption">Dự án phục hồi</system:String>
   <system:String x:Key="dialogs.remaptimeaxis.message">Nhịp độ của dự án sẽ được chỉnh mà không ảnh hưởng đến vị trí và trường độ (tính bằng giây) của các nốt.
   BPM mới:</system:String>

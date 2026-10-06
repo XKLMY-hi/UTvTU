@@ -30,11 +30,11 @@
   <system:String x:Key="debug.copylog">ログをコピー</system:String>
   <system:String x:Key="debug.reverselogorder">古い順に並び変える</system:String>
 
-  <system:String x:Key="dialogs.about.caption">OpenUTAUについて</system:String>
+  <system:String x:Key="dialogs.about.caption">UTvTUについて</system:String>
   <system:String x:Key="dialogs.about.message">
     OpenUtauはUTAUコミュニティのためのオープンソースなエディタであり、モダンなユーザー体験とインテリジェントな発音変換サポートを目指しています。Githubを中心に開発中です。
   </system:String>
-  <system:String x:Key="dialogs.exitsave.caption">OpenUtauを終了</system:String>
+  <system:String x:Key="dialogs.exitsave.caption">UTvTUを終了</system:String>
   <system:String x:Key="dialogs.exitsave.message">保存されていない変更があります。保存しますか？</system:String>
   <system:String x:Key="dialogs.export.caption">エクスポート</system:String>
   <system:String x:Key="dialogs.export.savefirst">プロジェクトを保存してください。</system:String>
@@ -183,7 +183,7 @@
   <system:String x:Key="menu.edit.selectall">全て選択</system:String>
   <system:String x:Key="menu.edit.undo">元に戻す</system:String>
   <system:String x:Key="menu.file">ファイル</system:String>
-  <system:String x:Key="menu.file.exit">OpenUtauを終了</system:String>
+  <system:String x:Key="menu.file.exit">UTvTUを終了</system:String>
   <system:String x:Key="menu.file.exportaudio">音声をエクスポート</system:String>
   <system:String x:Key="menu.file.exportds">DiffSinger Scriptsをエクスポート...</system:String>
   <system:String x:Key="menu.file.exportmidi">MIDIをエクスポート</system:String>
@@ -209,7 +209,7 @@
   <system:String x:Key="menu.file.saveas">別名で保存...</system:String>
   <system:String x:Key="menu.file.savetemplate">テンプレートを保存...</system:String>
   <system:String x:Key="menu.help">ヘルプ</system:String>
-  <system:String x:Key="menu.help.about">OpenUtauについて</system:String>
+  <system:String x:Key="menu.help.about">UTvTUについて</system:String>
   <system:String x:Key="menu.help.checkupdate">アップデートを確認</system:String>
   <system:String x:Key="menu.help.logslocation">ログの場所を開く</system:String>
   <system:String x:Key="menu.help.reportissue">問題を報告</system:String>
@@ -630,7 +630,7 @@
   <system:String x:Key="updater.update">アップデート</system:String>
 
   <system:String x:Key="warning">警告</system:String>
-  <system:String x:Key="warning.asciipath">OpenUtauのファイルパス "{0}" に非ASCII文字が含まれています。 EXE形式のエンジンが動作しない可能性があります。</system:String>
+  <system:String x:Key="warning.asciipath">UTvTUのファイルパス "{0}" に非ASCII文字が含まれています。 EXE形式のエンジンが動作しない可能性があります。</system:String>
   <system:String x:Key="warning.renderer">このレンダラーには設定項目がありません</system:String>
 
   <system:String x:Key="welcome.new">新規</system:String>

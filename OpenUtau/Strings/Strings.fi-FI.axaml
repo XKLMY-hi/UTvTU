@@ -30,7 +30,7 @@
   <!--<system:String x:Key="debug.copylog">Copy Log</system:String>-->
   <!--<system:String x:Key="debug.reverselogorder">Reverse Log Order</system:String>-->
 
-  <system:String x:Key="dialogs.about.caption">OpenUtausta</system:String>
+  <system:String x:Key="dialogs.about.caption">UTvTU:sta</system:String>
   <system:String x:Key="dialogs.about.message">
     OpenUtaun tavoitteena on olla avoimen lähdekoodin editointiympäristö UTAU-yhteisölle, jossa on moderni käyttökokemus ja älykäs foneettinen tuki. Vieraile Githubissa.
   </system:String>
@@ -621,7 +621,7 @@ Yleiset
   <!--<system:String x:Key="updater.update">Update</system:String>-->
 
   <system:String x:Key="warning">Varoitus</system:String>
-  <system:String x:Key="warning.asciipath">OpenUtau -kotihakemistossasi "{0}" sisältää ei-ASCII merkkejä. Exe resampler ei välttämättä toimi.</system:String>
+  <system:String x:Key="warning.asciipath">UTvTU-kotihakemistossasi "{0}" sisältää ei-ASCII merkkejä. Exe resampler ei välttämättä toimi.</system:String>
   <!--<system:String x:Key="warning.renderer">No settings for this renderer.</system:String>-->
 
   <!--<system:String x:Key="welcome.new">New</system:String>-->
