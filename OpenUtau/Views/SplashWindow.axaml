@@ -37,12 +37,12 @@
                 Stroke="{DynamicResource md3.on-surface}" StrokeThickness="8"
                 StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
         </Viewbox>
-        <!-- 字标：单线替代（大写高 93.8、宽 401.8）；缩放到 cap=28 -->
-        <Viewbox Width="126" Height="30" Stretch="Uniform" Margin="0,0,11.8,0">
-          <Path Name="Wordmark" Data="{StaticResource brand-wordmark-interim-monoline}"
-                Stroke="{DynamicResource md3.on-surface}" StrokeThickness="11.725"
-                StrokeLineCap="Round" StrokeJoin="Round" Width="401.8" Height="93.8"/>
-        </Viewbox>
+        <!-- 字标：正式轮廓几何（重出版，单一坐标系 x 0..377.33 / y 0..100、cap=100）——
+             字标按铁律用 **Fill**（不是描边）；缩放到 cap=28 ⇒ 宽 = 28 × 3.7733 = 105.7 -->
+        <Path Name="Wordmark" Data="{StaticResource brand-wordmark}"
+              Fill="{DynamicResource md3.on-surface}"
+              Width="105.7" Height="28" Stretch="Uniform"
+              VerticalAlignment="Center" Margin="0,0,11.8,0"/>
         <!-- } ：⚠ 冻结版 brand-brace-flipx 有缺陷（已报 fx-rack）：它把 x′=24−x **和** y′=24−y
              一起做了 ⇒ 实际是绕 (12,12) 的 180° 旋转（源 (20,4) → (4,20)），渲染出来是倒扣的括号。
              正确镜像应保持 y 不变（(20,4) → (4,4)）。重出前这里用源路径 + scale(-1,1) 代替，

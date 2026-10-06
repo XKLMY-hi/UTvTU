@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -11,29 +12,23 @@ namespace OpenUtau.Test.App {
     /// （归一空白后比较）。冻结文件一变、本用例即红 ⇒ 强迫消费方按 brand-frozen-manifest.md 重取，
     /// 这是"多处引用同一份共享几何"能成立的前提。
     ///
+    /// 期望键集合**由冻结文件推导**（取其非空几何键），并额外断言产品侧**没有多余品牌键**
+    /// ⇒ 临时键、占位键、已删键都会被抓到；冻结文件里那条故意为空的 `brand-wordmark-monoline`
+    /// 我们不镜像（W39f 标注"不进接入清单"）。
+    ///
     /// 注：断言读的是**产物副本**（两文件都以 None/CopyToOutputDirectory 链到测试输出目录），
     /// 所以改了源文件必须先重建再跑测试（UI 标准里的纪律）。
     /// </summary>
     public class BrandGeometryContractTests {
-        // 冻结清单（W39f）的 7 键；其中 brand-wordmark-monoline 在冻结文件里**故意为空**
-        //（W39f 标注"不进接入清单"），故这里只校验"键存在"，内容逐字比对交给第二条用例。
-        private static readonly string[] FrozenKeys = {
-            "brand-mark",
-            "brand-brace",
-            "brand-brace-flipx",
-            "brand-v-chevron",
-            "brand-v-chevron-stroke",
-            "brand-wordmark",
-            "brand-wordmark-monoline",
-        };
-
         private static string Normalize(string s) => Regex.Replace(s, @"\s+", "").Trim();
 
-        private static bool TryKey(string file, string key, out string value) {
+        private static Dictionary<string, string> ReadKeys(string file) {
             string text = File.ReadAllText(file);
-            var m = Regex.Match(text, "x:Key=\"" + Regex.Escape(key) + "\"[^>]*>([^<]*)<");
-            value = m.Success ? Normalize(m.Groups[1].Value) : string.Empty;
-            return m.Success;
+            var map = new Dictionary<string, string>();
+            foreach (Match m in Regex.Matches(text, "x:Key=\"(brand-[^\"]+)\"[^>]*>([^<]*)<")) {
+                map[m.Groups[1].Value] = Normalize(m.Groups[2].Value);
+            }
+            return map;
         }
 
         private static string ProductFile => Path.Combine(AppContext.BaseDirectory, "Assets", "Icons.axaml");
@@ -41,22 +36,32 @@ namespace OpenUtau.Test.App {
         private static string FrozenFile => Path.Combine(
             AppContext.BaseDirectory, "brand", "out", "utvtu-brand-lockup.axaml");
 
+        /// <summary>冻结几何键 = 冻结文件里几何非空的品牌键（空壳键不镜像）。</summary>
+        private static Dictionary<string, string> FrozenGeometries() {
+            Assert.True(File.Exists(FrozenFile), $"缺少产物副本 {FrozenFile}");
+            return ReadKeys(FrozenFile)
+                .Where(kv => kv.Value.Length > 0)
+                .ToDictionary(kv => kv.Key, kv => kv.Value);
+        }
+
         [Fact]
-        public void ProductIconDictionary_ExposesEveryFrozenGeometryKey() {
+        public void ProductIconDictionary_MatchesFrozenKeySet() {
             Assert.True(File.Exists(ProductFile), $"缺少产物副本 {ProductFile}");
-            string[] missing = FrozenKeys.Where(k => !TryKey(ProductFile, k, out _)).ToArray();
+            var frozen = FrozenGeometries();
+            var product = ReadKeys(ProductFile);
+            string[] missing = frozen.Keys.Where(k => !product.ContainsKey(k)).ToArray();
+            string[] extra = product.Keys.Where(k => !frozen.ContainsKey(k)).ToArray();
             Assert.True(missing.Length == 0, "Icons.axaml 缺少冻结几何键：" + string.Join(", ", missing));
+            Assert.True(extra.Length == 0, "Icons.axaml 有多余品牌键（临时/占位/已删键应清理）：" + string.Join(", ", extra));
         }
 
         [Fact]
         public void ProductGeometry_IsVerbatimCopyOfFrozenFile() {
-            Assert.True(File.Exists(FrozenFile), $"缺少产物副本 {FrozenFile}");
-            string[] drifted = FrozenKeys
-                .Where(k => {
-                    TryKey(FrozenFile, k, out string frozen);
-                    TryKey(ProductFile, k, out string product);
-                    return product != frozen;
-                })
+            var frozen = FrozenGeometries();
+            var product = ReadKeys(ProductFile);
+            string[] drifted = frozen
+                .Where(kv => !product.TryGetValue(kv.Key, out string v) || v != kv.Value)
+                .Select(kv => kv.Key)
                 .ToArray();
             Assert.True(drifted.Length == 0,
                 "品牌几何与冻结文件不一致（冻结文件变了吗？须按 brand-frozen-manifest.md 重取）："
