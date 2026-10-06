@@ -11,15 +11,17 @@
         Background="Transparent"
         WindowStartupLocation="CenterScreen">
   <!-- ══ W40：启动窗 = 签名锁定 { 脸 UTvTU }（cap 28，舒适档） ══
-       · 底色/描边改 md3.* 令牌（原为 Suki 时代键 SystemRegionBrush / PlusBrushBorderDefault）
-       · 三件全用**冻结版源几何、描边渲染**（见 Assets/Icons.axaml）：
-         括号 brand-brace / brand-brace-flipx（程序化镜像，不手绘）、标志 brand-mark（描边 = 尺寸÷8）、
-         字标 brand-wordmark-interim-monoline（描边 = cap×0.125）
-       · 尺寸按 W39f 对齐规则：括号墨迹高 = 1.2×cap、标志墨迹高 = cap、部件间距 = 0.42×cap
-         （此处 cap = 28 ⇒ 括号墨迹高 33.6、标志墨迹高 28、间距 11.8；括号按实测下沉 2.3px 对齐 cap 带）
-       · 取色：应用内 —— 括号 md3.primary（跟随色池）、标志与字标 md3.on-surface
-       · ⚠ 字标暂用单线替代：冻结版 brand-wordmark 的切角 v 坐标错位（已报 fx-rack 重出），
-         重出后把下面 Wordmark 的 Data 换成 brand-wordmark（Fill）即可，布局不用动 -->
+       · 底色/描边走 md3.* 令牌（原为 Suki 时代键 SystemRegionBrush / PlusBrushBorderDefault）
+       · 括号/标志用**纯提取件源几何**、描边渲染（见 Assets/Icons.axaml 与
+         .opencode/design/brand/extracted/）：括号 brand-brace、标志 brand-mark（64 网格、描边 = 尺寸÷8）
+       · 右括号 = 同一条 brace 路径 + ScaleX(-1)：这正是设计稿 `extracted/brace-close.svg` 的做法
+         （transform: scaleX(-1)、origin top_left），不预烘焙镜像几何、更不手绘
+       · 尺寸（W39f 对齐规则）：括号墨迹高 = 1.2×cap、标志墨迹高 = cap、间距 = 0.42×cap
+         （cap = 28 ⇒ 括号墨迹高 33.6、标志墨迹高 28、间距 11.8；括号按实测下沉 2.3px 对齐 cap 带）
+       · 取色：应用内 —— 括号 md3.primary（跟随色池）、标志/字标 md3.on-surface
+       · 字标已接**真矢量**：U/T 用 `brand-wordmark`（Fill；源 = extracted/wordmark-ut.svg，
+         已按 EvenOdd 重划）、切角 v 用 `brand-v-chevron` **单独描边**（v 是自交单环，描边不经填充规则）。
+         不接任何描摹/派生版字标（`out/` 已标 derived，不作产品用）。 -->
   <Border CornerRadius="12" Background="{DynamicResource md3.surface-container}"
           BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="1">
     <Grid RowDefinitions="*,Auto">
@@ -37,17 +39,29 @@
                 Stroke="{DynamicResource md3.on-surface}" StrokeThickness="8"
                 StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
         </Viewbox>
-        <!-- 字标：单线替代（大写高 93.8、宽 401.8）；缩放到 cap=28 -->
-        <Viewbox Width="126" Height="30" Stretch="Uniform" Margin="0,0,11.8,0">
-          <Path Name="Wordmark" Data="{StaticResource brand-wordmark-interim-monoline}"
-                Stroke="{DynamicResource md3.on-surface}" StrokeThickness="11.725"
-                StrokeLineCap="Round" StrokeJoin="Round" Width="401.8" Height="93.8"/>
-        </Viewbox>
-        <!-- } ：冻结版程序化镜像几何（brand-brace-flipx），不要 RenderTransform、不要手绘 -->
+        <!-- 字标：U/T 用 brand-wordmark（**Fill**，轮廓几何）；切角 v 用 brand-v-chevron **单独描边**
+             （v 的填充轮廓是自交单环，EvenOdd 会填出贯穿细缝 ⇒ 描边不经填充规则，从根上避开）。
+             cap = 28 ⇒ 缩放 = 28 / 277.4707 = 0.100912，字标框 = 1032.4137 × 0.100912 = 105.6 × 28；
+             v 元素框 9.31 × 14.53（= 中心线 91 × 142 × 缩放）、描边 6.24（= 61 × 缩放，源 non-scaling-stroke）、
+             左缘 47.38、底距 3.15 ⇒ Canvas.Top = 28 − 14.53 − 3.15 = 10.32 -->
+        <Canvas Width="105.6" Height="28" VerticalAlignment="Center" Margin="0,0,11.8,0">
+          <Path Name="Wordmark" Data="{StaticResource brand-wordmark}"
+                Fill="{DynamicResource md3.on-surface}"
+                Width="105.6" Height="28" Stretch="Uniform"/>
+          <!-- v 只描边：Avalonia 里"无填充"是**不写 Fill**（写 Fill="none" 会在 XAML 载入时抛
+               Invalid brush string: 'none' —— 真机跑出来的坑） -->
+          <Path Name="WordmarkV" Data="{StaticResource brand-v-chevron}"
+                Stroke="{DynamicResource md3.on-surface}" StrokeThickness="6.24"
+                StrokeLineCap="Round" StrokeJoin="Round"
+                Width="9.31" Height="14.53" Stretch="Uniform"
+                Canvas.Left="47.38" Canvas.Top="10.32"/>
+        </Canvas>
+        <!-- } ：brace-open 源路径 + scaleX(-1)（= 设计稿 brace-close.svg 的 transform 语义） -->
         <Viewbox Width="23.5" Height="40.3" Stretch="Uniform" Margin="0,2.3,0,0">
-          <Path Name="BraceRight" Data="{StaticResource brand-brace-flipx}"
+          <Path Name="BraceRight" Data="{StaticResource brand-brace}"
                 Stroke="{DynamicResource md3.primary}" StrokeThickness="6"
-                StrokeLineCap="Round" StrokeJoin="Round" Width="28" Height="48"/>
+                StrokeLineCap="Round" StrokeJoin="Round" Width="28" Height="48"
+                RenderTransform="scaleX(-1)" RenderTransformOrigin="50%,50%"/>
         </Viewbox>
       </StackPanel>
       <ProgressBar Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1032.413736" height="277.470703" viewBox="0 0 1032.413736 277.470703">
+  <!--
+      来源 = 品牌板 PDF 第 1 页 Type3 字体 CharProcs 路径提取（非描摹）
+      **表示已规范化、几何未改**：`d` 为标准 SVG 语法（M/L/C/Z，绝对坐标、参数按 SVG 顺序）；
+      原 PDF 的 `x y m` / 6 数 `c` / `h` 与所有 transform 均已展平烘焙进坐标 ⇒ 无 matrix/g 歧义，
+      可直接逐字对拷进 `Icons.axaml` 的 Geometry 字符串。
+      v 拆件（描边版）：PDF 里 v 的填充轮廓是『描边转轮廓』的**自交单环**（EvenOdd 会出细缝），
+      这里改用标准 SVG 描边表达；`stroke-width` 由与 PDF 轮廓做对称差拟合得到（残差 0.411%），
+      与 HTML 资产 v-chevron.svg 的声明值 61 + non-scaling-stroke 一致 ⇒ 同一实例。
+      中心线（本文件坐标）= [(np.float64(463.01), np.float64(100.71)), (508.51, np.float64(242.71)), (np.float64(554.01), np.float64(100.71))]
+      v 墨迹（本文件坐标）= x 432.510921..584.51157, y 70.210613..273.211255（页面空间 1790.50,2336.50 .. 1942.50,2539.50；基线 y=2336.00；cap=273.71）
+      定位（cap=100 归一化，unit=cap/100=2.7371）：左缘偏移 158.02（41.89%）/ v 宽 55.53（14.72%）/ v 高 74.17（x高/cap=0.7417）/ 底距基线 +0.18
+  -->
+    <!-- v · 描边（round join/cap；不受填充规则影响） -->
+    <path fill="none" stroke="#000000" stroke-width="61" stroke-linecap="round" stroke-linejoin="round" d="M 463.010921 100.710613 L 508.511245 242.711255 L 554.01157 100.710613"/>
+</svg>
