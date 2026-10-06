@@ -98,6 +98,23 @@
       <ContentControl Grid.Column="3" Name="FxChainHost"
                       Width="{Binding #FxChainSplitter.PanelWidth}"
                       IsVisible="{Binding #FxChainSplitter.PanelShown}"/>
+
+      <!-- ── 折叠处「快捷展开」边缘标签（W44 ② / 设计稿 §8）：链面板在分隔条**右侧** ⇒
+           标签贴这条边界、`AnchorRight=True`（贴右缘、向左展开进混音区），14×48 → 悬停/聚焦 92×48。
+           ⚠ **必须声明在混音区之后**（本块就是最后一个子元素）：z 序 = 声明顺序，通道条滚动区不透明
+           ⇒ 声明在它前面会被整块盖住：既看不见也命中不到（W44 主树那次的 FAIL 根因）。
+           无背景 Panel ⇒ 自身不吃点击；不参与列测量 ⇒ 零布局占用，`PanelSplitter` 五值一行未改。 ── -->
+      <Panel Grid.Column="0" ZIndex="10" IsHitTestVisible="True">
+        <c:PanelRevealTab x:Name="ChainRevealTab"
+                          HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8"
+                          IsVisible="{Binding #MixerRoot.ChainPanel.IsCollapsed}"
+                          AnchorRight="True"
+                          GlyphData="{StaticResource icon-equalizer}"
+                          PanelLabel="{DynamicResource panel.collapse.fxchain}"
+                          Hint="{DynamicResource panel.collapse.fxchain}"
+                          HintSuffix="{DynamicResource panel.expand.hint}"
+                          ExpandRequested="OnRevealChainPanel"/>
+      </Panel>
     </Grid>
   </Grid>
 </UserControl>
