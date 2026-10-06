@@ -134,6 +134,55 @@ namespace OpenUtau.Test.App {
             }
         }
 
+        /// <summary>
+        /// **响应式两段式**（裁决：处置二 + 处置一 组合）：
+        /// ① 波形弹性 132…200，柱高等比缩放（不变形）；
+        /// ② 涨到上限后的余量由中段组**对称**平摊（上下留白差 ≤ 4px）。
+        /// 三个尺寸都断言：1226×699、1000×660、1226×900（高窗专门验证"封顶后不出现单边洞"）。
+        /// </summary>
+        [AvaloniaTheory]
+        [InlineData(1226.0, 699.0)]
+        [InlineData(1000.0, 660.0)]
+        [InlineData(1226.0, 900.0)]
+        public void WelcomeView_WaveformIsElastic_AndResidualIsSymmetric(double width, double height) {
+            UsePool();
+            var view = new WelcomeView();
+            var window = new Window { Width = width, Height = height, Content = view };
+            window.Show();
+            try {
+                Dispatcher.UIThread.RunJobs();
+                var wave = view.GetVisualDescendants().OfType<ItemsControl>().First(c => c.Name == "WaveformBars");
+                var midGroup = view.GetVisualDescendants().OfType<StackPanel>().First(c => c.Name == "MidGroup");
+                var midHost = view.GetVisualDescendants().OfType<Grid>().First(c => c.Name == "MidHost");
+
+                // ① 弹性且不超上限
+                Assert.InRange(wave.Bounds.Height, WelcomeArt.MinWaveHeight - 0.5, WelcomeArt.MaxWaveHeight + 0.5);
+
+                // 柱高**等比**：最高柱 = 122 × (波形高 / 132)
+                var bars = (wave.ItemsSource as System.Collections.IEnumerable)?.Cast<WelcomeWaveBar>().ToList();
+                Assert.NotNull(bars);
+                Assert.Equal(26, bars!.Count);
+                double factor = wave.Bounds.Height / WelcomeArt.BaseWaveHeight;
+                Assert.Equal(122.0 * factor, bars.Max(b => b.Height), 1);
+                Assert.All(bars, b => Assert.InRange(b.Opacity, 0.4, 1.0));   // 透明度阶梯不参与缩放
+
+                // ② 余量对称（MidGroup 的 Bounds 相对 MidHost）
+                double top = midGroup.Bounds.Top;
+                double bottom = midHost.Bounds.Height - midGroup.Bounds.Bottom;
+                Assert.True(Math.Abs(top - bottom) <= 4.0,
+                    $"{width}x{height}: 中段组上下留白不对称 top={top:F1} bottom={bottom:F1}");
+
+                // 高窗：波形必须已封顶，且余量真的被平摊到两侧（否则说明居中宿主没撑到视口高）
+                if (height >= 900) {
+                    Assert.Equal(WelcomeArt.MaxWaveHeight, wave.Bounds.Height, 1);
+                    Assert.True(top > 8 && bottom > 8,
+                        $"{width}x{height}: 封顶后余量未被平摊 top={top:F1} bottom={bottom:F1}");
+                }
+            } finally {
+                window.Close();
+            }
+        }
+
         /// <summary>空态文案必须是专用键（此前复用 `welcome.open.description` ⇒ 空态显示"打开本地项目"）。</summary>
         [AvaloniaFact]
         public void WelcomeView_EmptyState_UsesItsOwnKey() {

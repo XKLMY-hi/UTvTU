@@ -193,9 +193,13 @@
         </StackPanel>
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel VerticalAlignment="Top" Margin="0,32,8,0">
+        <!-- MidHost：MinHeight 撑到视口高 ⇒ 余量可被 MidGroup 的 VerticalAlignment=Center 对称平摊；
+             内容超出视口时仍由外层 ScrollViewer 滚动（小窗安全网） -->
+        <Grid x:Name="MidHost" MinHeight="{Binding $parent[ScrollViewer].Bounds.Height}">
+        <StackPanel x:Name="MidGroup" VerticalAlignment="Center" Margin="0,0,8,0">
           <!-- 几何波形：唯一的装饰（26 根柱，数据取自设计稿） -->
-          <ItemsControl x:Name="WaveformBars" Height="132" VerticalAlignment="Bottom">
+          <!-- 波形：高度由 ApplyWaveformHeight() 按可用空间在 132…200 之间取值，柱高等比缩放 -->
+          <ItemsControl x:Name="WaveformBars" Height="132" MinHeight="132" VerticalAlignment="Bottom">
             <ItemsControl.ItemsPanel>
               <ItemsPanelTemplate>
                 <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom"/>
@@ -285,6 +289,7 @@
             </ItemsControl>
           </StackPanel>
         </StackPanel>
+        </Grid>
         </ScrollViewer>
 
         <!-- 版本行（稿：分隔线 + 11px 左版本 / 右版权） -->

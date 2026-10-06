@@ -35,6 +35,29 @@ namespace OpenUtau.App.Views {
             (27.0, 0.494), (62.0, 0.68),
         }.Select(t => new WelcomeWaveBar { Height = t.Item1, Opacity = t.Item2 }).ToList();
 
+        /// <summary>波形区的**基准高度**（设计基准；实际高度由可用空间弹性决定，上限 200）。</summary>
+        public const double BaseWaveHeight = 132.0;
+
+        /// <summary>波形区的**高度上限**（响应式：涨到上限即停，余量交给中段组对称居中）。</summary>
+        public const double MaxWaveHeight = 200.0;
+
+        /// <summary>波形区的**高度下限**（低于基准不再压，避免波形被压得不可辨）。</summary>
+        public const double MinWaveHeight = BaseWaveHeight;
+
+        /// <summary>
+        /// 按目标高度**等比缩放**柱高：柱子的相对高度与透明度阶梯不变 ⇒ **波形不变形**。
+        /// 柱宽（6px）与柱间距固定，只改高度系数，观感仍是同一段波形。
+        /// </summary>
+        public static IReadOnlyList<WelcomeWaveBar> Scaled(double waveHeight) {
+            double factor = Math.Max(0.0, waveHeight) / BaseWaveHeight;
+            return Waveform
+                .Select(b => new WelcomeWaveBar {
+                    Height = Math.Max(4.0, b.Height * factor),
+                    Opacity = b.Opacity,
+                })
+                .ToList();
+        }
+
         /// <summary>
         /// 「已安装音源」= **真实**数据（`SingerManager`），最多取 <paramref name="max"/> 个；
         /// 取不到就返回空表 ⇒ 调用方整段隐藏（**不编数**，与 spec-digest §6 同一条纪律）。

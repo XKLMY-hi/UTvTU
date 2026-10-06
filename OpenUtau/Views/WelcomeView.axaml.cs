@@ -24,8 +24,10 @@ namespace OpenUtau.App.Views {
 
         public WelcomeView() {
             InitializeComponent();
-            // 几何波形：26 根柱（设计稿逐值），纯装饰、无业务状态 ⇒ 由美术数据直接喂
-            WaveformBars.ItemsSource = WelcomeArt.Waveform;
+            // 几何波形：26 根柱（设计稿逐值），纯装饰、无业务状态 ⇒ 由美术数据直接喂；
+            // 高度按可用空间弹性取值（132…200），柱高等比缩放 ⇒ 不变形
+            WaveformBars.ItemsSource = WelcomeArt.Scaled(WaveformBars.Height);
+            MidHost.SizeChanged += (_, _) => ApplyWaveformHeight();   // 响应式：窗口变高变矮都重算
             // 已安装音源：**真实**数据；取不到就整段隐藏（不编数）
             var singers = WelcomeArt.InstalledSingers();
             SingerChips.ItemsSource = singers;
@@ -33,6 +35,42 @@ namespace OpenUtau.App.Views {
         }
 
         private MainWindowViewModel? ViewModel => DataContext as MainWindowViewModel;
+
+        /// <summary>
+        /// 波形高度 = clamp(左栏中段可用高度 − 其余内容高，132, 200)。
+        ///
+        /// **响应式两段式**（本轮裁决：处置二 + 处置一 组合）：
+        ///   ① 波形先"吃掉"可用余量（上限 200）—— 装饰承担弹性；
+        ///   ② 涨到上限后仍有余量时，不再动波形，交给 MidGroup 的 `VerticalAlignment=Center`
+        ///      把余量**对称**平摊到上下（`MidHost` 的 MinHeight 撑到视口高，才有可平摊的空间）。
+        /// 这样 1226×699 / 1000×660 / 1226×900 都不会出现"只有下边一个洞"的观感。
+        /// 其余内容高按**实测**累加（不写死行数），窗口尺寸变化时收敛（其余行高度与波形无关）。
+        /// </summary>
+        void ApplyWaveformHeight() {
+            if (MidHost.Bounds.Height <= 0) {
+                return;   // 首轮布局尚未发生
+            }
+            double others = 0;
+            foreach (var child in MidGroup.Children) {
+                if (ReferenceEquals(child, WaveformBars)) {
+                    continue;
+                }
+                others += child.Bounds.Height + child.Margin.Top + child.Margin.Bottom;
+            }
+            if (others <= 0) {
+                return;   // 其余内容还没量出来，等下一轮
+            }
+            // 24 = MidGroup 的顶部外边距；再往上留 8px 呼吸位，其余交给"对称平摊"
+            double target = Math.Clamp(
+                MidHost.Bounds.Height - others - 32,
+                WelcomeArt.MinWaveHeight,
+                WelcomeArt.MaxWaveHeight);
+            if (Math.Abs(target - WaveformBars.Height) < 0.5) {
+                return;
+            }
+            WaveformBars.Height = target;
+            WaveformBars.ItemsSource = WelcomeArt.Scaled(target);
+        }
 
         // ── 工程动作 ──
         void OnNewProject(object? sender, RoutedEventArgs args) => Host?.WelcomeNewProject();
