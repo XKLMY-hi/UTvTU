@@ -7,8 +7,11 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+// 别名：本文件同时用 System.IO.Path（Path.Combine），直接 using Avalonia.Controls.Shapes 会二义
+using ShapePath = Avalonia.Controls.Shapes.Path;
 using OpenUtau.App;
 using OpenUtau.App.Views;
 using OpenUtau.Core.Theming;
@@ -77,13 +80,16 @@ namespace OpenUtau.Test.App {
                     || xaml.Contains($"<Setter Property=\"FontSize\" Value=\"{size}\"/>", StringComparison.Ordinal),
                     $"缺字号 {size}");
             }
-            // 关键尺寸：动作卡 104/圆角 16、波形区 132、柱宽 6、拖放条 56、缩略图 48/圆角 8
+            // 关键尺寸：动作卡 104/圆角 16、波形区 132、拖放条 56、缩略图 48/圆角 8
             Assert.Contains("<Setter Property=\"Height\" Value=\"104\"/>", xaml);
             Assert.Contains("<Setter Property=\"CornerRadius\" Value=\"16\"/>", xaml);
             Assert.Contains("Height=\"132\"", xaml);   // 波形区（属性形态）
             Assert.Contains("<Setter Property=\"Height\" Value=\"56\"/>", xaml);
-            Assert.Contains("<Setter Property=\"Width\" Value=\"6\"/>", xaml);
-            Assert.Contains("CornerRadius=\"999\"", xaml);
+            // W38：波形改为**生成器产出的真实包络几何**（不再是 26 根宽 6 的柱）
+            //   ⇒ 原"柱宽 6 / 圆角 999"两条断言随实现作废，改为断**几何来源**与**缩放口径**
+            Assert.Contains("welcome-waveform", xaml);           // 几何来自 Assets/WelcomeWaveform.axaml
+            Assert.Contains("Stretch=\"Fill\"", xaml);           // 时基→宽 / 幅度→高（别改回 Uniform）
+            Assert.DoesNotContain("Classes=\"waveBar\"", xaml);  // 旧柱状实现已删除（防回潮）
             // 四张动作卡：新建 / 打开 / 导入音频 / 模板（**全部走 Button.Click**）
             foreach (string handler in new[] { "OnNewProject", "OnOpenProject", "OnImportAudio", "OnShowTemplates" }) {
                 Assert.Contains($"Click=\"{handler}\"", xaml);
@@ -95,15 +101,24 @@ namespace OpenUtau.Test.App {
         }
 
         [AvaloniaFact]
-        public void WelcomeView_Waveform_MatchesTheDesignSpec() {
-            var bars = WelcomeArt.Waveform;
-            Assert.Equal(26, bars.Count);                                  // 稿：26 根柱
-            Assert.Equal(18, bars[0].Height, 1);
-            Assert.Equal(62, bars[^1].Height, 1);
-            Assert.Equal(122, bars.Max(b => b.Height), 1);                  // 最高柱
-            Assert.Equal(1.0, bars.Max(b => b.Opacity), 3);
-            Assert.All(bars, b => Assert.InRange(b.Opacity, 0.4, 1.0));
-            Assert.All(bars, b => Assert.InRange(b.Height, 18, 132));
+        public void WelcomeView_Waveform_IsTheGeneratedEnvelope() {
+            // W38：波形从"26 根几何柱"换成**真实一小节演唱**的包络几何。
+            // 几何经 `Assets/WelcomeWaveform.axaml` **逐字**进入应用（生成器产物，单一来源）
+            // ⇒ 这里断"几何特征"，而不是断柱数：
+            //   · 路径铺满生成器 viewBox 的宽度（1000）⇒ 没被重画/裁剪；
+            //   · 幅度轴有实际高度（双极性包络，不是一条平线）；
+            //   · `Stretch=Fill`（时基→宽 / 幅度→高；**改回 Uniform 会让弹性失效**）；
+            //   · 有 Fill（描边渲染看不出包络）、Opacity 0.5（低强调度）。
+            InView(view => {
+                var wave = view.GetVisualDescendants().OfType<ShapePath>().First(p => p.Name == "WaveformBars");
+                Assert.NotNull(wave.Data);                  // 资源键 welcome-waveform 必须解析到
+                var bounds = wave.Data!.Bounds;
+                Assert.Equal(1000.0, bounds.Width, 0);      // 生成器 viewBox 宽（逐字引用）
+                Assert.InRange(bounds.Height, 100.0, 240.0); // 有真实幅度（双极性）
+                Assert.Equal(Stretch.Fill, wave.Stretch);
+                Assert.NotNull(wave.Fill);
+                Assert.Equal(0.5, wave.Opacity, 3);
+            });
         }
 
         /// <summary>
@@ -136,7 +151,7 @@ namespace OpenUtau.Test.App {
 
         /// <summary>
         /// **响应式两段式**（裁决：处置二 + 处置一 组合）：
-        /// ① 波形弹性 132…200，柱高等比缩放（不变形）；
+        /// ① 波形弹性 132…200（W38 起为**真实包络几何**，`Stretch=Fill`：时基→宽 / 幅度→高）；
         /// ② 涨到上限后的余量由中段组**对称**平摊（上下留白差 ≤ 4px）。
         /// 三个尺寸都断言：1226×699、1000×660、1226×900（高窗专门验证"封顶后不出现单边洞"）。
         /// </summary>
@@ -151,20 +166,17 @@ namespace OpenUtau.Test.App {
             window.Show();
             try {
                 Dispatcher.UIThread.RunJobs();
-                var wave = view.GetVisualDescendants().OfType<ItemsControl>().First(c => c.Name == "WaveformBars");
+                var wave = view.GetVisualDescendants().OfType<ShapePath>().First(p => p.Name == "WaveformBars");
                 var midGroup = view.GetVisualDescendants().OfType<StackPanel>().First(c => c.Name == "MidGroup");
                 var midHost = view.GetVisualDescendants().OfType<Grid>().First(c => c.Name == "MidHost");
 
                 // ① 弹性且不超上限
                 Assert.InRange(wave.Bounds.Height, WelcomeArt.MinWaveHeight - 0.5, WelcomeArt.MaxWaveHeight + 0.5);
 
-                // 柱高**等比**：最高柱 = 122 × (波形高 / 132)
-                var bars = (wave.ItemsSource as System.Collections.IEnumerable)?.Cast<WelcomeWaveBar>().ToList();
-                Assert.NotNull(bars);
-                Assert.Equal(26, bars!.Count);
-                double factor = wave.Bounds.Height / WelcomeArt.BaseWaveHeight;
-                Assert.Equal(122.0 * factor, bars.Max(b => b.Height), 1);
-                Assert.All(bars, b => Assert.InRange(b.Opacity, 0.4, 1.0));   // 透明度阶梯不参与缩放
+                // ①′ 缩放口径：**Fill**（时基 → 宽 / 幅度 → 高）。
+                //     包络线的幅度轴随面板高缩放是波形显示惯例，不是失真（时基不被非线性扭曲）；
+                //     改成 Uniform 会让高度 > 约 147 时停止增长 ⇒ 弹性失效（见 XAML 注释）。
+                Assert.Equal(Stretch.Fill, wave.Stretch);
 
                 // ② 余量对称（MidGroup 的 Bounds 相对 MidHost）
                 double top = midGroup.Bounds.Top;
@@ -319,11 +331,11 @@ namespace OpenUtau.Test.App {
         public void WelcomeView_Instantiates() {
             InView(view => {
                 Assert.Null(view.Host);   // 宿主由 MainWindow 注入
-                // 几何波形与音源 chips 由视图自己喂数据（不依赖 VM 构造顺序）
-                var waveform = view.GetVisualDescendants().OfType<ItemsControl>()
-                    .FirstOrDefault(c => c.Name == "WaveformBars");
+                // 波形几何由资源字典喂（W38：真实包络，非手画柱）—— 未解析则 Data 为 null
+                var waveform = view.GetVisualDescendants().OfType<ShapePath>()
+                    .FirstOrDefault(p => p.Name == "WaveformBars");
                 Assert.NotNull(waveform);
-                Assert.Equal(26, (waveform!.ItemsSource as System.Collections.IEnumerable)?.Cast<object>().Count() ?? 0);
+                Assert.NotNull(waveform!.Data);
             });
         }
 
@@ -377,9 +389,12 @@ namespace OpenUtau.Test.App {
             // 也就是说：旧颜色键（Plus* / Suki / Fluent 命名空间）在这里一律不允许出现。
             var md3Keys = new HashSet<string>(Enum.GetValues<Md3Role>().Select(ColorPool.Key));
             var md3ColorKeys = new HashSet<string>(Enum.GetValues<Md3Role>().Select(ColorPool.ColorKey));
+            // **非颜色**资源键白名单：本页只有波形几何（W38）。
+            // 它们不参与配色 ⇒ 不要求属于颜色池；新增时必须**显式登记**，防止"顺手引个外来颜色键"混进来。
+            var nonColorResourceKeys = new HashSet<string>(StringComparer.Ordinal) { "welcome-waveform" };
             var foreign = new List<string>();
             foreach (string key in KeysOf(ReadXaml("WelcomeView.axaml"), "DynamicResource")) {
-                if (md3Keys.Contains(key) || md3ColorKeys.Contains(key)) {
+                if (md3Keys.Contains(key) || md3ColorKeys.Contains(key) || nonColorResourceKeys.Contains(key)) {
                     continue;
                 }
                 if (key.StartsWith("md3.", StringComparison.Ordinal)) {
