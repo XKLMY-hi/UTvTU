@@ -329,14 +329,32 @@
               </MenuFlyout>
             </Button.Flyout>
             <StackPanel Orientation="Horizontal" Spacing="12">
-              <Border Width="36" Height="36" CornerRadius="8" VerticalAlignment="Center"
-                      Background="{DynamicResource md3.primary-container}">
-                <Path Data="{StaticResource icon-music}" Width="18" Height="18" Stretch="Uniform"
-                      HorizontalAlignment="Center" VerticalAlignment="Center"
-                      Fill="{DynamicResource md3.on-primary-container}"/>
-              </Border>
-              <TextBlock Text="UTvTU" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"
-                         Foreground="{DynamicResource md3.on-surface}"/>
+              <!-- W40：顶栏品牌 = 「标志 + 字标，无括号」。cap 15 落在品牌阶梯的 14–23 档 ⇒ 按规则**去括号**；
+                   原音符瓦片（md3.primary-container + icon-music）与文字 UTvTU 已删。
+                   尺寸与 SplashWindow 同一套口径（缩放 s = cap / 277.4707 = 15/277.4707 = 0.054060）：
+                     · 标志 brand-mark（源描边语义，描边 = 64 网格内 8 = 尺寸÷8）：要满足"标志墨迹高 = 字标 cap"，
+                       墨迹（38 单元 + 描边 8）占 64 网格的 46 ⇒ 渲染盒 = 15 × 64/46 = 20.9（rendered 描边 ≈ 2.6）
+                     · 字标 brand-wordmark（U/T 提取件，**Fill**）高 = cap = 15 ⇒ 宽 = 1032.4137 × s = 55.8
+                     · 切角 v 必须**单独描边**补齐（U/T 键不含 v；v 是自交单环，EvenOdd 填充会出贯穿细缝）：
+                       中心线 91×142 单元 → 元素框 4.92×7.68、描边 61 × s = 3.30、左缘 463.011 × s = 25.03、顶 100.711 × s = 5.44
+                     · 间距 = 0.42 × cap = 6.3；整组不撑高顶栏（原元素总高 36，此处最高 20.9） -->
+              <StackPanel Orientation="Horizontal" Spacing="6.3" VerticalAlignment="Center">
+                <Viewbox Width="20.9" Height="20.9" Stretch="Uniform">
+                  <Path Data="{StaticResource brand-mark}"
+                        Stroke="{DynamicResource md3.primary}" StrokeThickness="8"
+                        StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
+                </Viewbox>
+                <Canvas Width="55.8" Height="15" VerticalAlignment="Center">
+                  <Path Data="{StaticResource brand-wordmark}"
+                        Fill="{DynamicResource md3.on-surface}"
+                        Width="55.8" Height="15" Stretch="Uniform"/>
+                  <Path Data="{StaticResource brand-v-chevron}"
+                        Stroke="{DynamicResource md3.on-surface}" StrokeThickness="3.30"
+                        StrokeLineCap="Round" StrokeJoin="Round"
+                        Width="4.92" Height="7.68" Stretch="Uniform"
+                        Canvas.Left="25.03" Canvas.Top="5.44"/>
+                </Canvas>
+              </StackPanel>
               <Border Width="1" Height="20" VerticalAlignment="Center"
                       Background="{DynamicResource md3.outline-variant}"/>
               <TextBlock x:Name="ScreenTitle" Text="{DynamicResource view.workspace}" FontSize="11" VerticalAlignment="Center"
