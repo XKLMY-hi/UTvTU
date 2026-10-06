@@ -114,9 +114,11 @@ namespace OpenUtau.App.Controls {
             ExpPanel.IsCollapsed = Preferences.Default.PanelLayout.PianoRollExpCollapsed;
             ViewModel.NotesViewModel.ShowExpressions = !ExpPanel.IsCollapsed;
             UpdateExpChevron();
+            ExpRevealTab.IsVisible = ExpPanel.IsCollapsed;   // W34 ①：只在该面板折叠时出现在左下角
             ExpPanel.PropertyChanged += (_, e) => {
                 if (e.PropertyName == nameof(PanelSlot.IsCollapsed)) {
                     UpdateExpChevron();
+                    ExpRevealTab.IsVisible = ExpPanel.IsCollapsed;   // 展开后立刻隐藏
                 }
                 if (e.PropertyName != nameof(PanelSlot.IsCollapsed) || syncingExpPanel) {
                     return;
@@ -144,7 +146,11 @@ namespace OpenUtau.App.Controls {
                 });
         }
 
-        /// <summary>折叠入口的箭头方向随折叠态翻转（不需要转换器：两个箭头互斥显示）。</summary>
+        /// <summary>折叠处边缘标签的展开请求（W34 ①）：与顶部 chevron 共用同一条状态（含落盘）。</summary>
+        private void OnExpRevealRequested(object? sender, EventArgs e) {
+            ExpPanel.IsCollapsed = false;
+        }
+
         private void UpdateExpChevron() {
             ExpChevronDown.IsVisible = !ExpPanel.IsCollapsed;
             ExpChevronUp.IsVisible = ExpPanel.IsCollapsed;

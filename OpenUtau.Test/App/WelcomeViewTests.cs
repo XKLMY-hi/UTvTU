@@ -70,8 +70,8 @@ namespace OpenUtau.Test.App {
             Assert.Contains("md3.surface-container", xaml);
             Assert.DoesNotContain("md3.primary-container", xaml);
             // 字号阶梯（稿值抽查）
-            // 34px 英雄字号已按用户裁决删除（营销文案整块移除）⇒ 阶梯最高 30（右栏标题）
-            foreach (int size in new[] { 30, 26, 18, 15, 14, 13, 12, 11 }) {
+            // 34px 英雄字号已按用户裁决删除；26（旧头部字标字号）已被品牌锁定几何取代
+            foreach (int size in new[] { 30, 18, 15, 14, 13, 12, 11 }) {
                 // 属性形态或样式 Setter 形态都算（两种在本页都有使用）
                 Assert.True(xaml.Contains($"FontSize=\"{size}\"", StringComparison.Ordinal)
                     || xaml.Contains($"<Setter Property=\"FontSize\" Value=\"{size}\"/>", StringComparison.Ordinal),

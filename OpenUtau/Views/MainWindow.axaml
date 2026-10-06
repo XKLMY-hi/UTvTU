@@ -329,14 +329,32 @@
               </MenuFlyout>
             </Button.Flyout>
             <StackPanel Orientation="Horizontal" Spacing="12">
-              <Border Width="36" Height="36" CornerRadius="8" VerticalAlignment="Center"
-                      Background="{DynamicResource md3.primary-container}">
-                <Path Data="{StaticResource icon-music}" Width="18" Height="18" Stretch="Uniform"
-                      HorizontalAlignment="Center" VerticalAlignment="Center"
-                      Fill="{DynamicResource md3.on-primary-container}"/>
-              </Border>
-              <TextBlock Text="UTvTU" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"
-                         Foreground="{DynamicResource md3.on-surface}"/>
+              <!-- W40：顶栏品牌 = 「标志 + 字标，无括号」。cap 15 落在品牌阶梯的 14–23 档 ⇒ 按规则**去括号**；
+                   原音符瓦片（md3.primary-container + icon-music）与文字 UTvTU 已删。
+                   尺寸与 SplashWindow 同一套口径（缩放 s = cap / 277.4707 = 15/277.4707 = 0.054060）：
+                     · 标志 brand-mark（源描边语义，描边 = 64 网格内 8 = 尺寸÷8）：要满足"标志墨迹高 = 字标 cap"，
+                       墨迹（38 单元 + 描边 8）占 64 网格的 46 ⇒ 渲染盒 = 15 × 64/46 = 20.9（rendered 描边 ≈ 2.6）
+                     · 字标 brand-wordmark（U/T 提取件，**Fill**）高 = cap = 15 ⇒ 宽 = 1032.4137 × s = 55.8
+                     · 切角 v 必须**单独描边**补齐（U/T 键不含 v；v 是自交单环，EvenOdd 填充会出贯穿细缝）：
+                       中心线 91×142 单元 → 元素框 4.92×7.68、描边 61 × s = 3.30、左缘 463.011 × s = 25.03、顶 100.711 × s = 5.44
+                     · 间距 = 0.42 × cap = 6.3；整组不撑高顶栏（原元素总高 36，此处最高 20.9） -->
+              <StackPanel Orientation="Horizontal" Spacing="6.3" VerticalAlignment="Center">
+                <Viewbox Width="20.9" Height="20.9" Stretch="Uniform">
+                  <Path Data="{StaticResource brand-mark}"
+                        Stroke="{DynamicResource md3.primary}" StrokeThickness="8"
+                        StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
+                </Viewbox>
+                <Canvas Width="55.8" Height="15" VerticalAlignment="Center">
+                  <Path Data="{StaticResource brand-wordmark}"
+                        Fill="{DynamicResource md3.on-surface}"
+                        Width="55.8" Height="15" Stretch="Uniform"/>
+                  <Path Data="{StaticResource brand-v-chevron}"
+                        Stroke="{DynamicResource md3.on-surface}" StrokeThickness="3.30"
+                        StrokeLineCap="Round" StrokeJoin="Round"
+                        Width="4.92" Height="7.68" Stretch="Uniform"
+                        Canvas.Left="25.03" Canvas.Top="5.44"/>
+                </Canvas>
+              </StackPanel>
               <Border Width="1" Height="20" VerticalAlignment="Center"
                       Background="{DynamicResource md3.outline-variant}"/>
               <TextBlock x:Name="ScreenTitle" Text="{DynamicResource view.workspace}" FontSize="11" VerticalAlignment="Center"
@@ -538,6 +556,16 @@
                          CenterMin="320"
                          DragCompleted="OnPanelSplitterDragCompleted"
                          ToolTip.Tip="{DynamicResource panel.drag.hint}"/>
+
+        <!-- ── 折叠处「快捷展开」边缘标签（W34 / 设计稿 §8）：**overlay** ——
+             铺在中央列之上（Panel 无背景 ⇒ 自身不吃点击，只有标签可命中），
+             标签 14×48 圆角 8，悬停/聚焦展开到 92×48 显示面板名；
+             左列标签贴左边、向右展开；右列标签贴右边、向左展开（与面板头 chevron 镜像）。
+             不参与面板列测量 ⇒ 不吃布局、不留夹缝，`PanelSplitter` 五值一行未改。
+             ⚠ **必须声明在中央区之后**（本文件靠后处）并带 `ZIndex`：z 序 = 声明顺序，而中央区是
+             不透明的 `Background=md3.surface`，声明在它前面的 overlay 会被整块盖住（真机表现：
+             标签既看不见、也命中不到 —— W44 验收 FAIL 的根因）。 ── -->
+        <!-- 实际声明位置在本文件靠后（MainLayout 末尾），见那里的同名注释 -->
 
         <!-- ── 中：编排区（工作台视图：标尺 34 / 横向滚动 16 / 轨道区）── -->
         <Grid Grid.Column="2" ColumnDefinitions="*,8" Background="{DynamicResource md3.surface}"
@@ -1042,6 +1070,32 @@
                 IsVisible="{Binding ViewSwitcher.ShowMixer}">
           <ContentControl x:Name="MixerContainer" Classes="md3-fade"/>
         </Border>
+        <!-- ── 折叠处「快捷展开」边缘标签（W34 / 设计稿 §8）：**overlay**。
+             ⚠ **必须声明在 MainLayout 的最后**：z 序 = 声明顺序，而中央区/混音台覆盖层都是不透明的
+             （`Background=md3.surface`）—— 之前把这段放在中央区**之前**，标签被整块盖住：真机上
+             既看不见、`InputHitTest` 也命不中（W44 验收 FAIL 的根因）。这里再加 `ZIndex` 双保险。
+             标签 14×48 圆角 8，悬停/聚焦展开 92×48 显名；左列标签贴左、右列贴右（与面板头 chevron 镜像）。
+             无背景 Panel ⇒ 自身不吃点击，只有标签可命中；不参与面板列测量 ⇒ 零布局占用。 ── -->
+        <Panel Grid.Column="2" ZIndex="10" IsHitTestVisible="True">
+          <c:PanelRevealTab x:Name="TracksRevealTab"
+                            HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8"
+                            IsVisible="{Binding ShowTracksRevealTab}"
+                            AnchorRight="False"
+                            GlyphData="{StaticResource icon-list}"
+                            PanelLabel="{DynamicResource panel.toggle.tracks}"
+                            Hint="{DynamicResource panel.expand.tracks}"
+                            HintSuffix="{DynamicResource panel.expand.hint}"
+                            ExpandRequested="OnRevealTracksPanel"/>
+          <c:PanelRevealTab x:Name="LibraryRevealTab"
+                            HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8"
+                            IsVisible="{Binding ShowLibraryRevealTab}"
+                            AnchorRight="True"
+                            GlyphData="{StaticResource icon-folder-open}"
+                            PanelLabel="{DynamicResource panel.toggle.library}"
+                            Hint="{DynamicResource panel.expand.library}"
+                            HintSuffix="{DynamicResource panel.expand.hint}"
+                            ExpandRequested="OnRevealLibraryPanel"/>
+        </Panel>
       </Grid>
 
       <!-- ══════════ 状态条 32：左侧引擎/进度 · 右侧版本 ══════════ -->

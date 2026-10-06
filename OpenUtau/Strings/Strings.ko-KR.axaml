@@ -30,7 +30,7 @@
   <system:String x:Key="debug.copylog">로그 복사</system:String>
   <system:String x:Key="debug.reverselogorder">로그를 역순으로</system:String>
 
-  <system:String x:Key="dialogs.about.caption">OpenUTAU란?</system:String>
+  <system:String x:Key="dialogs.about.caption">UTvTU란?</system:String>
   <system:String x:Key="dialogs.about.message">
     OpenUtau(오픈우타우)는 세련된 사용자 경험과 유연한 음운 지원을 통해, UTAU 커뮤니티를 위한 오픈 소스 편집 환경이 되고자 합니다. 지금 GitHub의 OpenUtau 레포지토리를 방문해 보세요.
   </system:String>
@@ -207,7 +207,7 @@
   <system:String x:Key="menu.file.saveas">다른 이름으로 저장...</system:String>
   <system:String x:Key="menu.file.savetemplate">템플릿 파일 저장...</system:String>
   <system:String x:Key="menu.help">도움말</system:String>
-  <system:String x:Key="menu.help.about">OpenUtau란?</system:String>
+  <system:String x:Key="menu.help.about">UTvTU란?</system:String>
   <system:String x:Key="menu.help.checkupdate">업데이트 체크</system:String>
   <system:String x:Key="menu.help.logslocation">로그 파일 위치 열기</system:String>
   <system:String x:Key="menu.help.reportissue">이슈 보고</system:String>
@@ -621,7 +621,7 @@ Curve Type
   <system:String x:Key="updater.update">업데이트</system:String>
 
   <system:String x:Key="warning">경고</system:String>
-  <system:String x:Key="warning.asciipath">OpenUtau 설치 경로 "{0}"에 비 ASCII 문자가 있어요. Exe 리샘플러가 작동하지 않을 수 있습니다.</system:String>
+  <system:String x:Key="warning.asciipath">UTvTU 설치 경로 "{0}"에 비 ASCII 문자가 있어요. Exe 리샘플러가 작동하지 않을 수 있습니다.</system:String>
   <system:String x:Key="warning.renderer">이 렌더러에 대한 설정이 없습니다.</system:String>
 
   <!--<system:String x:Key="welcome.new">New</system:String>-->

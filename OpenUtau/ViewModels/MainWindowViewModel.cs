@@ -152,6 +152,14 @@ namespace OpenUtau.App.ViewModels {
         public bool TracksPanelVisible => ViewSwitcher.ShowWorkspace && !TracksPanel.IsCollapsed;
         /// <summary>右列分隔条可见性（工作台/混音台可见 + 面板未折叠）。</summary>
         public bool LibraryPanelVisible => ViewSwitcher.ShowLibrary && !LibraryPanel.IsCollapsed;
+        /// <summary>
+        /// 折叠处「快捷展开」边缘标签（W34）：**该视图下且面板确实被折叠**时显示。
+        /// 注意不能用 `!PanelShown` 单独判断：换到混音台视图时轨头分隔条整条隐藏、`PanelShown` 也是 false，
+        /// 那样标签会在不该出现的视图里冒出来。所以这里显式带上视图可见性。
+        /// </summary>
+        public bool ShowTracksRevealTab => ViewSwitcher.ShowWorkspace && TracksPanel.IsCollapsed;
+        /// <summary>素材库那侧的快捷展开标签（工作台/混音台都在）。</summary>
+        public bool ShowLibraryRevealTab => ViewSwitcher.ShowLibrary && LibraryPanel.IsCollapsed;
         /// <summary>是否显示轨头列（顶栏 / 工具菜单的可勾选项，= 未折叠）。</summary>
         public bool ShowTracksPanel {
             get => !TracksPanel.IsCollapsed;
@@ -299,6 +307,22 @@ namespace OpenUtau.App.ViewModels {
             this.RaisePropertyChanged(nameof(LibraryPanelVisible));
             this.RaisePropertyChanged(nameof(ShowTracksPanel));
             this.RaisePropertyChanged(nameof(ShowLibraryPanel));
+            this.RaisePropertyChanged(nameof(ShowTracksRevealTab));
+            this.RaisePropertyChanged(nameof(ShowLibraryRevealTab));
+        }
+
+        /// <summary>折叠处「快捷展开」：把面板展开回**持久化宽度**（不是强制默认宽），并落盘。</summary>
+        public void RevealTracksPanel() {
+            TracksPanel.IsCollapsed = false;
+            RaisePanelFlags();
+            PersistPanelLayout();
+        }
+
+        /// <summary>素材库那侧的快捷展开（同上）。</summary>
+        public void RevealLibraryPanel() {
+            LibraryPanel.IsCollapsed = false;
+            RaisePanelFlags();
+            PersistPanelLayout();
         }
 
         public void Undo() {
