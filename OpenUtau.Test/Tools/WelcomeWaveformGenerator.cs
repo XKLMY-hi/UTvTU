@@ -120,6 +120,7 @@ namespace OpenUtau.Test.Tools {
                 ["normalization"] = "共用峰值归一（分母 = 两候选的全局峰值）；Abs=max|x|，Up/Down=最大|x|处的带符号值",
                 ["candidates"] = new Dictionary<string, Envelope?> { ["a"] = envA, ["b"] = envB },
                 ["pitch"] = bPitch,
+                ["loudness"] = LoudnessPath(envB.Abs),
             };
             string jsonPath = Path.Combine(outDir, "waveform.json");
             File.WriteAllText(jsonPath, JsonSerializer.Serialize(json,
@@ -469,6 +470,10 @@ namespace OpenUtau.Test.Tools {
             sb.Append("pitch:    ");
             sb.Append(PitchGeometry(pitch));
             sb.AppendLine();
+            // 响度（单面面积）—— 欢迎页左栏实际使用的几何；算法与线上逐条对齐
+            sb.Append("loudness: ");
+            sb.Append(LoudnessPath(env.Abs));
+            sb.AppendLine();
             return sb.ToString();
         }
 
@@ -491,6 +496,64 @@ namespace OpenUtau.Test.Tools {
             return sb.ToString();
         }
 
+        /// <summary>
+        /// 响度（**单面面积**）几何 —— 与线上算法**逐条对齐**（Lead 2026-10 上机版）：
+        /// p2/p99 鲁棒归一 → 首尾强制 0 → 核 [1,4,6,4,1]/16 平滑**两遍**（边缘 edge padding）
+        /// → 归一到 [0,1] → **致密化 401 点**（线性插值）→ viewBox 1000×240、PAD=10、
+        /// y = H−PAD − amp·(H−2·PAD)，路径 M→逐点 L→收口 Z，坐标 **2 位小数**。
+        /// </summary>
+        internal static string LoudnessPath(IReadOnlyList<double> abs) {
+            int n = abs.Count;
+            double Quantile(double q) {
+                var s = abs.OrderBy(v => v).ToList();
+                double pos = q * (s.Count - 1);
+                int i = (int)Math.Floor(pos);
+                double f = pos - i;
+                return i + 1 < s.Count ? s[i] * (1 - f) + s[i + 1] * f : s[i];
+            }
+            double lo = Quantile(0.02), hi = Quantile(0.99);
+            var amp = new double[n];
+            for (int i = 0; i < n; i++) {
+                amp[i] = hi > lo ? Math.Clamp((abs[i] - lo) / (hi - lo), 0.0, 1.0) : 0.0;
+            }
+            amp[0] = 0;
+            amp[n - 1] = 0;
+            double[] kernel = { 1, 4, 6, 4, 1 };
+            for (int pass = 0; pass < 2; pass++) {
+                var next = new double[n];
+                for (int i = 0; i < n; i++) {
+                    double sum = 0;
+                    for (int k = -2; k <= 2; k++) {
+                        sum += kernel[k + 2] * amp[Math.Clamp(i + k, 0, n - 1)];   // edge padding
+                    }
+                    next[i] = sum / 16.0;
+                }
+                amp = next;
+            }
+            double mn = amp.Min(), mx = amp.Max();
+            if (mx > mn) {
+                for (int i = 0; i < n; i++) {
+                    amp[i] = (amp[i] - mn) / (mx - mn);
+                }
+            }
+            const int dense = 401;
+            const double W = 1000, H = 240, PAD = 10;
+            var sb = new StringBuilder();
+            sb.Append("M 0,").Append(F2(H - PAD));
+            for (int i = 0; i < dense; i++) {
+                double t = i / (double)(dense - 1);
+                double x = t * (n - 1);
+                int i0 = (int)Math.Floor(x);
+                int i1 = Math.Min(i0 + 1, n - 1);
+                double w = x - i0;
+                double v = amp[i0] * (1 - w) + amp[i1] * w;
+                sb.Append(" L ").Append(F2(i * W / (dense - 1))).Append(',').Append(F2(H - PAD - v * (H - 2 * PAD)));
+            }
+            sb.Append(" L ").Append(F2(W)).Append(',').Append(F2(H - PAD)).Append(" Z");
+            return sb.ToString();
+        }
+
+        static string F2(double v) => v.ToString("0.00", CultureInfo.InvariantCulture);
         internal static string PitchGeometry(List<double> pitch) {
             if (pitch.Count < 2) {
                 return "";
