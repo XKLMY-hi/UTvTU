@@ -1236,4 +1236,20 @@ General
   <system:String x:Key="command.group.view">View</system:String>
   <system:String x:Key="command.group.help">Help</system:String>
   <!-- /cmd -->
+  <!-- ⚠ welcome: W36 欢迎页重设计（几何/专业/克制）—— EN/zh 成对 -->
+  <system:String x:Key="welcome.brand.tagline">UTAU · DiffSinger workstation</system:String>
+  <system:String x:Key="welcome.brand.headline">Give every song a voice.</system:String>
+  <system:String x:Key="welcome.brand.description">Write melodies and lyrics, then shape an expressive performance with UTAU and DiffSinger voicebanks.</system:String>
+  <system:String x:Key="welcome.feature.voicebank">UTAU and DiffSinger voicebanks</system:String>
+  <system:String x:Key="welcome.feature.lyrics">Phoneme-level lyrics and pitch editing</system:String>
+  <system:String x:Key="welcome.feature.host">VST3 / ARA2 host integration</system:String>
+  <system:String x:Key="welcome.singers.installed">INSTALLED VOICEBANKS</system:String>
+  <system:String x:Key="welcome.copyright">© 2026</system:String>
+  <system:String x:Key="welcome.greeting.sub">Start a new vocal project, or pick up where you left off.</system:String>
+  <system:String x:Key="welcome.recent.viewall">View all</system:String>
+  <system:String x:Key="welcome.drop.hint">Drop a .ustx or .ust project here to import</system:String>
+  <system:String x:Key="welcome.import.description">Add a track from an audio file</system:String>
+  <system:String x:Key="welcome.template.description">Start from a saved template</system:String>
+  <system:String x:Key="welcome.template.tip">Pick a template</system:String>
+  <!-- /welcome -->
 </ResourceDictionary>
