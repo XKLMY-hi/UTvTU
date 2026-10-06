@@ -52,6 +52,17 @@
   "nub_norm": 23.0,
   "nub_over_stroke": 0.84
  },
+ "wordmark_sanity": {
+  "bbox": [
+   0.0,
+   0.0,
+   377.33,
+   100.0
+  ],
+  "w": 377.33,
+  "h": 100.0,
+  "cap": 100.0
+ },
  "overlay_iou": {
   "brace": 0.406,
   "mark": 0.533
