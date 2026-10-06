@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -70,9 +70,11 @@ namespace OpenUtau.Test.App {
         [AvaloniaFact]
         public void Shell_ChromeUsesMd3Roles() {
             string xaml = ReadXaml();
-            // 新外壳（顶栏 / 状态条 / 素材库）只吃颜色池角色键
+            // 新外壳（顶栏 / 状态条 / 素材库）只吃颜色池角色键。
+            // 注：`md3.primary-container` / `md3.on-primary-container` 于 W40 退出外壳 ——
+            // 顶栏那颗音符瓦片被品牌锁定（标志 md3.primary + 字标 md3.on-surface）替换，用户要求删瓦片。
             foreach (string key in new[] {
-                "md3.primary-container", "md3.on-primary-container", "md3.surface-container",
+                "md3.surface-container",
                 "md3.surface-container-high", "md3.on-surface", "md3.on-surface-variant",
                 "md3.outline-variant", "md3.primary", "md3.on-primary",
             }) {
