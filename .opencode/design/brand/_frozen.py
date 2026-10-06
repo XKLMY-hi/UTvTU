@@ -1,3 +1,6 @@
+# [已废弃 / DERIVED-OBSOLETE] 本脚本属`派生时代`（光学补偿 / 描摹重建）的产物：它生成的 out/** 资产
+# （含 utvtu-brand-lockup.axaml = 旧版描摹字标）**已废弃，不得作为消费来源**；重跑只为复现历史。
+# 唯一权威来源 = .opencode/design/brand/extracted/**（提取 + 规范化；见其 EXTRACT-MANIFEST.md 顶部声明）。
 """W39f 产出冻结版单文件几何 axaml + manifest。"""
 import io, json, math, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -106,7 +109,7 @@ def main():
                      "%.4f" % (max(p[0] for l in S.WM for p in l["pts"]) / 100))
             .replace('{L.wm_path_d(L.MONO and []) if False else ""}', "")
             .replace("{{", "{").replace("}}", "}"))
-    io.open(os.path.join(OUT, "utvtu-brand-lockup.axaml"), "w", encoding="utf-8").write(head)
+    io.open(os.path.join(OUT, "utvtu-brand-lockup.axaml"), "w", encoding="utf-8").write(head)  # 已废弃：只为复现历史
 
     manifest = f"""# UTvTU 品牌资产 · 冻结清单（W39f）
 
@@ -116,7 +119,7 @@ def main():
 
 | 文件 | 内容 | 消费方 |
 |---|---|---|
-| `out/utvtu-brand-lockup.axaml` | **单文件几何全集**：`brand-mark` / `brand-brace` / `brand-brace-flipx`（程序化镜像）/ `brand-v-chevron` / `brand-v-chevron-stroke` / `brand-wordmark`（描摹 U/T + 源 v）+ 三式锁定放置说明 | fx-ui（启动窗/欢迎页/关于页/顶栏）、实现者 |
+| `out/_obsolete/utvtu-brand-lockup.axaml`（**已废弃，不得消费**） | 旧版描摹字标：`brand-mark` / `brand-brace` / `brand-brace-flipx`（程序化镜像）/ `brand-v-chevron` / `brand-v-chevron-stroke` / `brand-wordmark`（描摹 U/T + 源 v）+ 三式锁定放置说明 | fx-ui（启动窗/欢迎页/关于页/顶栏）、实现者 |
 | `out/utvtu-brand-geometry.axaml` | 同源几何（含 `brand-brace` 源路径版）；**与上表内容重叠**，任选其一即可（推荐 lockup 那份） | fx-ui |
 | `out/utvtu.ico` | 多尺寸 16/24/32/48/64/128/256，**逐尺寸渲染**（源几何，描边语义） | fx-ctl（窗口/任务栏/文件关联） |
 | `out/utvtu-icon-16.png` `/24` `/32` | 逐尺寸瓦片（源几何） | fx-ctl |
@@ -136,12 +139,12 @@ def main():
 `brand-variants-*.png`（早期简化变体）—— 保留仅为历史记录。
 
 ## 变更流程
-1. 任何几何改动 ⇒ 我重出 `utvtu-brand-lockup.axaml` + 全部栅格资产，并**主动通知 fx-ctl / fx-ui**；
+1. ~~任何几何改动 ⇒ 我重出 `utvtu-brand-lockup.axaml`~~ **已废弃**：几何只在 `extracted/` 侧变动，消费方一律取 `extracted/**`；
 2. 仅文案/阶梯改动（如 cap 阈值）⇒ 不动文件，无需重取；
 3. 消费方若发现文件时间戳早于 `utvtu-brand-tailwind.html` 的几何口径，以本清单为准来找我。
 """
     io.open(os.path.join(OUT, "brand-frozen-manifest.md"), "w", encoding="utf-8").write(manifest)
-    print("wrote:", os.path.join(OUT, "utvtu-brand-lockup.axaml"))
+    print("wrote:", os.path.join(OUT, "utvtu-brand-lockup.axaml"))  # 已废弃
     print("wrote:", os.path.join(OUT, "brand-frozen-manifest.md"))
 
 

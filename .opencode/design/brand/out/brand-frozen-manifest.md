@@ -1,31 +1,37 @@
-# UTvTU 品牌资产 · 冻结清单（W39f）
+# UTvTU 品牌资产 · 冻结清单（W39f）—— ⚠️ **本目录为派生研究，已废弃**
 
-> **几何已冻结**（源路径 verbatim）。若几何有变，**消费方必须重取**对应文件；本轮之后我只在你要求时才动。
+> ## ⚠️ 单一来源声明（2026-10 更新，以此为准）
+> **产品几何的唯一权威来源 = `.opencode/design/brand/extracted/**`**（用户设计稿的**提取**件，
+> 规范化后的形态；见 `extracted/EXTRACT-MANIFEST.md`）。
+> **本目录（`out/`）全部为派生研究记录**（光学补偿 / 描摹重建 / 早期变体），**仅供查阅历史与对比**，
+> **不得作为消费来源**。原先的"几何已冻结、消费方必须重取本目录"口径**作废**。
+>
+> 已确认产品侧（`OpenUtau/**`）**零引用**本目录：`Icons.axaml` / `SplashWindow.axaml` 等一律引用
+> `extracted/**`。历史上把本目录当权威的就是下面第 9 行那条 ⇒ 已改写。
 
-## 冻结文件
+## 已废弃（不得消费）
 
-| 文件 | 内容 | 消费方 |
+| 文件 | 原描述 | 现状 |
 |---|---|---|
-| `out/utvtu-brand-lockup.axaml` | **单文件几何全集**：`brand-mark` / `brand-brace` / `brand-brace-flipx`（程序化镜像）/ `brand-v-chevron` / `brand-v-chevron-stroke` / `brand-wordmark`（描摹 U/T + 源 v）+ 三式锁定放置说明 | fx-ui（启动窗/欢迎页/关于页/顶栏）、实现者 |
-| `out/utvtu-brand-geometry.axaml` | 同源几何（含 `brand-brace` 源路径版）；**与上表内容重叠**，任选其一即可（推荐 lockup 那份） | fx-ui |
-| `out/utvtu.ico` | 多尺寸 16/24/32/48/64/128/256，**逐尺寸渲染**（源几何，描边语义） | fx-ctl（窗口/任务栏/文件关联） |
-| `out/utvtu-icon-16.png` `/24` `/32` | 逐尺寸瓦片（源几何） | fx-ctl |
-| `out/utvtu-splash@1x.png` `/@2x.png` | 480×320 / 960×640 闪屏（源几何 `{ 脸 }` + 字标轮廓） | fx-ctl（启动窗） |
-| `out/brand-icon-ladder.png` | 图标阶梯 256→16 × primary/ink/tonal | 设计/评审 |
-| `out/utvtu-lockup-*.svg`（9） | 3 式 × 3 finish（ink/reversed/branded） | 物料/文档/网页 |
-| `out/utvtu-lockup-*@1x/@2x.png`（18） | 同上栅格（cap 24/48） | 物料/文档 |
-| `out/utvtu-mark-source.svg` / `utvtu-brace-source.svg` / `-source-flipx.svg` / `utvtu-v-chevron-{fill,stroke}.svg` | 源几何 SVG（描边语义） | 设计/网页 |
-| `out/utvtu-wordmark.svg` / `-mono.svg` | 字标轮廓 SVG（Fill） | 物料 |
-| `out/brand-lockup-sheet.png` / `brand-lockup-ladder.png` / `brand-brace-new-vs-old.png` | 评审图 | 用户/评审 |
-| `out/brand-verify-*.png` | 健全性叠图（**不是逼近栅格**） | 评审 |
-| `out/brand-source-metrics.json` / `brand-source-raster-metrics.json` / `brand-wordmark-spacing.json` / `brand-wordmark-cap24.json` | 全部实测数值（源几何） | 评审/实现 |
+| `_obsolete/utvtu-brand-lockup.axaml`（原 `utvtu-brand-lockup.axaml`） | "单文件几何全集"，指给 fx-ui（启动窗/欢迎页/关于页/顶栏）与实现者 | **已移入 `_obsolete/` 并在文件头标记废弃**：`brand-wordmark` 是旧版描摹字标（1418 字符），不是产品定稿 |
+| 其内 `brand-brace-flipx` | 程序化镜像键 | **不进接入**（产品侧用 `brand-brace` + `ScaleX(-1)`，不留预翻转派生键） |
+| 其内 `brand-v-chevron-stroke` | 切角 v 的描边版（预烘焙坐标） | **不进接入**（产品侧 `brand-v-chevron` = 源 `M0 0 L4.5 14 L9 0`，由消费方单独描边渲染） |
+| 其内 `brand-wordmark-monoline` | 单线字标（空值） | **不进接入**（产品侧 `brand-wordmark` = `extracted/wordmark-ut.svg` 的 4 段 `d` 逐字拼接） |
+| `utvtu-brand-geometry.axaml` | "同源几何，与上表重叠，任选其一（推荐 lockup 那份）" | **同样不再作为来源**；如需 XAML 几何请从 `extracted/**` 现取 |
 
-## 已作废（不要引用）
-`out/utvtu-mark.svg`、`utvtu-mark-*.svg`（描摹+描边转填充系列）、`utvtu-brace.svg`（旧描摹版）、
-`brand-metrics.json`（在错误几何上测的）、`brand-optical-compensation-*.png`（错误几何上的补偿）、
-`brand-variants-*.png`（早期简化变体）—— 保留仅为历史记录。
+## 本目录其余内容：研究记录（一眼可辨，不属接入件）
 
-## 变更流程
-1. 任何几何改动 ⇒ 我重出 `utvtu-brand-lockup.axaml` + 全部栅格资产，并**主动通知 fx-ctl / fx-ui**；
-2. 仅文案/阶梯改动（如 cap 阈值）⇒ 不动文件，无需重取；
-3. 消费方若发现文件时间戳早于 `utvtu-brand-tailwind.html` 的几何口径，以本清单为准来找我。
+- `brand-*.png`（光学补偿对比、图标阶梯、锁定阶梯、`brand-verify-*` 健全性叠图、`brand-brace-new-vs-old`）——
+  评审/历史用图；
+- `utvtu-lockup-*.svg` / `@1x` / `@2x`（3 式 × 3 finish）—— 物料/文档可用的**早期派生图**，与 `extracted/` 定稿
+  不同源，若要正式物料请以 `extracted/**` 重出；
+- `utvtu.ico` / `utvtu-icon-*` / `utvtu-splash@*` —— 早期栅格；
+- `brand-*.json`（metrics / spacing / cap24 / source-metrics）—— 实测数值记录（注意：`brand-metrics.json`
+  在错误几何上测的，`brand-wordmark-cap24.json` 只含小尺寸可读性指标、**不含**字标宽与 v 定位）。
+
+## 变更流程（新口径）
+
+1. **几何改动只在 `extracted/` 侧发生**（提取器 + 规范化脚本，见其 manifest 的管线顺序）；
+2. 本目录**不再重出**任何资产，也不再"通知消费方重取本目录"；
+3. 消费方若需要 XAML/几何数字，一律取 `extracted/wordmark-ut.svg`、`extracted/wordmark-v-stroke.svg`、
+   `extracted/v-chevron.svg`、`extracted/brace-open.svg`、`extracted/mark*.svg`。

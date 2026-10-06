@@ -1202,6 +1202,10 @@ General
   <!-- W20：卷帘底部表达式/曲线区（行面板）。chevron 是**开合切换**，所以文案含"或展开"。 -->
   <system:String x:Key="panel.collapse.pianoroll.exp">Collapse or expand the expression panel</system:String>
   <system:String x:Key="panel.drag.hint">Drag to resize · double-click to reset width</system:String>
+  <!-- W34：折叠处「快捷展开」边缘标签（悬停显名复用上面的 panel.toggle.*，这里只加 tooltip 三件） -->
+  <system:String x:Key="panel.expand.tracks">Expand track headers</system:String>
+  <system:String x:Key="panel.expand.library">Expand library</system:String>
+  <system:String x:Key="panel.expand.hint">Click to expand · drag the splitter to resize</system:String>
   <!-- /panel -->
   <!-- ⚠ ustrxp: W27 格式止血 —— 另存为纯净 .ustx（跨软件交付唯一安全路径）—— EN/zh 成对 -->
   <system:String x:Key="menu.file.exportcleanustx">Save as Clean .ustx (readable by vanilla OpenUTAU)</system:String>

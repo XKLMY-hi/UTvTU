@@ -1407,6 +1407,12 @@ namespace OpenUtau.App.Views {
         }
 
         /// <summary>拖拽结束 / 双击复位 → 落盘（拖动过程中只更新内存，不写文件）。</summary>
+        /// <summary>折叠处边缘标签（W34）：展开回**持久化宽度**并落盘。</summary>
+        private void OnRevealTracksPanel(object? sender, EventArgs e) => viewModel.RevealTracksPanel();
+
+        /// <summary>素材库那侧的快捷展开（同上）。</summary>
+        private void OnRevealLibraryPanel(object? sender, EventArgs e) => viewModel.RevealLibraryPanel();
+
         private void OnPanelSplitterDragCompleted(object? sender, EventArgs e) {
             viewModel.PersistPanelLayout();
         }

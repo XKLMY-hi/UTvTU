@@ -557,6 +557,32 @@
                          DragCompleted="OnPanelSplitterDragCompleted"
                          ToolTip.Tip="{DynamicResource panel.drag.hint}"/>
 
+        <!-- ── 折叠处「快捷展开」边缘标签（W34 / 设计稿 §8）：**overlay** ——
+             铺在中央列之上（Panel 无背景 ⇒ 自身不吃点击，只有标签可命中），
+             标签 14×48 圆角 8，悬停/聚焦展开到 92×48 显示面板名；
+             左列标签贴左边、向右展开；右列标签贴右边、向左展开（与面板头 chevron 镜像）。
+             不参与面板列测量 ⇒ 不吃布局、不留夹缝，`PanelSplitter` 五值一行未改。 ── -->
+        <Panel Grid.Column="2" IsHitTestVisible="True">
+          <c:PanelRevealTab x:Name="TracksRevealTab"
+                            HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8"
+                            IsVisible="{Binding ShowTracksRevealTab}"
+                            AnchorRight="False"
+                            GlyphData="{StaticResource icon-list}"
+                            PanelLabel="{DynamicResource panel.toggle.tracks}"
+                            Hint="{DynamicResource panel.expand.tracks}"
+                            HintSuffix="{DynamicResource panel.expand.hint}"
+                            ExpandRequested="OnRevealTracksPanel"/>
+          <c:PanelRevealTab x:Name="LibraryRevealTab"
+                            HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8"
+                            IsVisible="{Binding ShowLibraryRevealTab}"
+                            AnchorRight="True"
+                            GlyphData="{StaticResource icon-folder-open}"
+                            PanelLabel="{DynamicResource panel.toggle.library}"
+                            Hint="{DynamicResource panel.expand.library}"
+                            HintSuffix="{DynamicResource panel.expand.hint}"
+                            ExpandRequested="OnRevealLibraryPanel"/>
+        </Panel>
+
         <!-- ── 中：编排区（工作台视图：标尺 34 / 横向滚动 16 / 轨道区）── -->
         <Grid Grid.Column="2" ColumnDefinitions="*,8" Background="{DynamicResource md3.surface}"
               IsVisible="{Binding ViewSwitcher.ShowWorkspace}">

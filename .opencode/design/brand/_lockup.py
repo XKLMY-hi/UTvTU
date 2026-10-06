@@ -1,3 +1,6 @@
+# [已废弃 / DERIVED-OBSOLETE] 本脚本属`派生时代`（光学补偿 / 描摹重建）的产物：它生成的 out/** 资产
+# （含 utvtu-brand-lockup.axaml = 旧版描摹字标）**已废弃，不得作为消费来源**；重跑只为复现历史。
+# 唯一权威来源 = .opencode/design/brand/extracted/**（提取 + 规范化；见其 EXTRACT-MANIFEST.md 顶部声明）。
 """W39 横向商标（锁定）资产生成器（一次性脚本，可重跑）。
 
 A. 字标转矢量轮廓：**没有 Roboto**（系统与仓库都没有）⇒ 不能"用字体导出轮廓"。
@@ -439,7 +442,7 @@ def main():
       G.svg_stroke([("line", (a[0], a[1], b[0], b[1]), sw) for _k, a, b, sw in MONO], color="currentColor")
       .replace('viewBox="0 0 64 64" width="64" height="64"', f'viewBox="0 0 {MONO_W:.1f} {CAP:.0f}"'))
     mono_d = " ".join(f"M{a[0]:.1f},{a[1]:.1f} L{b[0]:.1f},{b[1]:.1f}" for _k, a, b, _sw in MONO)
-    w("utvtu-brand-lockup.axaml",
+    w("utvtu-brand-lockup.axaml",  # 已废弃：派生时代（描摹/光学补偿）产物，不得作为消费来源
       "<!-- W39 字标与锁定几何。\n"
       "     字标（描摹轮廓）：归一化空间 = 大写高 100 单位、基线 y=100、左缘 x=0，用 Fill 填充：\n"
       "       <Path Data=\"{StaticResource brand-wordmark}\" Fill=\"{DynamicResource brand.ink}\"\n"

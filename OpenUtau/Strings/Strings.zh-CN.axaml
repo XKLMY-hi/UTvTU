@@ -1333,6 +1333,10 @@ Syntax: prefix,suffix</system:String>-->
   <!-- W20：卷帘底部表达式/曲线区（行面板）。chevron 是**开合切换**，所以文案含"或展开"。 -->
   <system:String x:Key="panel.collapse.pianoroll.exp">折叠或展开表达式面板</system:String>
   <system:String x:Key="panel.drag.hint">拖动调宽 · 双击分隔条恢复默认宽度</system:String>
+  <!-- W34：折叠处「快捷展开」边缘标签（悬停显名复用上面的 panel.toggle.*，这里只加 tooltip 三件） -->
+  <system:String x:Key="panel.expand.tracks">展开轨道头面板</system:String>
+  <system:String x:Key="panel.expand.library">展开素材库</system:String>
+  <system:String x:Key="panel.expand.hint">点击展开 · 拖动分隔条调整宽度</system:String>
   <!-- /panel -->
   <!-- ⚠ ustrxp: W27 格式止血 —— 另存为纯净 .ustx（跨软件交付唯一安全路径）—— EN/zh 成对 -->
   <system:String x:Key="menu.file.exportcleanustx">另存为纯净 .ustx（原版可读）</system:String>
