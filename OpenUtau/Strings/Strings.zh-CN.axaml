@@ -1367,4 +1367,22 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="command.group.view">视图</system:String>
   <system:String x:Key="command.group.help">帮助</system:String>
   <!-- /cmd -->
+  <!-- ⚠ welcome: W36 欢迎页重设计（几何/专业/克制）—— EN/zh 成对 -->
+  <system:String x:Key="welcome.brand.tagline">UTAU · DiffSinger 工作台</system:String>
+  <system:String x:Key="welcome.brand.headline">让每一首歌都有声音。</system:String>
+  <system:String x:Key="welcome.brand.description">谱写旋律、填写歌词，用 UTAU 与 DiffSinger 音源塑造富有表现力的歌声。</system:String>
+  <system:String x:Key="welcome.feature.voicebank">支持 UTAU 与 DiffSinger 音源</system:String>
+  <system:String x:Key="welcome.feature.lyrics">音素级歌词与音高编辑</system:String>
+  <system:String x:Key="welcome.feature.host">VST3 / ARA2 宿主集成</system:String>
+  <system:String x:Key="welcome.singers.installed">已安装音源</system:String>
+  <system:String x:Key="welcome.copyright">© 2026</system:String>
+  <system:String x:Key="welcome.greeting.sub">开始新的演唱工程，或继续上次的工作。</system:String>
+  <system:String x:Key="welcome.recent.viewall">查看全部</system:String>
+  <system:String x:Key="welcome.drop.hint">将 .ustx 或 .ust 工程文件拖到此处导入</system:String>
+  <system:String x:Key="welcome.import.description">从音频文件加入一条轨道</system:String>
+  <system:String x:Key="welcome.template.description">从已保存的模板开始</system:String>
+  <system:String x:Key="welcome.template.tip">选择模板</system:String>
+  <system:String x:Key="welcome.recent.empty">还没有最近工程 —— 用下面的“新建工程”开始一个。</system:String>
+  <system:String x:Key="welcome.template.empty">暂无模板。</system:String>
+  <!-- /welcome -->
 </ResourceDictionary>
