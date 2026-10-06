@@ -114,3 +114,40 @@ FontMatrix `[1/2048 0 0 −1/2048 0 0]`，`/CharProcs` 27 个（每个字形的�
 一条贯穿细缝（实测 IoU 0.855 → nonzero 0.9125）；② PDF 操作数在算子**之前**（`x y m`），切页路径原文时
 必须从"上一个算子之后"开始，否则丢掉起点、多出一条横穿字形的假边。
 
+## A″ 类 · EvenOdd 载体适配的**拆件版**（W43 追加，当前有效）
+
+**为什么必须拆**：`StreamGeometry` 无公开 `FillRule`、默认 **EvenOdd**；`Icons.axaml` 的字符串写法给不出
+FillRule；消费侧 `Path` 也没有 per-use FillRule。而 PDF 里字标**两件都不是** EvenOdd 天然安全：
+
+· **T（`g38`）** 的 CharProc 用**两个互相重叠的矩形**画字身与横杠（nonzero 下并集才是 T）⇒ EvenOdd 会把
+  重叠区挖空（实测 **656 px** 差异）。已**精确重划为 3 个互不重叠子矩形**（纯分区，几何零改动：
+  与原 NonZero 渲染**逐像素相等，0 px**）。
+· **切角 v** 的填充轮廓是自交单环 ⇒ EvenOdd 会出现贯穿细缝 ⇒ 改用**描边**表达（描边不经过填充规则）。
+
+| 产物 | 内容 |
+|---|---|
+| `wordmark-ut.svg` | U/T 四段（T 已重划）；`fill-rule="evenodd"`；U 的 `d` 逐字 verbatim |
+| `wordmark-v-stroke.svg` | v 描边版：`stroke-width=61`、round join/cap、中心线写在文件头 |
+| `wordmark-ut-evenodd-vs-nonzero.png` | 自证①：原样 EvenOdd（656 px 差）/ 原样 NonZero / 重划后 EvenOdd（0 px 差） |
+| `wordmark-split-evenodd.png` | 自证②：拆件合并（**EvenOdd 下**）的完整字标 |
+| `wordmark-split-vs-02-wordmark.png` | 自证②：与设计稿同尺度叠图（黑=仅我 / 红=仅参考 / 蓝=重合） |
+| `wordmark-split-report.json` | 全部数字（含 cap=100 归一化定位表与 EvenOdd 自证数字） |
+| `_w43_split.py` | 拆件脚本（重叠环重划 + 描边拟合 + 三张自证） |
+
+**v 的定位与描边数字（本次实测；与 Lead 的换算逐项一致）**
+
+- **stroke-width = 61.00**：由"与 PDF 轮廓做对称差拟合"独立量出，**残差 0.411%**；与 HTML 资产
+  `v-chevron.svg` 声明的 `stroke-width="61"` + `vector-effect="non-scaling-stroke"` **一致 ⇒ 同一实例**。
+- 中心线（本目录 SVG 坐标）= **(463.01, 100.71) → (508.51, 242.71) → (554.01, 100.71)**；
+  页面空间 = (1821.00, 2509.00) → (1866.50, 2367.00) → (1912.00, 2509.00)。
+- v 墨迹 = **152×203 pt**（页面 1790.50,2336.50 .. 1942.50,2539.50）；基线 y=2336.00；cap=273.71。
+- **cap=100 归一化**（unit = cap/100 = 2.7371 pt）：左缘偏移 **158.02**（= 字标墨迹宽的 **41.89%**）、
+  v 宽 **55.53**（**14.72%**）、v 高 **74.17**（**x高/cap = 0.7417**）、v 底距基线 **+0.18**、
+  字标墨迹宽 **377.19**（宽/cap = **3.7719**；与"宽/墨迹高" 3.7208 差一个 U 碗下伸 3.76）。
+- 合并验证（U/T EvenOdd + v 描边，**EvenOdd 下**）vs `sections/02-wordmark.png`：**IoU = 0.9095**
+  （单件填充基准 0.9125，差 0.3% = v 模型残差 0.41% + 二值化边缘差）。
+- 既有资产核对：`out/brand-wordmark-cap24.json` 只含小尺寸**可读性**指标（components / min_gap_px /
+  stroke_px / empty_runs / touching_pairs），**不含**字标宽与 v 定位 ⇒ 定位数字只能取 PDF 提取值（上表）。
+- v 的"填充版 / 修绕向版"**不需要**（描边路线已从根上绕开自交）。
+
+

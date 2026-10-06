@@ -1,0 +1,68 @@
+{
+ "kind": "split-for-evenodd",
+ "ut_svg": "wordmark-ut.svg",
+ "v_svg": "wordmark-v-stroke.svg",
+ "viewbox": [
+  0,
+  0,
+  1032.413736,
+  277.470703
+ ],
+ "evenodd_selfproof": {
+  "original_rings_evenodd_vs_nonzero_diff_px": 656,
+  "resplit_rings_evenodd_vs_nonzero_diff_px": 0,
+  "resplit_evenodd_vs_original_nonzero_diff_px": 0,
+  "note": "T(g38) 的 CharProc 是两个重叠矩形；重划为 3 个不重叠子矩形后 EvenOdd 安全"
+ },
+ "v_stroke": {
+  "stroke_width": 61.0,
+  "fit_symmetric_diff_px": 1274,
+  "fit_sym_ratio": 0.00411,
+  "fit_ref_area_px": 310186,
+  "sin_theta": 0.305141,
+  "centerline_svg": [
+   [
+    463.011,
+    100.711
+   ],
+   [
+    508.511,
+    242.711
+   ],
+   [
+    554.012,
+    100.711
+   ]
+  ],
+  "asset_v_chevron": {
+   "stroke_width": 61.0,
+   "box": [
+    91.0,
+    142.0
+   ],
+   "non_scaling_stroke": true
+  }
+ },
+ "normalized_cap100": {
+  "unit_pt_per_cap100": 2.7371,
+  "v_left_offset_pt": 432.51,
+  "v_left_offset_cap100": 158.02,
+  "v_left_offset_pct_of_wordmark": 41.89,
+  "v_ink_w_pt": 152.0,
+  "v_ink_w_cap100": 55.53,
+  "v_ink_w_pct_of_wordmark": 14.72,
+  "v_ink_h_pt": 203.0,
+  "v_ink_h_cap100": 74.17,
+  "xheight_over_cap": 0.7417,
+  "v_bottom_vs_baseline_pt": 0.5,
+  "v_bottom_vs_baseline_cap100": 0.18,
+  "wordmark_ink_w_pt": 1032.41,
+  "wordmark_ink_w_cap100": 377.19,
+  "aspect_w_over_cap": 3.7719,
+  "aspect_w_over_ink_h": 3.7208,
+  "stroke_width_pt": 61.0,
+  "stroke_width_cap100": 22.286
+ },
+ "merged_evenodd_iou": 0.9095,
+ "single_fill_iou_reference": 0.9125
+}

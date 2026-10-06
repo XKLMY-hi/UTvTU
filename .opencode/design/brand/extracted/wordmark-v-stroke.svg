@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1032.413736" height="277.470703" viewBox="0 0 1032.413736 277.470703">
+  <!--
+      来源 = 品牌板 PDF 第 1 页**页面路径**（切角 v，非字体字形）——**拆件之 v 件**
+      为什么描边：v 的填充轮廓是自交单环，EvenOdd 会填出贯穿细缝；描边不经过填充规则。
+      stroke-width = 61（与 PDF 轮廓做对称差拟合：残差 0.41%；与 HTML 资产 v-chevron.svg 声明的 61 + non-scaling-stroke 一致 ⇒ 同一实例）
+      stroke-linejoin/linecap = round（对应原设计的圆角连接与圆头端帽）
+      中心线（本文件坐标）= [(np.float64(463.01), np.float64(100.71)), (508.51, np.float64(242.71)), (np.float64(554.01), np.float64(100.71))]
+      v 墨迹（本文件坐标）= x 432.510921..584.51157, y 70.210613..273.211255（页面空间 = 1790.50,2336.50 .. 1942.50,2539.50；基线 y=2336.00；cap=273.71）
+      定位（cap=100 归一化，unit=cap/100）：左缘偏移 158.02 / 宽 55.53 / 高 74.17（x高/cap=0.7417）/ 底距基线 +0.18
+      占字标墨迹宽：左缘 41.89%、v 宽 14.72%（字标墨迹宽 377.19 @cap100）
+      坐标系同 wordmark-ut.svg（viewBox 0 0 1032.413736 277.470703）
+  -->
+  <g fill="#000000" fill-rule="evenodd" transform="matrix(1 0 0 -1 0 277.470703) translate(-1357.988754 -2332.240234)">
+    <!-- v · 描边（round join/cap；不受填充规则影响） -->
+    <path fill="none" stroke="#000000" stroke-width="61" stroke-linecap="round" stroke-linejoin="round" d="463.010921 100.710613 M 508.511245 242.711255 L 554.01157 100.710613 L"/>
+  </g>
+</svg>
