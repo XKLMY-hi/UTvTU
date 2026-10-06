@@ -176,20 +176,33 @@
     <Border Grid.Column="0" Background="{DynamicResource md3.surface-container}"
             BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,1,0">
       <Grid RowDefinitions="Auto,*,Auto" Margin="32">
-        <!-- 品牌头：52 图标 + UTVTU 26 + tagline 13（稿的 Brand Header / Wordmark） -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12">
-          <Border Width="52" Height="52" CornerRadius="12"
-                  Background="{DynamicResource md3.primary}">
-            <Path Data="{StaticResource icon-mic}" Width="26" Height="26" Stretch="Uniform"
-                  HorizontalAlignment="Center" VerticalAlignment="Center"
-                  Fill="{DynamicResource md3.on-primary}"/>
-          </Border>
-          <StackPanel VerticalAlignment="Center" Spacing="4">
-            <TextBlock Text="UTvTU" FontSize="26" FontWeight="Medium"
-                       Foreground="{DynamicResource md3.on-surface}"/>
-            <TextBlock Text="{DynamicResource welcome.brand.tagline}" FontSize="13"
-                       Foreground="{DynamicResource md3.on-surface-variant}"/>
-          </StackPanel>
+        <!-- 品牌头（W38）：display 式 `{ UTvTU }`，cap 24 —— 几何 verbatim 引用 Icons.axaml 的冻结品牌键
+             （不描摹、不做描边→填充）；四元素 = 左括号 → 字标(Fill) → v(描边，省略 Fill) → 右括号(对象式镜像)。
+             数值基准与推导见 .opencode/plans/welcome-design.md「追加三～六」：
+               括号 px/单位 0.6545 ⇒ 元素框 10.47×23.56、描边 5.24、墨迹 15.71×28.80
+               字标 90.53×24（cap）、v 元素框 7.98×12.45、v 描边 5.35、间距 10.08
+             基线 y=25.96；cap 带 1.96–25.96；括号墨迹上溢/下溢基线各 2.40（对齐 cap 带居中） -->
+        <StackPanel Grid.Row="0" Spacing="4">
+          <Canvas Width="142.11" Height="28.80" HorizontalAlignment="Left">
+            <Path Canvas.Left="2.62" Canvas.Top="2.62" Width="10.47" Height="23.56" Stretch="Uniform"
+                  Data="{StaticResource brand-brace}" Stroke="{DynamicResource md3.primary}"
+                  StrokeThickness="5.24" StrokeLineCap="Round" StrokeJoin="Round"/>
+            <Path Canvas.Left="25.79" Canvas.Top="1.96" Width="90.53" Height="24" Stretch="Uniform"
+                  Data="{StaticResource brand-wordmark}" Fill="{DynamicResource md3.on-surface}"/>
+            <Path Canvas.Left="66.40" Canvas.Top="16.21" Width="7.98" Height="12.45" Stretch="Uniform"
+                  Data="{StaticResource brand-v-chevron}" Stroke="{DynamicResource md3.on-surface}"
+                  StrokeThickness="5.35" StrokeLineCap="Round" StrokeJoin="Round"/>
+            <Path Canvas.Left="129.02" Canvas.Top="2.62" Width="10.47" Height="23.56" Stretch="Uniform"
+                  Data="{StaticResource brand-brace}" Stroke="{DynamicResource md3.primary}"
+                  StrokeThickness="5.24" StrokeLineCap="Round" StrokeJoin="Round"
+                  RenderTransformOrigin="0.5,0.5">
+              <Path.RenderTransform>
+                <ScaleTransform ScaleX="-1"/>
+              </Path.RenderTransform>
+            </Path>
+          </Canvas>
+          <TextBlock Text="{DynamicResource welcome.brand.tagline}" FontSize="13"
+                     Foreground="{DynamicResource md3.on-surface-variant}"/>
         </StackPanel>
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
