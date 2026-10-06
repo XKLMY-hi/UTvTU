@@ -320,6 +320,11 @@
             <MenuItem Classes="context" Header="{DynamicResource tracks.duplicatesettings}" Command="{Binding DuplicateSettings}"/>
             <MenuItem Classes="context" Header="{DynamicResource dialogs.voicecolorremapping}" Command="{Binding VoiceColorRemapping}"/>
             <Separator/>
+            <!-- W45/S1′：引擎/轨道设置的第二条入口 —— 行高 42 档要把 ⚙ 从动作条挪走（动作条只剩
+                 M/S/fx + 引擎状态点，合计 82 才能在同行放下），故卡片右键菜单必须有一条等价入口。
+                 **复用同一个 `TrackSettingsButtonClicked`** ⇒ 入口两处、逻辑一处（与 §5.1 引擎 badge 同规格）。 -->
+            <MenuItem Classes="context" Header="{DynamicResource tracks.tracksettings}"
+                      Click="TrackSettingsButtonClicked"/>
             <MenuItem Classes="context" Header="{DynamicResource tracks.mixfx}" Command="{Binding OpenMixFxDialog}"/>
           </ContextMenu>
         </Grid.ContextMenu>

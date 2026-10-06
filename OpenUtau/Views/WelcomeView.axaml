@@ -123,14 +123,6 @@
       <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
 
-    <!-- ══ 几何波形柱（稿：宽 6 / 圆角 999 / 底部对齐 / 透明度阶梯由数据给） ══ -->
-    <Style Selector="Border.waveBar">
-      <Setter Property="Width" Value="6"/>
-      <Setter Property="CornerRadius" Value="999"/>
-      <Setter Property="VerticalAlignment" Value="Bottom"/>
-      <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
-    </Style>
-
     <!-- ══ 文本层级 ══ -->
     <Style Selector="TextBlock.headline">
       <Setter Property="FontSize" Value="34"/>
@@ -210,20 +202,18 @@
              内容超出视口时仍由外层 ScrollViewer 滚动（小窗安全网） -->
         <Grid x:Name="MidHost" MinHeight="{Binding $parent[ScrollViewer].Bounds.Height}">
         <StackPanel x:Name="MidGroup" VerticalAlignment="Center" Margin="0,0,8,0">
-          <!-- 几何波形：唯一的装饰（26 根柱，数据取自设计稿） -->
-          <!-- 波形：高度由 ApplyWaveformHeight() 按可用空间在 132…200 之间取值，柱高等比缩放 -->
-          <ItemsControl x:Name="WaveformBars" Height="132" MinHeight="132" VerticalAlignment="Bottom">
-            <ItemsControl.ItemsPanel>
-              <ItemsPanelTemplate>
-                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom"/>
-              </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <Border Classes="waveBar" Height="{Binding Height}" Opacity="{Binding Opacity}"/>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
+          <!-- 波形：**真实一小节演唱**（几何逐字取自已提交的生成器产物，见 Assets/WelcomeWaveform.axaml；
+               单一来源、可重生成、勿手改、勿描摹）。
+               高度由 ApplyWaveformHeight() 在 132…200 之间取值。
+               缩放口径：时基轴 → 宽、幅度轴 → 高（Stretch=Fill）—— 波形显示惯例，
+               幅度随面板高缩放不是失真；时基不被非线性扭曲。
+               注意：不要改成 Uniform —— 宽度是固定约束时，高度超过约 147 就不再增长，弹性会失效。
+               灰用主题角色 @0.5（低强调度），不写 hex（ui-lint 会判硬编码色）。 -->
+          <Path x:Name="WaveformBars" Height="132" MinHeight="132" VerticalAlignment="Bottom"
+                Data="{DynamicResource welcome-waveform}"
+                Stretch="Fill"
+                Fill="{DynamicResource md3.on-surface-variant}"
+                Opacity="0.5"/>
 
           <!-- 文案已删（用户裁决：工作台内嵌视图不做营销）：大标语 / 描述段 / 能力行 -->
 
