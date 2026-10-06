@@ -1,0 +1,188 @@
+{
+ "wordmark": {
+  "stats": {
+   "source_px": {
+    "cap": 547,
+    "baseline_y": 695,
+    "ink_w": 2064,
+    "letters": 5
+   },
+   "letter_bboxes_norm": [
+    [
+     0.0,
+     0.0,
+     76.6,
+     100.0
+    ],
+    [
+     81.72,
+     0.0,
+     163.07,
+     100.0
+    ],
+    [
+     158.14,
+     25.78,
+     213.53,
+     99.82
+    ],
+    [
+     214.08,
+     0.0,
+     295.61,
+     100.0
+    ],
+    [
+     300.73,
+     0.0,
+     377.33,
+     100.0
+    ]
+   ],
+   "advance_norm": 377.33,
+   "stem_norm": 20.66,
+   "cap_units": 100.0
+  },
+  "metrics": {
+   "cap12": {
+    "outline": {
+     "cap": 12,
+     "components": 3,
+     "ink_pct": 25.7,
+     "stroke_px": 3,
+     "min_gap_px": 2.0,
+     "width_px": 53
+    },
+    "monoline": {
+     "cap": 12,
+     "components": 5,
+     "ink_pct": 17.7,
+     "stroke_px": 2,
+     "min_gap_px": 2.0,
+     "width_px": 56
+    }
+   },
+   "cap14": {
+    "outline": {
+     "cap": 14,
+     "components": 3,
+     "ink_pct": 26.9,
+     "stroke_px": 3,
+     "min_gap_px": 2.83,
+     "width_px": 60
+    },
+    "monoline": {
+     "cap": 14,
+     "components": 5,
+     "ink_pct": 17.6,
+     "stroke_px": 2,
+     "min_gap_px": 2.0,
+     "width_px": 65
+    }
+   },
+   "cap16": {
+    "outline": {
+     "cap": 16,
+     "components": 4,
+     "ink_pct": 28.6,
+     "stroke_px": 4,
+     "min_gap_px": 2.0,
+     "width_px": 68
+    },
+    "monoline": {
+     "cap": 16,
+     "components": 5,
+     "ink_pct": 17.0,
+     "stroke_px": 2,
+     "min_gap_px": 2.0,
+     "width_px": 73
+    }
+   },
+   "cap20": {
+    "outline": {
+     "cap": 20,
+     "components": 5,
+     "ink_pct": 30.9,
+     "stroke_px": 4,
+     "min_gap_px": 2.0,
+     "width_px": 83
+    },
+    "monoline": {
+     "cap": 20,
+     "components": 5,
+     "ink_pct": 20.4,
+     "stroke_px": 3,
+     "min_gap_px": 2.0,
+     "width_px": 89
+    }
+   },
+   "cap28": {
+    "outline": {
+     "cap": 28,
+     "components": 5,
+     "ink_pct": 35.0,
+     "stroke_px": 6,
+     "min_gap_px": 2.0,
+     "width_px": 113
+    },
+    "monoline": {
+     "cap": 28,
+     "components": 5,
+     "ink_pct": 21.8,
+     "stroke_px": 4,
+     "min_gap_px": 4.0,
+     "width_px": 122
+    }
+   },
+   "cap48": {
+    "outline": {
+     "cap": 48,
+     "components": 5,
+     "ink_pct": 38.3,
+     "stroke_px": 10,
+     "min_gap_px": 3.0,
+     "width_px": 189
+    },
+    "monoline": {
+     "cap": 48,
+     "components": 5,
+     "ink_pct": 23.3,
+     "stroke_px": 6,
+     "min_gap_px": 5.0,
+     "width_px": 203
+    }
+   }
+  },
+  "source": "traced from sections/02-wordmark.png (Roboto Bold 渲染图) —— 仓库/系统均无 Roboto 字体文件"
+ },
+ "lockups": {
+  "signature-ink": {
+   "svg": "utvtu-lockup-signature-ink.svg"
+  },
+  "signature-reversed": {
+   "svg": "utvtu-lockup-signature-reversed.svg"
+  },
+  "signature-branded": {
+   "svg": "utvtu-lockup-signature-branded.svg"
+  },
+  "display-ink": {
+   "svg": "utvtu-lockup-display-ink.svg"
+  },
+  "display-reversed": {
+   "svg": "utvtu-lockup-display-reversed.svg"
+  },
+  "display-branded": {
+   "svg": "utvtu-lockup-display-branded.svg"
+  },
+  "short-ink": {
+   "svg": "utvtu-lockup-short-ink.svg"
+  },
+  "short-reversed": {
+   "svg": "utvtu-lockup-short-reversed.svg"
+  },
+  "short-branded": {
+   "svg": "utvtu-lockup-short-branded.svg"
+  }
+ },
+ "finishes": {}
+}
