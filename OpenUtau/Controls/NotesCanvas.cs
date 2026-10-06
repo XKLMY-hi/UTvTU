@@ -537,10 +537,12 @@ namespace OpenUtau.App.Controls {
             Math.Abs(target - value) <= delta ? target : value + Math.Sign(target - value) * delta;
 
         private void RenderNoteBody(UNote note, NotesViewModel viewModel, DrawingContext context) {
-            Point leftTop = viewModel.TickToneToPoint(note.position, note.AdjustedTone);
-            leftTop = leftTop.WithX(leftTop.X + 1).WithY(Math.Round(leftTop.Y + 1));
-            Size size = viewModel.TickToneToSize(note.duration, 1);
-            size = size.WithWidth(size.Width - 1).WithHeight(Math.Floor(size.Height - 2));
+            // 几何走单一来源（W38 抽取）：音符体内缩口径见 NotesGeometry.NoteBodyRect
+            Rect bodyRect = NotesGeometry.NoteBodyRect(
+                viewModel.TickToneToPoint(note.position, note.AdjustedTone),
+                viewModel.TickToneToSize(note.duration, 1));
+            Point leftTop = bodyRect.TopLeft;
+            Size size = bodyRect.Size;
             leftTop += GetPlaybackBounceOffset(note);
             Point rightBottom = new Point(leftTop.X + size.Width, leftTop.Y + size.Height);
             var brush = selectedNotes.Contains(note)
@@ -554,7 +556,7 @@ namespace OpenUtau.App.Controls {
                     brush = BlendBrush(brush, note.Error ? ThemeManager.AccentBrush2Semi : ThemeManager.AccentBrush2, highlight);
                 }
             }
-            context.DrawRectangle(brush, null, new Rect(leftTop, rightBottom), 2, 2);
+            context.DrawRectangle(brush, null, new Rect(leftTop, rightBottom), NotesGeometry.NoteBodyCornerRadius, NotesGeometry.NoteBodyCornerRadius);
             if (Preferences.Default.NoteHoverGlow) {
                 DrawHoverGlow(context, leftTop, size, 2, brush, GetHoverGlow(note));
             }
@@ -660,14 +662,16 @@ namespace OpenUtau.App.Controls {
             double height = TrackHeight * relativeSize;
             double yOffset = Math.Floor(height * 0.5f);
             Point leftTop = viewModel.TickToneToPoint(partOffset + note.position, note.AdjustedTone);
-            leftTop = leftTop.WithX(leftTop.X + 1).WithY(Math.Round(leftTop.Y + 1 + yOffset));
-
-            Size size = viewModel.TickToneToSize(note.duration, relativeSize);
-            size = size.WithWidth(size.Width - 1).WithHeight(Math.Floor(size.Height - 2));
+            Rect ghostRect = NotesGeometry.NoteBodyRect(
+                viewModel.TickToneToPoint(partOffset + note.position, note.AdjustedTone),
+                viewModel.TickToneToSize(note.duration, relativeSize),
+                yOffset);
+            leftTop = ghostRect.TopLeft;
+            Size size = ghostRect.Size;
 
             Point rightBottom = new Point(leftTop.X + size.Width, leftTop.Y + size.Height);
 
-            context.DrawRectangle(brush, null, new Rect(leftTop, rightBottom), 2, 2);
+            context.DrawRectangle(brush, null, new Rect(leftTop, rightBottom), NotesGeometry.NoteBodyCornerRadius, NotesGeometry.NoteBodyCornerRadius);
         }
 
         private void RenderPitchBend(UNote note, NotesViewModel viewModel, DrawingContext context) {

@@ -63,6 +63,8 @@
     <None Include="..\OpenUtau\Controls\TrackHeader.axaml" Link="Controls\TrackHeader.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Styles\Md3Menus.axaml" Link="Styles\Md3Menus.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Views\MixFxDialog.axaml" Link="Views\MixFxDialog.axaml" CopyToOutputDirectory="PreserveNewest" />
+    <!-- W38 契约：源码层断言"卷帘真的调用了共享几何"（抽出来没接线要被挡住） -->
+    <None Include="..\OpenUtau\Controls\NotesCanvas.cs" Link="Controls\NotesCanvas.cs" CopyToOutputDirectory="PreserveNewest" />
     <!-- W28 命令层契约：EN/zh 显示名键成对断言要扫语言文件原文（avares 不保留 .axaml 原文） -->
     <None Include="..\OpenUtau\Strings\Strings.axaml" Link="Strings\Strings.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Strings\Strings.zh-CN.axaml" Link="Strings\Strings.zh-CN.axaml" CopyToOutputDirectory="PreserveNewest" />

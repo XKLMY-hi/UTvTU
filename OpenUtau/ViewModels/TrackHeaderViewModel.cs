@@ -19,7 +19,7 @@ using ReactiveUI.Fody.Helpers;
 using Serilog;
 
 namespace OpenUtau.App.ViewModels {
-    public class TrackHeaderViewModel : ViewModelBase, IActivatableViewModel {
+    public class TrackHeaderViewModel : ViewModelBase, IDisposable, IActivatableViewModel {
         public int TrackNo => track.TrackNo + 1;
         public USinger Singer => track.Singer;
         public Phonemizer Phonemizer => track.Phonemizer;
@@ -44,8 +44,20 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public bool IsSingerVisible { get; set; }
         [Reactive] public bool IsPhonemizerVisible { get; set; }
         [Reactive] public bool IsRendererVisible { get; set; }
+        /// <summary>W33 紧凑档：渲染器内联在名字行右侧（不占独立行），由 code-behind 按轨道高设置。</summary>
+        [Reactive] public bool IsRendererInline { get; set; }
+        /// <summary>
+        /// 次行的 `⋯` 溢出按钮是否显示（W33）：歌手/音素器被按高裁掉时，仍能从那里进它们的菜单。
+        /// **渲染器不再进溢出菜单** —— 它恒可见，避免同一入口两处（用户报的"渲染器被挤掉"）。
+        /// </summary>
+        public bool ShowOverflow => !IsSingerVisible || !IsPhonemizerVisible;
         [Reactive] public bool MixFxEnabled { get; set; }
         [Reactive] public IBrush HeaderBorderBrush { get; set; } = ThemeManager.NeutralAccentBrushSemi;
+
+        // W33：MessageBus 订阅句柄（此前"发出即丢"，VM 永不退订 ⇒ 跨用例/跨视图串扰）
+        private IDisposable? volumeSub;
+        private IDisposable? panSub;
+        private bool disposed;
 
         public ViewModelActivator Activator { get; }
 
@@ -146,7 +158,11 @@ namespace OpenUtau.App.ViewModels {
                 });
 
             // Listen for volume/pan changes from mixer window
-            MessageBus.Current.Listen<VolumeChangeNotification>()
+            // W33：这两条订阅必须留住句柄并在 Dispose 里释放 —— 此前它们**永不退订**，
+            // 于是"已无主的轨头 VM"会一直留在 MessageBus 上：之后任何人发
+            // Volume/PanChangeNotification 都会回调到它（headless 下跨用例串扰，
+            // MixerTrackStripTest 的"只发一次声像通知"就是被这种泄漏踩红的）。
+            volumeSub = MessageBus.Current.Listen<VolumeChangeNotification>()
                 .Where(n => n.TrackNo == track.TrackNo)
                 .Subscribe(n => {
                     _syncing = true;
@@ -157,7 +173,7 @@ namespace OpenUtau.App.ViewModels {
                     }
                     _syncing = false;
                 });
-            MessageBus.Current.Listen<PanChangeNotification>()
+            panSub = MessageBus.Current.Listen<PanChangeNotification>()
                 .Where(n => n.TrackNo == track.TrackNo)
                 .Subscribe(n => {
                     _syncing = true;
@@ -182,6 +198,9 @@ namespace OpenUtau.App.ViewModels {
                     track.Solo = solo;
                     DocManager.Inst.MarkProjectModified();
                 });
+            // W33：次行 `⋯` 的显隐由"歌手/音素器是否被按高裁掉"派生 ⇒ 两者变了要通知它
+            this.WhenAnyValue(x => x.IsSingerVisible, x => x.IsPhonemizerVisible)
+                .Subscribe(_ => this.RaisePropertyChanged(nameof(ShowOverflow)));
             this.WhenAnyValue(x => x.MixFxEnabled)
                 .Subscribe(enabled => {
                     if (track.MixFx != null) {
@@ -663,5 +682,15 @@ namespace OpenUtau.App.ViewModels {
                 MixFxDialog.Open(desktop.MainWindow, track);
             }
         }
-    }
+        /// <summary>释放 MessageBus 订阅（W33）。轨头被移除/重建时必须调用，否则监听者越积越多。</summary>
+        public void Dispose() {
+            if (disposed) {
+                return;
+            }
+            disposed = true;
+            volumeSub?.Dispose();
+            volumeSub = null;
+            panSub?.Dispose();
+            panSub = null;
+        }    }
 }

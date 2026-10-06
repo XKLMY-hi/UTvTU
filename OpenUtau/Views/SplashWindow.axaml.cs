@@ -1,5 +1,4 @@
 using System;
-using System.Reactive.Disposables;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -8,31 +7,17 @@ using Avalonia.Input;
 using OpenUtau.App;
 using OpenUtau.Classic;
 using OpenUtau.Core;
-using ReactiveUI;
 using Serilog;
 
 namespace OpenUtau.App.Views {
     // 启动徽标：普通 Window + 无装饰（不继承 WindowEx，完全绕开自绘边框逻辑）
-    public partial class SplashWindow : Window, IDisposable {
+    public partial class SplashWindow : Window {
         public SplashWindow() {
             InitializeComponent();
-            UpdateLogo();
-            MessageBus.Current.Listen<ThemeChangedEvent>()
-                .Subscribe(_ => UpdateLogo())
-                .DisposeWith(disposable);
+            // W40：徽标改为矢量品牌几何 + md3.* 令牌后，深浅色不再需要切位图 ——
+            // 原来这里订阅 ThemeChangedEvent 切 logotype-w.png / logotype.png，现已删除。
             this.Cursor = new Cursor(StandardCursorType.AppStarting);
             this.Opened += SplashWindow_Opened;
-        }
-
-        private readonly CompositeDisposable disposable = new();
-
-        private void UpdateLogo() {
-            LogoTypeDark.IsVisible = ThemeManager.IsDarkMode;
-            LogoTypeLight.IsVisible = !ThemeManager.IsDarkMode;
-        }
-
-        public void Dispose() {
-            disposable.Dispose();
         }
 
         private void SplashWindow_Opened(object? sender, EventArgs e) {
