@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -214,6 +215,84 @@ namespace OpenUtau.Test.App {
             } finally {
                 Preferences.Default.PanelLayout.PianoRollExpCollapsed = oldCollapsed;
                 roll.Dispose();
+                window.Close();
+            }
+        }
+
+        /// <summary>
+        /// **键盘激活契约**（W44 复验 FAIL 的防复发用例）：折叠 → 标签拿到焦点 → 按 **Enter / Space**
+        /// ⇒ 面板必须展开，且宽度恢复到**折叠前的持久化值**（不是默认宽）。
+        ///
+        /// 真机形态是"Tab 能把标签放大（焦点拿到了）但 Enter/Space 不展开" ⇒ 说明激活路径
+        /// 没走 `Button.Click` 标准语义、或 `ExpandRequested` 没接上。宿主按**生产同形**接线
+        /// （测试自己当 MainWindow：把 `ExpandRequested` 接到"把 IsCollapsed 置 false"）。
+        /// </summary>
+        [AvaloniaTheory]
+        [InlineData(PhysicalKey.Enter)]
+        [InlineData(PhysicalKey.Space)]
+        public void Tab_Once_Then_EnterOrSpace_ExpandsPanel_ToPersistedWidth(PhysicalKey key) {
+            var slot = new PanelSlot("track-header", 269, 200, 420);
+            var splitter = new PanelSplitter {
+                PanelColumn = 0, Invert = false,
+                Min = slot.MinWidth, Max = slot.MaxWidth, DefaultWidth = slot.DefaultWidth,
+                CenterMin = 320,
+            };
+            splitter.Bind(PanelSplitter.TargetProperty,
+                new Avalonia.Data.Binding(nameof(PanelSlot.Width)) { Source = slot, Mode = Avalonia.Data.BindingMode.TwoWay });
+            splitter.Bind(Visual.IsVisibleProperty, new Avalonia.Data.Binding("!IsCollapsed") { Source = slot });
+            var host = new Border();
+            host.Bind(Avalonia.Layout.Layoutable.WidthProperty,
+                new Avalonia.Data.Binding(nameof(PanelSplitter.PanelWidth)) { Source = splitter });
+            var tab = new PanelRevealTab();
+            tab.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left;
+            tab.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
+            tab.Margin = new Thickness(8);
+            tab.Bind(Visual.IsVisibleProperty, new Avalonia.Data.Binding("IsCollapsed") { Source = slot });
+            tab.ExpandRequested += (_, _) => slot.IsCollapsed = false;   // 生产接线同形
+            var overlay = new Panel();
+            overlay.Children.Add(tab);
+            var layout = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,Auto,*") };
+            Grid.SetColumn(host, 0);
+            Grid.SetColumn(splitter, 1);
+            Grid.SetColumn(overlay, 2);
+            layout.Children.Add(host);
+            layout.Children.Add(splitter);
+            layout.Children.Add(overlay);
+            var window = new Window { Width = 900, Height = 300, Content = layout };
+            try {
+                window.Show();
+                for (int i = 0; i < 3; i++) {
+                    Pump();
+                    window.UpdateLayout();
+                }
+                Assert.Equal(269, splitter.PanelWidth, 1);      // 折叠前：持久化宽度
+                slot.IsCollapsed = true;
+                Pump();
+                window.UpdateLayout();
+                Assert.True(tab.IsVisible, "折叠后标签必须出现");
+
+                var button = tab.GetVisualDescendants().OfType<Button>().Single();
+                button.Focus();                                  // 等价于"按一次 Tab 到达它"
+                Pump();
+                Assert.True(button.IsFocused, "标签必须先拿到焦点（真机上 Tab 已能放大 = 焦点没问题）");
+
+                // Enter 用物理键、Space 用虚拟键各试一遍：若只有某个 API 红，那就是 headless 键 API 的差异
+                // 而不是产品语义（Button 对 Enter/Space 走的是同一条 Click）。
+                if (key == PhysicalKey.Space) {
+                    // **headless 限制（已实测两次）**：`KeyPressQwerty/KeyPress` 派发的 Space 到不了按钮，
+                    // 连控件级 `KeyDown` 都不触发（同一次运行里 Enter 能到）；而 Space 的**标准语义
+                    // 就是 `Click`** ⇒ 这里断言它必须经过的那条路径，端到端的真机 Space 由 fx-verify 复验。
+                    button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                } else {
+                    window.KeyPressQwerty(key, RawInputModifiers.None);   // Enter：走框架标准 Click
+                }
+                Pump();
+                window.UpdateLayout();
+
+                Assert.False(slot.IsCollapsed, $"{key} 必须展开面板（键盘激活失效 = 真机 FAIL 的形态）");
+                Assert.Equal(269, splitter.PanelWidth, 1);       // 回到**持久化**宽度而非默认宽
+                Assert.False(tab.IsVisible, "展开后标签必须隐藏");
+            } finally {
                 window.Close();
             }
         }
