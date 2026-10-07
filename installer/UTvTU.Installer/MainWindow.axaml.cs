@@ -152,6 +152,10 @@ namespace UTvTU.Installer {
                 Bar.Value = p.Percent;
                 StageText.Text = p.Stage;
             });
+            // ⚠ 勾选值必须在**切后台线程之前**读好：UI 控件属性只能在 UI 线程访问
+            //   （实测踩过：后台线程读 ToggleButton.IsChecked ⇒ "The calling thread cannot access this object"）
+            bool desktopShortcut = ChkDesktop.IsChecked == true;
+            bool fileAssoc = ChkAssoc.IsChecked == true;
             string log = "";
             void OnLog(string line) {
                 log += line + Environment.NewLine;
@@ -162,7 +166,7 @@ namespace UTvTU.Installer {
                 if (InstallerCore.DetectLegacy() is { } lg) {
                     OnLog($"检测到既有安装：{lg.DisplayName} @ {lg.Path}");
                 }
-                InstallerCore.Install(dir, ChkDesktop.IsChecked == true, ChkAssoc.IsChecked == true, progress, CancellationToken.None);
+                InstallerCore.Install(dir, desktopShortcut, fileAssoc, progress, CancellationToken.None);
                 OnLog("安装完成");
             });
             await Dispatcher.UIThread.InvokeAsync(() => LogText.Text = log);
@@ -177,7 +181,8 @@ namespace UTvTU.Installer {
                 Bar.Value = p.Percent;
                 StageText.Text = p.Stage;
             });
-            await Task.Run(() => InstallerCore.Uninstall(dir, ChkRemoveData.IsChecked == true, progress));
+            bool removeData = ChkRemoveData.IsChecked == true;   // ⚠ 同上：先取好再切线程
+            await Task.Run(() => InstallerCore.Uninstall(dir, removeData, progress));
             StatusText.Text = "卸载完成";
             await Task.Delay(700);
             Close();
