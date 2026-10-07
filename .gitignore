@@ -358,3 +358,7 @@ VstTest/obj/
 packaging/publish/
 packaging/dist/
 packaging/vc_redist.x64.exe
+
+# 安装包产物（183MB+ 载荷，超 GitHub 单文件上限，不入库）
+dist/
+

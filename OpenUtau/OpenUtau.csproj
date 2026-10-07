@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
     <TargetFramework>net8.0-windows</TargetFramework>
   </PropertyGroup>
@@ -141,4 +141,13 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+
+  <!-- 构建时刻版本号（用户 2026-10 要求）：形如 UTvTU-26.10.7-143025。
+       ⚠ 必须在项目**求值阶段**赋值（顶层 PropertyGroup 里的属性函数）——放进 Target 会被
+       SDK 的 GenerateAssemblyInfo 提前捕获，导致版本号不生效（实测踩过）。
+       关闭 SDK 往 InformationalVersion 追加 "+<git sha>" 的默认行为，否则版本号被盖掉。 -->
+  <PropertyGroup>
+    <InformationalVersion>UTvTU-$([System.DateTime]::Now.ToString("yy.M.d-HHmmss"))</InformationalVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
 </Project>

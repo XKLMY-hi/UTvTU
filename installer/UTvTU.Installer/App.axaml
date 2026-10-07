@@ -1,0 +1,98 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="UTvTU.Installer.App"
+             RequestedThemeVariant="Default">
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <!-- 品牌几何：从 OpenUtau/Assets/Icons.axaml 逐字抽取生成（见 Assets/Brand.axaml 头部） -->
+        <ResourceInclude Source="/Assets/Brand.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
+  <Application.Styles>
+    <FluentTheme />
+
+    <!-- ══ MD3 安装器样式（只用写死的 inst.* 键；无阴影、无玻璃） ══ -->
+
+    <Style Selector="Window">
+      <Setter Property="Background" Value="{DynamicResource inst.surface}" />
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <Style Selector="TextBlock">
+      <Setter Property="Foreground" Value="{DynamicResource inst.on-surface}" />
+    </Style>
+    <Style Selector="TextBlock.h1">
+      <Setter Property="FontSize" Value="24" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.h2">
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.muted">
+      <Setter Property="Foreground" Value="{DynamicResource inst.on-surface-variant}" />
+      <Setter Property="FontSize" Value="12" />
+    </Style>
+    <Style Selector="TextBlock.caption">
+      <Setter Property="Foreground" Value="{DynamicResource inst.on-surface-variant}" />
+      <Setter Property="FontSize" Value="11" />
+    </Style>
+
+    <!-- 卡片：surface-container + 1px outline-variant + 圆角 12（与主程序一致的语言） -->
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="{DynamicResource inst.surface-container}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource inst.outline-variant}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Padding" Value="16" />
+    </Style>
+
+    <!-- 主按钮（filled）：primary / on-primary，圆角 999，高 36 -->
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="{DynamicResource inst.primary}" />
+      <Setter Property="Foreground" Value="{DynamicResource inst.on-primary}" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="Height" Value="36" />
+      <Setter Property="MinWidth" Value="96" />
+      <Setter Property="Padding" Value="20,0" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+
+    <!-- 次级按钮（tonal / outlined） -->
+    <Style Selector="Button.tonal">
+      <Setter Property="Background" Value="{DynamicResource inst.secondary-container}" />
+      <Setter Property="Foreground" Value="{DynamicResource inst.on-secondary-container}" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="Height" Value="36" />
+      <Setter Property="MinWidth" Value="88" />
+      <Setter Property="Padding" Value="18,0" />
+    </Style>
+    <Style Selector="Button.text">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{DynamicResource inst.primary}" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="Height" Value="36" />
+      <Setter Property="Padding" Value="14,0" />
+    </Style>
+
+    <Style Selector="ProgressBar">
+      <Setter Property="Height" Value="8" />
+      <Setter Property="Foreground" Value="{DynamicResource inst.primary}" />
+      <Setter Property="Background" Value="{DynamicResource inst.surface-container-highest}" />
+      <Setter Property="CornerRadius" Value="999" />
+    </Style>
+
+    <Style Selector="CheckBox">
+      <Setter Property="Foreground" Value="{DynamicResource inst.on-surface}" />
+    </Style>
+    <Style Selector="TextBox">
+      <Setter Property="Background" Value="{DynamicResource inst.surface-container-highest}" />
+      <Setter Property="Foreground" Value="{DynamicResource inst.on-surface}" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="MinHeight" Value="36" />
+    </Style>
+  </Application.Styles>
+</Application>

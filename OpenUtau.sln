@@ -28,6 +28,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenUtau.Plugin.Builtin", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VstProbe", "VstProbe\VstProbe.csproj", "{5CBB9B1D-BD4F-466C-88E3-2D405A997344}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "installer", "installer", "{1860D2E4-5C43-71D5-59A5-599A4DE1DF67}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UTvTU.Installer", "installer\UTvTU.Installer\UTvTU.Installer.csproj", "{6DC317CC-3DA1-4C1F-B978-6D743158E99B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -98,9 +102,24 @@ Global
 		{5CBB9B1D-BD4F-466C-88E3-2D405A997344}.Release|x64.Build.0 = Release|Any CPU
 		{5CBB9B1D-BD4F-466C-88E3-2D405A997344}.Release|x86.ActiveCfg = Release|Any CPU
 		{5CBB9B1D-BD4F-466C-88E3-2D405A997344}.Release|x86.Build.0 = Release|Any CPU
+		{6DC317CC-3DA1-4C1F-B978-6D743158E99B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DC317CC-3DA1-4C1F-B978-6D743158E99B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DC317CC-3DA1-4C1F-B978-6D743158E99B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6DC317CC-3DA1-4C1F-B978-6D743158E99B}.Debug|x64.Build.0 = Debug|Any CPU
+		{6DC317CC-3DA1-4C1F-B978-6D743158E99B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6DC317CC-3DA1-4C1F-B978-6D743158E99B}.Debug|x86.Build.0 = Debug|Any CPU
+		{6DC317CC-3DA1-4C1F-B978-6D743158E99B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DC317CC-3DA1-4C1F-B978-6D743158E99B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DC317CC-3DA1-4C1F-B978-6D743158E99B}.Release|x64.ActiveCfg = Release|Any CPU
+		{6DC317CC-3DA1-4C1F-B978-6D743158E99B}.Release|x64.Build.0 = Release|Any CPU
+		{6DC317CC-3DA1-4C1F-B978-6D743158E99B}.Release|x86.ActiveCfg = Release|Any CPU
+		{6DC317CC-3DA1-4C1F-B978-6D743158E99B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6DC317CC-3DA1-4C1F-B978-6D743158E99B} = {1860D2E4-5C43-71D5-59A5-599A4DE1DF67}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B9CB0FF-2508-4CE7-A63E-55A25641AFF8}

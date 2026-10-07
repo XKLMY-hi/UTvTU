@@ -1,0 +1,112 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="UTvTU.Installer.MainWindow"
+        Title="UTvTU 安装程序"
+        Width="780" Height="540" CanResize="False"
+        WindowStartupLocation="CenterScreen">
+  <Grid RowDefinitions="64,*,76">
+
+    <!-- ══ 顶栏：品牌锁定（几何与主程序顶栏逐字一致）+ 页名 ══ -->
+    <Border Grid.Row="0" Background="{DynamicResource inst.surface-container}"
+            BorderBrush="{DynamicResource inst.outline-variant}" BorderThickness="0,0,0,1">
+      <Grid ColumnDefinitions="Auto,*,Auto" Margin="24,0">
+        <StackPanel Orientation="Horizontal" Spacing="6.3" VerticalAlignment="Center">
+          <Viewbox Width="20.9" Height="20.9" Stretch="Uniform">
+            <Path Data="{StaticResource brand-mark}" Stroke="{DynamicResource inst.primary}"
+                  StrokeThickness="8" StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
+          </Viewbox>
+          <Canvas Width="55.8" Height="15" VerticalAlignment="Center">
+            <Path Data="{StaticResource brand-wordmark}" Fill="{DynamicResource inst.on-surface}"
+                  Width="55.8" Height="15" Stretch="Uniform"/>
+            <Path Data="{StaticResource brand-v-chevron}" Stroke="{DynamicResource inst.on-surface}"
+                  StrokeThickness="3.30" StrokeLineCap="Round" StrokeJoin="Round"
+                  Width="4.92" Height="7.68" Stretch="Uniform" Canvas.Left="25.03" Canvas.Top="5.44"/>
+          </Canvas>
+        </StackPanel>
+        <TextBlock Grid.Column="2" x:Name="PageTitle" Classes="caption"
+                   VerticalAlignment="Center" Text="安装"/>
+      </Grid>
+    </Border>
+
+    <!-- ══ 内容区（5 个页面互斥显示） ══ -->
+    <Grid Grid.Row="1" Margin="24,20,24,8">
+
+      <!-- ① 欢迎 -->
+      <StackPanel x:Name="PageWelcome" Spacing="14">
+        <TextBlock Classes="h1" Text="安装 UTvTU"/>
+        <TextBlock Classes="muted" TextWrapping="Wrap"
+                   Text="UTvTU —— OpenUTAU 的增强分支：DAW 混音台、VST3 效果链、常驻素材库，自研 Material Design 3 界面。"/>
+        <Border Classes="card">
+          <StackPanel Spacing="6">
+            <TextBlock Classes="h2" Text="将安装到"/>
+            <TextBlock x:Name="WelcomeTarget" Classes="muted" TextWrapping="Wrap"/>
+            <TextBlock x:Name="WelcomeLegacy" Classes="muted" TextWrapping="Wrap" IsVisible="False"/>
+          </StackPanel>
+        </Border>
+        <TextBlock Classes="caption" TextWrapping="Wrap"
+                   Text="提示：用户数据（工程 / 声库 / 设置 / 缓存）保存在与旧版相同的位置，安装与升级都不会动它。"/>
+      </StackPanel>
+
+      <!-- ② 安装位置 -->
+      <StackPanel x:Name="PageLocation" Spacing="14" IsVisible="False">
+        <TextBlock Classes="h1" Text="选择安装位置"/>
+        <TextBlock Classes="muted" Text="若该目录已有旧版 UTvTU / OpenUTAU Plus，将就地覆盖程序文件（用户数据不受影响）。"/>
+        <TextBox x:Name="DirBox"/>
+        <Border Classes="card" x:Name="LegacyCard" IsVisible="False">
+          <StackPanel Spacing="4">
+            <TextBlock Classes="h2" Text="检测到既有安装"/>
+            <TextBlock x:Name="LegacyInfo" Classes="muted" TextWrapping="Wrap"/>
+          </StackPanel>
+        </Border>
+        <StackPanel Spacing="6">
+          <CheckBox x:Name="ChkDesktop" Content="创建桌面快捷方式" IsChecked="True"/>
+          <CheckBox x:Name="ChkAssoc" Content="将 .ustx / .ustxp 工程关联到 UTvTU" IsChecked="True"/>
+        </StackPanel>
+        <TextBlock x:Name="ElevationNote" Classes="caption" IsVisible="False"
+                   Text="该位置需要管理员权限：点击「安装」会请求一次 UAC 提权（后台会以管理员身份重新打开本程序）。"/>
+      </StackPanel>
+
+      <!-- ③ 安装中 -->
+      <StackPanel x:Name="PageInstall" Spacing="14" IsVisible="False">
+        <TextBlock Classes="h1" Text="正在安装"/>
+        <ProgressBar x:Name="Bar" Minimum="0" Maximum="100" Value="0"/>
+        <TextBlock x:Name="StageText" Classes="muted"/>
+        <Border Classes="card" Padding="10">
+          <ScrollViewer Height="180">
+            <TextBlock x:Name="LogText" Classes="caption" TextWrapping="Wrap"/>
+          </ScrollViewer>
+        </Border>
+      </StackPanel>
+
+      <!-- ④ 完成 -->
+      <StackPanel x:Name="PageDone" Spacing="14" IsVisible="False">
+        <TextBlock Classes="h1" Text="安装完成"/>
+        <TextBlock Classes="muted" TextWrapping="Wrap"
+                   Text="程序文件、快捷方式与卸载项都已就位；用户数据保持原位，可直接打开旧工程。"/>
+        <CheckBox x:Name="ChkLaunch" Content="立即启动 UTvTU" IsChecked="True"/>
+      </StackPanel>
+
+      <!-- ⑤ 卸载（卸载模式：命令行带 uninstall 参数时进入） -->
+      <StackPanel x:Name="PageUninstall" Spacing="14" IsVisible="False">
+        <TextBlock Classes="h1" Text="卸载 UTvTU"/>
+        <TextBlock x:Name="UninstallTarget" Classes="muted" TextWrapping="Wrap"/>
+        <CheckBox x:Name="ChkRemoveData" Content="同时删除用户数据（工程 / 声库 / 设置 / 缓存）"/>
+        <TextBlock Classes="caption" TextWrapping="Wrap"
+                   Text="默认只删程序文件与快捷方式；用户数据保留，重装后可直接继续使用。"/>
+      </StackPanel>
+    </Grid>
+
+    <!-- ══ 底栏 ══ -->
+    <Border Grid.Row="2" Background="{DynamicResource inst.surface-container-low}"
+            BorderBrush="{DynamicResource inst.outline-variant}" BorderThickness="0,1,0,0">
+      <Grid ColumnDefinitions="*,Auto" Margin="24,0">
+        <TextBlock x:Name="StatusText" Classes="caption" VerticalAlignment="Center"/>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <Button x:Name="BtnCancel" Classes="text" Content="取消"/>
+          <Button x:Name="BtnBack" Classes="tonal" Content="上一步" IsVisible="False"/>
+          <Button x:Name="BtnNext" Classes="primary" Content="下一步"/>
+        </StackPanel>
+      </Grid>
+    </Border>
+  </Grid>
+</Window>

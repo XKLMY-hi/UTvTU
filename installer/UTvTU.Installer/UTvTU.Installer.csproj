@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>12</LangVersion>
+    <AssemblyName>UTvTU-Setup</AssemblyName>
+    <RootNamespace>UTvTU.Installer</RootNamespace>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <ApplicationIcon>..\..\OpenUtau\Assets\brand\utvtu.ico</ApplicationIcon>
+    <Version>0.1.568.2</Version>
+    <Company>XKLMY-hi</Company>
+    <Product>UTvTU</Product>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <!-- 构建时刻版本号（用户 2026-10 要求）：UTvTU-<yy.M.d>-<HHmmss>。
+         ⚠ 必须在项目**求值阶段**赋值（属性函数在顶层 PropertyGroup 里展开）——
+         放进 Target 里会被 SDK 的 GenerateAssemblyInfo 提前捕获，导致版本号不生效（实测）。 -->
+    <InformationalVersion>UTvTU-$([System.DateTime]::Now.ToString("yy.M.d-HHmmss"))</InformationalVersion>
+    <!-- SDK 默认会往 InformationalVersion 追加 "+<git sha>"，会把构建时刻版本号盖掉 ⇒ 关掉 -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.1.0" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.0" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.0" />
+  </ItemGroup>
+
+</Project>
