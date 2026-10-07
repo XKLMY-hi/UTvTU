@@ -255,20 +255,31 @@
     </Style>
   </UserControl.Styles>
 
-  <!-- 顶栏 56（照 6-Preferences 的 HTML：品牌标记 36 圆角 8 primary-container + UTVTU 15 粗 +
-       分隔线 1×20 outline-variant + 屏名 11 semibold on-surface-variant，底 surface-container） -->
+  <!-- 顶栏 56（照 6-Preferences 的 HTML：品牌锁定 + 分隔线 1×20 outline-variant + 屏名 11 semibold
+       on-surface-variant，底 surface-container）
+       ⚠ 品牌锁定数值与**主窗顶栏逐字一致**（MainWindow.axaml:341-355）：音符瓦片是旧品牌，已随 W40 退役。 -->
   <Grid RowDefinitions="56,*" Background="{DynamicResource md3.surface}">
     <Border Grid.Row="0" Background="{DynamicResource md3.surface-container}"
             BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1">
       <StackPanel Orientation="Horizontal" Spacing="12" Margin="16,0" VerticalAlignment="Center">
-        <Border Width="36" Height="36" CornerRadius="8" VerticalAlignment="Center"
-                Background="{DynamicResource md3.primary-container}">
-          <Path Data="{StaticResource icon-music}" Width="18" Height="18" Stretch="Uniform"
-                HorizontalAlignment="Center" VerticalAlignment="Center"
-                Fill="{DynamicResource md3.on-primary-container}"/>
-        </Border>
-        <TextBlock Text="UTvTU" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"
-                   Foreground="{DynamicResource md3.on-surface}"/>
+        <!-- 短式品牌（无括号）：标志描边取色 md3.primary + 字标 Fill md3.on-surface + v 单独描边 -->
+        <StackPanel Orientation="Horizontal" Spacing="6.3" VerticalAlignment="Center">
+          <Viewbox Width="20.9" Height="20.9" Stretch="Uniform">
+            <Path Data="{StaticResource brand-mark}"
+                  Stroke="{DynamicResource md3.primary}" StrokeThickness="8"
+                  StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
+          </Viewbox>
+          <Canvas Width="55.8" Height="15" VerticalAlignment="Center">
+            <Path Data="{StaticResource brand-wordmark}"
+                  Fill="{DynamicResource md3.on-surface}"
+                  Width="55.8" Height="15" Stretch="Uniform"/>
+            <Path Data="{StaticResource brand-v-chevron}"
+                  Stroke="{DynamicResource md3.on-surface}" StrokeThickness="3.30"
+                  StrokeLineCap="Round" StrokeJoin="Round"
+                  Width="4.92" Height="7.68" Stretch="Uniform"
+                  Canvas.Left="25.03" Canvas.Top="5.44"/>
+          </Canvas>
+        </StackPanel>
         <Border Width="1" Height="20" VerticalAlignment="Center"
                 Background="{DynamicResource md3.outline-variant}"/>
         <TextBlock Text="{DynamicResource prefs.caption}" FontSize="11" FontWeight="SemiBold"
@@ -949,14 +960,26 @@
           <StackPanel Spacing="12" MaxWidth="560" HorizontalAlignment="Center">
             <Border Classes="card" Padding="32">
               <StackPanel Spacing="16" HorizontalAlignment="Center">
-                <Border Width="96" Height="96" CornerRadius="24" HorizontalAlignment="Center"
-                        Background="{DynamicResource md3.primary-container}">
-                  <Path Data="{StaticResource icon-music}" Width="44" Height="44" Stretch="Uniform"
-                        HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Fill="{DynamicResource md3.on-primary-container}"/>
-                </Border>
-                <TextBlock Text="UTvTU" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"
-                           Foreground="{DynamicResource md3.on-surface}"/>
+                <!-- 关于页品牌锁定：与主窗顶栏同一套件，按 cap 24 放大（主窗数值 × 1.6 = 24/15）
+                     —— 旧的 96 圆角瓦片 + 音符图标是 W40 前的品牌，已退役。 -->
+                <StackPanel Orientation="Horizontal" Spacing="10.08" HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                  <Viewbox Width="33.4" Height="33.4" Stretch="Uniform">
+                    <Path Data="{StaticResource brand-mark}"
+                          Stroke="{DynamicResource md3.primary}" StrokeThickness="8"
+                          StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
+                  </Viewbox>
+                  <Canvas Width="89.28" Height="24" VerticalAlignment="Center">
+                    <Path Data="{StaticResource brand-wordmark}"
+                          Fill="{DynamicResource md3.on-surface}"
+                          Width="89.28" Height="24" Stretch="Uniform"/>
+                    <Path Data="{StaticResource brand-v-chevron}"
+                          Stroke="{DynamicResource md3.on-surface}" StrokeThickness="5.28"
+                          StrokeLineCap="Round" StrokeJoin="Round"
+                          Width="7.87" Height="12.29" Stretch="Uniform"
+                          Canvas.Left="40.05" Canvas.Top="8.70"/>
+                  </Canvas>
+                </StackPanel>
                 <StackPanel Spacing="4" HorizontalAlignment="Center">
                   <TextBlock Text="{DynamicResource prefs.about.version}" FontSize="11" HorizontalAlignment="Center"
                              Foreground="{DynamicResource md3.on-surface-variant}"/>
