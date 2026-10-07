@@ -9,16 +9,32 @@
 
 ## 界面预览
 
-> ⚠️ 以下截图拍摄于 **2026-08 阶段**。2026-09 界面已按设计稿重铸为 Material Design 3 体系
-> （详见下方「2026-09 UI 重铸」），截图待更新；当前结构与配色以应用内实际效果为准。
+> 截图取自 **2026-10 当前构建**（自研 Material Design 3 体系），窗口 1239×804。
+> 深色为默认主题，浅色一键切换（**使用偏好 → 外观**）；视图快捷键 **`Ctrl+1/2/3`** = 工作台 / 钢琴卷帘 / 混音台。
 
-| 欢迎页（旧） | 主窗口 + 侧栏素材库（旧，侧栏已退役） |
+**欢迎页** —— 品牌锁定 `{ UTvTU }` + 真实演唱的**响度图形** + 四张动作卡 + 最近工程
+
+| 深色（默认） | 浅色 |
 |---|---|
-| ![欢迎页](screenshots/welcome.png) | ![主窗口](screenshots/main-sidebar.png) |
+| ![欢迎页（深色）](screenshots/welcome-dark.png) | ![欢迎页（浅色）](screenshots/welcome-light.png) |
 
-| 混音台 + VST 效果器架（旧） |
-|---|
-| ![混音台与VST架](screenshots/mixer-vstrack.png) |
+**工作台** —— 轨道头卡片（M/S/FX/⚙ + 音量声像）+ 编排区 + 常驻素材库（左列可折叠，折叠后左上角出现**快捷展开标签**）
+
+![工作台](screenshots/workspace-dark.png)
+
+**钢琴卷帘** —— 左上角**悬浮工具轨**（绘制类 / 音高类分组、笔工具带子工具浮层）+ 音符与歌词 + 右侧音符属性 + 底部表情区
+
+![钢琴卷帘](screenshots/pianoroll-dark.png)
+
+**混音台** —— 通道条 + 主输出（响度 / 峰值 / 限制器 / 抖动）+ 右侧**效果链**（EQ / 压缩器 / 混响）
+
+![混音台](screenshots/mixer-dark.png)
+
+**使用偏好** —— 左分页导航（音频 / 音源与素材库 / 回放 / 外观 / 编辑 / MIDI 设备 / 通用 / 关于）
+
+| 使用偏好 | 关于 |
+|---|---|
+| ![使用偏好](screenshots/preferences-light.png) | ![关于](screenshots/about-light.png) |
 
 ---
 
