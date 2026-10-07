@@ -31,6 +31,21 @@ namespace UTvTU.Installer {
 
         private static readonly string[] KeepOnUninstall = { "Backups", "UCache", "Cache" };
 
+        private const int MOVEFILE_DELAY_UNTIL_REBOOT = 0x4;
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode,
+            SetLastError = true)]
+        private static extern bool MoveFileEx(string existingFileName, string? newFileName, int flags);
+
+        private static bool TryDelete(string path) {
+            try {
+                File.Delete(path);
+                return !File.Exists(path);
+            } catch {
+                return false;
+            }
+        }
+
         public static bool UninstallMode { get; private set; }
         public static bool Silent { get; private set; }
         public static bool NoDesktopShortcut { get; private set; }
@@ -333,14 +348,24 @@ namespace UTvTU.Installer {
             dir = Path.GetFullPath(dir);
             progress.Report((0, "删除程序文件…"));
             if (Directory.Exists(dir)) {
+                var locked = new List<string>();
                 foreach (string file in Directory.GetFiles(dir, "*", SearchOption.AllDirectories)) {
                     if (string.Equals(file, SelfPath, StringComparison.OrdinalIgnoreCase)) {
                         continue;   // 自身稍后由 cmd 删除
                     }
-                    try {
-                        File.Delete(file);
-                    } catch {
-                        // 占用中的文件跳过
+                    if (!TryDelete(file)) {
+                        locked.Add(file);
+                    }
+                }
+                // 被占用（杀软扫描/句柄未释放）时：等一秒重试一次；仍不行就登记"重启后删除"
+                if (locked.Count > 0) {
+                    Thread.Sleep(1000);
+                    foreach (string file in locked.ToList()) {
+                        if (TryDelete(file)) {
+                            locked.Remove(file);
+                        } else {
+                            MoveFileEx(file, null, MOVEFILE_DELAY_UNTIL_REBOOT);
+                        }
                     }
                 }
             }
