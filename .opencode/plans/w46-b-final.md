@@ -30,3 +30,10 @@
 15. **无投影**：以上三处**均无 `BoxShadow` setter** ⇒ 断言可直接判 `BoxShadow == null`。
 16. **元素锚点**：容器在 `PianoRoll.axaml:203-207`（`ToolRailLayer` Grid `Row=3/Col=1`；`Margin="12"`；`MaxHeight={Binding #ToolRailLayer.Bounds.Height}`；内层 `ScrollViewer VerticalScrollBarVisibility="Auto"`）；**10 项**在 `:215/216/234/235/236/237/238/239/240/241`（`:236` 带 `pitchGroup` = 分隔线首项）；笔浮层 `:216-232`（`Flyout Placement="Right" ShowMode="Transient"`）。
 17. **"无滚动条 + 末项不裁"的 headless 判据**：`ScrollViewer.Extent.Height <= Viewport.Height` + 第 10 个 `ListBoxItem` 的 `Bounds.Bottom <= 容器下端`。⚠ 本仓 headless 渲染是 **stub**（`Path.Bounds` 报 0）⇒ **像素级 hover/选中/描边只能由用户目视**，别把 stub 当"验过"。
+
+## 八、账目更新（Lead 转达用户目视验收，2026-10-07）
+18. **B（工具轨）= 用户目视通过**（"没啥问题"）：竖排悬浮距左上约 12 / 圆角 12 + 无投影 / 按钮约 36 见方 + 间距均匀 / 绘制类与音高类之间 1px 分隔线 / 正常窗口无滚动条 + 第 10 个工具完整；"选中态图标色被默认色覆盖"那个真缺陷修好后用户亦确认无异常。⇒ **我方"未验证"的像素项由用户目视覆盖**（记录在 `.opencode/plans/human-visual-check-2026-10-07.md`，Lead 署名）。
+19. **混音台链面板展开标签 = 用户目视通过**（折叠后右上角出现、可点开、回持久化宽度）。
+20. **`Ctrl+1/2/3` = 用户单独确认** ✔（W48 收口）。
+21. **仍属"未验证"（如实保留）**：① **浅色主题下的真机截图复核**；② **hover/pressed 的实际像素**（只能目视；用户已确认观感）。**机器证据状态**：断言可覆盖的部分由 **m1-strip 的 5 条 headless 断言**承接；**像素项仍无机器证据**（我这条注入路已按规范退役）。
+22. **我的下一件活（只读、不需前台）**：等 m1-strip 交 **S1′a（轨头档位重排）** 后复核 —— ① 四条布局断言与实现**是否 1:1**（每条真钉住它声称的档位，而非空转）；② **两次原子提交各自**是绿的；③ 有无把"只能目视"的项**错标成 headless 通过**。**在他交件前待命。**
