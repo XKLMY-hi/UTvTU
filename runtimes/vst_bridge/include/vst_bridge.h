@@ -1,4 +1,4 @@
-/// vst_bridge.h — C-ABI public exports for OpenUTAU Plus VST host bridge
+/// vst_bridge.h — C-ABI public exports for UTvTU VST host bridge
 ///
 /// This DLL wraps Steinberg VST3 SDK host helpers behind a flat C API so
 /// C# can call it via P/Invoke (DllImport).  Each call is thread-safe.

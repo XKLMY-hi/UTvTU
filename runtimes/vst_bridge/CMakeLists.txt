@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 project(vst_bridge
     VERSION 1.0.0
-    DESCRIPTION "VST3 host bridge for OpenUTAU Plus"
+    DESCRIPTION "VST3 host bridge for UTvTU"
     LANGUAGES CXX)
 
 # ═══════════════════════════════════════════════════════════════

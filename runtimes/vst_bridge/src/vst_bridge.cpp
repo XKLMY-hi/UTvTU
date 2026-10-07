@@ -1,4 +1,4 @@
-/// vst_bridge.cpp — VST3 host bridge for OpenUTAU Plus
+/// vst_bridge.cpp — VST3 host bridge for UTvTU
 ///
 /// Architecture:
 ///   C# P/Invoke → flat C API → VST3::Hosting::Module + PlugProvider

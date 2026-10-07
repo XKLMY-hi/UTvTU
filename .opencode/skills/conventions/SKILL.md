@@ -1,9 +1,9 @@
 ---
 name: conventions
-description: OpenUTAU Plus 开发铁律——动代码前必读。分层红线（View 不直接改 Core 模型、状态走 DocManager.ExecuteCmd）、VST 生命周期与 Dispose 约定、测试铁律（手写 Fake、AvaloniaFact、DocManagerTestSetup）、提交规范（中文 message、原子化、plus-develop 分支）。编写本仓库 C# 代码、提交改动时使用。
+description: UTvTU 开发铁律——动代码前必读。分层红线（View 不直接改 Core 模型、状态走 DocManager.ExecuteCmd）、VST 生命周期与 Dispose 约定、测试铁律（手写 Fake、AvaloniaFact、DocManagerTestSetup）、提交规范（中文 message、原子化、plus-develop 分支）。编写本仓库 C# 代码、提交改动时使用。
 ---
 
-# conventions — OpenUTAU Plus 开发铁律
+# conventions — UTvTU 开发铁律
 
 动代码前必读。
 

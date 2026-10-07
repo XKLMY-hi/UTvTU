@@ -1,10 +1,10 @@
-# CLAUDE.md — OpenUTAU Plus
+# CLAUDE.md — UTvTU
 
-这是 **OpenUTAU Plus** 项目，基于原版 [OpenUTAU](https://github.com/openutau/OpenUtau) 的分支版本。
+这是 **UTvTU** 项目，基于原版 [OpenUTAU](https://github.com/openutau/OpenUtau) 的分支版本。
 
 ## 项目概述
 
-OpenUTAU Plus 是开源歌声合成平台 OpenUTAU 的增强分支，目标：
+UTvTU 是开源歌声合成平台 OpenUTAU 的增强分支，目标：
 - UI/UX 改进优化
 - 新合成引擎和功能
 - 中文本地化增强

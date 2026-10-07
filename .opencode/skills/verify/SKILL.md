@@ -1,9 +1,9 @@
 ---
 name: verify
-description: OpenUTAU Plus 运行验证——构建/启动/驱动 Avalonia 桌面应用验证运行时行为。每步改动后运行：dotnet build、启动应用、检查 Logs 中 [ERR]/[FTL]，按清单验证保存加载、导出渲染、混音台、效果复位、自动保存。验证本仓库代码改动后是否正常工作时使用。
+description: UTvTU 运行验证——构建/启动/驱动 Avalonia 桌面应用验证运行时行为。每步改动后运行：dotnet build、启动应用、检查 Logs 中 [ERR]/[FTL]，按清单验证保存加载、导出渲染、混音台、效果复位、自动保存。验证本仓库代码改动后是否正常工作时使用。
 ---
 
-# verify — OpenUTAU Plus
+# verify — UTvTU
 
 Build/launch/drive for verifying runtime behavior of the Avalonia desktop app.
 

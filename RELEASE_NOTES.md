@@ -1,4 +1,4 @@
-## OpenUTAU Plus 0.1.568-plus.0.0.2-beta
+## UTvTU 0.1.568-plus.0.0.2-beta
 
 ### 新功能 🚀
 - **渲染窗口**（Ctrl+Shift+R）：实时录制导出含完整 VST 效果

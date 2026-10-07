@@ -1,11 +1,11 @@
-# verify — OpenUTAU Plus
+# verify — UTvTU
 
 Build/launch/drive for verifying runtime behavior of the Avalonia desktop app.
 
 ## Build & Launch
 
 ```bash
-cd "/d/xklmy文件夹/XK/XKLMY/项目/vibe coding/OpenUTAU Plus"
+cd "$(git rev-parse --show-toplevel)"
 dotnet build
 dotnet run --project OpenUtau &
 # App starts as a Windows desktop window. Logs at:

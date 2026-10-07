@@ -1,4 +1,4 @@
-# frontend-design — OpenUTAU Plus
+# frontend-design — UTvTU
 
 Avalonia 11.x 前端设计指南。编写 XAML / 控件 / 样式 / 窗口 / 主题相关代码时参考。
 

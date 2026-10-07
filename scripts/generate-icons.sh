@@ -3,7 +3,7 @@
 # Manual fallback paths for icons Heroicons doesn't have
 set -e
 
-cd "D:/xklmy文件夹/XK/XKLMY/项目/vibe coding/OpenUTAU Plus"
+cd "$(dirname "$0")/.."
 OUTPUT="OpenUtau/Assets/Icons.axaml"
 
 # ── Heroicons mapping (all via jsDelivr) ──

@@ -1,9 +1,9 @@
 ---
 name: frontend-design
-description: OpenUTAU Plus 的 Avalonia 前端设计指南。编写 XAML/控件/样式/窗口/主题相关代码时参考：窗口架构（WindowEx 自绘/对话框原生）、样式体系（Colors/Styles/资源 Key）、数据绑定（ViewModelBase + [Reactive]）、典型控件模式与参考文件。注意部分信息可能滞后，与 AGENTS.md 冲突时以 AGENTS.md 为准。
+description: UTvTU 的 Avalonia 前端设计指南。编写 XAML/控件/样式/窗口/主题相关代码时参考：窗口架构（WindowEx 自绘/对话框原生）、样式体系（Colors/Styles/资源 Key）、数据绑定（ViewModelBase + [Reactive]）、典型控件模式与参考文件。注意部分信息可能滞后，与 AGENTS.md 冲突时以 AGENTS.md 为准。
 ---
 
-# frontend-design — OpenUTAU Plus
+# frontend-design — UTvTU
 
 Avalonia 前端设计指南。编写 XAML / 控件 / 样式 / 窗口 / 主题相关代码时参考。
 

@@ -1,5 +1,5 @@
 @echo off
-REM Build vst_bridge.dll for OpenUTAU Plus
+REM Build vst_bridge.dll for UTvTU
 REM Prerequisites: Visual Studio 2022 with C++ tools, VST3 SDK in ..\vst3sdk
 
 setlocal

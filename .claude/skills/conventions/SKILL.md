@@ -1,4 +1,4 @@
-# conventions — OpenUTAU Plus 开发铁律
+# conventions — UTvTU 开发铁律
 
 动代码前必读。
 

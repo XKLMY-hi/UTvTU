@@ -1,8 +1,8 @@
-# AGENTS.md — OpenUTAU Plus
+# AGENTS.md — UTvTU
 
 > ⚠️ **工作区在移动硬盘上，盘符随时会更改**（历史出现 D:/E:/G: 等不同盘符）。每次工作开始前必须先确认实际工作区路径（用 `git remote -v` + 目录存在性核实），**不要沿用上会话的硬编码盘符**。
 
-这是 **OpenUTAU Plus** 项目，基于原版 [OpenUTAU](https://github.com/openutau/OpenUtau) 的分支版本。
+这是 **UTvTU** 项目，基于原版 [OpenUTAU](https://github.com/openutau/OpenUtau) 的分支版本。
 
 ## 平台范围（2026-10 用户明确）
 
@@ -29,7 +29,7 @@
 
 ## 项目概述
 
-OpenUTAU Plus 是开源歌声合成平台 OpenUTAU 的增强分支，目标：
+UTvTU 是开源歌声合成平台 OpenUTAU 的增强分支，目标：
 - UI/UX 改进优化
 - 新合成引擎和功能
 - 中文本地化增强

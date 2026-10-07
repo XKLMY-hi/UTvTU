@@ -44,8 +44,8 @@ git merge master
 
 | 文件 | 改动类型 | 说明 |
 |------|----------|------|
-| `OpenUtau/App.axaml` | 品牌 | 应用名称改为 "OpenUTAU Plus" |
-| `OpenUtau/ViewModels/MainWindowViewModel.cs` | 品牌 | AppVersion 改为 "OpenUTAU Plus" |
+| `OpenUtau/App.axaml` | 品牌 | 应用名称改为 "UTvTU" |
+| `OpenUtau/ViewModels/MainWindowViewModel.cs` | 品牌 | AppVersion 改为 "UTvTU" |
 | `OpenUtau/OpenUtau.csproj` | 品牌 | CFBundleName 等 macOS 信息 |
 | `OpenUtau/Strings/Strings.axaml` | 品牌 | 英文界面字符串中的品牌名 |
 | `OpenUtau/Strings/Strings.zh-CN.axaml` | 品牌+本地化 | 中文界面字符串中的品牌名 |
