@@ -27,6 +27,13 @@
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
 
+  <!-- 载荷内嵌：安装器必须是**完整单文件**、不引用外部资源（用户 2026-10 明确要求）。
+       payload.zip 由 scripts/build-installer.ps1 在打包前复制到本目录（已 gitignore）；
+       存在则内嵌（正式分发用），不存在则回落到同目录外部文件（开发调试方便）。 -->
+  <ItemGroup Condition="Exists('payload.zip')">
+    <EmbeddedResource Include="payload.zip" LogicalName="payload.zip" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="12.1.0" />
     <PackageReference Include="Avalonia.Desktop" Version="12.1.0" />

@@ -48,22 +48,24 @@ if (Test-Path $payload) { Remove-Item $payload -Force }
 Compress-Archive -Path "bin\$Runtime\*" -DestinationPath $payload -CompressionLevel Optimal
 Write-Host "   payload.zip = $([math]::Round((Get-Item $payload).Length / 1MB, 1)) MB"
 
-Write-Host '-- 3/3 构建并复制安装器'
+Write-Host '-- 3/3 构建安装器（载荷内嵌 ⇒ 完整单文件）'
 # 版本号 = 构建时刻版本号（用户 2026-10 要求）：UTvTU-<yy.M.d>-<HHmmss>
 $stamp = 'UTvTU-' + (Get-Date -Format 'yy.M.d-HHmmss')
-Write-Host "   版本号（同时用于 exe 属性与产物名）: $stamp"
+Write-Host "   版本号: $stamp"
+# 把载荷复制进安装器工程 ⇒ csproj 以 EmbeddedResource 内嵌 ⇒ 分发时只需一个 exe
+$embedded = 'installer\UTvTU.Installer\payload.zip'
+Copy-Item $payload $embedded -Force
 dotnet publish installer\UTvTU.Installer\UTvTU.Installer.csproj -c $Configuration -r $Runtime `
     --self-contained true -o "$OutDir\installer" -p:RuntimeIdentifiers=$Runtime `
-    -p:InformationalVersion=$stamp -p:ProductVersion=$stamp `
+    -p:InformationalVersion=$stamp -p:ProductVersion=$stamp -p:DebugType=none `
     -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true
 if ($LASTEXITCODE -ne 0) { throw "安装器 publish 失败（$LASTEXITCODE）" }
+Remove-Item $embedded -Force -ErrorAction SilentlyContinue   # 构建完就删，保持工作树干净（已 gitignore）
 
-$setup = Join-Path $OutDir 'installer\UTvTU-Setup.exe'
 $final = Join-Path $OutDir "$stamp.exe"
-Copy-Item $setup $final -Force
+Copy-Item (Join-Path $OutDir 'installer\UTvTU-Setup.exe') $final -Force
 
 Write-Host ''
-Write-Host '== 完成 =='
+Write-Host '== 完成（分发只需这一个文件）=='
 Write-Host "  $final  ($([math]::Round((Get-Item $final).Length / 1MB, 1)) MB)  版本 $stamp"
-Write-Host "  $payload"
-Write-Host '  分发时两者必须在同一目录（安装器会在自身旁边找 payload.zip）。'
+Write-Host "  中间产物：$payload（已内嵌进上面的 exe，无需一起分发）"

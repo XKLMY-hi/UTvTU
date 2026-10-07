@@ -362,3 +362,7 @@ packaging/vc_redist.x64.exe
 # 安装包产物（183MB+ 载荷，超 GitHub 单文件上限，不入库）
 dist/
 
+
+# 安装器载荷（构建时临时复制进工程内嵌，183MB，不入库）
+payload.zip
+

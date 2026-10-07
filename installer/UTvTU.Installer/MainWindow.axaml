@@ -34,36 +34,31 @@
       <!-- ① 欢迎 -->
       <StackPanel x:Name="PageWelcome" Spacing="14">
         <TextBlock Classes="h1" Text="安装 UTvTU"/>
-        <TextBlock Classes="muted" TextWrapping="Wrap"
-                   Text="UTvTU —— OpenUTAU 的增强分支：DAW 混音台、VST3 效果链、常驻素材库，自研 Material Design 3 界面。"/>
         <Border Classes="card">
           <StackPanel Spacing="6">
-            <TextBlock Classes="h2" Text="将安装到"/>
-            <TextBlock x:Name="WelcomeTarget" Classes="muted" TextWrapping="Wrap"/>
-            <TextBlock x:Name="WelcomeLegacy" Classes="muted" TextWrapping="Wrap" IsVisible="False"/>
+            <TextBlock Classes="caption" Text="安装位置"/>
+            <TextBlock x:Name="WelcomeTarget" TextWrapping="Wrap"/>
           </StackPanel>
         </Border>
-        <TextBlock Classes="caption" TextWrapping="Wrap"
-                   Text="提示：用户数据（工程 / 声库 / 设置 / 缓存）保存在与旧版相同的位置，安装与升级都不会动它。"/>
+        <TextBlock x:Name="WelcomeLegacy" Classes="muted" TextWrapping="Wrap" IsVisible="False"/>
       </StackPanel>
 
       <!-- ② 安装位置 -->
       <StackPanel x:Name="PageLocation" Spacing="14" IsVisible="False">
         <TextBlock Classes="h1" Text="选择安装位置"/>
-        <TextBlock Classes="muted" Text="若该目录已有旧版 UTvTU / OpenUTAU Plus，将就地覆盖程序文件（用户数据不受影响）。"/>
         <TextBox x:Name="DirBox"/>
         <Border Classes="card" x:Name="LegacyCard" IsVisible="False">
           <StackPanel Spacing="4">
-            <TextBlock Classes="h2" Text="检测到既有安装"/>
+            <TextBlock Classes="caption" Text="检测到既有安装"/>
             <TextBlock x:Name="LegacyInfo" Classes="muted" TextWrapping="Wrap"/>
           </StackPanel>
         </Border>
         <StackPanel Spacing="6">
           <CheckBox x:Name="ChkDesktop" Content="创建桌面快捷方式" IsChecked="True"/>
-          <CheckBox x:Name="ChkAssoc" Content="将 .ustx / .ustxp 工程关联到 UTvTU" IsChecked="True"/>
+          <CheckBox x:Name="ChkAssoc" Content="关联 .ustx / .ustxp 工程" IsChecked="True"/>
         </StackPanel>
         <TextBlock x:Name="ElevationNote" Classes="caption" IsVisible="False"
-                   Text="该位置需要管理员权限：点击「安装」会请求一次 UAC 提权（后台会以管理员身份重新打开本程序）。"/>
+                   Text="需要管理员权限，安装时会请求一次 UAC。"/>
       </StackPanel>
 
       <!-- ③ 安装中 -->
@@ -81,8 +76,6 @@
       <!-- ④ 完成 -->
       <StackPanel x:Name="PageDone" Spacing="14" IsVisible="False">
         <TextBlock Classes="h1" Text="安装完成"/>
-        <TextBlock Classes="muted" TextWrapping="Wrap"
-                   Text="程序文件、快捷方式与卸载项都已就位；用户数据保持原位，可直接打开旧工程。"/>
         <CheckBox x:Name="ChkLaunch" Content="立即启动 UTvTU" IsChecked="True"/>
       </StackPanel>
 
@@ -90,9 +83,7 @@
       <StackPanel x:Name="PageUninstall" Spacing="14" IsVisible="False">
         <TextBlock Classes="h1" Text="卸载 UTvTU"/>
         <TextBlock x:Name="UninstallTarget" Classes="muted" TextWrapping="Wrap"/>
-        <CheckBox x:Name="ChkRemoveData" Content="同时删除用户数据（工程 / 声库 / 设置 / 缓存）"/>
-        <TextBlock Classes="caption" TextWrapping="Wrap"
-                   Text="默认只删程序文件与快捷方式；用户数据保留，重装后可直接继续使用。"/>
+        <CheckBox x:Name="ChkRemoveData" Content="同时删除用户数据"/>
       </StackPanel>
     </Grid>
 

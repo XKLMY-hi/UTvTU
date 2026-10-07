@@ -72,7 +72,13 @@ namespace UTvTU.Installer {
         public static string SelfPath => Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule!.FileName!;
         public static string SelfDir => AppContext.BaseDirectory;
         public static string PayloadPath => Path.Combine(SelfDir, PayloadName);
-        public static bool HasPayload => File.Exists(PayloadPath);
+
+        /// <summary>内嵌载荷（正式分发的形态：安装器 = 完整单文件，不引用外部资源）。</summary>
+        private static Stream? EmbeddedPayload() =>
+            typeof(InstallerCore).Assembly.GetManifestResourceStream(PayloadName);
+
+        /// <summary>有载荷可用：优先内嵌，其次同目录外部文件（开发调试用）。</summary>
+        public static bool HasPayload => EmbeddedPayload() != null || File.Exists(PayloadPath);
 
         // ── 目录探测 ────────────────────────────────────────────────────────────
 
@@ -193,7 +199,11 @@ namespace UTvTU.Installer {
         }
 
         private static void ExtractPayload(string dir, Action<int> onProgress, CancellationToken ct) {
-            using ZipArchive zip = ZipFile.OpenRead(PayloadPath);
+            using Stream? source = EmbeddedPayload()
+                                   ?? (File.Exists(PayloadPath) ? File.OpenRead(PayloadPath) : null)
+                                   ?? throw new FileNotFoundException(
+                                       $"载荷不可用：安装器内未内嵌 {PayloadName}，同目录也没有该文件（{PayloadPath}）");
+            using var zip = new ZipArchive(source, ZipArchiveMode.Read);
             int total = Math.Max(1, zip.Entries.Count);
             for (int i = 0; i < zip.Entries.Count; i++) {
                 ct.ThrowIfCancellationRequested();

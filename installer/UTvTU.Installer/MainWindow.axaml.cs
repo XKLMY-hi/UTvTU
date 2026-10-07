@@ -42,8 +42,8 @@ namespace UTvTU.Installer {
                 string.Equals(legacy.Value.Path, dir, StringComparison.OrdinalIgnoreCase);
             if (legacy != null) {
                 string msg = sameAsLegacy
-                    ? $"检测到既有安装：{legacy.Value.DisplayName}（{legacy.Value.Path}）—— 将就地覆盖，用户数据不受影响。"
-                    : $"检测到另一个安装：{legacy.Value.DisplayName}（{legacy.Value.Path}）—— 本次安装不会动它。";
+                    ? $"检测到既有安装：{legacy.Value.DisplayName}（{legacy.Value.Path}）—— 将就地覆盖"
+                    : $"检测到另一个安装：{legacy.Value.DisplayName}（{legacy.Value.Path}）—— 不会动它";
                 WelcomeLegacy.Text = msg;
                 WelcomeLegacy.IsVisible = true;
                 LegacyCard.IsVisible = true;
@@ -61,7 +61,7 @@ namespace UTvTU.Installer {
             }
             StatusText.Text = own != null
                 ? $"已安装版本 {own} ⇒ 将升级到 {InstallerCore.Version}"
-                : $"UTvTU {InstallerCore.Version} · 载荷 {(InstallerCore.HasPayload ? "就绪" : "缺失")}";
+                : $"{InstallerCore.Version} · 载荷 {(InstallerCore.HasPayload ? "就绪" : "缺失")}";
 
             if (uninstallMode) {
                 PageTitle.Text = "卸载";
