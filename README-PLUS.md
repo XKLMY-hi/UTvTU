@@ -1,13 +1,13 @@
-# OpenUTAU Plus
+# UTvTU
 
-**OpenUTAU Plus** 是基于 [OpenUTAU](https://github.com/openutau/OpenUtau) 的增强分支版本。
+**UTvTU**（此前名为 **OpenUTAU Plus**，2026-10 更名并全量迁移）是基于 [OpenUTAU](https://github.com/openutau/OpenUtau) 的增强分支版本。
 
 > 完整功能说明、界面截图与开发文档见 **[README.md](./README.md)**；
 > 设计决策与踩坑记录见 [`.opencode/plans/ui-rework-decisions.md`](.opencode/plans/ui-rework-decisions.md)。
 
 ## 与原版的关系
 
-OpenUTAU Plus 在 MIT 许可证下从原版 OpenUTAU 分支而来，保持与上游同步的同时，添加以下改进：
+UTvTU 在 MIT 许可证下从原版 OpenUTAU 分支而来，保持与上游同步的同时，添加以下改进：
 
 - 🎨 **Material Design 3 界面体系**（2026-09 重铸）：设计稿驱动的颜色池、容器梯度、
   自有控件主题、单窗口三视图、全屏偏好设置；**第三方控件库已完全移除**

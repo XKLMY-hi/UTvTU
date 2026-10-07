@@ -1,4 +1,9 @@
-# OpenUTAU Plus
+# UTvTU
+
+> **UTvTU** —— 此前名为 **OpenUTAU Plus**。2026-10 起更名并全量迁移至本仓库
+> （[github.com/XKLMY-hi/UTvTU](https://github.com/XKLMY-hi/UTvTU)）；旧仓库
+> [OpenUTAU-Plus](https://github.com/XKLMY-hi/OpenUTAU-Plus) 仅作历史存档。
+> **更名不影响代码与用户数据目录**（数据目录仍为 `OpenUtau Plus`，无需任何迁移操作）。
 
 **OpenUTAU** 的增强分支 —— 带 DAW 混音台、VST3 效果器插件与常驻素材库的歌声合成工作站，
 界面为自研 Material Design 3 体系（2026-09 起，已移除第三方控件库）。
@@ -227,7 +232,7 @@ dotnet test  OpenUtau.Test\OpenUtau.Test.csproj   # 全量测试
 
 ## 设计目标
 
-OpenUTAU Plus 的愿景是将 OpenUTAU 从歌声合成编辑器逐步扩展为一个 **以人声为中心的 DAW 工作站**，让用户无需离开软件就能完成混音、母带、效果处理等全流程。
+UTvTU 的愿景是将 OpenUTAU 从歌声合成编辑器逐步扩展为一个 **以人声为中心的 DAW 工作站**，让用户无需离开软件就能完成混音、母带、效果处理等全流程。
 
 ### 近期目标（v1.x）
 
@@ -263,7 +268,7 @@ dotnet run --project OpenUtau
 
 需要 [.NET 8.0 Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)。
 
-> **平台支持**：OpenUTAU Plus 本体用 C# / Avalonia 构建，可在 Windows / macOS / Linux 上运行。但 **VST3 桥接 DLL 目前仅编译了 Windows x64**，macOS 和 Linux 下 VST 相关功能暂时不可用。
+> **平台支持**：UTvTU 本体用 C# / Avalonia 构建，可在 Windows / macOS / Linux 上运行。但 **VST3 桥接 DLL 目前仅编译了 Windows x64**，macOS 和 Linux 下 VST 相关功能暂时不可用。
 
 ---
 

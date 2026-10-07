@@ -1,4 +1,8 @@
-# OpenUTAU Plus
+# UTvTU
+
+> **UTvTU** — formerly **OpenUTAU Plus**. Renamed and fully migrated to this repository in 2026-10;
+> the previous repo ([OpenUTAU-Plus](https://github.com/XKLMY-hi/OpenUTAU-Plus)) is kept as a historical archive.
+> **The rename does not affect code or your user data directory** (still `OpenUtau Plus`, no migration needed).
 
 An enhanced fork of **OpenUTAU** — a vocal synthesis workstation with DAW-style mixer and VST3 plugin support.
 
@@ -53,7 +57,7 @@ Based on [OpenUTAU](https://github.com/openutau/OpenUtau) (MIT License)
 
 ## Design Goals
 
-OpenUTAU Plus aims to evolve OpenUTAU from a vocal synthesis editor into a **vocal-centric DAW workstation**, enabling the full mixing, mastering, and effects workflow without leaving the application.
+UTvTU aims to evolve OpenUTAU from a vocal synthesis editor into a **vocal-centric DAW workstation**, enabling the full mixing, mastering, and effects workflow without leaving the application.
 
 ### Near-term (v1.x)
 
@@ -85,7 +89,7 @@ dotnet run --project OpenUtau
 
 Requires [.NET 8.0 Runtime](https://dotnet.microsoft.com/download/dotnet/8.0).
 
-> **Platform Support**: OpenUTAU Plus is built with C# / Avalonia and runs on Windows / macOS / Linux. However, **the VST3 bridge DLL is currently only compiled for Windows x64**. VST features are unavailable on macOS and Linux for now.
+> **Platform Support**: UTvTU is built with C# / Avalonia and runs on Windows / macOS / Linux. However, **the VST3 bridge DLL is currently only compiled for Windows x64**. VST features are unavailable on macOS and Linux for now.
 
 ---
 
