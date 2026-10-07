@@ -54,7 +54,8 @@ $stamp = 'UTvTU-' + (Get-Date -Format 'yy.M.d-HHmmss')
 Write-Host "   版本号（同时用于 exe 属性与产物名）: $stamp"
 dotnet publish installer\UTvTU.Installer\UTvTU.Installer.csproj -c $Configuration -r $Runtime `
     --self-contained true -o "$OutDir\installer" -p:RuntimeIdentifiers=$Runtime `
-    -p:InformationalVersion=$stamp -p:ProductVersion=$stamp
+    -p:InformationalVersion=$stamp -p:ProductVersion=$stamp `
+    -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true
 if ($LASTEXITCODE -ne 0) { throw "安装器 publish 失败（$LASTEXITCODE）" }
 
 $setup = Join-Path $OutDir 'installer\UTvTU-Setup.exe'
