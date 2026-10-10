@@ -204,13 +204,24 @@ namespace OpenUtau.App.Views {
         }
 
         private async void OnReloadSingers(object? sender, RoutedEventArgs e) {
-            if (Host == null) {
+            if (Host == null || LoadingWindow.IsLoading()) {
                 return;
             }
+            var session = ViewModel;
             LoadingWindow.BeginLoading(Host);
-            await Task.Run(() => SingerManager.Inst.SearchAllSingers());
-            DocManager.Inst.ExecuteCmd(new SingersRefreshedNotification());
-            LoadingWindow.EndLoading();
+            try {
+                await Task.Run(() => SingerManager.Inst.SearchAllSingers());
+                if (ReferenceEquals(session, ViewModel) && session?.IsDisposed == false) {
+                    DocManager.Inst.ExecuteCmd(new SingersRefreshedNotification());
+                }
+            } catch (Exception ex) {
+                Log.Error(ex, "Failed to reload singers from preferences.");
+                if (ReferenceEquals(session, ViewModel) && session?.IsDisposed == false) {
+                    DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(ex));
+                }
+            } finally {
+                LoadingWindow.EndLoading();
+            }
         }
 
         // ── 自定义主题 ───────────────────────────────────────────
