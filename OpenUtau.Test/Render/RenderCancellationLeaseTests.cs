@@ -5,6 +5,25 @@ using Xunit;
 
 namespace OpenUtau.Test.Render {
     public class RenderCancellationLeaseTests {
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ThrowingCancellationCallback_CannotBreakReplacementOrResourceRetirement(bool owned) {
+            CancellationTokenSource slot = null!;
+            var first = owned ? RenderCancellationLease.Replace(ref slot) : null;
+            if (!owned) slot = new CancellationTokenSource();
+            var old = slot;
+            var token = old.Token;
+            using var callback = token.Register(() => throw new InvalidOperationException("Renderer cancellation failed"));
+            first?.Dispose();
+            using var next = RenderCancellationLease.Replace(ref slot);
+            Assert.True(token.IsCancellationRequested);
+            Assert.Same(next.Source, slot);
+            Assert.False(next.Source.IsCancellationRequested);
+            if (owned) Assert.Throws<ObjectDisposedException>(() => old.Token);
+            else { Assert.True(old.Token.IsCancellationRequested); old.Dispose(); }
+        }
+
         [Fact]
         public void ReplacementCancelsImmediately_ButKeepsSourceAliveUntilBackgroundBatchLeaves() {
             CancellationTokenSource slot = null!;

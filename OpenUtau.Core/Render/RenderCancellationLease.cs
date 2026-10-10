@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Serilog;
 
 namespace OpenUtau.Core.Render {
     /// <summary>The shared slot cancels a previous render immediately. Its source
@@ -17,10 +18,15 @@ namespace OpenUtau.Core.Render {
             owners.Add(next.Source, next);
             var previous = Interlocked.Exchange(ref slot, next.Source);
             if (previous != null) {
-                if (owners.TryGetValue(previous, out var owner)) owner.Retire();
-                else {
-                    // An external source remains owned by its caller.
-                    try { previous.Cancel(); } catch (ObjectDisposedException) { }
+                try {
+                    if (owners.TryGetValue(previous, out var owner)) owner.Retire();
+                    else previous.Cancel(); // An external source remains owned by its caller.
+                } catch (ObjectDisposedException) {
+                    // An external owner may already have disposed its source.
+                } catch (AggregateException error) {
+                    // A renderer callback cannot prevent a replacement job from starting.
+                    // Cancel has run all callbacks; Retire's finally still releases ownership.
+                    Log.Warning(error, "A render cancellation callback failed.");
                 }
             }
             return next;
