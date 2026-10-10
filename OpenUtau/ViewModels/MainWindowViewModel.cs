@@ -125,17 +125,10 @@ namespace OpenUtau.App.ViewModels {
         /// <summary>有最近工程但搜索无匹配（空态 B —— 与"还没工程"必须区分，不能都显示成同一句话）。</summary>
         [Reactive] public bool WelcomeNoMatch { get; set; }
 
-        /// <summary>按搜索词重建过滤集合：匹配工程名或所在目录，忽略大小写。</summary>
+        /// <summary>按搜索词重建过滤集合（语义在 <see cref="OpenUtau.App.Views.WelcomeArt.FilterRecent"/>，有单测钉死）。</summary>
         public void ApplyWelcomeSearch() {
-            string q = (WelcomeSearch ?? string.Empty).Trim();
-            IEnumerable<RecentFileInfo> src = RecentFiles;
-            if (q.Length > 0) {
-                src = src.Where(f =>
-                    (f.Name?.Contains(q, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                    (f.Directory?.Contains(q, StringComparison.OrdinalIgnoreCase) ?? false));
-            }
             FilteredRecentFiles.Clear();
-            FilteredRecentFiles.AddRange(src);
+            FilteredRecentFiles.AddRange(OpenUtau.App.Views.WelcomeArt.FilterRecent(RecentFiles, WelcomeSearch));
             WelcomeNoRecent = RecentFiles.Count == 0;
             WelcomeNoMatch = RecentFiles.Count > 0 && FilteredRecentFiles.Count == 0;
         }

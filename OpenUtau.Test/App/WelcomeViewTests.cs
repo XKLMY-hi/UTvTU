@@ -14,6 +14,7 @@ using Avalonia.VisualTree;
 using ShapePath = Avalonia.Controls.Shapes.Path;
 using OpenUtau.App;
 using OpenUtau.App.Views;
+using OpenUtau.App.ViewModels;
 using OpenUtau.Core.Theming;
 using OpenUtau.Theming;
 using Xunit;
@@ -242,7 +243,30 @@ namespace OpenUtau.Test.App {
             Assert.Equal("welcome.search.noresult", noMatch.Groups[1].Value);
         }
 
-        // ══════════════════════ 键盘可达（本轮缺陷修复） ══════════════════════
+        // ══════════════════════ 搜索过滤语义（纯函数，不依赖 Avalonia） ══════════════════════
+
+        /// <summary>
+        /// 搜索语义钉死（VM 的 `ApplyWelcomeSearch` 就是调它）：空/空白查询 = **全量**（不是清空），
+        /// 否则匹配**工程名或所在目录**、忽略大小写；无匹配返回空 ⇒ 视图显示"搜索无匹配"（与"没有工程"分开）。
+        /// </summary>
+        [Fact]
+        public void FilterRecent_MatchesNameOrDirectory_IgnoringCase_EmptyQueryKeepsAll() {
+            var files = new[] {
+                new RecentFileInfo(@"D:\Projects\雨靴\雨靴.ustx"),
+                new RecentFileInfo(@"C:\Users\Me\Music\Demo.ustxp"),
+            };
+            Assert.Equal(2, WelcomeArt.FilterRecent(files, "").Count());      // 空串 = 全量
+            Assert.Equal(2, WelcomeArt.FilterRecent(files, "   ").Count());   // 空白 = 全量
+            Assert.Equal(2, WelcomeArt.FilterRecent(files, null).Count());    // null = 全量
+            Assert.Single(WelcomeArt.FilterRecent(files, "demo"));            // 名称匹配，忽略大小写
+            Assert.Single(WelcomeArt.FilterRecent(files, "DEMO"));
+            Assert.Single(WelcomeArt.FilterRecent(files, "projects"));        // 目录匹配
+            Assert.Single(WelcomeArt.FilterRecent(files, "雨靴"));             // 中文/路径片段
+            Assert.Empty(WelcomeArt.FilterRecent(files, "zzzz"));             // 无匹配 = 空
+            Assert.Empty(WelcomeArt.FilterRecent(null, "x"));                 // 空集合安全
+        }
+
+        // ══════════════════════ 键盘可达 / 焦点环 ══════════════════════
 
         /// <summary>
         /// 守卫：入口**全是 Button**，不再有 `Border.PointerPressed` 那种键盘不可达的形态。

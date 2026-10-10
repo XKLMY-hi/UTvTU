@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenUtau.App.ViewModels;
 using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
 
@@ -21,6 +22,24 @@ namespace OpenUtau.App.Views {
     public static class WelcomeArt {
         /// <summary>页头波形装饰带的高度（XAML 里的 Height 必须与此一致；测试把两者钉在一起防漂移）。</summary>
         public const double WaveBandHeight = 64.0;
+
+        /// <summary>
+        /// 欢迎页「最近」的搜索语义（**纯函数**，便于单测钉死；VM 的 ApplyWelcomeSearch 调它）：
+        /// 空/空白查询 = 全量（不是清空）；否则匹配**工程名或所在目录**，忽略大小写。
+        /// 无匹配返回空序列 ⇒ 视图据此显示"搜索无匹配"空态（与"一个工程都没有"必须分开）。
+        /// </summary>
+        public static IEnumerable<RecentFileInfo> FilterRecent(IEnumerable<RecentFileInfo>? files, string? query) {
+            if (files == null) {
+                return Array.Empty<RecentFileInfo>();
+            }
+            string q = (query ?? string.Empty).Trim();
+            if (q.Length == 0) {
+                return files;
+            }
+            return files.Where(f =>
+                (f.Name?.Contains(q, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (f.Directory?.Contains(q, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
 
         /// <summary>
         /// 「已安装音源」= **真实**数据（`SingerManager`），最多取 <paramref name="max"/> 个；
