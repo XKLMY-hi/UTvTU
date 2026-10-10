@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
@@ -15,6 +16,7 @@ using OpenUtau.App.ViewModels;
 using OpenUtau.Core;
 using OpenUtau.Core.Render;
 using OpenUtau.Core.Ustx;
+using OpenUtau.Core.Util;
 using OpenUtau.Test.TestSupport;
 using ReactiveUI;
 using Xunit;
@@ -473,6 +475,173 @@ namespace OpenUtau.Test.App {
                 Assert.Same(foreign, DocManager.Inst.ActiveUndoGroup);
                 Assert.Empty(foreign.Commands);
             } finally { window.Close(); }
+        }
+
+        [AvaloniaFact]
+        public void DiscreteInputs_InitializationMissingTargetsAndSelectionDoNotSealForeignHistory() {
+            using var empty = new NotePropertiesViewModel();
+            Assert.Null(DocManager.Inst.ActiveUndoGroup);
+            Assert.False(DocManager.Inst.GetUndoState(out _));
+            empty.BeginDiscreteInput(nameof(empty.ApplyPortamentoPreset));
+            empty.ApplyPortamentoPreset = new NotePresets.PortamentoPreset("No part", 150, -20);
+            empty.EndDiscreteInputs();
+            empty.Part = part; // A part without selected notes is also not an edit target.
+            empty.BeginDiscreteInput(nameof(empty.ApplyVibratoPreset));
+            empty.ApplyVibratoPreset = new NotePresets.VibratoPreset("No selection", 60, 160, 40, 20, 20, 5, 5, 10);
+            empty.EndDiscreteInputs();
+            empty.SetVibratoEnable();
+            Assert.Null(DocManager.Inst.ActiveUndoGroup);
+            Assert.False(DocManager.Inst.GetUndoState(out _));
+            DocManager.Inst.StartUndoGroup();
+            var foreign = DocManager.Inst.ActiveUndoGroup;
+            bool previousFlag = NotePropertiesViewModel.PanelControlPressed;
+            try {
+                using var another = new NotePropertiesViewModel();
+                Assert.Same(foreign, DocManager.Inst.ActiveUndoGroup);
+                NotePropertiesViewModel.PanelControlPressed = true;
+                Select(second);
+                Assert.Same(foreign, DocManager.Inst.ActiveUndoGroup);
+                Assert.Empty(foreign!.Commands);
+            } finally { NotePropertiesViewModel.PanelControlPressed = previousFlag; }
+        }
+
+        [AvaloniaFact]
+        public void PortamentoPresetDropdown_CombinesBothParametersIntoOneUndo() {
+            var control = new NotePropertiesControl();
+            using var model = (NotePropertiesViewModel)control.DataContext!;
+            DocManager.Inst.ExecuteCmd(new LoadPartNotification(part, project, 0));
+            Select(first);
+            control.GetLogicalDescendants().OfType<Expander>().ElementAt(1).IsExpanded = true;
+            var preset = new NotePresets.PortamentoPreset("Combined", 140, -30);
+            model.PortamentoPresets!.Add(preset);
+            var before = first.pitch.data.Select(point => point.X).ToArray();
+            var window = Mount(control);
+            try {
+                var combo = control.GetLogicalDescendants().OfType<ComboBox>().Single(c => ReferenceEquals(c.ItemsSource, model.PortamentoPresets));
+                combo.IsDropDownOpen = true;
+                Dispatcher.UIThread.RunJobs();
+                combo.SetCurrentValue(ComboBox.SelectedItemProperty, preset);
+                Assert.Equal(-30f, first.pitch.data.First().X, 3);
+                Assert.Equal(140f, first.pitch.data.Last().X - first.pitch.data.First().X, 3);
+                Assert.True(DocManager.Inst.ActiveUndoGroup!.Commands.Count >= 2);
+                combo.IsDropDownOpen = false;
+                Assert.Null(DocManager.Inst.ActiveUndoGroup);
+                DocManager.Inst.Undo();
+                Assert.Equal(before, first.pitch.data.Select(point => point.X).ToArray());
+                Assert.False(DocManager.Inst.GetUndoState(out _));
+                Assert.True(DocManager.Inst.GetRedoState(out _));
+            } finally { window.Close(); }
+        }
+
+        [AvaloniaFact]
+        public void VibratoPresetIsOneUndo_AndShapeCaptureRejectsSelectionAndLoading() {
+            var before = new[] { first.vibrato.length, first.vibrato.period, first.vibrato.depth,
+                first.vibrato.@in, first.vibrato.@out, first.vibrato.shift, first.vibrato.drift, first.vibrato.volLink };
+            parent.BeginDiscreteInput(nameof(parent.ApplyVibratoPreset));
+            parent.ApplyVibratoPreset = new NotePresets.VibratoPreset("Combined", 60, 160, 40, 20, 20, 5, 5, 10);
+            Assert.Equal(8, DocManager.Inst.ActiveUndoGroup!.Commands.Count);
+            parent.EndDiscreteInputs();
+            DocManager.Inst.Undo();
+            Assert.Equal(before, new[] { first.vibrato.length, first.vibrato.period, first.vibrato.depth,
+                first.vibrato.@in, first.vibrato.@out, first.vibrato.shift, first.vibrato.drift, first.vibrato.volLink });
+            Assert.False(DocManager.Inst.GetUndoState(out _));
+            var shapeBefore = first.pitch.data.Select(point => point.shape).ToArray();
+            parent.BeginDiscreteInput(nameof(parent.PitchCurveShape));
+            parent.PitchCurveShape = (int)PitchPointShape.l;
+            parent.EndDiscreteInputs();
+            Assert.All(first.pitch.data, point => Assert.Equal(PitchPointShape.l, point.shape));
+            DocManager.Inst.Undo();
+            Assert.Equal(shapeBefore, first.pitch.data.Select(point => point.shape).ToArray());
+            parent.BeginDiscreteInput(nameof(parent.PitchCurveShape));
+            Select(second);
+            parent.PitchCurveShape = (int)PitchPointShape.i;
+            Assert.Equal(-1, parent.PitchCurveShape);
+            Assert.Equal(shapeBefore, first.pitch.data.Select(point => point.shape).ToArray());
+            Assert.Null(DocManager.Inst.ActiveUndoGroup);
+            parent.EndDiscreteInputs();
+            parent.BeginDiscreteInput(nameof(parent.PitchCurveShape));
+            bool previousLoading = NotePropertiesViewModel.NoteLoading;
+            try {
+                NotePropertiesViewModel.NoteLoading = true;
+                parent.PitchCurveShape = (int)PitchPointShape.l;
+            } finally { NotePropertiesViewModel.NoteLoading = previousLoading; parent.EndDiscreteInputs(); }
+            Assert.Null(DocManager.Inst.ActiveUndoGroup);
+            Assert.False(DocManager.Inst.GetUndoState(out _));
+        }
+
+        [AvaloniaFact]
+        public void PresetDropdown_RejectsNewSelectionAndPreservesForeignGroupOnDetach() {
+            var control = new NotePropertiesControl();
+            using var model = (NotePropertiesViewModel)control.DataContext!;
+            DocManager.Inst.ExecuteCmd(new LoadPartNotification(part, project, 0));
+            Select(first);
+            control.GetLogicalDescendants().OfType<Expander>().ElementAt(1).IsExpanded = true;
+            var preset = new NotePresets.PortamentoPreset("Captured", 150, -20);
+            model.PortamentoPresets!.Add(preset);
+            var firstBefore = first.pitch.data.Select(point => point.X).ToArray();
+            var secondBefore = second.pitch.data.Select(point => point.X).ToArray();
+            var host = new Panel { Children = { control } };
+            var window = Mount(host);
+            try {
+                var combo = control.GetLogicalDescendants().OfType<ComboBox>().Single(c => ReferenceEquals(c.ItemsSource, model.PortamentoPresets));
+                combo.IsDropDownOpen = true;
+                Dispatcher.UIThread.RunJobs();
+                Select(second);
+                combo.SetCurrentValue(ComboBox.SelectedItemProperty, preset);
+                Assert.Null(model.ApplyPortamentoPreset);
+                Assert.Equal(firstBefore, first.pitch.data.Select(point => point.X).ToArray());
+                Assert.Equal(secondBefore, second.pitch.data.Select(point => point.X).ToArray());
+                Assert.Null(DocManager.Inst.ActiveUndoGroup);
+                combo.IsDropDownOpen = false;
+                Select(first);
+                DocManager.Inst.StartUndoGroup();
+                var foreign = DocManager.Inst.ActiveUndoGroup;
+                combo.IsDropDownOpen = true;
+                Dispatcher.UIThread.RunJobs();
+                combo.SetCurrentValue(ComboBox.SelectedItemProperty, preset);
+                Assert.Null(model.ApplyPortamentoPreset);
+                Assert.Same(foreign, DocManager.Inst.ActiveUndoGroup);
+                Assert.Empty(foreign!.Commands);
+                host.Children.Remove(control);
+                Assert.False(combo.IsDropDownOpen);
+                Assert.Same(foreign, DocManager.Inst.ActiveUndoGroup);
+                Assert.Empty(foreign.Commands);
+            } finally { window.Close(); }
+        }
+
+        [AvaloniaFact]
+        public void PhonemizerMenuCaptureAndVibratoToggleUseOnlyTheirOwnTargetAndGroup() {
+            parent.BeginDiscreteInput(nameof(parent.PhonemizerOverride));
+            Select(second);
+            using (parent.SelectPhonemizerCommand.Execute("Captured").Subscribe()) { }
+            Assert.Null(first.PhonemizerOverride);
+            Assert.Null(second.PhonemizerOverride);
+            Assert.Null(DocManager.Inst.ActiveUndoGroup);
+            parent.EndDiscreteInputs();
+            Select(first);
+            parent.BeginDiscreteInput(nameof(parent.PhonemizerOverride));
+            using (parent.SelectPhonemizerCommand.Execute("Captured").Subscribe()) { }
+            parent.EndDiscreteInputs();
+            Assert.Equal("Captured", first.PhonemizerOverride);
+            Assert.Null(second.PhonemizerOverride);
+            DocManager.Inst.Undo();
+            Assert.Null(first.PhonemizerOverride);
+            float before = first.vibrato.length;
+            parent.SetVibratoEnable();
+            Assert.Equal(before > 0 ? 0 : NotePresets.Default.DefaultVibrato.VibratoLength, first.vibrato.length);
+            Assert.Null(DocManager.Inst.ActiveUndoGroup);
+            DocManager.Inst.Undo();
+            Assert.Equal(before, first.vibrato.length);
+            DocManager.Inst.StartUndoGroup();
+            var foreign = DocManager.Inst.ActiveUndoGroup;
+            parent.SetVibratoEnable();
+            Assert.Equal(before, first.vibrato.length);
+            parent.BeginDiscreteInput(nameof(parent.PhonemizerOverride));
+            using (parent.SelectPhonemizerCommand.Execute("Foreign").Subscribe()) { }
+            parent.EndDiscreteInputs();
+            Assert.Null(first.PhonemizerOverride);
+            Assert.Same(foreign, DocManager.Inst.ActiveUndoGroup);
+            Assert.Empty(foreign!.Commands);
         }
         public void Dispose() {
             parent.Dispose();

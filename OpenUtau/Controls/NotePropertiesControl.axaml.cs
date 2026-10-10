@@ -27,6 +27,9 @@ namespace OpenUtau.App.Controls {
         TextBox? editingBox;
         Slider? editingSlider;
         readonly Dictionary<Slider, List<Thumb>> sliderThumbs = new();
+        readonly Dictionary<ComboBox, string> discreteChoices = new();
+        NotePropertiesViewModel.NotePropertyEditSession? phonemizerEdit;
+        ContextMenu? phonemizerMenu;
 
         public NotePropertiesControl() {
             InitializeComponent();
@@ -48,7 +51,55 @@ namespace OpenUtau.App.Controls {
                   slider.AddHandler(PointerWheelChangedEvent, SliderWheel, RoutingStrategies.Tunnel);
                   slider.PropertyChanged += SliderValueChanged;
               }
-          
+            foreach (var combo in this.GetLogicalDescendants().OfType<ComboBox>()) {
+                string? input = ReferenceEquals(combo.ItemsSource, ViewModel.PortamentoPresets) ? nameof(ViewModel.ApplyPortamentoPreset) :
+                    ReferenceEquals(combo.ItemsSource, ViewModel.VibratoPresets) ? nameof(ViewModel.ApplyVibratoPreset) :
+                    combo.Items.OfType<ComboBoxItem>().Any() ? nameof(ViewModel.PitchCurveShape) : null;
+                if (input == null) continue;
+                discreteChoices[combo] = input;
+                combo.DropDownOpened += (_, _) => ViewModel.BeginDiscreteInput(input);
+                combo.DropDownClosed += (_, _) => ViewModel.EndDiscreteInput(input);
+                combo.AddHandler(KeyDownEvent, DiscreteChoiceKeyDown, RoutingStrategies.Tunnel);
+                combo.AddHandler(KeyUpEvent, DiscreteChoiceKeyUp, RoutingStrategies.Tunnel, handledEventsToo: true);
+                combo.AddHandler(PointerWheelChangedEvent, DiscreteChoiceWheel, RoutingStrategies.Tunnel);
+                combo.LostFocus += (_, _) => {
+                    if (!combo.IsDropDownOpen) ViewModel.EndDiscreteInput(input);
+                };
+            }
+            phonemizerMenu = this.GetLogicalDescendants().OfType<Button>().Select(button => button.ContextMenu).FirstOrDefault(menu => menu != null);
+            if (phonemizerMenu != null) {
+                phonemizerMenu.Opened += (_, _) => {
+                    phonemizerEdit ??= ViewModel.BeginDiscreteInput(nameof(ViewModel.PhonemizerOverride));
+                };
+                phonemizerMenu.Closed += (_, _) => {
+                    var edit = phonemizerEdit;
+                    phonemizerEdit = null;
+                    if (edit == null) return;
+                    var model = ViewModel;
+                    // Menu closing and command activation may share the same routed
+                    // input. Finish after activation, and never finish a reopened menu.
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() => model.EndDiscreteInput(nameof(model.PhonemizerOverride), edit));
+                };
+            }
+        }
+
+        void DiscreteChoiceKeyDown(object? sender, KeyEventArgs args) {
+            if (sender is not ComboBox combo || !combo.IsEffectivelyEnabled || combo.IsDropDownOpen ||
+                (args.KeyModifiers & (KeyModifiers.Control | KeyModifiers.Alt | KeyModifiers.Meta)) != 0) return;
+            if (args.Key is Key.Up or Key.Down or Key.Home or Key.End or Key.PageUp or Key.PageDown)
+                ViewModel.BeginDiscreteInput(discreteChoices[combo]);
+        }
+        void DiscreteChoiceKeyUp(object? sender, KeyEventArgs args) {
+            if (sender is ComboBox combo && !combo.IsDropDownOpen) ViewModel.EndDiscreteInput(discreteChoices[combo]);
+        }
+        void DiscreteChoiceWheel(object? sender, PointerWheelEventArgs args) {
+            if (sender is ComboBox combo && combo.IsEffectivelyEnabled && !combo.IsDropDownOpen &&
+                (args.KeyModifiers & (KeyModifiers.Control | KeyModifiers.Alt | KeyModifiers.Meta)) == 0) {
+                string input = discreteChoices[combo];
+                var model = ViewModel;
+                var edit = model.BeginDiscreteInput(input);
+                Avalonia.Threading.Dispatcher.UIThread.Post(() => model.EndDiscreteInput(input, edit));
+            }
         }
 
         protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs args) {
@@ -228,6 +279,10 @@ namespace OpenUtau.App.Controls {
         void CancelInput() {
             CancelTextEdit();
             EndSliderEdit();
+            ViewModel.EndDiscreteInputs();
+            foreach (var combo in discreteChoices.Keys) combo.SetCurrentValue(ComboBox.IsDropDownOpenProperty, false);
+            phonemizerEdit = null;
+            phonemizerMenu?.Close();
         }
         void VibratoEnableClicked(object sender, RoutedEventArgs e) {
             ViewModel.SetVibratoEnable();
@@ -312,6 +367,7 @@ namespace OpenUtau.App.Controls {
 
         public void OnPhonemizerButtonClicked(object? sender, RoutedEventArgs e) {
             if (ViewModel.IsPhonemizerEnabled && sender is Button button && button.ContextMenu != null) {
+                phonemizerEdit = ViewModel.BeginDiscreteInput(nameof(ViewModel.PhonemizerOverride));
                 button.ContextMenu.PlacementTarget = button;
                 button.ContextMenu.Open();
             }
