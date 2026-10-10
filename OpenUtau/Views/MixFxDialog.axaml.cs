@@ -6,6 +6,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.LogicalTree;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using OpenUtau.App.Controls;
@@ -64,8 +65,11 @@ namespace OpenUtau.App.Views {
             }, RoutingStrategies.Tunnel);
             AddHandler(PointerReleasedEvent, (_, _) => viewModel.FinishEdits(),
                 RoutingStrategies.Bubble, handledEventsToo: true);
-            AddHandler(PointerCaptureLostEvent, (_, _) => viewModel.FinishEdits(),
-                RoutingStrategies.Bubble, handledEventsToo: true);
+            // CaptureLost is a direct event: observe the knobs that own capture.
+            foreach (var knob in this.GetLogicalDescendants().OfType<Knob>()) {
+                knob.AddHandler(PointerCaptureLostEvent, (_, _) => viewModel.FinishEdits(),
+                    RoutingStrategies.Direct, handledEventsToo: true);
+            }
         }
 
         /// <summary>打开 <paramref name="track"/> 的机架；已开着就把它抬到最前。</summary>

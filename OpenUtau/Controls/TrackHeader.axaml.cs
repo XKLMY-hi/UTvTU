@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -55,6 +56,7 @@ namespace OpenUtau.App.Controls {
 
         private UTrack? track;
         private TrackHeaderCanvas? canvas;
+        readonly Dictionary<Slider, Thumb> captureThumbs = new();
 
         public TrackHeader() {
             InitializeComponent();
@@ -67,9 +69,19 @@ namespace OpenUtau.App.Controls {
                 slider.AddHandler(PointerReleasedEvent, (_, _) => ViewModel?.EndMixGesture(),
                     RoutingStrategies.Bubble, handledEventsToo: true);
                 slider.AddHandler(PointerCaptureLostEvent, (_, _) => ViewModel?.EndMixGesture(),
-                    RoutingStrategies.Bubble, handledEventsToo: true);
+                    RoutingStrategies.Direct, handledEventsToo: true);
+                slider.TemplateApplied += (_, _) => {
+                    if (captureThumbs.Remove(slider, out var old)) old.PointerCaptureLost -= FaderCaptureLost;
+                    var thumb = slider.GetVisualDescendants().OfType<Thumb>().FirstOrDefault();
+                    if (thumb != null) {
+                        captureThumbs.Add(slider, thumb);
+                        thumb.PointerCaptureLost += FaderCaptureLost;
+                    }
+                };
             }
         }
+
+        void FaderCaptureLost(object? sender, PointerCaptureLostEventArgs args) => ViewModel?.EndMixGesture();
 
         protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e) {
             ViewModel?.EndMixGesture();
@@ -312,6 +324,8 @@ namespace OpenUtau.App.Controls {
         }
 
         public void Dispose() {
+            foreach (var thumb in captureThumbs.Values) thumb.PointerCaptureLost -= FaderCaptureLost;
+            captureThumbs.Clear();
             unbinds.ForEach(u => u.Dispose());
             ViewModel?.Dispose();   // W33：连带释放 VM 的 MessageBus 订阅（此前只解绑属性）
             unbinds.Clear();

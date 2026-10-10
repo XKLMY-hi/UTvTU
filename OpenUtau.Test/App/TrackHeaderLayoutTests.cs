@@ -33,8 +33,8 @@ namespace OpenUtau.Test.App {
 
         static void Pump() => Dispatcher.UIThread.RunJobs();
 
-        internal static (WindowEx win, TrackHeaderCanvas canvas, TrackHeader header, ObservableCollection<UTrack> items) Setup(double trackHeight, double width = 240) {
-            var track = new UTrack { TrackNo = 0, TrackName = "Lead" };
+        internal static (WindowEx win, TrackHeaderCanvas canvas, TrackHeader header, ObservableCollection<UTrack> items) Setup(double trackHeight, double width = 240, UTrack? track = null) {
+            track ??= new UTrack { TrackNo = 0, TrackName = "Lead" };
             // 两个 DirectProperty 的 CLR setter 是私有的（生产里由 MainWindow 的 XAML 绑定驱动）
             // ⇒ 测试同样走绑定，走的是产品同一条赋值路径。
             var canvas = new TrackHeaderCanvas();

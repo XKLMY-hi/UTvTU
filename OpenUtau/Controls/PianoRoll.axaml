@@ -60,7 +60,7 @@
                          PointerWheelChanged="KeyboardPointerWheelChanged"
                          PointerPressed="KeyboardPointerPressed"
                          PointerMoved="KeyboardPointerMoved"
-                         PointerReleased="KeyboardPointerReleased"/>
+                         PointerReleased="KeyboardPointerReleased" PointerCaptureLost="InputCaptureLost"/>
       <Grid Grid.Column="0" Grid.Row="5" Height="{Binding #ExpPanelSplitter.PanelHeight}"
             IsVisible="{Binding #ExpPanelSplitter.PanelShown}">
         <Grid.RowDefinitions>
@@ -100,7 +100,7 @@
               PointerWheelChanged="TimelinePointerWheelChanged"
               PointerPressed="TimelinePointerPressed"
               PointerMoved="TimelinePointerMoved"
-              PointerReleased="TimelinePointerReleased"
+              PointerReleased="TimelinePointerReleased" PointerCaptureLost="InputCaptureLost"
               DoubleTapped="TimelineDoubleTapped">
         <Path Name="PlayPos"
               Canvas.Left="{Binding NotesViewModel.PlayPosX}"
@@ -167,7 +167,7 @@
                      Part="{Binding NotesViewModel.Part}"
                      PointerPressed="NotesCanvasPointerPressed"
                      PointerMoved="NotesCanvasPointerMoved"
-                     PointerReleased="NotesCanvasPointerReleased"
+                     PointerReleased="NotesCanvasPointerReleased" PointerCaptureLost="InputCaptureLost"
                      DoubleTapped="NotesCanvasDoubleTapped"
                      PointerWheelChanged="NotesCanvasPointerWheelChanged">
         <c:NotesCanvas.ContextMenu>
@@ -534,7 +534,7 @@
                        DoubleTapped="PhonemeCanvasDoubleTapped"
                        PointerPressed="PhonemeCanvasPointerPressed"
                        PointerMoved="PhonemeCanvasPointerMoved"
-                       PointerReleased="PhonemeCanvasPointerReleased"/>
+                       PointerReleased="PhonemeCanvasPointerReleased" PointerCaptureLost="InputCaptureLost"/>
       <!-- 频谱条：音素带位置（比曲线编辑器高一点），z 序在音素带之上、35% 透明——
            音素文字依然清晰，视觉上是音素显示下方的动态背景层。仅播放时显示 -->
       <!-- 折叠处「快捷展开」（W34 ①）：表达式区在**下方**（行方向面板）⇒ 标签横向 48×14 贴这一行
@@ -587,7 +587,7 @@
                           ShowRealCurve="True"
                           PointerPressed="ExpCanvasPointerPressed"
                           PointerMoved="ExpCanvasPointerMoved"
-                          PointerReleased="ExpCanvasPointerReleased"/>
+                          PointerReleased="ExpCanvasPointerReleased" PointerCaptureLost="InputCaptureLost"/>
       <ListBox Grid.Row="5" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Top" Classes="toolbar" Padding="2"
                SelectedIndex="{Binding CurveViewModel.CurveToolIndex}" IsVisible="{Binding NotesViewModel.ShowCurveToolbar, Mode=OneWay}">
         <ListBox.ItemsPanel>

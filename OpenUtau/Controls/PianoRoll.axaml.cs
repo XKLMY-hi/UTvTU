@@ -92,10 +92,9 @@ namespace OpenUtau.App.Controls {
             SetPenToolIcon();
             penTool.AddHandler(PointerPressedEvent, OnToolButtonPointerPressed, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
             this.LayoutUpdated += PianoRollLayoutUpdated;
-            AddHandler(PointerCaptureLostEvent, InputCaptureLost, RoutingStrategies.Bubble, true);
         }
 
-        void InputCaptureLost(object? sender, PointerCaptureLostEventArgs args) {
+        public void InputCaptureLost(object? sender, PointerCaptureLostEventArgs args) {
             if (ReferenceEquals(args.Source, editState?.control)) FinishNoteEdit();
             if (ReferenceEquals(args.Source, keyboardPlayState?.Control)) FinishKeyboardPlay();
             if (ReferenceEquals(args.Source, timelineControl)) {
@@ -245,7 +244,6 @@ namespace OpenUtau.App.Controls {
             }
             messageSubs.Clear();
             this.LayoutUpdated -= PianoRollLayoutUpdated;
-            RemoveHandler(PointerCaptureLostEvent, InputCaptureLost);
             lyricsDialogCommand?.Dispose();
             noteDefaultsCommand?.Dispose();
             noteBatchEditCommand?.Dispose();
