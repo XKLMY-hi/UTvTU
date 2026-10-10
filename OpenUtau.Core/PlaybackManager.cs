@@ -797,7 +797,7 @@ namespace OpenUtau.Core {
                 }
             } else if (cmd is LoadProjectNotification) {
                 StopPlayback();
-                renderCancellation?.Cancel();
+                RenderCancellationLease.Retire(ref renderCancellation);
                 // 工程切换：合成层短语缓存整体失效（hash 含 Timestamp 已兜底，这里显式清空防膨胀）
                 RenderEngine.InvalidatePhraseCache();
                 // 工程切换卸载全部槽位实例（延迟销毁：无 UI 线程原生 Dispose——
