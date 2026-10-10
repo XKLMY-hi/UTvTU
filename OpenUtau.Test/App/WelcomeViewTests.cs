@@ -62,53 +62,75 @@ namespace OpenUtau.Test.App {
 
         private static bool HasClass(Button b, string cls) => b.Classes.Contains(cls);
 
-        // ══════════════════════ 设计几何（对齐 1-Welcome 稿） ══════════════════════
+        // ══════════════════════ 设计几何（W50：与主界面同一套 MD3 词汇） ══════════════════════
 
         [AvaloniaFact]
         public void WelcomeView_MatchesDesignGeometry() {
             string xaml = ReadXaml("WelcomeView.axaml");
-            // 分栏：432 品牌栏（稿 480，因左栏不再自带 48 内边距而收窄）+ 自适应启动器
-            Assert.Contains("ColumnDefinitions=\"432,*\"", xaml);
-            // 品牌栏实底 = surface-container（稿的 teal 品牌底是独立色板，动态色池无对应角色）
-            Assert.Contains("md3.surface-container", xaml);
+            // 分栏：304 左导航（与 PreferencesView 同构）+ 自适应内容
+            // （W50 用户裁决「这套方案肯定要重设计的，不然和主界面的MD3不搭」⇒ 旧 432 品牌栏版作废）
+            Assert.Contains("ColumnDefinitions=\"304,*\"", xaml);
+            Assert.Contains("md3.surface-container-low", xaml);
             Assert.DoesNotContain("md3.primary-container", xaml);
-            // 字号阶梯（稿值抽查）
-            // 34px 英雄字号已按用户裁决删除；26（旧头部字标字号）已被品牌锁定几何取代
-            foreach (int size in new[] { 30, 18, 15, 14, 13, 12, 11 }) {
-                // 属性形态或样式 Setter 形态都算（两种在本页都有使用）
-                Assert.True(xaml.Contains($"FontSize=\"{size}\"", StringComparison.Ordinal)
-                    || xaml.Contains($"<Setter Property=\"FontSize\" Value=\"{size}\"/>", StringComparison.Ordinal),
-                    $"缺字号 {size}");
+            // 密度字号阶梯（主界面基准：标题 28 / 空态 16 / 副标 14 / 正文 13 / 分组 12 / 次要 11.5 / 徽标 11）
+            foreach (double size in new[] { 28.0, 16.0, 14.0, 13.0, 12.0, 11.5, 11.0 }) {
+                string s = size.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                Assert.True(xaml.Contains($"FontSize=\"{s}\"", StringComparison.Ordinal)
+                    || xaml.Contains($"<Setter Property=\"FontSize\" Value=\"{s}\"/>", StringComparison.Ordinal),
+                    $"缺字号 {s}");
             }
-            // 关键尺寸：动作卡 104/圆角 16、波形区 132、拖放条 56、缩略图 48/圆角 8
-            Assert.Contains("<Setter Property=\"Height\" Value=\"104\"/>", xaml);
-            Assert.Contains("<Setter Property=\"CornerRadius\" Value=\"16\"/>", xaml);
-            Assert.Contains("Height=\"132\"", xaml);   // 波形区（属性形态）
+            // 关键尺寸：最近行 56 / 格式徽标 24 / 音源 chip 28 / 模板卡 240×72 / 空态图标容器 56 / 波形带 64
             Assert.Contains("<Setter Property=\"Height\" Value=\"56\"/>", xaml);
-            // W38：波形改为**生成器产出的真实包络几何**（不再是 26 根宽 6 的柱）
-            //   ⇒ 原"柱宽 6 / 圆角 999"两条断言随实现作废，改为断**几何来源**与**缩放口径**
-            Assert.Contains("welcome-waveform", xaml);           // 几何来自 Assets/WelcomeWaveform.axaml
-            Assert.Contains("Stretch=\"Fill\"", xaml);           // 时基→宽 / 幅度→高（别改回 Uniform）
-            Assert.DoesNotContain("Classes=\"waveBar\"", xaml);  // 旧柱状实现已删除（防回潮）
-            // 四张动作卡：新建 / 打开 / 导入音频 / 模板（**全部走 Button.Click**）
-            foreach (string handler in new[] { "OnNewProject", "OnOpenProject", "OnImportAudio", "OnShowTemplates" }) {
+            Assert.Contains("<Setter Property=\"Height\" Value=\"24\"/>", xaml);
+            Assert.Contains("<Setter Property=\"Height\" Value=\"28\"/>", xaml);
+            Assert.Contains("<Setter Property=\"Height\" Value=\"72\"/>", xaml);
+            Assert.Contains("<Setter Property=\"Width\" Value=\"240\"/>", xaml);
+            Assert.Contains("<Setter Property=\"Width\" Value=\"56\"/>", xaml);
+            Assert.Contains($"Height=\"{WelcomeArt.WaveBandHeight.ToString(System.Globalization.CultureInfo.InvariantCulture)}\"", xaml);
+            // 导航项走**应用级共享** `Button.navItem`（Md3Controls.axaml）——本页不得再本地定义一套（防两页漂移）
+            Assert.Contains("Classes=\"navItem", xaml);
+            Assert.DoesNotContain("<Style Selector=\"Button.navItem\">", xaml);
+            Assert.Contains("Classes=\"railLink\"", xaml);
+            // 按钮走现成主题变体（`Md3ButtonTheme` 的 .primary / .outline），页面不自造按钮几何
+            Assert.Contains("Classes=\"primary\"", xaml);
+            Assert.Contains("Classes=\"outline\"", xaml);
+            // 波形仍是生成器产物的真实包络（几何来源 + 缩放口径不许回退）
+            Assert.Contains("welcome-waveform", xaml);
+            Assert.Contains("Stretch=\"Fill\"", xaml);
+            Assert.DoesNotContain("Classes=\"waveBar\"", xaml);
+            // Avalonia 12：占位符只能用 PlaceholderText（Watermark 已废弃，会出 AVLN5001）
+            Assert.Contains("PlaceholderText=", xaml);
+            Assert.DoesNotContain("Watermark", xaml);
+            // 最近列表禁用 ListBox（全局隐式 ListBoxItem{Height=28} 会把 56 行夹扁）
+            Assert.DoesNotContain("<ListBox", xaml);
+            // 键盘可达：入口一律 Button，不得用 PointerPressed
+            Assert.DoesNotContain("PointerPressed=\"", xaml);
+            // 绑定必须落在 VM 真名上（反射绑定写错**不报错**、只显示空白）
+            foreach (string name in new[] {
+                "WelcomeSearch", "FilteredRecentFiles", "WelcomeNoRecent", "WelcomeNoMatch",
+                "HasRecovery", "TemplateFiles", "AppVersion", "RecoveryString",
+            }) {
+                Assert.Contains(name, xaml);
+            }
+            // 入口处理器齐（左栏导航 + 工程动作 + 最近/模板行）
+            foreach (string handler in new[] {
+                "OnNavRecent", "OnNavNew", "OnNavOpen", "OnNavTemplates",
+                "OnNewProject", "OnOpenProject", "OnImportAudio", "OnShowTemplates",
+                "OnRecovery", "OnOpenRecent", "OnOpenTemplate",
+            }) {
                 Assert.Contains($"Click=\"{handler}\"", xaml);
             }
-            // MD3 铁律：无阴影、无玻璃（先剥注释——说明文字里会出现这些词）
+            // MD3 铁律：无阴影、无玻璃、无硬编码色值（先剥注释——说明文字里会出现这些词）
             string code = Regex.Replace(xaml, "<!--.*?-->", "", RegexOptions.Singleline);
             Assert.DoesNotContain("BoxShadow", code);
             Assert.DoesNotContain("BlurEffect", code);
+            Assert.DoesNotMatch("#[0-9A-Fa-f]{6}", code);
         }
 
         [AvaloniaFact]
         public void WelcomeView_Waveform_IsTheGeneratedEnvelope() {
-            // W38：波形从"26 根几何柱"换成**真实一小节演唱**的包络几何。
-            // 几何经 `Assets/WelcomeWaveform.axaml` **逐字**进入应用（生成器产物，单一来源）
-            // ⇒ 这里断"几何特征"，而不是断柱数：
-            //   · 路径铺满生成器 viewBox 的宽度（1000）⇒ 没被重画/裁剪；
-            //   · 幅度轴有实际高度（双极性包络，不是一条平线）；
-            //   · `Stretch=Fill`（时基→宽 / 幅度→高；**改回 Uniform 会让弹性失效**）；
-            //   · 有 Fill（描边渲染看不出包络）、Opacity 0.5（低强调度）。
+            // 波形是**真实一小节演唱**的响度几何（生成器产物，经 `Assets/WelcomeWaveform.axaml` 逐字进入应用）。
+            // W50 起它是**页头右侧的装饰带**（固定高 64）⇒ 除几何特征外，还断"固定高与低强调度"。
             InView(view => {
                 var wave = view.GetVisualDescendants().OfType<ShapePath>().First(p => p.Name == "WaveformBars");
                 Assert.NotNull(wave.Data);                  // 资源键 welcome-waveform 必须解析到
@@ -117,49 +139,58 @@ namespace OpenUtau.Test.App {
                 Assert.InRange(bounds.Height, 100.0, 240.0); // 有真实幅度（双极性）
                 Assert.Equal(Stretch.Fill, wave.Stretch);
                 Assert.NotNull(wave.Fill);
-                Assert.Equal(0.5, wave.Opacity, 3);
+                Assert.Equal(WelcomeArt.WaveBandHeight, wave.Bounds.Height, 1);
+                Assert.Equal(0.4, wave.Opacity, 3);
             });
         }
 
         /// <summary>
-        /// **布局层**断言：4 张动作卡在两个窗口尺寸下都真的渲染（`IsVisible` 且 `Bounds` 非零）。
-        /// 上一轮"第 4 张卡（模板）没渲染"就是因为只断言了 `Click=` 处理器在座、没断言可见性与尺寸
-        /// —— 当时模板卡带 `IsVisible="{Binding TemplateFiles.Count}"`，本机无模板 ⇒ 2×2 网格留洞。
+        /// **布局层 + 导航层**（W50 取代旧的"4 张动作卡都渲染"）：
+        /// 左栏 6 个导航项（4 主 + 偏好/包管理）在两个窗口尺寸下都真的渲染（`IsVisible` 且未被夹扁），
+        /// 右栏**同一时刻只有一个分页可见**（默认最近），且 `.selected` 只挂在当前页那一项上。
         /// </summary>
         [AvaloniaTheory]
         [InlineData(1226.0, 699.0)]
         [InlineData(1000.0, 660.0)]
-        public void WelcomeView_FourActionCards_AreLaidOut(double width, double height) {
+        public void WelcomeView_NavItems_RenderAndSinglePageIsVisible(double width, double height) {
             UsePool();
             var view = new WelcomeView();
             var window = new Window { Width = width, Height = height, Content = view };
             window.Show();
             try {
                 Dispatcher.UIThread.RunJobs();
-                var cards = Buttons(view).Where(b => HasClass(b, "actionCard")).ToList();
-                Assert.Equal(4, cards.Count);
-                for (int i = 0; i < cards.Count; i++) {
-                    Button card = cards[i];
-                    Assert.True(card.IsVisible, $"{width}x{height}: 第 {i + 1} 张动作卡不可见");
-                    Assert.True(card.Bounds.Width > 0 && card.Bounds.Height > 0,
-                        $"{width}x{height}: 第 {i + 1} 张动作卡无尺寸（{card.Bounds.Width}x{card.Bounds.Height}）");
+                var navs = Buttons(view).Where(b => HasClass(b, "navItem")).ToList();
+                Assert.Equal(6, navs.Count);   // 最近/新建/打开/模板 + 偏好设置/包管理器
+                for (int i = 0; i < navs.Count; i++) {
+                    Assert.True(navs[i].IsVisible, $"{width}x{height}: 第 {i + 1} 个导航项不可见");
+                    Assert.True(navs[i].Bounds.Width > 0 && navs[i].Bounds.Height >= 40,
+                        $"{width}x{height}: 第 {i + 1} 个导航项被夹扁（{navs[i].Bounds.Width}x{navs[i].Bounds.Height}）");
                 }
+                var pages = view.GetVisualDescendants().OfType<Control>()
+                    .Where(c => c.Name is "PageRecent" or "PageNew" or "PageOpen" or "PageTemplates")
+                    .ToList();
+                Assert.Equal(4, pages.Count);
+                Assert.Single(pages.Where(p => p.IsVisible));
+                Assert.Equal("PageRecent", pages.First(p => p.IsVisible).Name);
+                Assert.Single(navs.Where(n => HasClass(n, "selected")));
+                Assert.True(HasClass(navs[0], "selected"), "默认页应是「最近」");
             } finally {
                 window.Close();
             }
         }
 
         /// <summary>
-        /// **响应式两段式**（裁决：处置二 + 处置一 组合）：
-        /// ① 波形弹性 132…200（W38 起为**真实包络几何**，`Stretch=Fill`：时基→宽 / 幅度→高）；
-        /// ② 涨到上限后的余量由中段组**对称**平摊（上下留白差 ≤ 4px）。
-        /// 三个尺寸都断言：1226×699、1000×660、1226×900（高窗专门验证"封顶后不出现单边洞"）。
+        /// W50（MD3 重建）：波形从"左栏中段弹性大图（132…200）"改成**右栏页头右侧的装饰带**。
+        /// 契约：高度恒为 `WelcomeArt.WaveBandHeight`（±1 —— 常量与 XAML 不许分叉）、
+        /// `Stretch=Fill`（时基→宽 / 幅度→高）、低强调（Opacity 0.4）、几何仍是生成器产物
+        /// （资源键 `welcome-waveform`）、且落在**右栏**（x ≥ 304 左栏宽）。
+        /// 三个窗口尺寸下都不被压扁：装饰带不参与弹性布局，版面让给信息。
         /// </summary>
         [AvaloniaTheory]
         [InlineData(1226.0, 699.0)]
         [InlineData(1000.0, 660.0)]
         [InlineData(1226.0, 900.0)]
-        public void WelcomeView_WaveformIsElastic_AndResidualIsSymmetric(double width, double height) {
+        public void WelcomeView_WaveformBand_IsFixedHeaderDecoration(double width, double height) {
             UsePool();
             var view = new WelcomeView();
             var window = new Window { Width = width, Height = height, Content = view };
@@ -167,47 +198,48 @@ namespace OpenUtau.Test.App {
             try {
                 Dispatcher.UIThread.RunJobs();
                 var wave = view.GetVisualDescendants().OfType<ShapePath>().First(p => p.Name == "WaveformBars");
-                var midGroup = view.GetVisualDescendants().OfType<StackPanel>().First(c => c.Name == "MidGroup");
-                var midHost = view.GetVisualDescendants().OfType<Grid>().First(c => c.Name == "MidHost");
-
-                // ① 弹性且不超上限
-                Assert.InRange(wave.Bounds.Height, WelcomeArt.MinWaveHeight - 0.5, WelcomeArt.MaxWaveHeight + 0.5);
-
-                // ①′ 缩放口径：**Fill**（时基 → 宽 / 幅度 → 高）。
-                //     包络线的幅度轴随面板高缩放是波形显示惯例，不是失真（时基不被非线性扭曲）；
-                //     改成 Uniform 会让高度 > 约 147 时停止增长 ⇒ 弹性失效（见 XAML 注释）。
+                Assert.NotNull(wave.Data);                  // 资源键 welcome-waveform 必须解析到
+                Assert.Equal(WelcomeArt.WaveBandHeight, wave.Bounds.Height, 1);
                 Assert.Equal(Stretch.Fill, wave.Stretch);
-
-                // ② 余量对称（MidGroup 的 Bounds 相对 MidHost）
-                double top = midGroup.Bounds.Top;
-                double bottom = midHost.Bounds.Height - midGroup.Bounds.Bottom;
-                Assert.True(Math.Abs(top - bottom) <= 4.0,
-                    $"{width}x{height}: 中段组上下留白不对称 top={top:F1} bottom={bottom:F1}");
-
-                // 高窗：波形必须已封顶，且余量真的被平摊到两侧（否则说明居中宿主没撑到视口高）
-                if (height >= 900) {
-                    Assert.Equal(WelcomeArt.MaxWaveHeight, wave.Bounds.Height, 1);
-                    Assert.True(top > 8 && bottom > 8,
-                        $"{width}x{height}: 封顶后余量未被平摊 top={top:F1} bottom={bottom:F1}");
-                }
+                Assert.Equal(0.4, wave.Opacity, 3);
+                Assert.NotNull(wave.Fill);
+                var origin = wave.TranslatePoint(new Point(0, 0), view);
+                Assert.NotNull(origin);
+                Assert.True(origin!.Value.X >= 304,
+                    $"{width}x{height}: 波形带应落在右栏（x={origin.Value.X:F1}）");
             } finally {
                 window.Close();
             }
         }
 
-        /// <summary>空态文案必须是专用键（此前复用 `welcome.open.description` ⇒ 空态显示"打开本地项目"）。</summary>
+        /// <summary>
+        /// 空态文案必须是**各自的专用键**（此前复用 `welcome.open.description` ⇒ 空态显示"打开本地项目"）。
+        /// W50 起「最近」有两个空态且必须区分：
+        ///   ① 一个工程都没有 → `welcome.recent.empty`（绑 `WelcomeNoRecent`）
+        ///   ② 有工程但搜索无匹配 → `welcome.search.noresult`（绑 `WelcomeNoMatch`）
+        /// 混成一句的后果：用户搜不到东西时会以为"工程丢了"。
+        /// 「模板」页同理：有模板出网格、没模板出专用空态。
+        /// </summary>
         [AvaloniaFact]
-        public void WelcomeView_EmptyState_UsesItsOwnKey() {
+        public void WelcomeView_EmptyStates_UseDistinctKeysAndBindings() {
             string xaml = ReadXaml("WelcomeView.axaml");
             Assert.Contains("welcome.recent.empty", xaml);
+            Assert.Contains("welcome.search.noresult", xaml);
             Assert.Contains("welcome.template.empty", xaml);
-            // 只针对**空态元素**：其 Text= 必须是专用键（动作卡副标题用 welcome.open.description 是合理的）
-            var emptyState = Regex.Match(xaml,
-                "Text=\"\\{DynamicResource (welcome\\.[A-Za-z0-9_.]+)\\}\"[\\s\\S]{0,200}?IsVisible=\"\\{Binding !RecentFiles\\.Count\\}\"");
-            Assert.True(emptyState.Success, "找不到最近工程的空态元素");
-            Assert.Equal("welcome.recent.empty", emptyState.Groups[1].Value);
-            // 模板卡不得再按"有无模板"隐藏（否则留洞）
-            Assert.DoesNotContain("IsVisible=\"{Binding TemplateFiles.Count}\"", xaml);
+            Assert.Contains("IsVisible=\"{Binding WelcomeNoRecent}\"", xaml);
+            Assert.Contains("IsVisible=\"{Binding WelcomeNoMatch}\"", xaml);
+            Assert.Contains("IsVisible=\"{Binding TemplateFiles.Count}\"", xaml);
+            Assert.Contains("IsVisible=\"{Binding !TemplateFiles.Count}\"", xaml);
+            // 两个空态的文案键必须不同（防止"顺手复用"又混成一句）
+            // 窗口 700：空态里 icon 容器/Path 的属性不少，400 会漏（实测踩过）
+            var noRecent = Regex.Match(xaml,
+                "IsVisible=\"\\{Binding WelcomeNoRecent\\}\"[\\s\\S]{0,700}?Text=\"\\{DynamicResource (welcome\\.[A-Za-z0-9_.]+)\\}\"");
+            var noMatch = Regex.Match(xaml,
+                "IsVisible=\"\\{Binding WelcomeNoMatch\\}\"[\\s\\S]{0,700}?Text=\"\\{DynamicResource (welcome\\.[A-Za-z0-9_.]+)\\}\"");
+            Assert.True(noRecent.Success, "找不到「一个工程都没有」空态的文案键");
+            Assert.True(noMatch.Success, "找不到「搜索无匹配」空态的文案键");
+            Assert.Equal("welcome.recent.empty", noRecent.Groups[1].Value);
+            Assert.Equal("welcome.search.noresult", noMatch.Groups[1].Value);
         }
 
         // ══════════════════════ 键盘可达（本轮缺陷修复） ══════════════════════
@@ -223,70 +255,85 @@ namespace OpenUtau.Test.App {
 
             InView(view => {
                 var buttons = Buttons(view);
-                Assert.Equal(6, buttons.Count(b => HasClass(b, "linkRow")));        // 左栏快捷入口
-                Assert.Equal(4, buttons.Count(b => HasClass(b, "actionCard")));     // 动作卡 2×2
-                Assert.Equal(1, buttons.Count(b => HasClass(b, "linkButton")));     // 查看全部
+                Assert.Equal(6, buttons.Count(b => HasClass(b, "navItem")));   // 4 主导航 + 偏好设置 + 包管理器
+                Assert.Equal(4, buttons.Count(b => HasClass(b, "railLink")));  // 4 条外链（12px 小字行）
+                Assert.Equal(2, buttons.Count(b => HasClass(b, "primary")));   // 新建空白工程 / 浏览文件
+                Assert.Equal(2, buttons.Count(b => HasClass(b, "outline")));   // 模板 / 导入音频
                 Assert.All(buttons, b => Assert.True(b.Focusable, "入口必须可聚焦（Tab 可达）"));
             });
+            // 数据驱动的行（最近 / 模板）在 headless 无 VM 数据时不会实例化 ⇒ 只能断"模板里声明了该类 + 是 Button"
+            Assert.Contains("Classes=\"recentRow\"", xaml);
+            Assert.Contains("Classes=\"templateCard\"", xaml);
         }
 
-        /// <summary>Tab 序 = 阅读序：左栏快捷入口在前，右栏动作卡在后；首张卡片是主行动。</summary>
+        /// <summary>
+        /// Tab 序 = 阅读序（W50：左栏 → 右栏）。视觉树顺序即 XAML 声明序 ⇒ 断言"左栏全部入口
+        /// 排在右栏动作之前"，且左栏第一项是「最近」（默认页）。
+        /// </summary>
         [AvaloniaFact]
         public void WelcomeView_TabOrder_FollowsReadingOrder() {
             InView(view => {
                 var buttons = Buttons(view);
-                int lastLinkRow = buttons.FindLastIndex(b => HasClass(b, "linkRow"));
-                int firstCard = buttons.FindIndex(b => HasClass(b, "actionCard"));
-                Assert.True(lastLinkRow >= 0 && firstCard > lastLinkRow,
-                    $"动作卡应排在左栏快捷入口之后（linkRow 末 idx={lastLinkRow}，card 首 idx={firstCard}）");
-
-                var cards = buttons.Where(b => HasClass(b, "actionCard")).ToList();
-                Assert.True(HasClass(cards[0], "cardMain"), "第一张卡片应是主行动（新建工程）");
-                Assert.False(HasClass(cards[1], "cardMain"));
-            });
-        }
-
-        /// <summary>Space / Enter 能激活主行动卡（Border + PointerPressed 时代做不到）。</summary>
-        [AvaloniaFact]
-        public void WelcomeView_ActionCard_ActivatesOnSpaceAndEnter() {
-            InView(view => {
-                var card = Buttons(view).First(b => HasClass(b, "cardMain"));
-                int clicks = 0;
-                card.Click += (_, _) => clicks++;
-                Assert.True(card.Focus(), "主行动卡必须能拿到键盘焦点");
-
-                void Press(Key key) {
-                    card.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = key });
-                    card.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyUpEvent, Key = key });
-                }
-
-                Press(Key.Space);
-                int afterSpace = clicks;
-                Press(Key.Enter);
-                Assert.True(afterSpace >= 1, "Space 应激活动作卡");
-                Assert.True(clicks > afterSpace, "Enter 应激活动作卡");
+                int lastRail = buttons.FindLastIndex(b => HasClass(b, "navItem") || HasClass(b, "railLink"));
+                int firstContent = buttons.FindIndex(b =>
+                    HasClass(b, "primary") || HasClass(b, "outline") || HasClass(b, "recentRow"));
+                Assert.True(lastRail >= 0 && firstContent > lastRail,
+                    $"右栏动作应排在左栏之后（左栏末 idx={lastRail}，右栏首 idx={firstContent}）");
+                Assert.True(HasClass(buttons[0], "navItem"), "左栏第一个入口应是导航项");
+                var navs = buttons.Where(b => HasClass(b, "navItem")).ToList();
+                Assert.True(navs[0].Name == "NavRecent", "第一个导航项应是「最近」");
             });
         }
 
         /// <summary>
-        /// 焦点环：声明 `:focus-visible`，且**基础态就有 1px 透明描边**、焦点态只换颜色
-        /// ⇒ 聚焦不产生布局位移（Button 没有 BoxShadow 属性，不能用浮层焦点环）。
+        /// Space / Enter 能激活左栏导航并切换分页（`Border + PointerPressed` 时代键盘根本到不了）。
+        /// W50 起断言**行为后果**（分页真的切换、`.selected` 真的转移），而不是"Click 被触发了几次"。
         /// </summary>
         [AvaloniaFact]
-        public void WelcomeView_FocusRing_IsDeclaredWithoutLayoutShift() {
+        public void WelcomeView_Nav_ActivatesOnSpaceAndEnter() {
+            InView(view => {
+                var navNew = Buttons(view).First(b => b.Name == "NavNew");
+                var pageNew = view.GetVisualDescendants().OfType<Control>().First(c => c.Name == "PageNew");
+                Assert.True(navNew.Focus(), "导航项必须能拿到键盘焦点");
+                Assert.False(pageNew.IsVisible, "默认不应停在「新建」页");
+
+                void Press(Key key) {
+                    navNew.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = key });
+                    navNew.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyUpEvent, Key = key });
+                }
+
+                Press(Key.Space);
+                Assert.True(pageNew.IsVisible, "Space 应切到「新建」页");
+                Assert.True(HasClass(navNew, "selected"), "选中态应转移到「新建」");
+                var navRecent = Buttons(view).First(b => b.Name == "NavRecent");
+                Assert.False(HasClass(navRecent, "selected"), "旧页的选中态应被摘掉");
+            });
+        }
+
+        /// <summary>
+        /// 焦点环（W50）：导航项的焦点环在**应用级共享层**（`Styles/Md3Controls.axaml` 的
+        /// `Button.navItem:focus-visible`，与偏好设置页共用）；页面本地的行样式则要求
+        /// **基础态就有 1px 描边、焦点态只换颜色** ⇒ 聚焦不产生布局位移。
+        /// </summary>
+        [AvaloniaFact]
+        public void WelcomeView_FocusRings_DeclareNoLayoutShift() {
+            string shared = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "Md3Controls.axaml"));
+            Assert.Contains("Button.navItem:focus-visible", shared);
+            Assert.Contains("md3.primary", shared);
+
             string xaml = ReadXaml("WelcomeView.axaml");
-            int baseIdx = xaml.IndexOf("<Style Selector=\"Button.welcome\">", StringComparison.Ordinal);
-            int focusIdx = xaml.IndexOf("Button.welcome:focus-visible", StringComparison.Ordinal);
-            Assert.True(baseIdx >= 0, "缺少 Button.welcome 基础样式");
-            Assert.True(focusIdx > baseIdx, "缺少 Button.welcome:focus-visible 焦点环");
-
-            string baseBlock = xaml.Substring(baseIdx, focusIdx - baseIdx);
-            Assert.Contains("<Setter Property=\"BorderThickness\" Value=\"1\"/>", baseBlock);
-            Assert.Contains("Value=\"Transparent\"", baseBlock);
-
-            string focusBlock = xaml.Substring(focusIdx, Math.Min(200, xaml.Length - focusIdx));
-            Assert.Contains("md3.primary", focusBlock);          // 焦点 = 主色描边
-            Assert.DoesNotContain("BorderThickness", focusBlock); // 不改变厚度 ⇒ 零位移
+            foreach (string cls in new[] { "recentRow", "railLink" }) {
+                int baseIdx = xaml.IndexOf($"<Style Selector=\"Button.{cls}\">", StringComparison.Ordinal);
+                int focusIdx = xaml.IndexOf($"Button.{cls}:focus-visible", StringComparison.Ordinal);
+                Assert.True(baseIdx >= 0, $"缺少 Button.{cls} 基础样式");
+                Assert.True(focusIdx > baseIdx, $"缺少 Button.{cls}:focus-visible 焦点环");
+                string baseBlock = xaml.Substring(baseIdx, focusIdx - baseIdx);
+                Assert.Contains("<Setter Property=\"BorderThickness\" Value=\"1\"/>", baseBlock);
+                Assert.Contains("Value=\"Transparent\"", baseBlock);
+                string focusBlock = xaml.Substring(focusIdx, Math.Min(160, xaml.Length - focusIdx));
+                Assert.Contains("md3.primary", focusBlock);            // 焦点 = 主色描边
+                Assert.DoesNotContain("BorderThickness", focusBlock);  // 不改变厚度 ⇒ 零位移
+            }
         }
 
         // ══════════════════════ 动效 / 旧样式规避（原有契约，保留） ══════════════════════
@@ -323,7 +370,7 @@ namespace OpenUtau.Test.App {
             // ⚠ 后人不要"顺手换成 ListBox"。
             string xaml = ReadXaml("WelcomeView.axaml");
             Assert.DoesNotContain("<ListBox", xaml);
-            Assert.Contains("Classes=\"welcome recentRow\"", xaml);   // 行样式走自有类，不用 ListBoxItem
+            Assert.Contains("Classes=\"recentRow\"", xaml);   // 行样式走自有类，不用 ListBoxItem
             Assert.Contains("<ItemsControl", xaml);
         }
 

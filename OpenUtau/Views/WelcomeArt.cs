@@ -11,21 +11,16 @@ namespace OpenUtau.App.Views {
     }
 
     /// <summary>
-    /// 欢迎页的**声明式美术数据**（W36）。
+    /// 欢迎页的**声明式美术数据**（W50：MD3 重建版）。
     ///
-    /// 波形已从"26 根几何柱"换成**真实一小节演唱**的包络几何（生成器产物，见
-    /// `Assets/WelcomeWaveform.axaml`，单一来源、可重生成）；这里只保留**弹性高度**的三个口径常量。
+    /// 波形是**真实一小节演唱的响度几何**（生成器产物 `Assets/WelcomeWaveform.axaml`，单一来源、可重生成）。
+    /// W50 起它从"左栏中段弹性大图（132–200）"改为**右栏页头右侧的装饰带**：装饰不再与导航抢层级，
+    /// 版面全部让给信息（对齐主界面 MD3 的页头 28+14 规格）。
     /// 放在视图层而不是 VM：它是静态版式，不含业务状态。
     /// </summary>
     public static class WelcomeArt {
-        /// <summary>波形区的**基准高度**（设计基准；实际高度由可用空间弹性决定，上限 200）。</summary>
-        public const double BaseWaveHeight = 132.0;
-
-        /// <summary>波形区的**高度上限**（响应式：涨到上限即停，余量交给中段组对称居中）。</summary>
-        public const double MaxWaveHeight = 200.0;
-
-        /// <summary>波形区的**高度下限**（低于基准不再压，避免波形被压得不可辨）。</summary>
-        public const double MinWaveHeight = BaseWaveHeight;
+        /// <summary>页头波形装饰带的高度（XAML 里的 Height 必须与此一致；测试把两者钉在一起防漂移）。</summary>
+        public const double WaveBandHeight = 64.0;
 
         /// <summary>
         /// 「已安装音源」= **真实**数据（`SingerManager`），最多取 <paramref name="max"/> 个；
