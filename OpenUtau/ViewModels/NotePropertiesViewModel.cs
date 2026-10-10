@@ -790,8 +790,20 @@ namespace OpenUtau.App.ViewModels {
             internal bool ApplyExpression(NotePropertyExpViewModel expression, object? input) {
                 if (!IsCurrent || expression.IsDisposed || !ReferenceEquals(expression.parentViewmodel, owner) ||
                     !expression.TryParseNumerical(input, out var value)) return false;
+                return ApplyExpressionValue(expression, value, useCustomDefault: true);
+            }
+
+            internal bool ApplyOption(NotePropertyExpViewModel expression, int index) {
+                if (!IsCurrent || owner.IsRefreshingInputs || NoteLoading || expression.IsDisposed ||
+                    !ReferenceEquals(expression.parentViewmodel, owner) || !expression.IsOptions ||
+                    index < 0 || index >= expression.Options.Count) return false;
+                return ApplyExpressionValue(expression, index, useCustomDefault: false);
+            }
+
+            bool ApplyExpressionValue(NotePropertyExpViewModel expression, float? value, bool useCustomDefault) {
                 var targetTrack = track!;
-                if (targetTrack.TryGetExpDescriptor(project, expression.abbr, out var descriptor) && descriptor.CustomDefaultValue == value)
+                if (targetTrack.TryGetExpDescriptor(project, expression.abbr, out var descriptor) &&
+                    (useCustomDefault ? descriptor.CustomDefaultValue : descriptor.defaultValue) == value)
                     value = null;
                 if (notes.All(note => {
                     var oldValues = note.GetExpressionNoteHas(project, targetTrack, expression.abbr);
@@ -831,19 +843,6 @@ namespace OpenUtau.App.ViewModels {
                 DocManager.Inst.ExecuteCmd(new SetNotesSameExpressionCommand(DocManager.Inst.Project, track, Part, selectedNotes, abbr, value));
             }
         }
-        public void SetOptionalExpressionsChanges(string abbr, int? value) {
-            if (disposed) return;
-            if (!NoteLoading && Part != null && selectedNotes.Count > 0) {
-                var track = DocManager.Inst.Project.tracks[Part.trackNo];
-                if (track.TryGetExpDescriptor(DocManager.Inst.Project, abbr, out UExpressionDescriptor descriptor) && descriptor.defaultValue == value) {
-                    value = null;
-                }
-                DocManager.Inst.StartUndoGroup("command.exp.edit");
-                DocManager.Inst.ExecuteCmd(new SetNotesSameExpressionCommand(DocManager.Inst.Project, track, Part, selectedNotes, abbr, value));
-                DocManager.Inst.EndUndoGroup();
-            }
-        }
-
         // presets
         public void SavePortamentoPreset(string name) {
             if (disposed) return;
@@ -885,6 +884,7 @@ namespace OpenUtau.App.ViewModels {
 
     public class NotePropertyExpViewModel : ViewModelBase, IDisposable {
         readonly CompositeDisposable subscriptions = new();
+        NotePropertiesViewModel.NotePropertyEditSession? optionEdit;
         public bool IsDisposed { get; private set; }
         public string Name { get; set; }
         public bool IsNumerical { get; set; } = false;
@@ -926,8 +926,8 @@ namespace OpenUtau.App.ViewModels {
             if (IsOptions) {
                 this.WhenAnyValue(vm => vm.SelectedOption)
                     .Subscribe(value => {
-                        if (!IsDisposed && value >= 0 && DropDownOpen) {
-                            parentViewmodel.SetOptionalExpressionsChanges(abbr, value);
+                        if (!IsDisposed && optionEdit != null && !parentViewmodel.IsRefreshingInputs && !NotePropertiesViewModel.NoteLoading) {
+                            if (!optionEdit.ApplyOption(this, value)) RefreshInput();
                         }
                     }).DisposeWith(subscriptions);
             }
@@ -960,11 +960,23 @@ namespace OpenUtau.App.ViewModels {
 
         internal NotePropertiesViewModel.NotePropertyEditSession BeginInputEdit() => parentViewmodel.BeginInputEdit();
 
+        internal void BeginOptionEdit() {
+            EndOptionEdit();
+            if (!IsDisposed && IsOptions) optionEdit = BeginInputEdit();
+        }
+
+        internal void EndOptionEdit() {
+            var edit = optionEdit;
+            optionEdit = null;
+            edit?.Dispose();
+        }
+
         internal void RefreshInput() => parentViewmodel.RefreshInputs();
 
         public void Dispose() {
             if (IsDisposed) return;
             IsDisposed = true;
+            EndOptionEdit();
             subscriptions.Dispose();
         }
 

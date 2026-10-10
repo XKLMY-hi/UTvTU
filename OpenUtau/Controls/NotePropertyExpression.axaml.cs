@@ -14,6 +14,7 @@ namespace OpenUtau.App.Controls {
         NotePropertiesViewModel.NotePropertyEditSession? textEdit;
         NotePropertiesViewModel.NotePropertyEditSession? sliderEdit;
         NotePropertyExpViewModel? textModel;
+        NotePropertyExpViewModel? optionModel;
         string originalText = string.Empty;
         readonly List<Thumb> sliderThumbs = new();
 
@@ -27,6 +28,8 @@ namespace OpenUtau.App.Controls {
             slider.AddHandler(PointerWheelChangedEvent, SliderWheel, RoutingStrategies.Tunnel);
             slider.PropertyChanged += SliderValueChanged;
             comboBox.AddHandler(PointerPressedEvent, OnComboBoxPointerPressed, RoutingStrategies.Tunnel);
+            comboBox.DropDownOpened += (_, _) => BeginOptionEdit();
+            comboBox.DropDownClosed += (_, _) => EndOptionEdit();
             DataContextChanged += (_, _) => CancelInput();
         }
 
@@ -152,11 +155,24 @@ namespace OpenUtau.App.Controls {
                 args.Handled = true;
             }
         }
+        void BeginOptionEdit() {
+            EndOptionEdit();
+            optionModel = DataContext as NotePropertyExpViewModel;
+            optionModel?.BeginOptionEdit();
+        }
+        void EndOptionEdit() {
+            var model = optionModel;
+            optionModel = null;
+            model?.EndOptionEdit();
+            model?.RefreshInput();
+        }
         void CancelInput() {
             textEdit?.Dispose();
             textEdit = null;
             textModel = null;
             EndSliderEdit();
+            EndOptionEdit();
+            comboBox.SetCurrentValue(ComboBox.IsDropDownOpenProperty, false);
         }
         protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs args) {
             CancelInput();

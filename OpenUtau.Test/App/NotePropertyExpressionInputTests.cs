@@ -72,6 +72,17 @@ namespace OpenUtau.Test.App {
             return args;
         }
         NotePropertyExpression Row() => new() { DataContext = expression };
+        NotePropertyExpression OptionRow() {
+            var optionDescriptor = new UExpressionDescriptor("Test option", "choice", false,
+                new[] { "Default", "One", "Two", "Three" });
+            project.RegisterExpression(optionDescriptor);
+            first.SetExpression(project, project.tracks[0], "choice", new float?[] { 1 });
+            var option = new NotePropertyExpViewModel(optionDescriptor, parent);
+            parent.Expressions.Add(option);
+            Select(first);
+            return new NotePropertyExpression { DataContext = option };
+        }
+        float? OptionValue(UNote note) => note.phonemeExpressions.SingleOrDefault(e => e.abbr == "choice")?.value;
         static Window Mount(Control control) {
             var window = new Window { Width = 360, Height = 90, Content = control };
             window.Show();
@@ -376,6 +387,91 @@ namespace OpenUtau.Test.App {
                 Assert.Null(DocManager.Inst.ActiveUndoGroup);
                 tuning.SetCurrentValue(RangeBase.ValueProperty, 70d);
                 Assert.Equal(25, first.tuning);
+            } finally { window.Close(); }
+        }
+
+        [AvaloniaFact]
+        public void OptionDropdown_UndoAndRedoUpdateDisplayWithoutWritingBack() {
+            var row = OptionRow();
+            var window = Mount(row);
+            try {
+                Assert.Equal(1, row.comboBox.SelectedIndex);
+                row.comboBox.IsDropDownOpen = true;
+                Dispatcher.UIThread.RunJobs();
+                Assert.True(row.comboBox.IsDropDownOpen);
+                row.comboBox.SetCurrentValue(ComboBox.SelectedIndexProperty, 2);
+                Assert.Equal(2f, OptionValue(first));
+                Assert.NotNull(DocManager.Inst.ActiveUndoGroup);
+                DocManager.Inst.Undo();
+                Assert.Equal(1f, OptionValue(first));
+                Assert.Equal(1, row.comboBox.SelectedIndex);
+                Assert.Null(DocManager.Inst.ActiveUndoGroup);
+                Assert.True(DocManager.Inst.GetRedoState(out _));
+                DocManager.Inst.Redo();
+                Assert.Equal(2f, OptionValue(first));
+                Assert.Equal(2, row.comboBox.SelectedIndex);
+                Assert.Null(DocManager.Inst.ActiveUndoGroup);
+                row.comboBox.SetCurrentValue(ComboBox.SelectedIndexProperty, 3);
+                Assert.Equal(3f, OptionValue(first));
+                row.comboBox.IsDropDownOpen = false;
+                Assert.Null(DocManager.Inst.ActiveUndoGroup);
+                DocManager.Inst.Undo();
+                Assert.Equal(2f, OptionValue(first));
+            } finally { window.Close(); }
+        }
+
+        [AvaloniaFact]
+        public void OptionDropdown_CannotWriteNewSelection_AndDetachRequiresANewSession() {
+            var row = OptionRow();
+            var host = new Panel { Children = { row } };
+            var window = Mount(host);
+            try {
+                row.comboBox.IsDropDownOpen = true;
+                Dispatcher.UIThread.RunJobs();
+                Select(second);
+                row.comboBox.SetCurrentValue(ComboBox.SelectedIndexProperty, 3);
+                Assert.Equal(1f, OptionValue(first));
+                Assert.Null(OptionValue(second));
+                Assert.Equal(0, row.comboBox.SelectedIndex);
+                Assert.Null(DocManager.Inst.ActiveUndoGroup);
+                host.Children.Remove(row);
+                Assert.False(row.comboBox.IsDropDownOpen);
+                host.Children.Add(row);
+                row.comboBox.IsDropDownOpen = true;
+                Dispatcher.UIThread.RunJobs();
+                row.comboBox.SetCurrentValue(ComboBox.SelectedIndexProperty, 2);
+                Assert.Equal(2f, OptionValue(second));
+                row.comboBox.SetCurrentValue(ComboBox.SelectedIndexProperty, 0);
+                Assert.Null(OptionValue(second)); // The descriptor's default clears an override.
+                row.comboBox.IsDropDownOpen = false;
+                Assert.Null(DocManager.Inst.ActiveUndoGroup);
+                Assert.Equal(1f, OptionValue(first));
+            } finally { window.Close(); }
+        }
+
+        [AvaloniaFact]
+        public void OptionDropdown_InvalidIndicesAndForeignUndoGroupArePreserved() {
+            var row = OptionRow();
+            var option = (NotePropertyExpViewModel)row.DataContext!;
+            using (var edit = option.BeginInputEdit()) {
+                Assert.False(edit.ApplyOption(option, -1));
+                Assert.False(edit.ApplyOption(option, option.Options.Count));
+            }
+            var host = new Panel { Children = { row } };
+            var window = Mount(host);
+            try {
+                row.comboBox.IsDropDownOpen = true;
+                Dispatcher.UIThread.RunJobs();
+                DocManager.Inst.StartUndoGroup();
+                var foreign = DocManager.Inst.ActiveUndoGroup;
+                row.comboBox.SetCurrentValue(ComboBox.SelectedIndexProperty, 2);
+                Assert.Equal(1f, OptionValue(first));
+                Assert.Equal(1, row.comboBox.SelectedIndex);
+                Assert.Same(foreign, DocManager.Inst.ActiveUndoGroup);
+                Assert.Empty(foreign!.Commands);
+                host.Children.Remove(row);
+                Assert.Same(foreign, DocManager.Inst.ActiveUndoGroup);
+                Assert.Empty(foreign.Commands);
             } finally { window.Close(); }
         }
         public void Dispose() {
