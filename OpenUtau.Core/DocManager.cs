@@ -292,16 +292,20 @@ namespace OpenUtau.Core {
                 Log.Error($"No active UndoGroup {cmd}");
                 return;
             }
-            undoGroup.Commands.Add(cmd);
-            lock (Project) {
+            // Subscribers may finish the gesture or load another project while
+            // handling Publish. Keep the command's validation tied to its owner.
+            var commandGroup = undoGroup;
+            var commandProject = Project;
+            commandGroup.Commands.Add(cmd);
+            lock (commandProject) {
                 cmd.Execute();
             }
             if (!cmd.Silent) {
                 Log.Information($"ExecuteCmd {cmd}");
             }
             Publish(cmd);
-            if (!undoGroup.DeferValidate && cmd.AffectsSynthesis) {
-                Project.Validate(cmd.ValidateOptions);
+            if (ReferenceEquals(commandProject, Project) && !commandGroup.DeferValidate && cmd.AffectsSynthesis) {
+                commandProject.Validate(cmd.ValidateOptions);
             }
         }
 
