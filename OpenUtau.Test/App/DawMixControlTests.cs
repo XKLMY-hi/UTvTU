@@ -84,8 +84,8 @@ namespace OpenUtau.Test.App {
                 var before = header.MuteButton.Bounds.Size;
                 header.MuteButton.IsChecked = true;
                 MixerGeometryTests.Settle(window);
-                var glyph = header.MuteButton.GetVisualDescendants().OfType<Avalonia.Controls.Shapes.Path>().Single();
-                Assert.Equal(header.MuteButton.Foreground, glyph.Fill);
+                var glyph = header.MuteButton.GetVisualDescendants().OfType<TextBlock>().Single(t => t.Name == "PART_Label");
+                Assert.Equal(header.MuteButton.Foreground, glyph.Foreground);
                 Assert.Equal(header.SoloButton.Theme, header.MuteButton.Theme);
                 header.MuteButton.Focus(NavigationMethod.Tab);
                 MixerGeometryTests.Settle(window);

@@ -22,6 +22,7 @@
          Height="20" 顶成 32（W6 实测 24×31），应用级 `Button { Margin: 0,4 }`
          （Styles.axaml:159）再给 8px 竖向 margin ⇒ 本地两行都必须显式压掉。 -->
     <Style Selector="Button.masterMuteBtn">
+      <Setter Property="Theme" Value="{StaticResource DawMixButtonTheme}"/>
       <Setter Property="MinHeight" Value="20"/>
       <Setter Property="Margin" Value="0"/>
       <Setter Property="Padding" Value="0"/>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -117,7 +117,7 @@ namespace OpenUtau.Test.App {
 
         /// <summary>
         /// W21-C（`5f14dd89` 运输条图标对齐）：上游的缺陷形态是"图标 Path 不设尺寸、容器又写死总宽"，
-        /// 我们重构后的运输条**每个图标都显式定尺 + Stretch=Uniform、按钮定尺、胶囊不写死总宽** ⇒
+        /// 我们重构后的运输条**每个图标都显式定尺并按矢量边界居中、按钮定尺、胶囊不写死总宽** ⇒
         /// 该缺陷类在我们结构里不存在。这里把这条结构契约钉住，防止以后回退成"不设尺寸"。
         /// </summary>
         [AvaloniaFact]
@@ -128,7 +128,7 @@ namespace OpenUtau.Test.App {
                 string line = FindIconLine(xaml, icon);
                 Assert.Contains("Width=\"16\"", line);
                 Assert.Contains("Height=\"16\"", line);
-                Assert.Contains("Stretch=\"Uniform\"", line);
+                Assert.Contains("<c:DawIcon", line);
             }
             // 产品局部样式给按钮定尺；运输容器宽度随内容计算。
             string styles = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "WorkspaceShell.axaml"));
@@ -142,11 +142,11 @@ namespace OpenUtau.Test.App {
 
         private static string FindIconLine(string xaml, string iconKey) {
             foreach (string line in xaml.Split('\n')) {
-                if (line.Contains($"{{StaticResource {iconKey}}}") && line.Contains("<Path")) {
+                if (line.Contains($"{{StaticResource {iconKey}}}") && line.Contains("<c:DawIcon")) {
                     return line;
                 }
             }
-            throw new Xunit.Sdk.XunitException($"MainWindow.axaml 里找不到 {iconKey} 的 Path 行");
+            throw new Xunit.Sdk.XunitException($"MainWindow.axaml 里找不到 {iconKey} 的 DawIcon 行");
         }
     }
 }

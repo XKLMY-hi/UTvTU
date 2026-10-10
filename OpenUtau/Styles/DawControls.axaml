@@ -1,0 +1,108 @@
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Styles.Resources>
+    <!-- One content/state contract for workspace, track headers, piano tools and mixer.
+         Hosts choose density and shape; no host reaches into another template. -->
+    <ControlTheme x:Key="DawButtonTheme" TargetType="Button">
+      <Setter Property="MinHeight" Value="0"/>
+      <Setter Property="MinWidth" Value="0"/>
+      <Setter Property="Margin" Value="0"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="Focusable" Value="True"/>
+      <Setter Property="FocusAdorner" Value="{x:Null}"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="6"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Grid>
+            <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"/>
+            <Border Name="PART_StateLayer" Background="{TemplateBinding Foreground}" Opacity="0"
+                    CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False"/>
+            <ContentPresenter Name="PART_ContentPresenter" Margin="{TemplateBinding Padding}"
+                              Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Foreground="{TemplateBinding Foreground}"
+                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+            <Border Name="PART_FocusRing" BorderBrush="{DynamicResource md3.primary}" BorderThickness="1"
+                    CornerRadius="{TemplateBinding CornerRadius}" Opacity="0" IsHitTestVisible="False"/>
+          </Grid>
+        </ControlTemplate>
+      </Setter>
+      <Style Selector="^:pointerover /template/ Border#PART_StateLayer">
+        <Setter Property="Opacity" Value="0.08"/>
+      </Style>
+      <Style Selector="^:pressed /template/ Border#PART_StateLayer">
+        <Setter Property="Opacity" Value="0.12"/>
+      </Style>
+      <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+        <Setter Property="Opacity" Value="1"/>
+      </Style>
+      <Style Selector="^:disabled">
+        <Setter Property="Opacity" Value="0.38"/>
+      </Style>
+    </ControlTheme>
+    <!-- String labels own their TextBlock. Every font/color/alignment value is explicit,
+         so application TextBlock setters cannot replace the button's typography. -->
+    <ControlTheme x:Key="DawTextButtonTheme" TargetType="Button" BasedOn="{StaticResource DawButtonTheme}">
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Grid>
+            <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"/>
+            <Border Name="PART_StateLayer" Background="{TemplateBinding Foreground}" Opacity="0"
+                    CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False"/>
+            <!-- Keep fractional text origins: an odd-height line in an even-height
+                 compact button otherwise rounds its center half a DIP upward. -->
+            <TextBlock Name="PART_Label" UseLayoutRounding="False" Margin="{TemplateBinding Padding}" Text="{TemplateBinding Content}"
+                       Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}"
+                       FontWeight="{TemplateBinding FontWeight}" FontFamily="{TemplateBinding FontFamily}"
+                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
+                       HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                       VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+            <Border Name="PART_FocusRing" BorderBrush="{DynamicResource md3.primary}" BorderThickness="1"
+                    CornerRadius="{TemplateBinding CornerRadius}" Opacity="0" IsHitTestVisible="False"/>
+          </Grid>
+        </ControlTemplate>
+      </Setter>
+    </ControlTheme>
+    <ControlTheme x:Key="DawToolToggleTheme" TargetType="ToggleButton" BasedOn="{StaticResource DawButtonTheme}">
+      <Style Selector="^:checked">
+        <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+        <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+      </Style>
+    </ControlTheme>
+    <ControlTheme x:Key="DawTextToolToggleTheme" TargetType="ToggleButton" BasedOn="{StaticResource DawTextButtonTheme}">
+      <Style Selector="^:checked">
+        <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+        <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+      </Style>
+    </ControlTheme>
+    <ControlTheme x:Key="DawMixButtonTheme" TargetType="Button" BasedOn="{StaticResource DawTextButtonTheme}">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+      <Setter Property="CornerRadius" Value="4"/>
+      <Setter Property="FontSize" Value="10"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Style Selector="^.muteOn">
+        <Setter Property="Background" Value="{DynamicResource md3.error}"/>
+        <Setter Property="Foreground" Value="{DynamicResource md3.on-error}"/>
+      </Style>
+      <Style Selector="^.soloOn">
+        <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
+      </Style>
+    </ControlTheme>
+    <ControlTheme x:Key="DawMixToggleTheme" TargetType="ToggleButton" BasedOn="{StaticResource DawMixButtonTheme}">
+      <Style Selector="^.mute:checked">
+        <Setter Property="Background" Value="{DynamicResource md3.error}"/>
+        <Setter Property="Foreground" Value="{DynamicResource md3.on-error}"/>
+      </Style>
+      <Style Selector="^.solo:checked">
+        <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
+      </Style>
+    </ControlTheme>
+  </Styles.Resources>
+</Styles>

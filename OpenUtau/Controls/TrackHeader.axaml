@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:OpenUtau.App.ViewModels"
+             xmlns:c="clr-namespace:OpenUtau.App.Controls"
              mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="104"
              x:Class="OpenUtau.App.Controls.TrackHeader" Width="300" Height="104" TrackNo="{Binding TrackNo}">
   <Design.DataContext>
@@ -177,7 +178,7 @@
           <!-- "⋯" overflow button（紧凑视图：歌手/音素器被按高裁掉时才出现）。
                触发条件从 `!IsRendererVisible` 改成 `ShowOverflow`（W33）：渲染器已恒显，
                若还挂渲染器那个条件就永远不显示了；同时**渲染器兜底项已删除**（同一入口两处呈现是隐患）。 -->
-          <Button Name="OverflowButton" Classes="trackHeaderAction" Theme="{StaticResource TrackHeaderActionTheme}" Height="18" Width="17" Padding="0"
+          <Button Name="OverflowButton" Classes="trackHeaderAction" Theme="{StaticResource DawTextButtonTheme}" Height="18" Width="17" Padding="0"
                   Content="⋯" FontSize="12"
                   VerticalAlignment="Top" IsVisible="{Binding ShowOverflow}">
             <Button.Flyout>
@@ -199,12 +200,10 @@
           </Button>
 
           <!-- Mute button -->
-          <ToggleButton Name="MuteButton" Classes="trackHeaderToggle" Theme="{StaticResource TrackHeaderToggleTheme}" MinHeight="0" Margin="0" Padding="0" Height="20" Width="24"
+          <ToggleButton Name="MuteButton" Classes="trackHeaderToggle mute" Theme="{StaticResource TrackHeaderToggleTheme}" MinHeight="0" Margin="0" Padding="0" Height="20" Width="24"
                         HorizontalAlignment="Center"
                         AutomationProperties.Name="{DynamicResource tracks.mute}" ToolTip.Tip="{DynamicResource tracks.mute}"
-                        IsChecked="{Binding Mute, Mode=OneWay}" Command="{Binding ToggleMute}">
-            <Path Width="16" Height="16" Fill="{Binding $parent[ToggleButton].Foreground}"
-                  Data="M15.31 17A.51.56 0 0 1 14.81 16.44V9.2A.07.08 0 0 0 14.66 9.17L12.39 14.5a.29.32 0 0 1-.26.19h-.35a.29.32 0 0 1-.26-.19L9.27 9.17 9.12 9.2v7.24A.51.56 0 0 1 8.62 17H8.51A.51.56 0 0 1 8 16.44V7.56A.51.56 0 0 1 8.51 7h.84a.43.48 0 0 1 .39.28l2.23 5.2a.04.05 0 0 0 .07 0l2.16-5.2a.43.48 0 0 1 .41-.28h.88A.51.56 0 0 1 16 7.56v8.88A.51.56 0 0 1 15.5 17Z"/>
+                        IsChecked="{Binding Mute, Mode=OneWay}" Command="{Binding ToggleMute}" FontSize="10" FontWeight="Bold" Content="M">
             <ToggleButton.ContextMenu>
               <ContextMenu>
                 <MenuItem Classes="context" Header="{StaticResource tracks.mute}" Command="{Binding ToggleMute}"/>
@@ -216,12 +215,10 @@
           </ToggleButton>
 
           <!-- Solo button -->
-          <ToggleButton Name="SoloButton" Classes="trackHeaderToggle" Theme="{StaticResource TrackHeaderToggleTheme}" MinHeight="0" Margin="0" Padding="0" Height="20" Width="24"
+          <ToggleButton Name="SoloButton" Classes="trackHeaderToggle solo" Theme="{StaticResource TrackHeaderToggleTheme}" MinHeight="0" Margin="0" Padding="0" Height="20" Width="24"
                         HorizontalAlignment="Center"
                         AutomationProperties.Name="{DynamicResource tracks.solo}" ToolTip.Tip="{DynamicResource tracks.solo}"
-                        IsChecked="{Binding Solo, Mode=OneWay}" Command="{Binding ToggleSolo}">
-            <Path Width="16" Height="16" Fill="{Binding $parent[ToggleButton].Foreground}"
-                  Data="M15.99 14.08c0-.7-.2-1.23-.58-1.62-.38-.39-.97-.67-1.73-.86-.39-.09-.84-.17-1.4-.27-.54-.09-.97-.15-1.27-.21-.55-.12-.95-.3-1.17-.52-.23-.24-.33-.56-.33-.96 0-.45.22-.82.67-1.1.45-.28 1.04-.43 1.78-.43.67 0 1.33.1 1.97.31.64.2 1.58.49 1.99.81H16V7.71c-.47-.2-1.42-.38-2.03-.51-.6-.13-1.28-.2-2.01-.2-1.12 0-2.05.26-2.79.78-.73.5-1.1 1.17-1.1 1.98 0 .71.21 1.27.65 1.72.45.44 1.13.75 2.06.93.45.09.88.16 1.29.21.41.06.79.13 1.13.22.47.11.79.28 1.03.47.23.21.34.52.34.95 0 .5-.24.89-.71 1.19-.47.3-1.14.43-1.99.43-.61 0-1.24-.11-1.94-.33-.67-.23-1.28-.53-1.81-.94H8v1.61c.61.26 1.22.46 1.82.59.59.12 1.26.19 2.01.19.7 0 1.29-.07 1.78-.23.5-.16.94-.38 1.3-.65.33-.26.6-.56.79-.93.19-.37.29-.74.29-1.12Z"/>
+                        IsChecked="{Binding Solo, Mode=OneWay}" Command="{Binding ToggleSolo}" FontSize="10" FontWeight="Bold" Content="S">
             <ToggleButton.ContextMenu>
               <ContextMenu>
                 <MenuItem Classes="context" Header="{StaticResource tracks.solo.only}" Command="{Binding ToggleSolo}"/>
@@ -236,9 +233,7 @@
                   HorizontalAlignment="Center"
                   AutomationProperties.Name="{DynamicResource context.track.effects}" ToolTip.Tip="{DynamicResource context.track.effects}"
                   Classes.fxOn="{Binding MixFxEnabled}"
-                  Command="{Binding OpenMixFxDialog}">
-            <TextBlock Text="fx" FontSize="9" FontWeight="SemiBold" Foreground="{Binding $parent[Button].Foreground}"
-                       VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                  Command="{Binding OpenMixFxDialog}" FontSize="9" FontWeight="SemiBold" Content="fx">
           </Button>
 
           <!-- 轨道设置按钮（重建：旧按钮点击无效——去 Separator、常显、明确布局） -->
@@ -246,7 +241,7 @@
                   Background="Transparent" HorizontalAlignment="Center" VerticalAlignment="Top"
                   Click="TrackSettingsButtonClicked"
                   AutomationProperties.Name="{DynamicResource tracks.tracksettings}" ToolTip.Tip="{DynamicResource tracks.tracksettings}">
-            <Path Width="15" Height="15" Stretch="Uniform" Data="{StaticResource icon-settings}"
+            <c:DawIcon Width="15" Height="15" Data="{StaticResource icon-settings}"
                   Fill="{Binding $parent[Button].Foreground}"/>
           </Button>
         </WrapPanel>

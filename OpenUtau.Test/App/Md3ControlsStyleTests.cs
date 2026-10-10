@@ -137,6 +137,11 @@ namespace OpenUtau.Test.App {
                 string styles = File.ReadAllText(path);
                 defined.UnionWith(Regex.Matches(styles, "x:Key=\"([^\"]+)\"").Select(m => m.Groups[1].Value));
             }
+            // Shared themes resolve through the actual Application.Styles mount, not a key whitelist.
+            string appXaml = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "App.axaml"));
+            Assert.Contains("<StyleInclude Source=\"/Styles/DawControls.axaml\"/>", appXaml);
+            string shared = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "DawControls.axaml"));
+            defined.UnionWith(Regex.Matches(shared, "x:Key=\"([^\"]+)\"").Select(m => m.Groups[1].Value));
             var missing = used.Where(k => !defined.Contains(k)).ToList();
             Assert.True(missing.Count == 0, "TrackHeader 内悬空引用：" + string.Join(", ", missing));
         }

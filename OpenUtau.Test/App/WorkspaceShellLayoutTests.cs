@@ -34,7 +34,7 @@ namespace OpenUtau.Test.App {
         static XElement Named(XElement root, string name) => root.DescendantsAndSelf()
             .Single(e => (string?)e.Attribute(Xaml + "Name") == name);
 
-        sealed class Fixture : IDisposable {
+        internal sealed class Fixture : IDisposable {
             public readonly Window Window;
             public readonly Grid Shell;
             public readonly Dictionary<string, Control> NamedControls = new();
@@ -74,6 +74,7 @@ namespace OpenUtau.Test.App {
                     "Viewbox" => new Viewbox(),
                     "Canvas" => new Canvas(),
                     "Path" => new Avalonia.Controls.Shapes.Path(),
+                    "DawIcon" => new DawIcon(),
                     "ViewScaler" => new ViewScaler(),
                     "ProgressBar" => new ProgressBar(),
                     _ => throw new InvalidOperationException($"Unhandled shell element {e.Name}"),
@@ -89,6 +90,16 @@ namespace OpenUtau.Test.App {
                     } else if (!value.StartsWith("{", StringComparison.Ordinal)) {
                         ApplyLiteral(control, key, value);
                     }
+                }
+                if (control is DawIcon icon && (string?)e.Attribute("Data") is { } geometryText) {
+                    // Reparse the actual source under the active geometry provider. Application
+                    // assets may have been created before a test scopes the real Skia provider.
+                    if (geometryText.StartsWith("{StaticResource ", StringComparison.Ordinal)) {
+                        var assets = XDocument.Load(System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "Icons.axaml"));
+                        var key = geometryText.Substring(16).TrimEnd('}');
+                        geometryText = assets.Descendants().Single(node => (string?)node.Attribute(Xaml + "Key") == key).Value;
+                    }
+                    icon.Data = Geometry.Parse(geometryText);
                 }
                 if (control is TextBlock text) {
                     var textAttribute = (string?)e.Attribute("Text");

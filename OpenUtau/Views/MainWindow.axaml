@@ -150,25 +150,25 @@
           <Border x:Name="TransportPill" Classes="transportPill">
             <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
               <Button Classes="tpBtn" AutomationProperties.Name="{DynamicResource command.playback.gohome}" ToolTip.Tip="{DynamicResource command.playback.gohome}" Command="{Binding PlaybackViewModel.SeekStart}">
-                <Path Data="{StaticResource icon-skip-back}" Width="16" Height="16" Stretch="Uniform"
-                      Fill="{DynamicResource md3.on-surface}"/>
+                <c:DawIcon Data="{StaticResource icon-skip-back}" Width="16" Height="16"
+                      Fill="{Binding $parent[Button].Foreground}"/>
               </Button>
               <Button Classes="tpPlay" AutomationProperties.Name="{DynamicResource command.playback.playpause}" ToolTip.Tip="{DynamicResource command.playback.playpause}" Click="OnPlayOrPause">
-                <Path Data="{StaticResource icon-play}" Width="16" Height="16" Stretch="Uniform"
+                <c:DawIcon Data="{StaticResource icon-play}" Width="16" Height="16"
                       Fill="{DynamicResource md3.on-primary}"/>
               </Button>
               <Button Classes="tpBtn" AutomationProperties.Name="{DynamicResource command.playback.playpause}" ToolTip.Tip="{DynamicResource command.playback.playpause}" Command="{Binding PlaybackViewModel.Pause}">
-                <Path Data="{StaticResource icon-pause}" Width="16" Height="16" Stretch="Uniform"
-                      Fill="{DynamicResource md3.on-surface}"/>
+                <c:DawIcon Data="{StaticResource icon-pause}" Width="16" Height="16"
+                      Fill="{Binding $parent[Button].Foreground}"/>
               </Button>
               <Button Classes="tpBtn" AutomationProperties.Name="{DynamicResource command.playback.goend}" ToolTip.Tip="{DynamicResource command.playback.goend}" Command="{Binding PlaybackViewModel.SeekEnd}">
-                <Path Data="{StaticResource icon-skip-forward}" Width="16" Height="16" Stretch="Uniform"
-                      Fill="{DynamicResource md3.on-surface}"/>
+                <c:DawIcon Data="{StaticResource icon-skip-forward}" Width="16" Height="16"
+                      Fill="{Binding $parent[Button].Foreground}"/>
               </Button>
               <ToggleButton Classes="tpBtn" IsChecked="{Binding PlaybackViewModel.Metronome}"
                             AutomationProperties.Name="{DynamicResource prefs.playback.metronome}" ToolTip.Tip="{DynamicResource prefs.playback.metronome}">
-                <Path Data="{StaticResource icon-metronome}" Width="16" Height="16" Stretch="Uniform"
-                      Fill="{DynamicResource md3.on-surface}"/>
+                <c:DawIcon Data="{StaticResource icon-metronome}" Width="16" Height="16"
+                      Fill="{Binding $parent[Button].Foreground}"/>
               </ToggleButton>
             </StackPanel>
           </Border>
@@ -176,7 +176,7 @@
           <!-- 播放位置：等宽读数。 -->
           <Border x:Name="TimeReadout" Classes="tpReadout" Padding="10,0">
             <TextBlock Text="{Binding Path=PlaybackViewModel.PlayPosTime, StringFormat={}{0:mm\\:ss\\.fff}}"
-                       FontSize="14" FontFamily="Consolas" VerticalAlignment="Center"
+                       FontSize="14" FontFamily="Consolas" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"
                        Foreground="{DynamicResource md3.on-surface}"/>
           </Border>
 
@@ -226,28 +226,28 @@
             </Border>
             <Button x:Name="DetachViewButton" Classes="topBtn" Click="OnDetachViewClicked"
                     AutomationProperties.Name="{DynamicResource view.detach}" ToolTip.Tip="{DynamicResource view.detach}">
-              <Path Data="{StaticResource icon-external-link}" Width="16" Height="16" Stretch="Uniform"
-                    Fill="{DynamicResource md3.on-surface-variant}"/>
+              <c:DawIcon Data="{StaticResource icon-external-link}" Width="16" Height="16"
+                    Fill="{Binding $parent[Button].Foreground}"/>
             </Button>
           </StackPanel>
           <StackPanel x:Name="TopRightCluster" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
             <Button x:Name="ShellSaveButton" Classes="topBtn" Click="OnMenuSave" AutomationProperties.Name="{DynamicResource menu.file.save}" ToolTip.Tip="{DynamicResource menu.file.save}">
-              <Path Data="{StaticResource icon-save}" Width="16" Height="16" Stretch="Uniform" Fill="{DynamicResource md3.on-surface}"/>
+              <c:DawIcon Data="{StaticResource icon-save}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
             </Button>
             <Button x:Name="ShellRenderButton" Classes="topBtn" Click="OnMenuRender" AutomationProperties.Name="{DynamicResource menu.file.render}" ToolTip.Tip="{DynamicResource menu.file.render}">
-              <Path Data="{StaticResource icon-download}" Width="16" Height="16" Stretch="Uniform" Fill="{DynamicResource md3.on-surface}"/>
+              <c:DawIcon Data="{StaticResource icon-download}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
             </Button>
 
 
             <Button Classes="topBtn" Command="{Binding Undo}" IsEnabled="{Binding CanUndo}"
                     AutomationProperties.Name="{DynamicResource menu.edit.undo}" ToolTip.Tip="{DynamicResource menu.edit.undo}">
-              <Path Data="{StaticResource icon-undo}" Width="16" Height="16" Stretch="Uniform"
-                    Fill="{DynamicResource md3.on-surface}"/>
+              <c:DawIcon Data="{StaticResource icon-undo}" Width="16" Height="16"
+                    Fill="{Binding $parent[Button].Foreground}"/>
             </Button>
             <Button Classes="topBtn" Command="{Binding Redo}" IsEnabled="{Binding CanRedo}"
                     AutomationProperties.Name="{DynamicResource menu.edit.redo}" ToolTip.Tip="{DynamicResource menu.edit.redo}">
-              <Path Data="{StaticResource icon-redo}" Width="16" Height="16" Stretch="Uniform"
-                    Fill="{DynamicResource md3.on-surface}"/>
+              <c:DawIcon Data="{StaticResource icon-redo}" Width="16" Height="16"
+                    Fill="{Binding $parent[Button].Foreground}"/>
             </Button>
             <Border Width="1" Height="20" Margin="6,0" VerticalAlignment="Center"
                     Background="{DynamicResource md3.outline-variant}"/>
@@ -270,16 +270,16 @@
                   <MenuItem Header="{DynamicResource menu.tools.layout.hsplit13}" Click="OnMenuLayoutHSplit13"/>
                 </MenuFlyout>
               </Button.Flyout>
-              <Path Data="{StaticResource icon-layout}" Width="16" Height="16" Stretch="Uniform"
-                    Fill="{DynamicResource md3.on-surface}"/>
+              <c:DawIcon Data="{StaticResource icon-layout}" Width="16" Height="16"
+                    Fill="{Binding $parent[Button].Foreground}"/>
             </Button>
             <Button Classes="topBtn" Click="OnMenuMixer" AutomationProperties.Name="{DynamicResource menu.tools.mixer}" ToolTip.Tip="{DynamicResource menu.tools.mixer}">
-              <Path Data="{StaticResource icon-sliders}" Width="16" Height="16" Stretch="Uniform"
-                    Fill="{DynamicResource md3.on-surface}"/>
+              <c:DawIcon Data="{StaticResource icon-sliders}" Width="16" Height="16"
+                    Fill="{Binding $parent[Button].Foreground}"/>
             </Button>
             <Button Classes="topBtn" Click="OnMenuPreferences" AutomationProperties.Name="{DynamicResource menu.tools.prefs}" ToolTip.Tip="{DynamicResource menu.tools.prefs}">
-              <Path Data="{StaticResource icon-settings}" Width="16" Height="16" Stretch="Uniform"
-                    Fill="{DynamicResource md3.on-surface}"/>
+              <c:DawIcon Data="{StaticResource icon-settings}" Width="16" Height="16"
+                    Fill="{Binding $parent[Button].Foreground}"/>
             </Button>
             <Border Width="1" Height="20" Margin="6,0" VerticalAlignment="Center"
                     Background="{DynamicResource md3.outline-variant}"/>
@@ -311,13 +311,13 @@
                          Foreground="{DynamicResource md3.on-surface-variant}"/>
               <Button Grid.Column="1" Classes="panelToggle" Width="24" Height="24" Click="OnAddTrack"
                       AutomationProperties.Name="{DynamicResource command.track.add}" ToolTip.Tip="{DynamicResource command.track.add}">
-                <Path Data="{StaticResource icon-plus}" Width="12" Height="12" Stretch="Uniform"
-                      Fill="{DynamicResource md3.on-surface-variant}"/>
+                <c:DawIcon Data="{StaticResource icon-plus}" Width="12" Height="12"
+                      Fill="{Binding $parent[Button].Foreground}"/>
               </Button>
               <Button Grid.Column="2" Classes="panelToggle" Click="OnCollapseTracksPanel"
                       AutomationProperties.Name="{DynamicResource panel.collapse.tracks}" ToolTip.Tip="{DynamicResource panel.collapse.tracks}">
-                <Path Data="{StaticResource icon-chevron-left}" Width="12" Height="12" Stretch="Uniform"
-                      Fill="{DynamicResource md3.on-surface-variant}"/>
+                <c:DawIcon Data="{StaticResource icon-chevron-left}" Width="12" Height="12"
+                      Fill="{Binding $parent[Button].Foreground}"/>
               </Button>
             </Grid>
             <c:TrackHeaderCanvas Grid.Row="2" ClipToBounds="True" Background="Transparent"
@@ -539,13 +539,13 @@
                     <MenuItem Header="{DynamicResource menu.tools.packages}" Click="OnMenuPackageManager"/>
                   </MenuFlyout>
                 </Button.Flyout>
-                <Path Data="{StaticResource icon-list}" Width="14" Height="14" Stretch="Uniform"
-                      Fill="{DynamicResource md3.on-surface-variant}"/>
+                <c:DawIcon Data="{StaticResource icon-list}" Width="14" Height="14"
+                      Fill="{Binding $parent[Button].Foreground}"/>
               </Button>
               <Button Grid.Column="2" Classes="panelToggle" Click="OnCollapseLibraryPanel"
                       AutomationProperties.Name="{DynamicResource panel.collapse.library}" ToolTip.Tip="{DynamicResource panel.collapse.library}">
-                <Path Data="{StaticResource icon-chevron-right}" Width="12" Height="12" Stretch="Uniform"
-                      Fill="{DynamicResource md3.on-surface-variant}"/>
+                <c:DawIcon Data="{StaticResource icon-chevron-right}" Width="12" Height="12"
+                      Fill="{Binding $parent[Button].Foreground}"/>
               </Button>
               </Grid>
             </Border>
@@ -571,8 +571,8 @@
                   <TextBlock Classes="sideHeading" Text="{DynamicResource sidebar.singers}"/>
                   <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24" Click="OnRefreshSingers"
                           AutomationProperties.Name="{DynamicResource sidebar.refresh}" ToolTip.Tip="{DynamicResource sidebar.refresh}">
-                    <Path Data="{StaticResource icon-refresh-cw}" Width="12" Height="12" Stretch="Uniform"
-                          Fill="{DynamicResource md3.on-surface-variant}"/>
+                    <c:DawIcon Data="{StaticResource icon-refresh-cw}" Width="12" Height="12"
+                          Fill="{Binding $parent[Button].Foreground}"/>
                   </Button>
                 </Grid>
                 <ListBox Grid.Row="1" ItemsSource="{Binding Singers}" Background="Transparent"
@@ -615,7 +615,7 @@
                 <StackPanel Grid.Row="1" IsVisible="{Binding !HasSingers}">
                   <Border Classes="sideCard">
                     <StackPanel>
-                      <Path Data="{StaticResource icon-mic}" Width="14" Height="14" Stretch="Uniform"
+                      <c:DawIcon Data="{StaticResource icon-mic}" Width="14" Height="14"
                             Fill="{DynamicResource md3.on-surface-variant}"
                             HorizontalAlignment="Left" Margin="0,0,0,6"/>
                       <TextBlock FontSize="11" TextWrapping="Wrap"
@@ -632,8 +632,8 @@
                   <TextBlock Classes="sideHeading" Text="{DynamicResource sidebar.samples}"/>
                   <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24" Click="OnRefreshSamples"
                           AutomationProperties.Name="{DynamicResource sidebar.refresh}" ToolTip.Tip="{DynamicResource sidebar.refresh}">
-                    <Path Data="{StaticResource icon-refresh-cw}" Width="12" Height="12" Stretch="Uniform"
-                          Fill="{DynamicResource md3.on-surface-variant}"/>
+                    <c:DawIcon Data="{StaticResource icon-refresh-cw}" Width="12" Height="12"
+                          Fill="{Binding $parent[Button].Foreground}"/>
                   </Button>
                 </Grid>
                 <ListBox Grid.Row="1" ItemsSource="{Binding Samples}" Background="Transparent"
@@ -645,7 +645,7 @@
                         <Grid ColumnDefinitions="26,8,*,Auto,4,Auto" Background="Transparent">
                           <Border Grid.Column="0" Width="26" Height="26" CornerRadius="6"
                                   Background="{DynamicResource md3.surface-container-high}" HorizontalAlignment="Left">
-                            <Path Data="{StaticResource icon-music}" Width="13" Height="13" Stretch="Uniform"
+                            <c:DawIcon Data="{StaticResource icon-music}" Width="13" Height="13"
                                   Fill="{DynamicResource md3.on-surface-variant}"
                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
                           </Border>
@@ -661,10 +661,10 @@
                           <Button Grid.Column="5" Classes="iconBtn" Width="26" Height="26" Margin="4,0,0,0"
                                   Click="OnSamplePlay" AutomationProperties.Name="{DynamicResource sidebar.play}" ToolTip.Tip="{DynamicResource sidebar.play}">
                             <Panel>
-                              <Path Data="{StaticResource icon-play}" Width="11" Height="11" Stretch="Uniform"
-                                    Fill="{DynamicResource md3.on-surface}"
+                              <c:DawIcon Data="{StaticResource icon-play}" Width="11" Height="11"
+                                    Fill="{Binding $parent[Button].Foreground}"
                                     IsVisible="{Binding !IsPreviewing}"/>
-                              <Path Data="{StaticResource icon-stop}" Width="11" Height="11" Stretch="Uniform"
+                              <c:DawIcon Data="{StaticResource icon-stop}" Width="11" Height="11"
                                     Fill="{DynamicResource md3.primary}"
                                     IsVisible="{Binding IsPreviewing}"/>
                             </Panel>
@@ -677,7 +677,7 @@
                 <StackPanel Grid.Row="1" IsVisible="{Binding !HasSamples}">
                   <Border Classes="sideCard">
                     <StackPanel>
-                      <Path Data="{StaticResource icon-music}" Width="14" Height="14" Stretch="Uniform"
+                      <c:DawIcon Data="{StaticResource icon-music}" Width="14" Height="14"
                             Fill="{DynamicResource md3.on-surface-variant}"
                             HorizontalAlignment="Left" Margin="0,0,0,6"/>
                       <TextBlock FontSize="11" TextWrapping="Wrap"
@@ -692,7 +692,7 @@
               <StackPanel x:Name="MidiPanel" IsVisible="False" Spacing="8">
                 <Border Classes="sideCard">
                   <StackPanel>
-                    <Path Data="{StaticResource icon-music}" Width="14" Height="14" Stretch="Uniform"
+                    <c:DawIcon Data="{StaticResource icon-music}" Width="14" Height="14"
                           Fill="{DynamicResource md3.on-surface-variant}"
                           HorizontalAlignment="Left" Margin="0,0,0,6"/>
                     <TextBlock FontSize="11" TextWrapping="Wrap"
@@ -713,14 +713,14 @@
                              FontSize="11" VerticalContentAlignment="Center"
                              Text="{Binding SearchText, Mode=TwoWay}"
                              Watermark="{DynamicResource sidebar.effects.search}"/>
-                    <Path Data="{StaticResource icon-search}" Width="13" Height="13" Stretch="Uniform"
+                    <c:DawIcon Data="{StaticResource icon-search}" Width="13" Height="13"
                           Fill="{DynamicResource md3.on-surface-variant}" IsHitTestVisible="False"
                           HorizontalAlignment="Left" VerticalAlignment="Center" Margin="11,0,0,0"/>
                   </Panel>
                   <Button Grid.Column="1" Classes="iconBtn" Width="36" Height="36" Margin="6,0,0,0"
                           Click="OnRescanVstFromLibrary" AutomationProperties.Name="{DynamicResource prefs.vst.rescan}" ToolTip.Tip="{DynamicResource prefs.vst.rescan}">
-                    <Path Data="{StaticResource icon-refresh-cw}" Width="13" Height="13" Stretch="Uniform"
-                          Fill="{DynamicResource md3.on-surface-variant}"/>
+                    <c:DawIcon Data="{StaticResource icon-refresh-cw}" Width="13" Height="13"
+                          Fill="{Binding $parent[Button].Foreground}"/>
                   </Button>
                 </Grid>
 
@@ -736,8 +736,8 @@
                   <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24"
                           Click="OnToggleVstPathManager"
                           AutomationProperties.Name="{DynamicResource sidebar.effects.paths.manage}" ToolTip.Tip="{DynamicResource sidebar.effects.paths.manage}">
-                    <Path Data="{StaticResource icon-folder}" Width="12" Height="12" Stretch="Uniform"
-                          Fill="{DynamicResource md3.on-surface-variant}"/>
+                    <c:DawIcon Data="{StaticResource icon-folder}" Width="12" Height="12"
+                          Fill="{Binding $parent[Button].Foreground}"/>
                   </Button>
                 </Grid>
 
@@ -808,7 +808,7 @@
                   <StackPanel IsVisible="{Binding ShowNoPlugins}">
                     <Border Classes="sideCard">
                       <StackPanel Spacing="8">
-                        <Path Data="{StaticResource icon-sliders}" Width="14" Height="14" Stretch="Uniform"
+                        <c:DawIcon Data="{StaticResource icon-sliders}" Width="14" Height="14"
                               Fill="{DynamicResource md3.on-surface-variant}"
                               HorizontalAlignment="Left" Margin="0,0,0,2"/>
                         <TextBlock FontSize="11" TextWrapping="Wrap"
@@ -826,7 +826,7 @@
                   <StackPanel IsVisible="{Binding ShowNoMatch}">
                     <Border Classes="sideCard">
                       <StackPanel>
-                        <Path Data="{StaticResource icon-search}" Width="14" Height="14" Stretch="Uniform"
+                        <c:DawIcon Data="{StaticResource icon-search}" Width="14" Height="14"
                               Fill="{DynamicResource md3.on-surface-variant}"
                               HorizontalAlignment="Left" Margin="0,0,0,6"/>
                         <TextBlock FontSize="11" TextWrapping="Wrap"

@@ -21,6 +21,7 @@
            竖向 margin ⇒ 行高变成 28、行间距被撑成 6+8（规格是 gap 6）。
          本地 Style setter 优先于 ControlTheme，且本地样式后应用 ⇒ 两个都要显式写。 -->
     <Style Selector="Button.mixerBtn">
+      <Setter Property="Theme" Value="{StaticResource DawMixButtonTheme}"/>
       <Setter Property="MinHeight" Value="20"/>
       <Setter Property="Margin" Value="0"/>
       <Setter Property="Padding" Value="0"/>

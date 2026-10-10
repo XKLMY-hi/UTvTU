@@ -1,44 +1,16 @@
 <Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <Styles.Resources>
-    <!-- Surface, interaction layer and focus ring are owned by the button template.
-         Shape and density are set locally by the shell's semantic classes. -->
-    <ControlTheme x:Key="WorkspaceButtonTheme" TargetType="Button">
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
-      <Setter Property="Template">
-        <ControlTemplate>
-          <Grid>
-            <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"/>
-            <Border Name="PART_StateLayer" Background="{TemplateBinding Foreground}" Opacity="0"
-                    CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False"/>
-            <ContentPresenter Name="PART_ContentPresenter" Margin="{TemplateBinding Padding}"
-                              Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
-                              Foreground="{TemplateBinding Foreground}" RecognizesAccessKey="True"
-                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-            <Border Name="PART_FocusRing" BorderBrush="{DynamicResource md3.primary}" BorderThickness="2"
-                    CornerRadius="{TemplateBinding CornerRadius}" Opacity="0" IsHitTestVisible="False"/>
-          </Grid>
-        </ControlTemplate>
-      </Setter>
-      <Style Selector="^:pointerover /template/ Border#PART_StateLayer">
-        <Setter Property="Opacity" Value="0.08"/>
-      </Style>
-      <Style Selector="^:pressed /template/ Border#PART_StateLayer">
-        <Setter Property="Opacity" Value="0.12"/>
-      </Style>
-      <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
-        <Setter Property="Opacity" Value="1"/>
-      </Style>
-      <Style Selector="^:disabled">
-        <Setter Property="Opacity" Value="0.38"/>
-      </Style>
-    </ControlTheme>
-  </Styles.Resources>
+
   <!-- Original UTvTU shapes; short buttons still neutralize global density setters. -->
   <Style Selector="Button.topBtn,Button.tpBtn,ToggleButton.tpBtn,Button.tpPlay,Button.brandBtn,Button.viewTab,Button.libTab,Button.panelToggle,Button.iconBtn">
-    <Setter Property="Theme" Value="{StaticResource WorkspaceButtonTheme}"/>
+    <Setter Property="Theme" Value="{StaticResource DawButtonTheme}"/>
+  </Style>
+  <Style Selector="Button.viewTab,Button.libTab">
+    <Setter Property="Theme" Value="{StaticResource DawTextButtonTheme}"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
   </Style>
   <Style Selector="Button.topBtn">
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     <Setter Property="Margin" Value="0"/>
     <Setter Property="MinWidth" Value="0"/>
     <Setter Property="MinHeight" Value="36"/>
@@ -134,9 +106,11 @@
     <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
   </Style>
   <Style Selector="ToggleButton.tpBtn:checked">
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
     <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
   </Style>
   <Style Selector="Button.tpPlay">
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
     <Setter Property="Margin" Value="0"/>
     <Setter Property="MinWidth" Value="0"/>
     <Setter Property="MinHeight" Value="36"/>

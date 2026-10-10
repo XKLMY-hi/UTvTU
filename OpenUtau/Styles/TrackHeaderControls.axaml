@@ -3,90 +3,25 @@
   <!-- Templates and state layers belong to these control themes. Legacy clear/toolbar/fader
        classes are deliberately absent: their application-level setters would override themes. -->
   <Styles.Resources>
-    <ControlTheme x:Key="TrackHeaderTextButtonTheme" TargetType="Button">
-      <Setter Property="MinHeight" Value="0"/>
-      <Setter Property="MinWidth" Value="0"/>
-      <Setter Property="Focusable" Value="True"/>
+    <ControlTheme x:Key="TrackHeaderTextButtonTheme" TargetType="Button" BasedOn="{StaticResource DawTextButtonTheme}">
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="CornerRadius" Value="4"/>
-      <Setter Property="Cursor" Value="Hand"/>
-      <Setter Property="Template">
-        <ControlTemplate>
-          <Grid ClipToBounds="True">
-            <Border Name="PART_Surface" Background="{TemplateBinding Background}"
-                    BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
-                    CornerRadius="{TemplateBinding CornerRadius}"/>
-            <Border Name="PART_StateLayer" Background="{DynamicResource md3.on-surface}" Opacity="0"
-                    CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False"/>
-            <!-- String labels own their text element, so template values beat global TextBlock styles. -->
-            <TextBlock Name="PART_Label" Margin="{TemplateBinding Padding}" Text="{TemplateBinding Content}"
-                       Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}"
-                       FontWeight="{TemplateBinding FontWeight}" FontFamily="{TemplateBinding FontFamily}"
-                       TextTrimming="CharacterEllipsis"
-                       HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                       VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-            <Border Name="PART_FocusRing" CornerRadius="{TemplateBinding CornerRadius}"
-                    BorderBrush="{DynamicResource md3.primary}" BorderThickness="1" Opacity="0"
-                    IsHitTestVisible="False"/>
-          </Grid>
-        </ControlTemplate>
-      </Setter>
-      <Style Selector="^:pointerover /template/ Border#PART_StateLayer">
-        <Setter Property="Opacity" Value="0.08"/>
-      </Style>
-      <Style Selector="^:pressed /template/ Border#PART_StateLayer">
-        <Setter Property="Opacity" Value="0.12"/>
-      </Style>
-      <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
-        <Setter Property="Opacity" Value="1"/>
-      </Style>
-      <Style Selector="^:disabled">
-        <Setter Property="Opacity" Value="0.38"/>
-      </Style>
-    </ControlTheme>
-
-    <ControlTheme x:Key="TrackHeaderActionTheme" TargetType="Button" BasedOn="{StaticResource TrackHeaderTextButtonTheme}">
-      <Setter Property="Margin" Value="0"/>
-      <Setter Property="Padding" Value="0"/>
-      <Setter Property="CornerRadius" Value="6"/>
-      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
-      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
       <Setter Property="VerticalContentAlignment" Value="Center"/>
-      <Setter Property="Template">
-        <ControlTemplate>
-          <Grid ClipToBounds="True">
-            <Border Name="PART_Surface" Background="{TemplateBinding Background}"
-                    BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
-                    CornerRadius="{TemplateBinding CornerRadius}"/>
-            <Border Name="PART_StateLayer" Background="{DynamicResource md3.on-surface}" Opacity="0"
-                    CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False"/>
-            <ContentPresenter Name="PART_ContentPresenter" Margin="{TemplateBinding Padding}"
-                              Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
-                              Foreground="{TemplateBinding Foreground}"
-                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-            <Border Name="PART_FocusRing" CornerRadius="{TemplateBinding CornerRadius}"
-                    BorderBrush="{DynamicResource md3.primary}" BorderThickness="1" Opacity="0"
-                    IsHitTestVisible="False"/>
-          </Grid>
-        </ControlTemplate>
-      </Setter>
+      <Setter Property="CornerRadius" Value="4"/>
     </ControlTheme>
-    <ControlTheme x:Key="TrackHeaderEffectsTheme" TargetType="Button" BasedOn="{StaticResource TrackHeaderActionTheme}">
+    <ControlTheme x:Key="TrackHeaderActionTheme" TargetType="Button" BasedOn="{StaticResource DawButtonTheme}">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+      <Setter Property="CornerRadius" Value="4"/>
+    </ControlTheme>
+    <ControlTheme x:Key="TrackHeaderEffectsTheme" TargetType="Button" BasedOn="{StaticResource DawTextButtonTheme}">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+      <Setter Property="CornerRadius" Value="4"/>
       <Style Selector="^.fxOn">
         <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
         <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
       </Style>
     </ControlTheme>
-    <ControlTheme x:Key="TrackHeaderToggleTheme" TargetType="ToggleButton" BasedOn="{StaticResource TrackHeaderActionTheme}">
-      <Style Selector="^:checked">
-        <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
-        <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
-      </Style>
-    </ControlTheme>
+    <ControlTheme x:Key="TrackHeaderToggleTheme" TargetType="ToggleButton" BasedOn="{StaticResource DawMixToggleTheme}"/>
 
     <ControlTheme x:Key="TrackHeaderFaderTheme" TargetType="Slider">
       <Setter Property="Focusable" Value="True"/>
