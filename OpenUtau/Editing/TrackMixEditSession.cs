@@ -11,7 +11,7 @@ namespace OpenUtau.App.Editing {
         readonly UTrack track;
         bool gesture;
         bool disposed;
-        UCommandGroup? ownedGroup;
+        DocumentEditGesture? documentGesture;
 
         public TrackMixEditSession(UTrack track) {
             doc = DocManager.Inst;
@@ -30,10 +30,9 @@ namespace OpenUtau.App.Editing {
 
         public void EndGesture() {
             gesture = false;
-            if (ownedGroup != null && ReferenceEquals(ownedGroup, doc.ActiveUndoGroup) && IsCurrent) {
-                doc.EndUndoGroup();
-            }
-            ownedGroup = null;
+            var previous = documentGesture;
+            documentGesture = null;
+            previous?.Dispose();
         }
 
         public bool SetVolume(double db) {
@@ -72,16 +71,12 @@ namespace OpenUtau.App.Editing {
                 makeCommand().Execute();
                 return true;
             }
-            if (ownedGroup == null || !ReferenceEquals(ownedGroup, doc.ActiveUndoGroup)) {
-                doc.StartUndoGroup("command.track.setting");
-                ownedGroup = doc.ActiveUndoGroup;
-            }
+            documentGesture ??= new DocumentEditGesture(project, "command.track.setting");
             try {
-                doc.ExecuteCmd(makeCommand());
+                return documentGesture.CanExecute && documentGesture.Execute(makeCommand());
             } finally {
                 if (!gesture) EndGesture();
             }
-            return true;
         }
 
         public void Dispose() {

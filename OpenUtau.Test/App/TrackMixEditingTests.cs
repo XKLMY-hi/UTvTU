@@ -57,6 +57,62 @@ namespace OpenUtau.Test.App {
         }
 
         [AvaloniaFact]
+        public void RejectedHeaderAndRackEdits_RestoreTheDisplayedModelValues() {
+            var track = Load().tracks[0];
+            track.MixFx = new UMixFx { Enabled = true, EqLowDb = 2 };
+            using var header = new TrackHeaderViewModel(track);
+            using var rack = new MixFxViewModel(track);
+            Doc.StartUndoGroup();
+            var foreign = Doc.ActiveUndoGroup;
+            header.Volume = -8;
+            header.Pan = 40;
+            rack.EqLowDb = 6;
+            Assert.Equal(0, header.Volume);
+            Assert.Equal(0, header.Pan);
+            Assert.Equal(2, rack.EqLowDb);
+            Assert.Equal(2, track.MixFx.EqLowDb);
+            Assert.Same(foreign, Doc.ActiveUndoGroup);
+            Assert.Empty(foreign!.Commands);
+            Doc.EndUndoGroup();
+        }
+
+        [AvaloniaFact]
+        public void MixGesture_RejectsAndPreservesAnotherControlsTransaction() {
+            var track = Load().tracks[0];
+            using var edits = new TrackMixEditSession(track);
+            Doc.StartUndoGroup();
+            var foreign = Doc.ActiveUndoGroup;
+            edits.BeginGesture();
+            Assert.False(edits.SetVolume(-6));
+            edits.EndGesture();
+            Assert.Same(foreign, Doc.ActiveUndoGroup);
+            Assert.Empty(foreign!.Commands);
+            Assert.Equal(0, track.Volume);
+            Doc.EndUndoGroup();
+            Assert.True(edits.SetVolume(-3));
+            Assert.Null(Doc.ActiveUndoGroup);
+            Doc.Undo();
+            Assert.Equal(0, track.Volume);
+        }
+
+        [AvaloniaFact]
+        public void MixGesture_AfterSaveSeal_CannotCloseAnInterveningTransaction() {
+            var track = Load().tracks[0];
+            using var edits = new TrackMixEditSession(track);
+            edits.BeginGesture();
+            Assert.True(edits.SetVolume(-3));
+            Save();
+            Doc.StartUndoGroup();
+            var foreign = Doc.ActiveUndoGroup;
+            Assert.False(edits.SetVolume(-8));
+            edits.Dispose();
+            Assert.Same(foreign, Doc.ActiveUndoGroup);
+            Assert.Equal(-3, track.Volume);
+            Assert.Empty(foreign!.Commands);
+            Doc.EndUndoGroup();
+        }
+
+        [AvaloniaFact]
         public void FaderGesture_IsOneUndo_AndDoesNotRegenerateSinging() {
             var project = Load();
             var track = project.tracks[0];

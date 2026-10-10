@@ -151,13 +151,19 @@ namespace OpenUtau.App.ViewModels {
                 .Skip(1)
                 .Subscribe(volume => {
                     if (_syncing) return;
-                    mixEdits.SetVolume(volume);
+                    if (!mixEdits.SetVolume(volume) && track.Volume != volume) {
+                        _syncing = true;
+                        try { Volume = track.Volume; } finally { _syncing = false; }
+                    }
                 }).DisposeWith(subscriptions);
             this.WhenAnyValue(x => x.Pan)
                 .Skip(1)
                 .Subscribe(pan => {
                     if (_syncing) return;
-                    mixEdits.SetPan(pan);
+                    if (!mixEdits.SetPan(pan) && track.Pan * 100 != pan) {
+                        _syncing = true;
+                        try { Pan = track.Pan * 100; } finally { _syncing = false; }
+                    }
                 }).DisposeWith(subscriptions);
 
             // Listen for volume/pan changes from mixer window

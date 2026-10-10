@@ -178,6 +178,7 @@ namespace OpenUtau.App.ViewModels {
             // TrackName 只是窗口标题的同步（轨道重命名），不是音色参数，不参与回写。
             Changed.Where(e => !disposed && !suspendBindings && IsEffectProperty(e.PropertyName)).Subscribe(_ => {
                 if (Edits == null || Edits.SetEffects(BuildUMixFx())) dirty = true;
+                else RefreshFromTrack();
             }).DisposeWith(subscriptions);
 
             ApplyRecommendedCommand = ReactiveCommand.Create(ApplyRecommended);
@@ -368,6 +369,11 @@ namespace OpenUtau.App.ViewModels {
         public void OnNext(UCommand cmd, bool isUndo) {
             if (disposed || Edits?.IsCurrent != true || cmd is not TrackMixChangedNotification mix ||
                 !mix.Tracks.Contains(track)) return;
+            RefreshFromTrack();
+        }
+
+        void RefreshFromTrack() {
+            if (disposed || track == null) return;
             var fx = track.MixFx ?? new UMixFx();
             suspendBindings = true;
             try {
