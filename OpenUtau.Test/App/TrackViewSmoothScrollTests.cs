@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using System.Threading;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -129,18 +130,14 @@ namespace OpenUtau.Test.App {
                 Assert.Contains("Height=\"16\"", line);
                 Assert.Contains("Stretch=\"Uniform\"", line);
             }
-            // 按钮定尺（tpBtn/tpPlay 在样式里给 36×36）——图标居中由"等尺寸按钮 + 等尺寸图标盒"保证
-            Assert.Contains("<Style Selector=\"Button.tpBtn\">", xaml);
-            Assert.Contains("<Style Selector=\"Button.tpPlay\">", xaml);
-            // 运输条胶囊不写死总宽（上游缺陷的另一半：Width=127 固定宽 + 不等尺寸图标 = 视觉错位）
-            int chipStart = xaml.IndexOf("<!-- 运输条", StringComparison.Ordinal);
-            Assert.True(chipStart >= 0, "找不到运输条注释块");
-            int chipEnd = xaml.IndexOf("<!-- 播放位置", chipStart, StringComparison.Ordinal);
-            Assert.True(chipEnd > chipStart, "找不到运输条结束位置");
-            string chip = xaml.Substring(chipStart, chipEnd - chipStart);
-            // 胶囊自己不写死总宽（上游缺陷：Width=127 固定宽 + 不等尺寸图标 = 视觉错位）
-            string chipBorder = chip.Split('\n').First(l => l.Contains("Classes=\"tpChip\"") && l.Contains("Height=\"40\""));
-            Assert.DoesNotContain("Width=", chipBorder);
+            // 产品局部样式给按钮定尺；运输容器宽度随内容计算。
+            string styles = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "WorkspaceShell.axaml"));
+            Assert.Contains("<Style Selector=\"Button.tpBtn\">", styles);
+            Assert.Contains("<Style Selector=\"Button.tpPlay\">", styles);
+            XNamespace names = "http://schemas.microsoft.com/winfx/2006/xaml";
+            var transport = XDocument.Parse(xaml).Descendants()
+                .Single(e => (string)e.Attribute(names + "Name") == "TransportGroup");
+            Assert.Null(transport.Attribute("Width"));
         }
 
         private static string FindIconLine(string xaml, string iconKey) {

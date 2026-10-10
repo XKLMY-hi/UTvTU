@@ -32,6 +32,8 @@ namespace OpenUtau.App.Views {
         public MainWindow? Host { get; set; }
 
         private IDisposable? vstLibrarySubscription;
+        int attachmentGeneration;
+        volatile PreferencesViewModel? activeSession;
 
         public PreferencesView() {
             InitializeComponent();
@@ -40,36 +42,51 @@ namespace OpenUtau.App.Views {
         /// <summary>挂载即开始监听插件库变更（另一侧改了扫描路径时同步过来）。</summary>
         protected override void OnAttachedToVisualTree(Avalonia.VisualTreeAttachmentEventArgs e) {
             base.OnAttachedToVisualTree(e);
+            int generation = ++attachmentGeneration;
             vstLibrarySubscription?.Dispose();
             vstLibrarySubscription = ReactiveUI.MessageBus.Current
                 .Listen<VstLibraryChangedNotification>()
-                .Subscribe(_ => Avalonia.Threading.Dispatcher.UIThread.Post(SyncVstScanPathsFromStore));
+                .Subscribe(_ => {
+                    var session = activeSession;
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() => {
+                        if (generation == attachmentGeneration && ReferenceEquals(session, ViewModel)) {
+                            session?.SyncVstScanPathsFromStore();
+                        }
+                    });
+                });
         }
 
         /// <summary>卸载即退订（避免实例被广播长期持有）。</summary>
         protected override void OnDetachedFromVisualTree(Avalonia.VisualTreeAttachmentEventArgs e) {
             base.OnDetachedFromVisualTree(e);
+            ++attachmentGeneration;
             vstLibrarySubscription?.Dispose();
             vstLibrarySubscription = null;
         }
 
+        protected override void OnPropertyChanged(Avalonia.AvaloniaPropertyChangedEventArgs change) {
+            if (change.Property == DataContextProperty) activeSession = change.NewValue as PreferencesViewModel;
+            base.OnPropertyChanged(change);
+            if (change.Property == DataContextProperty && change.OldValue is PreferencesViewModel old &&
+                !ReferenceEquals(old, change.NewValue)) old.Dispose();
+        }
+
+        public void ReleaseSession() {
+            DataContext = null;
+            SingersDataContext = null;
+            Host = null;
+        }
+
         /// <summary>
         /// 从唯一存储（<c>Preferences.Default.VstScanPaths</c>）重载本页的路径列表。
-        /// 内容相同则不动（防"收发互踢"）；直接改 VM 的公开集合会触发它自己的存盘钩子。
+        /// 内容相同则不动；同步期间暂停存盘钩子，避免清空集合时覆盖唯一存储。
         /// </summary>
         public void SyncVstScanPathsFromStore() {
             PreferencesViewModel? vm = ViewModel;
             if (vm == null) {
                 return;
             }
-            var store = Preferences.Default.VstScanPaths ?? new System.Collections.Generic.List<string>();
-            if (vm.VstScanPaths.SequenceEqual(store, StringComparer.Ordinal)) {
-                return;
-            }
-            vm.VstScanPaths.Clear();
-            foreach (string path in store) {
-                vm.VstScanPaths.Add(path);
-            }
+            vm.SyncVstScanPathsFromStore();
         }
 
         /// <summary>音源列表数据源。</summary>
@@ -146,7 +163,9 @@ namespace OpenUtau.App.Views {
             if (Host == null) {
                 return;
             }
+            var session = ViewModel;
             string? path = await Host.PickFolder(ThemeManager.GetString("prefs.paths.addlsinger"));
+            if (!ReferenceEquals(session, ViewModel) || session?.IsDisposed != false) return;
             if (!string.IsNullOrEmpty(path) && Directory.Exists(path)) {
                 ViewModel!.SetAddlSingersPath(path!);
             }
@@ -156,7 +175,9 @@ namespace OpenUtau.App.Views {
             if (Host == null) {
                 return;
             }
+            var session = ViewModel;
             string? path = await Host.PickFolder(ThemeManager.GetString("prefs.paths.samples"));
+            if (!ReferenceEquals(session, ViewModel) || session?.IsDisposed != false) return;
             if (!string.IsNullOrEmpty(path) && Directory.Exists(path)) {
                 ViewModel!.SetSamplesPath(path!);
             }
@@ -184,13 +205,16 @@ namespace OpenUtau.App.Views {
             if (HostWindow == null) {
                 return;
             }
+            var session = ViewModel;
+            var owner = HostWindow;
             var dialog = new TypeInDialog {
                 Title = ThemeManager.GetString("prefs.appearance.customtheme.create.title")
             };
             dialog.SetPrompt(ThemeManager.GetString("prefs.appearance.customtheme.create.prompt"));
             dialog.onFinish = s => {
+                if (!ReferenceEquals(session, ViewModel) || session?.IsDisposed != false) return;
                 if (string.IsNullOrEmpty(s)) {
-                    MessageBox.ShowModal(HostWindow,
+                    MessageBox.ShowModal(owner,
                         ThemeManager.GetString("prefs.appearance.customtheme.create.empty"),
                         ThemeManager.GetString("prefs.appearance.customtheme.create.title"));
                     return;
@@ -202,7 +226,7 @@ namespace OpenUtau.App.Views {
                     Yaml.DefaultSerializer.Serialize(themeYaml));
                 ViewModel!.RefreshThemes();
             };
-            dialog.ShowDialog(HostWindow);
+            dialog.ShowDialog(owner);
         }
 
         // ── 外部工具路径（vLabeler / setParam / wine） ────────────
@@ -216,7 +240,9 @@ namespace OpenUtau.App.Views {
             if (HostWindow == null) {
                 return;
             }
+            var session = ViewModel;
             var path = await FilePicker.OpenFile(HostWindow, "prefs.advanced.vlabelerpath", FilePicker.EXE);
+            if (!ReferenceEquals(session, ViewModel) || session?.IsDisposed != false) return;
             if (!string.IsNullOrEmpty(path) && OS.AppExists(path)) {
                 ViewModel!.SetVLabelerPath(path!);
             }
@@ -226,7 +252,9 @@ namespace OpenUtau.App.Views {
             if (HostWindow == null) {
                 return;
             }
+            var session = ViewModel;
             var path = await FilePicker.OpenFile(HostWindow, "prefs.otoeditor.setparampath", FilePicker.EXE);
+            if (!ReferenceEquals(session, ViewModel) || session?.IsDisposed != false) return;
             if (!string.IsNullOrEmpty(path) && File.Exists(path)) {
                 ViewModel!.SetSetParamPath(path!);
             }
@@ -236,7 +264,9 @@ namespace OpenUtau.App.Views {
             if (HostWindow == null) {
                 return;
             }
+            var session = ViewModel;
             var path = await FilePicker.OpenFile(HostWindow, "prefs.advanced.winepath", FilePicker.UnixExecutable);
+            if (!ReferenceEquals(session, ViewModel) || session?.IsDisposed != false) return;
             if (!string.IsNullOrEmpty(path) && File.Exists(path)) {
                 ViewModel!.SetWinePath(path!);
             }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Disposables;
 using Avalonia;
 using DynamicData;
 using DynamicData.Binding;
@@ -60,7 +61,9 @@ namespace OpenUtau.App.ViewModels {
         }
     }
 
-    public class TracksViewModel : ViewModelBase, ICmdSubscriber {
+    public class TracksViewModel : ViewModelBase, ICmdSubscriber, IDisposable {
+        readonly CompositeDisposable subscriptions = new();
+        bool disposed;
         public UProject Project => DocManager.Inst.Project;
         [Reactive] public Rect Bounds { get; set; }
         public int TickCount => Math.Max(Project.timeAxis.BarBeatToTickPos(32, 0), Project.EndTick + 23040);
@@ -132,17 +135,17 @@ namespace OpenUtau.App.ViewModels {
                 .Subscribe(_ => {
                     OnXZoomed(new Point(), 0);
                     OnYZoomed(new Point(), 0);
-                });
+                }).DisposeWith(subscriptions);
 
             this.WhenAnyValue(x => x.TickWidth)
                 .Subscribe(tickWidth => {
                     UpdateSnapDiv();
                     SetPlayPos(DocManager.Inst.playPosTick, false);
-                });
+                }).DisposeWith(subscriptions);
             this.WhenAnyValue(x => x.TickOffset)
                 .Subscribe(tickOffset => {
                     SetPlayPos(DocManager.Inst.playPosTick, false);
-                });
+                }).DisposeWith(subscriptions);
 
             TickWidth = ViewConstants.TickWidthDefault;
             TrackHeight = ViewConstants.TrackHeightDefault;
@@ -151,15 +154,26 @@ namespace OpenUtau.App.ViewModels {
             MessageBus.Current.Listen<PianoRollOpenPartChangedEvent>()
                 .Subscribe(e => {
                     PianoRollOpenPart = e.Part;
-                });
+                }).DisposeWith(subscriptions);
 
             MessageBus.Current.Listen<PianoRollViewportChangedEvent>()
                 .Subscribe(e => {
                     PianoRollViewTickOffset = e.TickOffset;
                     PianoRollViewViewportTicks = e.ViewportTicks;
-                });
+                }).DisposeWith(subscriptions);
 
             DocManager.Inst.AddSubscriber(this);
+        }
+
+        public void Dispose() {
+            if (disposed) return;
+            disposed = true;
+            subscriptions.Dispose();
+            viewportTicks.Dispose();
+            viewportTracks.Dispose();
+            smallChangeX.Dispose();
+            smallChangeY.Dispose();
+            DocManager.Inst.RemoveSubscriber(this);
         }
 
         private void UpdateSnapDiv() {
@@ -469,6 +483,7 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public void OnNext(UCommand cmd, bool isUndo) {
+            if (disposed) return;
             if (cmd is NoteCommand noteCommand) {
                 if (noteCommand is ResizeNoteCommand || noteCommand is AddNoteCommand || noteCommand is MoveNoteCommand) {
                     MessageBus.Current.SendMessage(new PartRefreshEvent(noteCommand.Part));

@@ -1,10 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -34,7 +35,11 @@ namespace OpenUtau.App.ViewModels {
     }
     public class WaveformRefreshEvent { }
 
-    public class NotesViewModel : ViewModelBase, ICmdSubscriber {
+    public class NotesViewModel : ViewModelBase, ICmdSubscriber, IDisposable {
+        readonly CompositeDisposable subscriptions = new();
+        volatile bool disposed;
+        int portraitGeneration;
+        public bool IsDisposed => disposed;
         [Reactive] public Rect Bounds { get; set; }
         public int TickCount => Part?.Duration ?? 480 * 4;
         public int TrackCount => ViewConstants.MaxTone;
@@ -116,14 +121,17 @@ namespace OpenUtau.App.ViewModels {
         private int userKey => Project.key;
 
         public NotesViewModel() {
+            try {
             SnapDivs = new List<MenuItemViewModel>();
             SetSnapUnitCommand = ReactiveCommand.Create<int>(div => {
+                if (disposed) return;
                 userSnapDiv = div;
                 UpdateSnapDiv();
             });
 
             Keys = new List<MenuItemViewModel>();
             SetKeyCommand = ReactiveCommand.Create<int>(key => {
+                if (disposed) return;
                 DocManager.Inst.StartUndoGroup("command.project.key");
                 DocManager.Inst.ExecuteCmd(new KeyCommand(Project, key));
                 DocManager.Inst.EndUndoGroup();
@@ -146,17 +154,17 @@ namespace OpenUtau.App.ViewModels {
                 .Subscribe(_ => {
                     OnXZoomed(new Point(), 0);
                     OnYZoomed(new Point(), 0);
-                });
+                }).DisposeWith(subscriptions);
 
             this.WhenAnyValue(x => x.TickWidth)
                 .Subscribe(tickWidth => {
                     UpdateSnapDiv();
                     SetPlayPos(DocManager.Inst.playPosTick, false);
-                });
+                }).DisposeWith(subscriptions);
             this.WhenAnyValue(x => x.TickOffset)
                 .Subscribe(tickOffset => {
                     SetPlayPos(DocManager.Inst.playPosTick, false);
-                });
+                }).DisposeWith(subscriptions);
             this.WhenAnyValue(x => x.ExpBounds, x => x.PrimaryKey)
                 .Subscribe(t => {
                     UExpressionDescriptor? descriptor = null;
@@ -184,7 +192,7 @@ namespace OpenUtau.App.ViewModels {
                         ExpShadowOpacity = 0.3;
                         ShowCurveToolbar = false;
                     }
-                });
+                }).DisposeWith(subscriptions);
             this.WhenAnyValue(x => x.Project)
                 .Subscribe(project => {
                     if (project == null) {
@@ -214,7 +222,7 @@ namespace OpenUtau.App.ViewModels {
                             Command = SetKeyCommand,
                             CommandParameter = index,
                         }));
-                });
+                }).DisposeWith(subscriptions);
 
             ShowTips = Preferences.Default.ShowTips;
             IsSnapOn = true;
@@ -226,37 +234,37 @@ namespace OpenUtau.App.ViewModels {
              .Subscribe(playTone => {
                  Preferences.Default.PlayTone = playTone;
                  Preferences.Save();
-             });
+             }).DisposeWith(subscriptions);
             ShowVibrato = Preferences.Default.ShowVibrato;
             this.WhenAnyValue(x => x.ShowVibrato)
             .Subscribe(showVibrato => {
                 Preferences.Default.ShowVibrato = showVibrato;
                 Preferences.Save();
-            });
+            }).DisposeWith(subscriptions);
             ShowPitch = Preferences.Default.ShowPitch;
             this.WhenAnyValue(x => x.ShowPitch)
             .Subscribe(showPitch => {
                 Preferences.Default.ShowPitch = showPitch;
                 Preferences.Save();
-            });
+            }).DisposeWith(subscriptions);
             ShowFinalPitch = Preferences.Default.ShowFinalPitch;
             this.WhenAnyValue(x => x.ShowFinalPitch)
             .Subscribe(showFinalPitch => {
                 Preferences.Default.ShowFinalPitch = showFinalPitch;
                 Preferences.Save();
-            });
+            }).DisposeWith(subscriptions);
             ShowWaveform = Preferences.Default.ShowWaveform;
             this.WhenAnyValue(x => x.ShowWaveform)
             .Subscribe(showWaveform => {
                 Preferences.Default.ShowWaveform = showWaveform;
                 Preferences.Save();
-            });
+            }).DisposeWith(subscriptions);
             ShowPhoneme = Preferences.Default.ShowPhoneme;
             this.WhenAnyValue(x => x.ShowPhoneme)
             .Subscribe(showPhoneme => {
                 Preferences.Default.ShowPhoneme = showPhoneme;
                 Preferences.Save();
-            });
+            }).DisposeWith(subscriptions);
             ShowExpressions = Preferences.Default.ShowExpressions;
             this.WhenAnyValue(x => x.ShowExpressions)
             .Subscribe(showExpressions => {
@@ -266,13 +274,13 @@ namespace OpenUtau.App.ViewModels {
                     ? ViewConstants.ExpHeightMax : 0;
                 Preferences.Default.ShowExpressions = showExpressions;
                 Preferences.Save();
-            });
+            }).DisposeWith(subscriptions);
             ShowNoteParams = Preferences.Default.ShowNoteParams;
             this.WhenAnyValue(x => x.ShowNoteParams)
             .Subscribe(showNoteParams => {
                 Preferences.Default.ShowNoteParams = showNoteParams;
                 Preferences.Save();
-            });
+            }).DisposeWith(subscriptions);
             ShowPlaybackNoteHighlight = Preferences.Default.ShowPlaybackNoteHighlight;
             ShowPlaybackNoteBounce = Preferences.Default.ShowPlaybackNoteBounce;
 
@@ -293,13 +301,14 @@ namespace OpenUtau.App.ViewModels {
                 .Subscribe(p => {
                     MessageBus.Current.SendMessage(new PianoRollOpenPartChangedEvent(p));
                     PublishPianoRollViewport();
-                });
+                }).DisposeWith(subscriptions);
 
             this.WhenAnyValue(x => x.TickOffset, x => x.ViewportTicks, x => x.Bounds)
-                .Subscribe(_ => PublishPianoRollViewport());
+                .Subscribe(_ => PublishPianoRollViewport()).DisposeWith(subscriptions);
 
             MessageBus.Current.Listen<PianorollRefreshEvent>()
                 .Subscribe(e => {
+                    if (disposed) return;
                     switch (e.refreshItem) {
                         case "Part":
                             if (Part == null || Project == null) {
@@ -321,16 +330,22 @@ namespace OpenUtau.App.ViewModels {
                             ShowPlaybackNoteBounce = Preferences.Default.ShowPlaybackNoteBounce;
                             break;
                     }
-                });
+                }).DisposeWith(subscriptions);
             MessageBus.Current.Listen<CurveSelectionEvent>()
                 .Subscribe(e => {
+                    if (disposed) return;
                     Selection.SelectNone();
                     MessageBus.Current.SendMessage(new NotesSelectionEvent(Selection));
-                });
+                }).DisposeWith(subscriptions);
             MessageBus.Current.Listen<CurveCopyEvent>()
                 .Subscribe(e => {
+                    if (disposed) return;
                     DocManager.Inst.NotesClipboard?.Clear();
-                });
+                }).DisposeWith(subscriptions);
+            } catch {
+                Dispose();
+                throw;
+            }
         }
 
         private void UpdateSnapDiv() {
@@ -501,70 +516,94 @@ namespace OpenUtau.App.ViewModels {
             if (targetWidth == 0) {
                 targetWidth = 1;
             }
-            return Portrait.CreateScaledBitmap(new PixelSize(targetWidth, targetHeight));
+            try {
+                return Portrait.CreateScaledBitmap(new PixelSize(targetWidth, targetHeight));
+            } finally {
+                Portrait.Dispose();
+            }
+        }
+
+        private void ClearPortraitImages() {
+            var avatar = Avatar;
+            var portrait = Portrait;
+            Avatar = null;
+            Portrait = null;
+            PortraitMask = null;
+            portraitSource = null;
+            avatar?.Dispose();
+            if (!ReferenceEquals(avatar, portrait)) portrait?.Dispose();
         }
 
         private void LoadPortrait(UPart? part, UProject? project) {
-            if (part == null || project == null) {
-                lock (portraitLock) {
-                    Avatar = null;
-                    Portrait = null;
-                    portraitSource = null;
+            int generation;
+            lock (portraitLock) {
+                if (disposed) return;
+                generation = ++portraitGeneration;
+                if (part == null || project == null || part.trackNo < 0 || part.trackNo >= project.tracks.Count) {
+                    ClearPortraitImages();
+                    return;
                 }
-                return;
+                var oldAvatar = Avatar;
+                Avatar = null;
+                oldAvatar?.Dispose();
             }
             var singer = project.tracks[part.trackNo].Singer;
             lock (portraitLock) {
-                Avatar?.Dispose();
-                Avatar = null;
-                if (singer != null && singer.AvatarData != null && Preferences.Default.ShowIcon) {
+                if (disposed) return;
+                if (singer?.AvatarData != null && Preferences.Default.ShowIcon) {
                     try {
-                        using (var stream = new MemoryStream(singer.AvatarData)) {
-                            Avatar = new Bitmap(stream);
-                        }
+                        using var stream = new MemoryStream(singer.AvatarData);
+                        Avatar = new Bitmap(stream);
                     } catch (Exception e) {
-                        Avatar?.Dispose();
-                        Avatar = null;
-                        Log.Error(e, $"Failed to load Avatar {singer.Avatar}");
+                        Log.Error(e, "Failed to load Avatar {Avatar}", singer.Avatar);
                     }
                 }
-            }
-            if (singer == null || string.IsNullOrEmpty(singer.Portrait) || !Preferences.Default.ShowPortrait) {
-                lock (portraitLock) {
+                if (singer == null || string.IsNullOrEmpty(singer.Portrait) || !Preferences.Default.ShowPortrait) {
+                    var old = Portrait;
                     Portrait = null;
+                    PortraitMask = null;
                     portraitSource = null;
+                    old?.Dispose();
+                    return;
                 }
-                return;
+                if (portraitSource == singer.Portrait) return;
+                Portrait?.Dispose();
+                Portrait = null;
+                portraitSource = null;
             }
-            if (portraitSource != singer.Portrait) {
-                lock (portraitLock) {
-                    Portrait?.Dispose();
-                    Portrait = null;
-                    portraitSource = null;
+            string source = singer.Portrait;
+            int height = singer.PortraitHeight;
+            double opacity = singer.PortraitOpacity;
+            Task.Run(() => {
+                Bitmap? loaded = null;
+                try {
+                    if (disposed) return;
+                    var data = singer.LoadPortrait();
+                    if (data != null && !disposed) {
+                        using var stream = new MemoryStream(data);
+                        loaded = ResizePortrait(new Bitmap(stream), height);
+                    }
+                } catch (Exception e) {
+                    loaded?.Dispose();
+                    loaded = null;
+                    Log.Error(e, "Failed to load Portrait {Portrait}", source);
                 }
-                PortraitMask = new SolidColorBrush(Avalonia.Media.Colors.White, singer.PortraitOpacity);
-                Task.Run(() => {
+                // The worker owns the decoded bitmap until the UI callback accepts it.
+                var result = loaded;
+                Avalonia.Threading.Dispatcher.UIThread.Post(() => {
                     lock (portraitLock) {
-                        try {
-                            var data = singer.LoadPortrait();
-                            if (data == null) {
-                                Portrait = null;
-                                portraitSource = null;
-                            } else {
-                                using (var stream = new MemoryStream(data)) {
-                                    Portrait = ResizePortrait(new Bitmap(stream), singer.PortraitHeight);
-                                    portraitSource = singer.Portrait;
-                                }
-                            }
-                        } catch (Exception e) {
-                            Portrait?.Dispose();
-                            Portrait = null;
-                            portraitSource = null;
-                            Log.Error(e, $"Failed to load Portrait {singer.Portrait}");
+                        if (disposed || generation != portraitGeneration || !ReferenceEquals(Part, part) ||
+                            !ReferenceEquals(Project, project)) {
+                            result?.Dispose();
+                            return;
                         }
+                        Portrait?.Dispose();
+                        Portrait = result;
+                        PortraitMask = result == null ? null : new SolidColorBrush(Avalonia.Media.Colors.White, opacity);
+                        portraitSource = result == null ? null : source;
                     }
                 });
-            }
+            });
         }
         private void LoadWindowTitle(UPart? part, UProject? project) {
             if (part == null || project == null) {
@@ -939,6 +978,9 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public async void PasteSelectedParams(Window window) {
+            if (disposed) return;
+            var sessionPart = Part;
+            var sessionProject = Project;
             if (Part != null && DocManager.Inst.NotesClipboard != null && DocManager.Inst.NotesClipboard.Count > 0) {
                 var selectedNotes = Selection.ToList();
                 if (selectedNotes.Count == 0) {
@@ -949,6 +991,8 @@ namespace OpenUtau.App.ViewModels {
                 var vm = new PasteParamViewModel();
                 dialog.DataContext = vm;
                 await dialog.ShowDialog(window);
+                if (disposed || !ReferenceEquals(Part, sessionPart) || !ReferenceEquals(Project, sessionProject) ||
+                    sessionPart == null || !sessionProject.parts.Contains(sessionPart)) return;
 
                 if (dialog.Apply) {
                     DocManager.Inst.StartUndoGroup("command.parameter.paste");
@@ -1115,8 +1159,28 @@ namespace OpenUtau.App.ViewModels {
         readonly OpenUtau.App.UiThreadAffinity affinity = new OpenUtau.App.UiThreadAffinity();
 
         /// <summary>退订（W25）：此前一律只 AddSubscriber、从不 Remove ⇒ 反复构造会越积越多。</summary>
-        public void Unsubscribe() {
+        public void Unsubscribe() => Dispose();
+
+        public void Dispose() {
+            lock (portraitLock) {
+                if (disposed) return;
+                disposed = true;
+                ++portraitGeneration;
+            }
             DocManager.Inst.RemoveSubscriber(this);
+            subscriptions.Dispose();
+            viewportTicks?.Dispose();
+            viewportTracks?.Dispose();
+            smallChangeX?.Dispose();
+            smallChangeY?.Dispose();
+            SetSnapUnitCommand?.Dispose();
+            SetKeyCommand?.Dispose();
+            lock (portraitLock) ClearPortraitImages();
+            Part = null;
+            playbackNotes = Array.Empty<UNote>();
+            Selection.SelectNone();
+            SnapDivs?.Clear();
+            Keys?.Clear();
         }
 
         /// <summary>
@@ -1124,7 +1188,12 @@ namespace OpenUtau.App.ViewModels {
         /// 会写大量绑到控件的属性（`TickOffset`/`PrimaryKey`/曲目与音符集合等）⇒ 必须回到订阅线程。
         /// 口径见 <see cref="OpenUtau.App.UiThreadAffinity"/>（锚定订阅线程 + `Post`，不用 `Invoke`）。
         /// </summary>
-        public void OnNext(UCommand cmd, bool isUndo) => affinity.Post(() => OnNextCore(cmd, isUndo));
+        public void OnNext(UCommand cmd, bool isUndo) {
+            if (disposed) return;
+            affinity.Post(() => {
+                if (!disposed) OnNextCore(cmd, isUndo);
+            });
+        }
 
         void OnNextCore(UCommand cmd, bool isUndo) {
             if (cmd is UNotification notif) {

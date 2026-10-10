@@ -16,7 +16,8 @@ using Serilog;
 namespace OpenUtau.App.ViewModels {
 
     /// <summary>侧栏歌手卡片：歌手 + 懒加载头像 + 引擎铭牌（仅 Classic/DiffSinger）。</summary>
-    public class SingerItem : ReactiveObject {
+    public class SingerItem : ReactiveObject, IDisposable {
+        bool disposed;
         public USinger Singer { get; }
         public string Name => Singer.LocalizedName;
         public string SingerTypeText => Singer.SingerType switch {
@@ -35,7 +36,7 @@ namespace OpenUtau.App.ViewModels {
         /// <summary>加载中/无图时返回 null（显示首字符回退），头像就绪后通知刷新。</summary>
         public Bitmap? Avatar {
             get {
-                if (!avatarLoaded && !avatarLoading) {
+                if (!disposed && !avatarLoaded && !avatarLoading) {
                     avatarLoading = true;
                     LoadAvatarAsync();
                 }
@@ -62,6 +63,7 @@ namespace OpenUtau.App.ViewModels {
                 }
                 byte[] data = Singer.AvatarData;
                 Dispatcher.UIThread.Post(() => {
+                    if (disposed) return;
                     if (data != null) {
                         try {
                             using (var stream = new MemoryStream(data)) {
@@ -76,6 +78,12 @@ namespace OpenUtau.App.ViewModels {
                     this.RaisePropertyChanged(nameof(ShowAvatarFallback));
                 });
             });
+        }
+
+        public void Dispose() {
+            disposed = true;
+            avatar?.Dispose();
+            avatar = null;
         }
     }
 
@@ -97,7 +105,8 @@ namespace OpenUtau.App.ViewModels {
     /// - 歌手：SingerManager 扁平列表，订阅 SingersRefreshedNotification 自动刷新
     /// - 伴奏：枚举 SampleSearchPaths + SamplesPath 内音频格式文件（不读元数据）
     /// </summary>
-    public class SidebarViewModel : ViewModelBase, ICmdSubscriber {
+    public class SidebarViewModel : ViewModelBase, ICmdSubscriber, IDisposable {
+        bool disposed;
         static readonly string[] SampleExts = { ".wav", ".mp3", ".ogg", ".opus", ".flac" };
 
         public ObservableCollection<SingerItem> Singers { get; } = new ObservableCollection<SingerItem>();
@@ -108,21 +117,17 @@ namespace OpenUtau.App.ViewModels {
         public SidebarViewModel() {
             DocManager.Inst.AddSubscriber(this);
             // 试听状态变化 → 更新伴奏卡片播放状态（跨线程，回 UI 线程处理）
-            PlaybackManager.Inst.PreviewChanged += path => {
-                Dispatcher.UIThread.Post(() => {
-                    foreach (var item in Samples) {
-                        item.IsPreviewing = item.Path == path;
-                    }
-                });
-            };
+            PlaybackManager.Inst.PreviewChanged += OnPreviewChanged;
             RefreshSingers();
             RefreshSamples();
         }
 
         public void RefreshSingers() {
+            if (disposed) return;
             var singers = SingerManager.Inst.SingerGroups.Values
                 .SelectMany(list => list)
                 .ToList();
+            foreach (var item in Singers) item.Dispose();
             Singers.Clear();
             foreach (var singer in singers) {
                 Singers.Add(new SingerItem(singer));
@@ -132,9 +137,12 @@ namespace OpenUtau.App.ViewModels {
 
         /// <summary>重扫伴奏目录：仅枚举文件名（性能：不读时长/元数据）。</summary>
         public void RefreshSamples() {
+            if (disposed) return;
             var files = new List<string>();
             foreach (var dir in PathManager.Inst.SamplesPaths) {
                 try {
+                    // A fresh installation can have no sample library yet.
+                    if (!Directory.Exists(dir)) continue;
                     foreach (var file in Directory.GetFiles(dir)) {
                         if (SampleExts.Contains(System.IO.Path.GetExtension(file).ToLower())) {
                             files.Add(file);
@@ -155,6 +163,21 @@ namespace OpenUtau.App.ViewModels {
             if (cmd is SingersRefreshedNotification) {
                 RefreshSingers();
             }
+        }
+
+        void OnPreviewChanged(string? path) => Dispatcher.UIThread.Post(() => {
+            if (disposed) return;
+            foreach (var item in Samples) item.IsPreviewing = item.Path == path;
+        });
+
+        public void Dispose() {
+            if (disposed) return;
+            disposed = true;
+            PlaybackManager.Inst.PreviewChanged -= OnPreviewChanged;
+            DocManager.Inst.RemoveSubscriber(this);
+            foreach (var item in Singers) item.Dispose();
+            Singers.Clear();
+            Samples.Clear();
         }
     }
 }

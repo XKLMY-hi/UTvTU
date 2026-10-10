@@ -6,7 +6,8 @@ using ReactiveUI;
 
 namespace OpenUtau.App.ViewModels {
     public class TimeAxisChangedEvent { }
-    public class PlaybackViewModel : ViewModelBase, ICmdSubscriber {
+    public class PlaybackViewModel : ViewModelBase, ICmdSubscriber, IDisposable {
+        public void Dispose() => DocManager.Inst.RemoveSubscriber(this);
         UProject Project => DocManager.Inst.Project;
         public int BeatPerBar => Project.timeSignatures[0].beatPerBar;
         public int BeatUnit => Project.timeSignatures[0].beatUnit;

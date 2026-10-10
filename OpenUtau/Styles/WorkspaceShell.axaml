@@ -1,0 +1,293 @@
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Styles.Resources>
+    <ControlTheme x:Key="WorkspaceMenuItemTheme" TargetType="MenuItem" BasedOn="{StaticResource MenuItemTopLevel}">
+      <Style Selector="^ /template/ ContentPresenter TextBlock">
+        <Setter Property="FontSize" Value="12"/>
+      </Style>
+      <Style Selector="^ /template/ Border#PART_Item">
+        <Setter Property="CornerRadius" Value="4"/>
+      </Style>
+    </ControlTheme>
+  </Styles.Resources>
+  <!-- Compact MD3 workspace shell. Every short button resets the global MinHeight and Margin. -->
+  <Style Selector="Button.topBtn">
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="MinWidth" Value="0"/>
+    <Setter Property="MinHeight" Value="32"/>
+    <Setter Property="Width" Value="32"/>
+    <Setter Property="Height" Value="32"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="Focusable" Value="True"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+  </Style>
+  <Style Selector="Button.topBtn:pointerover">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+  </Style>
+  <Style Selector="Button.tpBtn">
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="MinWidth" Value="0"/>
+    <Setter Property="MinHeight" Value="32"/>
+    <Setter Property="Width" Value="32"/>
+    <Setter Property="Height" Value="32"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="Focusable" Value="True"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+  </Style>
+  <Style Selector="Button.tpBtn:pointerover">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+  </Style>
+  <Style Selector="ToggleButton.tpBtn">
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="MinWidth" Value="0"/>
+    <Setter Property="MinHeight" Value="32"/>
+    <Setter Property="Width" Value="32"/>
+    <Setter Property="Height" Value="32"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="Focusable" Value="True"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+  </Style>
+  <Style Selector="ToggleButton.tpBtn:pointerover">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+  </Style>
+  <Style Selector="Button.panelToggle">
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="MinWidth" Value="0"/>
+    <Setter Property="MinHeight" Value="24"/>
+    <Setter Property="Width" Value="24"/>
+    <Setter Property="Height" Value="24"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="CornerRadius" Value="4"/>
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="Focusable" Value="True"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+  </Style>
+  <Style Selector="Button.panelToggle:pointerover">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+  </Style>
+  <Style Selector="Button.iconBtn">
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="MinWidth" Value="0"/>
+    <Setter Property="MinHeight" Value="24"/>
+    <Setter Property="Width" Value="24"/>
+    <Setter Property="Height" Value="24"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="CornerRadius" Value="4"/>
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="Focusable" Value="True"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+  </Style>
+  <Style Selector="Button.iconBtn:pointerover">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+  </Style>
+  <Style Selector="ToggleButton.tpBtn:checked">
+    <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+  </Style>
+  <Style Selector="Button.tpPlay">
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="MinWidth" Value="0"/>
+    <Setter Property="MinHeight" Value="40"/>
+    <Setter Property="Width" Value="40"/>
+    <Setter Property="Height" Value="40"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="Focusable" Value="True"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+  </Style>
+  <Style Selector="Button.tpPlay:pointerover">
+    <Setter Property="Opacity" Value="0.92"/>
+  </Style>
+  <Style Selector="Button.brandBtn">
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="MinHeight" Value="28"/>
+    <Setter Property="Height" Value="28"/>
+    <Setter Property="Padding" Value="4,0"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="CornerRadius" Value="4"/>
+    <Setter Property="Focusable" Value="True"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+  </Style>
+  <Style Selector="Button.brandBtn:pointerover">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+  </Style>
+  <Style Selector="Border.shellRow">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-low}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+  </Style>
+  <Style Selector="Border.tpReadout">
+    <Setter Property="Height" Value="40"/>
+    <Setter Property="MinWidth" Value="125"/>
+    <Setter Property="CornerRadius" Value="4"/>
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+  </Style>
+  <Style Selector="Border.viewSwitch">
+    <Setter Property="Height" Value="40"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="CornerRadius" Value="0"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+  </Style>
+  <Style Selector="Button.viewTab">
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="MinWidth" Value="0"/>
+    <Setter Property="MinHeight" Value="40"/>
+    <Setter Property="Height" Value="40"/>
+    <Setter Property="Padding" Value="14,0"/>
+    <Setter Property="FontSize" Value="12"/>
+    <Setter Property="FontWeight" Value="SemiBold"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0,0,0,3"/>
+    <Setter Property="CornerRadius" Value="0"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+    <Setter Property="Focusable" Value="True"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+  </Style>
+  <Style Selector="Button.viewTab:pointerover">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+  </Style>
+  <Style Selector="Button.viewTab.selected">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+  </Style>
+  <Style Selector="Button.viewTab TextBlock">
+    <Setter Property="FontSize" Value="12"/>
+    <Setter Property="Foreground" Value="{Binding $parent[Button].Foreground}"/>
+  </Style>
+  <Style Selector="Button.libTab">
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="MinWidth" Value="0"/>
+    <Setter Property="MinHeight" Value="32"/>
+    <Setter Property="Height" Value="32"/>
+    <Setter Property="Padding" Value="3,0"/>
+    <Setter Property="FontSize" Value="11"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0,0,0,2"/>
+    <Setter Property="CornerRadius" Value="0"/>
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+    <Setter Property="Focusable" Value="True"/>
+    <Setter Property="ClipToBounds" Value="True"/>
+  </Style>
+  <Style Selector="Button.libTab.selected">
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+  </Style>
+  <Style Selector="Button.libTab:pointerover">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+  </Style>
+  <Style Selector="Button.libTab TextBlock">
+    <Setter Property="FontSize" Value="11"/>
+    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+    <Setter Property="Foreground" Value="{Binding $parent[Button].Foreground}"/>
+  </Style>
+  <Style Selector="Menu.workspaceMenu">
+    <Setter Property="ItemContainerTheme" Value="{StaticResource WorkspaceMenuItemTheme}"/>
+    <Setter Property="Margin" Value="8,0"/>
+    <Setter Property="FontSize" Value="12"/>
+  </Style>
+  <Style Selector="Menu.workspaceMenu > MenuItem">
+    <Setter Property="MinHeight" Value="28"/>
+    <Setter Property="Height" Value="28"/>
+    <Setter Property="Padding" Value="8,3"/>
+    <Setter Property="FontSize" Value="12"/>
+  </Style>
+  <Style Selector="Button.topBtn:focus-visible">
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="BorderThickness" Value="2"/>
+  </Style>
+  <Style Selector="Button.tpBtn:focus-visible">
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="BorderThickness" Value="2"/>
+  </Style>
+  <Style Selector="ToggleButton.tpBtn:focus-visible">
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="BorderThickness" Value="2"/>
+  </Style>
+  <Style Selector="Button.tpPlay:focus-visible">
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="BorderThickness" Value="2"/>
+  </Style>
+  <Style Selector="Button.brandBtn:focus-visible">
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="BorderThickness" Value="2"/>
+  </Style>
+  <Style Selector="Button.panelToggle:focus-visible">
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="BorderThickness" Value="2"/>
+  </Style>
+  <Style Selector="Button.iconBtn:focus-visible">
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="BorderThickness" Value="2"/>
+  </Style>
+  <Style Selector="Button.viewTab:focus-visible">
+    <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+  </Style>
+  <Style Selector="Button.libTab:focus-visible">
+    <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+  </Style>
+  <Style Selector="Border.sideItem">
+    <Setter Property="Height" Value="40"/>
+    <Setter Property="CornerRadius" Value="4"/>
+    <Setter Property="Padding" Value="8,0"/>
+    <Setter Property="Margin" Value="0,1"/>
+    <Setter Property="Cursor" Value="Hand"/>
+  </Style>
+  <Style Selector="Border.sideItem:pointerover">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+  </Style>
+  <Style Selector="Border.sideItem.small">
+    <Setter Property="Height" Value="34"/>
+  </Style>
+  <Style Selector="Border.sideItem.singer">
+    <Setter Property="Height" Value="56"/>
+  </Style>
+  <Style Selector="TextBlock.sideHeading">
+    <Setter Property="FontSize" Value="11"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+    <Setter Property="Margin" Value="2,4,0,4"/>
+  </Style>
+  <Style Selector="Border.sideCard">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="Padding" Value="10,8"/>
+    <Setter Property="Margin" Value="0,6,0,0"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+  </Style>
+</Styles>

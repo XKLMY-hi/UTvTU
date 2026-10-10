@@ -29,24 +29,21 @@ namespace OpenUtau.Test.App {
         // ── 1. 胶囊几何（A4 / 设计稿 VST-Plugin Tab Bar）────────────────────
 
         [AvaloniaFact]
-        public void Capsule_UsesDesignGeometry() {
+        public void Navigation_UsesCompactWorkspaceStyles() {
             string xaml = Xaml();
-            // 容器：高 36 / 内边距 3 / 圆角 full
-            Assert.Contains("<Style Selector=\"Border.viewSwitch\">", xaml);
+            Assert.Contains("<StyleInclude Source=\"/Styles/WorkspaceShell.axaml\"/>", xaml);
             Assert.Contains("x:Name=\"ViewSwitcher\" Classes=\"viewSwitch\"", xaml);
-            Assert.Contains("<Setter Property=\"Height\" Value=\"36\"/>", xaml);
-            Assert.Contains("<Setter Property=\"Padding\" Value=\"3\"/>", xaml);
-            // 选项：高 30 / 左右 18 / 文字 11 semibold（圆角 full 与容器同）
+            xaml = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "WorkspaceShell.axaml"));
+            // 导航为独立行，按钮尺寸由局部样式统一约束。
+            Assert.Contains("<Style Selector=\"Border.viewSwitch\">", xaml);
             Assert.Contains("<Style Selector=\"Button.viewTab\">", xaml);
-            Assert.Contains("<Setter Property=\"Height\" Value=\"30\"/>", xaml);
-            Assert.Contains("<Setter Property=\"Padding\" Value=\"18,0\"/>", xaml);
-            Assert.Contains("<Setter Property=\"FontSize\" Value=\"11\"/>", xaml);
+            Assert.Contains("<Setter Property=\"Height\" Value=\"40\"/>", xaml);
+            Assert.Contains("<Setter Property=\"Padding\" Value=\"14,0\"/>", xaml);
+            Assert.Contains("<Setter Property=\"FontSize\" Value=\"12\"/>", xaml);
             Assert.Contains("<Setter Property=\"FontWeight\" Value=\"SemiBold\"/>", xaml);
-            // 容器 36 = 内边距 3 + 选项 30 + 内边距 3：三处几何必须同时成立
-            Assert.Contains("<StackPanel Orientation=\"Horizontal\" Spacing=\"3\">", xaml);
             // 颜色只取 md3.*（无硬编码色值）
             Assert.Contains("Button.viewTab.selected", xaml);
-            Assert.Contains("{DynamicResource md3.secondary-container}", xaml);
+            Assert.Contains("{DynamicResource md3.primary}", xaml);
         }
 
         // ── 2. 三个工作视图都在胶囊里；Tag 能被枚举解析 ────────────────────
@@ -259,8 +256,9 @@ namespace OpenUtau.Test.App {
             Assert.Contains("SwitchToView(AppSurface.PianoRoll);", code);
             Assert.Contains("RequestView(view);", code);
             Assert.Contains("case AppSurface.PianoRoll:", code);
-            // 未创建过卷帘时胶囊不抢跑（入口仍是双击）
-            Assert.Contains("if (pianoRoll == null) {", code);
+            // 顶栏与双击共用创建和打开路径；可用性由当前工程片段状态驱动。
+            Assert.Contains("await OpenPianoRollPartAsync", code);
+            Assert.Contains("IsEnabled=\"{Binding PianoRollNavigation.CanOpen}\"", xaml);
             Assert.True(ViewSwitcherPolicy.IsWorkView(AppSurface.PianoRoll));
         }
 

@@ -56,6 +56,10 @@ namespace OpenUtau.App.Views {
 
         private PianoRollDetachedWindow? pianoRollWindow;
         private PianoRoll? pianoRoll;
+        private Task<PianoRoll>? pianoRollCreationTask;
+        private bool shellDisposed;
+        private int pianoRollOpenGeneration;
+        private int preferencesGeneration;
         private MixerControl? mixerControl;
         private MixerWindow? mixerWindow;
 
@@ -92,6 +96,8 @@ namespace OpenUtau.App.Views {
             Log.Information("Creating main window.");
             InitializeComponent();
             Log.Information("Initialized main window component.");
+            Closed += OnShellClosed;
+            WorkspaceMenu.AddHandler(MenuItem.SubmenuOpenedEvent, OnMainMenuOpened);
             DataContext = viewModel = new MainWindowViewModel {
                 // give the viewmodel a way to prompt/save using the view's existing method
                 AskIfSaveAndContinue = AskIfSaveAndContinue
@@ -202,6 +208,7 @@ namespace OpenUtau.App.Views {
         private static void SetShown(Control control, bool shown) => control.Classes.Set("shown", shown);
 
         private void ShowWelcome() {
+            ++pianoRollOpenGeneration;
             WelcomeHost.Host = this;
             WelcomeHost.DataContext = viewModel;
             viewModel.InitProject();          // 恢复状态（HasRecovery/RecoveryString）
@@ -408,7 +415,8 @@ namespace OpenUtau.App.Views {
             }
         }
 
-        void OnMainMenuOpened(object sender, RoutedEventArgs args) {
+        void OnMainMenuOpened(object? sender, RoutedEventArgs args) {
+            if (args.Source is MenuItem item && item.Parent != WorkspaceMenu) return;
             viewModel.RefreshOpenRecent();
             viewModel.RefreshTemplates();
             viewModel.RefreshCacheSize();
@@ -447,6 +455,7 @@ namespace OpenUtau.App.Views {
                 await SaveAs();
             } else {
                 viewModel.SaveProject();
+                if (!DocManager.Inst.ChangesSaved) return;
                 string message = ThemeManager.GetString("progress.saved");
                 message = string.Format(message, DateTime.Now);
                 DocManager.Inst.ExecuteCmd(new ProgressBarNotification(0, message));
@@ -455,9 +464,10 @@ namespace OpenUtau.App.Views {
 
         async void OnMenuSaveAs(object sender, RoutedEventArgs args) => await SaveAs();
         internal async Task SaveAs() {
+            var project = DocManager.Inst.Project;
             var file = await FilePicker.SaveFileAboutProject(
                 this, "menu.file.saveas", FilePicker.USTXP);
-            if (!string.IsNullOrEmpty(file)) {
+            if (!shellDisposed && ReferenceEquals(project, DocManager.Inst.Project) && !string.IsNullOrEmpty(file)) {
                 viewModel.SaveProject(file);
             }
         }
@@ -820,13 +830,17 @@ namespace OpenUtau.App.Views {
         void OnMenuPreferences(object sender, RoutedEventArgs args) => ShowPreferences();
 
         /// <summary>
-        /// 顶栏按视图切内容（工作台 / 卷帘 / 混音台共用同一条 56px 顶栏，与设计稿一致）：
+        /// 顶栏按视图收起运输行和导航行，菜单与状态栏保持可见：
         /// 欢迎页 / 偏好页只留品牌 + 屏名；三个工作视图显示运输组 + 右侧组 + 胶囊；
         /// 「分离」只在卷帘 / 混音台出场。策略全在 <see cref="ViewSwitcherPolicy.ChromeFor"/>（可单测）。
         /// </summary>
         private void SetChromeForView(ViewChrome chrome) {
             ScreenTitle[!TextBlock.TextProperty] = new DynamicResourceExtension(chrome.TitleKey);
             TransportGroup.IsVisible = chrome.ShowTransport;
+            ShellTransportRow.IsVisible = chrome.ShowTransport;
+            ShellNavigationRow.IsVisible = chrome.ShowViewSwitcher;
+            MainGrid.RowDefinitions[1].Height = new GridLength(chrome.ShowTransport ? 60 : 0);
+            MainGrid.RowDefinitions[2].Height = new GridLength(chrome.ShowViewSwitcher ? 40 : 0);
             TopRightCluster.IsVisible = chrome.ShowRightCluster;
             ViewSwitcher.IsVisible = chrome.ShowViewSwitcher;
             DetachViewButton.IsVisible = chrome.ShowDetachButton;
@@ -838,6 +852,7 @@ namespace OpenUtau.App.Views {
 
         /// <summary>切到某个工作视图（卷帘 / 混音台的宿主控件由调用方保证已就绪）。</summary>
         private void SwitchToView(AppSurface view) {
+            if (view != AppSurface.PianoRoll) ++pianoRollOpenGeneration;
             viewModel.ViewSwitcher.SwitchTo(view);   // 改变 → OnCurrentViewChanged
         }
 
@@ -903,21 +918,15 @@ namespace OpenUtau.App.Views {
         }
 
         /// <summary>
-        /// 进入某个视图（胶囊 / Ctrl+M / 菜单共用）：
-        /// 卷帘沿用 A5「双击片段进入」，未创建过则胶囊不作用；已分离则把独立窗口置前。
+        /// 进入工作视图；歌声编辑使用选中或当前片段，与双击共用异步创建路径。
+        /// 每次导航意图使更早的打开请求失效；已分离则把独立窗口置前。
         /// </summary>
-        private void RequestView(AppSurface view) {
+        private async void RequestView(AppSurface view) {
+            ++pianoRollOpenGeneration;
             switch (view) {
                 case AppSurface.PianoRoll:
-                    if (pianoRoll == null) {
-                        return;                     // A5：入口仍是双击片段（胶囊只负责回切）
-                    }
-                    if (pianoRollWindow != null) {
-                        pianoRollWindow.Show();
-                        pianoRollWindow.Activate();
-                        return;
-                    }
-                    SwitchToView(AppSurface.PianoRoll);
+                    var part = viewModel.PianoRollNavigation.TargetPart;
+                    if (part != null) await OpenPianoRollPartAsync(part, part.position);
                     break;
                 case AppSurface.Mixer:
                     if (mixerWindow != null) {
@@ -956,6 +965,14 @@ namespace OpenUtau.App.Views {
 
         /// <summary>偏好设置（全屏视图，设计稿 6-Preferences）。</summary>
         public void ShowPreferences() {
+            ++pianoRollOpenGeneration;
+            ++preferencesGeneration;
+            if (PreferencesHost.IsVisible && PreferencesHost.DataContext is PreferencesViewModel active && !active.IsDisposed) {
+                SetShown(PreferencesHost, true);
+                SetChromeForView(ViewSwitcherPolicy.ChromeFor(AppSurface.Preferences));
+                return;
+            }
+            PreferencesHost.ReleaseSession();
             PreferencesViewModel dataContext;
             try {
                 dataContext = new PreferencesViewModel();
@@ -981,8 +998,11 @@ namespace OpenUtau.App.Views {
                 return;
             }
             SetShown(PreferencesHost, false);
+            int generation = ++preferencesGeneration;
             await Task.Delay(TransitionMs);
+            if (generation != preferencesGeneration || shellDisposed) return;
             PreferencesHost.IsVisible = false;
+            PreferencesHost.ReleaseSession();
             bool backToWelcome = WelcomeHost.IsVisible;
             SetChromeForView(backToWelcome
                 ? ViewSwitcherPolicy.ChromeFor(AppSurface.Welcome)
@@ -1000,6 +1020,7 @@ namespace OpenUtau.App.Views {
             }
             Preferences.Reset();
             App.SetTheme();
+            PreferencesHost.ReleaseSession();
             ShowPreferences();
         }
 
@@ -2048,45 +2069,72 @@ namespace OpenUtau.App.Views {
         }
 
         public async void PartsCanvasDoubleTapped(object sender, TappedEventArgs args) {
-            if (sender is not Canvas canvas) {
-                return;
+            if (sender is Canvas canvas && canvas.InputHitTest(args.GetPosition(canvas)) is
+                PartControl { part: UVoicePart part }) {
+                int tick = viewModel.TracksViewModel.PointToTick(args.GetPosition(canvas));
+                await OpenPianoRollPartAsync(part, tick);
             }
-            var control = canvas.InputHitTest(args.GetPosition(canvas));
-            if (control is PartControl partControl && partControl.part is UVoicePart) {
+        }
+
+        async Task OpenPianoRollPartAsync(UVoicePart part, int tick) {
+            var project = DocManager.Inst.Project;
+            int generation = ++pianoRollOpenGeneration;
+            if (shellDisposed || !project.parts.Contains(part)) return;
+            try {
                 if (pianoRoll == null) {
-                    LoadingWindow.BeginLoading(this);
-
-                    var model = await Task.Run<PianoRollViewModel>(() => new PianoRollViewModel());
-
-                    // Let's attach when needed to avoid startup slowdowns
-                    pianoRoll = new PianoRoll(model) {
-                        MainWindow = this
-                    };
-
-                    if (Preferences.Default.DetachPianoRoll) {
-                        pianoRollWindow = CreatePianoRollWindow();
-                    } else {
-                        PianoRollContainer.Content = pianoRoll;
+                    var creation = pianoRollCreationTask ??= CreatePianoRollAsync();
+                    try {
+                        pianoRoll = await creation;
+                    } finally {
+                        if (ReferenceEquals(creation, pianoRollCreationTask)) pianoRollCreationTask = null;
                     }
-
-                    await Task.Run(() =>
-                        pianoRoll.InitializePianoRollWindowAsync()
-                    );
-                    LoadingWindow.EndLoading();
-
-                    pianoRoll.ViewModel.PlaybackViewModel = viewModel.PlaybackViewModel;
                 }
+                // A document switch or a later navigation request invalidates the old continuation.
+                if (shellDisposed || generation != pianoRollOpenGeneration ||
+                    !ReferenceEquals(project, DocManager.Inst.Project) || !project.parts.Contains(part)) return;
+                if (pianoRollWindow == null && Preferences.Default.DetachPianoRoll) {
+                    DetachAndFlush(PianoRollContainer);
+                    CreatePianoRollWindow();
+                }
+                DocManager.Inst.ExecuteCmd(new LoadPartNotification(part, project, tick));
+                pianoRoll.AttachExpressions();
                 if (pianoRollWindow != null) {
                     pianoRollWindow.Show();
                     pianoRollWindow.Activate();
                 } else {
-                    // S5：卷帘是工作区的一个视图（A5 进入方式不变 = 双击片段）
                     SwitchToView(AppSurface.PianoRoll);
                     pianoRoll.Focus();
                 }
-                int tick = viewModel.TracksViewModel.PointToTick(args.GetPosition(canvas));
-                DocManager.Inst.ExecuteCmd(new LoadPartNotification(partControl.part, DocManager.Inst.Project, tick));
-                pianoRoll.AttachExpressions();
+            } catch (Exception e) {
+                if (!shellDisposed && generation == pianoRollOpenGeneration && ReferenceEquals(project, DocManager.Inst.Project)) {
+                    Log.Error(e, "Failed to open the voice editor");
+                    DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e));
+                }
+            }
+        }
+
+        async Task<PianoRoll> CreatePianoRollAsync() {
+            LoadingWindow.BeginLoading(this);
+            PianoRoll? control = null;
+            PianoRollViewModel? model = null;
+            try {
+                model = await Dispatcher.UIThread.InvokeAsync(() => new PianoRollViewModel());
+                if (shellDisposed) {
+                    throw new OperationCanceledException();
+                }
+                control = new PianoRoll(model) { MainWindow = this };
+                await Dispatcher.UIThread.InvokeAsync(control.InitializePianoRollWindowAsync);
+                if (shellDisposed) throw new OperationCanceledException();
+                control.ViewModel.PlaybackViewModel = viewModel.PlaybackViewModel;
+                return control;
+            } catch {
+                if (control != null) control.Dispose();
+                else if (model != null) {
+                    model.Dispose();
+                }
+                throw;
+            } finally {
+                LoadingWindow.EndLoading();
             }
         }
 
@@ -2744,12 +2792,26 @@ namespace OpenUtau.App.Views {
                     }
                     // Save cancelled or failed (e.g. dismissed the Save As picker) —
                     // stay in the app instead of exiting.
-                    return viewModel.ProjectSaved;
+                    return viewModel.ProjectSaved && DocManager.Inst.ChangesSaved;
                 case MessageBox.MessageBoxResult.No:
                     return true; // Continue.
                 default:
                     return false; // Cancel.
             }
+        }
+
+        void OnShellClosed(object? sender, EventArgs e) {
+            if (shellDisposed) return;
+            shellDisposed = true;
+            ++preferencesGeneration;
+            ++pianoRollOpenGeneration;
+            timer.Stop();
+            autosaveTimer.Stop();
+            PreferencesHost.ReleaseSession();
+            pianoRoll?.Dispose();
+            sidebarViewModel.Dispose();
+            viewModel.Dispose();
+            DocManager.Inst.RemoveSubscriber(this);
         }
 
         // ── In-window modal overlay host ─────────────────────────

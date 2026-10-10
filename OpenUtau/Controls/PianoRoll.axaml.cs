@@ -131,7 +131,7 @@ namespace OpenUtau.App.Controls {
                     syncingExpPanel = false;
                 }
             };
-            ViewModel.NotesViewModel.WhenAnyValue(x => x.ShowExpressions)
+            messageSubs.Add(ViewModel.NotesViewModel.WhenAnyValue(x => x.ShowExpressions)
                 .Subscribe(show => {
                     if (syncingExpPanel || ExpPanel.IsCollapsed == !show) {
                         return;
@@ -143,7 +143,7 @@ namespace OpenUtau.App.Controls {
                     } finally {
                         syncingExpPanel = false;
                     }
-                });
+                }));
         }
 
         /// <summary>折叠处边缘标签的展开请求（W34 ①）：与顶部 chevron 共用同一条状态（含落盘）。</summary>
@@ -194,10 +194,11 @@ namespace OpenUtau.App.Controls {
                 sub.Dispose();
             }
             messageSubs.Clear();
-            ViewModel?.NotesViewModel?.Unsubscribe();
-            if (ViewModel != null) {
-                DocManager.Inst.RemoveSubscriber(ViewModel);
-            }
+            this.LayoutUpdated -= PianoRollLayoutUpdated;
+            lyricsDialogCommand?.Dispose();
+            noteDefaultsCommand?.Dispose();
+            noteBatchEditCommand?.Dispose();
+            ViewModel?.Dispose();
             foreach (var control in this.GetVisualDescendants().OfType<Control>()) {
                 switch (control.DataContext) {
                     case IDisposable disposable:

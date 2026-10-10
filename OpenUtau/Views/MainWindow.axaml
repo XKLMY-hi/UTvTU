@@ -1,4 +1,4 @@
-<controls:WindowEx xmlns="https://github.com/avaloniaui"
+﻿<controls:WindowEx xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -14,240 +14,59 @@
         Focusable="True" KeyDown="OnKeyDown" PointerPressed="OnPointerPressed" Closing="WindowClosing"
         SizeChanged="OnWindowSizeChanged"
         DragDrop.AllowDrop="True">
-  <!-- 主窗骨架（对齐设计稿 2-Main-Window）：
-       顶栏 56（品牌=菜单 · 运输条 40 胶囊 · 时间/速度 40 圆角块 · 右侧图标组）
-       / 工作区：左 轨道头 264（表头 34）· 中 编排区 · 右 素材库 296（表头 44 / 页签 40）
-       / 状态条 32。颜色一律取 md3 角色键；编排区、卷帘、混音台的内部绘制仍走旧画笔，按 S2–S5 逐步迁。 -->
+  <!-- 原生标题栏之外：菜单 30 / 运输 60 / 视图操作 40 / 工作区 / 状态 25。
+       几何取自 md3-daw-2026-10-11/index.html；主题继续使用现有动态 MD3 角色。 -->
   <Window.Styles>
-    <Style Selector="Button,ToggleButton">
-      <Setter Property="Focusable" Value="False"/>
-    </Style>
-    <!-- 顶栏：圆形图标按钮 36（稿：36×36 圆角 999） -->
-    <Style Selector="Button.topBtn">
-      <Setter Property="Margin" Value="0"/>
-      <Setter Property="HorizontalContentAlignment" Value="Center"/>
-      <Setter Property="VerticalContentAlignment" Value="Center"/>      <Setter Property="Width" Value="36"/>
-      <Setter Property="Height" Value="36"/>
-      <Setter Property="Padding" Value="0"/>
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="CornerRadius" Value="999"/>
-      <Setter Property="Cursor" Value="Hand"/>
-    </Style>
-    <Style Selector="Button.topBtn:pointerover">
-      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-    </Style>
-    <!-- 顶栏：品牌=菜单触发器（无边框、hover 提亮） -->
-    <Style Selector="Button.brandBtn">
-      <Setter Property="Margin" Value="0"/>
-      <Setter Property="HorizontalContentAlignment" Value="Center"/>
-      <Setter Property="VerticalContentAlignment" Value="Center"/>      <Setter Property="Padding" Value="4,0"/>
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="CornerRadius" Value="10"/>
-      <Setter Property="Cursor" Value="Hand"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
-    <Style Selector="Button.brandBtn:pointerover">
-      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-    </Style>
-    <!-- 顶栏：运输条按钮（40 胶囊内的 36 圆钮） -->
-    <Style Selector="Button.tpBtn">
-      <Setter Property="Margin" Value="0"/>
-      <Setter Property="HorizontalContentAlignment" Value="Center"/>
-      <Setter Property="VerticalContentAlignment" Value="Center"/>      <Setter Property="Width" Value="36"/>
-      <Setter Property="Height" Value="36"/>
-      <Setter Property="Padding" Value="0"/>
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="CornerRadius" Value="999"/>
-      <Setter Property="Cursor" Value="Hand"/>
-    </Style>
-    <Style Selector="Button.tpBtn:pointerover">
-      <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
-    </Style>
-    <Style Selector="ToggleButton.tpBtn">
-      <Setter Property="Margin" Value="0"/>
-      <Setter Property="HorizontalContentAlignment" Value="Center"/>
-      <Setter Property="VerticalContentAlignment" Value="Center"/>      <Setter Property="Width" Value="36"/>
-      <Setter Property="Height" Value="36"/>
-      <Setter Property="Padding" Value="0"/>
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="CornerRadius" Value="999"/>
-      <Setter Property="Cursor" Value="Hand"/>
-    </Style>
-    <Style Selector="ToggleButton.tpBtn:pointerover">
-      <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
-    </Style>
-    <Style Selector="ToggleButton.tpBtn:checked">
-      <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
-    </Style>
-    <!-- 顶栏：播放键 = primary 实底圆钮 -->
-    <Style Selector="Button.tpPlay">
-      <Setter Property="Margin" Value="0"/>
-      <Setter Property="HorizontalContentAlignment" Value="Center"/>
-      <Setter Property="VerticalContentAlignment" Value="Center"/>      <Setter Property="Width" Value="36"/>
-      <Setter Property="Height" Value="36"/>
-      <Setter Property="Padding" Value="0"/>
-      <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="CornerRadius" Value="999"/>
-      <Setter Property="Cursor" Value="Hand"/>
-    </Style>
-    <Style Selector="Button.tpPlay:pointerover">
-      <Setter Property="Opacity" Value="0.92"/>
-    </Style>
-    <!-- 顶栏：时间 / 速度圆角块（面板之上提一档 = 控件层） -->
-    <Style Selector="Border.tpChip">
-      <Setter Property="Height" Value="40"/>
-      <Setter Property="CornerRadius" Value="8"/>
-      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
-    <!-- 顶栏：视图胶囊（决策 A4 / 设计稿 VST-Plugin Tab Bar 同源规格）
-         容器 高 36 / 内边距 3 / 圆角 full；选项 高 30 / 左右 18 / 文字 11px semibold；同组间距 3 -->
-    <Style Selector="Border.viewSwitch">
-      <Setter Property="Height" Value="36"/>
-      <Setter Property="Padding" Value="3"/>
-      <Setter Property="CornerRadius" Value="999"/>
-      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
-    <!-- 视图胶囊选项（决策 A4：容器 36 / 内边距 3；选项 30 / 左右 18 / 文字 11 semibold）
-         ⚠ 本仓按钮尺寸的**通用陷阱**，适用于所有声明 <32 高的 Button 类：
-           · 全局 Md3ButtonTheme 设 MinHeight=32（Styles/Md3ControlThemes.axaml:28），布局取
-             Max(MinHeight, Height) ⇒ 只写 Height="30" 会被顶到 32（本钮修前实测 Bounds=32）；
-           · 应用级 `Button { Margin: 0,4 }`（Styles/Styles.axaml:159）还会外加 8px 竖向 margin；
-           · 容器有硬约束时：Measure 阶段 DesiredSize 会被父夹到可用高度（胶囊内区
-             36−2×3=30），但 **Arrange 仍尊重 MinHeight** ⇒ Bounds 仍 32、在胶囊里上下各溢 1px。
-           因此每个声明 <32 的按钮类都必须在自己的样式里显式压 MinHeight（并清 Margin）。
-           注：Avalonia 类型选择器是**精确匹配**，`Button` 选择器不影响 ToggleButton。 -->
-    <Style Selector="Button.viewTab">
-      <Setter Property="MinHeight" Value="30"/>
-      <Setter Property="Margin" Value="0"/>
-      <Setter Property="HorizontalContentAlignment" Value="Center"/>
-      <Setter Property="VerticalContentAlignment" Value="Center"/>
-      <Setter Property="Height" Value="30"/>
-      <Setter Property="Padding" Value="18,0"/>
-      <Setter Property="FontSize" Value="11"/>
-      <Setter Property="FontWeight" Value="SemiBold"/>
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="CornerRadius" Value="999"/>
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
-      <Setter Property="Cursor" Value="Hand"/>
-    </Style>
-    <Style Selector="Button.viewTab:pointerover">
-      <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
-    </Style>
-    <Style Selector="Button.viewTab.selected">
-      <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
-    </Style>
-    <!-- W16 面板 chrome：面板头部的折叠按钮（一处样式，面板共用）
-         ⚠ 同「通用陷阱」：Height=24 必须配 MinHeight=24，否则被全局 Md3ButtonTheme 的 MinHeight=32 顶高。 -->
-    <Style Selector="Button.panelToggle">
-      <Setter Property="MinHeight" Value="24"/>
-      <Setter Property="Margin" Value="0"/>
-      <Setter Property="Width" Value="24"/>
-      <Setter Property="Height" Value="24"/>
-      <Setter Property="Padding" Value="0"/>
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="CornerRadius" Value="7"/>
-      <Setter Property="Cursor" Value="Hand"/>
-      <Setter Property="HorizontalContentAlignment" Value="Center"/>
-      <Setter Property="VerticalContentAlignment" Value="Center"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
-    <Style Selector="Button.panelToggle:pointerover">
-      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-    </Style>
-    <!-- 素材库：页签胶囊（稿：高 28 / 文字 10）
-         ⚠ 同「通用陷阱」：Height=28 必须配 MinHeight=28，否则被全局 Md3ButtonTheme 的
-           MinHeight=32 顶到 32（详见 Button.viewTab 上的说明）。 -->
-    <Style Selector="Button.libTab">
-      <Setter Property="MinHeight" Value="28"/>
-      <Setter Property="Margin" Value="0"/>
-      <Setter Property="HorizontalContentAlignment" Value="Center"/>
-      <Setter Property="VerticalContentAlignment" Value="Center"/>
-      <Setter Property="Height" Value="28"/>
-      <Setter Property="Padding" Value="14,0"/>
-      <Setter Property="FontSize" Value="10"/>
-      <Setter Property="FontWeight" Value="SemiBold"/>
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="CornerRadius" Value="999"/>
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
-      <Setter Property="Cursor" Value="Hand"/>
-    </Style>
-    <Style Selector="Button.libTab:pointerover">
-      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-    </Style>
-    <Style Selector="Button.libTab.selected">
-      <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
-    </Style>
-    <!-- 素材库：内容区小图标按钮 -->
-    <Style Selector="Button.iconBtn">
-      <Setter Property="Margin" Value="0"/>
-      <Setter Property="HorizontalContentAlignment" Value="Center"/>
-      <Setter Property="VerticalContentAlignment" Value="Center"/>      <Setter Property="Width" Value="28"/>
-      <Setter Property="Height" Value="28"/>
-      <Setter Property="Padding" Value="0"/>
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="CornerRadius" Value="7"/>
-      <Setter Property="Cursor" Value="Hand"/>
-    </Style>
-    <Style Selector="Button.iconBtn:pointerover">
-      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-    </Style>
-    <!-- 素材库：列表项 / 卡片 / 小标题（内容细化留 S4，先沿用结构） -->
-    <Style Selector="Border.sideItem">
-      <Setter Property="Height" Value="44"/>
-      <Setter Property="CornerRadius" Value="8"/>
-      <Setter Property="Padding" Value="8,0"/>
-      <Setter Property="Margin" Value="0,1"/>
-      <Setter Property="Cursor" Value="Hand"/>
-    </Style>
-    <Style Selector="Border.sideItem:pointerover">
-      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-    </Style>
-    <Style Selector="Border.sideItem.small">
-      <Setter Property="Height" Value="38"/>
-    </Style>
-    <Style Selector="Border.sideItem.singer">
-      <Setter Property="Height" Value="62"/>
-    </Style>
-    <Style Selector="TextBlock.sideHeading">
-      <Setter Property="FontSize" Value="11"/>
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
-      <Setter Property="Margin" Value="2,4,0,4"/>
-    </Style>
-    <Style Selector="Border.sideCard">
-      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-      <Setter Property="CornerRadius" Value="10"/>
-      <Setter Property="Padding" Value="12,10"/>
-      <Setter Property="Margin" Value="0,8,0,0"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
-      <Setter Property="BorderThickness" Value="1"/>
-    </Style>
+    <StyleInclude Source="/Styles/WorkspaceShell.axaml"/>
   </Window.Styles>
   <!-- 窗口装饰已交还系统（原生标题栏），内容不再为自绘标题栏留白 -->
   <Border Padding="0">
   <Grid>
     <!-- MainGrid：主内容（overlay 时模糊目标） -->
-    <Grid x:Name="MainGrid" RowDefinitions="56,*,32">
-      <!-- ══════════ 顶栏 56：品牌(=菜单) · 运输条 · 时间/速度 · 右侧图标 ══════════ -->
-      <Border Grid.Row="0" Background="{DynamicResource md3.surface-container}"
-              BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1">
-        <Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="16,0">
-          <!-- 品牌 = 菜单按钮（稿：36 标记 + UTVTU + 分隔线 + 屏名） -->
-          <Button Grid.Column="0" x:Name="AppMenuButton" Classes="brandBtn" Click="OnAppMenuClicked">
+    <Grid x:Name="MainGrid" RowDefinitions="30,60,40,*,25">
+      <!-- 菜单与品牌：完整菜单只挂载一次，避免 MenuItem 型 ItemsSource 的双亲冲突。 -->
+      <Border x:Name="ShellMenuRow" Grid.Row="0" Classes="shellRow">
+        <Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="12,0">
+          <Button Grid.Column="0" AutomationProperties.Name="UTvTU" ToolTip.Tip="{DynamicResource menu.file}" x:Name="AppMenuButton" Classes="brandBtn" Click="OnAppMenuClicked">
             <Button.Flyout>
               <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                <MenuItem Header="{DynamicResource menu.file.save}" Click="OnMenuSave"/>
+                <MenuItem Header="{DynamicResource menu.tools.prefs}" Click="OnMenuPreferences"/>
+                <MenuItem Header="{DynamicResource menu.help.wiki}" Click="OnMenuWiki"/>
+              </MenuFlyout>
+            </Button.Flyout>
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <!-- W40：顶栏品牌 = 「标志 + 字标，无括号」。cap 15 落在品牌阶梯的 14–23 档 ⇒ 按规则**去括号**；
+                   原音符瓦片（md3.primary-container + icon-music）与文字 UTvTU 已删。
+                   尺寸与 SplashWindow 同一套口径（缩放 s = cap / 277.4707 = 15/277.4707 = 0.054060）：
+                     · 标志 brand-mark（源描边语义，描边 = 64 网格内 8 = 尺寸÷8）：要满足"标志墨迹高 = 字标 cap"，
+                       墨迹（38 单元 + 描边 8）占 64 网格的 46 ⇒ 渲染盒 = 15 × 64/46 = 20.9（rendered 描边 ≈ 2.6）
+                     · 字标 brand-wordmark（U/T 提取件，**Fill**）高 = cap = 15 ⇒ 宽 = 1032.4137 × s = 55.8
+                     · 切角 v 必须**单独描边**补齐（U/T 键不含 v；v 是自交单环，EvenOdd 填充会出贯穿细缝）：
+                       中心线 91×142 单元 → 元素框 4.92×7.68、描边 61 × s = 3.30、左缘 463.011 × s = 25.03、顶 100.711 × s = 5.44
+                     · 间距 = 0.42 × cap = 6.3；整组不撑高顶栏（原元素总高 36，此处最高 20.9） -->
+              <StackPanel Orientation="Horizontal" Spacing="6.3" VerticalAlignment="Center">
+                <Viewbox Width="20.9" Height="20.9" Stretch="Uniform">
+                  <Path Data="{StaticResource brand-mark}"
+                        Stroke="{DynamicResource md3.primary}" StrokeThickness="8"
+                        StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
+                </Viewbox>
+                <Canvas Width="55.8" Height="15" VerticalAlignment="Center">
+                  <Path Data="{StaticResource brand-wordmark}"
+                        Fill="{DynamicResource md3.on-surface}"
+                        Width="55.8" Height="15" Stretch="Uniform"/>
+                  <Path Data="{StaticResource brand-v-chevron}"
+                        Stroke="{DynamicResource md3.on-surface}" StrokeThickness="3.30"
+                        StrokeLineCap="Round" StrokeJoin="Round"
+                        Width="4.92" Height="7.68" Stretch="Uniform"
+                        Canvas.Left="25.03" Canvas.Top="5.44"/>
+                </Canvas>
+              </StackPanel>
+
+            </StackPanel>
+          </Button>
+          <Menu x:Name="WorkspaceMenu" Grid.Column="1" Classes="workspaceMenu" VerticalAlignment="Center" Margin="8,0">
+
                 <MenuItem Header="{DynamicResource menu.file}">
                   <MenuItem Header="{DynamicResource menu.file.new}" InputGesture="Ctrl+N" Click="OnMenuNew"/>
                   <MenuItem Header="{DynamicResource menu.file.newfromtemplate}" ItemsSource="{Binding OpenTemplatesMenuItems}" Classes="MenuItemWithSubMenu"/>
@@ -326,83 +145,54 @@
                   <MenuItem Header="{DynamicResource menu.help.reportissue}" Click="OnMenuReportIssue"/>
                   <MenuItem Header="{DynamicResource menu.help.logslocation}" Click="OnMenuLogsLocation"/>
                 </MenuItem>
-              </MenuFlyout>
-            </Button.Flyout>
-            <StackPanel Orientation="Horizontal" Spacing="12">
-              <!-- W40：顶栏品牌 = 「标志 + 字标，无括号」。cap 15 落在品牌阶梯的 14–23 档 ⇒ 按规则**去括号**；
-                   原音符瓦片（md3.primary-container + icon-music）与文字 UTvTU 已删。
-                   尺寸与 SplashWindow 同一套口径（缩放 s = cap / 277.4707 = 15/277.4707 = 0.054060）：
-                     · 标志 brand-mark（源描边语义，描边 = 64 网格内 8 = 尺寸÷8）：要满足"标志墨迹高 = 字标 cap"，
-                       墨迹（38 单元 + 描边 8）占 64 网格的 46 ⇒ 渲染盒 = 15 × 64/46 = 20.9（rendered 描边 ≈ 2.6）
-                     · 字标 brand-wordmark（U/T 提取件，**Fill**）高 = cap = 15 ⇒ 宽 = 1032.4137 × s = 55.8
-                     · 切角 v 必须**单独描边**补齐（U/T 键不含 v；v 是自交单环，EvenOdd 填充会出贯穿细缝）：
-                       中心线 91×142 单元 → 元素框 4.92×7.68、描边 61 × s = 3.30、左缘 463.011 × s = 25.03、顶 100.711 × s = 5.44
-                     · 间距 = 0.42 × cap = 6.3；整组不撑高顶栏（原元素总高 36，此处最高 20.9） -->
-              <StackPanel Orientation="Horizontal" Spacing="6.3" VerticalAlignment="Center">
-                <Viewbox Width="20.9" Height="20.9" Stretch="Uniform">
-                  <Path Data="{StaticResource brand-mark}"
-                        Stroke="{DynamicResource md3.primary}" StrokeThickness="8"
-                        StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
-                </Viewbox>
-                <Canvas Width="55.8" Height="15" VerticalAlignment="Center">
-                  <Path Data="{StaticResource brand-wordmark}"
-                        Fill="{DynamicResource md3.on-surface}"
-                        Width="55.8" Height="15" Stretch="Uniform"/>
-                  <Path Data="{StaticResource brand-v-chevron}"
-                        Stroke="{DynamicResource md3.on-surface}" StrokeThickness="3.30"
-                        StrokeLineCap="Round" StrokeJoin="Round"
-                        Width="4.92" Height="7.68" Stretch="Uniform"
-                        Canvas.Left="25.03" Canvas.Top="5.44"/>
-                </Canvas>
-              </StackPanel>
-              <Border Width="1" Height="20" VerticalAlignment="Center"
-                      Background="{DynamicResource md3.outline-variant}"/>
-              <TextBlock x:Name="ScreenTitle" Text="{DynamicResource view.workspace}" FontSize="11" VerticalAlignment="Center"
-                         Foreground="{DynamicResource md3.on-surface-variant}"/>
-            </StackPanel>
-          </Button>
 
-          <!-- 运输组（运输条 + 播放位置 + 速度/拍号）：仅工作台视图显示（欢迎页/偏好页的稿子顶栏没有它） -->
-          <StackPanel x:Name="TransportGroup" Grid.Column="1" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
-          <!-- 运输条（稿：40 胶囊，内边距 0/10，按钮 36） -->
-          <Border Classes="tpChip" Height="40"
-                  CornerRadius="999" Padding="10,0">
+          </Menu>
+          <TextBlock x:Name="ScreenTitle" Grid.Column="3" Text="{DynamicResource view.workspace}"
+                     FontSize="11" VerticalAlignment="Center" MaxWidth="180" TextTrimming="CharacterEllipsis"
+                     Foreground="{DynamicResource md3.on-surface-variant}"/>
+        </Grid>
+      </Border>
+      <Border x:Name="ShellTransportRow" Grid.Row="1" Classes="shellRow">
+        <Grid ColumnDefinitions="*,Auto" Margin="12,0">
+          <StackPanel x:Name="TransportGroup" Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+          <!-- 平面运输控件：32px 操作，40px 主播放键。 -->
+          <Border Height="40" Padding="0">
             <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-              <Button Classes="tpBtn" Command="{Binding PlaybackViewModel.SeekStart}">
+              <Button Classes="tpBtn" AutomationProperties.Name="{DynamicResource command.playback.gohome}" ToolTip.Tip="{DynamicResource command.playback.gohome}" Command="{Binding PlaybackViewModel.SeekStart}">
                 <Path Data="{StaticResource icon-skip-back}" Width="16" Height="16" Stretch="Uniform"
                       Fill="{DynamicResource md3.on-surface}"/>
               </Button>
-              <Button Classes="tpPlay" Click="OnPlayOrPause">
+              <Button Classes="tpPlay" AutomationProperties.Name="{DynamicResource command.playback.playpause}" ToolTip.Tip="{DynamicResource command.playback.playpause}" Click="OnPlayOrPause">
                 <Path Data="{StaticResource icon-play}" Width="16" Height="16" Stretch="Uniform"
                       Fill="{DynamicResource md3.on-primary}"/>
               </Button>
-              <Button Classes="tpBtn" Command="{Binding PlaybackViewModel.Pause}">
+              <Button Classes="tpBtn" AutomationProperties.Name="{DynamicResource command.playback.playpause}" ToolTip.Tip="{DynamicResource command.playback.playpause}" Command="{Binding PlaybackViewModel.Pause}">
                 <Path Data="{StaticResource icon-pause}" Width="16" Height="16" Stretch="Uniform"
                       Fill="{DynamicResource md3.on-surface}"/>
               </Button>
-              <Button Classes="tpBtn" Command="{Binding PlaybackViewModel.SeekEnd}">
+              <Button Classes="tpBtn" AutomationProperties.Name="{DynamicResource command.playback.goend}" ToolTip.Tip="{DynamicResource command.playback.goend}" Command="{Binding PlaybackViewModel.SeekEnd}">
                 <Path Data="{StaticResource icon-skip-forward}" Width="16" Height="16" Stretch="Uniform"
                       Fill="{DynamicResource md3.on-surface}"/>
               </Button>
               <ToggleButton Classes="tpBtn" IsChecked="{Binding PlaybackViewModel.Metronome}"
-                            ToolTip.Tip="{DynamicResource prefs.playback.metronome}">
+                            AutomationProperties.Name="{DynamicResource prefs.playback.metronome}" ToolTip.Tip="{DynamicResource prefs.playback.metronome}">
                 <Path Data="{StaticResource icon-metronome}" Width="16" Height="16" Stretch="Uniform"
                       Fill="{DynamicResource md3.on-surface}"/>
               </ToggleButton>
             </StackPanel>
           </Border>
 
-          <!-- 播放位置（稿：40 圆角块，内边距 0/14，14px） -->
-          <Border Classes="tpChip" Padding="14,0">
+          <!-- 播放位置：等宽读数。 -->
+          <Border Classes="tpReadout" Padding="10,0">
             <TextBlock Text="{Binding Path=PlaybackViewModel.PlayPosTime, StringFormat={}{0:mm\\:ss\\.fff}}"
-                       FontSize="14" VerticalAlignment="Center"
+                       FontSize="14" FontFamily="Consolas" VerticalAlignment="Center"
                        Foreground="{DynamicResource md3.on-surface}"/>
           </Border>
 
-          <!-- 速度 / 拍号（稿：同款圆角块，14px） -->
-          <Border Classes="tpChip" Padding="14,0">
+          <!-- 工程速度 / 拍号，沿用现有编辑入口。 -->
+          <Border Height="40" Padding="8,0">
             <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-              <TextBlock Background="Transparent" PointerPressed="OnEditBpm" Cursor="Hand"
+              <TextBlock ToolTip.Tip="BPM" Background="Transparent" PointerPressed="OnEditBpm" Cursor="Hand"
                          FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"
                          Foreground="{DynamicResource md3.primary}">
                 <TextBlock.Text>
@@ -411,6 +201,8 @@
                   </MultiBinding>
                 </TextBlock.Text>
               </TextBlock>
+              <TextBlock Text="BPM" FontSize="10" VerticalAlignment="Center"
+                         Foreground="{DynamicResource md3.on-surface-variant}"/>
               <TextBlock Background="Transparent" PointerPressed="OnEditTimeSignature" Cursor="Hand"
                          FontSize="14" VerticalAlignment="Center"
                          Foreground="{DynamicResource md3.on-surface}">
@@ -425,47 +217,54 @@
           </Border>
 
           </StackPanel>
-
-          <!-- 视图胶囊（A1/A4/S5）：工作台 / 钢琴卷帘 / 混音台 —— 同一工作区里互斥显示的三个视图。
-               欢迎页与偏好设置保持 overlay 行为，不进胶囊（ShowViewSwitcher=false）。
-               「分离」是视图级动作（A2/A5：稿里的最小化·最大化·关闭三钮收敛成一个分离按钮）。 -->
-          <StackPanel x:Name="ViewSwitcherGroup" Grid.Column="2" Orientation="Horizontal" Spacing="8"
-                      HorizontalAlignment="Center" VerticalAlignment="Center">
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+            <Button x:Name="ShellSaveButton" Classes="topBtn" Click="OnMenuSave" AutomationProperties.Name="{DynamicResource menu.file.save}" ToolTip.Tip="{DynamicResource menu.file.save}">
+              <Path Data="{StaticResource icon-save}" Width="16" Height="16" Stretch="Uniform" Fill="{DynamicResource md3.on-surface}"/>
+            </Button>
+            <Button x:Name="ShellRenderButton" Classes="topBtn" Click="OnMenuRender" AutomationProperties.Name="{DynamicResource menu.file.render}" ToolTip.Tip="{DynamicResource menu.file.render}">
+              <Path Data="{StaticResource icon-download}" Width="16" Height="16" Stretch="Uniform" Fill="{DynamicResource md3.on-surface}"/>
+            </Button>
+          </StackPanel>
+        </Grid>
+      </Border>
+      <Border x:Name="ShellNavigationRow" Grid.Row="2" Classes="shellRow" BorderThickness="0">
+        <Grid ColumnDefinitions="*,Auto" Margin="12,0">
+          <StackPanel x:Name="ViewSwitcherGroup" Grid.Column="0" Orientation="Horizontal" Spacing="8"
+                      HorizontalAlignment="Left" VerticalAlignment="Center">
             <Border x:Name="ViewSwitcher" Classes="viewSwitch">
-              <StackPanel Orientation="Horizontal" Spacing="3">
+              <StackPanel Orientation="Horizontal" Spacing="0">
                 <Button x:Name="ViewTabWorkspace" Classes="viewTab" Tag="workspace"
                         Classes.selected="{Binding ViewSwitcher.ShowWorkspace}"
                         Click="OnViewTabClicked" Content="{DynamicResource view.workspace}"/>
-                <Button x:Name="ViewTabPianoRoll" Classes="viewTab" Tag="pianoroll"
+                <Border ToolTip.Tip="{Binding PianoRollNavigation.Hint}"><Button x:Name="ViewTabPianoRoll" Classes="viewTab" Tag="pianoroll"
                         Classes.selected="{Binding ViewSwitcher.ShowPianoRoll}"
-                        Click="OnViewTabClicked" Content="{DynamicResource view.pianoroll}"/>
+                        IsEnabled="{Binding PianoRollNavigation.CanOpen}" ToolTip.Tip="{Binding PianoRollNavigation.Hint}"
+                        Click="OnViewTabClicked" Content="{DynamicResource view.pianoroll}"/></Border>
                 <Button x:Name="ViewTabMixer" Classes="viewTab" Tag="mixer"
                         Classes.selected="{Binding ViewSwitcher.ShowMixer}"
                         Click="OnViewTabClicked" Content="{DynamicResource view.mixer}"/>
               </StackPanel>
             </Border>
             <Button x:Name="DetachViewButton" Classes="topBtn" Click="OnDetachViewClicked"
-                    ToolTip.Tip="{DynamicResource view.detach}">
+                    AutomationProperties.Name="{DynamicResource view.detach}" ToolTip.Tip="{DynamicResource view.detach}">
               <Path Data="{StaticResource icon-external-link}" Width="16" Height="16" Stretch="Uniform"
                     Fill="{DynamicResource md3.on-surface-variant}"/>
             </Button>
           </StackPanel>
-
-          <!-- 右侧：撤销/重做 · 布局 · 混音台 · 设置 · 轨道高度（三个工作视图都显示；欢迎/偏好不显示） -->
-          <StackPanel x:Name="TopRightCluster" Grid.Column="3" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+          <StackPanel x:Name="TopRightCluster" Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
             <Button Classes="topBtn" Command="{Binding Undo}" IsEnabled="{Binding CanUndo}"
-                    ToolTip.Tip="{DynamicResource menu.edit.undo}">
+                    AutomationProperties.Name="{DynamicResource menu.edit.undo}" ToolTip.Tip="{DynamicResource menu.edit.undo}">
               <Path Data="{StaticResource icon-undo}" Width="16" Height="16" Stretch="Uniform"
                     Fill="{DynamicResource md3.on-surface}"/>
             </Button>
             <Button Classes="topBtn" Command="{Binding Redo}" IsEnabled="{Binding CanRedo}"
-                    ToolTip.Tip="{DynamicResource menu.edit.redo}">
+                    AutomationProperties.Name="{DynamicResource menu.edit.redo}" ToolTip.Tip="{DynamicResource menu.edit.redo}">
               <Path Data="{StaticResource icon-redo}" Width="16" Height="16" Stretch="Uniform"
                     Fill="{DynamicResource md3.on-surface}"/>
             </Button>
             <Border Width="1" Height="20" Margin="6,0" VerticalAlignment="Center"
                     Background="{DynamicResource md3.outline-variant}"/>
-            <Button Classes="topBtn" ToolTip.Tip="{DynamicResource menu.tools.layout}">
+            <Button Classes="topBtn" AutomationProperties.Name="{DynamicResource menu.tools.layout}" ToolTip.Tip="{DynamicResource menu.tools.layout}">
               <Button.Flyout>
                 <MenuFlyout Placement="BottomEdgeAlignedRight">
                   <!-- W16 面板系统：折叠/展开开关（面板折叠后仍从这里找回；混音台视图同样可达 —— 顶栏 chrome 三个工作视图都显示） -->
@@ -487,11 +286,11 @@
               <Path Data="{StaticResource icon-layout}" Width="16" Height="16" Stretch="Uniform"
                     Fill="{DynamicResource md3.on-surface}"/>
             </Button>
-            <Button Classes="topBtn" Click="OnMenuMixer" ToolTip.Tip="{DynamicResource menu.tools.mixer}">
+            <Button Classes="topBtn" Click="OnMenuMixer" AutomationProperties.Name="{DynamicResource menu.tools.mixer}" ToolTip.Tip="{DynamicResource menu.tools.mixer}">
               <Path Data="{StaticResource icon-sliders}" Width="16" Height="16" Stretch="Uniform"
                     Fill="{DynamicResource md3.on-surface}"/>
             </Button>
-            <Button Classes="topBtn" Click="OnMenuPreferences" ToolTip.Tip="{DynamicResource menu.tools.prefs}">
+            <Button Classes="topBtn" Click="OnMenuPreferences" AutomationProperties.Name="{DynamicResource menu.tools.prefs}" ToolTip.Tip="{DynamicResource menu.tools.prefs}">
               <Path Data="{StaticResource icon-settings}" Width="16" Height="16" Stretch="Uniform"
                     Fill="{DynamicResource md3.on-surface}"/>
             </Button>
@@ -510,26 +309,26 @@
            两列都是 Auto：宽度由面板自己的 Width="{Binding XxxPanel.Width}" 决定（默认值见 PanelLayoutPreferences，
            拖拽/双击复位由 PanelSplitter 负责），折叠时面板 IsVisible=false ⇒ 列宽 0，不留空白也不留窄条。
            中央列 `*`（MinWidth=320）保证拖宽面板时不会把编排区挤没。 -->
-      <Grid Grid.Row="1" x:Name="MainLayout" ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+      <Grid Grid.Row="3" x:Name="MainLayout" ColumnDefinitions="Auto,Auto,*,Auto,Auto">
         <!-- ── 左：轨道头（仅工作台视图；面板本体带宽度绑定 + 折叠可见性） ── -->
         <Border Grid.Column="0" IsVisible="{Binding ViewSwitcher.ShowWorkspace}">
         <!-- 面板容器：宽与显隐都取自分隔条（夹紧后的有效宽 / 放不下自动折叠），不直接绑 VM 的意图值 -->
         <Border x:Name="TracksPanelHost" Width="{Binding #TracksPanelSplitter.PanelWidth}"
                 IsVisible="{Binding #TracksPanelSplitter.PanelShown}"
-                Background="{DynamicResource md3.surface-container}"
+                Background="{DynamicResource md3.surface-container-low}"
                 BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,1,0">
           <Grid RowDefinitions="34,16,*">
             <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="12,0">
               <TextBlock Text="{DynamicResource command.import.track}" FontSize="11" FontWeight="SemiBold"
                          VerticalAlignment="Center"
                          Foreground="{DynamicResource md3.on-surface-variant}"/>
-              <Button Grid.Column="1" Classes="topBtn" Width="22" Height="22" Click="OnAddTrack"
-                      ToolTip.Tip="{DynamicResource command.track.add}">
+              <Button Grid.Column="1" Classes="panelToggle" Width="24" Height="24" Click="OnAddTrack"
+                      AutomationProperties.Name="{DynamicResource command.track.add}" ToolTip.Tip="{DynamicResource command.track.add}">
                 <Path Data="{StaticResource icon-plus}" Width="12" Height="12" Stretch="Uniform"
                       Fill="{DynamicResource md3.on-surface-variant}"/>
               </Button>
               <Button Grid.Column="2" Classes="panelToggle" Click="OnCollapseTracksPanel"
-                      ToolTip.Tip="{DynamicResource panel.collapse.tracks}">
+                      AutomationProperties.Name="{DynamicResource panel.collapse.tracks}" ToolTip.Tip="{DynamicResource panel.collapse.tracks}">
                 <Path Data="{StaticResource icon-chevron-left}" Width="12" Height="12" Stretch="Uniform"
                       Fill="{DynamicResource md3.on-surface-variant}"/>
               </Button>
@@ -734,17 +533,17 @@
         <Border Grid.Column="4" IsVisible="{Binding ViewSwitcher.ShowLibrary}">
         <Border x:Name="LibraryPanelHost" Width="{Binding #LibraryPanelSplitter.PanelWidth}"
                 IsVisible="{Binding #LibraryPanelSplitter.PanelShown}"
-                Background="{DynamicResource md3.surface-container}"
+                Background="{DynamicResource md3.surface-container-low}"
                 BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="1,0,0,0">
-          <Grid RowDefinitions="44,40,*">
+          <Grid RowDefinitions="40,36,*">
             <!-- 表头 -->
             <Border Grid.Row="0" BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1">
               <Grid ColumnDefinitions="*,Auto,Auto" Margin="12,0">
               <TextBlock Text="{DynamicResource sidebar.library}" FontSize="11" FontWeight="SemiBold"
                          VerticalAlignment="Center"
                          Foreground="{DynamicResource md3.on-surface-variant}"/>
-              <Button Grid.Column="1" Classes="topBtn" Width="26" Height="26" VerticalAlignment="Center"
-                      ToolTip.Tip="{DynamicResource sidebar.refresh}">
+              <Button Grid.Column="1" Classes="panelToggle" Width="24" Height="24" VerticalAlignment="Center"
+                      AutomationProperties.Name="{DynamicResource sidebar.refresh}" ToolTip.Tip="{DynamicResource sidebar.refresh}">
                 <Button.Flyout>
                   <MenuFlyout Placement="BottomEdgeAlignedRight">
                     <MenuItem Header="{DynamicResource sidebar.refresh}" Click="OnRefreshSingers"/>
@@ -757,7 +556,7 @@
                       Fill="{DynamicResource md3.on-surface-variant}"/>
               </Button>
               <Button Grid.Column="2" Classes="panelToggle" Click="OnCollapseLibraryPanel"
-                      ToolTip.Tip="{DynamicResource panel.collapse.library}">
+                      AutomationProperties.Name="{DynamicResource panel.collapse.library}" ToolTip.Tip="{DynamicResource panel.collapse.library}">
                 <Path Data="{StaticResource icon-chevron-right}" Width="12" Height="12" Stretch="Uniform"
                       Fill="{DynamicResource md3.on-surface-variant}"/>
               </Button>
@@ -765,17 +564,17 @@
             </Border>
 
             <!-- 页签：音源 / 音频 / MIDI / 效果器 -->
-            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="4" Margin="12,0"
+            <Grid x:Name="LibraryTabs" Grid.Row="1" ColumnDefinitions="*,*,*,*" Margin="8,0"
                         VerticalAlignment="Center">
-              <Button x:Name="SingersTab" Classes="libTab selected" Click="OnShowSingers"
+              <Button Grid.Column="0" x:Name="SingersTab" Classes="libTab selected" Click="OnShowSingers"
                       Content="{DynamicResource sidebar.singers}"/>
-              <Button x:Name="SamplesTab" Classes="libTab" Click="OnShowSamples"
+              <Button Grid.Column="1" x:Name="SamplesTab" Classes="libTab" Click="OnShowSamples"
                       Content="{DynamicResource sidebar.samples}"/>
-              <Button x:Name="MidiTab" Classes="libTab" Click="OnShowMidi"
+              <Button Grid.Column="2" x:Name="MidiTab" Classes="libTab" Click="OnShowMidi"
                       Content="{DynamicResource sidebar.midi}"/>
-              <Button x:Name="EffectsTab" Classes="libTab" Click="OnShowVst"
+              <Button Grid.Column="3" x:Name="EffectsTab" Classes="libTab" Click="OnShowVst"
                       Content="{DynamicResource sidebar.effects}"/>
-            </StackPanel>
+            </Grid>
 
             <!-- 内容：音源 / 音频 / MIDI / 效果器 -->
             <Grid Grid.Row="2" Margin="12,0,12,0">
@@ -784,7 +583,7 @@
                 <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,2">
                   <TextBlock Classes="sideHeading" Text="{DynamicResource sidebar.singers}"/>
                   <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24" Click="OnRefreshSingers"
-                          ToolTip.Tip="{DynamicResource sidebar.refresh}">
+                          AutomationProperties.Name="{DynamicResource sidebar.refresh}" ToolTip.Tip="{DynamicResource sidebar.refresh}">
                     <Path Data="{StaticResource icon-refresh-cw}" Width="12" Height="12" Stretch="Uniform"
                           Fill="{DynamicResource md3.on-surface-variant}"/>
                   </Button>
@@ -794,7 +593,7 @@
                   <ListBox.Styles>
                     <Style Selector="ListBoxItem">
                       <Setter Property="Padding" Value="0"/>
-                      <Setter Property="MinHeight" Value="64"/>
+                      <Setter Property="MinHeight" Value="56"/>
                     </Style>
                   </ListBox.Styles>
                   <ListBox.ItemTemplate>
@@ -845,7 +644,7 @@
                 <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,2">
                   <TextBlock Classes="sideHeading" Text="{DynamicResource sidebar.samples}"/>
                   <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24" Click="OnRefreshSamples"
-                          ToolTip.Tip="{DynamicResource sidebar.refresh}">
+                          AutomationProperties.Name="{DynamicResource sidebar.refresh}" ToolTip.Tip="{DynamicResource sidebar.refresh}">
                     <Path Data="{StaticResource icon-refresh-cw}" Width="12" Height="12" Stretch="Uniform"
                           Fill="{DynamicResource md3.on-surface-variant}"/>
                   </Button>
@@ -873,7 +672,7 @@
                                        Text="{Binding Format}"/>
                           </Border>
                           <Button Grid.Column="5" Classes="iconBtn" Width="26" Height="26" Margin="4,0,0,0"
-                                  Click="OnSamplePlay" ToolTip.Tip="{DynamicResource sidebar.play}">
+                                  Click="OnSamplePlay" AutomationProperties.Name="{DynamicResource sidebar.play}" ToolTip.Tip="{DynamicResource sidebar.play}">
                             <Panel>
                               <Path Data="{StaticResource icon-play}" Width="11" Height="11" Stretch="Uniform"
                                     Fill="{DynamicResource md3.on-surface}"
@@ -932,7 +731,7 @@
                           HorizontalAlignment="Left" VerticalAlignment="Center" Margin="11,0,0,0"/>
                   </Panel>
                   <Button Grid.Column="1" Classes="iconBtn" Width="36" Height="36" Margin="6,0,0,0"
-                          Click="OnRescanVstFromLibrary" ToolTip.Tip="{DynamicResource prefs.vst.rescan}">
+                          Click="OnRescanVstFromLibrary" AutomationProperties.Name="{DynamicResource prefs.vst.rescan}" ToolTip.Tip="{DynamicResource prefs.vst.rescan}">
                     <Path Data="{StaticResource icon-refresh-cw}" Width="13" Height="13" Stretch="Uniform"
                           Fill="{DynamicResource md3.on-surface-variant}"/>
                   </Button>
@@ -949,7 +748,7 @@
                              Text="{DynamicResource sidebar.effects.scanning}"/>
                   <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24"
                           Click="OnToggleVstPathManager"
-                          ToolTip.Tip="{DynamicResource sidebar.effects.paths.manage}">
+                          AutomationProperties.Name="{DynamicResource sidebar.effects.paths.manage}" ToolTip.Tip="{DynamicResource sidebar.effects.paths.manage}">
                     <Path Data="{StaticResource icon-folder}" Width="12" Height="12" Stretch="Uniform"
                           Fill="{DynamicResource md3.on-surface-variant}"/>
                   </Button>
@@ -1098,8 +897,8 @@
         </Panel>
       </Grid>
 
-      <!-- ══════════ 状态条 32：左侧引擎/进度 · 右侧版本 ══════════ -->
-      <Border Grid.Row="2" Background="{DynamicResource md3.surface-container}"
+      <!-- ══════════ 状态条 25：左侧引擎/进度 · 右侧版本 ══════════ -->
+      <Border x:Name="ShellStatusRow" Grid.Row="4" Background="{DynamicResource md3.surface-container-low}"
               BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,1,0,0">
         <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,0">
           <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
@@ -1107,7 +906,7 @@
                     Background="{DynamicResource md3.primary}"/>
             <TextBlock VerticalAlignment="Center" FontSize="10"
                        Foreground="{DynamicResource md3.on-surface-variant}"
-                       Text="{Binding ProgressText}"/>
+                       MaxWidth="400" TextTrimming="CharacterEllipsis" Text="{Binding ProgressText}"/>
           </StackPanel>
           <ProgressBar Grid.Column="1" Height="4" VerticalAlignment="Center" Margin="16,0"
                        Minimum="0" Maximum="100" Value="{Binding Progress}"

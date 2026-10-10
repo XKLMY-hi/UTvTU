@@ -1272,4 +1272,6 @@ General
   <system:String x:Key="welcome.search.placeholder">Search recent projects…</system:String>
   <system:String x:Key="welcome.new.blank">New blank project</system:String>
   <!-- /welcome -->
+  <system:String x:Key="view.pianoroll.selectpart">Select a voice part in the arrangement to open the voice editor.</system:String>
+  <system:String x:Key="view.pianoroll.openpart">Open the selected or current voice part.</system:String>
 </ResourceDictionary>

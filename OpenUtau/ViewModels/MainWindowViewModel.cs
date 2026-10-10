@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using Avalonia.Input;
 using Avalonia.Threading;
@@ -103,12 +104,15 @@ namespace OpenUtau.App.ViewModels {
         }
     }
 
-    public class MainWindowViewModel : ViewModelBase, ICmdSubscriber {
+    public class MainWindowViewModel : ViewModelBase, ICmdSubscriber, IDisposable {
+        readonly CompositeDisposable subscriptions = new();
+        bool disposed;
         public string Title => !ProjectSaved
             ? $"{AppVersion}"
             : $"{(DocManager.Inst.ChangesSaved ? "" : "*")}{AppVersion} [{DocManager.Inst.Project.FilePath}]";
         public double Width => Preferences.Default.MainWindowSize.Width;
         public double Height => Preferences.Default.MainWindowSize.Height;
+        public PianoRollNavigationViewModel PianoRollNavigation { get; } = new();
 
         // 阶段 E3：欢迎页独立成 WelcomeWindow，Page（Carousel 索引）移除
         public ObservableCollectionExtended<RecentFileInfo> RecentFiles { get; } = new ObservableCollectionExtended<RecentFileInfo>();
@@ -219,7 +223,7 @@ namespace OpenUtau.App.ViewModels {
         public MainWindowViewModel() {
             IsDarkMode = ThemeManager.IsDarkMode;
             MessageBus.Current.Listen<ThemeChangedEvent>()
-                .Subscribe(_ => { IsDarkMode = ThemeManager.IsDarkMode; });
+                .Subscribe(_ => { IsDarkMode = ThemeManager.IsDarkMode; }).DisposeWith(subscriptions);
             PlaybackViewModel = new PlaybackViewModel();
             TracksViewModel = new TracksViewModel();
             ClearCacheHeader = string.Empty;
@@ -229,7 +233,7 @@ namespace OpenUtau.App.ViewModels {
                 .Select(file => new RecentFileInfo(file))
                 .OrderByDescending(f => f.LastWriteTime));
             ApplyWelcomeSearch();   // 初始化过滤集合（欢迎页列表绑定 FilteredRecentFiles）
-            this.WhenAnyValue(x => x.WelcomeSearch).Subscribe(_ => ApplyWelcomeSearch());
+            this.WhenAnyValue(x => x.WelcomeSearch).Subscribe(_ => ApplyWelcomeSearch()).DisposeWith(subscriptions);
             TemplateFiles.Clear();
             Directory.CreateDirectory(PathManager.Inst.TemplatesPath);
             var templates = Directory.GetFiles(PathManager.Inst.TemplatesPath, "*.ustxp")
@@ -678,17 +682,37 @@ namespace OpenUtau.App.ViewModels {
             }
         }
 
+        public void Dispose() {
+            if (disposed) return;
+            disposed = true;
+            AskIfSaveAndContinue = null;
+            subscriptions.Dispose();
+            PianoRollNavigation.Dispose();
+            TracksViewModel.Dispose();
+            PlaybackViewModel.Dispose();
+            OpenRecentCommand?.Dispose();
+            OpenTemplateCommand?.Dispose();
+            PartDeleteCommand.Dispose();
+            AddTempoChangeCmd?.Dispose();
+            DelTempoChangeCmd?.Dispose();
+            AddTimeSigChangeCmd?.Dispose();
+            DelTimeSigChangeCmd?.Dispose();
+            DocManager.Inst.RemoveSubscriber(this);
+        }
+
         #region ICmdSubscriber
 
         public void OnNext(UCommand cmd, bool isUndo) {
+            if (disposed) return;
             if (cmd is ProgressBarNotification progressBarNotification) {
                 Dispatcher.UIThread.InvokeAsync(() => {
+                    if (disposed) return;
                     Progress = progressBarNotification.Progress;
                     ProgressText = progressBarNotification.Info;
                 }, DispatcherPriority.Background);
             } else if (cmd is LoadProjectNotification loadProject) {
                 Preferences.AddRecentFileIfEnabled(loadProject.project.FilePath);
-            } else if (cmd is SaveProjectNotification saveProject) {
+            } else if (cmd is SaveProjectNotification saveProject && DocManager.Inst.ChangesSaved) {
                 Preferences.AddRecentFileIfEnabled(saveProject.Path);
             }
             SetUndoState();
