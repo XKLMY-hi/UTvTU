@@ -117,6 +117,7 @@ namespace OpenUtau.Core.Render {
         public Tuple<WaveMix, List<Fader>> RenderMixdown(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation, bool wait, MixFxMode mode) {
             using var renderLifetime = RenderCancellationLease.Replace(ref cancellation);
             var newCancellation = renderLifetime.Source;
+            var notificationToken = newCancellation.Token;
             double startMs = project.timeAxis.TickPosToMsPos(startTick);
             double endMs = endTick == -1 ? double.PositiveInfinity : project.timeAxis.TickPosToMsPos(endTick);
             var faders = new List<Fader>();
@@ -138,12 +139,12 @@ namespace OpenUtau.Core.Render {
                     var flatEx = task.Exception.Flatten();
                     var innerEx = flatEx.InnerExceptions.ToList();
                     if (innerEx.Count == 1 && innerEx[0] is MessageCustomizableException mce) {
-                        DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(mce));
+                        RenderNotificationPublisher.Queue(project, notificationToken, new ErrorMessageNotification(mce));
                     } else if (innerEx.Any(e => e is DllNotFoundException)) {
-                        DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(
+                        RenderNotificationPublisher.Queue(project, notificationToken, new ErrorMessageNotification(
                             new MessageCustomizableException("Failed to render.", "<translate:errors.failed.render>: <translate:errors.install.cpp>", flatEx)));
                     } else {
-                        DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(
+                        RenderNotificationPublisher.Queue(project, notificationToken, new ErrorMessageNotification(
                             new MessageCustomizableException("Failed to render.", "<translate:errors.failed.render>", flatEx)));
                     }
                 }
