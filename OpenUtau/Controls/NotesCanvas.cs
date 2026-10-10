@@ -12,6 +12,7 @@ using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
 using OpenUtau.Core.Util;
 using ReactiveUI;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 
 namespace OpenUtau.App.Controls {
@@ -131,6 +132,9 @@ namespace OpenUtau.App.Controls {
         private double tickOffset;
         private double trackOffset;
         private UVoicePart? part;
+        // UI publishes the identity separately; worker callbacks never read an
+        // Avalonia control property while deciding which attachment to target.
+        private volatile UVoicePart? eventPart;
         private bool showPitch = true;
         private bool showFinalPitch = true;
         private bool showVibrato = true;
@@ -150,6 +154,7 @@ namespace OpenUtau.App.Controls {
         private bool playbackSeekPending = true;
         private bool renderPassActive;
         private bool invalidatePending;
+        private CompositeDisposable? subscriptions;
 
         private const double HoverGlowDuration = 0.12;
         private const float PlaybackHighlightFadeInPerSecond = 8.0f;
@@ -186,35 +191,89 @@ namespace OpenUtau.App.Controls {
             pointGeometry = new EllipseGeometry(new Rect(-2.5, -2.5, 5, 5));
 
             highlightTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1000.0 / 30.0) };
-            highlightTimer.Tick += (_, _) => UpdatePlaybackHighlight(false);
+            highlightTimer.Tick += (_, _) => {
+                if (subscriptions != null) UpdatePlaybackHighlight(false);
+            };
             hoverTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1000.0 / 60.0) };
-            hoverTimer.Tick += (_, _) => UpdateHoverGlow();
+            hoverTimer.Tick += (_, _) => {
+                if (subscriptions != null) UpdateHoverGlow();
+            };
+        }
 
-            MessageBus.Current.Listen<NotesRefreshEvent>()
-                .Subscribe(_ => InvalidateVisual());
-            MessageBus.Current.Listen<NotesSelectionEvent>()
-                .Subscribe(e => {
-                    selectedNotes.Clear();
-                    selectedNotes.UnionWith(e.selectedNotes);
-                    selectedNotes.UnionWith(e.tempSelectedNotes);
-                    InvalidateVisual();
+        protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs attachment) {
+            base.OnAttachedToVisualTree(attachment);
+            if (subscriptions != null) return;
+            var lifetime = new CompositeDisposable();
+            subscriptions = lifetime;
+            try {
+                MessageBus.Current.Listen<NotesRefreshEvent>()
+                    .Subscribe(_ => RunForAttachment(lifetime, InvalidateVisual)).DisposeWith(lifetime);
+                MessageBus.Current.Listen<NotesSelectionEvent>()
+                    .Subscribe(e => RunForAttachment(lifetime, () => {
+                        selectedNotes.Clear();
+                        selectedNotes.UnionWith(e.selectedNotes);
+                        selectedNotes.UnionWith(e.tempSelectedNotes);
+                        InvalidateVisual();
+                    })).DisposeWith(lifetime);
+                MessageBus.Current.Listen<PartRefreshEvent>()
+                    .Subscribe(_ => RunForAttachment(lifetime, RefreshGhostNotes)).DisposeWith(lifetime);
+                RestoreSelection();
+                RefreshGhostNotes();
+                ResetAnimation();
+                UpdatePlaybackHighlight(true);
+                InvalidateVisual();
+            } catch {
+                StopListening();
+                throw;
+            }
+        }
+
+        protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs attachment) {
+            StopListening();
+            otherPartsInView.Clear();
+            base.OnDetachedFromVisualTree(attachment);
+        }
+
+        private void RunForAttachment(CompositeDisposable lifetime, Action action) {
+            if (!ReferenceEquals(subscriptions, lifetime)) return;
+            if (!Dispatcher.UIThread.CheckAccess()) {
+                var targetPart = eventPart;
+                Dispatcher.UIThread.Post(() => {
+                    if (ReferenceEquals(subscriptions, lifetime) && ReferenceEquals(Part, targetPart)) action();
                 });
-            MessageBus.Current.Listen<PartRefreshEvent>()
-                .Subscribe(_ => RefreshGhostNotes());
-            this.WhenAnyValue(x => x.Part)
-                .Where(p => p != null)
-                .Subscribe(_ => {
-                    RefreshGhostNotes();
-                    hoverNote = null;
-                    fadingHoverNote = null;
-                    hoverGlow = 0;
-                    hoverFadeGlow = 0;
-                    hoverTimer.Stop();
-                });
+            } else action();
+        }
+
+        private void StopListening() {
+            var lifetime = subscriptions;
+            subscriptions = null;
+            lifetime?.Dispose();
+            ResetAnimation();
+        }
+
+        private void ResetAnimation() {
+            highlightTimer.Stop();
+            hoverTimer.Stop();
+            activePlaybackNote = fadingPlaybackNote = null;
+            activeHighlight = fadingHighlight = activeBounceElapsed = 0;
+            hoverNote = fadingHoverNote = null;
+            hoverGlow = hoverFadeGlow = 0;
+            highlightLastFrame = hoverLastFrame = DateTime.UtcNow;
+            playbackSeekPending = true;
+            invalidatePending = false;
+        }
+
+        private void RestoreSelection() {
+            if (DataContext is PianoRollViewModel viewModel) {
+                selectedNotes.Clear();
+                selectedNotes.UnionWith(viewModel.NotesViewModel.Selection);
+                selectedNotes.UnionWith(viewModel.NotesViewModel.Selection.TempSelectedNotes);
+            }
         }
 
         void RefreshGhostNotes() {
             showGhostNotes = Convert.ToBoolean(Preferences.Default.ShowGhostNotes);
+            otherPartsInView.Clear();
             if (Part == null || !showGhostNotes) {
                 return;
             }
@@ -227,6 +286,18 @@ namespace OpenUtau.App.Controls {
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
             base.OnPropertyChanged(change);
+            if (change.Property == PartProperty) {
+                eventPart = part;
+                selectedNotes.Clear();
+                ResetAnimation();
+                if (subscriptions != null) {
+                    RestoreSelection();
+                    RefreshGhostNotes();
+                    UpdatePlaybackHighlight(true);
+                } else otherPartsInView.Clear();
+            } else if (change.Property == DataContextProperty && subscriptions != null) {
+                RestoreSelection();
+            }
             if (change.Property == PlayPosTickProperty) {
                 if (!ShowPlaybackNoteHighlight && !ShowPlaybackNoteBounce) {
                     return;
@@ -284,6 +355,7 @@ namespace OpenUtau.App.Controls {
         }
 
         void SetHoveredNote(UNote? note) {
+            if (subscriptions == null) return;
             if (!Preferences.Default.NoteHoverGlow) {
                 note = null;
             }
@@ -304,6 +376,7 @@ namespace OpenUtau.App.Controls {
         }
 
         void UpdateHoverGlow() {
+            if (subscriptions == null) return;
             var now = DateTime.UtcNow;
             float dt = (float)Math.Clamp((now - hoverLastFrame).TotalSeconds, 0, 0.1);
             hoverLastFrame = now;
@@ -439,6 +512,7 @@ namespace OpenUtau.App.Controls {
         }
 
         private void UpdatePlaybackHighlight(bool seek) {
+            if (subscriptions == null) return;
             var now = DateTime.UtcNow;
             float dt = (float)Math.Clamp((now - highlightLastFrame).TotalSeconds, 0, 0.1);
             highlightLastFrame = now;
@@ -478,7 +552,8 @@ namespace OpenUtau.App.Controls {
                 activeBounceElapsed += dt;
                 changed = true;
             }
-            bool needed = activeHighlight > 0.001f || fadingHighlight > 0.001f || bouncing;
+            bool needed = activeHighlight > 0.001f || fadingHighlight > 0.001f || bouncing ||
+                (ShowPlaybackNoteHighlight && activePlaybackNote != null);
             if (needed) {
                 if (!highlightTimer.IsEnabled) {
                     highlightTimer.Start();
@@ -490,7 +565,10 @@ namespace OpenUtau.App.Controls {
                 if (renderPassActive) {
                     if (!invalidatePending) {
                         invalidatePending = true;
+                        var lifetime = subscriptions;
+                        var renderedPart = Part;
                         Dispatcher.UIThread.Post(() => {
+                            if (!ReferenceEquals(subscriptions, lifetime) || !ReferenceEquals(Part, renderedPart)) return;
                             invalidatePending = false;
                             InvalidateVisual();
                         }, DispatcherPriority.Background);
