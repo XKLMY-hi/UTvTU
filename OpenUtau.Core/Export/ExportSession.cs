@@ -53,35 +53,33 @@ namespace OpenUtau.Core.Export {
 
         public Task RunAsync(IProgress<ProgressInfo> progress, CancellationToken ct = default) {
             return Task.Run(() => {
-                // 注意：RenderEngine 的 ref CTS 会 Interlocked.Exchange 替换——不能是 using 变量。
-                // 不能用 CreateLinkedTokenSource：RenderMixdown Exchange 时 Cancel 旧 CTS 会
-                // **反向传播**取消用户的 token（写文件循环的 ct 检查直接 break → 文件残缺）。
-                var cts = new CancellationTokenSource();
-                ct.Register(() => cts.Cancel());
+                // The render owner links the replacement source to the caller's token.
+                // Retiring a child never cancels its parent and releases the registration.
+                CancellationTokenSource cts = null;
                 int startTick = options.StartTick ?? 0;
                 int endTick = options.EndTick ?? -1;
                 try {
+                    ct.ThrowIfCancellationRequested();
                     if (!options.PerTrack) {
                         progress.Report(new ProgressInfo { Percent = 0.2, CurrentFile = basePath });
                         var mix = RenderEngine.RenderMixdown(
                             project, DocManager.Inst.MainScheduler, ref cts,
                             wait: true, applyMixFx: options.ApplyMixFx,
-                            startTick: startTick, endTick: endTick).Item1;
+                            startTick: startTick, endTick: endTick, cancellationToken: ct).Item1;
 
                         progress.Report(new ProgressInfo { Percent = 0.7, CurrentFile = basePath });
                         using (RenderGate.Enter()) {
-                            CheckFileWritable(basePath);
-                            WaveFileWriter.CreateWaveFile16(basePath, new ExportAdapter(mix));
+                            WriteWaveFile(basePath, mix, ct);
                         }
                         progress.Report(new ProgressInfo { Percent = 1.0, CurrentFile = basePath });
                     } else {
                         var trackMixes = RenderEngine.RenderTracks(
                             project, DocManager.Inst.MainScheduler, ref cts,
-                            startTick: startTick, endTick: endTick);
+                            startTick: startTick, endTick: endTick, cancellationToken: ct);
                         int total = project.tracks.Count;
                         using (RenderGate.Enter()) {
                             for (int i = 0; i < trackMixes.Count; ++i) {
-                                if (ct.IsCancellationRequested) break;
+                                ct.ThrowIfCancellationRequested();
                                 if (trackMixes[i] == null || i >= total || project.tracks[i].Muted) continue;
                                 if (options.TrackFilter != null && !options.TrackFilter.Contains(i)) continue;
 
@@ -90,8 +88,7 @@ namespace OpenUtau.Core.Export {
                                     TrackIndex = i, TrackCount = total,
                                     CurrentFile = file, Percent = 0.2 + 0.6 * i / Math.Max(1, total),
                                 });
-                                CheckFileWritable(file);
-                                WaveFileWriter.CreateWaveFile16(file, new ExportAdapter(trackMixes[i]));
+                                WriteWaveFile(file, trackMixes[i], ct);
                             }
                         }
                         progress.Report(new ProgressInfo { TrackIndex = -1, TrackCount = total, Percent = 1.0 });
@@ -99,9 +96,18 @@ namespace OpenUtau.Core.Export {
                 } catch {
                     throw; // 错误处理由调用方（PlaybackManager / RenderWindow）负责
                 } finally {
-                    cts.Dispose();
+                    RenderCancellationLease.Retire(ref cts);
                 }
             }, ct);
+        }
+
+        internal static void WriteWaveFile(string path, ISignalSource mix, CancellationToken cancellation) {
+            cancellation.ThrowIfCancellationRequested();
+            CheckFileWritable(path);
+            AtomicFile.Write(path, temporaryPath => {
+                WaveFileWriter.CreateWaveFile16(temporaryPath, new ExportAdapter(mix, cancellation));
+                cancellation.ThrowIfCancellationRequested();
+            });
         }
 
         private static void CheckFileWritable(string filePath) {

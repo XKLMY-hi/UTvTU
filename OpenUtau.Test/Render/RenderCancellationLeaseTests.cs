@@ -5,6 +5,40 @@ using Xunit;
 
 namespace OpenUtau.Test.Render {
     public class RenderCancellationLeaseTests {
+        [Fact]
+        public void ParentCancellationFollowsEveryReplacement_AndRetirementDoesNotCancelTheParent() {
+            using var parent = new CancellationTokenSource();
+            CancellationTokenSource slot = null!;
+            var first = RenderCancellationLease.Replace(ref slot, parent.Token);
+            first.Dispose();
+            var second = RenderCancellationLease.Replace(ref slot, parent.Token);
+            Assert.False(parent.IsCancellationRequested);
+            Assert.Throws<ObjectDisposedException>(() => first.Source.Token);
+            parent.Cancel();
+            Assert.True(second.Source.IsCancellationRequested);
+            var borrowed = second.Acquire();
+            second.Dispose();
+            RenderCancellationLease.Retire(ref slot);
+            Assert.Null(slot);
+            Assert.True(second.Source.Token.IsCancellationRequested);
+            borrowed.Dispose();
+            Assert.Throws<ObjectDisposedException>(() => second.Source.Token);
+        }
+
+        [Fact]
+        public void RetirementUnsubscribesFromParent_AndAlreadyCancelledParentStopsNewWork() {
+            using var parent = new CancellationTokenSource();
+            CancellationTokenSource slot = null!;
+            var operation = RenderCancellationLease.Replace(ref slot, parent.Token);
+            operation.Dispose();
+            RenderCancellationLease.Retire(ref slot);
+            Assert.Throws<ObjectDisposedException>(() => operation.Source.Token);
+            parent.Cancel(); // No dangling callback may cancel a disposed child.
+            using var cancelled = RenderCancellationLease.Replace(ref slot, parent.Token);
+            Assert.True(cancelled.Source.IsCancellationRequested);
+            RenderCancellationLease.Retire(ref slot);
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]

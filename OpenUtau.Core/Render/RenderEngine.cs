@@ -109,14 +109,15 @@ namespace OpenUtau.Core.Render {
         }
 
         // 旧布尔入口（调用点兼容）：true = 导出快照，false = 干轨（分轨/干声导出）。
-        public Tuple<WaveMix, List<Fader>> RenderMixdown(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation, bool wait, bool applyMixFx) {
-            return RenderMixdown(uiScheduler, ref cancellation, wait, applyMixFx ? MixFxMode.Snapshot : MixFxMode.Off);
+        public Tuple<WaveMix, List<Fader>> RenderMixdown(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation, bool wait, bool applyMixFx, CancellationToken cancellationToken = default) {
+            return RenderMixdown(uiScheduler, ref cancellation, wait, applyMixFx ? MixFxMode.Snapshot : MixFxMode.Off, cancellationToken);
         }
 
         /// <summary>离线混音渲染核心（导出/录制共用）。</summary>
-        public Tuple<WaveMix, List<Fader>> RenderMixdown(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation, bool wait, MixFxMode mode) {
-            using var renderLifetime = RenderCancellationLease.Replace(ref cancellation);
+        public Tuple<WaveMix, List<Fader>> RenderMixdown(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation, bool wait, MixFxMode mode, CancellationToken cancellationToken = default) {
+            using var renderLifetime = RenderCancellationLease.Replace(ref cancellation, cancellationToken);
             var newCancellation = renderLifetime.Source;
+            newCancellation.Token.ThrowIfCancellationRequested();
             var notificationToken = newCancellation.Token;
             double startMs = project.timeAxis.TickPosToMsPos(startTick);
             double endMs = endTick == -1 ? double.PositiveInfinity : project.timeAxis.TickPosToMsPos(endTick);
@@ -247,9 +248,14 @@ namespace OpenUtau.Core.Render {
 
                 // LevelTracker wraps the FINAL per-track output (fader + FX),
                 // so the mixer meter shows the actual audible signal.
-                var tracker = new LevelTracker(trackOut);
-                TrackLevels.Register(track.TrackNo, tracker);
-                trackOutputs.Add(tracker);
+                if (mode == MixFxMode.Live) {
+                    var tracker = new LevelTracker(trackOut);
+                    TrackLevels.Register(track.TrackNo, tracker);
+                    trackOutputs.Add(tracker);
+                } else {
+                    // Export cannot replace playback's meter source.
+                    trackOutputs.Add(trackOut);
+                }
             }
             return trackOutputs;
         }
@@ -271,15 +277,17 @@ namespace OpenUtau.Core.Render {
         }
 
         // for export
-        public List<WaveMix> RenderTracks(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation) {
-            using var renderLifetime = RenderCancellationLease.Replace(ref cancellation);
+        public List<WaveMix> RenderTracks(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation, CancellationToken cancellationToken = default) {
+            using var renderLifetime = RenderCancellationLease.Replace(ref cancellation, cancellationToken);
             var newCancellation = renderLifetime.Source;
+            newCancellation.Token.ThrowIfCancellationRequested();
             var trackMixes = new List<WaveMix>();
             var requests = PrepareRequests();
             // 遍历全部轨道——纯音频轨（UWavePart）/空轨也在列表中（null 或混入 wave part），
             // 此前只覆盖"有 voice part 的轨道"→ 分轨导出静默丢轨
             for (int i = 0; i < project.tracks.Count; ++i) {
                 var trackRequests = requests.Where(req => req.trackNo == i).ToArray();
+                newCancellation.Token.ThrowIfCancellationRequested();
                 if (trackRequests.Length == 0) {
                     var waveSources = project.parts
                         .Where(part => part is UWavePart && part.trackNo == i)
@@ -542,17 +550,17 @@ namespace OpenUtau.Core.Render {
         public static Tuple<WaveMix, List<Fader>> RenderMixdown(
             UProject project, TaskScheduler uiScheduler, ref CancellationTokenSource cancellation,
             bool wait = false, bool applyMixFx = true,
-            int startTick = 0, int endTick = -1, int trackNo = -1) {
+            int startTick = 0, int endTick = -1, int trackNo = -1, CancellationToken cancellationToken = default) {
             var engine = new RenderEngine(project, startTick, endTick, trackNo, phraseCache);
-            return engine.RenderMixdown(uiScheduler, ref cancellation, wait, applyMixFx);
+            return engine.RenderMixdown(uiScheduler, ref cancellation, wait, applyMixFx, cancellationToken);
         }
 
         /// <summary>逐轨混音渲染（分轨导出用）。</summary>
         public static List<WaveMix> RenderTracks(
             UProject project, TaskScheduler uiScheduler, ref CancellationTokenSource cancellation,
-            int startTick = 0, int endTick = -1) {
+            int startTick = 0, int endTick = -1, CancellationToken cancellationToken = default) {
             var engine = new RenderEngine(project, startTick, endTick, -1, phraseCache);
-            return engine.RenderTracks(uiScheduler, ref cancellation);
+            return engine.RenderTracks(uiScheduler, ref cancellation, cancellationToken);
         }
 
         /// <summary>整体失效短语缓存（编辑/换工程/清缓存用）。</summary>

@@ -11,12 +11,25 @@ namespace OpenUtau.Core.Render {
         readonly object sync = new();
         int users = 1;
         bool retired, canceling, disposed, ownerReleased;
-        public CancellationTokenSource Source { get; } = new();
+        public CancellationTokenSource Source { get; }
 
-        public static RenderCancellationLease Replace(ref CancellationTokenSource slot) {
-            var next = new RenderCancellationLease();
+        RenderCancellationLease(CancellationToken cancellation) {
+            Source = cancellation.CanBeCanceled
+                ? CancellationTokenSource.CreateLinkedTokenSource(cancellation) : new();
+        }
+
+        public static RenderCancellationLease Replace(ref CancellationTokenSource slot, CancellationToken cancellation = default) {
+            var next = new RenderCancellationLease(cancellation);
             owners.Add(next.Source, next);
             var previous = Interlocked.Exchange(ref slot, next.Source);
+            RetireSource(previous);
+            return next;
+        }
+
+        public static void Retire(ref CancellationTokenSource slot) =>
+            RetireSource(Interlocked.Exchange(ref slot, null));
+
+        static void RetireSource(CancellationTokenSource previous) {
             if (previous != null) {
                 try {
                     if (owners.TryGetValue(previous, out var owner)) owner.Retire();
@@ -29,7 +42,6 @@ namespace OpenUtau.Core.Render {
                     Log.Warning(error, "A render cancellation callback failed.");
                 }
             }
-            return next;
         }
 
         public IDisposable Acquire() {
