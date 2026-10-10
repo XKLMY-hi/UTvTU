@@ -113,6 +113,7 @@ namespace OpenUtau.App.Controls {
                 bool inlineRenderer = trackHeight < ViewConstants.TrackHeightDefault;
                 ViewModel.IsRendererInline = inlineRenderer;
                 Classes.Set("compact", inlineRenderer);
+                MainCard.CornerRadius = new CornerRadius(inlineRenderer ? 6 : 12);
                 // Compact cards use two short action rows; settings remain reachable in the card menu.
                 AvatarCard.Width = AvatarCard.Height = inlineRenderer ? 28 : 44;
                 ActionRail.Width = inlineRenderer ? 40 : 24;

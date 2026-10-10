@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -43,12 +43,12 @@ namespace OpenUtau.Test.App {
                 var source = Source();
                 var main = Named(source, "MainGrid");
                 Shell = new Grid { RowDefinitions = new RowDefinitions((string)main.Attribute("RowDefinitions")!) };
-                foreach (var name in new[] { "ShellMenuRow", "ShellTransportRow", "ShellNavigationRow", "ShellStatusRow" }) {
+                foreach (var name in new[] { "ShellHeaderRow", "ShellStatusRow" }) {
                     Shell.Children.Add(Build(Named(source, name)));
                 }
                 // The workspace consumes the remaining row just as the product does.
                 var body = new Border();
-                Grid.SetRow(body, 3);
+                Grid.SetRow(body, 1);
                 Shell.Children.Add(body);
                 Window = new Window { Width = width, Height = height, Content = Shell, RequestedThemeVariant = theme };
                 Window.Styles.Add(new StyleInclude(new Uri("avares://OpenUtau/")) {
@@ -63,6 +63,7 @@ namespace OpenUtau.Test.App {
             public Control Build(XElement e) {
                 Control control = e.Name.LocalName switch {
                     "Grid" => new Grid(),
+                    "WorkspaceHeader" => new WorkspaceHeader(),
                     "StackPanel" => new StackPanel(),
                     "Border" => new Border(),
                     "Button" => new Button(),
@@ -134,6 +135,7 @@ namespace OpenUtau.Test.App {
                     case "Padding" when c is Border b: b.Padding = Thickness.Parse(value); break;
                     case "Padding" when c is Avalonia.Controls.Primitives.TemplatedControl t: t.Padding = Thickness.Parse(value); break;
                     case "BorderThickness" when c is Border b: b.BorderThickness = Thickness.Parse(value); break;
+                    case "CornerRadius" when c is Border b: b.CornerRadius = CornerRadius.Parse(value); break;
                     case "FontSize" when c is TextBlock t: t.FontSize = Number(); break;
                     case "FontFamily" when c is TextBlock t: t.FontFamily = new FontFamily(value); break;
                     case "FontWeight" when c is TextBlock t: t.FontWeight = value == "SemiBold" ? FontWeight.SemiBold : FontWeight.Normal; break;
@@ -165,24 +167,24 @@ namespace OpenUtau.Test.App {
         [InlineData(960, 600)]
         [InlineData(1200, 800)]
         [InlineData(1440, 900)]
+        [InlineData(1800, 900)]
         public void ActualShellRows_ArrangeWithoutControlOverlap(double width, double height) {
             foreach (var theme in new[] { ThemeVariant.Light, ThemeVariant.Dark }) {
                 using var f = new Fixture(width, height, theme);
-                var menu = f.InShell(f.NamedControls["ShellMenuRow"]);
-                var transport = f.InShell(f.NamedControls["ShellTransportRow"]);
-                var navigation = f.InShell(f.NamedControls["ShellNavigationRow"]);
+                var header = f.InShell(f.NamedControls["ShellHeaderRow"]);
                 var status = f.InShell(f.NamedControls["ShellStatusRow"]);
-                Assert.Equal(30, menu.Height, 3);
-                Assert.Equal(60, transport.Height, 3);
-                Assert.Equal(40, navigation.Height, 3);
-                Assert.Equal(25, status.Height, 3);
-                Assert.Equal(menu.Bottom, transport.Top, 3);
-                Assert.Equal(transport.Bottom, navigation.Top, 3);
+                Assert.True(header.Height is 57 or 101, $"Unexpected header height: {header}"); // Includes separator.
+                if (width == 800) Assert.Equal(101, header.Height);
+                if (width == 1800) Assert.Equal(57, header.Height);
+                Assert.Equal(32, status.Height, 3);
                 Assert.Equal(height, status.Bottom, 3);
-                Assert.True(f.InShell(f.NamedControls["ViewSwitcherGroup"]).Right <=
-                            f.InShell(f.NamedControls["TopRightCluster"]).Left + 0.5);
-                Assert.True(f.InShell(f.NamedControls["TransportGroup"]).Right <=
-                            f.InShell(f.NamedControls["ShellSaveButton"]).Left + 0.5);
+                var groups = new[] { "AppMenuButton", "TransportGroup", "ViewSwitcherGroup", "TopRightCluster" }
+                    .Select(n => f.InShell(f.NamedControls[n])).ToArray();
+                for (int i = 0; i < groups.Length; i++) {
+                    for (int j = i + 1; j < groups.Length; j++) {
+                        Assert.False(groups[i].Intersects(groups[j]), $"Header groups overlap: {groups[i]} / {groups[j]}");
+                    }
+                }
                 foreach (var button in f.Shell.GetVisualDescendants().OfType<Button>().Where(b =>
                     b.Classes.Any(cls => cls is "topBtn" or "tpBtn" or "tpPlay" or "viewTab" or "brandBtn"))) {
                     var bounds = f.InShell(button);
@@ -193,9 +195,43 @@ namespace OpenUtau.Test.App {
                     Assert.True(bounds.Top >= rowBounds.Top - 0.5 && bounds.Bottom <= rowBounds.Bottom + 0.5,
                         $"{button.Name}/{string.Join(' ', button.Classes)} overflows its row: {bounds} / {rowBounds}");
                     Assert.True(button.Focusable);
-                    Assert.Equal(button.Classes.Contains("tpPlay") ? 40 : button.Classes.Contains("viewTab") ? 40 : button.Classes.Contains("brandBtn") ? 28 : 32, bounds.Height, 3);
+                    Assert.Equal(button.Classes.Contains("viewTab") ? 30 : 36, bounds.Height, 3);
                 }
             }
+        }
+
+        [AvaloniaFact]
+        public void ResizingHeader_KeepsGroupIdentity_AndUsesOriginalShapes() {
+            using var f = new Fixture(1800, 900, ThemeVariant.Dark);
+            var header = f.NamedControls["WorkspaceHeader"];
+            var transport = f.NamedControls["TransportGroup"];
+            var views = f.NamedControls["ViewSwitcherGroup"];
+            Assert.Equal(56, header.Bounds.Height);
+            f.Window.Width = 800;
+            Dispatcher.UIThread.RunJobs();
+            f.Window.UpdateLayout();
+            Assert.Equal(100, header.Bounds.Height);
+            Assert.True(f.InShell(views).Top >= f.InShell(transport).Bottom);
+            f.Window.Width = 1800;
+            Dispatcher.UIThread.RunJobs();
+            f.Window.UpdateLayout();
+            Assert.Equal(56, header.Bounds.Height);
+            Assert.True(f.InShell(views).Top < f.InShell(transport).Bottom);
+            var capsule = (Border)f.NamedControls["ViewSwitcher"];
+            Assert.Equal(new CornerRadius(999), capsule.CornerRadius);
+            Assert.Equal(36, capsule.Bounds.Height);
+            Assert.Equal(new Thickness(3), capsule.Padding);
+            var tab = (Button)f.NamedControls["ViewTabWorkspace"];
+            tab.Classes.Add("selected");
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(new CornerRadius(999), tab.CornerRadius);
+            Assert.Equal(f.Window.FindResource("md3.secondary-container"), tab.Background);
+            Assert.Equal(f.Window.FindResource("md3.on-secondary-container"), tab.Foreground);
+            var text = tab.GetVisualDescendants().OfType<TextBlock>().Single();
+            Assert.Equal(11, text.FontSize);
+            Assert.Equal(tab.Foreground, text.Foreground);
+            Assert.Equal(new CornerRadius(8), ((Border)f.NamedControls["TimeReadout"]).CornerRadius);
+            Assert.Equal(new CornerRadius(999), ((Border)f.NamedControls["TransportPill"]).CornerRadius);
         }
 
         [AvaloniaFact]
@@ -223,7 +259,7 @@ namespace OpenUtau.Test.App {
             var tabs = (Grid)f.Build(Named(Source(), "LibraryTabs"));
             var host = new Border { Width = width, Height = 36, Child = tabs };
             f.Shell.Children.Add(host);
-            Grid.SetRow(host, 3);
+            Grid.SetRow(host, 1);
             f.Window.UpdateLayout();
             Dispatcher.UIThread.RunJobs();
             f.Window.UpdateLayout();
@@ -232,7 +268,7 @@ namespace OpenUtau.Test.App {
             double next = 0;
             foreach (var button in buttons) {
                 Assert.Equal((width - 16) / 4, button.Bounds.Width, 2);
-                Assert.Equal(32, button.Bounds.Height, 3);
+                Assert.Equal(28, button.Bounds.Height, 3);
                 Assert.True(button.Bounds.Left >= next - 0.5);
                 Assert.True(button.Bounds.Right <= tabs.Bounds.Width + 0.5);
                 next = button.Bounds.Right;

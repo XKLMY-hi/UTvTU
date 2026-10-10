@@ -70,7 +70,7 @@
   <Grid Margin="2,2,2,2">
     <!-- Main card -->
     <Border Name="MainCard" Margin="0" BorderThickness="1" BorderBrush="{Binding HeaderBorderBrush}"
-            CornerRadius="4" PointerPressed="HeaderPointerPressed"
+            CornerRadius="12" PointerPressed="HeaderPointerPressed"
             Background="{DynamicResource md3.surface-container-low}">
       <Grid Name="HeaderContent" ColumnDefinitions="auto,*,auto" RowDefinitions="*" Margin="6,3,4,3">
 

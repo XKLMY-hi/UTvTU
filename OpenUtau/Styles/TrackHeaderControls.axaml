@@ -50,6 +50,8 @@
     <ControlTheme x:Key="TrackHeaderActionTheme" TargetType="Button" BasedOn="{StaticResource TrackHeaderTextButtonTheme}">
       <Setter Property="Margin" Value="0"/>
       <Setter Property="Padding" Value="0"/>
+      <Setter Property="CornerRadius" Value="6"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
       <Setter Property="HorizontalContentAlignment" Value="Center"/>
       <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -122,7 +124,7 @@
                        Background="{TemplateBinding Foreground}" BorderThickness="0">
                   <Thumb.Template>
                     <ControlTemplate>
-                      <Border Background="{TemplateBinding Background}" CornerRadius="2"/>
+                      <Border Background="{TemplateBinding Background}" CornerRadius="999"/>
                     </ControlTemplate>
                   </Thumb.Template>
                 </Thumb>

@@ -97,7 +97,6 @@ namespace OpenUtau.App.Views {
             InitializeComponent();
             Log.Information("Initialized main window component.");
             Closed += OnShellClosed;
-            WorkspaceMenu.AddHandler(MenuItem.SubmenuOpenedEvent, OnMainMenuOpened);
             DataContext = viewModel = new MainWindowViewModel {
                 // give the viewmodel a way to prompt/save using the view's existing method
                 AskIfSaveAndContinue = AskIfSaveAndContinue
@@ -416,7 +415,6 @@ namespace OpenUtau.App.Views {
         }
 
         void OnMainMenuOpened(object? sender, RoutedEventArgs args) {
-            if (args.Source is MenuItem item && item.Parent != WorkspaceMenu) return;
             viewModel.RefreshOpenRecent();
             viewModel.RefreshTemplates();
             viewModel.RefreshCacheSize();
@@ -830,17 +828,14 @@ namespace OpenUtau.App.Views {
         void OnMenuPreferences(object sender, RoutedEventArgs args) => ShowPreferences();
 
         /// <summary>
-        /// 顶栏按视图收起运输行和导航行，菜单与状态栏保持可见：
+        /// 顶栏按视图收起运输组和导航组，菜单与状态栏保持可见：
         /// 欢迎页 / 偏好页只留品牌 + 屏名；三个工作视图显示运输组 + 右侧组 + 胶囊；
         /// 「分离」只在卷帘 / 混音台出场。策略全在 <see cref="ViewSwitcherPolicy.ChromeFor"/>（可单测）。
         /// </summary>
         private void SetChromeForView(ViewChrome chrome) {
             ScreenTitle[!TextBlock.TextProperty] = new DynamicResourceExtension(chrome.TitleKey);
             TransportGroup.IsVisible = chrome.ShowTransport;
-            ShellTransportRow.IsVisible = chrome.ShowTransport;
-            ShellNavigationRow.IsVisible = chrome.ShowViewSwitcher;
-            MainGrid.RowDefinitions[1].Height = new GridLength(chrome.ShowTransport ? 60 : 0);
-            MainGrid.RowDefinitions[2].Height = new GridLength(chrome.ShowViewSwitcher ? 40 : 0);
+            ViewSwitcherGroup.IsVisible = chrome.ShowViewSwitcher;
             TopRightCluster.IsVisible = chrome.ShowRightCluster;
             ViewSwitcher.IsVisible = chrome.ShowViewSwitcher;
             DetachViewButton.IsVisible = chrome.ShowDetachButton;

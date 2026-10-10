@@ -19,7 +19,7 @@ namespace OpenUtau.Test.App {
         public void Shell_UsesDesignGeometry() {
             string xaml = ReadXaml();
             // 三行骨架：顶栏 56 / 工作区 / 状态条 32
-            Assert.Contains("RowDefinitions=\"30,60,40,*,25\"", xaml);
+            Assert.Contains("RowDefinitions=\"Auto,*,32\"", xaml);
             // 工作区五列骨架（W16 面板系统）：左面板 / 分隔条 / 中央 / 分隔条 / 右面板。
             // 面板宽**不再写死在列定义里**，而是来自绑定（宽度与折叠态可调、可持久化）——
             // 所以这里断言"列宽来自绑定"，以后调默认值不会再假红（默认值见 PanelLayoutPreferences）。

@@ -34,12 +34,12 @@ namespace OpenUtau.Test.App {
             Assert.Contains("<StyleInclude Source=\"/Styles/WorkspaceShell.axaml\"/>", xaml);
             Assert.Contains("x:Name=\"ViewSwitcher\" Classes=\"viewSwitch\"", xaml);
             xaml = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "WorkspaceShell.axaml"));
-            // 导航为独立行，按钮尺寸由局部样式统一约束。
+            // 原版胶囊形状保留，布局由 WorkspaceHeader 根据实际宽度安排。
             Assert.Contains("<Style Selector=\"Border.viewSwitch\">", xaml);
             Assert.Contains("<Style Selector=\"Button.viewTab\">", xaml);
-            Assert.Contains("<Setter Property=\"Height\" Value=\"40\"/>", xaml);
-            Assert.Contains("<Setter Property=\"Padding\" Value=\"14,0\"/>", xaml);
-            Assert.Contains("<Setter Property=\"FontSize\" Value=\"12\"/>", xaml);
+            Assert.Contains("<Setter Property=\"Height\" Value=\"36\"/>", xaml);
+            Assert.Contains("<Setter Property=\"Padding\" Value=\"12,0\"/>", xaml);
+            Assert.Contains("<Setter Property=\"FontSize\" Value=\"11\"/>", xaml);
             Assert.Contains("<Setter Property=\"FontWeight\" Value=\"SemiBold\"/>", xaml);
             // 颜色只取 md3.*（无硬编码色值）
             Assert.Contains("Button.viewTab.selected", xaml);

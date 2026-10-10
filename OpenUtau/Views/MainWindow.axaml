@@ -1,4 +1,4 @@
-﻿<controls:WindowEx xmlns="https://github.com/avaloniaui"
+<controls:WindowEx xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -14,8 +14,8 @@
         Focusable="True" KeyDown="OnKeyDown" PointerPressed="OnPointerPressed" Closing="WindowClosing"
         SizeChanged="OnWindowSizeChanged"
         DragDrop.AllowDrop="True">
-  <!-- 原生标题栏之外：菜单 30 / 运输 60 / 视图操作 40 / 工作区 / 状态 25。
-       几何取自 md3-daw-2026-10-11/index.html；主题继续使用现有动态 MD3 角色。 -->
+  <!-- 沿用 GitHub 原版的胶囊分组与 56 DIP 顶栏；窄窗自适应为 56 + 44。
+       品牌、菜单、工程命令与当前导航生命周期保持同一入口。 -->
   <Window.Styles>
     <StyleInclude Source="/Styles/WorkspaceShell.axaml"/>
   </Window.Styles>
@@ -23,49 +23,13 @@
   <Border Padding="0">
   <Grid>
     <!-- MainGrid：主内容（overlay 时模糊目标） -->
-    <Grid x:Name="MainGrid" RowDefinitions="30,60,40,*,25">
-      <!-- 菜单与品牌：完整菜单只挂载一次，避免 MenuItem 型 ItemsSource 的双亲冲突。 -->
-      <Border x:Name="ShellMenuRow" Grid.Row="0" Classes="shellRow">
-        <Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="12,0">
-          <Button Grid.Column="0" AutomationProperties.Name="UTvTU" ToolTip.Tip="{DynamicResource menu.file}" x:Name="AppMenuButton" Classes="brandBtn" Click="OnAppMenuClicked">
+    <Grid x:Name="MainGrid" RowDefinitions="Auto,*,32">
+      <!-- Original UTvTU group hierarchy, with a second row only when groups cannot fit. -->
+      <Border x:Name="ShellHeaderRow" Grid.Row="0" Classes="shellRow">
+        <c:WorkspaceHeader x:Name="WorkspaceHeader">
+          <Button AutomationProperties.Name="UTvTU" ToolTip.Tip="{DynamicResource menu.file}" x:Name="AppMenuButton" Classes="brandBtn" Click="OnAppMenuClicked">
             <Button.Flyout>
               <MenuFlyout Placement="BottomEdgeAlignedLeft">
-                <MenuItem Header="{DynamicResource menu.file.save}" Click="OnMenuSave"/>
-                <MenuItem Header="{DynamicResource menu.tools.prefs}" Click="OnMenuPreferences"/>
-                <MenuItem Header="{DynamicResource menu.help.wiki}" Click="OnMenuWiki"/>
-              </MenuFlyout>
-            </Button.Flyout>
-            <StackPanel Orientation="Horizontal" Spacing="12">
-              <!-- W40：顶栏品牌 = 「标志 + 字标，无括号」。cap 15 落在品牌阶梯的 14–23 档 ⇒ 按规则**去括号**；
-                   原音符瓦片（md3.primary-container + icon-music）与文字 UTvTU 已删。
-                   尺寸与 SplashWindow 同一套口径（缩放 s = cap / 277.4707 = 15/277.4707 = 0.054060）：
-                     · 标志 brand-mark（源描边语义，描边 = 64 网格内 8 = 尺寸÷8）：要满足"标志墨迹高 = 字标 cap"，
-                       墨迹（38 单元 + 描边 8）占 64 网格的 46 ⇒ 渲染盒 = 15 × 64/46 = 20.9（rendered 描边 ≈ 2.6）
-                     · 字标 brand-wordmark（U/T 提取件，**Fill**）高 = cap = 15 ⇒ 宽 = 1032.4137 × s = 55.8
-                     · 切角 v 必须**单独描边**补齐（U/T 键不含 v；v 是自交单环，EvenOdd 填充会出贯穿细缝）：
-                       中心线 91×142 单元 → 元素框 4.92×7.68、描边 61 × s = 3.30、左缘 463.011 × s = 25.03、顶 100.711 × s = 5.44
-                     · 间距 = 0.42 × cap = 6.3；整组不撑高顶栏（原元素总高 36，此处最高 20.9） -->
-              <StackPanel Orientation="Horizontal" Spacing="6.3" VerticalAlignment="Center">
-                <Viewbox Width="20.9" Height="20.9" Stretch="Uniform">
-                  <Path Data="{StaticResource brand-mark}"
-                        Stroke="{DynamicResource md3.primary}" StrokeThickness="8"
-                        StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
-                </Viewbox>
-                <Canvas Width="55.8" Height="15" VerticalAlignment="Center">
-                  <Path Data="{StaticResource brand-wordmark}"
-                        Fill="{DynamicResource md3.on-surface}"
-                        Width="55.8" Height="15" Stretch="Uniform"/>
-                  <Path Data="{StaticResource brand-v-chevron}"
-                        Stroke="{DynamicResource md3.on-surface}" StrokeThickness="3.30"
-                        StrokeLineCap="Round" StrokeJoin="Round"
-                        Width="4.92" Height="7.68" Stretch="Uniform"
-                        Canvas.Left="25.03" Canvas.Top="5.44"/>
-                </Canvas>
-              </StackPanel>
-
-            </StackPanel>
-          </Button>
-          <Menu x:Name="WorkspaceMenu" Grid.Column="1" Classes="workspaceMenu" VerticalAlignment="Center" Margin="8,0">
 
                 <MenuItem Header="{DynamicResource menu.file}">
                   <MenuItem Header="{DynamicResource menu.file.new}" InputGesture="Ctrl+N" Click="OnMenuNew"/>
@@ -146,17 +110,44 @@
                   <MenuItem Header="{DynamicResource menu.help.logslocation}" Click="OnMenuLogsLocation"/>
                 </MenuItem>
 
-          </Menu>
-          <TextBlock x:Name="ScreenTitle" Grid.Column="3" Text="{DynamicResource view.workspace}"
-                     FontSize="11" VerticalAlignment="Center" MaxWidth="180" TextTrimming="CharacterEllipsis"
-                     Foreground="{DynamicResource md3.on-surface-variant}"/>
-        </Grid>
-      </Border>
-      <Border x:Name="ShellTransportRow" Grid.Row="1" Classes="shellRow">
-        <Grid ColumnDefinitions="*,Auto" Margin="12,0">
-          <StackPanel x:Name="TransportGroup" Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-          <!-- 平面运输控件：32px 操作，40px 主播放键。 -->
-          <Border Height="40" Padding="0">
+              </MenuFlyout>
+            </Button.Flyout>
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <!-- W40：顶栏品牌 = 「标志 + 字标，无括号」。cap 15 落在品牌阶梯的 14–23 档 ⇒ 按规则**去括号**；
+                   原音符瓦片（md3.primary-container + icon-music）与文字 UTvTU 已删。
+                   尺寸与 SplashWindow 同一套口径（缩放 s = cap / 277.4707 = 15/277.4707 = 0.054060）：
+                     · 标志 brand-mark（源描边语义，描边 = 64 网格内 8 = 尺寸÷8）：要满足"标志墨迹高 = 字标 cap"，
+                       墨迹（38 单元 + 描边 8）占 64 网格的 46 ⇒ 渲染盒 = 15 × 64/46 = 20.9（rendered 描边 ≈ 2.6）
+                     · 字标 brand-wordmark（U/T 提取件，**Fill**）高 = cap = 15 ⇒ 宽 = 1032.4137 × s = 55.8
+                     · 切角 v 必须**单独描边**补齐（U/T 键不含 v；v 是自交单环，EvenOdd 填充会出贯穿细缝）：
+                       中心线 91×142 单元 → 元素框 4.92×7.68、描边 61 × s = 3.30、左缘 463.011 × s = 25.03、顶 100.711 × s = 5.44
+                     · 间距 = 0.42 × cap = 6.3；整组不撑高顶栏（原元素总高 36，此处最高 20.9） -->
+              <StackPanel Orientation="Horizontal" Spacing="6.3" VerticalAlignment="Center">
+                <Viewbox Width="20.9" Height="20.9" Stretch="Uniform">
+                  <Path Data="{StaticResource brand-mark}"
+                        Stroke="{DynamicResource md3.primary}" StrokeThickness="8"
+                        StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
+                </Viewbox>
+                <Canvas Width="55.8" Height="15" VerticalAlignment="Center">
+                  <Path Data="{StaticResource brand-wordmark}"
+                        Fill="{DynamicResource md3.on-surface}"
+                        Width="55.8" Height="15" Stretch="Uniform"/>
+                  <Path Data="{StaticResource brand-v-chevron}"
+                        Stroke="{DynamicResource md3.on-surface}" StrokeThickness="3.30"
+                        StrokeLineCap="Round" StrokeJoin="Round"
+                        Width="4.92" Height="7.68" Stretch="Uniform"
+                        Canvas.Left="25.03" Canvas.Top="5.44"/>
+                </Canvas>
+              </StackPanel>
+
+              <TextBlock x:Name="ScreenTitle" Text="{DynamicResource view.workspace}" FontSize="11"
+                         VerticalAlignment="Center" MaxWidth="100" TextTrimming="CharacterEllipsis"
+                         Foreground="{DynamicResource md3.on-surface-variant}"/>
+            </StackPanel>
+          </Button>
+          <StackPanel x:Name="TransportGroup" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+          <!-- 原设计：40 DIP 胶囊与 36 DIP 圆形按钮。 -->
+          <Border x:Name="TransportPill" Classes="transportPill">
             <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
               <Button Classes="tpBtn" AutomationProperties.Name="{DynamicResource command.playback.gohome}" ToolTip.Tip="{DynamicResource command.playback.gohome}" Command="{Binding PlaybackViewModel.SeekStart}">
                 <Path Data="{StaticResource icon-skip-back}" Width="16" Height="16" Stretch="Uniform"
@@ -183,15 +174,15 @@
           </Border>
 
           <!-- 播放位置：等宽读数。 -->
-          <Border Classes="tpReadout" Padding="10,0">
+          <Border x:Name="TimeReadout" Classes="tpReadout" Padding="10,0">
             <TextBlock Text="{Binding Path=PlaybackViewModel.PlayPosTime, StringFormat={}{0:mm\\:ss\\.fff}}"
                        FontSize="14" FontFamily="Consolas" VerticalAlignment="Center"
                        Foreground="{DynamicResource md3.on-surface}"/>
           </Border>
 
           <!-- 工程速度 / 拍号，沿用现有编辑入口。 -->
-          <Border Height="40" Padding="8,0">
-            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+          <Border x:Name="TempoReadout" Classes="tpChip" Padding="8,0">
+            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
               <TextBlock ToolTip.Tip="BPM" Background="Transparent" PointerPressed="OnEditBpm" Cursor="Hand"
                          FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"
                          Foreground="{DynamicResource md3.primary}">
@@ -217,22 +208,10 @@
           </Border>
 
           </StackPanel>
-          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-            <Button x:Name="ShellSaveButton" Classes="topBtn" Click="OnMenuSave" AutomationProperties.Name="{DynamicResource menu.file.save}" ToolTip.Tip="{DynamicResource menu.file.save}">
-              <Path Data="{StaticResource icon-save}" Width="16" Height="16" Stretch="Uniform" Fill="{DynamicResource md3.on-surface}"/>
-            </Button>
-            <Button x:Name="ShellRenderButton" Classes="topBtn" Click="OnMenuRender" AutomationProperties.Name="{DynamicResource menu.file.render}" ToolTip.Tip="{DynamicResource menu.file.render}">
-              <Path Data="{StaticResource icon-download}" Width="16" Height="16" Stretch="Uniform" Fill="{DynamicResource md3.on-surface}"/>
-            </Button>
-          </StackPanel>
-        </Grid>
-      </Border>
-      <Border x:Name="ShellNavigationRow" Grid.Row="2" Classes="shellRow" BorderThickness="0">
-        <Grid ColumnDefinitions="*,Auto" Margin="12,0">
-          <StackPanel x:Name="ViewSwitcherGroup" Grid.Column="0" Orientation="Horizontal" Spacing="8"
+          <StackPanel x:Name="ViewSwitcherGroup" Orientation="Horizontal" Spacing="8"
                       HorizontalAlignment="Left" VerticalAlignment="Center">
             <Border x:Name="ViewSwitcher" Classes="viewSwitch">
-              <StackPanel Orientation="Horizontal" Spacing="0">
+              <StackPanel Orientation="Horizontal" Spacing="3">
                 <Button x:Name="ViewTabWorkspace" Classes="viewTab" Tag="workspace"
                         Classes.selected="{Binding ViewSwitcher.ShowWorkspace}"
                         Click="OnViewTabClicked" Content="{DynamicResource view.workspace}"/>
@@ -251,7 +230,15 @@
                     Fill="{DynamicResource md3.on-surface-variant}"/>
             </Button>
           </StackPanel>
-          <StackPanel x:Name="TopRightCluster" Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+          <StackPanel x:Name="TopRightCluster" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+            <Button x:Name="ShellSaveButton" Classes="topBtn" Click="OnMenuSave" AutomationProperties.Name="{DynamicResource menu.file.save}" ToolTip.Tip="{DynamicResource menu.file.save}">
+              <Path Data="{StaticResource icon-save}" Width="16" Height="16" Stretch="Uniform" Fill="{DynamicResource md3.on-surface}"/>
+            </Button>
+            <Button x:Name="ShellRenderButton" Classes="topBtn" Click="OnMenuRender" AutomationProperties.Name="{DynamicResource menu.file.render}" ToolTip.Tip="{DynamicResource menu.file.render}">
+              <Path Data="{StaticResource icon-download}" Width="16" Height="16" Stretch="Uniform" Fill="{DynamicResource md3.on-surface}"/>
+            </Button>
+
+
             <Button Classes="topBtn" Command="{Binding Undo}" IsEnabled="{Binding CanUndo}"
                     AutomationProperties.Name="{DynamicResource menu.edit.undo}" ToolTip.Tip="{DynamicResource menu.edit.undo}">
               <Path Data="{StaticResource icon-undo}" Width="16" Height="16" Stretch="Uniform"
@@ -302,14 +289,14 @@
                             Min="{Binding TrackHeightMin}" Max="{Binding TrackHeightMax}"/>
             </Border>
           </StackPanel>
-        </Grid>
+        </c:WorkspaceHeader>
       </Border>
 
       <!-- ══════════ 工作区（W16 面板系统）：左 轨头 · 分隔条 · 中 编排区 · 分隔条 · 右 素材库 ══════════
            两列都是 Auto：宽度由面板自己的 Width="{Binding XxxPanel.Width}" 决定（默认值见 PanelLayoutPreferences，
            拖拽/双击复位由 PanelSplitter 负责），折叠时面板 IsVisible=false ⇒ 列宽 0，不留空白也不留窄条。
            中央列 `*`（MinWidth=320）保证拖宽面板时不会把编排区挤没。 -->
-      <Grid Grid.Row="3" x:Name="MainLayout" ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+      <Grid Grid.Row="1" x:Name="MainLayout" ColumnDefinitions="Auto,Auto,*,Auto,Auto">
         <!-- ── 左：轨道头（仅工作台视图；面板本体带宽度绑定 + 折叠可见性） ── -->
         <Border Grid.Column="0" IsVisible="{Binding ViewSwitcher.ShowWorkspace}">
         <!-- 面板容器：宽与显隐都取自分隔条（夹紧后的有效宽 / 放不下自动折叠），不直接绑 VM 的意图值 -->
@@ -897,8 +884,8 @@
         </Panel>
       </Grid>
 
-      <!-- ══════════ 状态条 25：左侧引擎/进度 · 右侧版本 ══════════ -->
-      <Border x:Name="ShellStatusRow" Grid.Row="4" Background="{DynamicResource md3.surface-container-low}"
+      <!-- ══════════ 状态条 32：左侧引擎/进度 · 右侧版本 ══════════ -->
+      <Border x:Name="ShellStatusRow" Grid.Row="2" Background="{DynamicResource md3.surface-container-low}"
               BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,1,0,0">
         <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,0">
           <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">

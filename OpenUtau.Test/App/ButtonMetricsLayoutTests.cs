@@ -94,15 +94,15 @@ namespace OpenUtau.Test.App {
         [AvaloniaFact]
         public void MainWindowMarkup_CarriesMinHeightNeutralizersForCapsuleAndLibraryTabs() {
             string xaml = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "WorkspaceShell.axaml"));
-            // 导航选项与40px导航行一致，局部样式显式中和全局边距。
+            // 导航选项与36px胶囊一致，局部样式显式中和全局边距。
             string viewTab = StyleBlock(xaml, "Button.viewTab");
-            Assert.Contains("<Setter Property=\"Height\" Value=\"40\"/>", viewTab);
-            Assert.Contains("<Setter Property=\"MinHeight\" Value=\"40\"/>", viewTab);
+            Assert.Contains("<Setter Property=\"Height\" Value=\"30\"/>", viewTab);
+            Assert.Contains("<Setter Property=\"MinHeight\" Value=\"30\"/>", viewTab);
             Assert.Contains("<Setter Property=\"Margin\" Value=\"0\"/>", viewTab);
-            // 素材库页签32px，位于36px页签行内。
+            // 素材库页签28px，位于36px页签行内。
             string libTab = StyleBlock(xaml, "Button.libTab");
-            Assert.Contains("<Setter Property=\"Height\" Value=\"32\"/>", libTab);
-            Assert.Contains("<Setter Property=\"MinHeight\" Value=\"32\"/>", libTab);
+            Assert.Contains("<Setter Property=\"Height\" Value=\"28\"/>", libTab);
+            Assert.Contains("<Setter Property=\"MinHeight\" Value=\"28\"/>", libTab);
             Assert.Contains("<Setter Property=\"Margin\" Value=\"0\"/>", libTab);
             // 全局主题与应用级样式一律不许被本类改动（中和只允许写在各自样式里）：
             // 主题的 MinHeight=32 直接从随构建产出的 Styles/Md3ControlThemes.axaml 读；
