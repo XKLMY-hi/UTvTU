@@ -213,6 +213,7 @@ public partial class MixerControl : UserControl
 
     public void RebuildStrips()
     {
+        if (shutdown) return;
         // 视觉树只能在**它所属的线程**上改：Tracks 的变更通知可能来自别的线程（测试宿主、
         // 未来的后台路径），与 MixerViewModel.RefreshTracks 的编组构成双保险。
         // 判据不用 Dispatcher.CheckAccess()——它在 headless 测试宿主下不可靠（实测会误判为 true），
@@ -243,6 +244,7 @@ public partial class MixerControl : UserControl
 
     public void Shutdown()
     {
+        if (shutdown) return;
         shutdown = true;
         SyncTimer();
         _selectionSubscription?.Dispose();
@@ -256,7 +258,10 @@ public partial class MixerControl : UserControl
                 strip.DisposeSubscriptions();
             }
         }
-        DocManager.Inst.RemoveSubscriber(ViewModel);
+        TrackStripsPanel.Children.Clear();
+        chainPanel.Shutdown();
+        FxChainHost.Content = null;
+        ViewModel.Dispose();
     }
 
     private void OnAddTrackClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)

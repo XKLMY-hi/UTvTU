@@ -4,13 +4,15 @@ using System.Linq;
 using System.Reactive;
 using Avalonia;
 using Avalonia.Threading;
+using OpenUtau.App.Editing;
 using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace OpenUtau.App.ViewModels {
-    public class MixerViewModel : ViewModelBase, ICmdSubscriber {
+    public class MixerViewModel : ViewModelBase, ICmdSubscriber, IDisposable {
+        bool disposed;
         public ObservableCollection<UTrack> Tracks { get; } = new();
 
         [Reactive] public double MasterVolume { get; set; } = 0;
@@ -24,6 +26,7 @@ namespace OpenUtau.App.ViewModels {
 
         /// <summary>选中轨道；null = 无选中。同一对象不重复通知。</summary>
         public void SelectTrack(UTrack? track) {
+            if (disposed) return;
             if (ReferenceEquals(SelectedTrack, track)) {
                 return;
             }
@@ -34,7 +37,7 @@ namespace OpenUtau.App.ViewModels {
 
         public MixerViewModel() {
             OpenMixFxCommand = ReactiveCommand.Create<UTrack>(track => {
-                if (track == null) return;
+                if (disposed || track == null || !DocManager.Inst.Project.tracks.Contains(track)) return;
                 if (Application.Current?.ApplicationLifetime is
                     Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop) {
                     // 与轨道头同一个入口：每轨单窗、非模态；已开着则聚焦（Open 内部处理）。
@@ -49,6 +52,7 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public void OnNext(UCommand cmd, bool isUndo) {
+            if (disposed) return;
             if (cmd is LoadProjectNotification || cmd is WillRemoveTrackNotification || cmd is TrackCommand) {
                 // TrackCommand 覆盖新建/删除/移动/重命名轨道（含撤销重做）
                 RefreshTracks();
@@ -58,18 +62,18 @@ namespace OpenUtau.App.ViewModels {
         /// <summary>新建轨道（混音台工具行入口，可撤销）。</summary>
         public void AddTrack() {
             var project = DocManager.Inst.Project;
-            if (project == null) {
+            if (disposed || project == null) {
                 return;
             }
-            DocManager.Inst.StartUndoGroup("command.track.add");
-            DocManager.Inst.ExecuteCmd(new AddTrackCommand(project, new UTrack(project) { TrackNo = project.tracks.Count }));
-            DocManager.Inst.EndUndoGroup();
+            using var edits = new DocumentEditGesture(project, "command.track.add");
+            if (edits.CanExecute) edits.Execute(new AddTrackCommand(project, new UTrack(project) { TrackNo = project.tracks.Count }));
         }
 
         readonly UiThreadAffinity affinity = new UiThreadAffinity();
 
         /// <summary>刷新通道条（UI 线程亲和，见 <see cref="UiThreadAffinity"/>）。</summary>
         public void RefreshTracks() {
+            if (disposed) return;
             // 跨线程编组（与链面板同法）：Tracks 变更会让 MixerControl 重建通道条（动视觉树），
             // 而命令通知在测试宿主等场景可能落在非 UI 线程 ⇒ 不编组会抛 Dispatcher.VerifyAccess。
             // 生产路径由 DocManager 的主线程守卫兜住，这里只是把契约显式化。
@@ -80,6 +84,7 @@ namespace OpenUtau.App.ViewModels {
         }
 
         void RefreshTracksCore() {
+            if (disposed) return;
             Tracks.Clear();
             var project = DocManager.Inst.Project;
             if (project?.tracks == null) {
@@ -100,6 +105,13 @@ namespace OpenUtau.App.ViewModels {
         public static string FormatVolume(double db) {
             if (db <= -24) return "-∞ dB";
             return $"{db:+0.0;-0.0} dB";
+        }
+
+        public void Dispose() {
+            if (disposed) return;
+            disposed = true;
+            DocManager.Inst.RemoveSubscriber(this);
+            OpenMixFxCommand.Dispose();
         }
     }
 }

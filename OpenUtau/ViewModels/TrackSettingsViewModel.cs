@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using DynamicData.Binding;
+using OpenUtau.App.Editing;
 using OpenUtau.Classic;
 using OpenUtau.Core;
 using OpenUtau.Core.Render;
@@ -24,8 +25,10 @@ namespace OpenUtau.App.ViewModels {
             new ObservableCollectionExtended<IResampler>();
         ObservableCollectionExtended<IWavtool> wavtools =
             new ObservableCollectionExtended<IWavtool>();
+        readonly UProject project;
 
         public TrackSettingsViewModel(UTrack track) {
+            project = DocManager.Inst.Project;
             ToolsManager.Inst.Initialize();
             Track = track;
             if (!string.IsNullOrEmpty(Track.RendererSettings.renderer)) {
@@ -91,15 +94,16 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public void Finish() {
-            if (Renderers.CLASSIC != Track.RendererSettings.renderer) {
+            if (!ReferenceEquals(project, DocManager.Inst.Project) || !project.tracks.Contains(Track) ||
+                Renderers.CLASSIC != Track.RendererSettings.renderer) {
                 return;
             }
-            DocManager.Inst.StartUndoGroup("command.track.setting");
+            using var edits = new DocumentEditGesture(project, "command.track.setting");
+            if (!edits.CanExecute) return;
             var settings = Track.RendererSettings.Clone();
             settings.resampler = Resampler?.ToString() ?? string.Empty;
             settings.wavtool = Wavtool?.ToString() ?? string.Empty;
-            DocManager.Inst.ExecuteCmd(new TrackChangeRenderSettingCommand(DocManager.Inst.Project, Track, settings));
-            DocManager.Inst.EndUndoGroup();
+            edits.Execute(new TrackChangeRenderSettingCommand(project, Track, settings));
         }
     }
 }

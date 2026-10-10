@@ -65,6 +65,7 @@ namespace OpenUtau.App.ViewModels {
         public ViewModelActivator Activator { get; }
 
         private readonly UTrack track;
+        private readonly UProject? project;
         private readonly TrackMixEditSession? mixEdits;
         private bool _syncing;
 
@@ -85,14 +86,17 @@ namespace OpenUtau.App.ViewModels {
 
         public TrackHeaderViewModel(UTrack track) {
             this.track = track;
+            project = DocManager.Inst.Project.tracks.Contains(track) ? DocManager.Inst.Project : null;
             mixEdits = new TrackMixEditSession(track);
             DocManager.Inst.AddSubscriber(this);
             SelectSingerCommand = ReactiveCommand.Create<USinger>(singer => {
+                if (!IsCurrent) return;
                 if (track.Singer != singer) {
-                    DocManager.Inst.StartUndoGroup("command.track.singer");
-                    ApplySingerToTrack(track, singer);
+                    using var edits = BeginTrackEdit("command.track.singer");
+                    if (edits == null || !ApplySingerToTrack(track, singer, edits)) return;
                     DocManager.Inst.ExecuteCmd(new VoiceColorRemappingNotification(track.TrackNo, true));
-                    DocManager.Inst.EndUndoGroup();
+                    edits.Dispose();
+                    if (!IsCurrent) return;
                     UpdateRecentSingers(singer);
                     Preferences.Save();
                     MessageBus.Current.SendMessage(new PianorollRefreshEvent("Part"));
@@ -103,12 +107,15 @@ namespace OpenUtau.App.ViewModels {
                 RefreshAvatar();
             });
             SelectPhonemizerCommand = ReactiveCommand.Create<PhonemizerFactory>(factory => {
+                if (!IsCurrent) return;
                 if (track.Phonemizer.GetType() != factory.type) {
-                    DocManager.Inst.StartUndoGroup("command.track.setting");
+                    using var edits = BeginTrackEdit("command.track.setting");
+                    if (edits == null) return;
                     var phonemizer = factory.Create();
                     Log.Information($"Loading Phonemizer: {phonemizer.ToString()}");
-                    DocManager.Inst.ExecuteCmd(new TrackChangePhonemizerCommand(DocManager.Inst.Project, track, phonemizer));
-                    DocManager.Inst.EndUndoGroup();
+                    if (!ExecuteTrackCommand(edits, new TrackChangePhonemizerCommand(project!, track, phonemizer))) return;
+                    edits.Dispose();
+                    if (!IsCurrent) return;
                     var name = phonemizer.GetType().FullName!;
                     if (!string.IsNullOrEmpty(Singer?.Id) && phonemizer != null) {
                         Preferences.Default.SingerPhonemizers[Singer.Id] = name;
@@ -125,12 +132,12 @@ namespace OpenUtau.App.ViewModels {
                 this.RaisePropertyChanged(nameof(PhonemizerTag));
             });
             SelectRendererCommand = ReactiveCommand.Create<string>(name => {
+                using var edits = BeginTrackEdit("command.track.setting");
+                if (edits == null) return;
                 var settings = new URenderSettings {
                     renderer = name,
                 };
-                DocManager.Inst.StartUndoGroup("command.track.setting");
-                DocManager.Inst.ExecuteCmd(new TrackChangeRenderSettingCommand(DocManager.Inst.Project, track, settings));
-                DocManager.Inst.EndUndoGroup();
+                if (!ExecuteTrackCommand(edits, new TrackChangeRenderSettingCommand(project!, track, settings))) return;
                 this.RaisePropertyChanged(nameof(Renderer));
             });
 
@@ -258,15 +265,32 @@ namespace OpenUtau.App.ViewModels {
             Muted = track.Muted;
         }
 
-        private void ApplySingerToTrack(UTrack targetTrack, USinger? singer) {
+        bool IsCurrent => !disposed && IsTrackCurrent;
+        bool IsTrackCurrent => project != null && ReferenceEquals(project, DocManager.Inst.Project) &&
+            project.tracks.Contains(track);
+
+        DocumentEditGesture? BeginTrackEdit(string name) {
+            if (!IsCurrent) return null;
+            var edits = new DocumentEditGesture(project!, name);
+            if (edits.CanExecute) return edits;
+            edits.Dispose();
+            return null;
+        }
+
+        // A synchronous view rebuild may dispose this VM during publication. Finish the captured
+        // batch while its document/track remain valid; disposed VMs cannot begin a new batch.
+        bool ExecuteTrackCommand(DocumentEditGesture edits, UCommand command) => IsTrackCurrent && edits.Execute(command);
+
+        private bool ApplySingerToTrack(UTrack targetTrack, USinger? singer, DocumentEditGesture edits) {
             if (singer is USinger selectedSinger) {
                 Log.Information($"Loading Singer: {selectedSinger.Name}");
-                DocManager.Inst.ExecuteCmd(new TrackChangeSingerCommand(DocManager.Inst.Project, targetTrack, selectedSinger));
+                if (!ExecuteTrackCommand(edits, new TrackChangeSingerCommand(project!, targetTrack, selectedSinger))) return false;
+                if (!IsTrackCurrent || !edits.CanExecute) return false;
                 if (!string.IsNullOrEmpty(selectedSinger.Id) &&
                     Preferences.Default.SingerPhonemizers.TryGetValue(selectedSinger.Id, out var phonemizerName) &&
-                    TryChangePhonemizer(targetTrack, phonemizerName)) {
+                    TryChangePhonemizer(targetTrack, phonemizerName, edits)) {
                 } else if (!string.IsNullOrEmpty(selectedSinger.DefaultPhonemizer)) {
-                    TryChangePhonemizer(targetTrack, selectedSinger.DefaultPhonemizer);
+                    TryChangePhonemizer(targetTrack, selectedSinger.DefaultPhonemizer, edits);
                 }
                 if (!selectedSinger.Found || selectedSinger.SingerType != targetTrack.RendererSettings.Renderer?.SingerType) {
                     var settings = new URenderSettings();
@@ -275,13 +299,14 @@ namespace OpenUtau.App.ViewModels {
                             renderer = Core.Render.Renderers.GetDefaultRenderer(selectedSinger.SingerType),
                         };
                     }
-                    DocManager.Inst.ExecuteCmd(new TrackChangeRenderSettingCommand(DocManager.Inst.Project, targetTrack, settings));
+                    if (!ExecuteTrackCommand(edits, new TrackChangeRenderSettingCommand(project!, targetTrack, settings))) return false;
                 }
             } else {
-                DocManager.Inst.ExecuteCmd(new TrackChangeSingerCommand(DocManager.Inst.Project, targetTrack, USinger.CreateMissing(string.Empty)));
+                if (!ExecuteTrackCommand(edits, new TrackChangeSingerCommand(project!, targetTrack, USinger.CreateMissing(string.Empty)))) return false;
                 var settings = new URenderSettings();
-                DocManager.Inst.ExecuteCmd(new TrackChangeRenderSettingCommand(DocManager.Inst.Project, targetTrack, settings));
+                if (!ExecuteTrackCommand(edits, new TrackChangeRenderSettingCommand(project!, targetTrack, settings))) return false;
             }
+            return IsTrackCurrent && edits.CanExecute;
         }
 
         private void UpdateRecentSingers(USinger? singer) {
@@ -303,13 +328,12 @@ namespace OpenUtau.App.ViewModels {
             };
         }
 
-        private bool TryChangePhonemizer(UTrack targetTrack, string phonemizerName) {
+        private bool TryChangePhonemizer(UTrack targetTrack, string phonemizerName, DocumentEditGesture edits) {
             try {
                 var factory = PhonemizerFactory.Get(phonemizerName);
                 var phonemizer = factory?.Create();
                 if (phonemizer != null) {
-                    DocManager.Inst.ExecuteCmd(new TrackChangePhonemizerCommand(DocManager.Inst.Project, targetTrack, phonemizer));
-                    return true;
+                    return ExecuteTrackCommand(edits, new TrackChangePhonemizerCommand(project!, targetTrack, phonemizer));
                 }
             } catch (Exception e) {
                 Log.Error(e, $"Failed to load phonemizer {phonemizerName}");
@@ -495,18 +519,23 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public void RefreshAvatar() {
+            if (disposed) return;
+            Bitmap? next = null;
             var singer = track?.Singer;
             if (singer == null || singer.AvatarData == null) {
-                Avatar = new RenderTargetBitmap(new PixelSize(1, 1));
-                return;
+                // An absent image needs no native bitmap allocation.
+            } else {
+                try {
+                    using var stream = new MemoryStream(singer.AvatarData);
+                    using var source = new Bitmap(stream);
+                    next = source.CreateScaledBitmap(new PixelSize(100, 100));
+                } catch (Exception e) {
+                    Log.Error(e, "Failed to decode avatar.");
+                }
             }
-            try {
-                using var stream = new MemoryStream(singer.AvatarData);
-                Avatar = new Bitmap(stream).CreateScaledBitmap(new PixelSize(100, 100));
-            } catch (Exception e) {
-                Avatar = null;
-                Log.Error(e, "Failed to decode avatar.");
-            }
+            var previous = Avatar;
+            Avatar = next;
+            previous?.Dispose();
         }
 
         public void ManuallyRaise() {
@@ -559,52 +588,53 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public void Remove() {
-            DocManager.Inst.StartUndoGroup("command.track.delete");
-            DocManager.Inst.ExecuteCmd(new RemoveTrackCommand(DocManager.Inst.Project, track));
-            DocManager.Inst.EndUndoGroup();
+            using var edits = BeginTrackEdit("command.track.delete");
+            if (edits != null) ExecuteTrackCommand(edits, new RemoveTrackCommand(project!, track));
         }
 
         public void MoveUp() {
-            if (track == DocManager.Inst.Project.tracks.First()) {
+            if (!IsCurrent || track == project!.tracks.First()) {
                 return;
             }
-            DocManager.Inst.StartUndoGroup("command.track.order");
-            DocManager.Inst.ExecuteCmd(new MoveTrackCommand(DocManager.Inst.Project, track, true));
-            DocManager.Inst.EndUndoGroup();
+            using var edits = BeginTrackEdit("command.track.order");
+            if (edits != null) ExecuteTrackCommand(edits, new MoveTrackCommand(project!, track, true));
         }
 
         public void MoveDown() {
-            if (track == DocManager.Inst.Project.tracks.Last()) {
+            if (!IsCurrent || track == project!.tracks.Last()) {
                 return;
             }
-            DocManager.Inst.StartUndoGroup("command.track.order");
-            DocManager.Inst.ExecuteCmd(new MoveTrackCommand(DocManager.Inst.Project, track, false));
-            DocManager.Inst.EndUndoGroup();
+            using var edits = BeginTrackEdit("command.track.order");
+            if (edits != null) ExecuteTrackCommand(edits, new MoveTrackCommand(project!, track, false));
         }
 
         public void Rename() {
+            if (!IsCurrent) return;
             var dialog = new TypeInDialog();
             dialog.Title = ThemeManager.GetString("tracks.rename");
             dialog.SetText(track.TrackName);
-            dialog.onFinish = name => {
-                if (!string.IsNullOrWhiteSpace(name) && name != track.TrackName) {
-                    DocManager.Inst.StartUndoGroup("command.track.setting");
-                    this.TrackName = name;
-                    DocManager.Inst.ExecuteCmd(new RenameTrackCommand(DocManager.Inst.Project, track, name));
-                    DocManager.Inst.EndUndoGroup();
-                }
-            };
+            dialog.onFinish = RenameTo;
             if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null) {
                 dialog.ShowDialog(desktop.MainWindow);
             }
         }
 
+        internal void RenameTo(string name) {
+            if (string.IsNullOrWhiteSpace(name) || name == track.TrackName) return;
+            using var edits = BeginTrackEdit("command.track.setting");
+            if (edits != null && ExecuteTrackCommand(edits, new RenameTrackCommand(project!, track, name)) && IsCurrent) {
+                TrackName = track.TrackName;
+            }
+        }
+
         public async void SelectTrackColor() {
+            if (!IsCurrent) return;
             var dialog = new TrackColorDialog();
             dialog.DataContext = new TrackColorViewModel(track);
 
             if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null) {
                 await dialog.ShowDialog(desktop.MainWindow);
+                if (!IsCurrent) return;
                 TrackAccentColor = ThemeManager.GetTrackColor(track.TrackColor).AccentColor;
                 TrackColor = Preferences.Default.UseTrackColor
                 ? ThemeManager.GetTrackColor(track.TrackColor)
@@ -614,12 +644,13 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public void Duplicate() {
-            DocManager.Inst.StartUndoGroup("command.track.duplicate");
+            using var edits = BeginTrackEdit("command.track.duplicate");
+            if (edits == null) return;
             var newTrack = new UTrack(track.TrackName + "_copy") {
                 TrackNo = track.TrackNo + 1,
                 Singer = track.Singer,
                 Phonemizer = track.Phonemizer,
-                RendererSettings = track.RendererSettings,
+                RendererSettings = track.RendererSettings.Clone(),
                 Mute = track.Mute,
                 Muted = track.Muted,
                 Solo = false,
@@ -628,24 +659,25 @@ namespace OpenUtau.App.ViewModels {
                 TrackColor = track.TrackColor,
                 TrackExpressions = track.TrackExpressions.Select(exp => exp.Clone()).ToList()
             };
-            DocManager.Inst.ExecuteCmd(new AddTrackCommand(DocManager.Inst.Project, newTrack));
-            var parts = DocManager.Inst.Project.parts
+            var parts = project!.parts
                 .Where(part => part.trackNo == track.TrackNo)
                 .Select(part => part.Clone()).ToList();
+            if (!ExecuteTrackCommand(edits, new AddTrackCommand(project, newTrack))) return;
             foreach (var part in parts) {
+                if (!project.tracks.Contains(newTrack)) break;
                 part.trackNo = newTrack.TrackNo;
-                DocManager.Inst.ExecuteCmd(new AddPartCommand(DocManager.Inst.Project, part));
+                if (!ExecuteTrackCommand(edits, new AddPartCommand(project, part))) break;
             }
-            DocManager.Inst.EndUndoGroup();
         }
 
         public void DuplicateSettings() {
-            DocManager.Inst.StartUndoGroup("command.track.duplicate");
-            DocManager.Inst.ExecuteCmd(new AddTrackCommand(DocManager.Inst.Project, new UTrack(track.TrackName + "_copy") {
+            using var edits = BeginTrackEdit("command.track.duplicate");
+            if (edits == null) return;
+            ExecuteTrackCommand(edits, new AddTrackCommand(project!, new UTrack(track.TrackName + "_copy") {
                 TrackNo = track.TrackNo + 1,
                 Singer = track.Singer,
                 Phonemizer = track.Phonemizer,
-                RendererSettings = track.RendererSettings,
+                RendererSettings = track.RendererSettings.Clone(),
                 Mute = track.Mute,
                 Muted = track.Muted,
                 Solo = false,
@@ -654,16 +686,16 @@ namespace OpenUtau.App.ViewModels {
                 TrackColor = track.TrackColor,
                 TrackExpressions = track.TrackExpressions.Select(exp => exp.Clone()).ToList()
             }));
-            DocManager.Inst.EndUndoGroup();
         }
 
         public void VoiceColorRemapping() {
-            if (track.Singer != null && track.Singer.Found && track.VoiceColorExp != null) {
+            if (IsCurrent && track.Singer != null && track.Singer.Found && track.VoiceColorExp != null) {
                 DocManager.Inst.ExecuteCmd(new VoiceColorRemappingNotification(track.TrackNo, false));
             }
         }
 
         public void OpenMixFxDialog() {
+            if (!IsCurrent) return;
             if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null) {
                 // 轨道头 fx 按钮 = 这条轨的实时效果机架（三面板，非模态、每轨单窗）。
                 // 效果链的**管理入口**已收归混音台右侧链面板（FxChainPanel，决策 B3）：
@@ -687,6 +719,9 @@ namespace OpenUtau.App.ViewModels {
             volumeSub = null;
             panSub?.Dispose();
             panSub = null;
+            var avatar = Avatar;
+            Avatar = null;
+            avatar?.Dispose();
         }
     }
 }

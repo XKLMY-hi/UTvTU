@@ -88,6 +88,7 @@ namespace OpenUtau.App.Controls {
         public double PanValue {
             get => panValue;
             set {
+                if (!double.IsFinite(value)) return;
                 double v = Math.Clamp(value, -100, 100);
                 if (Math.Abs(v - panValue) < 0.001) {
                     return;
@@ -98,6 +99,9 @@ namespace OpenUtau.App.Controls {
                     if (_vm.ApplyPan(v)) {
                         MessageBus.Current.SendMessage(new PanChangeNotification(track.TrackNo, v));
                     }
+                    // Rejected edits must not become the next keyboard/wheel starting value.
+                    panValue = track.Pan * 100;
+                    UpdatePanValueDisplay();
                 }
             }
         }
@@ -345,13 +349,13 @@ namespace OpenUtau.App.Controls {
         }
 
         private void ApplyVolume(double db) {
-            if (track == null || _vm == null || !_vm.Edits.IsCurrent || !double.IsFinite(db)) return;
+            if (track == null || _vm == null || !double.IsFinite(db)) return;
             db = Math.Clamp(db, MixerMetrics.FaderMinDb, MixerMetrics.FaderMaxDb);
             if (_vm.ApplyVolume(db)) {
                 MessageBus.Current.SendMessage(new VolumeChangeNotification(track.TrackNo, track.Muted ? MixerMetrics.FaderMinDb : db));
             }
             UpdateFaderPosition();
-            UpdateVolValueDisplay(db);
+            UpdateVolValueDisplay(track.Volume);
         }
 
         // ── 按钮 ─────────────────────────────────────────────
