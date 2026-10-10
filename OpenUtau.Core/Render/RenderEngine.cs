@@ -51,7 +51,8 @@ namespace OpenUtau.Core.Render {
 
     class RenderPartRequest {
         public UVoicePart part;
-        public long timestamp;
+        public long revision;
+        internal int publicationScheduled;
         public int trackNo;
         public RenderPhrase[] phrases;
         public WaveSource[] sources;
@@ -406,6 +407,7 @@ namespace OpenUtau.Core.Render {
             CancellationTokenSource cancellation,
             Progress progress,
             SemaphoreSlim sem) {
+            var token = cancellation.Token;
             await sem.WaitAsync().ConfigureAwait(false);
             try {
                 if (cancellation.IsCancellationRequested) return;
@@ -426,10 +428,7 @@ namespace OpenUtau.Core.Render {
                     progress.Complete(phrase.phones.Length, "Cached");
                 }
                 source.SetSamples(samples);
-                if (request.sources.All(s => s.HasSamples)) {
-                    request.part.SetMix(request.mix);
-                    DocManager.Inst.ExecuteCmd(new PartRenderedNotification(request.part));
-                }
+                RenderResultPublisher.Queue(project, request, token);
             } finally {
                 sem.Release();
             }

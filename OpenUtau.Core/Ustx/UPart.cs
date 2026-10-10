@@ -57,6 +57,7 @@ namespace OpenUtau.Core.Ustx {
         [YamlIgnore] private Dictionary<string, Phonemizer> overridePhonemizers = new Dictionary<string, Phonemizer>();
         [YamlIgnore] private long notesTimestamp;
         [YamlIgnore] private long phonemesTimestamp;
+        [YamlIgnore] private long renderRevision;
 
         [YamlIgnore] private ISignalSource mix;
 
@@ -306,9 +307,13 @@ namespace OpenUtau.Core.Ustx {
                     phoneme.Validate(options, project, track, this, note);
                 }
             }
-            renderPhrases.Clear();
-            if (PhonemesUpToDate) {
-                renderPhrases.AddRange(RenderPhrase.FromPart(project, track, this));
+            var phrases = PhonemesUpToDate
+                ? RenderPhrase.FromPart(project, track, this).ToArray()
+                : Array.Empty<RenderPhrase>();
+            lock (this) {
+                renderPhrases.Clear();
+                renderPhrases.AddRange(phrases);
+                ++renderRevision;
             }
         }
 
@@ -322,7 +327,7 @@ namespace OpenUtau.Core.Ustx {
             lock (this) {
                 return new RenderPartRequest() {
                     part = this,
-                    timestamp = notesTimestamp,
+                    revision = renderRevision,
                     trackNo = trackNo,
                     phrases = renderPhrases.ToArray(),
                 };
@@ -332,6 +337,14 @@ namespace OpenUtau.Core.Ustx {
         internal void SetMix(ISignalSource mix) {
             lock (this) {
                 this.mix = mix;
+            }
+        }
+
+        internal bool TrySetMix(ISignalSource mix, long revision) {
+            lock (this) {
+                if (revision != renderRevision) return false;
+                this.mix = mix;
+                return true;
             }
         }
 
