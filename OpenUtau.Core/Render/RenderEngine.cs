@@ -302,20 +302,16 @@ namespace OpenUtau.Core.Render {
             for (int i = 0; i < project.tracks.Count; ++i) {
                 var trackRequests = requests.Where(req => req.trackNo == i).ToArray();
                 newCancellation.Token.ThrowIfCancellationRequested();
-                if (trackRequests.Length == 0) {
-                    var waveSources = project.parts
-                        .Where(part => part is UWavePart && part.trackNo == i)
-                        .Select(part => part as UWavePart)
-                        .Where(part => part.Samples != null)
-                        .Select(part => part.TrimSamples(project))
-                        .OfType<ISignalSource>()
-                        .ToList();
-                    trackMixes.Add(waveSources.Count > 0 ? new WaveMix(waveSources) : null);
-                } else {
+                if (trackRequests.Length > 0) {
                     // RenderTracks 由后台导出任务线程调用（无 UI 上下文依赖），同步等待安全
                     RenderRequestsAsync(trackRequests, newCancellation).GetAwaiter().GetResult();
-                    trackMixes.Add(new WaveMix(trackRequests.Select(req => req.mix).ToArray()));
                 }
+                // A voice request does not replace imported audio on the same track.
+                var sources = trackRequests.Select(req => req.mix).OfType<ISignalSource>().ToList();
+                sources.AddRange(project.parts.OfType<UWavePart>()
+                    .Where(part => part.trackNo == i && part.Samples != null)
+                    .Select(part => part.TrimSamples(project)));
+                trackMixes.Add(sources.Count > 0 ? new WaveMix(sources) : null);
             }
             return trackMixes;
         }

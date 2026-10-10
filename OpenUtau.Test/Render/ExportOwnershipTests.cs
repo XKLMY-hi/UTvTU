@@ -102,6 +102,32 @@ namespace OpenUtau.Test.Render {
             Assert.NotNull(typeof(ExportAdapter).GetConstructor(new[] { typeof(ISignalSource) }));
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void DryStemKeepsImportedAudio_WhenVoicePartSharesTheTrack(bool includeVoice) {
+            using var dispatcher = DocManagerTestSetup.EnterScopedDispatcher(installScheduler: false);
+            var project = new UProject();
+            project.tracks[0].Volume = -12;
+            project.tracks[0].Pan = 1;
+            var audio = new UWavePart { trackNo = 0, channels = 2, sampleRate = 44100 };
+            var samples = new float[32];
+            Array.Fill(samples, .25f);
+            typeof(UWavePart).GetProperty(nameof(UWavePart.Samples))!.SetValue(audio, samples);
+            project.parts.Add(audio);
+            if (includeVoice) project.parts.Add(new UVoicePart { trackNo = 0, Duration = 480 });
+            CancellationTokenSource slot = null!;
+            try {
+                var stems = RenderEngine.RenderTracks(project, TaskScheduler.Default, ref slot);
+                Assert.Single(stems);
+                var result = new float[32];
+                Assert.Equal(32, new ExportAdapter(stems[0]).Read(result, 0, result.Length));
+                Assert.All(result, value => Assert.Equal(.25f, value)); // Dry means no track fader/pan.
+            } finally {
+                RenderCancellationLease.Retire(ref slot);
+            }
+        }
+
         sealed class TinySource(Action? onRead = null) : ISignalSource {
             public int Calls;
             public bool IsReady(int position, int count) => true;
