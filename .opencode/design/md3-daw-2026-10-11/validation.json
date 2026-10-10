@@ -1,0 +1,76 @@
+{
+  "renderedAt": "2026-10-10T17:01:28.186Z",
+  "browser": "155.0.4283.45",
+  "captures": [
+    {
+      "filename": "arrange-dark-1440.png",
+      "view": "arrange",
+      "theme": "dark",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "filename": "piano-dark-1440.png",
+      "view": "piano",
+      "theme": "dark",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "filename": "mixer-dark-1440.png",
+      "view": "mixer",
+      "theme": "dark",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "filename": "arrange-light-1440.png",
+      "view": "arrange",
+      "theme": "light",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "filename": "piano-light-1440.png",
+      "view": "piano",
+      "theme": "light",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "filename": "mixer-light-1440.png",
+      "view": "mixer",
+      "theme": "light",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "filename": "piano-dark-1024.png",
+      "view": "piano",
+      "theme": "dark",
+      "width": 1024,
+      "height": 768
+    }
+  ],
+  "narrow": {
+    "documentWidth": 1024,
+    "viewportWidth": 1024,
+    "centerWidth": 824,
+    "rightHidden": true
+  },
+  "interactions": {
+    "dirtyOnMute": "未保存",
+    "muteUndo": "false",
+    "muteRedo": "true",
+    "saved": "已保存",
+    "volumeEdited": "-10.1",
+    "volumeDirty": "未保存",
+    "volumeUndo": "-3.2",
+    "collapsed": "workspace left-off right-off",
+    "shortcutView": true,
+    "themeToggle": "light",
+    "dialog": true,
+    "narrowReveal": true
+  },
+  "pageErrors": []
+}
