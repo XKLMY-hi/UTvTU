@@ -26,7 +26,7 @@ namespace OpenUtau.App.Editing {
         public bool Execute(UCommand command) {
             if (!CanExecute) return false;
             if (command is PartCommand part && (!ReferenceEquals(part.project, project) ||
-                !project.parts.Contains(part.part))) return false;
+                (command is AddPartCommand ? project.parts.Contains(part.part) : !project.parts.Contains(part.part)))) return false;
             var voicePart = command switch {
                 NoteCommand note => note.Part,
                 ExpCommand expression => expression.Part,

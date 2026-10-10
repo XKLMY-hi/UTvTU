@@ -46,6 +46,25 @@ namespace OpenUtau.Test.App {
         }
 
         [Fact]
+        public void NewPartCanBeAddedOnce_AndStaleExistingPartCommandsRemainRejected() {
+            Load();
+            var project = Doc.Project;
+            var added = new UVoicePart { Duration = 1920 };
+            using (var gesture = new DocumentEditGesture(project, "command.part.add")) {
+                Assert.True(gesture.Execute(new AddPartCommand(project, added)));
+                Assert.False(gesture.Execute(new AddPartCommand(project, added)));
+            }
+            Assert.Equal(2, project.parts.Count);
+            Doc.Undo();
+            Assert.DoesNotContain(added, project.parts);
+            using var stale = new DocumentEditGesture(project, "command.part.move");
+            Assert.False(stale.Execute(new MovePartCommand(project, added, 480, 0)));
+            Assert.Null(Doc.ActiveUndoGroup);
+            Doc.Redo();
+            Assert.Contains(added, project.parts);
+        }
+
+        [Fact]
         public void SealedGroupDuringInput_CanContinueInANewOwnedGroup() {
             var part = Load();
             using var gesture = new DocumentEditGesture(Doc.Project, "command.part.move");
