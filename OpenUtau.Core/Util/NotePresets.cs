@@ -16,9 +16,8 @@ namespace OpenUtau.Core.Util {
 
         public static void Save() {
             try {
-                File.WriteAllText(PathManager.Inst.NotePresetsFilePath,
-                    JsonConvert.SerializeObject(Default, Formatting.Indented),
-                    Encoding.UTF8);
+                AtomicFile.WriteAllText(PathManager.Inst.NotePresetsFilePath,
+                    JsonConvert.SerializeObject(Default, Formatting.Indented));
             } catch (Exception e) {
                 Log.Error(e, "Failed to save note presets.");
             }
