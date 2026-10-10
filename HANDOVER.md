@@ -1,4 +1,37 @@
-# HANDOVER — 新会话交接（2026-10-10 收口）
+# HANDOVER — 新会话交接（2026-10-11 原位重构启动）
+
+## 2026-10-11 最新状态（优先于下方历史记录）
+
+- 工作区本次核实为 `G:/xklmy文件夹/vibe coding/UTvTU`，移动盘下次仍须核实目录与 remote。
+- 主树仍是 `plus-develop`；产品改动提交 `6f8998e4`，设计提交 `09c7f292`，随后为进度文档提交。
+  尚未推送。下方的 `d89cf1b8` / “与远端一致”是旧会话记录，不代表当前 HEAD。
+- 用户要求先回到 GitHub 产品基线 `b0eb3278`；回滚前 18 个提交保存在
+  `codex/backup-before-github-rollback-20261011`（`2747decb`），不能整体恢复这些改动。
+- 方向：**人声制作工作站**，在 UTvTU 上原位重构；`../UTvTU-rebuild` 只作为上游参考，
+  上游提交 `5c3c83bb`，不从零另建产品。Windows 为唯一当前验收平台。
+- 用户明确授权直接实施，前后端共同推进，允许一个子 agent 设计紧凑 MD3 视觉，保留 DAW 专业性，
+  **不再逐阶段询问审批**。仍交付可查看结果；不自行截图产品界面。
+- 已实施首批：统一混音编辑会话、命令、拖动撤销、跨视图同步、效果预览/取消、失败保存、旧窗口隔离。
+  SDK **9.0.317** 构建成功；基线 813 测试全绿，当前 **824 测试全绿**（新增 11 个行为用例）。
+- 当前技术栈是 .NET 8 / Avalonia 12.1.0 / 自研 MD3 + Fluent；AGENTS 的 SukiUI 现状描述已过时。
+- 视觉子 agent 已交付 `.opencode/design/md3-daw-2026-10-11/` 的 HTML + 7 张 PNG + 规格，
+  原型已渲染检查，**尚未替换产品界面**；HTML 令牌和 SVG 几何为后续迁移依据。
+- Windows 两轨测试工程启动/加载成功。运行目录缺少 `Samples`，启动日志报一次目录错误。
+  桌面控制工具拒绝读取 OpenUTAU（未获工具授权）；未驱动实机推子或验证真实音频听觉。
+  交互行为以 Avalonia 无头测试验证，不将启动描述为零错误。测试启动实例已结束。
+- 下一步先看 [首批实施与验证](.opencode/plans/mix-editing-2026-10-11.md)、
+  [共同重构路线](.opencode/plans/utvtu-in-place-refactor.md) 与
+  [设计规格](.opencode/design/md3-daw-2026-10-11/README.md)，按模块迁移应用壳视觉和导航/生命周期边界。
+  F05/F06、合成/音频重构、自动保存失败与原子写入仍未完成。不要重新从零探索仓库。
+
+本机存在 SDK 10；遵守 SDK 9 构建限制时直接指定 MSBuild，不新增 global.json：
+
+```powershell
+dotnet 'C:\Program Files\dotnet\sdk\9.0.317\MSBuild.dll' OpenUtau.sln -restore -m:1 -p:RuntimeIdentifiers= -p:UsedAvaloniaProducts= -verbosity:minimal
+dotnet test OpenUtau.Test/OpenUtau.Test.csproj --no-build
+```
+
+下方保留 2026-10-10 历史资料，涉及分支/HEAD/基线数字时以上述最新状态为准。
 
 > **新会话第一件事：读这个文件。** 它包含路径核实方法、分支/工作树实况、已完成与未完成、验证命令与基线、项目铁律、已知陷阱。
 > 读完即可开工，**不要重新探索仓库**（本仓库的队友反复因"从零摸索"烧完上下文）。
