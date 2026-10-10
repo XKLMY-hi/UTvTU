@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -107,12 +107,8 @@ namespace OpenUtau.Core.Render {
 
         /// <summary>离线混音渲染核心（导出/录制共用）。</summary>
         public Tuple<WaveMix, List<Fader>> RenderMixdown(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation, bool wait, MixFxMode mode) {
-            var newCancellation = new CancellationTokenSource();
-            var oldCancellation = Interlocked.Exchange(ref cancellation, newCancellation);
-            if (oldCancellation != null) {
-                oldCancellation.Cancel();
-                oldCancellation.Dispose();
-            }
+            using var renderLifetime = RenderCancellationLease.Replace(ref cancellation);
+            var newCancellation = renderLifetime.Source;
             double startMs = project.timeAxis.TickPosToMsPos(startTick);
             double endMs = endTick == -1 ? double.PositiveInfinity : project.timeAxis.TickPosToMsPos(endTick);
             var faders = new List<Fader>();
@@ -121,11 +117,14 @@ namespace OpenUtau.Core.Render {
             // StopPlayback / StartPlayback（Stop+drain 后）/ 渲染与导出段尾部。
             var requests = FilterRequests(PrepareRequests(), startMs, endMs);
             var trackOutputs = BuildTrackOutputs(requests, mode, faders);
+            var renderOperation = renderLifetime.Acquire();
             var task = Task.Run(async () => {
+                using var operation = renderOperation;
                 await RenderRequestsAsync(requests, newCancellation, playing: !wait);
             });
             task.ContinueWith(task => {
-                if (task.IsFaulted && !wait) {
+                if (task.IsFaulted && !wait && !newCancellation.IsCancellationRequested &&
+                    ReferenceEquals(project, DocManager.Inst.Project)) {
                     Log.Error(task.Exception.Flatten(), "Failed to render.");
                     PlaybackManager.Inst.StopPlayback();
                     var flatEx = task.Exception.Flatten();
@@ -158,12 +157,8 @@ namespace OpenUtau.Core.Render {
         public Tuple<MasterAdapter, List<Fader>>? RenderProject(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation) {
             double startMs = project.timeAxis.TickPosToMsPos(startTick);
             double endMs = endTick == -1 ? double.PositiveInfinity : project.timeAxis.TickPosToMsPos(endTick);
-            var newCancellation = new CancellationTokenSource();
-            var oldCancellation = Interlocked.Exchange(ref cancellation, newCancellation);
-            if (oldCancellation != null) {
-                oldCancellation.Cancel();
-                oldCancellation.Dispose();
-            }
+            using var renderLifetime = RenderCancellationLease.Replace(ref cancellation);
+            var newCancellation = renderLifetime.Source;
 
             var faders = new List<Fader>();
             var requests = FilterRequests(PrepareRequests(), startMs, endMs);
@@ -175,7 +170,7 @@ namespace OpenUtau.Core.Render {
             master.SetPosition((int)(startMs * SignalChain.AudioSettings.SampleRate / 1000) * SignalChain.AudioSettings.Channels);
 
             // 两批渲染：等批 1 完成即返回（播放头前方数据必在）；批 2 后台继续
-            RenderPlaybackAsync(requests, newCancellation).GetAwaiter().GetResult();
+            RenderPlaybackAsync(requests, newCancellation, renderLifetime).GetAwaiter().GetResult();
             if (newCancellation.IsCancellationRequested) {
                 return null;
             }
@@ -268,12 +263,8 @@ namespace OpenUtau.Core.Render {
 
         // for export
         public List<WaveMix> RenderTracks(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation) {
-            var newCancellation = new CancellationTokenSource();
-            var oldCancellation = Interlocked.Exchange(ref cancellation, newCancellation);
-            if (oldCancellation != null) {
-                oldCancellation.Cancel();
-                oldCancellation.Dispose();
-            }
+            using var renderLifetime = RenderCancellationLease.Replace(ref cancellation);
+            var newCancellation = renderLifetime.Source;
             var trackMixes = new List<WaveMix>();
             var requests = PrepareRequests();
             // 遍历全部轨道——纯音频轨（UWavePart）/空轨也在列表中（null 或混入 wave part），
@@ -306,18 +297,14 @@ namespace OpenUtau.Core.Render {
             if (PlaybackManager.Inst.OutputActive || PlaybackManager.Inst.PlayingMaster || PlaybackManager.Inst.IsRecording) {
                 return;
             }
-            var newCancellation = new CancellationTokenSource();
-            var oldCancellation = Interlocked.Exchange(ref cancellation, newCancellation);
-            if (oldCancellation != null) {
-                oldCancellation.Cancel();
-                oldCancellation.Dispose();
-            }
+            using var renderLifetime = RenderCancellationLease.Replace(ref cancellation);
+            var newCancellation = renderLifetime.Source;
+            var renderOperation = renderLifetime.Acquire();
+            var token = newCancellation.Token;
             Task.Run(async () => {
+                using var operation = renderOperation;
                 try {
-                    Thread.Sleep(200);
-                    if (newCancellation.Token.IsCancellationRequested) {
-                        return;
-                    }
+                    await Task.Delay(200, token).ConfigureAwait(false);
                     await RenderRequestsAsync(PrepareRequests(), newCancellation);
                 } catch (Exception e) {
                     if (!newCancellation.IsCancellationRequested) {
@@ -408,7 +395,8 @@ namespace OpenUtau.Core.Render {
             Progress progress,
             SemaphoreSlim sem) {
             var token = cancellation.Token;
-            await sem.WaitAsync().ConfigureAwait(false);
+            try { await sem.WaitAsync(token).ConfigureAwait(false); }
+            catch (OperationCanceledException) when (token.IsCancellationRequested) { return; }
             try {
                 if (cancellation.IsCancellationRequested) return;
                 var phrase = tuple.Item1;
@@ -429,6 +417,8 @@ namespace OpenUtau.Core.Render {
                 }
                 source.SetSamples(samples);
                 RenderResultPublisher.Queue(project, request, token);
+            } catch (OperationCanceledException) when (token.IsCancellationRequested) {
+                // Cancellation is an expected render lifecycle outcome.
             } finally {
                 sem.Release();
             }
@@ -440,7 +430,8 @@ namespace OpenUtau.Core.Render {
         /// （运行中的 Task 由线程池持有，不会 GC；取消由 token 传播）。
         /// 批 2 未就绪短语由既有 Waited 静音保护兜底（WaveMix 取 Max → MasterAdapter 累计）。
         /// </summary>
-        private async Task RenderPlaybackAsync(RenderPartRequest[] requests, CancellationTokenSource cancellation) {
+        private async Task RenderPlaybackAsync(RenderPartRequest[] requests, CancellationTokenSource cancellation,
+            RenderCancellationLease renderLifetime) {
             if (requests.Length == 0 || cancellation.IsCancellationRequested) {
                 return;
             }
@@ -471,7 +462,9 @@ namespace OpenUtau.Core.Render {
             }
             // 批 2 后台继续；完成时收尾（进度清零 + 机会性 Flush）。
             // 异常必须观察：批 2 渲染失败此前被静默吞掉（播放头后方无提示静音）
+            var renderOperation = renderLifetime.Acquire();
             _ = RenderBatchAsync(batch2, cancellation, progress).ContinueWith(t => {
+                using var operation = renderOperation;
                 if (t.IsFaulted && !cancellation.IsCancellationRequested) {
                     Log.Error(t.Exception.Flatten(), "Failed to render background batch.");
                     DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(
