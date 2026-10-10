@@ -130,6 +130,13 @@ namespace OpenUtau.Test.App {
             var used = Regex.Matches(xaml, @"\{StaticResource ([A-Za-z0-9_]+)\}")
                 .Select(m => m.Groups[1].Value).Distinct().ToList();
             var defined = Regex.Matches(xaml, "x:Key=\"([^\"]+)\"").Select(m => m.Groups[1].Value).ToHashSet();
+            // Locally mounted control themes are part of this resource scope, just like inline menus.
+            foreach (Match include in Regex.Matches(xaml, "<StyleInclude[^>]*Source=\"([^\"]+)\"")) {
+                string path = Path.Combine(AppContext.BaseDirectory, include.Groups[1].Value.TrimStart('/'));
+                Assert.True(File.Exists(path), "Missing mounted style source: " + path);
+                string styles = File.ReadAllText(path);
+                defined.UnionWith(Regex.Matches(styles, "x:Key=\"([^\"]+)\"").Select(m => m.Groups[1].Value));
+            }
             var missing = used.Where(k => !defined.Contains(k)).ToList();
             Assert.True(missing.Count == 0, "TrackHeader 内悬空引用：" + string.Join(", ", missing));
         }

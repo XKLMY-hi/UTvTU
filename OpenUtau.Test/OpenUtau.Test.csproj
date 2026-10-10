@@ -56,6 +56,7 @@
     <None Include="..\OpenUtau\App.axaml" Link="App.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Styles\Md3Controls.axaml" Link="Styles\Md3Controls.axaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\OpenUtau\Styles\WorkspaceShell.axaml" Link="Styles\WorkspaceShell.axaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\OpenUtau\Styles\TrackHeaderControls.axaml" Link="Styles\TrackHeaderControls.axaml" CopyToOutputDirectory="PreserveNewest" />
     <!-- W31：应用级样式表不再允许 ControlTheme 之外的 /template/ 补丁 —— 按源码原文做常驻契约断言 -->
     <None Include="..\OpenUtau\Styles\Styles.axaml" Link="Styles\Styles.axaml" CopyToOutputDirectory="PreserveNewest" />
     <!-- W40：品牌几何防漂移契约 —— 产品几何 vs 用户设计稿**纯提取件**逐字比对。
