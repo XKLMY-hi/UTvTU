@@ -183,3 +183,33 @@ M/S 未保存/撤销/重做、轨道音量从 −3.2 改到 −10.1 后撤销、
 写入完成时已做 XML 解析、旧 x:Name / 事件集合保留、全部事件处理器存在、品牌 Path 属性一致
 及 `git diff --check` 检查。按主 agent 协作约定未在本子 agent 运行构建 / 测试 / 提交；
 测试绿色状态与实际运行结论须由主 agent 统一验证后记录。未截图产品。
+
+### 轨道头控件模板收敛（2026-10-11）
+
+`OpenUtau/Controls/TrackHeader.axaml` 局部挂载 `TrackHeaderControls.axaml`，
+轨道头文字按钮、动作按钮、M/S、FX、两条小滑杆分别显式选择由本控件拥有的 ControlTheme。
+原 `clear` / `toolbar` / `fader` 类改为专用类，避免全局旧模板与状态样式抢占新主题。
+轨道头文件已无外部 `/template/` 补丁；新文件内的部件状态选择器只操作其自有模板。
+
+状态令牌继续来自设计 HTML：悬停层 8%、按下层 12%、禁用透明度 38%，
+M/S 选中与 FX 启用均为动态 secondary-container / on-secondary-container，
+键盘焦点采用动态 primary 内描边，反馈不改变控件尺寸。
+文字入口直接拥有 TextBlock，以 TemplateBinding 转发字体与前景，避免全局 TextBlock 样式压过继承值；
+M/S 原生路径与 FX 标签分别显式取自身按钮的 Foreground。
+
+保留姓名 18（compact 16）、歌手 / 音素器 / 渲染器 16、标准档 M/S/FX/设置 24×20、
+小滑杆内容高 16 和 8×8 Thumb；外框圆角从 12 收敛为 4。
+Volume / Pan 的范围、值绑定、手势事件和禁用条件保持原有语义；
+Slider 模板仍使用原生 PART_Track、RepeatButton 和 Thumb，因此真实拖动、键盘与轨道点击仍交给 Slider。
+compact 布局行高、内联渲染器、菜单、所有旧名称及事件均保留，
+主 agent 随后补齐紧凑档：头像 28×28，动作栏两列、每键 20×16，M/S 同行、FX/溢出同下一行；
+设置在紧凑档从已有卡片菜单进入，42/63/84 DIP 也接受整张卡片的溢出检查。
+
+写入时仅做 XML、原名称 / 事件 / 命令 / 双向或单向状态绑定保留检查与 diff 空白检查。
+后续统一验证应覆盖现有 TrackHeaderLayoutTests 的 42 / 63 / 84 / 105 / 147 高度与窄宽度，
+Mute/Solo/FX 的正常、选中、悬停、按下、禁用、键盘聚焦；
+特别检查实际模板文字色是否等于所属按钮前景，以及两个小滑杆拖动 / 键盘 / 复位 / 保存。
+子 agent 未构建、提交或截图产品；最终产品验证由主 agent 统一执行，见
+[第三批实施记录](../../plans/control-refactor-2026-10-11.md)。
+第三批最终 SDK 9 构建成功，866 项测试全绿，UI lint ERROR/WARN 0，Windows 启动/退出无 ERR/FTL。
+未截图产品，真实字体光栅化与听觉仍由用户实机检查。
