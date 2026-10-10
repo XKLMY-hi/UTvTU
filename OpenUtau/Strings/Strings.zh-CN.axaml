@@ -1234,6 +1234,7 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="render.status.exporting">导出轨道 {0}/{1}: {2}</system:String>
   <system:String x:Key="render.status.done">渲染完成！</system:String>
   <system:String x:Key="render.status.failed">渲染失败。</system:String>
+  <system:String x:Key="render.status.cancelled">导出已取消。</system:String>
 
   <system:String x:Key="window.minimize">最小化</system:String>
   <system:String x:Key="window.maximize">最大化</system:String>

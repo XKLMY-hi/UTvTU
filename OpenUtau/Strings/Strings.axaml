@@ -1106,6 +1106,7 @@ General
   <system:String x:Key="render.status.exporting">Exporting track {0}/{1}: {2}</system:String>
   <system:String x:Key="render.status.done">Render complete!</system:String>
   <system:String x:Key="render.status.failed">Render failed.</system:String>
+  <system:String x:Key="render.status.cancelled">Render cancelled.</system:String>
 
   <system:String x:Key="window.minimize">Minimize</system:String>
   <system:String x:Key="window.maximize">Maximize</system:String>
