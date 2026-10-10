@@ -31,9 +31,7 @@
   <system:String x:Key="debug.reverselogorder">Log volgorde omkeren</system:String>
 
   <system:String x:Key="dialogs.about.caption">Over OpenUTAU</system:String>
-  <system:String x:Key="dialogs.about.message">
-    OpenUtau wil een open-source bewerkingsomgeving zijn voor de UTAU-gemeenschap, met een moderne gebruikerservaring en intelligente fonologische ondersteuning. Bezoek ons op Github.
-  </system:String>
+  <system:String x:Key="dialogs.about.message">OpenUtau wil een open-source bewerkingsomgeving zijn voor de UTAU-gemeenschap, met een moderne gebruikerservaring en intelligente fonologische ondersteuning. Bezoek ons op Github.</system:String>
   <system:String x:Key="dialogs.exitsave.caption">UTvTU afsluiten</system:String>
   <system:String x:Key="dialogs.exitsave.message">Het huidige project bevat niet-opgeslagen wijzigingen. Wilt u het opslaan?</system:String>
   <system:String x:Key="dialogs.export.caption">Exporteren</system:String>

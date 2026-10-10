@@ -31,9 +31,7 @@
   <system:String x:Key="debug.reverselogorder">Inverti l'ordine dei log</system:String>
 
   <system:String x:Key="dialogs.about.caption">Informazioni su OpenUTAU</system:String>
-  <system:String x:Key="dialogs.about.message">
-    OpenUTAU punta ad essere un programma open source con un'esperienza utente moderna e supporto fonetico intelligente per la communità di UTAU. Visitaci su GitHub.
-  </system:String>
+  <system:String x:Key="dialogs.about.message">OpenUTAU punta ad essere un programma open source con un'esperienza utente moderna e supporto fonetico intelligente per la communità di UTAU. Visitaci su GitHub.</system:String>
   <system:String x:Key="dialogs.exitsave.caption">Stai uscendo da OpenUtau</system:String>
   <system:String x:Key="dialogs.exitsave.message">Questo progetto attuale ha dei cambiamenti non salvati. Vuoi salvare?</system:String>
   <system:String x:Key="dialogs.export.caption">Esporta</system:String>
@@ -476,9 +474,7 @@ Tieni premuto Ctrl per selezionare</system:String>
     Se vuoi utilizzare resampler esterni, aggiungi il file DLL o EXE del resampler nella cartella Resampler all'interno del percorso d'installazione.
   </system:String>
   <!--<system:String x:Key="prefs.rendering.skipmuted">Skip muted tracks</system:String>-->
-  <system:String x:Key="prefs.rendering.threads.cpuwarn">
-    Attenzione: troppi render threads attivi possono causare rallentamenti.
-  </system:String>
+  <system:String x:Key="prefs.rendering.threads.cpuwarn">Attenzione: troppi render threads attivi possono causare rallentamenti.</system:String>
   <system:String x:Key="prefs.rendering.threads.numthreads">Render Threads Massimi</system:String>
   <!--<system:String x:Key="prefs.rendering.wavtool">Wavtool</system:String>-->
   <!--<system:String x:Key="prefs.utau">UTAU</system:String>-->

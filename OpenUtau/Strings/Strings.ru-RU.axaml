@@ -31,9 +31,7 @@
   <system:String x:Key="debug.reverselogorder">Обратный порядок лога</system:String>
 
   <system:String x:Key="dialogs.about.caption">Об OpenUtau</system:String>
-  <system:String x:Key="dialogs.about.message">
-    OpenUtau стремится стать средой редактирования с открытым исходным кодом для сообщества UTAU, с современным пользовательским интерфейсом и интеллектуальной фонологической поддержкой. Посетите нас на GitHub.
-  </system:String>
+  <system:String x:Key="dialogs.about.message">OpenUtau стремится стать средой редактирования с открытым исходным кодом для сообщества UTAU, с современным пользовательским интерфейсом и интеллектуальной фонологической поддержкой. Посетите нас на GitHub.</system:String>
   <system:String x:Key="dialogs.exitsave.caption">Выход из OpenUtau</system:String>
   <system:String x:Key="dialogs.exitsave.message">Текущий проект содержит несохраненные изменения. Хотите сохранить изменения?</system:String>
   <system:String x:Key="dialogs.export.caption">Экспорт</system:String>
@@ -472,9 +470,7 @@ Syntax: prefix,suffix</system:String>-->
     Примечание: для использования внешних ресамплеров, пожалуйста, добавьте DLL или EXE ресамплера в папку Resamplers в пути установки OpenUtau и выберите его в параметрах
   </system:String>
   <system:String x:Key="prefs.rendering.skipmuted">Пропускать заглушенные треки</system:String>
-  <system:String x:Key="prefs.rendering.threads.cpuwarn">
-    Предупреждение: слишком большое количество потоков рендеринга может привести к медленной работе OpenUtau.
-  </system:String>
+  <system:String x:Key="prefs.rendering.threads.cpuwarn">Предупреждение: слишком большое количество потоков рендеринга может привести к медленной работе OpenUtau.</system:String>
   <system:String x:Key="prefs.rendering.threads.numthreads">Максимальное количество потоков рендеринга</system:String>
   <system:String x:Key="prefs.rendering.wavtool">Вавтул</system:String>
   <system:String x:Key="prefs.utau">УТАУ</system:String>

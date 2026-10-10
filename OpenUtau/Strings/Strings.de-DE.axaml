@@ -31,9 +31,7 @@
   <system:String x:Key="debug.reverselogorder">Log Reihenfolge umkehren</system:String>
 
   <system:String x:Key="dialogs.about.caption">Über OpenUTAU</system:String>
-  <system:String x:Key="dialogs.about.message">
-    OpenUtaus Ziel ist es eine quelloffene Bearbeitungsumgebung für die UTAU Community mit einer modernen Benutzererfahrung und intelligenter phonologischer Unterstützung zu sein. Besuchen Sie uns auf Github.
-  </system:String>
+  <system:String x:Key="dialogs.about.message">OpenUtaus Ziel ist es eine quelloffene Bearbeitungsumgebung für die UTAU Community mit einer modernen Benutzererfahrung und intelligenter phonologischer Unterstützung zu sein. Besuchen Sie uns auf Github.</system:String>
   <system:String x:Key="dialogs.exitsave.caption">OpenUtau schließen</system:String>
   <system:String x:Key="dialogs.exitsave.message">Das aktuelle Projekt beinhaltet nicht gespeicherte Änderungen. Möchten Sie es speichern?</system:String>
   <system:String x:Key="dialogs.export.caption">Exportieren</system:String>
@@ -476,9 +474,7 @@ Warnung: Diese Option entfernt alle benutzerdefinierten Einstellungen.</system:S
     Anmerkung: Um externe resampler zu verwenden, fügen Sie bitte die DLL or EXE Datei des resamplers in den Resamplers Ordner im OpenUtau Installationspfad hinzu. Wählen Sie ihn anschließend in den Einstellungen aus.
   </system:String>
   <system:String x:Key="prefs.rendering.skipmuted">Stummgeschaltete Spuren überspringen</system:String>
-  <system:String x:Key="prefs.rendering.threads.cpuwarn">
-    Warnung: Zu viele Render-Prozesse können OpenUtau verlangsamen.
-  </system:String>
+  <system:String x:Key="prefs.rendering.threads.cpuwarn">Warnung: Zu viele Render-Prozesse können OpenUtau verlangsamen.</system:String>
   <system:String x:Key="prefs.rendering.threads.numthreads">Maximale Render-Prozesse</system:String>
   <!--<system:String x:Key="prefs.rendering.wavtool">Wavtool</system:String>-->
   <!--<system:String x:Key="prefs.utau">UTAU</system:String>-->

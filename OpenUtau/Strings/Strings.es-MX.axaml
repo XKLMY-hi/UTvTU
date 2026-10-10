@@ -31,9 +31,7 @@
   <system:String x:Key="debug.reverselogorder">Revertir orden del registro</system:String>
 
   <system:String x:Key="dialogs.about.caption">Sobre OpenUTAU</system:String>
-  <system:String x:Key="dialogs.about.message">
-    OpenUTAU es un entorno de edición de código abierto para el programa de síntesis UTAU. Su objetivo es ofrecer una interfaz moderna, y soporte fonológico inteligente. ¡Visítanos en GitHub!
-  </system:String>
+  <system:String x:Key="dialogs.about.message">OpenUTAU es un entorno de edición de código abierto para el programa de síntesis UTAU. Su objetivo es ofrecer una interfaz moderna, y soporte fonológico inteligente. ¡Visítanos en GitHub!</system:String>
   <system:String x:Key="dialogs.exitsave.caption">Salir de OpenUTAU</system:String>
   <system:String x:Key="dialogs.exitsave.message">El projecto tiene cambios sin guardar. ¿Quieres guardar el archivo?</system:String>
   <system:String x:Key="dialogs.export.caption">Exportar</system:String>
@@ -476,9 +474,7 @@ Advertencia: Esta opción eliminará las bases personalizadas.</system:String>
     Nota: Para usar un Resampler externo, pon su archivo (sea .exe o .dll) en la carpeta Resamplers, en la ruta de instalación de OpenUTAU.
   </system:String>
   <system:String x:Key="prefs.rendering.skipmuted">Saltar pistas silenciadas</system:String>
-  <system:String x:Key="prefs.rendering.threads.cpuwarn">
-    Cuidado: Activar demasiados hilos de renderización puede causar que OpenUTAU corra lento. 
-  </system:String>
+  <system:String x:Key="prefs.rendering.threads.cpuwarn">Cuidado: Activar demasiados hilos de renderización puede causar que OpenUTAU corra lento.</system:String>
   <system:String x:Key="prefs.rendering.threads.numthreads">Máximo número de hilos de renderización</system:String>
   <!--<system:String x:Key="prefs.rendering.wavtool">Wavtool</system:String>-->
   <!--<system:String x:Key="prefs.utau">UTAU</system:String>-->

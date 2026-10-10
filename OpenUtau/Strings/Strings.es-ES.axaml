@@ -31,9 +31,7 @@
   <!--<system:String x:Key="debug.reverselogorder">Reverse Log Order</system:String>-->
 
   <system:String x:Key="dialogs.about.caption">Acerca de OpenUTAU</system:String>
-  <system:String x:Key="dialogs.about.message">
-    OpenUtau busca ser un entorno de edición de código fuente libre para la comunidad de UTAU, junto a una moderna experiencia de usuario y soporte inteligente fonológico. Visita el proyecto en Github
-  </system:String>
+  <system:String x:Key="dialogs.about.message">OpenUtau busca ser un entorno de edición de código fuente libre para la comunidad de UTAU, junto a una moderna experiencia de usuario y soporte inteligente fonológico. Visita el proyecto en Github</system:String>
   <!--<system:String x:Key="dialogs.exitsave.caption">Exit OpenUtau</system:String>-->
   <!--<system:String x:Key="dialogs.exitsave.message">The current project contains unsaved changes. Do you want to save it?</system:String>-->
   <system:String x:Key="dialogs.export.caption">Exportar</system:String>

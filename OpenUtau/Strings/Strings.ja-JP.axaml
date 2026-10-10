@@ -31,9 +31,7 @@
   <system:String x:Key="debug.reverselogorder">古い順に並び変える</system:String>
 
   <system:String x:Key="dialogs.about.caption">UTvTUについて</system:String>
-  <system:String x:Key="dialogs.about.message">
-    OpenUtauはUTAUコミュニティのためのオープンソースなエディタであり、モダンなユーザー体験とインテリジェントな発音変換サポートを目指しています。Githubを中心に開発中です。
-  </system:String>
+  <system:String x:Key="dialogs.about.message">OpenUtauはUTAUコミュニティのためのオープンソースなエディタであり、モダンなユーザー体験とインテリジェントな発音変換サポートを目指しています。Githubを中心に開発中です。</system:String>
   <system:String x:Key="dialogs.exitsave.caption">UTvTUを終了</system:String>
   <system:String x:Key="dialogs.exitsave.message">保存されていない変更があります。保存しますか？</system:String>
   <system:String x:Key="dialogs.export.caption">エクスポート</system:String>
@@ -484,9 +482,7 @@
     Note: エンジンを使用するには、使用したいエンジンのDLLまたはEXEファイルをOpenUTAUフォルダ内のResamplersフォルダに追加し、選択してください。
   </system:String>
   <system:String x:Key="prefs.rendering.skipmuted">ミュート中のトラックをレンダリングしない</system:String>
-  <system:String x:Key="prefs.rendering.threads.cpuwarn">
-    警告：レンダースレッドが多すぎるとOpenUtauの動作が重くなる可能性があります。
-  </system:String>
+  <system:String x:Key="prefs.rendering.threads.cpuwarn">警告：レンダースレッドが多すぎるとOpenUtauの動作が重くなる可能性があります。</system:String>
   <system:String x:Key="prefs.rendering.threads.numthreads">最大レンダースレッド数</system:String>
   <!--<system:String x:Key="prefs.rendering.wavtool">Wavtool</system:String>-->
   <!--<system:String x:Key="prefs.utau">UTAU</system:String>-->

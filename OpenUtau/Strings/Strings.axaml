@@ -101,8 +101,7 @@
   <system:String x:Key="debug.reverselogorder">Reverse Log Order</system:String>
 
   <system:String x:Key="dialogs.about.caption">About UTvTU</system:String>
-  <system:String x:Key="dialogs.about.message">
-UTvTU is an enhanced fork of OpenUtau, an open source editing environment for UTAU community, with a modern user experience and intelligent phonological support.</system:String>
+  <system:String x:Key="dialogs.about.message">UTvTU is an enhanced fork of OpenUtau, an open source editing environment for UTAU community, with a modern user experience and intelligent phonological support.</system:String>
   <system:String x:Key="dialogs.exitsave.caption">Exit UTvTU</system:String>
   <system:String x:Key="dialogs.exitsave.message">The current project contains unsaved changes. Do you want to save it?</system:String>
   <system:String x:Key="dialogs.export.caption">Export</system:String>

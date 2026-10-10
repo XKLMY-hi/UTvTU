@@ -31,9 +31,7 @@
   <system:String x:Key="debug.reverselogorder">로그를 역순으로</system:String>
 
   <system:String x:Key="dialogs.about.caption">UTvTU란?</system:String>
-  <system:String x:Key="dialogs.about.message">
-    OpenUtau(오픈우타우)는 세련된 사용자 경험과 유연한 음운 지원을 통해, UTAU 커뮤니티를 위한 오픈 소스 편집 환경이 되고자 합니다. 지금 GitHub의 OpenUtau 레포지토리를 방문해 보세요.
-  </system:String>
+  <system:String x:Key="dialogs.about.message">OpenUtau(오픈우타우)는 세련된 사용자 경험과 유연한 음운 지원을 통해, UTAU 커뮤니티를 위한 오픈 소스 편집 환경이 되고자 합니다. 지금 GitHub의 OpenUtau 레포지토리를 방문해 보세요.</system:String>
   <system:String x:Key="dialogs.exitsave.caption">프로젝트 닫기</system:String>
   <system:String x:Key="dialogs.exitsave.message">프로젝트가 저장되지 않았습니다. 저장할까요?</system:String>
   <system:String x:Key="dialogs.export.caption">내보내기</system:String>
@@ -476,9 +474,7 @@ Syntax: prefix,suffix</system:String>-->
     참고: 외부 리샘플러를 사용하려면, OpenUtau 설치 경로 속 Resamplers 폴더에 리샘플러의 DLL 또는 EXE 파일을 넣어 주세요. 그리고 환경 설정에서 리샘플러를 선택합시다.
   </system:String>
   <system:String x:Key="prefs.rendering.skipmuted">뮤트된 트랙 건너뛰기</system:String>
-  <system:String x:Key="prefs.rendering.threads.cpuwarn">
-    경고: 렌더링 스레드가 너무 많아요. OpenUtau가 느려질 수 있습니다.
-  </system:String>
+  <system:String x:Key="prefs.rendering.threads.cpuwarn">경고: 렌더링 스레드가 너무 많아요. OpenUtau가 느려질 수 있습니다.</system:String>
   <system:String x:Key="prefs.rendering.threads.numthreads">최대 스레드 수</system:String>
   <system:String x:Key="prefs.rendering.wavtool">웨이브툴</system:String>
   <!--<system:String x:Key="prefs.utau">UTAU</system:String>-->

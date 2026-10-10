@@ -32,9 +32,7 @@
 
   <system:String x:Key="dialogs.about.caption">À propos de OpenUTAU
 </system:String>
-  <system:String x:Key="dialogs.about.message">
-    OpenUtau est un logiciel libre de synthétiseur vocal pour la communauté UTAU, avec une interface moderne et un support phonétique intelligent. Plus d'informations sur notre GitHub.
-  </system:String>
+  <system:String x:Key="dialogs.about.message">OpenUtau est un logiciel libre de synthétiseur vocal pour la communauté UTAU, avec une interface moderne et un support phonétique intelligent. Plus d'informations sur notre GitHub.</system:String>
   <system:String x:Key="dialogs.exitsave.caption">Quitter OpenUtau</system:String>
   <system:String x:Key="dialogs.exitsave.message">Le projet actuel contient des changements non enregistrés. Souhaitez-vous les enregistrer ?</system:String>
   <system:String x:Key="dialogs.export.caption">Exporter</system:String>
@@ -473,9 +471,7 @@ Attention : cela va effacer les préréglages.</system:String>
     Note: pour utiliser des resamplers externes, ajoutez le fichier .exe ou .dll du resampler dans le dossier "Resamplers" de OpenUTAU, puis choisissez-le dans Préférences.
   </system:String>
   <system:String x:Key="prefs.rendering.skipmuted">Sauter les pistes muettes</system:String>
-  <system:String x:Key="prefs.rendering.threads.cpuwarn">
-    Attention : l'utilisation de trop de threads pourrait ralentir OpenUTAU.
-  </system:String>
+  <system:String x:Key="prefs.rendering.threads.cpuwarn">Attention : l'utilisation de trop de threads pourrait ralentir OpenUTAU.</system:String>
   <system:String x:Key="prefs.rendering.threads.numthreads">Threads maximum pour le rendu</system:String>
   <!--<system:String x:Key="prefs.rendering.wavtool">Wavtool</system:String>-->
   <!--<system:String x:Key="prefs.utau">UTAU</system:String>-->

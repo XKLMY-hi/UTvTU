@@ -31,9 +31,7 @@
   <system:String x:Key="debug.reverselogorder">Balikan Urutan Log</system:String>
 
   <system:String x:Key="dialogs.about.caption">Tentang OpenUtau</system:String>
-  <system:String x:Key="dialogs.about.message">
-    OpenUtau bertujuan untuk menjadi lingkungan pengeditan sumber terbuka untuk komunitas UTAU, dengan pengalaman pengguna modern dan dukungan fonologis yang cerdas. Kunjungi kami di Github.
-  </system:String>
+  <system:String x:Key="dialogs.about.message">OpenUtau bertujuan untuk menjadi lingkungan pengeditan sumber terbuka untuk komunitas UTAU, dengan pengalaman pengguna modern dan dukungan fonologis yang cerdas. Kunjungi kami di Github.</system:String>
   <system:String x:Key="dialogs.exitsave.caption">Keluar dari OpenUtau</system:String>
   <system:String x:Key="dialogs.exitsave.message">Proyek saat ini berisi perubahan yang belum disimpan. Apakah Anda ingin menyimpannya?</system:String>
   <system:String x:Key="dialogs.export.caption">Ekspor</system:String>
@@ -476,9 +474,7 @@ Peringatan: opsi ini menghapus prasetel khusus.</system:String>
     Catatan: untuk menggunakan resampler eksternal, silakan tambahkan berkas resampler DLL atau EXE di folder Resamplers di jalur instal OpenUtau dan pilih di Preferensi.
   </system:String>
   <!--<system:String x:Key="prefs.rendering.skipmuted">Skip muted tracks</system:String>-->
-  <system:String x:Key="prefs.rendering.threads.cpuwarn">
-    Peringatan: terlalu banyak thread render dapat menyebabkan OpenUtau berjalan lambat.
-  </system:String>
+  <system:String x:Key="prefs.rendering.threads.cpuwarn">Peringatan: terlalu banyak thread render dapat menyebabkan OpenUtau berjalan lambat.</system:String>
   <!--<system:String x:Key="prefs.rendering.threads.numthreads">Maximum Render Threads</system:String>-->
   <!--<system:String x:Key="prefs.rendering.wavtool">Wavtool</system:String>-->
   <!--<system:String x:Key="prefs.utau">UTAU</system:String>-->

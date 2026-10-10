@@ -31,9 +31,7 @@
   <system:String x:Key="debug.reverselogorder">Đảo thứ tự log</system:String>
 
   <system:String x:Key="dialogs.about.caption">Thông tin về OpenUTAU</system:String>
-  <system:String x:Key="dialogs.about.message">
-    OpenUTAU nhắm đến việc tạo nên một môi trường làm việc mã nguồn mở dành cho cộng đồng UTAU, với một giao diện hiện đại và các tiện ích hỗ trợ âm vị thông minh. Thông tin chi tiết trên Github.
-  </system:String>
+  <system:String x:Key="dialogs.about.message">OpenUTAU nhắm đến việc tạo nên một môi trường làm việc mã nguồn mở dành cho cộng đồng UTAU, với một giao diện hiện đại và các tiện ích hỗ trợ âm vị thông minh. Thông tin chi tiết trên Github.</system:String>
   <system:String x:Key="dialogs.exitsave.caption">Thoát OpenUTAU</system:String>
   <system:String x:Key="dialogs.exitsave.message">Dự án đã bị chỉnh sửa. Bạn có muốn lưu không?</system:String>
   <system:String x:Key="dialogs.export.caption">Xuất thành</system:String>
@@ -476,9 +474,7 @@ Lưu ý: tuỳ chọn này cũng sẽ xoá các tổ hợp thiết lập của b
     Ghi chú: để sử dụng resampler khác, thêm resampler định dạng EXE hoặc DLL vào trong thư mục Resamplers của OpenUTAU và chọn trong Tuỳ chỉnh.
   </system:String>
   <system:String x:Key="prefs.rendering.skipmuted">Không render track bị tắt tiếng</system:String>
-  <system:String x:Key="prefs.rendering.threads.cpuwarn">
-    Cảnh báo: quá nhiều luồng render có thể làm OpenUTAU chạy chậm.
-  </system:String>
+  <system:String x:Key="prefs.rendering.threads.cpuwarn">Cảnh báo: quá nhiều luồng render có thể làm OpenUTAU chạy chậm.</system:String>
   <system:String x:Key="prefs.rendering.threads.numthreads">Luồng render tối đa</system:String>
   <!--<system:String x:Key="prefs.rendering.wavtool">Wavtool</system:String>-->
   <!--<system:String x:Key="prefs.utau">UTAU</system:String>-->
