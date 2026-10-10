@@ -1228,6 +1228,8 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="render.effects.volume">应用轨道音量 / 声像</system:String>
   <system:String x:Key="render.outputpath.placeholder">选择文件保存位置...</system:String>
   <system:String x:Key="render.ready">准备就绪</system:String>
+  <system:String x:Key="render.contract.mixdown">WAV 32 位浮点 · 全部轨道 · 包含实时效果、轨道音量/声像与主输出设置</system:String>
+  <system:String x:Key="render.contract.pertrack">WAV 16 位 · 整曲 · 所选未静音轨道 · 不含效果、轨道音量/声像与主输出设置的干轨</system:String>
   <system:String x:Key="render.status.preparing">正在准备渲染...</system:String>
   <system:String x:Key="render.status.mixdown">正在渲染混缩...</system:String>
   <system:String x:Key="render.status.writing">正在写入录音文件...</system:String>

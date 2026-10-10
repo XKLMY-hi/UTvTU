@@ -7,10 +7,12 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Markup.Xaml.MarkupExtensions;
 using OpenUtau.App.Controls;
 using OpenUtau.Core;
 using OpenUtau.Core.Export;
 using OpenUtau.Core.Render;
+using OpenUtau.Core.SignalChain;
 using OpenUtau.Core.Util;
 using Serilog;
 
@@ -20,6 +22,10 @@ namespace OpenUtau.App.Views {
         private readonly Core.Ustx.UProject project;
         private bool closed;
         private int browseVersion;
+        private bool rendering;
+        private bool refreshingContract;
+        private bool showingMixdown = true;
+        private readonly Dictionary<Core.Ustx.UTrack, bool> stemSelections = new();
         private readonly List<(CheckBox cb, Core.Ustx.UTrack track)> _trackChecks = new();
 
         /// <summary>
@@ -49,6 +55,13 @@ namespace OpenUtau.App.Views {
             }
 
             BuildTrackList();
+            RadioMixdown.IsCheckedChanged += (_, _) => {
+                if (RadioMixdown.IsChecked == true) RefreshModeContract();
+            };
+            RadioPerTrack.IsCheckedChanged += (_, _) => {
+                if (RadioPerTrack.IsChecked == true) RefreshModeContract();
+            };
+            RefreshModeContract();
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -77,6 +90,38 @@ namespace OpenUtau.App.Views {
                 row.Children.Add(label);
                 TrackCheckPanel.Children.Add(row);
                 _trackChecks.Add((cb, t));
+                stemSelections[t] = true;
+            }
+        }
+
+        void RefreshModeContract() {
+            if (closed || refreshingContract) return;
+            refreshingContract = true;
+            try {
+                if (!showingMixdown) {
+                    foreach (var (cb, track) in _trackChecks) stemSelections[track] = cb.IsChecked == true;
+                }
+                bool mixdown = rendering ? showingMixdown : RadioMixdown.IsChecked == true;
+                var policy = new RenderWindowModePolicy(mixdown, AudioSettings.SampleRate, rendering);
+                showingMixdown = mixdown;
+                RadioMixdown.IsChecked = mixdown;
+                RadioPerTrack.IsChecked = !mixdown;
+                InputPanel.IsEnabled = policy.InputsEnabled;
+                TrackCheckPanel.IsEnabled = policy.TrackSelectionEnabled;
+                RangeOptions.IsEnabled = policy.RangeSelectionEnabled;
+                if (!mixdown) RadioFullSong.IsChecked = true;
+                FormatCombo.ItemsSource = new[] { policy.FormatLabel };
+                FormatCombo.SelectedIndex = 0;
+                SampleRateCombo.ItemsSource = new[] { policy.SampleRateLabel };
+                SampleRateCombo.SelectedIndex = 0;
+                ChkVst.IsChecked = policy.IncludesEffects;
+                ChkBuiltinFx.IsChecked = policy.IncludesEffects;
+                ChkVolume.IsChecked = policy.IncludesTrackVolumeAndPan;
+                var displayed = policy.DisplayTrackSelection(_trackChecks.Select(x => stemSelections[x.track]));
+                for (int i = 0; i < _trackChecks.Count; i++) _trackChecks[i].cb.IsChecked = displayed[i];
+                ModeContractHint[!TextBlock.TextProperty] = new DynamicResourceExtension(policy.HintKey);
+            } finally {
+                refreshingContract = false;
             }
         }
 
@@ -85,7 +130,7 @@ namespace OpenUtau.App.Views {
         // ═══════════════════════════════════════════════════════════════
 
         public async void OnBrowsePath(object? sender, RoutedEventArgs args) {
-            if (closed) return;
+            if (closed || rendering) return;
             int version = ++browseVersion;
             var file = await FilePicker.SaveFile(this, "menu.file.exportmixdown", FilePicker.WAV);
             if (!closed && version == browseVersion && ReferenceEquals(project, DocManager.Inst.Project) && !string.IsNullOrEmpty(file))
@@ -97,12 +142,13 @@ namespace OpenUtau.App.Views {
         // ═══════════════════════════════════════════════════════════════
 
         public void OnStartRender(object? sender, RoutedEventArgs args) {
-            if (closed) return;
+            if (closed || rendering) return;
             if (!ReferenceEquals(project, DocManager.Inst.Project)) {
                 ProgressLabel.Text = ThemeManager.GetString("render.status.cancelled");
                 ProgressSubLabel.IsVisible = false;
                 return;
             }
+            RefreshModeContract();
             string path = OutputPathBox.Text ?? "";
             if (string.IsNullOrWhiteSpace(path)) {
                 var proj = project;
@@ -114,7 +160,7 @@ namespace OpenUtau.App.Views {
             }
 
             bool isMixdown = RadioMixdown.IsChecked == true;
-            bool applyMixFx = (ChkVst.IsChecked == true) || (ChkBuiltinFx.IsChecked == true);
+            var policy = new RenderWindowModePolicy(isMixdown, AudioSettings.SampleRate, false);
 
             // 渲染范围 → tick（此前范围单选是死 UI——恒整曲）
             int rangeStart = 0, rangeEnd = -1;
@@ -126,12 +172,14 @@ namespace OpenUtau.App.Views {
                 rangeStart = project.timeAxis.MsPosToTickPos(rStartMs);
                 rangeEnd = project.timeAxis.MsPosToTickPos(rEndMs);
             }
-            var selTrackNos = _trackChecks.Where(x => x.cb.IsChecked == true)
+            var selTrackNos = policy.TrackFilter(_trackChecks.Where(x => x.cb.IsChecked == true)
                 .Where(x => project.tracks.Contains(x.track))
-                .Select(x => x.track.TrackNo).ToHashSet();
+                .Select(x => x.track.TrackNo));
 
             var job = jobs.TryBegin(project.tracks.Select(t => t.TrackName));
             if (job == null) return;
+            rendering = true;
+            RefreshModeContract();
             browseVersion++; // A previously opened picker cannot rename the running job's destination.
             StartBtn.IsEnabled = false;
             ProgressLabel.Text = ThemeManager.GetString("render.status.preparing");
@@ -190,6 +238,8 @@ namespace OpenUtau.App.Views {
                     if (!job.Token.IsCancellationRequested) Log.Error(ex, "[RenderWindow] Render failed");
                 } finally {
                     jobs.Finish(job, error, outcome => {
+                        rendering = false;
+                        RefreshModeContract();
                         StartBtn.IsEnabled = true;
                         ProgressLabel.Text = ThemeManager.GetString(outcome switch {
                             RenderWindowJobOwner.Outcome.Completed => "render.status.done",

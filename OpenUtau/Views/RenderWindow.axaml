@@ -89,9 +89,10 @@
   <DockPanel LastChildFill="True">
     <Border>
     <DockPanel Margin="16" LastChildFill="True">
+      <StackPanel Name="InputPanel" DockPanel.Dock="Top">
 
       <!-- ═══ 1. Output Mode ═══ -->
-      <Border DockPanel.Dock="Top" Classes="renderCard" Margin="0,0,0,8">
+      <Border Classes="renderCard" Margin="0,0,0,8">
         <StackPanel>
           <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
             <Path Classes="cardIcon" Data="{StaticResource icon-layout}"/>
@@ -105,11 +106,14 @@
                          Name="RadioPerTrack"
                          Content="{DynamicResource render.pertrack}"/>
           </StackPanel>
+          <TextBlock Name="ModeContractHint" FontSize="11" TextWrapping="Wrap"
+                     Foreground="{DynamicResource md3.on-surface-variant}" Margin="0,6,0,0"
+                     Text="{DynamicResource render.contract.mixdown}"/>
         </StackPanel>
       </Border>
 
       <!-- ═══ 2. Range + Format ═══ -->
-      <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+      <Grid Margin="0,0,0,8">
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="*"/>
           <ColumnDefinition Width="*"/>
@@ -117,7 +121,7 @@
 
         <!-- Range -->
         <Border Grid.Column="0" Classes="renderCard" Margin="0,0,4,0">
-          <StackPanel>
+          <StackPanel Name="RangeOptions">
             <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
               <Path Classes="cardIcon" Data="{StaticResource icon-play}"/>
               <TextBlock Classes="cardTitle" Text="{DynamicResource render.range}"/>
@@ -141,21 +145,15 @@
               <TextBlock Classes="cardTitle" Text="{DynamicResource render.format}"/>
             </StackPanel>
             <TextBlock Classes="subLabel" Text="{DynamicResource render.formatlabel}"/>
-            <ComboBox Classes="renderCombo" Name="FormatCombo" SelectedIndex="0">
-              <ComboBoxItem Content="WAV 16-bit" Tag="Wav16"/>
-              <ComboBoxItem Content="WAV 32-bit float" Tag="Wav32"/>
-            </ComboBox>
+            <ComboBox Classes="renderCombo" Name="FormatCombo" IsEnabled="False"/>
             <TextBlock Classes="subLabel" Text="{DynamicResource render.samplerate}"/>
-            <ComboBox Classes="renderCombo" Name="SampleRateCombo" SelectedIndex="0">
-              <ComboBoxItem Content="44100 Hz" Tag="44100"/>
-              <ComboBoxItem Content="48000 Hz" Tag="48000"/>
-            </ComboBox>
+            <ComboBox Classes="renderCombo" Name="SampleRateCombo" IsEnabled="False"/>
           </StackPanel>
         </Border>
       </Grid>
 
       <!-- ═══ 3. Tracks + Effects ═══ -->
-      <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+      <Grid Margin="0,0,0,8">
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="*"/>
           <ColumnDefinition Width="*"/>
@@ -182,15 +180,15 @@
               <TextBlock Classes="cardTitle" Text="{DynamicResource render.effects}"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-              <CheckBox Name="ChkVst" IsChecked="True" VerticalAlignment="Center"/>
+              <CheckBox Name="ChkVst" IsChecked="True" IsEnabled="False" VerticalAlignment="Center"/>
               <TextBlock Text="{DynamicResource render.effects.vst}" FontSize="12" VerticalAlignment="Center" Margin="6,0,0,0"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-              <CheckBox Name="ChkBuiltinFx" IsChecked="True" VerticalAlignment="Center"/>
+              <CheckBox Name="ChkBuiltinFx" IsChecked="True" IsEnabled="False" VerticalAlignment="Center"/>
               <TextBlock Text="{DynamicResource render.effects.builtin}" FontSize="12" VerticalAlignment="Center" Margin="6,0,0,0"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-              <CheckBox Name="ChkVolume" IsChecked="True" VerticalAlignment="Center"/>
+              <CheckBox Name="ChkVolume" IsChecked="True" IsEnabled="False" VerticalAlignment="Center"/>
               <TextBlock Text="{DynamicResource render.effects.volume}" FontSize="12" VerticalAlignment="Center" Margin="6,0,0,0"/>
             </StackPanel>
           </StackPanel>
@@ -198,7 +196,7 @@
       </Grid>
 
       <!-- ═══ 4. Output path ═══ -->
-      <Border DockPanel.Dock="Top" Classes="renderCard" Margin="0,0,0,10">
+      <Border Classes="renderCard" Margin="0,0,0,10">
         <StackPanel>
           <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
             <Path Classes="cardIcon" Data="{StaticResource icon-folder-open}"/>
@@ -213,6 +211,7 @@
           </Grid>
         </StackPanel>
       </Border>
+      </StackPanel>
 
       <!-- ═══ 5. Bottom: progress + buttons ═══ -->
       <Border DockPanel.Dock="Bottom" Padding="0" Background="Transparent">

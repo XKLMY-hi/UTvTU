@@ -1100,6 +1100,8 @@ General
   <system:String x:Key="render.effects.volume">Apply track volume / pan</system:String>
   <system:String x:Key="render.outputpath.placeholder">Choose file location...</system:String>
   <system:String x:Key="render.ready">Ready</system:String>
+  <system:String x:Key="render.contract.mixdown">WAV 32-bit float · All tracks · Live effects, track volume/pan and master controls included</system:String>
+  <system:String x:Key="render.contract.pertrack">WAV 16-bit · Full song · Selected unmuted tracks · Dry stems without effects, track volume/pan or master controls</system:String>
   <system:String x:Key="render.status.preparing">Preparing to render...</system:String>
   <system:String x:Key="render.status.mixdown">Rendering mixdown...</system:String>
   <system:String x:Key="render.status.writing">Writing audio file...</system:String>
