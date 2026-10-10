@@ -27,12 +27,16 @@ namespace OpenUtau.App.Controls {
     ///   （集成时 = <c>mixerViewModel.WhenAnyValue(x =&gt; x.SelectedTrack)</c>）；
     /// · 面板**不写** <c>MixerViewModel</c>；一切模型变更由 VM 走 <c>DocManager.ExecuteCmd</c>。
     /// </summary>
-    public partial class FxChainPanel : UserControl {
+    public partial class FxChainPanel : UserControl, IDisposable {
         /// <summary>当前选中轨道（面板显示它的链）。</summary>
         public static readonly StyledProperty<UTrack?> TrackProperty =
             AvaloniaProperty.Register<FxChainPanel, UTrack?>(nameof(Track));
 
         IDisposable? selectionSub;
+        int selectionVersion;
+        bool shutdown;
+        internal int SelectionVersion => selectionVersion;
+        internal bool IsSelectionCurrent(int version) => !shutdown && version == selectionVersion;
 
         public FxChainPanel() {
             InitializeComponent();
@@ -66,20 +70,28 @@ namespace OpenUtau.App.Controls {
         /// （宿主在 UI 线程构造面板并接线），跨线程一律 Post。
         /// </summary>
         public void BindSelection(IObservable<UTrack?> selection) {
+            if (shutdown) return;
+            int version = ++selectionVersion;
             selectionSub?.Dispose();
             var owner = Thread.CurrentThread;
             selectionSub = selection.Subscribe(t => {
+                var document = DocManager.Inst.Project;
+                bool documentTrack = t != null && document.tracks.Contains(t);
+                void ApplySelection() {
+                    if (IsSelectionCurrent(version) && ReferenceEquals(document, DocManager.Inst.Project) &&
+                        (!documentTrack || document.tracks.Contains(t!))) Track = t;
+                }
                 if (Thread.CurrentThread == owner) {
-                    Track = t;
+                    ApplySelection();
                 } else {
-                    Dispatcher.UIThread.Post(() => Track = t);
+                    Dispatcher.UIThread.Post(ApplySelection);
                 }
             });
         }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
             base.OnPropertyChanged(change);
-            if (change.Property == TrackProperty) {
+            if (!shutdown && change.Property == TrackProperty) {
                 ViewModel.Attach(Track);
             }
         }
@@ -90,6 +102,18 @@ namespace OpenUtau.App.Controls {
             ViewModel.Subscribe();
         }
 
+        /// <summary>Final host shutdown. Temporary reparenting only calls Unsubscribe.</summary>
+        public void Shutdown() {
+            if (shutdown) return;
+            shutdown = true;
+            selectionVersion++;
+            selectionSub?.Dispose();
+            selectionSub = null;
+            ViewModel.Dispose();
+        }
+
+        public void Dispose() => Shutdown();
+
         protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e) {
             ViewModel.Unsubscribe();
             base.OnDetachedFromVisualTree(e);
@@ -98,15 +122,22 @@ namespace OpenUtau.App.Controls {
         // ══════════════════ 「＋」：加内置模块 / 浏览插件 ══════════════════
 
         void OnAddClick(object? sender, RoutedEventArgs e) {
+            int version = selectionVersion;
+            var target = ViewModel.CaptureTarget();
+            if (target == null || !target.IsCurrent) return;
             var flyout = new MenuFlyout();
             foreach (var descriptor in FxChainCatalog.BuiltIns) {
                 var module = descriptor.Module;
                 var item = new MenuItem { Header = ThemeManager.GetString(descriptor.NameKey) };
-                item.Click += (_, _) => ViewModel.AddBuiltIn(module);
+                item.Click += (_, _) => {
+                    if (IsSelectionCurrent(version)) ViewModel.AddBuiltIn(target, module);
+                };
                 flyout.Items.Add(item);
             }
             var browse = new MenuItem { Header = ThemeManager.GetString("fxchain.addvst") };
-            browse.Click += (_, _) => ViewModel.BrowseVst();
+            browse.Click += (_, _) => {
+                if (IsSelectionCurrent(version)) ViewModel.BrowseVst(target);
+            };
             flyout.Items.Add(browse);
             flyout.ShowAt(AddButton);
         }
@@ -114,7 +145,7 @@ namespace OpenUtau.App.Controls {
         // ══════════════════ 素材库拖入 ══════════════════
 
         void OnDragOver(object? sender, DragEventArgs e) {
-            bool accept = ViewModel.Track != null && FxChainDragData.Read(e) != null;
+            bool accept = !shutdown && ViewModel.CaptureTarget()?.CanExecute == true && FxChainDragData.Read(e) != null;
             e.DragEffects = accept ? DragDropEffects.Copy : DragDropEffects.None;
             ((IPseudoClasses)ChainRoot.Classes).Set("dragover", accept);
             e.Handled = true;
@@ -151,6 +182,7 @@ namespace OpenUtau.App.Controls {
 
         /// <summary>B5：内置三件套共用同一个内置编辑器弹层（MixFxDialog 自己保证每轨单窗 + 非模态）。</summary>
         public void OpenBuiltInEditor(UTrack track, MixFxModule module) {
+            if (panel.ViewModel.CaptureTarget(track)?.IsCurrent != true) return;
             MixFxDialog.Open(OwnerWindow, track);
         }
 
@@ -158,6 +190,10 @@ namespace OpenUtau.App.Controls {
         public void OpenVstEditor(UTrack track, int slotIndex) => _ = OpenVstEditorAsync(track, slotIndex);
 
         async System.Threading.Tasks.Task OpenVstEditorAsync(UTrack track, int slotIndex) {
+            var target = panel.ViewModel.CaptureTarget(track, slotIndex);
+            int version = panel.SelectionVersion;
+            bool Current() => panel.IsSelectionCurrent(version) && target?.IsCurrent == true;
+            if (!Current()) return;
             var slot = SlotAt(track, slotIndex);
             if (slot == null || !slot.IsLoaded || slot.Entry == null) {
                 return;
@@ -165,9 +201,12 @@ namespace OpenUtau.App.Controls {
             // 共享实例：没有就现加载（原生调用走异步路径，不卡 UI 线程）
             var fx = VstPluginManager.Inst.GetEffect(track.TrackNo, slotIndex)
                      ?? await VstPluginManager.Inst.LoadEffectAsync(track.TrackNo, slot);
+            if (!Current()) return;
             if (fx == null) {
-                OnUi(() => ShowInfo($"{ThemeManager.GetString("effects.error.load")}\n" +
-                                   $"{VstBridge.LastError() ?? ThemeManager.GetString("effects.error.unknown")}"));
+                OnUi(() => {
+                    if (Current()) ShowInfo($"{ThemeManager.GetString("effects.error.load")}\n" +
+                        $"{VstBridge.LastError() ?? ThemeManager.GetString("effects.error.unknown")}");
+                });
                 return;
             }
             bool opened = false;
@@ -180,7 +219,9 @@ namespace OpenUtau.App.Controls {
                 // 原生 GUI 打不开：退回诊断窗（不丢"打开 GUI / 看插件信息"的能力）
                 // await 之后的续体正常回到 UI 上下文；这里仍显式编组一次，
                 // 以便将来允许从后台线程调用而不用逐个补编组。
-                OnUi(() => new VstEditorWindow(fx).Show());
+                OnUi(() => {
+                    if (Current()) new VstEditorWindow(fx).Show();
+                });
             }
         }
 
@@ -195,6 +236,9 @@ namespace OpenUtau.App.Controls {
 
         /// <summary>浏览并加载插件（从 TrackEffectRack.BrowsePlugin 迁移；选择结果走命令写槽）。</summary>
         public void BrowsePlugin(UTrack track, int slotIndex) {
+            var target = panel.ViewModel.CaptureTarget(track, slotIndex);
+            int version = panel.SelectionVersion;
+            if (target == null || !target.IsCurrent || !panel.IsSelectionCurrent(version)) return;
             VstPluginRegistry.Inst.ScanAll();
             var effects = VstPluginRegistry.Inst.Effects;
             var instruments = VstPluginRegistry.Inst.All.Where(p => !p.IsEffect).ToList();
@@ -242,7 +286,7 @@ namespace OpenUtau.App.Controls {
 
             void Load(VstPluginEntry entry) {
                 // 选择对话框留在命令外；写 UID + 异步加载进命令（可撤销）
-                panel.ViewModel.LoadPlugin(slotIndex, entry.Uid);
+                if (panel.IsSelectionCurrent(version)) panel.ViewModel.LoadPlugin(target, slotIndex, entry.Uid);
                 picker.Close();
             }
 

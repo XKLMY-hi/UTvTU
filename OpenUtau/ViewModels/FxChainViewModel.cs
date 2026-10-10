@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Windows.Input;
 using Avalonia.Input;
 using Avalonia.Threading;
+using OpenUtau.App.Editing;
 using OpenUtau.Core;
 using OpenUtau.Core.Theming;
 using OpenUtau.Core.Ustx;
@@ -184,6 +186,7 @@ namespace OpenUtau.App.ViewModels {
 
         internal FxChainRowViewModel(FxChainViewModel owner, FxBuiltInDescriptor? builtIn, int slotIndex) {
             this.owner = owner;
+            Target = owner.CaptureTarget(slotIndex >= 0 ? slotIndex : null);
             BuiltIn = builtIn;
             Kind = builtIn != null ? FxChainItemKind.BuiltIn : FxChainItemKind.Vst;
             SlotIndex = slotIndex;
@@ -234,6 +237,7 @@ namespace OpenUtau.App.ViewModels {
         public ICommand MoveUpCommand { get; }
         /// <summary>下移（VST 段内，走命令）。</summary>
         public ICommand MoveDownCommand { get; }
+        internal FxChainViewModel.EditTarget? Target { get; }
 
         /// <summary>双击 / Enter：请求打开该行的编辑器。</summary>
         public event EventHandler<FxChainRowViewModel>? Activated;
@@ -261,8 +265,60 @@ namespace OpenUtau.App.ViewModels {
     /// </summary>
     public sealed class FxChainViewModel : ViewModelBase, ICmdSubscriber, IDisposable {
         UTrack? track;
+        UProject? project;
         IDisposable? messageSub;
         bool subscribed;
+        bool disposed;
+        int lifetime;
+        int rebuildVersion;
+
+        // A popup/row keeps the document, track and slot payload it was opened for.
+        // Unregistered tracks remain usable as independent previews without document history.
+        internal sealed class EditTarget {
+            readonly FxChainViewModel owner;
+            readonly int lifetime;
+            readonly int? slotIndex;
+            readonly VstPluginSlot? slot;
+            readonly string? pluginUid;
+            internal UTrack Track { get; }
+            internal UProject? Project { get; }
+            internal EditTarget(FxChainViewModel owner, UTrack track, UProject? project, int lifetime, int? slotIndex) {
+                this.owner = owner;
+                Track = track;
+                Project = project;
+                this.lifetime = lifetime;
+                this.slotIndex = slotIndex;
+                slot = slotIndex.HasValue ? SlotAt(track, slotIndex.Value) : null;
+                pluginUid = slot?.PluginUid;
+            }
+            internal bool IsCurrent => !owner.disposed && lifetime == owner.lifetime &&
+                (Project == null || (ReferenceEquals(Project, DocManager.Inst.Project) && Project.tracks.Contains(Track))) &&
+                (!slotIndex.HasValue || (slotIndex.Value >= 0 &&
+                    (slot != null ? ReferenceEquals(slot, SlotAt(Track, slotIndex.Value)) && slot.PluginUid == pluginUid
+                                  : slotIndex.Value == (Track.VstSlots?.Count ?? 0))));
+            internal bool CanExecute => IsCurrent && (Project == null || DocManager.Inst.ActiveUndoGroup == null);
+            internal bool MatchesSlot(int index) => slotIndex == index;
+            internal DocumentEditGesture? CreateGesture() => Project == null ? null :
+                new DocumentEditGesture(Project, "command.track.setting", deferValidate: true);
+            internal bool Execute(UCommand command, DocumentEditGesture? gesture = null) {
+                if (!IsCurrent) return false;
+                if (Project == null) {
+                    command.Execute();
+                    return true;
+                }
+                if (gesture != null) return gesture.Execute(command);
+                using var owned = CreateGesture();
+                return owned!.Execute(command);
+            }
+            static VstPluginSlot? SlotAt(UTrack track, int index) =>
+                track.VstSlots != null && index >= 0 && index < track.VstSlots.Count ? track.VstSlots[index] : null;
+        }
+
+        internal EditTarget? CaptureTarget(int? slotIndex = null) => disposed || track == null ? null :
+            new EditTarget(this, track, project, lifetime, slotIndex);
+        internal EditTarget? CaptureTarget(UTrack expectedTrack, int? slotIndex = null) =>
+            ReferenceEquals(track, expectedTrack) ? CaptureTarget(slotIndex) : null;
+        bool CanUseRow(FxChainRowViewModel row) => Rows.Contains(row) && row.Target?.IsCurrent == true;
 
         /// <summary>链行（按 DSP 顺序）。</summary>
         public ObservableCollection<FxChainRowViewModel> Rows { get; } = new();
@@ -298,7 +354,7 @@ namespace OpenUtau.App.ViewModels {
         /// 重复调用无副作用。
         /// </summary>
         public void Subscribe() {
-            if (subscribed) {
+            if (subscribed || disposed) {
                 return;
             }
             subscribed = true;
@@ -307,10 +363,11 @@ namespace OpenUtau.App.ViewModels {
             // 靠这条通知让链行实时跟上（否则开关与旁通状态停留在旧值）。
             messageSub = MessageBus.Current.Listen<MixFxChangedNotification>()
                 .Subscribe(n => {
-                    if (track != null && n.trackNo == track.TrackNo) {
+                    if (subscribed && !disposed && track != null && n.trackNo == track.TrackNo) {
                         Rebuild();
                     }
                 });
+            Rebuild();
         }
 
         /// <summary>退订（面板离开视觉树时调用）。</summary>
@@ -319,23 +376,40 @@ namespace OpenUtau.App.ViewModels {
                 return;
             }
             subscribed = false;
+            lifetime++;
+            Interlocked.Increment(ref rebuildVersion);
             DocManager.Inst.RemoveSubscriber(this);
             messageSub?.Dispose();
             messageSub = null;
         }
 
-        public void Dispose() => Unsubscribe();
+        public void Dispose() {
+            if (disposed) return;
+            Unsubscribe();
+            disposed = true;
+            lifetime++;
+            Interlocked.Increment(ref rebuildVersion);
+            foreach (var row in Rows) row.Activated -= OnRowActivated;
+            Rows.Clear();
+            track = null;
+            project = null;
+            Launcher = null;
+            EditorRequested = null;
+            PluginBrowseRequested = null;
+        }
 
         /// <summary>
         /// 绑定当前轨道（冻结契约 §1.1 第 2 条：宿主把 <c>MixerViewModel.SelectedTrack</c> 送进来）。
         /// 传 null = 未选中轨道 ⇒ 空态。
         /// </summary>
         public void Attach(UTrack? newTrack) {
+            if (disposed) return;
             if (ReferenceEquals(track, newTrack)) {
                 Rebuild();
                 return;
             }
             track = newTrack;
+            project = newTrack != null && DocManager.Inst.Project.tracks.Contains(newTrack) ? DocManager.Inst.Project : null;
             Rebuild();
         }
 
@@ -361,15 +435,23 @@ namespace OpenUtau.App.ViewModels {
         readonly UiThreadAffinity affinity = new UiThreadAffinity();
 
         public void Rebuild() {
+            if (disposed) return;
+            int version = Interlocked.Increment(ref rebuildVersion);
             // 后台线程（异步加载通知 / Publish 在命令线程上）⇒ 编组回 UI 线程。
             // 判据用 `UiThreadAffinity`（锚定**订阅时所属线程**）而非 `CheckAccess()`：
             // 后者在 headless 测试宿主下会误判为 true（我们已因此踩过两次）；
             // 投递目标直指 `RebuildCore`，避免入队后再次进入本方法自我循环。
-            affinity.Post(RebuildCore);
+            affinity.Post(() => {
+                if (!disposed && version == Volatile.Read(ref rebuildVersion)) RebuildCore();
+            });
         }
 
         /// <summary>链行重投影的实体（**只能在 UI 线程调用**；见 <see cref="Rebuild"/>）。</summary>
         void RebuildCore() {
+            if (project != null && (!ReferenceEquals(project, DocManager.Inst.Project) || !project.tracks.Contains(track!))) {
+                track = null;
+                project = null;
+            }
             foreach (var row in Rows) {
                 row.Activated -= OnRowActivated;
             }
@@ -428,15 +510,17 @@ namespace OpenUtau.App.ViewModels {
         }
 
         void OnRowActivated(object? sender, FxChainRowViewModel row) {
+            if (!CanUseRow(row)) return;
+            var target = row.Target!;
             // 双击 = 打开编辑器（B4/B5）；派发目标由 Launcher 决定，VM 不碰窗口。
             EditorRequested?.Invoke(this, row);
-            if (Launcher == null || track == null) {
+            if (Launcher == null || !target.IsCurrent) {
                 return;
             }
             if (row.Kind == FxChainItemKind.BuiltIn && row.Module.HasValue) {
-                Launcher.OpenBuiltInEditor(track, row.Module.Value);
+                Launcher.OpenBuiltInEditor(target.Track, row.Module.Value);
             } else if (row.Kind == FxChainItemKind.Vst) {
-                Launcher.OpenVstEditor(track, row.SlotIndex);
+                Launcher.OpenVstEditor(target.Track, row.SlotIndex);
             }
         }
 
@@ -444,32 +528,37 @@ namespace OpenUtau.App.ViewModels {
 
         /// <summary>切换一行的电源 / 旁通（内置 = 模块电源；VST = 槽位旁通）。</summary>
         public void SetPower(FxChainRowViewModel row, bool powered) {
-            if (track == null || row.IsPowered == powered) {
+            if (!CanUseRow(row) || !row.Target!.CanExecute) {
                 return;
             }
+            var target = row.Target!;
+            var track = target.Track;
             UCommand? cmd = null;
             if (row.Kind == FxChainItemKind.BuiltIn && row.Module.HasValue) {
                 if (track.MixFx == null) {
                     return;   // 内置段不存在（Rebuild 不会产出这种行）
                 }
+                if (TrackMixCommands.IsModuleEnabled(track.MixFx, row.Module.Value) == powered) return;
                 cmd = TrackMixCommands.SetMixFxModule(track, row.Module.Value, powered);
             } else if (row.Kind == FxChainItemKind.Vst) {
+                if (track.VstSlots[row.SlotIndex].Bypassed == !powered) return;
                 // 既有命令：槽位旁通（数据级，下次渲染快照生效；不必重载实例）
                 cmd = TrackMixCommands.ToggleVstBypass(track, row.SlotIndex);
             }
             if (cmd == null) {
                 return;
             }
-            Execute(cmd);
+            target.Execute(cmd);
             Rebuild();
         }
 
         /// <summary>移除一行（仅 VST 槽；内置模块无删除语义 —— 见报告）。</summary>
         public void RemoveRow(FxChainRowViewModel row) {
-            if (track == null || row.Kind != FxChainItemKind.Vst) {
+            if (!CanUseRow(row) || !row.Target!.CanExecute || row.Kind != FxChainItemKind.Vst) {
                 return;
             }
-            Execute(TrackMixCommands.RemoveVstSlot(track, row.SlotIndex));
+            var target = row.Target!;
+            target.Execute(TrackMixCommands.RemoveVstSlot(target.Track, row.SlotIndex));
             Rebuild();
         }
 
@@ -479,9 +568,11 @@ namespace OpenUtau.App.ViewModels {
         /// 多步移动包在一个 UndoGroup 里 ⇒ Ctrl+Z 一次回到原位。
         /// </summary>
         public void MoveRow(FxChainRowViewModel row, int delta) {
-            if (track == null || delta == 0 || row.Kind != FxChainItemKind.Vst) {
+            if (!CanUseRow(row) || !row.Target!.CanExecute || delta == 0 || row.Kind != FxChainItemKind.Vst) {
                 return;
             }
+            var target = CaptureTarget()!;
+            var track = target.Track;
             if (track.VstSlots == null) {
                 return;
             }
@@ -494,20 +585,17 @@ namespace OpenUtau.App.ViewModels {
             int step = Math.Sign(delta);
             int remaining = delta;
             int index = at;
-            DocManager.Inst.StartUndoGroup(deferValidate: true);
-            try {
+            using (var gesture = target.CreateGesture()) {
                 while (remaining != 0) {
                     int next = index + step;
                     if (next < 0 || next >= order.Count) {
                         break;   // 到 VST 段边界即停
                     }
-                    Execute(TrackMixCommands.ReorderVstSlot(track, order[index], order[next]), ownGroup: false);
+                    if (!target.Execute(TrackMixCommands.ReorderVstSlot(track, order[index], order[next]), gesture)) break;
                     // 被移动的插件载荷现在落在 next 位置
                     index = next;
                     remaining -= step;
                 }
-            } finally {
-                DocManager.Inst.EndUndoGroup();
             }
             Rebuild();
         }
@@ -517,9 +605,13 @@ namespace OpenUtau.App.ViewModels {
         /// <c>MixFx == null</c> 时创建之（撤销回到 null）；已存在则打开该模块电源。
         /// </summary>
         public void AddBuiltIn(MixFxModule module) {
-            if (track == null) {
-                return;
-            }
+            var target = CaptureTarget();
+            if (target != null) AddBuiltIn(target, module);
+        }
+
+        internal bool AddBuiltIn(EditTarget target, MixFxModule module) {
+            if (!target.CanExecute) return false;
+            var track = target.Track;
             var before = track.MixFx;
             if (before == null) {
                 // 先按描述表把三路开关摆好（只有被点的那个开），再把整条链挂上去；
@@ -528,35 +620,47 @@ namespace OpenUtau.App.ViewModels {
                 foreach (var d in FxChainCatalog.BuiltIns) {
                     TrackMixCommands.SetModuleEnabled(created, d.Module, d.Module == module);
                 }
-                Execute(TrackMixCommands.SetMixFx(track, created));
+                bool changed = target.Execute(TrackMixCommands.SetMixFx(track, created));
                 Rebuild();
-                return;
+                return changed;
             }
             if (FxChainCatalog.Descriptor(module).GetEnabled(before)) {
-                return;   // 已在链上
+                return true;   // 已在链上
             }
-            Execute(TrackMixCommands.SetMixFxModule(track, module, true));
+            bool applied = target.Execute(TrackMixCommands.SetMixFxModule(track, module, true));
             Rebuild();
+            return applied;
         }
 
 
         /// <summary>「＋」：浏览插件并加载到第一个空槽（无空槽则追加）。</summary>
         public void BrowseVst() {
-            if (track == null) {
-                return;
-            }
+            var target = CaptureTarget();
+            if (target != null) BrowseVst(target);
+        }
+
+        internal void BrowseVst(EditTarget target) {
+            if (!target.IsCurrent) return;
+            var track = target.Track;
             int slotIndex = FirstFreeSlotIndex(track);
             PluginBrowseRequested?.Invoke(this, (track, slotIndex));
-            Launcher?.BrowsePlugin(track, slotIndex);
+            if (target.IsCurrent) Launcher?.BrowsePlugin(track, slotIndex);
         }
 
         /// <summary>选好插件后写入槽位（走既有 <c>SetVstPlugin</c> 命令，可撤销）。</summary>
         public void LoadPlugin(int slotIndex, string pluginUid) {
-            if (track == null || string.IsNullOrWhiteSpace(pluginUid)) {
-                return;
-            }
-            Execute(TrackMixCommands.SetVstPlugin(track, slotIndex, pluginUid.Trim()));
+            var target = CaptureTarget(slotIndex);
+            if (target != null) LoadPlugin(target, slotIndex, pluginUid);
+        }
+
+        internal bool LoadPlugin(EditTarget target, int slotIndex, string pluginUid) {
+            if (!target.CanExecute || !target.MatchesSlot(slotIndex) || slotIndex < 0 || string.IsNullOrWhiteSpace(pluginUid)) return false;
+            var slots = target.Track.VstSlots;
+            if (slotIndex > (slots?.Count ?? 0)) return false;
+            if (slots != null && slotIndex < slots.Count && slots[slotIndex].PluginUid == pluginUid.Trim()) return true;
+            bool applied = target.Execute(TrackMixCommands.SetVstPlugin(target.Track, slotIndex, pluginUid.Trim()));
             Rebuild();
+            return applied;
         }
 
         /// <summary>第一个空槽下标（没有空槽 = 追加到末尾）。</summary>
@@ -578,39 +682,27 @@ namespace OpenUtau.App.ViewModels {
         /// 返回是否被接受（拖拽源据此决定取消与否）。
         /// </summary>
         public bool DropPayload(string? payload, int slotIndex = -1) {
-            if (track == null || string.IsNullOrWhiteSpace(payload)) {
+            var captured = CaptureTarget();
+            if (captured == null || !captured.CanExecute || string.IsNullOrWhiteSpace(payload)) {
                 return false;
             }
             var builtIn = FxChainDragData.BuiltInOf(payload);
             if (builtIn != null) {
-                AddBuiltIn(builtIn.Module);
-                return true;
+                return AddBuiltIn(captured, builtIn.Module);
             }
-            int target = slotIndex >= 0 ? slotIndex : FirstFreeSlotIndex(track);
-            LoadPlugin(target, payload);
-            return true;
-        }
-
-        /// <summary>
-        /// 在 UndoGroup 内执行命令（<c>DocManager.ExecuteCmd</c> 拒绝组外命令）。
-        /// <paramref name="ownGroup"/> = false 时由调用方管理组（多步重排 = 一次撤销）。
-        /// </summary>
-        void Execute(UCommand cmd, bool ownGroup = true) {
-            if (!ownGroup) {
-                DocManager.Inst.ExecuteCmd(cmd);
-                return;
-            }
-            DocManager.Inst.StartUndoGroup(deferValidate: true);
-            try {
-                DocManager.Inst.ExecuteCmd(cmd);
-            } finally {
-                DocManager.Inst.EndUndoGroup();
-            }
+            int slot = slotIndex >= 0 ? slotIndex : FirstFreeSlotIndex(captured.Track);
+            var target = CaptureTarget(slot);
+            return target != null && LoadPlugin(target, slot, payload);
         }
 
         // ══════════════════ 订阅 ══════════════════
 
         public void OnNext(UCommand cmd, bool isUndo) {
+            if (!subscribed || disposed) return;
+            if (cmd is LoadProjectNotification) {
+                Rebuild();
+                return;
+            }
             // 1) VST 槽异步加载完成 → 行重建（名字/徽标在加载完成后才解析得出）
             if (cmd is VstSlotChangedNotification n) {
                 if (track != null && n.TrackNo == track.TrackNo) {
