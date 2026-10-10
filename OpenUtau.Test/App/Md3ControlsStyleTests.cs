@@ -71,6 +71,27 @@ namespace OpenUtau.Test.App {
         /// 现在改为：按 &lt;Style Selector="…"&gt; 分块，**只对不含 '.' 的裸元素选择器**禁布局属性。
         /// </summary>
         [AvaloniaFact]
+        public void Md3Controls_NavItemText_DeclaresSizeAndSelectionColor() {
+            // 依据（2026-10 fx-ui 复核实测）：
+            //  · `Styles.axaml:110` 的应用级 `TextBlock{FontSize 13}` 与 `Md3InputThemes` 的
+            //    `TextBlock{Foreground}` 都是**显式赋值 ⇒ 压过继承**；
+            //  · 于是在 Button 上写 FontSize/Foreground 对内部 TextBlock 无效：导航项本想 14 实际 13、
+            //    选中药丸里"底色变、图标变绿、文字还是白"。
+            // ⇒ 共享层必须为导航项**显式声明**子 TextBlock 的字号与选中态前景色（欢迎页与偏好设置同受益）。
+            string xaml = StyleXaml();
+            Assert.Contains("<Style Selector=\"Button.navItem TextBlock\">", xaml);
+            Assert.Contains("<Style Selector=\"Button.navItem.selected TextBlock\">", xaml);
+            Match size = Regex.Match(xaml,
+                "<Style Selector=\"Button.navItem TextBlock\">\\s*<Setter Property=\"FontSize\" Value=\"(\\d+)\"/>");
+            Assert.True(size.Success, "导航项子 TextBlock 未显式声明字号");
+            Assert.Equal("14", size.Groups[1].Value);
+            Match color = Regex.Match(xaml,
+                "<Style Selector=\"Button.navItem.selected TextBlock\">\\s*<Setter Property=\"Foreground\" Value=\"\\{DynamicResource md3\\.([a-z-]+)\\}\"/>");
+            Assert.True(color.Success, "选中态子 TextBlock 未显式声明前景色");
+            Assert.Equal("on-secondary-container", color.Groups[1].Value);
+        }
+
+        [AvaloniaFact]
         public void Md3Controls_DoesNotTouchLayout_ForGlobalElementSelectors() {
             string xaml = StripComments(StyleXaml());
             string[] forbidden = {

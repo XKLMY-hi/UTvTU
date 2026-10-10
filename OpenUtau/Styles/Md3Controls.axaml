@@ -141,6 +141,18 @@
       <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
       <Setter Property="FontWeight" Value="Medium"/>
     </Style>
+    <!-- ⚠ 陷阱（2026-10 复核实测）：`Styles.axaml:110` 有**应用级** `TextBlock{FontSize 13}`，
+         它显式赋值 ⇒ **压过继承**。所以在 Button 上写 FontSize 不会传到内部 TextBlock
+         （导航项本想 14、实际渲染 13）。凡"设在按钮上、期望子元素跟随"的字体/前景，都必须
+         用 `X TextBlock { … }` 显式声明。下面这条就是修正。 -->
+    <Style Selector="Button.navItem TextBlock">
+      <Setter Property="FontSize" Value="14"/>
+    </Style>
+    <!-- 选中药丸里的**文字**必须与图标同色：应用级 `TextBlock{Foreground}` 会显式覆盖继承，
+         不加这条会出现"底色变、图标变绿、文字还是白"的三不像（fx-ui 复核 A②；两页同时受益）。 -->
+    <Style Selector="Button.navItem.selected TextBlock">
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+    </Style>
     <!-- 图标基础色**必须也在共享层**（Lead 收口补充）：原先这条留在 PreferencesView 本地，
          提取后欢迎页的未选中导航项就没有 Fill ⇒ 图标不可见。放在 `.selected Path` 之前，
          靠选择器特异性让选中态胜出（`Button.navItem.selected Path` 两个类 > 一个类）。 -->

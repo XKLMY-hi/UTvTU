@@ -69,6 +69,11 @@
     <Style Selector="Button.railLink Path">
       <Setter Property="Fill" Value="{DynamicResource md3.on-surface-variant}"/>
     </Style>
+    <!-- ⚠ 与共享层同一条陷阱：应用级 `TextBlock{FontSize 13}` 压过继承 ⇒ 必须显式声明，
+         否则"12px 小字行"实际渲染成 13px（fx-ui 复核第 3 条实测命中）。 -->
+    <Style Selector="Button.railLink TextBlock">
+      <Setter Property="FontSize" Value="12"/>
+    </Style>
     <Style Selector="Button.railLink:focus-visible">
       <!-- 只换颜色：厚度已由基础态定为 1px ⇒ 聚焦零布局位移 -->
       <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
@@ -289,14 +294,15 @@
     <!-- ══════════ 右：内容区（内边距 32 / 页头 28+14 / 单页聚焦） ══════════ -->
     <Grid Grid.Column="1" RowDefinitions="Auto,*,Auto" Margin="32,24,32,0">
 
-      <!-- 页头：标题 + 副标；右侧 = 响度波形装饰带（低强调，不与标题抢层级） -->
-      <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+      <!-- 页头：标题 + 副标；右侧 = 响度波形装饰带（低强调，不与标题抢层级）
+           列宽 3*:2* ⇒ 装饰带**宽度弹性**（窄窗不挤压标题、也不会溢出；见 fx-ui 复核 A⑤） -->
+      <Grid Grid.Row="0" ColumnDefinitions="3*,2*">
         <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
           <TextBlock x:Name="PageTitle" Classes="pageTitle" Text="{DynamicResource welcome.recent}"/>
           <TextBlock x:Name="PageSubtitle" Classes="pageSub" Text="{DynamicResource welcome.greeting.sub}"/>
         </StackPanel>
-        <Path Grid.Column="1" x:Name="WaveformBars" Width="300" Height="64" Margin="24,0,0,0"
-              VerticalAlignment="Center" HorizontalAlignment="Right"
+        <Path Grid.Column="1" x:Name="WaveformBars" Height="64" Margin="24,0,0,0"
+              VerticalAlignment="Center" HorizontalAlignment="Stretch"
               Data="{DynamicResource welcome-waveform}" Stretch="Fill"
               Fill="{DynamicResource md3.on-surface-variant}" Opacity="0.4"/>
       </Grid>

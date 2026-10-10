@@ -92,6 +92,9 @@ namespace OpenUtau.Test.App {
             Assert.Contains("Classes=\"navItem", xaml);
             Assert.DoesNotContain("<Style Selector=\"Button.navItem\">", xaml);
             Assert.Contains("Classes=\"railLink\"", xaml);
+            // ⚠ 应用级 `TextBlock{FontSize 13}`（Styles.axaml:110）压过继承 ⇒ 链接行的 12px 必须显式声明，
+            //   否则"12px 小字行"实际渲染成 13px（2026-10 fx-ui 复核实测命中）
+            Assert.Contains("<Style Selector=\"Button.railLink TextBlock\">", xaml);
             // 按钮走现成主题变体（`Md3ButtonTheme` 的 .primary / .outline），页面不自造按钮几何
             Assert.Contains("Classes=\"primary\"", xaml);
             Assert.Contains("Classes=\"outline\"", xaml);
@@ -214,6 +217,35 @@ namespace OpenUtau.Test.App {
         }
 
         /// <summary>
+        /// 页头波形带必须**宽度弹性**（2026-10 fx-ui 复核 A⑤：原先 `Width="300"` 是固定宽 ⇒ 窄窗不收缩/会挤压标题）。
+        /// 断言：窄窗宽度 &lt; 宽窗宽度，且带子完全落在视图内（不溢出），窄窗下也不至于压到不可辨。
+        /// </summary>
+        [AvaloniaFact]
+        public void WelcomeView_WaveformBand_WidthIsElastic_AndNeverOverflows() {
+            double BandWidthAt(double w, double h) {
+                UsePool();
+                var view = new WelcomeView();
+                var window = new Window { Width = w, Height = h, Content = view };
+                try {
+                    window.Show();
+                    Dispatcher.UIThread.RunJobs();
+                    var wave = view.GetVisualDescendants().OfType<ShapePath>().First(p => p.Name == "WaveformBars");
+                    var origin = wave.TranslatePoint(new Point(0, 0), view);
+                    Assert.NotNull(origin);
+                    Assert.True(origin!.Value.X + wave.Bounds.Width <= view.Bounds.Width + 0.5,
+                        $"{w}x{h}: 波形带溢出（x={origin.Value.X:F1} + w={wave.Bounds.Width:F1} > view={view.Bounds.Width:F1}）");
+                    return wave.Bounds.Width;
+                } finally {
+                    window.Close();
+                }
+            }
+            double narrow = BandWidthAt(1000, 660);
+            double wide = BandWidthAt(1400, 900);
+            Assert.True(narrow < wide, $"波形带应随窗口弹性（窄 {narrow:F1} / 宽 {wide:F1}）");
+            Assert.True(narrow > 100, $"窄窗下不应压到不可辨（{narrow:F1}）");
+        }
+
+        /// <summary>
         /// 空态文案必须是**各自的专用键**（此前复用 `welcome.open.description` ⇒ 空态显示"打开本地项目"）。
         /// W50 起「最近」有两个空态且必须区分：
         ///   ① 一个工程都没有 → `welcome.recent.empty`（绑 `WelcomeNoRecent`）
@@ -243,9 +275,7 @@ namespace OpenUtau.Test.App {
             Assert.Equal("welcome.search.noresult", noMatch.Groups[1].Value);
         }
 
-        // ══════════════════════ 搜索过滤语义（纯函数，不依赖 Avalonia） ══════════════════════
-
-        /// <summary>
+        // ══════════════════════ 搜索过滤语义（纯函数，不依赖 Avalonia） ══════════════════════        /// <summary>
         /// 搜索语义钉死（VM 的 `ApplyWelcomeSearch` 就是调它）：空/空白查询 = **全量**（不是清空），
         /// 否则匹配**工程名或所在目录**、忽略大小写；无匹配返回空 ⇒ 视图显示"搜索无匹配"（与"没有工程"分开）。
         /// </summary>
