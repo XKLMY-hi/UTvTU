@@ -30,35 +30,8 @@
     <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="{DynamicResource md3.color.primary}"/>
   </UserControl.Resources>
   <UserControl.Styles>
-    <!-- ══ 左导航 ══ -->
-    <Style Selector="Button.navItem">
-      <Setter Property="Height" Value="44"/>
-      <Setter Property="Padding" Value="16,0"/>
-      <Setter Property="Margin" Value="0"/>
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="CornerRadius" Value="999"/>
-      <Setter Property="FontSize" Value="14"/>
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
-      <Setter Property="HorizontalAlignment" Value="Stretch"/>
-      <Setter Property="HorizontalContentAlignment" Value="Left"/>
-      <Setter Property="VerticalContentAlignment" Value="Center"/>
-      <Setter Property="Cursor" Value="Hand"/>
-    </Style>
-    <Style Selector="Button.navItem:pointerover">
-      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-    </Style>
-    <Style Selector="Button.navItem.selected">
-      <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
-      <Setter Property="FontWeight" Value="Medium"/>
-    </Style>
-    <Style Selector="Button.navItem.selected Path">
-      <Setter Property="Fill" Value="{DynamicResource md3.on-secondary-container}"/>
-    </Style>
-    <Style Selector="Button.navItem Path">
-      <Setter Property="Fill" Value="{DynamicResource md3.on-surface-variant}"/>
-    </Style>
+    <!-- 左导航项样式（基础态/悬停/选中/图标色/焦点环）已全部提取到应用级 Styles/Md3Controls.axaml 的
+         `Button.navItem` 一族（欢迎页共用同一套词汇）——本页不再本地定义，避免两处漂移。 -->
 
     <!-- ══ 卡片与字段 ══ -->
     <Style Selector="Border.card">

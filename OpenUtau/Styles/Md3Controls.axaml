@@ -114,4 +114,43 @@
   <Style Selector="ListBoxItem TextBlock">
     <Setter Property="Foreground" Value="{Binding $parent[ListBoxItem].Foreground}"/>
   </Style>
-</Styles>
+    <!-- ══ 左导航项（组件样式：2026-10 提取自 PreferencesView，欢迎页与偏好设置共用 ⇒ 杜绝漂移）
+         依据：契约 Md3ControlsStyleTests 允许**类选择器**组件样式携带自身规格（只对裸元素选择器禁布局属性）。
+         规格：高 44 / Padding 16,0 / 圆角 999 / 字号 14 / 前景 on-surface-variant；
+         hover surface-container-high；选中 secondary-container + on-secondary-container + Medium，
+         且**图标 Fill 同步换色**（否则图标与文字不同色）；焦点环走 md3.primary 2px。 -->
+    <Style Selector="Button.navItem">
+      <Setter Property="Height" Value="44"/>
+      <Setter Property="Padding" Value="16,0"/>
+      <Setter Property="Margin" Value="0"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.navItem:pointerover">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    </Style>
+    <Style Selector="Button.navItem.selected">
+      <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+    </Style>
+    <!-- 图标基础色**必须也在共享层**（Lead 收口补充）：原先这条留在 PreferencesView 本地，
+         提取后欢迎页的未选中导航项就没有 Fill ⇒ 图标不可见。放在 `.selected Path` 之前，
+         靠选择器特异性让选中态胜出（`Button.navItem.selected Path` 两个类 > 一个类）。 -->
+    <Style Selector="Button.navItem Path">
+      <Setter Property="Fill" Value="{DynamicResource md3.on-surface-variant}"/>
+    </Style>
+    <Style Selector="Button.navItem.selected Path">
+      <Setter Property="Fill" Value="{DynamicResource md3.on-secondary-container}"/>
+    </Style>
+    <Style Selector="Button.navItem:focus-visible">
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+      <Setter Property="BorderThickness" Value="2"/>
+    </Style></Styles>
