@@ -125,7 +125,7 @@ namespace OpenUtau.App.ViewModels {
                             edit.ApplyParameter("VibratoOut", Math.Max(0, Math.Min(100, vibratoPreset.VibratoOut)));
                             edit.ApplyParameter("VibratoShift", Math.Max(0, Math.Min(100, vibratoPreset.VibratoShift)));
                             edit.ApplyParameter("VibratoDrift", Math.Max(-100, Math.Min(100, vibratoPreset.VibratoDrift)));
-                            edit.ApplyParameter("VibratoVolLink", Math.Max(0, Math.Min(100, vibratoPreset.VibratoVolLink)));
+                            edit.ApplyParameter("VibratoVolLink", Math.Max(-100, Math.Min(100, vibratoPreset.VibratoVolLink)));
                         });
                     }).DisposeWith(subscriptions);
                 this.WhenAnyValue(vm => vm.PitchCurveShape)
