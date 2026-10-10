@@ -271,9 +271,9 @@ namespace OpenUtau.Test.App {
         // ══════════════════════ D1 端到端：VM → DocManager「工程已修改」链路 ══════════════════════
 
         /// <summary>
-        /// "静默丢改动"缺陷的正解回归：机架旋钮直接改模型（不进 undo 队列），
+        /// "静默丢改动"缺陷的正解回归：机架旋钮通过可撤销命令实时修改模型，
         /// 必须让 <see cref="DocManager"/> 判定工程未保存，否则退出不提示保存、30s autosave 跳过。
-        /// 跨层断言（VM → VM.MarkModifiedIfDirty → DocManager.Project.Saved / ChangesSaved），
+        /// 跨层断言（VM → TrackMixEditSession → DocManager.ChangesSaved），
         /// 不依赖任何时序或等待。
         /// </summary>
         [AvaloniaFact]
@@ -287,11 +287,11 @@ namespace OpenUtau.Test.App {
 
             var snapshot = new UMixFx { Enabled = true, EqLowDb = 0 };
             track.MixFx = snapshot;
-            var vm = new MixFxViewModel(track);
+            using var vm = new MixFxViewModel(track);
 
             // 对照组 A：完全不动参数 → 不标脏，工程状态原封不动
             Assert.False(vm.IsDirty);
-            vm.MarkModifiedIfDirty();
+            vm.FinishEdits();
             Assert.True(project.Saved, "未动参数时关窗不应把工程标脏");
             Assert.True(DocManager.Inst.ChangesSaved);
 
@@ -302,8 +302,7 @@ namespace OpenUtau.Test.App {
             Assert.Equal(3, track.MixFx!.EqLowDb);
 
             // 直接关窗路径 → DocManager 必须判定为未保存
-            vm.MarkModifiedIfDirty();
-            Assert.False(project.Saved, "改动后必须把工程标为未保存");
+            vm.FinishEdits();
             Assert.False(DocManager.Inst.ChangesSaved,
                 "改动后 ChangesSaved 必须为 false——否则退出不提示保存、autosave 跳过 → 静默丢改动");
 
@@ -324,8 +323,8 @@ namespace OpenUtau.Test.App {
             DocManager.Inst.ExecuteCmd(new LoadProjectNotification(project));
             Assert.True(project.Saved);
 
-            // 轨道头 VM 构造时会写回 Volume/Pan（也会标脏）→ 构造完把基线复位，单独考察 FX 开关这一条
-            var vm = new TrackHeaderViewModel(track);
+            // 轨道头构造只同步显示，不回写模型，也不产生撤销记录
+            using var vm = new TrackHeaderViewModel(track);
             project.Saved = true;
             Assert.Null(track.MixFx);
 
@@ -341,7 +340,7 @@ namespace OpenUtau.Test.App {
             vm.MixFxEnabled = true;
             Assert.NotNull(track.MixFx);
             Assert.True(track.MixFx!.Enabled);
-            Assert.False(project.Saved, "轨道头开 FX 开关必须把工程标为未保存");
+            Assert.False(DocManager.Inst.ChangesSaved, "轨道头开 FX 开关必须进入工程修改记录");
             Assert.Equal(1, notified);
 
             // 重复写同一个值：不应再标脏、再通知（防 ManuallyRaise 回环空转）
@@ -353,7 +352,7 @@ namespace OpenUtau.Test.App {
             // 关闭同样是工程变更
             vm.MixFxEnabled = false;
             Assert.False(track.MixFx!.Enabled);
-            Assert.False(project.Saved);
+            Assert.False(DocManager.Inst.ChangesSaved);
             Assert.Equal(2, notified);
         }
 

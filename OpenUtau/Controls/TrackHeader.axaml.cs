@@ -58,6 +58,20 @@ namespace OpenUtau.App.Controls {
 
         public TrackHeader() {
             InitializeComponent();
+            foreach (var slider in new[] { VolumeSlider, PanSlider }) {
+                slider.AddHandler(PointerPressedEvent, (_, e) => {
+                    if (e.GetCurrentPoint(slider).Properties.IsLeftButtonPressed) ViewModel?.BeginMixGesture();
+                }, RoutingStrategies.Tunnel);
+                slider.AddHandler(PointerReleasedEvent, (_, _) => ViewModel?.EndMixGesture(),
+                    RoutingStrategies.Bubble, handledEventsToo: true);
+                slider.AddHandler(PointerCaptureLostEvent, (_, _) => ViewModel?.EndMixGesture(),
+                    RoutingStrategies.Bubble, handledEventsToo: true);
+            }
+        }
+
+        protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e) {
+            ViewModel?.EndMixGesture();
+            base.OnDetachedFromVisualTree(e);
         }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {

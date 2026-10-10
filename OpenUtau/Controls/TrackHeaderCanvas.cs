@@ -62,42 +62,6 @@ namespace OpenUtau.App.Controls {
                         trackAdder.TrackNo = trackHeaders.Count;
                     }
                 });
-            MessageBus.Current.Listen<TracksSoloEvent>()
-                .Subscribe(e => {
-                    foreach (var (track, header) in trackHeaders) {
-                        if (header.ViewModel != null) {
-                            if (e.solo) {
-                                if (track.TrackNo == e.trackNo) {
-                                    header.ViewModel.Solo = true;
-                                } else if (!e.additionally) {
-                                    header.ViewModel.Solo = false;
-                                }
-                            } else {
-                                if (track.TrackNo == e.trackNo || e.trackNo == -1) {
-                                    header.ViewModel.Solo = false;
-                                }
-                            }
-                        }
-                    }
-                    foreach (var (track, header) in trackHeaders) {
-                        if (header.ViewModel != null) {
-                            header.ViewModel.JudgeMuted();
-                            header.ViewModel.ManuallyRaise();
-                        }
-                    }
-                });
-            MessageBus.Current.Listen<TracksMuteEvent>()
-                .Subscribe(e => {
-                    foreach (var (track, header) in trackHeaders) {
-                        if (header.ViewModel != null) {
-                            if(e.trackNo == -1) {
-                                header.ViewModel.ToggleMute(e.allmute);
-                            } else if (track.TrackNo == e.trackNo) {
-                                header.ViewModel.ToggleMute();
-                            }
-                        }
-                    }
-                });
             MessageBus.Current.Listen<MixFxChangedNotification>()
                 .Subscribe(e => {
                     foreach (var (track, header) in trackHeaders) {

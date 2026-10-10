@@ -1586,7 +1586,8 @@ namespace OpenUtau.App.Views {
             }
             var part = selected.First();
             var track = DocManager.Inst.Project.tracks[part.trackNo];
-            MessageBus.Current.SendMessage(new TracksSoloEvent(part.trackNo, !track.Solo, false));
+            using var edits = new OpenUtau.App.Editing.TrackMixEditSession(track);
+            edits.SetSolo(!track.Solo);
         }
 
         /// <summary>静音当前选中片段所在轨道（原 Shift+M 分支，语义不变）。</summary>
@@ -1596,7 +1597,9 @@ namespace OpenUtau.App.Views {
                 return;
             }
             var part = selected.First();
-            MessageBus.Current.SendMessage(new TracksMuteEvent(part.trackNo, false));
+            var track = DocManager.Inst.Project.tracks[part.trackNo];
+            using var edits = new OpenUtau.App.Editing.TrackMixEditSession(track);
+            edits.SetMute(!track.Mute);
         }
 
         /// <summary>快捷键总览（W28/M09）：数据源 = 命令注册表，只读。</summary>

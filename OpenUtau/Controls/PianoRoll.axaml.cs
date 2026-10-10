@@ -2113,14 +2113,17 @@ namespace OpenUtau.App.Controls {
                     // solo
                     if (isShift) {
                         var track = project.tracks[notesVm.Part.trackNo];
-                        MessageBus.Current.SendMessage(new TracksSoloEvent(notesVm.Part.trackNo, !track.Solo, false));
+                        using var edits = new OpenUtau.App.Editing.TrackMixEditSession(track);
+                        edits.SetSolo(!track.Solo);
                         return true;
                     }
                     break;
                 case Key.M:
                     // mute
                     if (isShift) {
-                        MessageBus.Current.SendMessage(new TracksMuteEvent(notesVm.Part.trackNo, false));
+                        var track = project.tracks[notesVm.Part.trackNo];
+                        using var edits = new OpenUtau.App.Editing.TrackMixEditSession(track);
+                        edits.SetMute(!track.Mute);
                         return true;
                     }
                     break;

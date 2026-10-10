@@ -41,7 +41,9 @@ namespace OpenUtau.Core.Format {
         /// <summary>
         /// Save project in .ustxp (Plus native) format.
         /// </summary>
-        public static void Save(string filePath, UProject project) {
+        public static bool Save(string filePath, UProject project) {
+            string previousPath = project.FilePath;
+            string? temporaryPath = null;
             try {
                 // Ensure .ustxp extension
                 if (!filePath.EndsWith(Extension, StringComparison.OrdinalIgnoreCase)) {
@@ -51,18 +53,34 @@ namespace OpenUtau.Core.Format {
                 project.ustxpVersion = kUstxpVersion;    // Plus version for Plus-specific tracking
                 project.FilePath = filePath;
                 project.BeforeSave();
-                File.WriteAllText(filePath, SerializeForSave(project), Encoding.UTF8);
-                project.Saved = true;
+                temporaryPath = filePath + "." + Guid.NewGuid().ToString("N") + ".tmp";
+                File.WriteAllText(temporaryPath, SerializeForSave(project), Encoding.UTF8);
+                File.Move(temporaryPath, filePath, overwrite: true);
                 project.AfterSave();
-                Preferences.Default.RecoveryPath = string.Empty;
-                Preferences.Save();
-                DocManager.Inst.Recovered = false;
+                project.Saved = true;
             } catch (Exception ex) {
+                project.FilePath = previousPath;
+                project.AfterSave();
                 var e = new MessageCustomizableException(
                     $"Failed to save ustxp: {filePath}",
                     $"<translate:errors.failed.save>: {filePath}", ex);
                 DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e));
+                return false;
+            } finally {
+                if (temporaryPath != null && File.Exists(temporaryPath)) {
+                    try { File.Delete(temporaryPath); }
+                    catch (Exception ex) { Log.Warning(ex, "Failed to remove temporary project file {Path}", temporaryPath); }
+                }
             }
+            // A preferences failure does not undo a successfully persisted project.
+            try {
+                Preferences.Default.RecoveryPath = string.Empty;
+                Preferences.Save();
+                DocManager.Inst.Recovered = false;
+            } catch (Exception ex) {
+                Log.Warning(ex, "Project saved, but recovery preferences could not be updated");
+            }
+            return true;
         }
 
         /// <summary>

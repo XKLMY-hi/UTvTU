@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using OpenUtau.Core.Ustx;
 using OpenUtau.Core.Vst;
@@ -33,17 +34,70 @@ namespace OpenUtau.Core {
     public static class TrackMixCommands {
         public static UCommand Mute(UTrack track, bool newValue) {
             bool old = track.Mute;
-            return new LambdaCommand(
-                () => { track.Mute = newValue; track.Muted = newValue; },
-                () => { track.Mute = old; track.Muted = old; },
+            var tracks = MixTracks(track);
+            return new TrackMixCommand(tracks, TrackMixProperty.Mute,
+                () => { track.Mute = newValue; RefreshMuted(tracks); },
+                () => { track.Mute = old; RefreshMuted(tracks); },
                 $"Mute track {track.TrackName} = {newValue}");
         }
-        public static UCommand Solo(UTrack track, bool newValue) {
-            bool old = track.Solo;
-            return new LambdaCommand(
-                () => track.Solo = newValue,
-                () => track.Solo = old,
+        public static UCommand Solo(UTrack track, bool newValue, bool additionally = false) {
+            var tracks = MixTracks(track);
+            var old = tracks.Select(t => t.Solo).ToArray();
+            return new TrackMixCommand(tracks, TrackMixProperty.Solo,
+                () => {
+                    if (newValue && !additionally) {
+                        foreach (var t in tracks) t.Solo = false;
+                    }
+                    track.Solo = newValue;
+                    RefreshMuted(tracks);
+                },
+                () => {
+                    for (int i = 0; i < tracks.Length; i++) tracks[i].Solo = old[i];
+                    RefreshMuted(tracks);
+                },
                 $"Solo track {track.TrackName} = {newValue}");
+        }
+
+        public static UCommand Volume(UTrack track, double db) {
+            double old = track.Volume;
+            return new TrackMixCommand(new[] { track }, TrackMixProperty.Volume,
+                () => track.Volume = db, () => track.Volume = old, $"Volume {track.TrackName} = {db}");
+        }
+
+        public static UCommand Pan(UTrack track, double pan) {
+            double old = track.Pan;
+            return new TrackMixCommand(new[] { track }, TrackMixProperty.Pan,
+                () => track.Pan = pan, () => track.Pan = old, $"Pan {track.TrackName} = {pan}");
+        }
+
+        public static UCommand MuteTracks(UTrack[] tracks, Func<UTrack, bool> value) {
+            var old = tracks.Select(t => t.Mute).ToArray();
+            var next = tracks.Select(value).ToArray();
+            void Set(bool[] values) {
+                for (int i = 0; i < tracks.Length; i++) tracks[i].Mute = values[i];
+                RefreshMuted(tracks);
+            }
+            return new TrackMixCommand(tracks, TrackMixProperty.Mute,
+                () => Set(next), () => Set(old), "Mute tracks");
+        }
+
+        public static UCommand UnsoloTracks(UTrack[] tracks) {
+            var old = tracks.Select(t => t.Solo).ToArray();
+            return new TrackMixCommand(tracks, TrackMixProperty.Solo,
+                () => { foreach (var t in tracks) t.Solo = false; RefreshMuted(tracks); },
+                () => { for (int i = 0; i < tracks.Length; i++) tracks[i].Solo = old[i]; RefreshMuted(tracks); },
+                "Unsolo tracks");
+        }
+
+        static UTrack[] MixTracks(UTrack track) =>
+            DocManager.Inst.Project.tracks.Contains(track) ? DocManager.Inst.Project.tracks.ToArray() : new[] { track };
+
+        public static void RefreshMuted(System.Collections.Generic.IEnumerable<UTrack> tracks) {
+            bool hasSolo = tracks.Any(t => t.Solo);
+            foreach (var track in tracks) {
+                // Preserve the existing policy: a soloed track overrides its own mute.
+                track.Muted = !track.Solo && (track.Mute || hasSolo);
+            }
         }
 
         /// <summary>添加槽位并加载插件（do：写 UID + 异步 Load；undo：Unload + Clear）。</summary>
@@ -171,20 +225,16 @@ namespace OpenUtau.Core {
         /// 面板/编辑器一律走它，避免"直接改 fx.EqEnabled"这种不进 undo 队列的写法。
         /// </summary>
         public static UCommand SetMixFxModule(UTrack track, MixFxModule module, bool enabled) {
-            bool old = IsModuleEnabled(track.MixFx, module);
-            return new LambdaCommand(
-                () => SetModuleEnabled(track.MixFx, module, enabled),
-                () => SetModuleEnabled(track.MixFx, module, old),
-                $"MixFx {module} on {track.TrackName} = {enabled}");
+            var fx = track.MixFx?.Clone();
+            SetModuleEnabled(fx, module, enabled);
+            return SetMixFx(track, fx);
         }
 
         /// <summary>链路总电源（内置段整体通过声 / 旁通）。</summary>
         public static UCommand SetMixFxEnabled(UTrack track, bool enabled) {
-            bool old = track.MixFx?.Enabled ?? false;
-            return new LambdaCommand(
-                () => { if (track.MixFx != null) track.MixFx.Enabled = enabled; },
-                () => { if (track.MixFx != null) track.MixFx.Enabled = old; },
-                $"MixFx enabled on {track.TrackName} = {enabled}");
+            var fx = track.MixFx?.Clone();
+            if (fx != null) fx.Enabled = enabled;
+            return SetMixFx(track, fx);
         }
 
         /// <summary>
@@ -194,7 +244,7 @@ namespace OpenUtau.Core {
         /// </summary>
         public static UCommand SetMixFx(UTrack track, UMixFx? fx) {
             UMixFx? old = track.MixFx;
-            return new LambdaCommand(
+            return new TrackMixCommand(new[] { track }, TrackMixProperty.Effects,
                 () => track.MixFx = fx,
                 () => track.MixFx = old,
                 $"Set MixFx on {track.TrackName}");

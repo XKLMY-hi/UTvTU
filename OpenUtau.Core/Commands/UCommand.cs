@@ -5,6 +5,8 @@ using System.Linq;
 namespace OpenUtau.Core {
     public abstract class UCommand {
         public virtual bool Silent => false;
+        // Live mix edits change playback parameters, not synthesized voice data.
+        public virtual bool AffectsSynthesis => true;
         public virtual ValidateOptions ValidateOptions => default;
         public abstract void Execute();
         public abstract void Unexecute();

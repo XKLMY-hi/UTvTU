@@ -26,7 +26,7 @@ namespace OpenUtau.App.Controls {
     /// · 通知订阅/声像写回开关**随挂载启停**，重挂即恢复；
     /// · <see cref="UpdateLevel"/> 只依赖 Track，不依赖订阅状态 ⇒ 重挂后立刻恢复跳表。
     /// </summary>
-    public partial class MixerTrackStrip : UserControl {
+    public partial class MixerTrackStrip : UserControl, ICmdSubscriber {
         private UTrack? track;
         private bool isDragging;
         private bool _syncing;
@@ -51,6 +51,10 @@ namespace OpenUtau.App.Controls {
                 if (ReferenceEquals(track, value)) {
                     return;
                 }
+                bool wasSuppressed = suppressed;
+                DisposeSubscriptions();
+                _vm?.Edits.Dispose();
+                suppressed = wasSuppressed;
                 track = value;
                 _vm = track != null ? new MixerTrackStripViewModel(track) : null;
                 LoadTrackData();
@@ -87,10 +91,9 @@ namespace OpenUtau.App.Controls {
                 panValue = v;
                 UpdatePanValueDisplay();
                 if (subscribed && track != null && _vm != null) {
-                    _vm.ApplyPan(v);
-                    var pn = new PanChangeNotification(track.TrackNo, v);
-                    DocManager.Inst.ExecuteCmd(pn);
-                    MessageBus.Current.SendMessage(pn);
+                    if (_vm.ApplyPan(v)) {
+                        MessageBus.Current.SendMessage(new PanChangeNotification(track.TrackNo, v));
+                    }
                 }
             }
         }
@@ -135,6 +138,7 @@ namespace OpenUtau.App.Controls {
                 return;
             }
             subscribed = true;
+            DocManager.Inst.AddSubscriber(this);
             _volumeSubscription = MessageBus.Current.Listen<VolumeChangeNotification>()
                 .Where(n => n.TrackNo == track.TrackNo)
                 .Subscribe(n => {
@@ -152,7 +156,6 @@ namespace OpenUtau.App.Controls {
                     _syncing = true;
                     panValue = Math.Clamp(n.Pan, -100, 100);
                     UpdatePanValueDisplay();
-                    track.Pan = n.Pan / 100.0;
                     _syncing = false;
                 });
         }
@@ -162,6 +165,7 @@ namespace OpenUtau.App.Controls {
         /// 清空是重挂后 VU 与声像永久失效的根因（旧实现在 Unloaded 里做这件事）。
         /// </summary>
         public void DisposeSubscriptions() {
+            DocManager.Inst.RemoveSubscriber(this);
             subscribed = false;
             suppressed = true;
             _volumeSubscription?.Dispose();
@@ -169,6 +173,15 @@ namespace OpenUtau.App.Controls {
             _panSubscription?.Dispose();
             _panSubscription = null;
             EndPanTracking();
+            isDragging = false;
+            _vm?.Edits.EndGesture();
+        }
+
+        public void OnNext(UCommand cmd, bool isUndo) {
+            if (subscribed && cmd is TrackMixChangedNotification mix && track != null &&
+                mix.Tracks.Contains(track)) {
+                LoadTrackData();
+            }
         }
 
         // ── 数据装载 ─────────────────────────────────────────
@@ -233,6 +246,7 @@ namespace OpenUtau.App.Controls {
                 return;
             }
             PanHitArea.Focus();
+            _vm?.Edits.BeginGesture();
             dragStartPan = panValue;
             var topLevel = TopLevel.GetTopLevel(this);
             panTrackingRoot = topLevel;
@@ -266,6 +280,7 @@ namespace OpenUtau.App.Controls {
         }
 
         private void EndPanTracking() {
+            _vm?.Edits.EndGesture();
             if (panTrackingRoot == null) {
                 return;
             }
@@ -318,10 +333,9 @@ namespace OpenUtau.App.Controls {
         private void ApplyVolume(double db) {
             if (track == null || _vm == null) return;
             db = Math.Clamp(db, MixerMetrics.FaderMinDb, MixerMetrics.FaderMaxDb);
-            _vm.ApplyVolume(db);
-            var vn = new VolumeChangeNotification(track.TrackNo, track.Muted ? MixerMetrics.FaderMinDb : db);
-            DocManager.Inst.ExecuteCmd(vn);
-            MessageBus.Current.SendMessage(vn);
+            if (_vm.ApplyVolume(db)) {
+                MessageBus.Current.SendMessage(new VolumeChangeNotification(track.TrackNo, track.Muted ? MixerMetrics.FaderMinDb : db));
+            }
             UpdateFaderPosition();
             UpdateVolValueDisplay(db);
         }
@@ -331,6 +345,7 @@ namespace OpenUtau.App.Controls {
         private void OnFaderPressed(object? sender, PointerPressedEventArgs e) {
             if (track == null) return;
             isDragging = true;
+            _vm?.Edits.BeginGesture();
             e.Pointer.Capture(FaderBox);
             ApplyVolume(MixerMetrics.FaderTopToDb(e.GetPosition(FaderBox).Y,
                 FaderBox.Bounds.Height, MixerMetrics.FaderHandleHeight));
@@ -346,10 +361,12 @@ namespace OpenUtau.App.Controls {
 
         private void OnFaderReleased(object? sender, PointerEventArgs e) {
             isDragging = false; e.Pointer.Capture(null);
+            _vm?.Edits.EndGesture();
         }
 
         private void OnFaderCaptureLost(object? sender, PointerCaptureLostEventArgs e) {
             isDragging = false;
+            _vm?.Edits.EndGesture();
         }
 
         private void OnVolLabelPressed(object? sender, PointerPressedEventArgs e) {

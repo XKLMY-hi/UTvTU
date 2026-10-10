@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using OpenUtau.App.Editing;
 using Avalonia.Media;
 using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
@@ -8,6 +9,7 @@ using ReactiveUI.Fody.Helpers;
 namespace OpenUtau.App.ViewModels {
     public class MixerTrackStripViewModel : ViewModelBase {
         private readonly UTrack _track;
+        public TrackMixEditSession Edits { get; }
         public int TrackNo => _track.TrackNo;
         public string TrackName => _track.TrackName;
         public IBrush TrackColor => ThemeManager.GetTrackColor(_track.TrackColor).AccentColor;
@@ -20,41 +22,31 @@ namespace OpenUtau.App.ViewModels {
 
         public MixerTrackStripViewModel(UTrack track) {
             _track = track;
+            Edits = new TrackMixEditSession(track);
             Volume = track.Volume;
             Pan = track.Pan * 100.0;
             Mute = track.Mute;
             Solo = track.Solo;
             ToggleMuteCmd = ReactiveCommand.Create(() => {
-                Mute = !Mute;
-                _track.Mute = Mute; _track.Muted = Mute;
-                var vn = new VolumeChangeNotification(TrackNo, Mute ? -24 : Volume);
-                DocManager.Inst.StartUndoGroup();
-                DocManager.Inst.ExecuteCmd(TrackMixCommands.Mute(_track, Mute));
-                DocManager.Inst.EndUndoGroup();
-                DocManager.Inst.ExecuteCmd(vn);
-                MessageBus.Current.SendMessage(vn);
-                MessageBus.Current.SendMessage(new TracksMuteEvent(TrackNo, false));
+                Edits.SetMute(!_track.Mute);
+                Refresh();
             });
             ToggleSoloCmd = ReactiveCommand.Create(() => {
-                Solo = !Solo;
-                _track.Solo = Solo;
-                DocManager.Inst.StartUndoGroup();
-                DocManager.Inst.ExecuteCmd(TrackMixCommands.Solo(_track, Solo));
-                DocManager.Inst.EndUndoGroup();
-                MessageBus.Current.SendMessage(new TracksSoloEvent(TrackNo, Solo, false));
+                Edits.SetSolo(!_track.Solo);
+                Refresh();
             });
         }
 
-        public void ApplyVolume(double db) {
-            db = System.Math.Clamp(db, -24, 12);
-            Volume = db;
-            _track.Volume = db;
+        public bool ApplyVolume(double db) {
+            bool changed = Edits.SetVolume(db);
+            Refresh();
+            return changed;
         }
 
-        public void ApplyPan(double value) {
-            var clamped = System.Math.Clamp(value, -100, 100);
-            Pan = clamped;
-            _track.Pan = clamped / 100.0;
+        public bool ApplyPan(double value) {
+            bool changed = Edits.SetPan(value);
+            Refresh();
+            return changed;
         }
 
         public void Refresh() {

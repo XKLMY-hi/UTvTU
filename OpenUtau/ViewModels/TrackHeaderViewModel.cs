@@ -4,12 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Disposables;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Styling;
 using OpenUtau.Api;
+using OpenUtau.App.Editing;
 using OpenUtau.App.Views;
 using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
@@ -19,7 +21,7 @@ using ReactiveUI.Fody.Helpers;
 using Serilog;
 
 namespace OpenUtau.App.ViewModels {
-    public class TrackHeaderViewModel : ViewModelBase, IDisposable, IActivatableViewModel {
+    public class TrackHeaderViewModel : ViewModelBase, IDisposable, IActivatableViewModel, ICmdSubscriber {
         public int TrackNo => track.TrackNo + 1;
         public USinger Singer => track.Singer;
         public Phonemizer Phonemizer => track.Phonemizer;
@@ -58,11 +60,16 @@ namespace OpenUtau.App.ViewModels {
         private IDisposable? volumeSub;
         private IDisposable? panSub;
         private bool disposed;
+        readonly CompositeDisposable subscriptions = new();
 
         public ViewModelActivator Activator { get; }
 
         private readonly UTrack track;
+        private readonly TrackMixEditSession? mixEdits;
         private bool _syncing;
+
+        public void BeginMixGesture() => mixEdits?.BeginGesture();
+        public void EndMixGesture() => mixEdits?.EndGesture();
 
         // Parameterless constructor for Avalonia preview only.
         public TrackHeaderViewModel() {
@@ -72,12 +79,14 @@ namespace OpenUtau.App.ViewModels {
             Activator = new ViewModelActivator();
             track = new UTrack(DocManager.Inst.Project);
             this.WhenAnyValue(x => x.IsSelected)
-                .Subscribe(_ => RefreshSelectionStyle());
+                .Subscribe(_ => RefreshSelectionStyle()).DisposeWith(subscriptions);
             RefreshSelectionStyle();
         }
 
         public TrackHeaderViewModel(UTrack track) {
             this.track = track;
+            mixEdits = new TrackMixEditSession(track);
+            DocManager.Inst.AddSubscriber(this);
             SelectSingerCommand = ReactiveCommand.Create<USinger>(singer => {
                 if (track.Singer != singer) {
                     DocManager.Inst.StartUndoGroup("command.track.singer");
@@ -139,23 +148,17 @@ namespace OpenUtau.App.ViewModels {
             Solo = track.Solo;
             MixFxEnabled = track.MixFx?.Enabled ?? false;
             this.WhenAnyValue(x => x.Volume)
+                .Skip(1)
                 .Subscribe(volume => {
                     if (_syncing) return;
-                    track.Volume = volume;
-                    // 直接改模型（不进 undo 队列）——标记工程已修改（防退出/autosave 丢改动）
-                    DocManager.Inst.MarkProjectModified();
-                    var vn = new VolumeChangeNotification(track.TrackNo, Muted ? -24 : volume);
-                    DocManager.Inst.ExecuteCmd(vn);
-                    MessageBus.Current.SendMessage(vn);
-                });
+                    mixEdits.SetVolume(volume);
+                }).DisposeWith(subscriptions);
             this.WhenAnyValue(x => x.Pan)
+                .Skip(1)
                 .Subscribe(pan => {
-                    track.Pan = pan / 100.0;
-                    DocManager.Inst.MarkProjectModified();
-                    var pn = new PanChangeNotification(track.TrackNo, pan);
-                    DocManager.Inst.ExecuteCmd(pn);
-                    MessageBus.Current.SendMessage(pn);
-                });
+                    if (_syncing) return;
+                    mixEdits.SetPan(pan);
+                }).DisposeWith(subscriptions);
 
             // Listen for volume/pan changes from mixer window
             // W33：这两条订阅必须留住句柄并在 Dispose 里释放 —— 此前它们**永不退订**，
@@ -181,48 +184,27 @@ namespace OpenUtau.App.ViewModels {
                     _syncing = false;
                 });
             this.WhenAnyValue(x => x.Mute)
+                .Skip(1)
                 .Subscribe(mute => {
-                    track.Mute = mute;
-                    DocManager.Inst.MarkProjectModified();
-                });
-            this.WhenAnyValue(x => x.Muted)
-                .Subscribe(muted => {
-                    track.Muted = muted;
-                    DocManager.Inst.MarkProjectModified();
-                    var vnm = new VolumeChangeNotification(track.TrackNo, muted ? -24 : Volume);
-                    DocManager.Inst.ExecuteCmd(vnm);
-                    MessageBus.Current.SendMessage(vnm);
-                });
+                    if (!_syncing) mixEdits.SetMute(mute);
+                }).DisposeWith(subscriptions);
             this.WhenAnyValue(x => x.Solo)
+                .Skip(1)
                 .Subscribe(solo => {
-                    track.Solo = solo;
-                    DocManager.Inst.MarkProjectModified();
-                });
+                    if (!_syncing) mixEdits.SetSolo(solo);
+                }).DisposeWith(subscriptions);
             // W33：次行 `⋯` 的显隐由"歌手/音素器是否被按高裁掉"派生 ⇒ 两者变了要通知它
             this.WhenAnyValue(x => x.IsSingerVisible, x => x.IsPhonemizerVisible)
-                .Subscribe(_ => this.RaisePropertyChanged(nameof(ShowOverflow)));
+                .Subscribe(_ => this.RaisePropertyChanged(nameof(ShowOverflow))).DisposeWith(subscriptions);
             this.WhenAnyValue(x => x.MixFxEnabled)
                 .Subscribe(enabled => {
-                    if (track.MixFx != null) {
-                        // 值没变就直接返回：订阅时会立刻发一次当前值，
-                        // 且 MixFxChangedNotification 会回调 ManuallyRaise() 再读一次模型，
-                        // 不拦就会产生"无变更也标脏 + 再发一次通知"的空转。
-                        if (track.MixFx.Enabled == enabled) {
-                            return;
-                        }
-                        track.MixFx.Enabled = enabled;
-                    } else if (enabled) {
-                        track.MixFx = new UMixFx { Enabled = true };
-                    } else {
-                        return;
-                    }
-                    // 与 Volume/Pan/Mute/Solo 同款：模型变更 → 标脏（防退出/autosave 丢改动）+ 刷新轨道头徽标。
-                    // 注意：这里**不**通知 Core 重渲染——实时机架在下一个音频块自行读取 track.MixFx。
-                    DocManager.Inst.MarkProjectModified();
-                    MessageBus.Current.SendMessage(new MixFxChangedNotification(track.TrackNo));
-                });
+                    if (_syncing || (track.MixFx?.Enabled ?? false) == enabled) return;
+                    var fx = track.MixFx?.Clone() ?? new UMixFx();
+                    fx.Enabled = enabled;
+                    if (mixEdits.SetEffects(fx)) MessageBus.Current.SendMessage(new MixFxChangedNotification(track.TrackNo));
+                }).DisposeWith(subscriptions);
             this.WhenAnyValue(x => x.IsSelected)
-                .Subscribe(_ => RefreshSelectionStyle());
+                .Subscribe(_ => RefreshSelectionStyle()).DisposeWith(subscriptions);
 
             RefreshAvatar();
             RefreshSelectionStyle();
@@ -235,62 +217,39 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public void ToggleSolo() {
-            MessageBus.Current.SendMessage(new TracksSoloEvent(track.TrackNo, !track.Solo, false));
+            mixEdits?.SetSolo(!track.Solo);
         }
 
         public void SoloAdditionally() {
-            MessageBus.Current.SendMessage(new TracksSoloEvent(track.TrackNo, !track.Solo, true));
+            mixEdits?.SetSolo(!track.Solo, additionally: true);
         }
 
         public void UnsoloAll() {
-            MessageBus.Current.SendMessage(new TracksSoloEvent(-1, false, false));
+            mixEdits?.UnsoloAll();
         }
 
         public void ToggleMute() {
-            if (!Mute) {
-                Mute = true;
-            } else {
-                Mute = false;
-            }
-            this.RaisePropertyChanged(nameof(Mute));
-            JudgeMuted();
+            mixEdits?.SetMute(!track.Mute);
         }
 
         public void ToggleMute(bool mute) {
-            if (mute) {
-                Mute = true;
-            } else {
-                Mute = false;
-            }
-            this.RaisePropertyChanged(nameof(Mute));
-            JudgeMuted();
+            mixEdits?.SetMute(mute);
         }
 
         public void MuteOnly() {
-            MessageBus.Current.SendMessage(new TracksMuteEvent(-1, false));
-            ToggleMute();
+            mixEdits?.SetMutes(t => ReferenceEquals(t, track));
         }
 
         public void MuteAllOthers() {
-            MessageBus.Current.SendMessage(new TracksMuteEvent(-1, true));
-            ToggleMute();
+            mixEdits?.SetMutes(t => !ReferenceEquals(t, track));
         }
 
         public void UnmuteAll() {
-            MessageBus.Current.SendMessage(new TracksMuteEvent(-1, false));
+            mixEdits?.SetMutes(_ => false);
         }
 
         public void JudgeMuted() {
-            if (Solo) {
-                Muted = false;
-            } else if (Mute) {
-                Muted = true;
-            } else if (DocManager.Inst.Project.SoloTrackExist) {
-                Muted = true;
-            } else {
-                Muted = false;
-            }
-            this.RaisePropertyChanged(nameof(Muted));
+            Muted = track.Muted;
         }
 
         private void ApplySingerToTrack(UTrack targetTrack, USinger? singer) {
@@ -545,6 +504,8 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public void ManuallyRaise() {
+            SyncMixState();
+            _syncing = true;
             TrackName = track.TrackName;
             TrackAccentColor = ThemeManager.GetTrackColor(track.TrackColor).AccentColor;
             TrackColor = Preferences.Default.UseTrackColor
@@ -566,7 +527,29 @@ namespace OpenUtau.App.ViewModels {
             this.RaisePropertyChanged(nameof(MixFxEnabled));
             this.RaisePropertyChanged(nameof(Volume));
             this.RaisePropertyChanged(nameof(Pan));
+            _syncing = false;
             RefreshAvatar();
+        }
+
+        public void OnNext(UCommand cmd, bool isUndo) {
+            if (!disposed && mixEdits?.IsCurrent == true &&
+                cmd is TrackMixChangedNotification mix && mix.Tracks.Contains(track)) {
+                SyncMixState();
+            }
+        }
+
+        void SyncMixState() {
+            _syncing = true;
+            try {
+                Volume = track.Volume;
+                Pan = track.Pan * 100;
+                Mute = track.Mute;
+                Muted = track.Muted;
+                Solo = track.Solo;
+                MixFxEnabled = track.MixFx?.Enabled ?? false;
+            } finally {
+                _syncing = false;
+            }
         }
 
         public void Remove() {
@@ -688,9 +671,16 @@ namespace OpenUtau.App.ViewModels {
                 return;
             }
             disposed = true;
+            DocManager.Inst.RemoveSubscriber(this);
+            mixEdits?.Dispose();
+            subscriptions.Dispose();
+            SelectSingerCommand.Dispose();
+            SelectPhonemizerCommand.Dispose();
+            SelectRendererCommand.Dispose();
             volumeSub?.Dispose();
             volumeSub = null;
             panSub?.Dispose();
             panSub = null;
-        }    }
+        }
+    }
 }

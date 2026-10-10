@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using OpenUtau.App.Controls;
 using OpenUtau.App.ViewModels;
 using OpenUtau.Core;
@@ -27,10 +29,11 @@ namespace OpenUtau.App.Views {
 
         readonly MixFxViewModel viewModel;
         readonly UTrack? track;
-        // 取消 / ESC 走过 Revert：关窗时不要把它当成"保留改动"再标记一次工程已修改。
+        // 取消 / ESC 走过 Revert：关窗无需再次结束已完成的手势。
         bool reverted;
-        // 确定走过 Apply（已经标记过工程已修改），关窗时不再重复标记。
+        // 确定走过 Apply，关窗无需再次结束手势。
         bool applied;
+        readonly IDisposable enabledSubscription;
 
         public MixFxDialog() : this(null) { }
 
@@ -40,7 +43,7 @@ namespace OpenUtau.App.Views {
             DataContext = viewModel = new MixFxViewModel(track);
             viewModel.AskForName = PromptForNameAsync;
             // 轨道头上的 fx 指示灯跟随总电源开关。
-            viewModel.WhenAnyValue(x => x.Enabled).Subscribe(_ => NotifyTrackHeader());
+            enabledSubscription = viewModel.WhenAnyValue(x => x.Enabled).Subscribe(_ => NotifyTrackHeader());
             if (track != null) {
                 DocManager.Inst.AddSubscriber(this);
             }
@@ -53,6 +56,16 @@ namespace OpenUtau.App.Views {
                 }
             });
             Closed += OnDialogClosed;
+            AddHandler(PointerPressedEvent, (_, e) => {
+                if (e.Source is Control source &&
+                    (source is Knob || source.GetVisualAncestors().Any(a => a is Knob))) {
+                    viewModel.Edits?.BeginGesture();
+                }
+            }, RoutingStrategies.Tunnel);
+            AddHandler(PointerReleasedEvent, (_, _) => viewModel.FinishEdits(),
+                RoutingStrategies.Bubble, handledEventsToo: true);
+            AddHandler(PointerCaptureLostEvent, (_, _) => viewModel.FinishEdits(),
+                RoutingStrategies.Bubble, handledEventsToo: true);
         }
 
         /// <summary>打开 <paramref name="track"/> 的机架；已开着就把它抬到最前。</summary>
@@ -71,7 +84,9 @@ namespace OpenUtau.App.Views {
         }
 
         protected void OnDialogClosed(object? sender, EventArgs e) {
+            enabledSubscription.Dispose();
             if (track == null) {
+                viewModel.Dispose();
                 return;
             }
             DocManager.Inst.RemoveSubscriber(this);
@@ -79,10 +94,11 @@ namespace OpenUtau.App.Views {
                 open.Remove(track);
             }
             if (!reverted && !applied) {
-                // 直接关窗 = 保留改动（确定路径已经在 Apply 里标记过，这里只在"脏"时补一次）。
-                viewModel.MarkModifiedIfDirty();
+                // 直接关窗 = 保留改动；编辑发生时已经写入工程命令。
+                viewModel.FinishEdits();
             }
             NotifyTrackHeader();
+            viewModel.Dispose();
         }
 
         /// <summary>
@@ -107,7 +123,7 @@ namespace OpenUtau.App.Views {
         }
 
         void NotifyTrackHeader() {
-            if (track != null) {
+            if (track != null && viewModel.Edits?.IsCurrent == true) {
                 MessageBus.Current.SendMessage(new MixFxChangedNotification(track.TrackNo));
             }
         }

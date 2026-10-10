@@ -142,9 +142,11 @@ namespace OpenUtau.Core {
             get {
                 return (Project.Saved || (Project.tracks.Count <= 1 && Project.parts.Count == 0)) &&
                     (undoQueue.Count > 0 && savedPoint == undoQueue.Last() || undoQueue.Count == 0 && savedPoint == null) &&
-                    !Recovered;
+                    !Recovered && (undoGroup == null || undoGroup.Commands.Count == 0);
             }
         }
+
+        public UCommandGroup? ActiveUndoGroup => undoGroup;
 
         /// <summary>
         /// 标记工程已修改——混音台推子/声像/Mute/Solo、MixFx 滑杆等**直接改模型**
@@ -188,7 +190,7 @@ namespace OpenUtau.Core {
             if (Project == null) {
                 return;
             }
-            if (undoQueue.LastOrDefault() == autosavedPoint) {
+            if (undoQueue.LastOrDefault() == autosavedPoint && (undoGroup == null || undoGroup.Commands.Count == 0)) {
                 Log.Information("Autosave skipped.");
                 return;
             }
@@ -241,13 +243,10 @@ namespace OpenUtau.Core {
         private void ExecuteCmdCore(UCommand cmd) {
             if (cmd is UNotification) {
                 if (cmd is SaveProjectNotification saveProjectNotif) {
-                    if (undoQueue.Count > 0) {
-                        savedPoint = undoQueue.Last();
-                    }
-                    if (string.IsNullOrEmpty(saveProjectNotif.Path)) {
-                        Format.Ustxp.Save(Project.FilePath, Project);
-                    } else {
-                        Format.Ustxp.Save(saveProjectNotif.Path, Project);
+                    if (undoGroup != null) EndUndoGroup();
+                    string path = string.IsNullOrEmpty(saveProjectNotif.Path) ? Project.FilePath : saveProjectNotif.Path;
+                    if (Format.Ustxp.Save(path, Project)) {
+                        savedPoint = undoQueue.LastOrDefault();
                     }
                 } else if (cmd is LoadProjectNotification notification) {
                     undoQueue.Clear();
@@ -295,7 +294,7 @@ namespace OpenUtau.Core {
                 Log.Information($"ExecuteCmd {cmd}");
             }
             Publish(cmd);
-            if (!undoGroup.DeferValidate) {
+            if (!undoGroup.DeferValidate && cmd.AffectsSynthesis) {
                 Project.Validate(cmd.ValidateOptions);
             }
         }
@@ -321,13 +320,15 @@ namespace OpenUtau.Core {
             while (undoQueue.Count > Util.Preferences.Default.UndoLimit) {
                 undoQueue.RemoveFromFront();
             }
-            if (undoGroup.DeferValidate) {
+            bool affectsSynthesis = undoGroup.Commands.Any(cmd => cmd.AffectsSynthesis);
+            if (undoGroup.DeferValidate && affectsSynthesis) {
                 Project.ValidateFull();
             }
             undoGroup.Merge();
             undoGroup = null;
             Log.Information("undoGroup ended");
-            ExecuteCmd(new PreRenderNotification());
+            Publish(new CommandHistoryChangedNotification());
+            if (affectsSynthesis) ExecuteCmd(new PreRenderNotification());
         }
 
         public void RollBackUndoGroup() {
@@ -338,7 +339,7 @@ namespace OpenUtau.Core {
             for (int i = undoGroup.Commands.Count - 1; i >= 0; i--) {
                 var cmd = undoGroup.Commands[i];
                 cmd.Unexecute();
-                if (i == 0) {
+                if (i == 0 && undoGroup.Commands.Any(c => c.AffectsSynthesis)) {
                     Project.ValidateFull();
                 }
                 Publish(cmd, true);
@@ -347,6 +348,7 @@ namespace OpenUtau.Core {
         }
 
         public void Undo() {
+            if (undoGroup != null) EndUndoGroup();
             if (undoQueue.Count == 0) {
                 return;
             }
@@ -354,16 +356,18 @@ namespace OpenUtau.Core {
             for (int i = group.Commands.Count - 1; i >= 0; i--) {
                 var cmd = group.Commands[i];
                 cmd.Unexecute();
-                if (i == 0) {
+                if (i == 0 && group.Commands.Any(c => c.AffectsSynthesis)) {
                     Project.ValidateFull();
                 }
                 Publish(cmd, true);
             }
             redoQueue.AddToBack(group);
-            ExecuteCmd(new PreRenderNotification());
+            Publish(new CommandHistoryChangedNotification());
+            if (group.Commands.Any(c => c.AffectsSynthesis)) ExecuteCmd(new PreRenderNotification());
         }
 
         public void Redo() {
+            if (undoGroup != null) EndUndoGroup();
             if (redoQueue.Count == 0) {
                 return;
             }
@@ -371,18 +375,22 @@ namespace OpenUtau.Core {
             for (var i = 0; i < group.Commands.Count; i++) {
                 var cmd = group.Commands[i];
                 cmd.Execute();
-                if (i == group.Commands.Count - 1) {
+                if (i == group.Commands.Count - 1 && group.Commands.Any(c => c.AffectsSynthesis)) {
                     Project.ValidateFull();
                 }
                 Publish(cmd);
             }
             undoQueue.AddToBack(group);
-            ExecuteCmd(new PreRenderNotification());
+            Publish(new CommandHistoryChangedNotification());
+            if (group.Commands.Any(c => c.AffectsSynthesis)) ExecuteCmd(new PreRenderNotification());
         }
 
         public bool GetUndoState(out string? key) {
             key = null;
-            if (undoQueue.Count > 0) {
+            if (undoGroup?.Commands.Count > 0) {
+                key = undoGroup.NameKey;
+                return true;
+            } else if (undoQueue.Count > 0) {
                 key = undoQueue.Last().NameKey;
                 return true;
             } else {
@@ -391,6 +399,7 @@ namespace OpenUtau.Core {
         }
         public bool GetRedoState(out string? key) {
             key = null;
+            if (undoGroup?.Commands.Count > 0) return false;
             if (redoQueue.Count > 0) {
                 key = redoQueue.Last().NameKey;
                 return true;
@@ -423,10 +432,28 @@ namespace OpenUtau.Core {
         }
 
         private void Publish(UCommand cmd, bool isUndo = false) {
-            lock (lockObj) {
-                foreach (var sub in subscribers) {
-                    sub.OnNext(cmd, isUndo);
+            if (cmd is LoadProjectNotification || cmd is TrackCommand) {
+                TrackMixCommands.RefreshMuted(Project.tracks);
+            }
+            ICmdSubscriber[] snapshot;
+            lock (lockObj) snapshot = subscribers.ToArray();
+            // Track/view rebuilding can subscribe or dispose while receiving this command.
+            foreach (var sub in snapshot) sub.OnNext(cmd, isUndo);
+            if (cmd is TrackMixCommand mix) {
+                // Notify the audio engine and views on execute AND undo/redo.
+                foreach (var track in mix.Tracks) {
+                    if (mix.Property is TrackMixProperty.Volume or TrackMixProperty.Mute or TrackMixProperty.Solo) {
+                        Publish(new VolumeChangeNotification(track.TrackNo, track.Muted ? -24 : track.Volume));
+                    } else if (mix.Property == TrackMixProperty.Pan) {
+                        Publish(new PanChangeNotification(track.TrackNo, track.Pan * 100));
+                    }
                 }
+                Publish(new TrackMixChangedNotification(Project, mix.Tracks), isUndo);
+            } else if (cmd is TrackCommand) {
+                foreach (var track in Project.tracks) {
+                    Publish(new VolumeChangeNotification(track.TrackNo, track.Muted ? -24 : track.Volume));
+                }
+                Publish(new TrackMixChangedNotification(Project, Project.tracks.ToArray()), isUndo);
             }
         }
 
