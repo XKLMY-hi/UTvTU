@@ -63,8 +63,11 @@
       <!-- 表头：轨道名（无背景）+ 「＋」 -->
       <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="12,10,10,8">
         <TextBlock Name="HeaderName" Classes="chainHeader" Text="{Binding HeaderText}"/>
-        <Button Name="AddButton" Grid.Column="1" Classes="addButton" Content="＋"
-                Click="OnAddClick" ToolTip.Tip="{DynamicResource fxchain.add.tip}"/>
+        <Button Name="AddButton" Grid.Column="1" Classes="addButton" Theme="{StaticResource DawButtonTheme}"
+                Click="OnAddClick" ToolTip.Tip="{DynamicResource fxchain.add.tip}">
+          <c:DawIcon Data="{StaticResource icon-plus}" Width="16" Height="16"
+                     Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+        </Button>
       </Grid>
 
       <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"

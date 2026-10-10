@@ -13,6 +13,14 @@
     颜色全部取 md3.* 角色键；本文件不含任何字面量色值。
   -->
   <UserControl.Styles>
+    <Style Selector="Border#PanHitArea:focus-visible">
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+      <Setter Property="CornerRadius" Value="4"/>
+    </Style>
+    <Style Selector="Border#PanHitArea:pointerover">
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    </Style>
     <!-- M/S：常态底 surface-container-high + 文字 on-surface-variant（spec-digest §9.1）
          ⚠ 两处"继承来的几何"必须在这里压掉，否则渲染尺寸 ≠ 规格：
          · 主题 Md3ButtonTheme 设 MinHeight=32（Styles/Md3ControlThemes.axaml:28），

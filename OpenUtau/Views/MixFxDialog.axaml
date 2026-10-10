@@ -75,6 +75,8 @@
                               VerticalAlignment="Center"
                               Foreground="{TemplateBinding Foreground}"
                               FontSize="{TemplateBinding FontSize}"
+                              FontFamily="{TemplateBinding FontFamily}" FontWeight="{TemplateBinding FontWeight}"
+                              UseLayoutRounding="False" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                               IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNotNull}}"/>
           </StackPanel>
         </ControlTemplate>
@@ -198,7 +200,7 @@
       <ToggleButton Grid.Column="3" Classes="md3switch" Margin="0,0,20,0"
                     IsChecked="{Binding ApplyOnExportMixdown}"
                     Content="{DynamicResource mixfx.applyonexport}"/>
-      <Button Grid.Column="4" Margin="0,0,20,0"
+      <Button Theme="{StaticResource DawTextButtonTheme}" Grid.Column="4" Margin="0,0,20,0"
               Content="{DynamicResource mixfx.recommended}"
               Command="{Binding ApplyRecommendedCommand}"
               ToolTip.Tip="{DynamicResource mixfx.recommended.tip}"/>
@@ -223,14 +225,14 @@
             </DataTemplate>
           </ComboBox.ItemTemplate>
         </ComboBox>
-        <Button Grid.Column="2" Margin="8,0,0,0" Content="{DynamicResource mixfx.library.save}"
+        <Button Theme="{StaticResource DawTextButtonTheme}" Grid.Column="2" Margin="8,0,0,0" Content="{DynamicResource mixfx.library.save}"
                 Command="{Binding SaveUserPresetCommand}"/>
-        <Button Grid.Column="3" Margin="8,0,0,0" Content="{DynamicResource mixfx.library.delete}"
+        <Button Theme="{StaticResource DawTextButtonTheme}" Grid.Column="3" Margin="8,0,0,0" Content="{DynamicResource mixfx.library.delete}"
                 Command="{Binding DeleteUserPresetCommand}"
                 IsEnabled="{Binding CanDeleteSelectedPreset}"/>
-        <Button Grid.Column="5" Content="{DynamicResource button.cancel}"
+        <Button Theme="{StaticResource DawTextButtonTheme}" Grid.Column="5" Content="{DynamicResource button.cancel}"
                 MinWidth="90" Margin="0,0,8,0" Click="OnCancelClicked"/>
-        <Button Grid.Column="6" Classes="primary" Content="{DynamicResource button.ok}"
+        <Button Theme="{StaticResource DawTextButtonTheme}" Grid.Column="6" Classes="primary" Content="{DynamicResource button.ok}"
                 MinWidth="90" Click="OnOkClicked"/>
       </Grid>
     </StackPanel>

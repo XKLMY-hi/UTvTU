@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:OpenUtau.App.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="14" d:DesignHeight="48"
@@ -39,7 +40,13 @@
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="ClipToBounds" Value="False"/>
     </Style>
-    <!-- 悬停/聚焦：展开到 92 宽、胶囊圆角、主色底（改容器，不改 Button） -->
+    <!-- 悬停/聚焦：容器与按钮一起展开，显示范围和命中范围保持一致。 -->
+    <Style Selector="Button.revealTab:pointerover">
+      <Setter Property="Width" Value="92"/>
+    </Style>
+    <Style Selector="Button.revealTab:focus">
+      <Setter Property="Width" Value="92"/>
+    </Style>
     <Style Selector="Button.revealTab:pointerover Border.revealChrome">
       <Setter Property="Width" Value="92"/>
       <Setter Property="CornerRadius" Value="999"/>
@@ -85,10 +92,9 @@
       <Setter Property="Height" Value="48"/>
     </Style>
     <!-- 字形 14×14 居中（容器只有 14 宽，14 已是上限） -->
-    <Style Selector="Path.revealGlyph">
+    <Style Selector="c|DawIcon.revealGlyph">
       <Setter Property="Width" Value="14"/>
       <Setter Property="Height" Value="14"/>
-      <Setter Property="Stretch" Value="Uniform"/>
       <Setter Property="HorizontalAlignment" Value="Center"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
       <Setter Property="Stroke" Value="{DynamicResource md3.on-surface-variant}"/>
@@ -96,10 +102,10 @@
       <Setter Property="StrokeLineCap" Value="Round"/>
       <Setter Property="StrokeJoin" Value="Round"/>
     </Style>
-    <Style Selector="Button.revealTab:pointerover Path.revealGlyph">
+    <Style Selector="Button.revealTab:pointerover c|DawIcon.revealGlyph">
       <Setter Property="Stroke" Value="{DynamicResource md3.on-primary}"/>
     </Style>
-    <Style Selector="Button.revealTab:focus Path.revealGlyph">
+    <Style Selector="Button.revealTab:focus c|DawIcon.revealGlyph">
       <Setter Property="Stroke" Value="{DynamicResource md3.on-primary}"/>
     </Style>
     <Style Selector="TextBlock.revealLabel">
@@ -107,7 +113,8 @@
       <Setter Property="FontSize" Value="11"/>
       <Setter Property="IsVisible" Value="False"/>
       <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-      <Setter Property="Margin" Value="4,0,0,0"/>
+      <Setter Property="MaxWidth" Value="68"/>
+      <Setter Property="Margin" Value="4,0,4,0"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
     <Style Selector="Button.revealTab:pointerover TextBlock.revealLabel">
@@ -118,21 +125,22 @@
     </Style>
     <Style Selector="Button.revealTab.horizontal TextBlock.revealLabel">
       <Setter Property="Margin" Value="0,4,0,0"/>
+      <Setter Property="MaxWidth" Value="40"/>
     </Style>
   </UserControl.Styles>
 
   <!-- TabIndex=0：让标签在该 Tab 范围内**排在最前** ⇒ 折叠后按一次 Tab 就能到它（纯键盘路径，
        不依赖鼠标 hover）；`Button` 原生支持 Enter/Space 激活。 -->
-  <Button Name="TabButton" Classes="revealTab" Click="OnTabClicked"
+  <Button Name="TabButton" Classes="revealTab" Theme="{StaticResource DawButtonTheme}" Click="OnTabClicked"
           KeyboardNavigation.TabIndex="0"
           ToolTip.Tip="{Binding Hint, RelativeSource={RelativeSource AncestorType=UserControl}}">
     <Border Name="Chrome" Classes="revealChrome">
-      <Panel>
-        <Path Classes="revealGlyph"
+      <Grid Name="RevealContent" ColumnDefinitions="*,Auto">
+        <c:DawIcon Name="RevealGlyph" Classes="revealGlyph"
               Data="{Binding GlyphData, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-        <TextBlock Classes="revealLabel"
+        <TextBlock Name="RevealLabel" Grid.Column="1" Classes="revealLabel" UseLayoutRounding="False"
                    Text="{Binding PanelLabel, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-      </Panel>
+      </Grid>
     </Border>
   </Button>
 </UserControl>

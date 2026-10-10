@@ -3,13 +3,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:OpenUtau.App.ViewModels"
+             xmlns:c="using:OpenUtau.App.Controls"
              x:Class="OpenUtau.App.Controls.ExpSelector">
   <Design.DataContext>
     <vm:ExpSelectorViewModel/>
   </Design.DataContext>
   <Grid Height="22" Width="60" Background="{Binding Background}" PointerPressed="TextBlockPointerPressed">
-    <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="22"
-              Focusable="False" Foreground="{Binding TagBrush}" Background="Transparent" Width="20"
+    <ComboBox Name="DescriptorPicker" VerticalAlignment="Center" HorizontalAlignment="Left" Height="22" MinHeight="0" Padding="0"
+              Focusable="True" Foreground="{Binding TagBrush}" Background="Transparent" Width="20"
               SelectedItem="{Binding Descriptor}" ItemsSource="{Binding Descriptors}" SelectedIndex="{Binding SelectedIndex}">
       <ComboBox.Styles>
         <Style Selector="ComboBox">
@@ -33,37 +34,21 @@
           <Setter Property="Template">
             <ControlTemplate>
               <DataValidationErrors>
-                <Grid RowDefinitions="Auto, *, Auto"
-                      ColumnDefinitions="4,22">
+                <Grid RowDefinitions="*" ColumnDefinitions="*">
                   <Border x:Name="Background"
-                          Grid.Row="1"
+                          Grid.Row="0"
                           Grid.Column="0"
-                          Grid.ColumnSpan="2"
+                          Grid.ColumnSpan="1"
                           Background="{TemplateBinding Background}"
                           BorderBrush="{TemplateBinding BorderBrush}"
                           BorderThickness="{TemplateBinding BorderThickness}"
-                          MinWidth="{DynamicResource ComboBoxThemeMinWidth}" />
+                          CornerRadius="4" />
 
-                  <Viewbox UseLayoutRounding="False"
-                           MinHeight="{DynamicResource ComboBoxMinHeight}"
-                           Grid.Row="1"
-                           Grid.Column="1"
-                           IsHitTestVisible="False"
-                           Margin="0,0,10,0"
-                           Height="12"
-                           Width="12"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center">
-                    <Panel>
-                      <Panel Height="12"
-                             Width="12" />
-                      <Path x:Name="DropDownGlyph"
-                            Stretch="Uniform"
-                            VerticalAlignment="Center"
-                            Fill="{TemplateBinding Foreground}"
-                            Data="M1939 486L2029 576L1024 1581L19 576L109 486L1024 1401L1939 486Z" />
-                    </Panel>
-                  </Viewbox>
+                  <c:DawIcon Name="PickerChevron" Data="{StaticResource icon-chevron-down}"
+                             Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Fill="{TemplateBinding Foreground}"/>
+                  <Border Name="PickerFocus" BorderBrush="{DynamicResource md3.primary}" BorderThickness="1"
+                          CornerRadius="4" IsHitTestVisible="False" Opacity="0"/>
                   <Popup Name="PART_Popup"
                          WindowManagerAddShadowHint="False"
                          IsOpen="{TemplateBinding IsDropDownOpen, Mode=TwoWay}"
@@ -99,6 +84,9 @@
           <Setter Property="Padding" Value="8,2" />
           <Setter Property="HorizontalContentAlignment" Value="Center" />
         </Style>
+        <Style Selector="ComboBox:focus-visible /template/ Border#PickerFocus">
+          <Setter Property="Opacity" Value="1"/>
+        </Style>
         <Style Selector="ComboBox:pointerover /template/ Border#Background">
           <Setter Property="Background" Value="Transparent"/>
         </Style>
@@ -110,10 +98,8 @@
         </Style>
       </ComboBox.Styles>
     </ComboBox>
-    <Viewbox Margin="20,0,0,0" Height="22" Width="40">
-      <TextBlock Height="22" MinWidth="36" Margin="0,0,4,0" Padding="0,3,0,3"
-                 Foreground="{Binding TagBrush}"
-                 TextAlignment="Right" Text="{Binding Header}"/>
-    </Viewbox>
+    <TextBlock Margin="20,0,4,0" FontSize="11" UseLayoutRounding="False" VerticalAlignment="Center"
+               Foreground="{Binding TagBrush}" TextTrimming="CharacterEllipsis"
+               TextAlignment="Right" Text="{Binding Header}"/>
   </Grid>
 </UserControl>

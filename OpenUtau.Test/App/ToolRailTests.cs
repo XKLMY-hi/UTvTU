@@ -55,6 +55,7 @@ namespace OpenUtau.Test.App {
         }
 
         static void Close(Window window, DocManagerTestSetup.ScopedDispatcher scope) {
+            (window.Content as PianoRoll)?.Dispose();
             window.Close();
             Dispatcher.UIThread.RunJobs();
             scope.Dispose();
@@ -294,7 +295,7 @@ namespace OpenUtau.Test.App {
                     .First(b => b.Name == "PART_LayoutRoot");
                 var overlay = item.GetVisualDescendants().OfType<Border>()
                     .First(b => b.Name == "PART_HoverOverlay");
-                var icon = item.GetVisualDescendants().OfType<Path>().First(p => p.Name == "PART_ToolIcon");
+                var icon = item.GetVisualDescendants().OfType<DawIcon>().First(p => p.Name == "PART_ToolIcon");
                 var pseudo = (IPseudoClasses)item.Classes;
 
                 Assert.Equal(0, overlay.Opacity, 3);                       // 静止：叠加层不可见

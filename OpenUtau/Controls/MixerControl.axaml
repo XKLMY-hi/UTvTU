@@ -43,7 +43,7 @@
         <!-- 28 高工具行（设计稿无此元素，spec-digest C-6 自定）：MinHeight 必须显式压到 28，
              否则全局 Md3ButtonTheme 的 MinHeight=32 会把 Height 顶成 32；Margin 必须清零，
              否则应用级 `Button { Margin: 0,4 }`（Styles.axaml:159）再撑 8px。 -->
-        <Button Grid.Column="0" Name="AddTrackBtn" Height="28" MinHeight="28" Margin="0" CornerRadius="999"
+        <Button Grid.Column="0" Name="AddTrackBtn" Theme="{StaticResource DawTextButtonTheme}" Height="28" MinHeight="28" Margin="0" CornerRadius="999"
                 Padding="12,0" FontSize="11" FontWeight="SemiBold"
                 Content="{DynamicResource mixer.addtrack}" Click="OnAddTrackClick"
                 Background="{DynamicResource md3.surface-container-high}"
@@ -51,14 +51,14 @@
                 BorderThickness="0"/>
         <TextBlock Grid.Column="2" Name="StatusText" FontSize="10" VerticalAlignment="Center"
                    Foreground="{DynamicResource md3.on-surface-variant}"/>
-        <Button Grid.Column="3" Name="ChainToggleBtn" Classes="chainToggle" Margin="8,0,0,0"
+        <Button Grid.Column="3" Name="ChainToggleBtn" Theme="{StaticResource DawButtonTheme}" Classes="chainToggle" Margin="8,0,0,0"
                 Click="OnToggleChainPanel" ToolTip.Tip="{DynamicResource panel.collapse.fxchain}"
                 DataContext="{Binding #MixerRoot.ChainPanel}">
           <Panel>
-            <Path Data="{StaticResource icon-chevron-right}" Width="12" Height="12" Stretch="Uniform"
+            <c:DawIcon Data="{StaticResource icon-chevron-right}" Width="12" Height="12"
                   IsVisible="{Binding !IsCollapsed}"
                   Fill="{DynamicResource md3.on-surface-variant}"/>
-            <Path Data="{StaticResource icon-chevron-left}" Width="12" Height="12" Stretch="Uniform"
+            <c:DawIcon Data="{StaticResource icon-chevron-left}" Width="12" Height="12"
                   IsVisible="{Binding IsCollapsed}"
                   Fill="{DynamicResource md3.on-surface-variant}"/>
           </Panel>

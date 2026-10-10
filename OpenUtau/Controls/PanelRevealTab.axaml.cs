@@ -120,6 +120,10 @@ namespace OpenUtau.App.Controls {
             Width = horizontal ? 48 : CollapsedWidth;
             Height = horizontal ? CollapsedHeight : 48;
             TabButton.Classes.Set("horizontal", horizontal);
+            RevealContent.ColumnDefinitions = new ColumnDefinitions(horizontal ? "*" : "*,Auto");
+            RevealContent.RowDefinitions = new RowDefinitions(horizontal ? "*,Auto" : "*");
+            Grid.SetColumn(RevealLabel, horizontal ? 0 : 1);
+            Grid.SetRow(RevealLabel, horizontal ? 1 : 0);
             SyncCanvasOffset();
         }
 

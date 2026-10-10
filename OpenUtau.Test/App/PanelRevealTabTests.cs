@@ -336,7 +336,7 @@ namespace OpenUtau.Test.App {
                 }
                 var button = tab.GetVisualDescendants().OfType<Button>().Single();
                 var chrome = tab.GetVisualDescendants().OfType<Border>().First(b => b.Classes.Contains("revealChrome"));
-                var glyph = tab.GetVisualDescendants().OfType<Avalonia.Controls.Shapes.Path>()
+                var glyph = tab.GetVisualDescendants().OfType<DawIcon>()
                     .First(p => p.Classes.Contains("revealGlyph"));
 
                 var center = tab.TranslatePoint(new Point(tab.Bounds.Width / 2, tab.Bounds.Height / 2), window);
