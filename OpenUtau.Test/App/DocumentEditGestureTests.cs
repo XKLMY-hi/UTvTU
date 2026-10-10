@@ -1,9 +1,11 @@
 using System;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using OpenUtau.App.Editing;
+using OpenUtau.App.ViewModels;
 using OpenUtau.App.Views;
 using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
@@ -85,6 +87,84 @@ namespace OpenUtau.Test.App {
             gesture.Dispose();
             Assert.Same(current, Doc.ActiveUndoGroup);
             Assert.Equal(480, part.position);
+        }
+
+        [AvaloniaFact]
+        public void ActualPartMove_DoesNotRetargetWhenSelectionChangesDuringCapture() {
+            var part = Load();
+            var other = new UVoicePart { position = 2400, Duration = 1920 };
+            Doc.Project.parts.Add(other);
+            using var tracks = new TracksViewModel();
+            var state = new PartMoveEditState(new Border(), tracks, part);
+            var pointer = new Pointer(Pointer.GetNextFreeId(), PointerType.Mouse, true);
+            try {
+                state.Begin(pointer, tracks.TickTrackToPoint(0, 0));
+                state.Update(pointer, tracks.TickTrackToPoint(960, 0));
+                Assert.Equal(960, part.position);
+                tracks.DeselectParts(); tracks.SelectPart(other);
+                state.Update(pointer, tracks.TickTrackToPoint(1440, 0));
+                Assert.Equal(960, part.position);
+                Assert.Equal(2400, other.position);
+                state.Cancel();
+                Doc.Undo();
+                Assert.Equal(0, part.position);
+                Assert.Equal(2400, other.position);
+            } finally { state.Cancel(); }
+        }
+
+        [AvaloniaFact]
+        public void ActualPartMove_ReentrantSelectionChangeStopsTheRestOfTheBatch() {
+            var part = Load();
+            var other = new UVoicePart { position = 2400, Duration = 1920 };
+            var replacement = new UVoicePart { position = 4800, Duration = 1920 };
+            Doc.Project.parts.Add(other); Doc.Project.parts.Add(replacement);
+            using var tracks = new TracksViewModel();
+            tracks.SelectPart(part); tracks.SelectPart(other);
+            Assert.Equal(2, tracks.SelectedParts.Count);
+            var state = new PartMoveEditState(new Border(), tracks, part);
+            var pointer = new Pointer(Pointer.GetNextFreeId(), PointerType.Mouse, true);
+            int changes = 0;
+            var subscriber = new SelectionChange(cmd => {
+                if (cmd is MovePartCommand) {
+                    changes++;
+                    tracks.DeselectParts(); tracks.SelectPart(replacement);
+                }
+            });
+            Doc.AddSubscriber(subscriber);
+            try {
+                state.Begin(pointer, tracks.TickTrackToPoint(0, 0));
+                state.Update(pointer, tracks.TickTrackToPoint(960, 0));
+                Assert.Equal(1, changes);
+                Assert.Equal(1, new[] { part.position != 0, other.position != 2400 }.Count(changed => changed));
+                Assert.Equal(4800, replacement.position);
+            } finally { Doc.RemoveSubscriber(subscriber); state.Cancel(); }
+        }
+
+        sealed class SelectionChange(Action<UCommand> callback) : ICmdSubscriber {
+            public void OnNext(UCommand command, bool isUndo) => callback(command);
+        }
+
+        [AvaloniaFact]
+        public void ActualPartMove_RemovedTargetOrForeignTransactionCannotBeEdited() {
+            var part = Load();
+            using var tracks = new TracksViewModel();
+            var state = new PartMoveEditState(new Border(), tracks, part);
+            var pointer = new Pointer(Pointer.GetNextFreeId(), PointerType.Mouse, true);
+            try {
+                state.Begin(pointer, tracks.TickTrackToPoint(0, 0));
+                Doc.Project.parts.Remove(part);
+                state.Update(pointer, tracks.TickTrackToPoint(960, 0));
+                Assert.Equal(0, part.position);
+                Assert.Null(Doc.ActiveUndoGroup);
+                Doc.Project.parts.Add(part);
+                Doc.StartUndoGroup();
+                var foreign = Doc.ActiveUndoGroup;
+                state.Update(pointer, tracks.TickTrackToPoint(960, 0));
+                state.Cancel();
+                Assert.Equal(0, part.position);
+                Assert.Same(foreign, Doc.ActiveUndoGroup);
+                Assert.Empty(foreign!.Commands);
+            } finally { state.Cancel(); }
         }
 
         [AvaloniaFact]
