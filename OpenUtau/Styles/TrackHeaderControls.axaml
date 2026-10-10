@@ -1,0 +1,151 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Templates and state layers belong to these control themes. Legacy clear/toolbar/fader
+       classes are deliberately absent: their application-level setters would override themes. -->
+  <Styles.Resources>
+    <ControlTheme x:Key="TrackHeaderTextButtonTheme" TargetType="Button">
+      <Setter Property="MinHeight" Value="0"/>
+      <Setter Property="MinWidth" Value="0"/>
+      <Setter Property="Focusable" Value="True"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="4"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Grid ClipToBounds="True">
+            <Border Name="PART_Surface" Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}"/>
+            <Border Name="PART_StateLayer" Background="{DynamicResource md3.on-surface}" Opacity="0"
+                    CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False"/>
+            <!-- String labels own their text element, so template values beat global TextBlock styles. -->
+            <TextBlock Name="PART_Label" Margin="{TemplateBinding Padding}" Text="{TemplateBinding Content}"
+                       Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}"
+                       FontWeight="{TemplateBinding FontWeight}" FontFamily="{TemplateBinding FontFamily}"
+                       TextTrimming="CharacterEllipsis"
+                       HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                       VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+            <Border Name="PART_FocusRing" CornerRadius="{TemplateBinding CornerRadius}"
+                    BorderBrush="{DynamicResource md3.primary}" BorderThickness="1" Opacity="0"
+                    IsHitTestVisible="False"/>
+          </Grid>
+        </ControlTemplate>
+      </Setter>
+      <Style Selector="^:pointerover /template/ Border#PART_StateLayer">
+        <Setter Property="Opacity" Value="0.08"/>
+      </Style>
+      <Style Selector="^:pressed /template/ Border#PART_StateLayer">
+        <Setter Property="Opacity" Value="0.12"/>
+      </Style>
+      <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+        <Setter Property="Opacity" Value="1"/>
+      </Style>
+      <Style Selector="^:disabled">
+        <Setter Property="Opacity" Value="0.38"/>
+      </Style>
+    </ControlTheme>
+
+    <ControlTheme x:Key="TrackHeaderActionTheme" TargetType="Button" BasedOn="{StaticResource TrackHeaderTextButtonTheme}">
+      <Setter Property="Margin" Value="0"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Grid ClipToBounds="True">
+            <Border Name="PART_Surface" Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}"/>
+            <Border Name="PART_StateLayer" Background="{DynamicResource md3.on-surface}" Opacity="0"
+                    CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False"/>
+            <ContentPresenter Name="PART_ContentPresenter" Margin="{TemplateBinding Padding}"
+                              Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Foreground="{TemplateBinding Foreground}"
+                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+            <Border Name="PART_FocusRing" CornerRadius="{TemplateBinding CornerRadius}"
+                    BorderBrush="{DynamicResource md3.primary}" BorderThickness="1" Opacity="0"
+                    IsHitTestVisible="False"/>
+          </Grid>
+        </ControlTemplate>
+      </Setter>
+    </ControlTheme>
+    <ControlTheme x:Key="TrackHeaderEffectsTheme" TargetType="Button" BasedOn="{StaticResource TrackHeaderActionTheme}">
+      <Style Selector="^.fxOn">
+        <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+        <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+      </Style>
+    </ControlTheme>
+    <ControlTheme x:Key="TrackHeaderToggleTheme" TargetType="ToggleButton" BasedOn="{StaticResource TrackHeaderActionTheme}">
+      <Style Selector="^:checked">
+        <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+        <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+      </Style>
+    </ControlTheme>
+
+    <ControlTheme x:Key="TrackHeaderFaderTheme" TargetType="Slider">
+      <Setter Property="Focusable" Value="True"/>
+      <Setter Property="MinHeight" Value="0"/>
+      <Setter Property="MinWidth" Value="0"/>
+      <Setter Property="Background" Value="{DynamicResource md3.outline-variant}"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <DataValidationErrors>
+            <Grid Name="SliderContainer" MinHeight="16">
+              <Track Name="PART_Track" Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}"
+                     Value="{TemplateBinding Value, Mode=TwoWay}" IsDirectionReversed="{TemplateBinding IsDirectionReversed}"
+                     Orientation="Horizontal" Height="16" VerticalAlignment="Center">
+                <Track.DecreaseButton>
+                  <RepeatButton Name="PART_DecreaseButton" Focusable="False" MinHeight="0" MinWidth="0"
+                                Padding="0" Margin="0" Background="{TemplateBinding Foreground}">
+                    <RepeatButton.Template>
+                      <ControlTemplate>
+                        <Border Height="4" VerticalAlignment="Center" Background="{TemplateBinding Background}" CornerRadius="2"/>
+                      </ControlTemplate>
+                    </RepeatButton.Template>
+                  </RepeatButton>
+                </Track.DecreaseButton>
+                <Track.IncreaseButton>
+                  <RepeatButton Name="PART_IncreaseButton" Focusable="False" MinHeight="0" MinWidth="0"
+                                Padding="0" Margin="0" Background="{TemplateBinding Background}">
+                    <RepeatButton.Template>
+                      <ControlTemplate>
+                        <Border Height="4" VerticalAlignment="Center" Background="{TemplateBinding Background}" CornerRadius="2"/>
+                      </ControlTemplate>
+                    </RepeatButton.Template>
+                  </RepeatButton>
+                </Track.IncreaseButton>
+                <Thumb Name="thumb" Width="8" Height="8" MinWidth="0" MinHeight="0" Margin="0" Padding="0"
+                       Background="{TemplateBinding Foreground}" BorderThickness="0">
+                  <Thumb.Template>
+                    <ControlTemplate>
+                      <Border Background="{TemplateBinding Background}" CornerRadius="2"/>
+                    </ControlTemplate>
+                  </Thumb.Template>
+                </Thumb>
+              </Track>
+              <!-- Focus stays within the 16 DIP row, so narrow/short cards never expand. -->
+              <Border Name="PART_FocusRing" BorderBrush="{DynamicResource md3.primary}" BorderThickness="1"
+                      CornerRadius="4" Opacity="0" IsHitTestVisible="False"/>
+            </Grid>
+          </DataValidationErrors>
+        </ControlTemplate>
+      </Setter>
+      <Style Selector="^:pointerover /template/ RepeatButton#PART_DecreaseButton">
+        <Setter Property="Opacity" Value="0.88"/>
+      </Style>
+      <Style Selector="^:pressed /template/ RepeatButton#PART_DecreaseButton">
+        <Setter Property="Opacity" Value="0.76"/>
+      </Style>
+      <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+        <Setter Property="Opacity" Value="1"/>
+      </Style>
+      <Style Selector="^:disabled">
+        <Setter Property="Opacity" Value="0.38"/>
+      </Style>
+    </ControlTheme>
+  </Styles.Resources>
+</Styles>

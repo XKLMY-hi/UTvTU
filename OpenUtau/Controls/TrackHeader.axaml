@@ -1,4 +1,4 @@
-<UserControl xmlns="https://github.com/avaloniaui"
+﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -9,67 +9,12 @@
     <vm:TrackHeaderViewModel/>
   </Design.DataContext>
   <UserControl.Styles>
-    <Style Selector="ToggleButton">
-      <Setter Property="Background" Value="Transparent"/>
-    </Style>
-    <Style Selector="Button.fxButton">
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="Padding" Value="0"/>
-      <Setter Property="HorizontalContentAlignment" Value="Center"/>
-      <Setter Property="VerticalContentAlignment" Value="Center"/>
-      <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}" />
-      </Style>
-      <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushPointerOver}" />
-      </Style>
-    </Style>
-    <Style Selector="Button.fxButton.fxOn">
-      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushSemi}" />
-      </Style>
-      <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}" />
-      </Style>
-      <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushPointerOver}" />
-      </Style>
-    </Style>
-    <Style Selector="Slider.fader">
-      <Setter Property="Foreground" Value="{Binding TrackColor.AccentColor}"/>
-      <Style Selector="^:pointerover /template/ RepeatButton#PART_DecreaseButton">
-        <Setter Property="Background" Value="{Binding TrackColor.AccentColorLight}" />
-      </Style>
-      <Style Selector="^:pressed /template/ RepeatButton#PART_DecreaseButton">
-        <Setter Property="Background" Value="{Binding TrackColor.AccentColorDark}" />
-      </Style>
-      <!-- Suki thumb 圆形改小一半：容器 + 内部 Border 同步 8px（Track 按 Thumb 尺寸算截断范围） -->
-      <Style Selector="^ /template/ Thumb">
-        <Setter Property="Width" Value="8"/>
-        <Setter Property="Height" Value="8"/>
-      </Style>
-      <Style Selector="^ /template/ Thumb /template/ Border">
-        <Setter Property="Width" Value="8"/>
-        <Setter Property="Height" Value="8"/>
-        <Setter Property="CornerRadius" Value="4"/>
-      </Style>
-    </Style>
+    <StyleInclude Source="/Styles/TrackHeaderControls.axaml"/>
+    <!-- These are density adjustments, not external template-part patches. -->
     <Style Selector="FlyoutPresenter">
       <Setter Property="Padding" Value="5"/>
       <Setter Property="MinHeight" Value="0"/>
     </Style>
-    <!-- **必须本地压 MinHeight**（踩过 3 次的陷阱，W33 溢出断言又抓到一次）：本控件的
-         `Button.clear` 都声明 Height=16/18，但主题给 Button 的 MinHeight 更大 ⇒ Arrange 按
-         MinHeight 走，行实际高约 32，四行叠下来把音量条挤出卡片 7px（**连最高轨道高都溢出**）。
-         只压 MinHeight，不动各按钮自己的 Margin。 -->
-    <Style Selector="Button.clear">
-      <Setter Property="MinHeight" Value="0"/>
-    </Style>
-    <!-- 紧凑档（轨道高不足以放下"渲染器独立行"时由 code-behind 加 `compact` 类）：
-         只为**塞进最小轨道高、不留纵向溢出**而做的收紧，不是设计稿的密度档位 —
-         等 fx-rack 的设计提案落地后这里会被动作条取代。
-         最小轨道高 42：上边距 3→2、名字行 18→16、音量条行上边距 2→0、下边距 3→2 ⇒ 40 ≤ 42。 -->
     <Style Selector="UserControl.compact Grid#HeaderContent">
       <Setter Property="Margin" Value="6,2,4,2"/>
     </Style>
@@ -78,9 +23,6 @@
     </Style>
     <Style Selector="UserControl.compact Grid#LevelsRow">
       <Setter Property="Margin" Value="0"/>
-    </Style>
-    <Style Selector="UserControl.compact Slider.fader">
-      <Setter Property="MinHeight" Value="0"/>
     </Style>
   </UserControl.Styles>
 
@@ -124,18 +66,18 @@
     </ContextMenu>
   </UserControl.Resources>
 
-  <!-- TrackHeader: rounded card -->
+  <!-- Track header: compact track surface, with existing height-dependent layout. -->
   <Grid Margin="2,2,2,2">
     <!-- Main card -->
     <Border Name="MainCard" Margin="0" BorderThickness="1" BorderBrush="{Binding HeaderBorderBrush}"
-            CornerRadius="12" PointerPressed="HeaderPointerPressed"
-            Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+            CornerRadius="4" PointerPressed="HeaderPointerPressed"
+            Background="{DynamicResource md3.surface-container-low}">
       <Grid Name="HeaderContent" ColumnDefinitions="auto,*,auto" RowDefinitions="*" Margin="6,3,4,3">
 
         <!-- ── Left: Avatar（圆角矩形，竖居中）+ TrackNo badge（右下角不挡头像） ── -->
-        <Border Grid.Column="0" VerticalAlignment="Top" Margin="0,2,6,0"
+        <Border Name="AvatarCard" Grid.Column="0" VerticalAlignment="Top" Margin="0,2,6,0"
                 Width="44" Height="44" CornerRadius="8" ClipToBounds="True"
-                BorderBrush="{DynamicResource NeutralAccentBrushSemi}" BorderThickness="0">
+                BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0">
           <Image Source="{Binding Avatar}" Stretch="Uniform"
                  RenderOptions.BitmapInterpolationMode="HighQuality"
                  ToolTip.Tip="{Binding Singer}"/>
@@ -151,31 +93,31 @@
         <!-- ── Center: Track name + singer/phonemizer/renderer + volume/pan ── -->
         <Grid Name="ContentRows" Grid.Column="1" RowDefinitions="auto,auto,auto,auto,auto">
           <!-- Row 0: Track name（紧凑档下渲染器会内联到本行右侧，见 code-behind） -->
-          <Button Name="TrackNameButton" Classes="clear" Grid.Row="0" Margin="2,0,0,0" Padding="2,0" Height="18"
-                  HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Focusable="False"
+          <Button Name="TrackNameButton" Classes="trackHeaderText" Theme="{StaticResource TrackHeaderTextButtonTheme}" Grid.Row="0" Margin="2,0,0,0" Padding="2,0" Height="18"
+                  HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Focusable="True"
                   FontSize="11" FontWeight="SemiBold"
                   Content="{Binding TrackName}" Click="TrackNameButtonClicked"/>
 
           <!-- Row 1: Singer (visible when track is tall enough) -->
-          <Button Classes="clear" Grid.Row="1" Margin="2,0,0,0" Padding="2,0" Height="16"
+          <Button Classes="trackHeaderText" Theme="{StaticResource TrackHeaderTextButtonTheme}" Grid.Row="1" Margin="2,0,0,0" Padding="2,0" Height="16"
                   FontSize="10" IsVisible="{Binding IsSingerVisible}"
-                  HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Focusable="False"
+                  HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Focusable="True"
                   Content="{Binding Singer, TargetNullValue={StaticResource tracks.selectsinger}}"
                   Click="SingerButtonClicked" ContextRequested="SingerButtonContextRequested"
                   ToolTip.Tip="{Binding Singer}" ContextMenu="{StaticResource SingersMenuRes}"/>
 
           <!-- Row 2: Phonemizer -->
-          <Button Classes="clear" Grid.Row="2" Margin="2,0,0,0" Padding="2,0" Height="16"
+          <Button Classes="trackHeaderText" Theme="{StaticResource TrackHeaderTextButtonTheme}" Grid.Row="2" Margin="2,0,0,0" Padding="2,0" Height="16"
                   FontSize="10" IsVisible="{Binding IsPhonemizerVisible}"
-                  HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Focusable="False"
+                  HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Focusable="True"
                   Content="{Binding PhonemizerTag}" Click="PhonemizerButtonClicked"
                   ContextRequested="PhonemizerButtonContextRequested"
                   ToolTip.Tip="{Binding Phonemizer}" ContextMenu="{StaticResource PhonemizerMenuRes}"/>
 
           <!-- Row 3: Renderer（W33：**恒可见**，不再按轨道高裁剪；命名供布局测试定位） -->
-          <Button Name="RendererButton" Classes="clear" Grid.Row="3" Margin="2,0,0,0" Padding="2,0" Height="16"
+          <Button Name="RendererButton" Classes="trackHeaderText" Theme="{StaticResource TrackHeaderTextButtonTheme}" Grid.Row="3" Margin="2,0,0,0" Padding="2,0" Height="16"
                   FontSize="10" IsVisible="{Binding IsRendererVisible}"
-                  HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Focusable="False"
+                  HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Focusable="True"
                   Content="{Binding Renderer}" Click="RendererButtonClicked"
                   ContextRequested="RendererButtonContextRequested"
                   ToolTip.Tip="{DynamicResource tracks.selectrenderer}" ContextMenu="{StaticResource RendererMenuRes}"/>
@@ -191,11 +133,11 @@
             </Grid.Styles>
             <!-- Volume -->
             <Slider Grid.Column="1" Name="VolumeSlider" HorizontalAlignment="Stretch"
-                    Classes="fader" Minimum="-24" Maximum="12" Value="{Binding Volume}"
+                    Classes="trackHeaderFader" Theme="{StaticResource TrackHeaderFaderTheme}" Foreground="{Binding TrackColor.AccentColor}" Minimum="-24" Maximum="12" Value="{Binding Volume}"
                     PointerPressed="VolumeFaderPointerPressed" ValueChanged="VolumeOrPanSliderValueChanged"
                     ContextRequested="VolumeFaderContextRequested" IsEnabled="{Binding !Muted}"/>
             <TextBlock Grid.Column="2" HorizontalAlignment="Left" Background="Transparent" Margin="2,0"
-                       TextAlignment="Center" FontSize="9" FontFamily="{DynamicResource PlusFontFamilyMono}"
+                       TextAlignment="Center" FontSize="9" Foreground="{DynamicResource md3.on-surface-variant}" FontFamily="{DynamicResource PlusFontFamilyMono}"
                        PointerPressed="VolumePointerPressed">
               <TextBlock.Text>
                 <MultiBinding StringFormat="{}{0:+#00.0;-#00.0}">
@@ -210,11 +152,11 @@
 
             <!-- Pan -->
             <Slider Grid.Column="3" Name="PanSlider" HorizontalAlignment="Stretch"
-                    Classes="fader" Minimum="-100" Maximum="100" Value="{Binding Pan}"
+                    Classes="trackHeaderFader" Theme="{StaticResource TrackHeaderFaderTheme}" Foreground="{Binding TrackColor.AccentColor}" Minimum="-100" Maximum="100" Value="{Binding Pan}"
                     PointerPressed="PanFaderPointerPressed" ValueChanged="VolumeOrPanSliderValueChanged"
                     ContextRequested="PanFaderContextRequested" IsEnabled="{Binding !Muted}"/>
             <TextBlock Grid.Column="4" HorizontalAlignment="Stretch" Background="Transparent" Margin="1,0"
-                       TextAlignment="Center" FontSize="9" FontFamily="{DynamicResource PlusFontFamilyMono}"
+                       TextAlignment="Center" FontSize="9" Foreground="{DynamicResource md3.on-surface-variant}" FontFamily="{DynamicResource PlusFontFamilyMono}"
                        PointerPressed="PanPointerPressed">
               <TextBlock.Text>
                 <MultiBinding StringFormat="{}{0:00R;00L;C}">
@@ -229,24 +171,25 @@
         </Grid>
 
         <!-- ── Right: Mute / Solo / FX / Settings buttons ── -->
-        <StackPanel Grid.Column="2" VerticalAlignment="Top" Margin="0,2,0,0" Spacing="1">
+        <WrapPanel Name="ActionRail" Grid.Column="2" Width="24"
+                   VerticalAlignment="Top" Margin="0,2,0,0">
 
           <!-- "⋯" overflow button（紧凑视图：歌手/音素器被按高裁掉时才出现）。
                触发条件从 `!IsRendererVisible` 改成 `ShowOverflow`（W33）：渲染器已恒显，
                若还挂渲染器那个条件就永远不显示了；同时**渲染器兜底项已删除**（同一入口两处呈现是隐患）。 -->
-          <Button Name="OverflowButton" Classes="clear" Height="18" Width="17" Padding="0"
+          <Button Name="OverflowButton" Classes="trackHeaderAction" Theme="{StaticResource TrackHeaderActionTheme}" Height="18" Width="17" Padding="0"
                   Content="⋯" FontSize="12"
                   VerticalAlignment="Top" IsVisible="{Binding ShowOverflow}">
             <Button.Flyout>
               <Flyout>
                 <StackPanel Spacing="2">
-                  <Button Classes="clear" Margin="2" Height="18" IsVisible="{Binding !IsSingerVisible}"
-                          HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Focusable="False"
+                  <Button Classes="trackHeaderText" Theme="{StaticResource TrackHeaderTextButtonTheme}" Margin="2" Height="18" IsVisible="{Binding !IsSingerVisible}"
+                          HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Focusable="True"
                           Content="{Binding Singer, TargetNullValue={StaticResource tracks.selectsinger}}"
                           Click="SingerButtonClicked" ContextRequested="SingerButtonContextRequested"
                           ToolTip.Tip="{Binding Singer}" ContextMenu="{StaticResource SingersMenuRes}"/>
-                  <Button Classes="clear" Margin="2" Height="18" IsVisible="{Binding !IsPhonemizerVisible}"
-                          HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Focusable="False"
+                  <Button Classes="trackHeaderText" Theme="{StaticResource TrackHeaderTextButtonTheme}" Margin="2" Height="18" IsVisible="{Binding !IsPhonemizerVisible}"
+                          HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Focusable="True"
                           Content="{Binding PhonemizerTag}" Click="PhonemizerButtonClicked"
                           ContextRequested="PhonemizerButtonContextRequested"
                           ToolTip.Tip="{Binding Phonemizer}" ContextMenu="{StaticResource PhonemizerMenuRes}"/>
@@ -256,11 +199,11 @@
           </Button>
 
           <!-- Mute button -->
-          <ToggleButton Classes="toolbar" Margin="0" Padding="0" Height="20" Width="24"
+          <ToggleButton Name="MuteButton" Classes="trackHeaderToggle" Theme="{StaticResource TrackHeaderToggleTheme}" MinHeight="0" Margin="0" Padding="0" Height="20" Width="24"
                         HorizontalAlignment="Center"
-                        ToolTip.Tip="{DynamicResource tracks.mute}"
+                        AutomationProperties.Name="{DynamicResource tracks.mute}" ToolTip.Tip="{DynamicResource tracks.mute}"
                         IsChecked="{Binding Mute, Mode=OneWay}" Command="{Binding ToggleMute}">
-            <Path Classes="filled" Width="16" Height="16"
+            <Path Width="16" Height="16" Fill="{Binding $parent[ToggleButton].Foreground}"
                   Data="M15.31 17A.51.56 0 0 1 14.81 16.44V9.2A.07.08 0 0 0 14.66 9.17L12.39 14.5a.29.32 0 0 1-.26.19h-.35a.29.32 0 0 1-.26-.19L9.27 9.17 9.12 9.2v7.24A.51.56 0 0 1 8.62 17H8.51A.51.56 0 0 1 8 16.44V7.56A.51.56 0 0 1 8.51 7h.84a.43.48 0 0 1 .39.28l2.23 5.2a.04.05 0 0 0 .07 0l2.16-5.2a.43.48 0 0 1 .41-.28h.88A.51.56 0 0 1 16 7.56v8.88A.51.56 0 0 1 15.5 17Z"/>
             <ToggleButton.ContextMenu>
               <ContextMenu>
@@ -273,11 +216,11 @@
           </ToggleButton>
 
           <!-- Solo button -->
-          <ToggleButton Classes="toolbar" Margin="0" Padding="0" Height="20" Width="24"
+          <ToggleButton Name="SoloButton" Classes="trackHeaderToggle" Theme="{StaticResource TrackHeaderToggleTheme}" MinHeight="0" Margin="0" Padding="0" Height="20" Width="24"
                         HorizontalAlignment="Center"
-                        ToolTip.Tip="{DynamicResource tracks.solo}"
+                        AutomationProperties.Name="{DynamicResource tracks.solo}" ToolTip.Tip="{DynamicResource tracks.solo}"
                         IsChecked="{Binding Solo, Mode=OneWay}" Command="{Binding ToggleSolo}">
-            <Path Classes="filled" Width="16" Height="16"
+            <Path Width="16" Height="16" Fill="{Binding $parent[ToggleButton].Foreground}"
                   Data="M15.99 14.08c0-.7-.2-1.23-.58-1.62-.38-.39-.97-.67-1.73-.86-.39-.09-.84-.17-1.4-.27-.54-.09-.97-.15-1.27-.21-.55-.12-.95-.3-1.17-.52-.23-.24-.33-.56-.33-.96 0-.45.22-.82.67-1.1.45-.28 1.04-.43 1.78-.43.67 0 1.33.1 1.97.31.64.2 1.58.49 1.99.81H16V7.71c-.47-.2-1.42-.38-2.03-.51-.6-.13-1.28-.2-2.01-.2-1.12 0-2.05.26-2.79.78-.73.5-1.1 1.17-1.1 1.98 0 .71.21 1.27.65 1.72.45.44 1.13.75 2.06.93.45.09.88.16 1.29.21.41.06.79.13 1.13.22.47.11.79.28 1.03.47.23.21.34.52.34.95 0 .5-.24.89-.71 1.19-.47.3-1.14.43-1.99.43-.61 0-1.24-.11-1.94-.33-.67-.23-1.28-.53-1.81-.94H8v1.61c.61.26 1.22.46 1.82.59.59.12 1.26.19 2.01.19.7 0 1.29-.07 1.78-.23.5-.16.94-.38 1.3-.65.33-.26.6-.56.79-.93.19-.37.29-.74.29-1.12Z"/>
             <ToggleButton.ContextMenu>
               <ContextMenu>
@@ -289,24 +232,24 @@
           </ToggleButton>
 
           <!-- FX button -->
-          <Button Classes="toolbar fxButton" Margin="0" Height="20" Width="24"
+          <Button Name="FxButton" Classes="trackHeaderAction fxButton" Theme="{StaticResource TrackHeaderEffectsTheme}" Margin="0" Height="20" Width="24"
                   HorizontalAlignment="Center"
-                  ToolTip.Tip="{DynamicResource context.track.effects}"
+                  AutomationProperties.Name="{DynamicResource context.track.effects}" ToolTip.Tip="{DynamicResource context.track.effects}"
                   Classes.fxOn="{Binding MixFxEnabled}"
                   Command="{Binding OpenMixFxDialog}">
-            <TextBlock Text="fx" FontSize="9" FontWeight="SemiBold"
+            <TextBlock Text="fx" FontSize="9" FontWeight="SemiBold" Foreground="{Binding $parent[Button].Foreground}"
                        VerticalAlignment="Center" HorizontalAlignment="Center"/>
           </Button>
 
           <!-- 轨道设置按钮（重建：旧按钮点击无效——去 Separator、常显、明确布局） -->
-          <Button Classes="clear" Margin="0" Padding="0" Height="20" Width="24"
+          <Button Name="SettingsButton" Classes="trackHeaderAction" Theme="{StaticResource TrackHeaderActionTheme}" Margin="0" Padding="0" Height="20" Width="24"
                   Background="Transparent" HorizontalAlignment="Center" VerticalAlignment="Top"
                   Click="TrackSettingsButtonClicked"
-                  ToolTip.Tip="{DynamicResource tracks.tracksettings}">
+                  AutomationProperties.Name="{DynamicResource tracks.tracksettings}" ToolTip.Tip="{DynamicResource tracks.tracksettings}">
             <Path Width="15" Height="15" Stretch="Uniform" Data="{StaticResource icon-settings}"
-                  Fill="{DynamicResource NeutralAccentBrush}"/>
+                  Fill="{Binding $parent[Button].Foreground}"/>
           </Button>
-        </StackPanel>
+        </WrapPanel>
 
         <!-- ── Context menu (right-click on whole header) ── -->
         <Grid.ContextMenu>

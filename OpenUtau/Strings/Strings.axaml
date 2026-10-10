@@ -1274,4 +1274,7 @@ General
   <!-- /welcome -->
   <system:String x:Key="view.pianoroll.selectpart">Select a voice part in the arrangement to open the voice editor.</system:String>
   <system:String x:Key="view.pianoroll.openpart">Open the selected or current voice part.</system:String>
+  <system:String x:Key="controls.volume">Volume</system:String>
+  <system:String x:Key="controls.fader.tip">Arrow keys: 1 dB · Shift: 0.1 dB · 0: unity gain</system:String>
+  <system:String x:Key="controls.value.tip">Double-click, Enter or F2 to edit · Enter to apply · Escape to cancel</system:String>
 </ResourceDictionary>

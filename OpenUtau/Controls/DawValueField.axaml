@@ -1,0 +1,24 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="OpenUtau.App.Controls.DawValueField" Focusable="True">
+  <UserControl.Styles>
+    <Style Selector="TextBlock#Readout">
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+    </Style>
+    <Style Selector=".selected TextBlock#Readout">
+      <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+    </Style>
+    <Style Selector=":focus-visible TextBlock#Readout">
+      <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+      <Setter Property="TextDecorations" Value="Underline"/>
+    </Style>
+  </UserControl.Styles>
+  <Grid MinHeight="16">
+    <TextBlock Name="Readout" FontSize="9" VerticalAlignment="Center"
+               FontFamily="{DynamicResource PlusFontFamilyMono}"/>
+    <TextBox Name="Editor" IsVisible="False" MinHeight="16" Height="16" MinWidth="0"
+             FontSize="9" FontFamily="{DynamicResource PlusFontFamilyMono}"
+             Padding="2,0" Margin="0" CornerRadius="4" VerticalContentAlignment="Center"
+             KeyDown="OnEditorKeyDown" LostFocus="OnEditorLostFocus"/>
+  </Grid>
+</UserControl>

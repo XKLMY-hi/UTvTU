@@ -28,7 +28,6 @@ namespace OpenUtau.App.Controls {
     /// </summary>
     public partial class MixerTrackStrip : UserControl, ICmdSubscriber {
         private UTrack? track;
-        private bool isDragging;
         private bool _syncing;
         private bool subscribed;
         private bool suppressed;
@@ -41,6 +40,8 @@ namespace OpenUtau.App.Controls {
         private double dragStartX;
         private double dragStartPan;
         private TopLevel? panTrackingRoot;
+        private UTrack? volumeEditTrack;
+        public TextBlock VolValueLabel => VolumeField.Readout;
 
         /// <summary>点击通道条时抛出（混音台据此更新 SelectedTrack → 右侧链面板）。</summary>
         public event EventHandler? Selected;
@@ -52,6 +53,8 @@ namespace OpenUtau.App.Controls {
                     return;
                 }
                 bool wasSuppressed = suppressed;
+                VolumeField.CancelEdit();
+                volumeEditTrack = null;
                 DisposeSubscriptions();
                 _vm?.Edits.Dispose();
                 suppressed = wasSuppressed;
@@ -73,6 +76,7 @@ namespace OpenUtau.App.Controls {
                 }
                 isSelected = value;
                 StripCard.Classes.Set("selected", value);
+                VolumeField.Classes.Set("selected", value);
             }
         }
 
@@ -100,11 +104,20 @@ namespace OpenUtau.App.Controls {
 
         public MixerTrackStrip() {
             InitializeComponent();
-            FaderBox.SizeChanged += (s, e) => UpdateFaderPosition();
-            FaderBox.AddHandler(PointerReleasedEvent, OnFaderReleased,
-                RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
-            FaderBox.AddHandler(PointerCaptureLostEvent, OnFaderCaptureLost,
-                RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
+            FaderBox.Handle = FaderHandle;
+            FaderBox.GestureStarted += (_, _) => _vm?.Edits.BeginGesture();
+            FaderBox.GestureEnded += (_, _) => _vm?.Edits.EndGesture();
+            FaderBox.ValueEdited += (_, _) => {
+                if (subscribed) ApplyVolume(FaderBox.Value);
+            };
+            VolumeField.EditingStarted += (_, _) => {
+                volumeEditTrack = track;
+                if (track != null) VolumeField.Value = track.Volume;
+            };
+            VolumeField.ValueCommitted += (_, _) => {
+                if (subscribed && ReferenceEquals(volumeEditTrack, track)) ApplyVolume(VolumeField.Value);
+                volumeEditTrack = null;
+            };
             StripCard.AddHandler(PointerPressedEvent, OnStripPressed,
                 RoutingStrategies.Bubble, handledEventsToo: true);
             // 构造函数里先订阅一次：测试与未挂载用法（直接 new）也要能工作。
@@ -121,6 +134,7 @@ namespace OpenUtau.App.Controls {
             base.OnAttachedToVisualTree(e);
             suppressed = false;
             SubscribeNotifications();
+            LoadTrackData(); // An undo while detached may have superseded the displayed value.
         }
 
         protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e) {
@@ -173,7 +187,9 @@ namespace OpenUtau.App.Controls {
             _panSubscription?.Dispose();
             _panSubscription = null;
             EndPanTracking();
-            isDragging = false;
+            FaderBox.EndGesture();
+            VolumeField.CancelEdit();
+            volumeEditTrack = null;
             _vm?.Edits.EndGesture();
         }
 
@@ -224,6 +240,7 @@ namespace OpenUtau.App.Controls {
         }
 
         private void UpdateVolValueDisplay(double db) {
+            VolumeField.Value = db;
             VolValueLabel.Text = db <= MixerMetrics.FaderMinDb ? "-∞ dB" : $"{db:+0.0;-0.0} dB";
         }
 
@@ -318,94 +335,23 @@ namespace OpenUtau.App.Controls {
         // ── 推子 ─────────────────────────────────────────────
 
         private void UpdateFaderPositionFromDb(double db) {
-            if (track == null || FaderBox.Bounds.Height <= 0) return;
-            Canvas.SetTop(FaderHandle,
-                MixerMetrics.FaderTop(db, FaderBox.Bounds.Height, MixerMetrics.FaderHandleHeight));
+            if (track != null) FaderBox.Value = db;
         }
 
         private void UpdateFaderPosition() {
-            if (track == null || FaderBox.Bounds.Height <= 0) return;
+            if (track == null) return;
             double db = Math.Clamp(track.Volume, MixerMetrics.FaderMinDb, MixerMetrics.FaderMaxDb);
-            Canvas.SetTop(FaderHandle,
-                MixerMetrics.FaderTop(db, FaderBox.Bounds.Height, MixerMetrics.FaderHandleHeight));
+            FaderBox.Value = db;
         }
 
         private void ApplyVolume(double db) {
-            if (track == null || _vm == null) return;
+            if (track == null || _vm == null || !_vm.Edits.IsCurrent || !double.IsFinite(db)) return;
             db = Math.Clamp(db, MixerMetrics.FaderMinDb, MixerMetrics.FaderMaxDb);
             if (_vm.ApplyVolume(db)) {
                 MessageBus.Current.SendMessage(new VolumeChangeNotification(track.TrackNo, track.Muted ? MixerMetrics.FaderMinDb : db));
             }
             UpdateFaderPosition();
             UpdateVolValueDisplay(db);
-        }
-
-        // ── 鼠标（推子）─────────────────────────────────────
-
-        private void OnFaderPressed(object? sender, PointerPressedEventArgs e) {
-            if (track == null) return;
-            isDragging = true;
-            _vm?.Edits.BeginGesture();
-            e.Pointer.Capture(FaderBox);
-            ApplyVolume(MixerMetrics.FaderTopToDb(e.GetPosition(FaderBox).Y,
-                FaderBox.Bounds.Height, MixerMetrics.FaderHandleHeight));
-            e.Handled = true;
-        }
-
-        private void OnFaderMoved(object? sender, PointerEventArgs e) {
-            if (!isDragging || track == null) return;
-            ApplyVolume(MixerMetrics.FaderTopToDb(e.GetPosition(FaderBox).Y,
-                FaderBox.Bounds.Height, MixerMetrics.FaderHandleHeight));
-            e.Handled = true;
-        }
-
-        private void OnFaderReleased(object? sender, PointerEventArgs e) {
-            isDragging = false; e.Pointer.Capture(null);
-            _vm?.Edits.EndGesture();
-        }
-
-        private void OnFaderCaptureLost(object? sender, PointerCaptureLostEventArgs e) {
-            isDragging = false;
-            _vm?.Edits.EndGesture();
-        }
-
-        private void OnVolLabelPressed(object? sender, PointerPressedEventArgs e) {
-            if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed && e.ClickCount == 2)
-                BeginEditVolume();
-        }
-
-        private void BeginEditVolume() {
-            if (track == null) return;
-            VolValueLabel.IsVisible = false;
-            var tb = new TextBox {
-                Text = $"{track.Volume:F1}", FontSize = 9, FontFamily = ThemeManager.MonoFontFamily,
-                TextAlignment = TextAlignment.Left, HorizontalAlignment = HorizontalAlignment.Stretch,
-                Padding = new Thickness(0), Margin = new Thickness(0),
-            };
-            var parent = VolValueLabel.Parent as Panel;
-            int idx = parent?.Children.IndexOf(VolValueLabel) ?? -1;
-            if (parent != null && idx >= 0) {
-                Grid.SetRow(tb, Grid.GetRow(VolValueLabel));
-                parent.Children.Insert(idx, tb);
-                tb.SelectAll(); tb.Focus();
-                tb.KeyDown += (s, e) => {
-                    if (e.Key == Key.Enter) CommitEdit(tb);
-                    else if (e.Key == Key.Escape) CancelEdit(tb);
-                };
-                tb.LostFocus += (s, e) => CommitEdit(tb);
-            }
-        }
-
-        private void CommitEdit(TextBox tb) {
-            if (double.TryParse(tb.Text, out double db)) {
-                ApplyVolume(Math.Clamp(db, MixerMetrics.FaderMinDb, MixerMetrics.FaderMaxDb));
-            }
-            CancelEdit(tb);
-        }
-
-        private void CancelEdit(TextBox tb) {
-            (tb.Parent as Panel)?.Children.Remove(tb);
-            VolValueLabel.IsVisible = true;
         }
 
         // ── 按钮 ─────────────────────────────────────────────

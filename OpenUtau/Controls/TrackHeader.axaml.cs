@@ -58,6 +58,8 @@ namespace OpenUtau.App.Controls {
 
         public TrackHeader() {
             InitializeComponent();
+            ActionRail.Children.Remove(OverflowButton);
+            ActionRail.Children.Add(OverflowButton);
             foreach (var slider in new[] { VolumeSlider, PanSlider }) {
                 slider.AddHandler(PointerPressedEvent, (_, e) => {
                     if (e.GetCurrentPoint(slider).Properties.IsLeftButtonPressed) ViewModel?.BeginMixGesture();
@@ -111,6 +113,14 @@ namespace OpenUtau.App.Controls {
                 bool inlineRenderer = trackHeight < ViewConstants.TrackHeightDefault;
                 ViewModel.IsRendererInline = inlineRenderer;
                 Classes.Set("compact", inlineRenderer);
+                // Compact cards use two short action rows; settings remain reachable in the card menu.
+                AvatarCard.Width = AvatarCard.Height = inlineRenderer ? 28 : 44;
+                ActionRail.Width = inlineRenderer ? 40 : 24;
+                SettingsButton.IsVisible = !inlineRenderer;
+                foreach (var action in new Control[] { MuteButton, SoloButton, FxButton, OverflowButton }) {
+                    action.Width = inlineRenderer ? 20 : action == OverflowButton ? 17 : 24;
+                    action.Height = inlineRenderer ? 16 : action == OverflowButton ? 18 : 20;
+                }
                 // 紧凑档把卡片外层的上下 2px 边距也吃掉：卡片实际高 = 轨道高 − 4，
                 // 最小高 42 只剩 38，内容再省也差 2px（溢出契约断言抓到的）。
                 if (Content is Grid root) {

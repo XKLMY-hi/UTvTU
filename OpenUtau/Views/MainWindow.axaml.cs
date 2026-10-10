@@ -1524,6 +1524,12 @@ namespace OpenUtau.App.Views {
             if (FindSelfOrAncestor<TextBox>(focused) != null) {
                 return true;
             }
+            bool rangeKey = key is Key.Left or Key.Right or Key.Up or Key.Down or
+                Key.Home or Key.End or Key.PageUp or Key.PageDown;
+            if (rangeKey && (FindSelfOrAncestor<Slider>(focused) != null ||
+                FindSelfOrAncestor<DawFader>(focused) != null)) return true;
+            if (FindSelfOrAncestor<DawFader>(focused) != null && key is Key.D0 or Key.NumPad0) return true;
+            if (FindSelfOrAncestor<DawValueField>(focused) != null && key is Key.Enter or Key.F2) return true;
             if (key != Key.Space && key != Key.Enter) {
                 return false;
             }

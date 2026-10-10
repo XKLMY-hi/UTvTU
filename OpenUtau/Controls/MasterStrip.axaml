@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:OpenUtau.App.Controls"
              x:Class="OpenUtau.App.Controls.MasterStrip"
              Width="160">
   <!--
@@ -103,8 +104,10 @@
       <Border Grid.Row="4" Name="ChannelSpacer"/>
 
       <!-- 719-734 · 推子区 144×500（双表 10 宽 left 24/38、轨 4 宽 left 74、柄 24×16 left 64、刻度 9 条 left 96） -->
-      <Canvas Grid.Row="5" Name="FaderBox" Width="144" Height="500"
-              PointerPressed="OnFaderPressed" PointerMoved="OnFaderMoved">
+      <controls:DawFader Grid.Row="5" Name="FaderBox" Width="144" Height="500"
+                         FocusBrush="{DynamicResource md3.primary}"
+                         AutomationProperties.Name="{DynamicResource mixer.master}"
+                         ToolTip.Tip="{DynamicResource controls.fader.tip}">
         <Border Name="MeterBarL" Width="10" Height="500" Canvas.Left="24" Canvas.Top="0"
                 CornerRadius="999" ClipToBounds="True"
                 Background="{DynamicResource md3.surface-container-highest}">
@@ -139,7 +142,7 @@
                 Background="{DynamicResource md3.outline-variant}"/>
         <Border Name="FaderTick9" Width="8" Height="1" Canvas.Left="96" Canvas.Top="498"
                 Background="{DynamicResource md3.outline-variant}"/>
-      </Canvas>
+      </controls:DawFader>
 
       <!-- 735 · 峰值读数 13px semibold -->
       <TextBlock Grid.Row="6" Name="MasterPeakLabel" FontSize="13" FontWeight="SemiBold"

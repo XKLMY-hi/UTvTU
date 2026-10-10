@@ -42,10 +42,13 @@
       <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
     </Style>
     <!-- 选中轨：通道名 / Fader dB / 手柄三处同亮 primary（spec-digest §8 第 22 条、§12 U-12） -->
-    <Style Selector="Border#StripCard.selected TextBlock#TrackNameLabel">
-      <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+    <Style Selector="TextBlock#TrackNameLabel">
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     </Style>
-    <Style Selector="Border#StripCard.selected TextBlock#VolValueLabel">
+    <Style Selector="Border#FaderHandle">
+      <Setter Property="Background" Value="{DynamicResource md3.on-surface}"/>
+    </Style>
+    <Style Selector="Border#StripCard.selected TextBlock#TrackNameLabel">
       <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
     </Style>
     <Style Selector="Border#StripCard.selected Border#FaderHandle">
@@ -66,7 +69,7 @@
       <!-- 1 · 通道名（45：11px / 行高 12 / semibold） -->
       <TextBlock Grid.Row="1" Name="TrackNameLabel" FontSize="11" LineHeight="12"
                  FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
-                 Foreground="{DynamicResource md3.on-surface}" Text="--"/>
+                 Text="--"/>
 
       <!-- 2 · EQ 曲线屏（47-49：80×76 圆角 8；零线 80×1 在 top 38） -->
       <Border Grid.Row="2" Name="EqDisplay" Width="80" Height="76" CornerRadius="8"
@@ -115,8 +118,10 @@
 
       <!-- 6 · 推子区（81-94：80×500；表 8 宽 left 4、轨 4 宽 left 34、柄 24×14 left 24、刻度 9 条 left 52）
                刻度由代码按 MixerMetrics.TickTops/TickWidths 生成 -->
-      <Canvas Grid.Row="6" Name="FaderBox" Width="80" Height="500"
-              PointerPressed="OnFaderPressed" PointerMoved="OnFaderMoved">
+      <c:DawFader Grid.Row="6" Name="FaderBox" Width="80" Height="500"
+                         FocusBrush="{DynamicResource md3.primary}"
+                         AutomationProperties.Name="{DynamicResource controls.volume}"
+                         ToolTip.Tip="{DynamicResource controls.fader.tip}">
         <Border Name="MeterBar" Width="8" Height="500" Canvas.Left="4" Canvas.Top="0"
                 CornerRadius="999" ClipToBounds="True"
                 Background="{DynamicResource md3.surface-container-highest}">
@@ -126,7 +131,7 @@
         <Border Name="FaderTrack" Width="4" Height="500" Canvas.Left="34" Canvas.Top="0"
                 CornerRadius="999" Background="{DynamicResource md3.surface-container-highest}"/>
         <Border Name="FaderHandle" Width="24" Height="14" Canvas.Left="24" Canvas.Top="146"
-                CornerRadius="4" Background="{DynamicResource md3.on-surface}"/>
+                CornerRadius="4"/>
         <!-- 刻度 9 条（86-94）：宽 8/5 交替、left 52、top 0/62/125/187/249/311/374/436/498 -->
         <Border Name="FaderTick1" Width="8" Height="1" Canvas.Left="52" Canvas.Top="0"
                 Background="{DynamicResource md3.outline-variant}"/>
@@ -146,12 +151,12 @@
                 Background="{DynamicResource md3.outline-variant}"/>
         <Border Name="FaderTick9" Width="8" Height="1" Canvas.Left="52" Canvas.Top="498"
                 Background="{DynamicResource md3.outline-variant}"/>
-      </Canvas>
+      </c:DawFader>
 
       <!-- 7 · 推子读数（95：9px 满宽；双击改值保留） -->
-      <TextBlock Grid.Row="7" Name="VolValueLabel" FontSize="9" TextAlignment="Left"
-                 Foreground="{DynamicResource md3.on-surface}" Text="-3.0 dB"
-                 PointerPressed="OnVolLabelPressed"/>
+      <c:DawValueField Grid.Row="7" Name="VolumeField" HorizontalAlignment="Stretch"
+                             AutomationProperties.Name="{DynamicResource controls.volume}"
+                             ToolTip.Tip="{DynamicResource controls.value.tip}"/>
     </Grid>
   </Border>
 </UserControl>

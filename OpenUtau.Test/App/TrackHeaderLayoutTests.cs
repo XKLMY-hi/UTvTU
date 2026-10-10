@@ -33,7 +33,7 @@ namespace OpenUtau.Test.App {
 
         static void Pump() => Dispatcher.UIThread.RunJobs();
 
-        static (WindowEx win, TrackHeaderCanvas canvas, TrackHeader header, ObservableCollection<UTrack> items) Setup(double trackHeight, double width = 240) {
+        internal static (WindowEx win, TrackHeaderCanvas canvas, TrackHeader header, ObservableCollection<UTrack> items) Setup(double trackHeight, double width = 240) {
             var track = new UTrack { TrackNo = 0, TrackName = "Lead" };
             // 两个 DirectProperty 的 CLR setter 是私有的（生产里由 MainWindow 的 XAML 绑定驱动）
             // ⇒ 测试同样走绑定，走的是产品同一条赋值路径。
@@ -151,13 +151,11 @@ namespace OpenUtau.Test.App {
         [InlineData(105, 240, false)]
         [InlineData(105, 160, false)]
         [InlineData(147, 300, false)]
-        // 最小/中间高度：只对**内容列**（名字/歌手/音素器/渲染器/音量条）要求零溢出 ——
-        // 这是 W33 修的这条链路。头像（44 高 > 最小行 42）与右侧 M/S/FX/⚙ 竖列（≈104 高）
-        // 的溢出是**既有设计**、归 fx-rack 的设计提案（见本用例下方注释与报告）。
-        [InlineData(42, 160, true)]
-        [InlineData(42, 240, true)]
-        [InlineData(63, 160, true)]
-        [InlineData(84, 200, true)]
+        // Control refactor: avatar and action rail must also fit, including the smallest cards.
+        [InlineData(42, 160, false)]
+        [InlineData(42, 240, false)]
+        [InlineData(63, 160, false)]
+        [InlineData(84, 200, false)]
         public void EveryChild_StaysInsideTheCard(double trackHeight, double width, bool contentColumnOnly) {
             var (win, _, header, items) = Setup(trackHeight, width);
             try {

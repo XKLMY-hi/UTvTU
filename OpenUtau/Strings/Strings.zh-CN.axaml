@@ -1405,4 +1405,7 @@ Syntax: prefix,suffix</system:String>-->
   <!-- /welcome -->
   <system:String x:Key="view.pianoroll.selectpart">在编排中选择一个歌声片段，再打开歌声编辑器。</system:String>
   <system:String x:Key="view.pianoroll.openpart">打开选中或当前的歌声片段。</system:String>
+  <system:String x:Key="controls.volume">音量</system:String>
+  <system:String x:Key="controls.fader.tip">方向键：1 dB · Shift：0.1 dB · 0：单位增益</system:String>
+  <system:String x:Key="controls.value.tip">双击、Enter 或 F2 编辑 · Enter 应用 · Escape 取消</system:String>
 </ResourceDictionary>

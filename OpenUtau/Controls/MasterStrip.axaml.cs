@@ -22,16 +22,12 @@ namespace OpenUtau.App.Controls;
 /// </summary>
 public partial class MasterStrip : UserControl {
     private readonly MixerMeter meter = new MixerMeter();
-    private bool isDragging;
     private double masterDb = 0;
 
     public MasterStrip() {
         InitializeComponent();
-        FaderBox.SizeChanged += (s, e) => UpdateFaderPosition();
-        FaderBox.AddHandler(PointerReleasedEvent, OnFaderReleased,
-            RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
-        FaderBox.AddHandler(PointerCaptureLostEvent, OnFaderCaptureLost,
-            RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
+        FaderBox.Handle = FaderHandle;
+        FaderBox.ValueEdited += (_, _) => ApplyMasterVolume(FaderBox.Value);
         InitBusInfo();
         UpdateMuteBtn();
         UpdateFaderPosition();
@@ -90,10 +86,8 @@ public partial class MasterStrip : UserControl {
     // ── 推子 ───────────────────────────────────────────
 
     private void UpdateFaderPosition() {
-        if (FaderBox.Bounds.Height <= 0) return;
         double db = PlaybackManager.Inst.MasterMuted ? MixerMetrics.FaderMinDb : masterDb;
-        Canvas.SetTop(FaderHandle,
-            MixerMetrics.FaderTop(db, FaderBox.Bounds.Height, MixerMetrics.MasterHandleHeight));
+        FaderBox.Value = db;
     }
 
     private void ApplyMasterVolume(double db) {
@@ -104,29 +98,4 @@ public partial class MasterStrip : UserControl {
         UpdateFaderPosition();
     }
 
-    // ── 鼠标 ───────────────────────────────────────────
-
-    private void OnFaderPressed(object? sender, PointerPressedEventArgs e) {
-        isDragging = true;
-        e.Pointer.Capture(FaderBox);
-        ApplyMasterVolume(MixerMetrics.FaderTopToDb(e.GetPosition(FaderBox).Y,
-            FaderBox.Bounds.Height, MixerMetrics.MasterHandleHeight));
-        e.Handled = true;
-    }
-
-    private void OnFaderMoved(object? sender, PointerEventArgs e) {
-        if (!isDragging) return;
-        ApplyMasterVolume(MixerMetrics.FaderTopToDb(e.GetPosition(FaderBox).Y,
-            FaderBox.Bounds.Height, MixerMetrics.MasterHandleHeight));
-        e.Handled = true;
-    }
-
-    private void OnFaderReleased(object? sender, PointerEventArgs e) {
-        isDragging = false;
-        e.Pointer.Capture(null);
-    }
-
-    private void OnFaderCaptureLost(object? sender, PointerCaptureLostEventArgs e) {
-        isDragging = false;
-    }
 }
