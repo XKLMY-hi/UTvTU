@@ -394,6 +394,11 @@ namespace OpenUtau.App.ViewModels {
                     SelectedParts.ToArray(), TempSelectedParts.ToArray()));
         }
 
+        public void CancelTempSelectParts() {
+            TempSelectedParts.Clear();
+            MessageBus.Current.SendMessage(new PartsSelectionEvent(SelectedParts.ToArray(), Array.Empty<UPart>()));
+        }
+
         public void DeleteSelectedParts() {
             if (SelectedParts.Count <= 0) {
                 return;

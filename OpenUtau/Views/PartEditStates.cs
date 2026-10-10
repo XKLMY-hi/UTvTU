@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
@@ -6,6 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Input;
 using OpenUtau.App.Controls;
+using OpenUtau.App.Editing;
 using OpenUtau.App.ViewModels;
 using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
@@ -17,20 +18,31 @@ namespace OpenUtau.App.Views {
         public readonly MainWindowViewModel vm;
         public Point startPoint;
         protected virtual string? commandNameKey => null;
+        DocumentEditGesture? gesture;
+        protected IPointer? capturedPointer;
+        protected bool CanEdit => gesture?.IsCurrent == true;
 
         public PartEditState(Control control, MainWindowViewModel vm) {
             this.control = control;
             this.vm = vm;
         }
         public virtual void Begin(IPointer pointer, Point point) {
+            gesture = new DocumentEditGesture(DocManager.Inst.Project, commandNameKey);
+            capturedPointer = pointer;
             pointer.Capture(control);
             startPoint = point;
-            DocManager.Inst.StartUndoGroup(commandNameKey);
         }
         public virtual void End(IPointer pointer, Point point) {
-            pointer.Capture(null);
-            DocManager.Inst.EndUndoGroup();
+            Cancel();
         }
+        public virtual void Cancel() {
+            var pointer = capturedPointer;
+            capturedPointer = null;
+            gesture?.Dispose();
+            gesture = null;
+            if (pointer?.Captured == control) pointer.Capture(null);
+        }
+        protected void ExecuteCmd(UCommand command) => gesture?.Execute(command);
         public virtual void Update(IPointer pointer, Point point) { }
         public static void Swap<T>(ref T a, ref T b) {
             T temp = a;
@@ -48,6 +60,7 @@ namespace OpenUtau.App.Views {
             this.selectionBox = selectionBox;
         }
         public override void Begin(IPointer pointer, Point point) {
+            capturedPointer = pointer;
             pointer.Capture(control);
             startPoint = point;
             selectionBox.IsVisible = true;
@@ -56,10 +69,14 @@ namespace OpenUtau.App.Views {
             startTrack = tracksVm.PointToTrackNo(point);
         }
         public override void End(IPointer pointer, Point point) {
-            pointer.Capture(null);
-            selectionBox.IsVisible = false;
             var tracksVm = vm.TracksViewModel;
             tracksVm.CommitTempSelectParts();
+            Cancel();
+        }
+        public override void Cancel() {
+            selectionBox.IsVisible = false;
+            vm.TracksViewModel.CancelTempSelectParts();
+            base.Cancel();
         }
         public override void Update(IPointer pointer, Point point) {
             var tracksVm = vm.TracksViewModel;
@@ -105,6 +122,7 @@ namespace OpenUtau.App.Views {
             xOffset = point.X - tracksVm.TickTrackToPoint(part.position, 0).X;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEdit) return;
             var delta = point - startPoint;
             if (Math.Abs(delta.X) + Math.Abs(delta.Y) < 4) {
                 return;
@@ -144,12 +162,12 @@ namespace OpenUtau.App.Views {
                 return;
             }
             if (tracksVm.SelectedParts.Count == 0) {
-                DocManager.Inst.ExecuteCmd(new MovePartCommand(
+                ExecuteCmd(new MovePartCommand(
                     project, part, part.position + deltaTick, part.trackNo + deltaTrack));
                 return;
             }
             foreach (var part in tracksVm.SelectedParts) {
-                DocManager.Inst.ExecuteCmd(new MovePartCommand(
+                ExecuteCmd(new MovePartCommand(
                     project, part, part.position + deltaTick, part.trackNo + deltaTrack));
             }
         }
@@ -178,6 +196,7 @@ namespace OpenUtau.App.Views {
             this.fromStart = fromStart;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEdit) return;
             var project = DocManager.Inst.Project;
             var tracksVm = vm.TracksViewModel;
 
@@ -194,7 +213,7 @@ namespace OpenUtau.App.Views {
                     return;
                 }
                 foreach (UVoicePart voicePart in selectedParts.Where(part => part is UVoicePart)) {
-                    DocManager.Inst.ExecuteCmd(new ResizeVoicePartCommand(project, voicePart, deltaDuration, fromStart));
+                    ExecuteCmd(new ResizeVoicePartCommand(project, voicePart, deltaDuration, fromStart));
                 }
             } else if (part is UWavePart) {
                 int newPos = tracksVm.PointToTick(point);
@@ -213,7 +232,7 @@ namespace OpenUtau.App.Views {
                     return;
                 }
                 foreach (UWavePart wavePart in selectedWaveParts) {
-                    DocManager.Inst.ExecuteCmd(new ResizeWavePartCommand(project, wavePart, deltaDuration, fromStart));
+                    ExecuteCmd(new ResizeWavePartCommand(project, wavePart, deltaDuration, fromStart));
                 }
             }
         }
@@ -227,12 +246,13 @@ namespace OpenUtau.App.Views {
             this.part = part;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEdit) return;
             var project = DocManager.Inst.Project;
             var tracksVm = vm.TracksViewModel;
             int pointerTick = tracksVm.PointToTick(point);
             int fadeTick = Math.Max(0, pointerTick - part.position);
             fadeTick = Math.Min(fadeTick, part.Duration - part.fadeout - 120);
-            DocManager.Inst.ExecuteCmd(new PartFadeInCommand(project, part, fadeTick));
+            ExecuteCmd(new PartFadeInCommand(project, part, fadeTick));
         }
     }
 
@@ -244,12 +264,13 @@ namespace OpenUtau.App.Views {
             this.part = part;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEdit) return;
             var project = DocManager.Inst.Project;
             var tracksVm = vm.TracksViewModel;
             int pointerTick = tracksVm.PointToTick(point);
             int fadeTick = Math.Max(0, part.End - pointerTick);
             fadeTick = Math.Min(fadeTick, part.Duration - part.fadein - 120);
-            DocManager.Inst.ExecuteCmd(new PartFadeOutCommand(project, part, fadeTick));
+            ExecuteCmd(new PartFadeOutCommand(project, part, fadeTick));
         }
     }
 
@@ -259,10 +280,11 @@ namespace OpenUtau.App.Views {
 
         public PartEraseEditState(Control control, MainWindowViewModel vm) : base(control, vm) { }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEdit) return;
             var project = DocManager.Inst.Project;
             var control = base.control.InputHitTest(point);
             if (control is PartControl partControl) {
-                DocManager.Inst.ExecuteCmd(new RemovePartCommand(project, partControl.part));
+                ExecuteCmd(new RemovePartCommand(project, partControl.part));
             }
         }
     }
@@ -271,11 +293,12 @@ namespace OpenUtau.App.Views {
         public override MouseButton MouseButton => MouseButton.Middle;
         public PartPanningState(Control control, MainWindowViewModel vm) : base(control, vm) { }
         public override void Begin(IPointer pointer, Point point) {
+            capturedPointer = pointer;
             pointer.Capture(control);
             startPoint = point;
         }
         public override void End(IPointer pointer, Point point) {
-            pointer.Capture(null);
+            Cancel();
         }
         public override void Update(IPointer pointer, Point point) {
             var tracksVm = vm.TracksViewModel;

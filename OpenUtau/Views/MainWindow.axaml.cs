@@ -207,6 +207,7 @@ namespace OpenUtau.App.Views {
         private static void SetShown(Control control, bool shown) => control.Classes.Set("shown", shown);
 
         private void ShowWelcome() {
+            FinishPartEdit();
             ++pianoRollOpenGeneration;
             WelcomeHost.Host = this;
             WelcomeHost.DataContext = viewModel;
@@ -847,6 +848,7 @@ namespace OpenUtau.App.Views {
 
         /// <summary>切到某个工作视图（卷帘 / 混音台的宿主控件由调用方保证已就绪）。</summary>
         private void SwitchToView(AppSurface view) {
+            FinishPartEdit();
             if (view != AppSurface.PianoRoll) ++pianoRollOpenGeneration;
             viewModel.ViewSwitcher.SwitchTo(view);   // 改变 → OnCurrentViewChanged
         }
@@ -960,6 +962,7 @@ namespace OpenUtau.App.Views {
 
         /// <summary>偏好设置（全屏视图，设计稿 6-Preferences）。</summary>
         public void ShowPreferences() {
+            FinishPartEdit();
             ++pianoRollOpenGeneration;
             ++preferencesGeneration;
             if (PreferencesHost.IsVisible && PreferencesHost.DataContext is PreferencesViewModel active && !active.IsDisposed) {
@@ -2063,9 +2066,19 @@ namespace OpenUtau.App.Views {
             }
             var control = (Control)sender;
             var point = args.GetCurrentPoint(control);
-            partEditState.Update(point.Pointer, point.Position);
-            partEditState.End(point.Pointer, point.Position);
+            var state = partEditState;
             partEditState = null;
+            state.Update(point.Pointer, point.Position);
+            state.End(point.Pointer, point.Position);
+            Cursor = null;
+        }
+
+        public void PartsCanvasCaptureLost(object? sender, PointerCaptureLostEventArgs args) => FinishPartEdit();
+
+        void FinishPartEdit() {
+            var state = partEditState;
+            partEditState = null; // Capture release can reenter this handler.
+            state?.Cancel();
             Cursor = null;
         }
 
@@ -2078,6 +2091,7 @@ namespace OpenUtau.App.Views {
         }
 
         async Task OpenPianoRollPartAsync(UVoicePart part, int tick) {
+            FinishPartEdit();
             var project = DocManager.Inst.Project;
             int generation = ++pianoRollOpenGeneration;
             if (shellDisposed || !project.parts.Contains(part)) return;
@@ -2804,6 +2818,7 @@ namespace OpenUtau.App.Views {
         void OnShellClosed(object? sender, EventArgs e) {
             if (shellDisposed) return;
             shellDisposed = true;
+            FinishPartEdit();
             ++preferencesGeneration;
             ++pianoRollOpenGeneration;
             timer.Stop();
@@ -2821,6 +2836,7 @@ namespace OpenUtau.App.Views {
         private TaskCompletionSource<MessageBox.MessageBoxResult>? overlayTcs;
 
         private void ShowOverlayContent(Control content, bool closable = true, double sizeFraction = 0, string? headerTitle = null) {
+            FinishPartEdit();
             OverlayContent.Content = content;
             overlaySizeFraction = sizeFraction;
             if (headerTitle != null) {
@@ -2969,7 +2985,9 @@ namespace OpenUtau.App.Views {
         }
 
         public void OnNext(UCommand cmd, bool isUndo) {
-            if (cmd is ErrorMessageNotification notif) {
+            if (cmd is LoadProjectNotification) {
+                FinishPartEdit();
+            } else if (cmd is ErrorMessageNotification notif) {
                 switch (notif.e) {
                     case Core.Render.NoResamplerException:
                     case Core.Render.NoWavtoolException:

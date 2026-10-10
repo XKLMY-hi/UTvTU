@@ -424,6 +424,7 @@
                           PointerPressed="PartsCanvasPointerPressed"
                           PointerMoved="PartsCanvasPointerMoved"
                           PointerReleased="PartsCanvasPointerReleased"
+                          PointerCaptureLost="PartsCanvasCaptureLost"
                           DoubleTapped="PartsCanvasDoubleTapped"
                           PointerWheelChanged="MainPagePointerWheelChanged">
               <Rectangle Name="PlayPosHighlight"
