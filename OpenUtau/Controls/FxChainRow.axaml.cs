@@ -22,6 +22,7 @@ namespace OpenUtau.App.Controls {
     /// </summary>
     public partial class FxChainRow : UserControl {
         FxChainRowViewModel? vm;
+        bool attached;
 
         // 把手拖拽：按下 → 记录起点；松开 → 按"行高倍数"折算步数
         bool dragging;
@@ -42,13 +43,24 @@ namespace OpenUtau.App.Controls {
             }
             base.OnDataContextChanged(e);
             vm = DataContext as FxChainRowViewModel;
+            if (vm != null && attached) {
+                vm.PropertyChanged += OnViewModelChanged;
+            }
+            ApplyAll();
+        }
+
+        protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
+            base.OnAttachedToVisualTree(e);
+            attached = true;
             if (vm != null) {
+                vm.PropertyChanged -= OnViewModelChanged;
                 vm.PropertyChanged += OnViewModelChanged;
             }
             ApplyAll();
         }
 
         protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e) {
+            attached = false;
             if (vm != null) {
                 vm.PropertyChanged -= OnViewModelChanged;
             }
