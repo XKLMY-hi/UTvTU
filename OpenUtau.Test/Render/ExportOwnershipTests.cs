@@ -1,12 +1,15 @@
 using System;
 using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using NAudio.Wave;
 using OpenUtau.Core.Export;
+using OpenUtau.Core;
 using OpenUtau.Core.Render;
 using OpenUtau.Core.SignalChain;
 using OpenUtau.Core.Ustx;
+using OpenUtau.Core.Util;
 using OpenUtau.Test.TestSupport;
 using Xunit;
 
@@ -14,7 +17,12 @@ namespace OpenUtau.Test.Render {
     [Collection("WorkspaceSession")]
     public class ExportOwnershipTests : IDisposable {
         readonly string directory = Path.Combine(Path.GetTempPath(), "utvtu-export-" + Guid.NewGuid().ToString("N"));
-        public ExportOwnershipTests() => Directory.CreateDirectory(directory);
+        readonly string previousDataPath = PathManager.Inst.DataPath;
+        static readonly PropertyInfo DataPath = typeof(PathManager).GetProperty(nameof(PathManager.DataPath))!;
+        public ExportOwnershipTests() {
+            Directory.CreateDirectory(directory);
+            DataPath.SetValue(PathManager.Inst, directory);
+        }
         string PathName => Path.Combine(directory, "result.wav");
 
         [Theory]
@@ -67,6 +75,33 @@ namespace OpenUtau.Test.Render {
             }
         }
 
+        [Fact]
+        public async Task AlreadyCancelledRecordingDoesNotClaimOrTouchAudioOutputOrDelivery() {
+            using var cancellation = new CancellationTokenSource();
+            cancellation.Cancel();
+            var manager = PlaybackManager.Inst;
+            var output = manager.AudioOutput;
+            File.WriteAllBytes(PathName, new byte[] { 4, 3, 2, 1 });
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => manager.RecordMixdown(
+                new UProject(), PathName, ct: cancellation.Token));
+            Assert.False(manager.IsRecording);
+            Assert.Same(output, manager.AudioOutput);
+            Assert.Equal(new byte[] { 4, 3, 2, 1 }, File.ReadAllBytes(PathName));
+        }
+
+        [Fact]
+        public void CancellationOverloadsPreserveTheExistingBinaryEntryPoints() {
+            var source = typeof(CancellationTokenSource).MakeByRefType();
+            var prefix = new[] { typeof(UProject), typeof(TaskScheduler), source };
+            Assert.NotNull(typeof(RenderEngine).GetMethod(nameof(RenderEngine.RenderProject),
+                new[] { prefix[0], prefix[1], prefix[2], typeof(int), typeof(int), typeof(int) }));
+            Assert.NotNull(typeof(RenderEngine).GetMethod(nameof(RenderEngine.RenderMixdown),
+                new[] { prefix[0], prefix[1], prefix[2], typeof(bool), typeof(bool), typeof(int), typeof(int), typeof(int) }));
+            Assert.NotNull(typeof(RenderEngine).GetMethod(nameof(RenderEngine.RenderTracks),
+                new[] { prefix[0], prefix[1], prefix[2], typeof(int), typeof(int) }));
+            Assert.NotNull(typeof(ExportAdapter).GetConstructor(new[] { typeof(ISignalSource) }));
+        }
+
         sealed class TinySource(Action? onRead = null) : ISignalSource {
             public int Calls;
             public bool IsReady(int position, int count) => true;
@@ -79,6 +114,9 @@ namespace OpenUtau.Test.Render {
             }
         }
 
-        public void Dispose() => Directory.Delete(directory, recursive: true);
+        public void Dispose() {
+            DataPath.SetValue(PathManager.Inst, previousDataPath);
+            Directory.Delete(directory, recursive: true);
+        }
     }
 }

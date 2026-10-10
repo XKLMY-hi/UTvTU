@@ -633,14 +633,12 @@ namespace OpenUtau.Core {
                 // 渲染取消/无设备/路径不可写等——async void 菜单入口无捕获，这里必须转用户可见错误
                 var customEx = new MessageCustomizableException("Failed to render.", $"<translate:errors.failed.render>: {exportPath}", e);
                 DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(customEx));
-                try {
-                    if (File.Exists(exportPath)) File.Delete(exportPath);
-                } catch { }
             }
         }
 
         /// <summary>导出录制中（禁止播放操作，防止打断录制通道）。</summary>
-        public bool IsRecording { get; private set; }
+        int recordingSession;
+        public bool IsRecording => Volatile.Read(ref recordingSession) != 0;
 
         /// <summary>
         /// 录制式混音导出：导出期间**直接禁用前台音频管线**（主 AudioOutput 临时换
@@ -652,10 +650,15 @@ namespace OpenUtau.Core {
         public Task RecordMixdown(UProject project, string exportPath, int startTick = 0, int endTick = -1,
                                   IProgress<double>? progress = null, CancellationToken ct = default) {
             // 同步置位（Task.Run 调度窗口内 PlayOrPause 可能放行一次播放渲染互踩）
-            IsRecording = true;
+            if (ct.IsCancellationRequested) return Task.FromCanceled(ct);
+            if (Interlocked.CompareExchange(ref recordingSession, 1, 0) != 0) {
+                return Task.FromException(new InvalidOperationException("An export recording is already running."));
+            }
             var task = Task.Run(() => {
                 var savedOutput = AudioOutput;
+                CancellationTokenSource recordingCancellation = null;
                 try {
+                    ct.ThrowIfCancellationRequested();
                     StopPlayback();
                     // ── 直接禁用前台音频管线：主输出换 Dummy（彻底静音） ──
                     AudioOutput = new Audio.DummyAudioOutput();
@@ -664,10 +667,10 @@ namespace OpenUtau.Core {
                         throw new OperationCanceledException(ct);
                     }
                     var result = RenderEngine.RenderProject(
-                        project, DocManager.Inst.MainScheduler, ref renderCancellation,
+                        project, DocManager.Inst.MainScheduler, ref recordingCancellation, ct,
                         startTick: startTick, endTick: endTick);
                     if (result == null) {
-                        throw new Exception("Render cancelled.");
+                        throw new OperationCanceledException(ct);
                     }
                     if (ct.IsCancellationRequested) {
                         // 渲染阶段取消（等批 1 完成才返回）——不写文件
@@ -684,43 +687,44 @@ namespace OpenUtau.Core {
                     double endMs = project.timeAxis.TickPosToMsPos(realEnd);
                     double totalMs = Math.Max(0, endMs - startMs);
 
-                    using var writer = new WaveFileWriter(File.Create(exportPath), master.WaveFormat);
-                    // 静音输出（双保险）——设备播放静音，用户听不到
-                    var recorder = new SignalChain.RecordingAdapter(master, writer, silentOutput: true);
-                    // 独立音频线路：PCM16 转换（设备格式匹配，杜绝 float 破音）+ WasapiOut
-                    using var output = new NAudio.Wave.WasapiOut(NAudio.CoreAudioApi.AudioClientShareMode.Shared, 100);
-                    output.Init(new NAudio.Wave.SampleProviders.SampleToWaveProvider16(recorder));
-                    output.Play();
+                    AtomicFile.Write(exportPath, temporaryPath => {
+                        using var writer = new WaveFileWriter(File.Create(temporaryPath), master.WaveFormat);
+                        // 静音输出（双保险）——设备播放静音，用户听不到
+                        var recorder = new SignalChain.RecordingAdapter(master, writer, silentOutput: true);
+                        // 独立音频线路：PCM16 转换（设备格式匹配，杜绝 float 破音）+ WasapiOut
+                        using var output = new NAudio.Wave.WasapiOut(NAudio.CoreAudioApi.AudioClientShareMode.Shared, 100);
+                        output.Init(new NAudio.Wave.SampleProviders.SampleToWaveProvider16(recorder));
+                        output.Play();
 
-                    // 录制消费段进入在飞计数——Flush 不得释放正在被录制回调消费的 VST handle
-                    //（TryFlush 另有 IsRecording 条件，双保险）
-                    bool cancelled = false;
-                    using (RenderGate.Enter()) {
-                        // 等待录制完成（时长或取消）
-                        var sw = System.Diagnostics.Stopwatch.StartNew();
-                        while (sw.ElapsedMilliseconds < totalMs && !ct.IsCancellationRequested) {
-                            Thread.Sleep(50);
-                            if (progress != null) {
-                                progress.Report(Math.Min(1.0, sw.ElapsedMilliseconds / totalMs));
+                        // 录制消费段进入在飞计数——Flush 不得释放正在被录制回调消费的 VST handle
+                        //（TryFlush 另有 IsRecording 条件，双保险）
+                        bool cancelled = false;
+                        using (RenderGate.Enter()) {
+                            // 等待录制完成（时长或取消）
+                            var sw = System.Diagnostics.Stopwatch.StartNew();
+                            while (sw.ElapsedMilliseconds < totalMs && !ct.IsCancellationRequested) {
+                                Thread.Sleep(50);
+                                if (progress != null) {
+                                    progress.Report(Math.Min(1.0, sw.ElapsedMilliseconds / totalMs));
+                                }
                             }
+                            cancelled = ct.IsCancellationRequested;
                         }
-                        cancelled = ct.IsCancellationRequested;
-                    }
-                    output.Stop();
-                    if (cancelled) {
-                        // 取消：删除半成品文件 + 抛取消（UI 显示失败而非"完成"）
-                        try { if (File.Exists(exportPath)) File.Delete(exportPath); } catch { }
-                        throw new OperationCanceledException(ct);
-                    }
+                        output.Stop();
+                        if (cancelled) {
+                            throw new OperationCanceledException(ct);
+                        }
+                        ct.ThrowIfCancellationRequested();
+                    });
                     progress?.Report(1.0);
                 } finally {
                     AudioOutput = savedOutput;
                     // 失效导出链的 faders 引用（防 Volume/Pan 通知写入死链）
                     faders = null;
+                    RenderCancellationLease.Retire(ref recordingCancellation);
+                    Volatile.Write(ref recordingSession, 0);
                 }
-            }, ct);
-            // ct 已取消时 lambda 不执行——continuation 确保 IsRecording 复位
-            _ = task.ContinueWith(_ => IsRecording = false, TaskScheduler.Default);
+            }); // Always execute cleanup, even when cancellation wins before scheduling.
             return task;
         }
 

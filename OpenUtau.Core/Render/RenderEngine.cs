@@ -109,12 +109,18 @@ namespace OpenUtau.Core.Render {
         }
 
         // 旧布尔入口（调用点兼容）：true = 导出快照，false = 干轨（分轨/干声导出）。
-        public Tuple<WaveMix, List<Fader>> RenderMixdown(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation, bool wait, bool applyMixFx, CancellationToken cancellationToken = default) {
+        public Tuple<WaveMix, List<Fader>> RenderMixdown(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation, bool wait, bool applyMixFx) =>
+            RenderMixdown(uiScheduler, ref cancellation, wait, applyMixFx, default);
+
+        public Tuple<WaveMix, List<Fader>> RenderMixdown(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation, bool wait, bool applyMixFx, CancellationToken cancellationToken) {
             return RenderMixdown(uiScheduler, ref cancellation, wait, applyMixFx ? MixFxMode.Snapshot : MixFxMode.Off, cancellationToken);
         }
 
         /// <summary>离线混音渲染核心（导出/录制共用）。</summary>
-        public Tuple<WaveMix, List<Fader>> RenderMixdown(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation, bool wait, MixFxMode mode, CancellationToken cancellationToken = default) {
+        public Tuple<WaveMix, List<Fader>> RenderMixdown(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation, bool wait, MixFxMode mode) =>
+            RenderMixdown(uiScheduler, ref cancellation, wait, mode, default);
+
+        public Tuple<WaveMix, List<Fader>> RenderMixdown(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation, bool wait, MixFxMode mode, CancellationToken cancellationToken) {
             using var renderLifetime = RenderCancellationLease.Replace(ref cancellation, cancellationToken);
             var newCancellation = renderLifetime.Source;
             newCancellation.Token.ThrowIfCancellationRequested();
@@ -165,10 +171,15 @@ namespace OpenUtau.Core.Render {
         /// 调用方不得 StartPlayback。
         /// </summary>
         public Tuple<MasterAdapter, List<Fader>>? RenderProject(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation) {
+            return RenderProject(uiScheduler, ref cancellation, default);
+        }
+
+        public Tuple<MasterAdapter, List<Fader>>? RenderProject(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation, CancellationToken cancellationToken) {
             double startMs = project.timeAxis.TickPosToMsPos(startTick);
             double endMs = endTick == -1 ? double.PositiveInfinity : project.timeAxis.TickPosToMsPos(endTick);
-            using var renderLifetime = RenderCancellationLease.Replace(ref cancellation);
+            using var renderLifetime = RenderCancellationLease.Replace(ref cancellation, cancellationToken);
             var newCancellation = renderLifetime.Source;
+            newCancellation.Token.ThrowIfCancellationRequested();
 
             var faders = new List<Fader>();
             var requests = FilterRequests(PrepareRequests(), startMs, endMs);
@@ -277,7 +288,10 @@ namespace OpenUtau.Core.Render {
         }
 
         // for export
-        public List<WaveMix> RenderTracks(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation, CancellationToken cancellationToken = default) {
+        public List<WaveMix> RenderTracks(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation) =>
+            RenderTracks(uiScheduler, ref cancellation, default);
+
+        public List<WaveMix> RenderTracks(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation, CancellationToken cancellationToken) {
             using var renderLifetime = RenderCancellationLease.Replace(ref cancellation, cancellationToken);
             var newCancellation = renderLifetime.Source;
             newCancellation.Token.ThrowIfCancellationRequested();
@@ -538,9 +552,14 @@ namespace OpenUtau.Core.Render {
         /// <summary>播放渲染：同步建链 → 等批 1 完成即返回 master。null = 被新周期取消。</summary>
         public static Tuple<MasterAdapter, List<Fader>>? RenderProject(
             UProject project, TaskScheduler uiScheduler, ref CancellationTokenSource cancellation,
-            int startTick = 0, int endTick = -1, int trackNo = -1) {
+            int startTick = 0, int endTick = -1, int trackNo = -1) =>
+            RenderProject(project, uiScheduler, ref cancellation, default, startTick, endTick, trackNo);
+
+        public static Tuple<MasterAdapter, List<Fader>>? RenderProject(
+            UProject project, TaskScheduler uiScheduler, ref CancellationTokenSource cancellation,
+            CancellationToken cancellationToken, int startTick = 0, int endTick = -1, int trackNo = -1) {
             var engine = new RenderEngine(project, startTick, endTick, trackNo, phraseCache);
-            return engine.RenderProject(uiScheduler, ref cancellation);
+            return engine.RenderProject(uiScheduler, ref cancellation, cancellationToken);
         }
 
         /// <summary>
@@ -550,7 +569,14 @@ namespace OpenUtau.Core.Render {
         public static Tuple<WaveMix, List<Fader>> RenderMixdown(
             UProject project, TaskScheduler uiScheduler, ref CancellationTokenSource cancellation,
             bool wait = false, bool applyMixFx = true,
-            int startTick = 0, int endTick = -1, int trackNo = -1, CancellationToken cancellationToken = default) {
+            int startTick = 0, int endTick = -1, int trackNo = -1) =>
+            RenderMixdown(project, uiScheduler, ref cancellation, default, wait, applyMixFx, startTick, endTick, trackNo);
+
+        public static Tuple<WaveMix, List<Fader>> RenderMixdown(
+            UProject project, TaskScheduler uiScheduler, ref CancellationTokenSource cancellation,
+            CancellationToken cancellationToken,
+            bool wait = false, bool applyMixFx = true,
+            int startTick = 0, int endTick = -1, int trackNo = -1) {
             var engine = new RenderEngine(project, startTick, endTick, trackNo, phraseCache);
             return engine.RenderMixdown(uiScheduler, ref cancellation, wait, applyMixFx, cancellationToken);
         }
@@ -558,7 +584,12 @@ namespace OpenUtau.Core.Render {
         /// <summary>逐轨混音渲染（分轨导出用）。</summary>
         public static List<WaveMix> RenderTracks(
             UProject project, TaskScheduler uiScheduler, ref CancellationTokenSource cancellation,
-            int startTick = 0, int endTick = -1, CancellationToken cancellationToken = default) {
+            int startTick = 0, int endTick = -1) =>
+            RenderTracks(project, uiScheduler, ref cancellation, default, startTick, endTick);
+
+        public static List<WaveMix> RenderTracks(
+            UProject project, TaskScheduler uiScheduler, ref CancellationTokenSource cancellation,
+            CancellationToken cancellationToken, int startTick = 0, int endTick = -1) {
             var engine = new RenderEngine(project, startTick, endTick, -1, phraseCache);
             return engine.RenderTracks(uiScheduler, ref cancellation, cancellationToken);
         }

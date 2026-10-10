@@ -11,7 +11,9 @@ namespace OpenUtau.Core.SignalChain {
 
         public WaveFormat WaveFormat => waveFormat;
 
-        public ExportAdapter(ISignalSource source, CancellationToken cancellation = default) {
+        public ExportAdapter(ISignalSource source) : this(source, default) { }
+
+        public ExportAdapter(ISignalSource source, CancellationToken cancellation) {
             this.source = source;
             this.cancellation = cancellation;
             waveFormat = WaveFormat.CreateIeeeFloatWaveFormat(source.SampleRate, source.Channels);
