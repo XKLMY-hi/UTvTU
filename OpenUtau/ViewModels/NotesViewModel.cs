@@ -466,7 +466,7 @@ namespace OpenUtau.App.ViewModels {
             return new Size(ticks * TickWidth, tone * TrackHeight);
         }
 
-        public UNote? MaybeAddNote(Point point, bool useLastLength) {
+        public UNote? MaybeAddNote(Point point, bool useLastLength, Func<UCommand, bool> execute) {
             if (Part == null) {
                 return null;
             }
@@ -480,8 +480,7 @@ namespace OpenUtau.App.ViewModels {
             int snappedTick = (int)Math.Floor((double)tick / snapUnit) * snapUnit;
             UNote note = project.CreateNote(tone, snappedTick,
                 useLastLength ? _lastNoteLength : IsSnapOn ? snapUnit : 15);
-            DocManager.Inst.ExecuteCmd(new AddNoteCommand(Part, note));
-            return note;
+            return execute(new AddNoteCommand(Part, note)) ? note : null;
         }
 
         private void LoadPart(UPart part, UProject project) {
@@ -781,6 +780,11 @@ namespace OpenUtau.App.ViewModels {
 
         public void CommitTempSelectNotes() {
             Selection.CommitTemporarySelection();
+            MessageBus.Current.SendMessage(new NotesSelectionEvent(Selection));
+        }
+
+        public void CancelTempSelectNotes() {
+            Selection.SetTemporarySelection(Array.Empty<UNote>());
             MessageBus.Current.SendMessage(new NotesSelectionEvent(Selection));
         }
 

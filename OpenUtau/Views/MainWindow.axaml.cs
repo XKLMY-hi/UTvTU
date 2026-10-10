@@ -208,6 +208,7 @@ namespace OpenUtau.App.Views {
 
         private void ShowWelcome() {
             FinishPartEdit();
+            pianoRoll?.CancelActiveInput();
             ++pianoRollOpenGeneration;
             WelcomeHost.Host = this;
             WelcomeHost.DataContext = viewModel;
@@ -849,6 +850,7 @@ namespace OpenUtau.App.Views {
         /// <summary>切到某个工作视图（卷帘 / 混音台的宿主控件由调用方保证已就绪）。</summary>
         private void SwitchToView(AppSurface view) {
             FinishPartEdit();
+            if (view != AppSurface.PianoRoll) pianoRoll?.CancelActiveInput();
             if (view != AppSurface.PianoRoll) ++pianoRollOpenGeneration;
             viewModel.ViewSwitcher.SwitchTo(view);   // 改变 → OnCurrentViewChanged
         }
@@ -963,6 +965,7 @@ namespace OpenUtau.App.Views {
         /// <summary>偏好设置（全屏视图，设计稿 6-Preferences）。</summary>
         public void ShowPreferences() {
             FinishPartEdit();
+            pianoRoll?.CancelActiveInput();
             ++pianoRollOpenGeneration;
             ++preferencesGeneration;
             if (PreferencesHost.IsVisible && PreferencesHost.DataContext is PreferencesViewModel active && !active.IsDisposed) {

@@ -20,11 +20,19 @@ namespace OpenUtau.App.Editing {
         }
 
         public bool IsCurrent => !finished && ReferenceEquals(project, doc.Project);
+        public bool CanExecute => IsCurrent && (doc.ActiveUndoGroup == null ||
+            ReferenceEquals(ownedGroup, doc.ActiveUndoGroup));
 
         public bool Execute(UCommand command) {
-            if (!IsCurrent) return false;
+            if (!CanExecute) return false;
             if (command is PartCommand part && (!ReferenceEquals(part.project, project) ||
                 !project.parts.Contains(part.part))) return false;
+            var voicePart = command switch {
+                NoteCommand note => note.Part,
+                ExpCommand expression => expression.Part,
+                _ => null,
+            };
+            if (voicePart != null && !project.parts.Contains(voicePart)) return false;
             if (ownedGroup == null || !ReferenceEquals(ownedGroup, doc.ActiveUndoGroup)) {
                 // Modal actions and another control may own the active transaction.
                 // Do not close it or silently append this gesture's commands to it.

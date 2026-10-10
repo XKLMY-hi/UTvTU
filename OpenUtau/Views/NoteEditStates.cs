@@ -6,6 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Input;
 using OpenUtau.App.Controls;
+using OpenUtau.App.Editing;
 using OpenUtau.App.ViewModels;
 using OpenUtau.Classic;
 using OpenUtau.Core;
@@ -19,18 +20,23 @@ namespace OpenUtau.App.Views {
         private readonly TrackBackground element;
         private readonly PianoRollViewModel vm;
         private int activeTone;
+        IPointer? capturedPointer;
+        bool toneStarted;
 
         public KeyboardPlayState(TrackBackground element, PianoRollViewModel vm) {
             this.element = element;
             this.vm = vm;
         }
         public void Begin(IPointer pointer, Point point) {
+            capturedPointer = pointer;
             pointer.Capture(element);
             var tone = vm.NotesViewModel.PointToTone(point);
             PlaybackManager.Inst.PlayTone(MusicMath.ToneToFreq(tone));
             activeTone = tone;
+            toneStarted = true;
         }
         public void Update(IPointer pointer, Point point) {
+            if (!toneStarted) return;
             var tone = vm.NotesViewModel.PointToTone(point);
             if (activeTone != tone) {
                 PlaybackManager.Inst.EndTone(MusicMath.ToneToFreq(activeTone));
@@ -39,8 +45,17 @@ namespace OpenUtau.App.Views {
             }
         }
         public void End(IPointer pointer, Point point) {
-            pointer.Capture(null);
-            PlaybackManager.Inst.EndTone(MusicMath.ToneToFreq(activeTone));
+            Cancel();
+        }
+        public Control Control => element;
+        public void Cancel() {
+            var pointer = capturedPointer;
+            capturedPointer = null;
+            if (toneStarted) {
+                toneStarted = false;
+                PlaybackManager.Inst.EndTone(MusicMath.ToneToFreq(activeTone));
+            }
+            if (pointer?.Captured == element) pointer.Capture(null);
         }
     }
 
@@ -52,6 +67,12 @@ namespace OpenUtau.App.Views {
         public IValueTip valueTip;
         protected virtual bool ShowValueTip => true;
         protected virtual string? commandNameKey => null;
+        DocumentEditGesture? gesture;
+        IPointer? capturedPointer;
+        UVoicePart? ownerPart;
+        protected bool CanEditGesture => gesture?.CanExecute == true &&
+            ReferenceEquals(ownerPart, vm?.NotesViewModel?.Part) &&
+            (ownerPart == null || DocManager.Inst.Project.parts.Contains(ownerPart));
         public bool ctrlShiftHeld = false;
         public bool altShiftHeld = false;
         public bool shiftHeld = false;
@@ -64,20 +85,29 @@ namespace OpenUtau.App.Views {
             this.valueTip = valueTip;
         }
         public virtual void Begin(IPointer pointer, Point point) {
+            ownerPart = vm?.NotesViewModel?.Part;
+            gesture = new DocumentEditGesture(DocManager.Inst.Project, commandNameKey);
+            capturedPointer = pointer;
             pointer.Capture(control);
             startPoint = point;
-            DocManager.Inst.StartUndoGroup(commandNameKey);
             if (ShowValueTip) {
                 valueTip.ShowValueTip();
             }
         }
         public virtual void End(IPointer pointer, Point point) {
-            pointer.Capture(null);
-            DocManager.Inst.EndUndoGroup();
+            Cancel();
+        }
+        public virtual void Cancel() {
+            var pointer = capturedPointer;
+            capturedPointer = null;
+            gesture?.Dispose();
+            gesture = null;
             if (ShowValueTip) {
                 valueTip.HideValueTip();
             }
+            if (pointer?.Captured == control) pointer.Capture(null);
         }
+        protected bool ExecuteCmd(UCommand command) => CanEditGesture && gesture!.Execute(command);
         public virtual void Update(IPointer pointer, Point point) { }
         public static void Swap<T>(ref T a, ref T b) {
             T temp = a;
@@ -105,20 +135,24 @@ namespace OpenUtau.App.Views {
             this.selectionBox = selectionBox;
         }
         public override void Begin(IPointer pointer, Point point) {
-            pointer.Capture(control);
-            startPoint = point;
+            base.Begin(pointer, point);
+            if (!CanEditGesture) { Cancel(); return; }
             selectionBox.IsVisible = true;
             var notesVm = vm.NotesViewModel;
             startTick = notesVm.PointToTick(point);
             startTone = notesVm.PointToTone(point);
         }
         public override void End(IPointer pointer, Point point) {
-            pointer.Capture(null);
+            if (CanEditGesture) vm.NotesViewModel.CommitTempSelectNotes();
+            Cancel();
+        }
+        public override void Cancel() {
             selectionBox.IsVisible = false;
-            var notesVm = vm.NotesViewModel;
-            notesVm.CommitTempSelectNotes();
+            if (CanEditGesture) vm.NotesViewModel.CancelTempSelectNotes();
+            base.Cancel();
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             int tick = notesVm.PointToTick(point);
             int tone = notesVm.PointToTone(point);
@@ -167,10 +201,12 @@ namespace OpenUtau.App.Views {
         }
         public override void Begin(IPointer pointer, Point point) {
             base.Begin(pointer, point);
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             xOffset = point.X - notesVm.TickToneToPoint(note.position, 0).X;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var delta = point - startPoint;
             if (Math.Abs(delta.X) + Math.Abs(delta.Y) < 4) {
                 return;
@@ -221,15 +257,15 @@ namespace OpenUtau.App.Views {
                 note = note.Clone();
                 notes = notes.Select(note => note.Clone()).ToList();
                 notes.Add(note);
-                DocManager.Inst.ExecuteCmd(new AddNoteCommand(part, notes));
+                if (!ExecuteCmd(new AddNoteCommand(part, notes))) return;
                 notesVm.Selection.Select(notes);
                 MessageBus.Current.SendMessage(new NotesSelectionEvent(notesVm.Selection));
                 duplicated = true;
             }
             if (notes.Count == 0) {
-                DocManager.Inst.ExecuteCmd(new MoveNoteCommand(part, note, deltaTick, deltaTone));
+                ExecuteCmd(new MoveNoteCommand(part, note, deltaTick, deltaTone));
             } else {
-                DocManager.Inst.ExecuteCmd(new MoveNoteCommand(part, notes, deltaTick, deltaTone));
+                ExecuteCmd(new MoveNoteCommand(part, notes, deltaTick, deltaTone));
             }
         }
     }
@@ -238,6 +274,7 @@ namespace OpenUtau.App.Views {
         private UNote? note;
         private bool playTone;
         private int activeTone;
+        private bool toneStarted;
         protected override string? commandNameKey => "command.note.add";
 
         public NoteDrawEditState(
@@ -249,7 +286,8 @@ namespace OpenUtau.App.Views {
         }
         public override void Begin(IPointer pointer, Point point) {
             base.Begin(pointer, point);
-            note = vm.NotesViewModel.MaybeAddNote(point, false);
+            if (!CanEditGesture) { Cancel(); return; }
+            note = vm.NotesViewModel.MaybeAddNote(point, false, ExecuteCmd);
             if (note != null && playTone) {
                 if (PlaybackManager.Inst.PlayingMaster) {
                     // Stop playback if playing project
@@ -257,15 +295,17 @@ namespace OpenUtau.App.Views {
                 }
                 activeTone = note.tone;
                 PlaybackManager.Inst.PlayTone(MusicMath.ToneToFreq(note.tone));
+                toneStarted = true;
             }
             if (note != null) {
                 var prev = vm.NotesViewModel.Part!.notes.FirstOrDefault(n => n.position < note.position && note.position < n.End);
                 if (prev != null) {
-                    DocManager.Inst.ExecuteCmd(new ResizeNoteCommand(vm.NotesViewModel.Part, prev, note.position - prev.End));
+                    ExecuteCmd(new ResizeNoteCommand(vm.NotesViewModel.Part, prev, note.position - prev.End));
                 }
             }
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             if (note == null) {
                 return;
             }
@@ -276,7 +316,7 @@ namespace OpenUtau.App.Views {
                 return;
             }
             int tone = notesVm.PointToTone(point);
-            if (activeTone != tone) {
+            if (toneStarted && activeTone != tone) {
                 // Tone has changed
                 PlaybackManager.Inst.EndTone(MusicMath.ToneToFreq(activeTone));
                 PlaybackManager.Inst.PlayTone(MusicMath.ToneToFreq(tone));
@@ -301,21 +341,24 @@ namespace OpenUtau.App.Views {
                 deltaDuration = Math.Max(deltaDuration, -maxNegDelta);
             }
             if (deltaTone != 0) {
-                DocManager.Inst.ExecuteCmd(new MoveNoteCommand(part, note, 0, deltaTone));
+                ExecuteCmd(new MoveNoteCommand(part, note, 0, deltaTone));
             }
             if (deltaDuration != 0) {
-                DocManager.Inst.ExecuteCmd(new ResizeNoteCommand(part, note, deltaDuration));
+                ExecuteCmd(new ResizeNoteCommand(part, note, deltaDuration));
                 if (NotePresets.Default.AutoVibratoToggle && note.duration >= NotePresets.Default.AutoVibratoNoteDuration) {
-                    DocManager.Inst.ExecuteCmd(new VibratoLengthCommand(part, note, NotePresets.Default.DefaultVibrato.VibratoLength));
+                    ExecuteCmd(new VibratoLengthCommand(part, note, NotePresets.Default.DefaultVibrato.VibratoLength));
                 } else {
-                    DocManager.Inst.ExecuteCmd(new VibratoLengthCommand(part, note, 0));
+                    ExecuteCmd(new VibratoLengthCommand(part, note, 0));
                 }
             }
             valueTip.UpdateValueTip(note.duration.ToString());
         }
-        public override void End(IPointer pointer, Point point) {
-            base.End(pointer, point);
-            PlaybackManager.Inst.EndTone(MusicMath.ToneToFreq(activeTone));
+        public override void Cancel() {
+            if (toneStarted) {
+                toneStarted = false;
+                PlaybackManager.Inst.EndTone(MusicMath.ToneToFreq(activeTone));
+            }
+            base.Cancel();
         }
     }
 
@@ -343,6 +386,7 @@ namespace OpenUtau.App.Views {
             this.fromStart = fromStart;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var project = DocManager.Inst.Project;
             var notesVm = vm.NotesViewModel;
             var part = notesVm.Part;
@@ -406,21 +450,21 @@ namespace OpenUtau.App.Views {
                     cutDuration = neighborNote.End - (note.position - deltaDuration);
                 }
                 if (!fromStart) {
-                    DocManager.Inst.ExecuteCmd(new MoveNoteCommand(part, neighborNote, cutDuration, 0));
+                    ExecuteCmd(new MoveNoteCommand(part, neighborNote, cutDuration, 0));
                 }
-                DocManager.Inst.ExecuteCmd(new ResizeNoteCommand(part, neighborNote, -cutDuration));
+                ExecuteCmd(new ResizeNoteCommand(part, neighborNote, -cutDuration));
             }
             // Resize current note
             if (notesVm.Selection.Count <= 1) {
                 if (fromStart) {
-                    DocManager.Inst.ExecuteCmd(new MoveNoteCommand(part, note, -deltaDuration, 0));
+                    ExecuteCmd(new MoveNoteCommand(part, note, -deltaDuration, 0));
                 }
-                DocManager.Inst.ExecuteCmd(new ResizeNoteCommand(part, note, deltaDuration));
+                ExecuteCmd(new ResizeNoteCommand(part, note, deltaDuration));
             } else {
                 if (fromStart) {
-                    DocManager.Inst.ExecuteCmd(new MoveNoteCommand(part, notesVm.Selection.ToList(), -deltaDuration, 0));
+                    ExecuteCmd(new MoveNoteCommand(part, notesVm.Selection.ToList(), -deltaDuration, 0));
                 }
-                DocManager.Inst.ExecuteCmd(new ResizeNoteCommand(part, notesVm.Selection.ToList(), deltaDuration));
+                ExecuteCmd(new ResizeNoteCommand(part, notesVm.Selection.ToList(), deltaDuration));
             }
             valueTip.UpdateValueTip(note.duration.ToString());
         }
@@ -460,6 +504,7 @@ namespace OpenUtau.App.Views {
         public override void Begin(IPointer pointer, Point point) {
             var notesVm = vm.NotesViewModel;
             base.Begin(pointer, point);
+            if (!CanEditGesture) { Cancel(); return; }
             var project = DocManager.Inst.Project;
             var part = notesVm.Part;
             if (project == null || part == null || note == null) {
@@ -469,20 +514,21 @@ namespace OpenUtau.App.Views {
             if (note.duration <= snapUnit) {
                 return;
             }
-            newNote = notesVm.MaybeAddNote(point, false);
+            newNote = notesVm.MaybeAddNote(point, false, ExecuteCmd);
             if (newNote == null) {
                 return;
             }
             // 切出来的新音符**继承源音符的表达式**（上游 `59000b1c`）：按 index 升序逐条写入，
             // 顺序与取值都与源音符一致，撤销即逐条回退。
             foreach (var exp in note.phonemeExpressions.OrderBy(exp => exp.index)) {
-                DocManager.Inst.ExecuteCmd(new SetNoteExpressionCommand(
+                ExecuteCmd(new SetNoteExpressionCommand(
                     project, project.tracks[part.trackNo], part, newNote, exp.abbr, new float?[] { exp.value }));
             }
-            DocManager.Inst.ExecuteCmd(new ChangeNoteLyricCommand(part, newNote, NotePresets.Default.SplittedLyric));
+            ExecuteCmd(new ChangeNoteLyricCommand(part, newNote, NotePresets.Default.SplittedLyric));
         }
 
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var project = DocManager.Inst.Project;
             var notesVm = vm.NotesViewModel;
             if (notesVm.Part == null || newNote == null) {
@@ -513,38 +559,38 @@ namespace OpenUtau.App.Views {
                 return;
             }
             if (note.duration + deltaDuration < oldDur) {
-                DocManager.Inst.ExecuteCmd(new ResizeNoteCommand(notesVm.Part, newNote, -deltaDuration));
-                DocManager.Inst.ExecuteCmd(new ResizeNoteCommand(notesVm.Part, note, deltaDuration));
-                if (note.duration > oldDur - 10) DocManager.Inst.ExecuteCmd(new ResizeNoteCommand(notesVm.Part, note, oldDur - note.duration - 10));
-                if (note.duration + newNote.duration > oldDur) DocManager.Inst.ExecuteCmd(new ResizeNoteCommand(notesVm.Part, newNote, -(note.duration + newNote.duration - oldDur))); ;
-                DocManager.Inst.ExecuteCmd(new MoveNoteCommand(notesVm.Part, newNote, note.End - newNote.position, 0));
+                ExecuteCmd(new ResizeNoteCommand(notesVm.Part, newNote, -deltaDuration));
+                ExecuteCmd(new ResizeNoteCommand(notesVm.Part, note, deltaDuration));
+                if (note.duration > oldDur - 10) ExecuteCmd(new ResizeNoteCommand(notesVm.Part, note, oldDur - note.duration - 10));
+                if (note.duration + newNote.duration > oldDur) ExecuteCmd(new ResizeNoteCommand(notesVm.Part, newNote, -(note.duration + newNote.duration - oldDur))); ;
+                ExecuteCmd(new MoveNoteCommand(notesVm.Part, newNote, note.End - newNote.position, 0));
             }
 
             if (oldVibLength > 0) {
-                DocManager.Inst.ExecuteCmd(new VibratoDepthCommand(notesVm.Part, newNote, note.vibrato.depth));
-                DocManager.Inst.ExecuteCmd(new VibratoPeriodCommand(notesVm.Part, newNote, note.vibrato.period));
+                ExecuteCmd(new VibratoDepthCommand(notesVm.Part, newNote, note.vibrato.depth));
+                ExecuteCmd(new VibratoPeriodCommand(notesVm.Part, newNote, note.vibrato.period));
 
                 if (oldVibLengthTicks > newNote.duration) {
                     float newVibLengthTicks = oldVibLengthTicks - newNote.duration;
                     //length correction
-                    DocManager.Inst.ExecuteCmd(new VibratoLengthCommand(notesVm.Part, newNote, 100));
-                    DocManager.Inst.ExecuteCmd(new VibratoLengthCommand(notesVm.Part, note, newVibLengthTicks * 100 / note.duration));
+                    ExecuteCmd(new VibratoLengthCommand(notesVm.Part, newNote, 100));
+                    ExecuteCmd(new VibratoLengthCommand(notesVm.Part, note, newVibLengthTicks * 100 / note.duration));
                     //fade in/out correction
-                    DocManager.Inst.ExecuteCmd(new VibratoFadeInCommand(notesVm.Part, note, oldVibFadeInTicks * 100 / newVibLengthTicks));
-                    DocManager.Inst.ExecuteCmd(new VibratoFadeOutCommand(notesVm.Part, note, 0));
-                    DocManager.Inst.ExecuteCmd(new VibratoFadeInCommand(notesVm.Part, newNote, 0));
-                    DocManager.Inst.ExecuteCmd(new VibratoFadeOutCommand(notesVm.Part, newNote, oldVibFadeOutTicks * 100 / newNote.duration));
+                    ExecuteCmd(new VibratoFadeInCommand(notesVm.Part, note, oldVibFadeInTicks * 100 / newVibLengthTicks));
+                    ExecuteCmd(new VibratoFadeOutCommand(notesVm.Part, note, 0));
+                    ExecuteCmd(new VibratoFadeInCommand(notesVm.Part, newNote, 0));
+                    ExecuteCmd(new VibratoFadeOutCommand(notesVm.Part, newNote, oldVibFadeOutTicks * 100 / newNote.duration));
                     //phase correction
                     double newVibLengthMs = project.timeAxis.MsBetweenTickPos(newNote.position, newNote.position + newVibLengthTicks);
                     float newVibShift = (float)(100 * (newVibLengthMs % vibPeriod / vibPeriod)) + oldVibShift;
                     if (newVibShift > 100) newVibShift -= 100;
-                    DocManager.Inst.ExecuteCmd(new VibratoShiftCommand(notesVm.Part, newNote, newVibShift));
+                    ExecuteCmd(new VibratoShiftCommand(notesVm.Part, newNote, newVibShift));
                 } else {
-                    DocManager.Inst.ExecuteCmd(new VibratoLengthCommand(notesVm.Part, note, 0));
-                    DocManager.Inst.ExecuteCmd(new VibratoLengthCommand(notesVm.Part, newNote, oldVibLengthTicks * 100 / newNote.duration));
-                    DocManager.Inst.ExecuteCmd(new VibratoFadeInCommand(notesVm.Part, newNote, oldVibFadeIn));
-                    DocManager.Inst.ExecuteCmd(new VibratoFadeOutCommand(notesVm.Part, newNote, oldVibFadeOut));
-                    DocManager.Inst.ExecuteCmd(new VibratoShiftCommand(notesVm.Part, newNote, oldVibShift));
+                    ExecuteCmd(new VibratoLengthCommand(notesVm.Part, note, 0));
+                    ExecuteCmd(new VibratoLengthCommand(notesVm.Part, newNote, oldVibLengthTicks * 100 / newNote.duration));
+                    ExecuteCmd(new VibratoFadeInCommand(notesVm.Part, newNote, oldVibFadeIn));
+                    ExecuteCmd(new VibratoFadeOutCommand(notesVm.Part, newNote, oldVibFadeOut));
+                    ExecuteCmd(new VibratoShiftCommand(notesVm.Part, newNote, oldVibShift));
                 }
             }
 
@@ -566,10 +612,11 @@ namespace OpenUtau.App.Views {
             this.mouseButton = mouseButton;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             var noteHitInfo = notesVm.HitTest.HitTestNote(point);
             if (noteHitInfo.hitBody && notesVm.Part != null) {
-                DocManager.Inst.ExecuteCmd(new RemoveNoteCommand(notesVm.Part, noteHitInfo.note));
+                ExecuteCmd(new RemoveNoteCommand(notesVm.Part, noteHitInfo.note));
             }
         }
     }
@@ -582,13 +629,14 @@ namespace OpenUtau.App.Views {
             PianoRollViewModel vm,
             IValueTip valueTip) : base(control, vm, valueTip) { }
         public override void Begin(IPointer pointer, Point point) {
-            pointer.Capture(control);
-            startPoint = point;
+            base.Begin(pointer, point);
+            if (!CanEditGesture) { Cancel(); return; }
         }
         public override void End(IPointer pointer, Point point) {
-            pointer.Capture(null);
+            Cancel();
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             double deltaX = (point.X - startPoint.X) / notesVm.TickWidth;
             double deltaY = (point.Y - startPoint.Y) / notesVm.TrackHeight;
@@ -622,14 +670,16 @@ namespace OpenUtau.App.Views {
         }
         public override void Begin(IPointer pointer, Point point) {
             base.Begin(pointer, point);
+            if (!CanEditGesture) { Cancel(); return; }
             if (!onPoint && vm.NotesViewModel.Part != null) {
                 pitchPoint = new PitchPoint(x, y, NotePresets.Default.DefaultPitchShape);
                 index++;
-                DocManager.Inst.ExecuteCmd(new AddPitchPointCommand(
+                ExecuteCmd(new AddPitchPointCommand(
                     vm.NotesViewModel.Part, note, pitchPoint, index));
             }
         }
         public override void End(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             if (note.pitch.data.Count > 2) {
                 var notesVm = vm.NotesViewModel;
                 bool removed = false;
@@ -637,14 +687,14 @@ namespace OpenUtau.App.Views {
                     var prev = note.pitch.data[index - 1];
                     var delta = notesVm.TickToneToSize(prev.X - pitchPoint.X, (prev.Y - pitchPoint.Y) * 0.1);
                     if (delta.Width * delta.Width + delta.Height * delta.Height < 64) {
-                        DocManager.Inst.ExecuteCmd(new DeletePitchPointCommand(notesVm.Part, note, index));
+                        ExecuteCmd(new DeletePitchPointCommand(notesVm.Part, note, index));
                         removed = true;
                     }
                     if (!removed) {
                         var next = note.pitch.data[index + 1];
                         delta = notesVm.TickToneToSize(next.X - pitchPoint.X, (next.Y - pitchPoint.Y) * 0.1);
                         if (delta.Width * delta.Width + delta.Height * delta.Height < 64) {
-                            DocManager.Inst.ExecuteCmd(new DeletePitchPointCommand(notesVm.Part, note, index));
+                            ExecuteCmd(new DeletePitchPointCommand(notesVm.Part, note, index));
                         }
                     }
                 }
@@ -652,6 +702,7 @@ namespace OpenUtau.App.Views {
             base.End(pointer, point);
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             int partPos = notesVm.Part?.position ?? 0;
             double x = notesVm.Project.timeAxis.TickPosToMsPos(notesVm.PointToTick(point) + partPos);
@@ -684,7 +735,7 @@ namespace OpenUtau.App.Views {
                 return;
             }
             if (notesVm.Part != null) {
-                DocManager.Inst.ExecuteCmd(new MovePitchPointCommand(notesVm.Part, pitchPoint, (float)deltaX, (float)deltaY));
+                ExecuteCmd(new MovePitchPointCommand(notesVm.Part, pitchPoint, (float)deltaX, (float)deltaY));
             }
             valueTip.UpdateValueTip($"{pitchPoint.X:0.0}ms, {pitchPoint.Y * 10:0}cent");
         }
@@ -712,6 +763,7 @@ namespace OpenUtau.App.Views {
         }
         public override void Begin(IPointer pointer, Point point) {
             base.Begin(pointer, point);
+            if (!CanEditGesture) { Cancel(); return; }
             firstPoint = point;
             lastPoint = point;
             startValue = 0;
@@ -720,6 +772,7 @@ namespace OpenUtau.App.Views {
             base.End(pointer, point);
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             if (descriptor == null) {
                 return;
             }
@@ -806,7 +859,7 @@ namespace OpenUtau.App.Views {
                     continue;
                 }
                 if (notesVm.Part != null) {
-                    DocManager.Inst.ExecuteCmd(new SetPhonemeExpressionCommand(
+                    ExecuteCmd(new SetPhonemeExpressionCommand(
                         notesVm.Project, track, notesVm.Part, hit.phoneme, key, (int)finalValue));
                 }
             }
@@ -835,7 +888,7 @@ namespace OpenUtau.App.Views {
                 y = (int)Math.Round(descriptor.min + (descriptor.max - descriptor.min) * (1 - firstPoint.Y / control.Bounds.Height));
                 startValue = y;
             }
-            DocManager.Inst.ExecuteCmd(new SetCurveCommand(notesVm.Project, notesVm.Part, notesVm.PrimaryKey, x, y, lastX, lastY));
+            ExecuteCmd(new SetCurveCommand(notesVm.Project, notesVm.Part, notesVm.PrimaryKey, x, y, lastX, lastY));
         }
     }
 
@@ -862,9 +915,11 @@ namespace OpenUtau.App.Views {
         }
         public override void Begin(IPointer pointer, Point point) {
             base.Begin(pointer, point);
+            if (!CanEditGesture) { Cancel(); return; }
             lastPoint = point;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             if (descriptor == null) {
                 return;
             }
@@ -894,7 +949,7 @@ namespace OpenUtau.App.Views {
                 if (!hit.phoneme.GetExpression(notesVm.Project, track, key).Item2) {
                     continue;
                 }
-                DocManager.Inst.ExecuteCmd(new SetPhonemeExpressionCommand(
+                ExecuteCmd(new SetPhonemeExpressionCommand(
                     notesVm.Project, track, notesVm.Part, hit.phoneme, key, null));
             }
         }
@@ -903,7 +958,7 @@ namespace OpenUtau.App.Views {
             int lastX = notesVm.PointToTick(lastPoint);
             int x = notesVm.PointToTick(point);
             if (descriptor != null && notesVm.Part != null) {
-                DocManager.Inst.ExecuteCmd(new SetCurveCommand(
+                ExecuteCmd(new SetCurveCommand(
                     notesVm.Project, notesVm.Part, notesVm.PrimaryKey,
                     x, (int)descriptor.defaultValue, lastX, (int)descriptor.defaultValue));
             }
@@ -924,8 +979,8 @@ namespace OpenUtau.App.Views {
             this.descriptor = descriptor;
         }
         public override void Begin(IPointer pointer, Point point) {
-            pointer.Capture(control);
-            startPoint = point;
+            base.Begin(pointer, point);
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             int snapUnit = notesVm.Project.resolution * 4 / notesVm.SnapDiv;
             int tick = notesVm.PointToTick(point);
@@ -937,9 +992,10 @@ namespace OpenUtau.App.Views {
             startTick = tick;
         }
         public override void End(IPointer pointer, Point point) {
-            pointer.Capture(null);
+            Cancel();
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             if (descriptor == null || notesVm.Part == null) {
                 return;
@@ -985,6 +1041,7 @@ namespace OpenUtau.App.Views {
 
         public override void Begin(IPointer pointer, Point point) {
             base.Begin(pointer, point);
+            if (!CanEditGesture) { Cancel(); return; }
 
             abbr = descriptor.abbr;
 
@@ -1004,6 +1061,7 @@ namespace OpenUtau.App.Views {
         }
 
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             if (!CanEdit(out var project, out var part, out var curve)) {
                 return;
             }
@@ -1013,7 +1071,7 @@ namespace OpenUtau.App.Views {
             var (newXs, newYs) = BuildEditedCurve(point);
 
             if (!oldXs.SequenceEqual(newXs) || !oldYs.SequenceEqual(newYs)) {
-                DocManager.Inst.ExecuteCmd(new MergedSetCurveCommand(
+                ExecuteCmd(new MergedSetCurveCommand(
                     project,
                     part,
                     abbr,
@@ -1168,6 +1226,7 @@ namespace OpenUtau.App.Views {
 
         public override void Begin(IPointer pointer, Point point) {
             base.Begin(pointer, point);
+            if (!CanEditGesture) { Cancel(); return; }
             centerY = GetSelectionCenterY();
         }
 
@@ -1270,11 +1329,12 @@ namespace OpenUtau.App.Views {
             this.note = note;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             int tick = notesVm.PointToTick(point);
             float newLength = 100f - 100f * (tick - note.position) / note.duration;
             if (newLength != note.vibrato.length && notesVm.Part != null) {
-                DocManager.Inst.ExecuteCmd(new VibratoLengthCommand(notesVm.Part, note, newLength));
+                ExecuteCmd(new VibratoLengthCommand(notesVm.Part, note, newLength));
             }
             valueTip.UpdateValueTip($"{note.vibrato.length:0}%");
         }
@@ -1292,6 +1352,7 @@ namespace OpenUtau.App.Views {
             this.note = note;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             int tick = notesVm.PointToTick(point);
             float vibratoTick = note.vibrato.length / 100f * note.duration;
@@ -1299,9 +1360,9 @@ namespace OpenUtau.App.Views {
             float newIn = (tick - startTick) / vibratoTick * 100f;
             if (newIn != note.vibrato.@in && notesVm.Part != null) {
                 if (newIn + note.vibrato.@out > 100) {
-                    DocManager.Inst.ExecuteCmd(new VibratoFadeOutCommand(notesVm.Part, note, 100 - newIn));
+                    ExecuteCmd(new VibratoFadeOutCommand(notesVm.Part, note, 100 - newIn));
                 }
-                DocManager.Inst.ExecuteCmd(new VibratoFadeInCommand(notesVm.Part, note, newIn));
+                ExecuteCmd(new VibratoFadeInCommand(notesVm.Part, note, newIn));
             }
             valueTip.UpdateValueTip($"{note.vibrato.@in:0}%");
         }
@@ -1319,15 +1380,16 @@ namespace OpenUtau.App.Views {
             this.note = note;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             int tick = notesVm.PointToTick(point);
             float vibratoTick = note.vibrato.length / 100f * note.duration;
             float newOut = (note.position + note.duration - tick) / vibratoTick * 100f;
             if (newOut != note.vibrato.@out && notesVm.Part != null) {
                 if (newOut + note.vibrato.@in > 100) {
-                    DocManager.Inst.ExecuteCmd(new VibratoFadeInCommand(notesVm.Part, note, 100 - newOut));
+                    ExecuteCmd(new VibratoFadeInCommand(notesVm.Part, note, 100 - newOut));
                 }
-                DocManager.Inst.ExecuteCmd(new VibratoFadeOutCommand(notesVm.Part, note, newOut));
+                ExecuteCmd(new VibratoFadeOutCommand(notesVm.Part, note, newOut));
             }
             valueTip.UpdateValueTip($"{note.vibrato.@out:0}%");
         }
@@ -1345,11 +1407,12 @@ namespace OpenUtau.App.Views {
             this.note = note;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             float tone = (float)notesVm.PointToToneDouble(point) - 0.5f;
             float newDepth = note.vibrato.ToneToDepth(note, tone);
             if (newDepth != note.vibrato.depth && notesVm.Part != null) {
-                DocManager.Inst.ExecuteCmd(new VibratoDepthCommand(notesVm.Part, note, newDepth));
+                ExecuteCmd(new VibratoDepthCommand(notesVm.Part, note, newDepth));
             }
             valueTip.UpdateValueTip($"{note.vibrato.depth:0.0}");
         }
@@ -1367,6 +1430,7 @@ namespace OpenUtau.App.Views {
             this.note = note;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             var project = notesVm.Project;
             int partPos = notesVm.Part?.position ?? 0;
@@ -1379,7 +1443,7 @@ namespace OpenUtau.App.Views {
             double pointerMs = project.timeAxis.TickPosToMsPos(notesVm.PointToTick(point) + notesVm.Part.position);
             float newPeriod = (float)((pointerMs - startMs) / (1 + note.vibrato.shift / 100f));
             if (newPeriod != note.vibrato.period) {
-                DocManager.Inst.ExecuteCmd(new VibratoPeriodCommand(notesVm.Part, note, newPeriod));
+                ExecuteCmd(new VibratoPeriodCommand(notesVm.Part, note, newPeriod));
             }
             valueTip.UpdateValueTip($"{note.vibrato.period:0.0}ms");
         }
@@ -1403,6 +1467,7 @@ namespace OpenUtau.App.Views {
             this.initialShift = initialShift;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             var project = notesVm.Project;
             float periodTick = project.timeAxis.TicksBetweenMsPos(note.PositionMs, note.PositionMs + note.vibrato.period);
@@ -1410,7 +1475,7 @@ namespace OpenUtau.App.Views {
             float deltaShift = deltaTick / periodTick * 100f;
             float newShift = initialShift + deltaShift;
             if (newShift != note.vibrato.shift && notesVm.Part != null) {
-                DocManager.Inst.ExecuteCmd(new VibratoShiftCommand(notesVm.Part, note, newShift));
+                ExecuteCmd(new VibratoShiftCommand(notesVm.Part, note, newShift));
             }
             valueTip.UpdateValueTip($"{note.vibrato.shift:0}%");
         }
@@ -1436,16 +1501,18 @@ namespace OpenUtau.App.Views {
         }
         public override void Begin(IPointer pointer, Point point) {
             base.Begin(pointer, point);
+            if (!CanEditGesture) { Cancel(); return; }
             startOffset = leadingNote.GetPhonemeOverride(index).offset ?? 0;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             int partPos = notesVm.Part?.position ?? 0;
             int offset = startOffset + notesVm.PointToTick(point) - notesVm.PointToTick(startPoint);
             if (notesVm.Part == null) {
                 return;
             }
-            DocManager.Inst.ExecuteCmd(new PhonemeOffsetCommand(
+            ExecuteCmd(new PhonemeOffsetCommand(
                 notesVm.Part, leadingNote, index, offset));
             var project = notesVm.Project;
             double offsetMs = project.timeAxis.TickPosToMsPos(phoneme.position + offset + partPos) - phoneme.PositionMs;
@@ -1471,6 +1538,7 @@ namespace OpenUtau.App.Views {
             this.index = index;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             var project = notesVm.Project;
             double preutter = project.timeAxis.MsBetweenTickPos(notesVm.PointToTick(point), phoneme.position);
@@ -1478,7 +1546,7 @@ namespace OpenUtau.App.Views {
             if (notesVm.Part == null) {
                 return;
             }
-            DocManager.Inst.ExecuteCmd(new PhonemePreutterCommand(notesVm.Part, leadingNote, index, phoneme, (float)preutterDelta));
+            ExecuteCmd(new PhonemePreutterCommand(notesVm.Part, leadingNote, index, phoneme, (float)preutterDelta));
             valueTip.UpdateValueTip($"{ThemeManager.GetString("pianoroll.tooltip.preutter")}: {phoneme.preutter:0.0}ms ({phoneme.preutterDelta ?? 0:+0.0;-0.0;0}ms)");
         }
     }
@@ -1499,6 +1567,7 @@ namespace OpenUtau.App.Views {
             this.index = index;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             var project = notesVm.Project;
             int partPos = notesVm.Part?.position ?? 0;
@@ -1507,7 +1576,7 @@ namespace OpenUtau.App.Views {
             if (notesVm.Part == null) {
                 return;
             }
-            DocManager.Inst.ExecuteCmd(new PhonemeAttackTimeCommand(notesVm.Part, leadingNote, index, phoneme, (float)attackTimeDelta));
+            ExecuteCmd(new PhonemeAttackTimeCommand(notesVm.Part, leadingNote, index, phoneme, (float)attackTimeDelta));
             valueTip.UpdateValueTip($"{ThemeManager.GetString("pianoroll.tooltip.attack")}: {phoneme.attackTimeDelta ?? 0:+0.0;-0.0;0}ms");
         }
     }
@@ -1528,6 +1597,7 @@ namespace OpenUtau.App.Views {
             this.index = index;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             var project = notesVm.Project;
             int partPos = notesVm.Part?.position ?? 0;
@@ -1536,7 +1606,7 @@ namespace OpenUtau.App.Views {
             if (notesVm.Part == null) {
                 return;
             }
-            DocManager.Inst.ExecuteCmd(new PhonemeReleaseTimeCommand(notesVm.Part, leadingNote, index, phoneme, (float)releaseTimeDelta));
+            ExecuteCmd(new PhonemeReleaseTimeCommand(notesVm.Part, leadingNote, index, phoneme, (float)releaseTimeDelta));
             valueTip.UpdateValueTip($"{ThemeManager.GetString("pianoroll.tooltip.release")}: {phoneme.releaseTimeDelta ?? 0:+0.0;-0.0;0}ms");
         }
     }
@@ -1559,6 +1629,7 @@ namespace OpenUtau.App.Views {
             this.index = index;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             var project = notesVm.Project;
             int partPos = notesVm.Part?.position ?? 0;
@@ -1567,7 +1638,7 @@ namespace OpenUtau.App.Views {
             if (notesVm.Part == null) {
                 return;
             }
-            DocManager.Inst.ExecuteCmd(new PhonemeOverlapCommand(notesVm.Part, leadingNote, index, phoneme, (float)overlapDelta));
+            ExecuteCmd(new PhonemeOverlapCommand(notesVm.Part, leadingNote, index, phoneme, (float)overlapDelta));
             valueTip.UpdateValueTip($"{ThemeManager.GetString("pianoroll.tooltip.overlap")}: {phoneme.overlap:0.0}ms ({phoneme.overlapDelta ?? 0:+0.0;-0.0;0}ms)");
         }
     }
@@ -1582,6 +1653,7 @@ namespace OpenUtau.App.Views {
             PianoRollViewModel vm,
             IValueTip valueTip) : base(control, vm, valueTip) { }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             var hitInfo = notesVm.HitTest.HitTestPhoneme(point);
             if (hitInfo.hit && notesVm.Part != null) {
@@ -1590,9 +1662,9 @@ namespace OpenUtau.App.Views {
                 var leadingNote = parent.Extends ?? parent;
                 int index = phoneme.index;
                 if (hitInfo.hitPosition) {
-                    DocManager.Inst.ExecuteCmd(new PhonemeOffsetCommand(notesVm.Part, leadingNote, index, 0));
+                    ExecuteCmd(new PhonemeOffsetCommand(notesVm.Part, leadingNote, index, 0));
                 } else if (hitInfo.hitPreutter) {
-                    DocManager.Inst.ExecuteCmd(new PhonemePreutterCommand(notesVm.Part, leadingNote, index, phoneme, 0));
+                    ExecuteCmd(new PhonemePreutterCommand(notesVm.Part, leadingNote, index, phoneme, 0));
                 } else if (hitInfo.hitOverlap) {
                     if (phoneme.Next == null) {
                         return;
@@ -1601,11 +1673,11 @@ namespace OpenUtau.App.Views {
                     parent = phoneme.Parent;
                     leadingNote = parent.Extends ?? parent;
                     index = phoneme.index;
-                    DocManager.Inst.ExecuteCmd(new PhonemeOverlapCommand(notesVm.Part, leadingNote, index, phoneme, 0));
+                    ExecuteCmd(new PhonemeOverlapCommand(notesVm.Part, leadingNote, index, phoneme, 0));
                 } else if (hitInfo.hitAttackTime) {
-                    DocManager.Inst.ExecuteCmd(new PhonemeAttackTimeCommand(notesVm.Part, leadingNote, index, phoneme, 0));
+                    ExecuteCmd(new PhonemeAttackTimeCommand(notesVm.Part, leadingNote, index, phoneme, 0));
                 } else if (hitInfo.hitReleaseTime) {
-                    DocManager.Inst.ExecuteCmd(new PhonemeReleaseTimeCommand(notesVm.Part, leadingNote, index, phoneme, 0));
+                    ExecuteCmd(new PhonemeReleaseTimeCommand(notesVm.Part, leadingNote, index, phoneme, 0));
                 }
                 return;
             }
@@ -1615,7 +1687,7 @@ namespace OpenUtau.App.Views {
                 if (phoneme.rawPhoneme != phoneme.phoneme && notesVm.Part != null) {
                     var note = phoneme.Parent;
                     int index = phoneme.index;
-                    DocManager.Inst.ExecuteCmd(
+                    ExecuteCmd(
                         new ChangePhonemeAliasCommand(
                             notesVm.Part, note.Extends ?? note, index, null));
                 }
@@ -1639,9 +1711,11 @@ namespace OpenUtau.App.Views {
         }
         public override void Begin(IPointer pointer, Point point) {
             base.Begin(pointer, point);
+            if (!CanEditGesture) { Cancel(); return; }
             lastPoint = point;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             int tick = vm.NotesViewModel.PointToTick(point);
             var samplePoint = vm.NotesViewModel.TickToneToPoint(
                 (int)Math.Round(tick / 5.0) * 5,
@@ -1653,7 +1727,7 @@ namespace OpenUtau.App.Views {
                 return;
             }
             double tone = vm.NotesViewModel.PointToToneDouble(point);
-            DocManager.Inst.ExecuteCmd(new SetCurveCommand(
+            ExecuteCmd(new SetCurveCommand(
                 vm.NotesViewModel.Project,
                 vm.NotesViewModel.Part,
                 Core.Format.Ustx.PITD,
@@ -1705,18 +1779,18 @@ namespace OpenUtau.App.Views {
         }
 
         public override void Begin(IPointer pointer, Point point) {
-            pointer.Capture(control);
+            base.Begin(pointer, point);
+            if (!CanEditGesture) { Cancel(); return; }
             firstPoint = point;
             endPoint = point;
             prevPoint = point;
             phase = Phase.Drawing;
             InitDefaultParams();
-            DocManager.Inst.StartUndoGroup(commandNameKey);
-            valueTip.ShowValueTip();
             ShowPreview();
         }
 
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             var notesVm = vm.NotesViewModel;
             if (notesVm.Part == null) {
                 prevPoint = point;
@@ -1737,6 +1811,7 @@ namespace OpenUtau.App.Views {
         }
 
         public override void End(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             if (!curveApplied) {
                 if (IsSignificantDrag(firstPoint, endPoint)) {
                     ApplyCurve();
@@ -1744,9 +1819,7 @@ namespace OpenUtau.App.Views {
                 curveApplied = true;
             }
             HidePreview();
-            pointer.Capture(null);
-            DocManager.Inst.EndUndoGroup();
-            valueTip.HideValueTip();
+            base.End(pointer, point);
         }
 
         /// <summary>
@@ -1754,6 +1827,7 @@ namespace OpenUtau.App.Views {
         /// Returns false if the drag was not significant (click without drag), signaling cancellation.
         /// </summary>
         public bool TransitionToAdjusting(Point point) {
+            if (!CanEditGesture) { Cancel(); return false; }
             if (!IsSignificantDrag(firstPoint, point)) {
                 // Click without drag — cancel the edit
                 Cancel(null);
@@ -1773,6 +1847,7 @@ namespace OpenUtau.App.Views {
 
         /// <summary>Called by PianoRoll to apply the curve edit.</summary>
         public void Apply() {
+            if (!CanEditGesture) return;
             ApplyCurve();
             curveApplied = true;
         }
@@ -1785,10 +1860,11 @@ namespace OpenUtau.App.Views {
 
         /// <summary>Called by PianoRoll to cancel the edit (e.g. right-click during adjusting).</summary>
         public void Cancel(IPointer? pointer) {
+            Cancel();
+        }
+        public override void Cancel() {
             HidePreview();
-            pointer?.Capture(null);
-            DocManager.Inst.EndUndoGroup();
-            valueTip.HideValueTip();
+            base.Cancel();
         }
 
         private void ShowPreview() {
@@ -1913,19 +1989,19 @@ namespace OpenUtau.App.Views {
                 for (int i = 0; i < oldXs.Length; i++) {
                     if (oldXs[i] > endTick) { newXs.Add(oldXs[i]); newYs.Add(oldYs[i]); }
                 }
-                DocManager.Inst.ExecuteCmd(new MergedSetCurveCommand(project, part, Core.Format.Ustx.PITD, oldXs, oldYs, newXs.ToArray(), newYs.ToArray()));
+                ExecuteCmd(new MergedSetCurveCommand(project, part, Core.Format.Ustx.PITD, oldXs, oldYs, newXs.ToArray(), newYs.ToArray()));
             } else {
                 // Insert start boundary anchor if there's a gap
                 if (startAnchor.HasValue) {
                     var (ax, ay) = startAnchor.Value;
-                    DocManager.Inst.ExecuteCmd(new SetCurveCommand(project, part, Core.Format.Ustx.PITD, ax, ay, ax, ay));
+                    ExecuteCmd(new SetCurveCommand(project, part, Core.Format.Ustx.PITD, ax, ay, ax, ay));
                 }
                 foreach (var (x, y) in curveSamples)
-                    DocManager.Inst.ExecuteCmd(new SetCurveCommand(project, part, Core.Format.Ustx.PITD, x, y, x, y));
+                    ExecuteCmd(new SetCurveCommand(project, part, Core.Format.Ustx.PITD, x, y, x, y));
                 // Insert end boundary anchor if there's a gap
                 if (endAnchor.HasValue) {
                     var (ax, ay) = endAnchor.Value;
-                    DocManager.Inst.ExecuteCmd(new SetCurveCommand(project, part, Core.Format.Ustx.PITD, ax, ay, ax, ay));
+                    ExecuteCmd(new SetCurveCommand(project, part, Core.Format.Ustx.PITD, ax, ay, ax, ay));
                 }
             }
         }
@@ -2014,11 +2090,11 @@ namespace OpenUtau.App.Views {
                 }
                 newXs.Add(tick);
                 newYs.Add(y);
-                DocManager.Inst.ExecuteCmd(new MergedSetCurveCommand(
+                ExecuteCmd(new MergedSetCurveCommand(
                     notesVm.Project, part, Core.Format.Ustx.PITD,
                     oldXs, oldYs, newXs.ToArray(), newYs.ToArray()));
             } else {
-                DocManager.Inst.ExecuteCmd(new SetCurveCommand(
+                ExecuteCmd(new SetCurveCommand(
                     notesVm.Project, part, Core.Format.Ustx.PITD,
                     notesVm.PointToTick(point), y,
                     notesVm.PointToTick(lastPoint), y));
@@ -2099,6 +2175,7 @@ namespace OpenUtau.App.Views {
         }
         public override void Begin(IPointer pointer, Point point) {
             base.Begin(pointer, point);
+            if (!CanEditGesture) { Cancel(); return; }
         }
         private double GetPitch(int tick, UCurve? curve = null) {
             var point = vm.NotesViewModel.TickToneToPoint(tick, 0);
@@ -2110,6 +2187,7 @@ namespace OpenUtau.App.Views {
             return pitch.Value + curve.Sample(tick);
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             if (vm.NotesViewModel.Part == null) return;
             var curve = vm.NotesViewModel.Part.curves.FirstOrDefault(c => c.abbr == Core.Format.Ustx.PITD);
             if (curve == null) return;
@@ -2126,7 +2204,7 @@ namespace OpenUtau.App.Views {
                 total -= GetPitch(baseTick - kernelRadius * 5, curve);
             }
             foreach (var (tick, pitch) in newPoints)
-                DocManager.Inst.ExecuteCmd(new SetCurveCommand(
+                ExecuteCmd(new SetCurveCommand(
                     vm.NotesViewModel.Project,
                     vm.NotesViewModel.Part,
                     Core.Format.Ustx.PITD,
@@ -2147,13 +2225,15 @@ namespace OpenUtau.App.Views {
             IValueTip valueTip) : base(control, vm, valueTip) { }
         public override void Begin(IPointer pointer, Point point) {
             base.Begin(pointer, point);
+            if (!CanEditGesture) { Cancel(); return; }
             lastPoint = point;
         }
         public override void Update(IPointer pointer, Point point) {
+            if (!CanEditGesture) { Cancel(); return; }
             if (vm.NotesViewModel.Part == null) {
                 return;
             }
-            DocManager.Inst.ExecuteCmd(new SetCurveCommand(
+            ExecuteCmd(new SetCurveCommand(
                 vm.NotesViewModel.Project,
                 vm.NotesViewModel.Part,
                 Core.Format.Ustx.PITD,
