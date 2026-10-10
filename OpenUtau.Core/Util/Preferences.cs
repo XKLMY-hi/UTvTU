@@ -18,13 +18,16 @@ namespace OpenUtau.Core.Util {
             Load();
         }
 
-        public static void Save() {
+        public static void Save() => TrySave();
+
+        public static bool TrySave() {
             try {
-                File.WriteAllText(PathManager.Inst.PrefsFilePath,
-                    JsonConvert.SerializeObject(Default, Formatting.Indented),
-                    Encoding.UTF8);
+                AtomicFile.WriteAllText(PathManager.Inst.PrefsFilePath,
+                    JsonConvert.SerializeObject(Default, Formatting.Indented));
+                return true;
             } catch (Exception e) {
                 Log.Error(e, "Failed to save prefs.");
+                return false;
             }
         }
 

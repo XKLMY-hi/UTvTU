@@ -43,7 +43,6 @@ namespace OpenUtau.Core.Format {
         /// </summary>
         public static bool Save(string filePath, UProject project) {
             string previousPath = project.FilePath;
-            string? temporaryPath = null;
             try {
                 // Ensure .ustxp extension
                 if (!filePath.EndsWith(Extension, StringComparison.OrdinalIgnoreCase)) {
@@ -53,24 +52,17 @@ namespace OpenUtau.Core.Format {
                 project.ustxpVersion = kUstxpVersion;    // Plus version for Plus-specific tracking
                 project.FilePath = filePath;
                 project.BeforeSave();
-                temporaryPath = filePath + "." + Guid.NewGuid().ToString("N") + ".tmp";
-                File.WriteAllText(temporaryPath, SerializeForSave(project), Encoding.UTF8);
-                File.Move(temporaryPath, filePath, overwrite: true);
-                project.AfterSave();
+                AtomicFile.WriteAllText(filePath, SerializeForSave(project));
                 project.Saved = true;
             } catch (Exception ex) {
                 project.FilePath = previousPath;
-                project.AfterSave();
                 var e = new MessageCustomizableException(
                     $"Failed to save ustxp: {filePath}",
                     $"<translate:errors.failed.save>: {filePath}", ex);
                 DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e));
                 return false;
             } finally {
-                if (temporaryPath != null && File.Exists(temporaryPath)) {
-                    try { File.Delete(temporaryPath); }
-                    catch (Exception ex) { Log.Warning(ex, "Failed to remove temporary project file {Path}", temporaryPath); }
-                }
+                project.AfterSave();
             }
             // A preferences failure does not undo a successfully persisted project.
             try {
@@ -86,7 +78,12 @@ namespace OpenUtau.Core.Format {
         /// <summary>
         /// Auto-save for crash recovery. Uses .ustxp extension.
         /// </summary>
-        public static void AutoSave(string filePath, UProject project) {
+        public static void AutoSave(string filePath, UProject project) => TryAutoSave(filePath, project);
+
+        /// <summary>Return success only when both the recovery file and its locator
+        /// are durable, so a failed automatic save remains eligible for retry.</summary>
+        public static bool TryAutoSave(string filePath, UProject project) {
+            string previousRecoveryPath = Preferences.Default.RecoveryPath;
             try {
                 // Always save as .ustxp for recovery
                 if (!filePath.EndsWith(Extension, StringComparison.OrdinalIgnoreCase) &&
@@ -96,12 +93,19 @@ namespace OpenUtau.Core.Format {
                 project.ustxVersion = Ustx.kUstxVersion;
                 project.ustxpVersion = kUstxpVersion;
                 project.BeforeSave();
-                File.WriteAllText(filePath, SerializeForSave(project), Encoding.UTF8);
-                project.AfterSave();
+                AtomicFile.WriteAllText(filePath, SerializeForSave(project));
                 Preferences.Default.RecoveryPath = filePath;
-                Preferences.Save();
+                if (!Preferences.TrySave()) {
+                    Preferences.Default.RecoveryPath = previousRecoveryPath;
+                    return false;
+                }
+                return true;
             } catch (Exception ex) {
                 Log.Error(ex, $"Failed to autosave: {filePath}");
+                Preferences.Default.RecoveryPath = previousRecoveryPath;
+                return false;
+            } finally {
+                project.AfterSave();
             }
         }
 

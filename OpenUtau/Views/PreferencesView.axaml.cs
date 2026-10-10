@@ -139,13 +139,19 @@ namespace OpenUtau.App.Views {
 
         /// <summary>关闭：落盘 + 重套主题/颜色池，然后退出偏好页。</summary>
         private void OnCloseClicked(object? sender, RoutedEventArgs e) {
-            ApplyPreferences();
+            if (!ApplyPreferences()) {
+                DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(new MessageCustomizableException(
+                    "Failed to save preferences.", $"<translate:errors.failed.save>: {PathManager.Inst.PrefsFilePath}",
+                    new IOException("Preferences could not be persisted."))));
+                return;
+            }
             Host?.HidePreferences();
         }
 
-        private static void ApplyPreferences() {
-            Preferences.Save();
+        private static bool ApplyPreferences() {
+            if (!Preferences.TrySave()) return false;
             App.SetTheme();
+            return true;
         }
 
         // ── 路径（音源 / 伴奏库） ─────────────────────────────────
