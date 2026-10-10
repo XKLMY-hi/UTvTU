@@ -25,7 +25,7 @@ namespace OpenUtau.Test.App {
     ///
     /// 三类断言：
     /// 1) **令牌与资源**：颜色只走 MD3 颜色池、文案键可解析、图标键可解析（原有契约，保留）；
-    /// 2) **设计几何**：分栏 432、字号阶梯、卡片 104/圆角 16、波形 132、拖放条 56（对齐设计稿）；
+    /// 2) **设计几何**：导航 232、字号阶梯、紧凑卡片、波形 32、拖放条 32（保留原版形状语言）；
     /// 3) **键盘可达**（本轮修掉的缺陷）：入口**全是 Button**（不再有 `Border.PointerPressed`）、
     ///    Tab 序 = 阅读序、Space/Enter 能激活、焦点环声明存在且不产生布局位移。
     /// </summary>
@@ -68,13 +68,13 @@ namespace OpenUtau.Test.App {
         [AvaloniaFact]
         public void WelcomeView_MatchesDesignGeometry() {
             string xaml = ReadXaml("WelcomeView.axaml");
-            // 分栏：304 左导航（与 PreferencesView 同构）+ 自适应内容
+            // 分栏：232 左导航（与 PreferencesView 同构）+ 自适应内容
             // （W50 用户裁决「这套方案肯定要重设计的，不然和主界面的MD3不搭」⇒ 旧 432 品牌栏版作废）
-            Assert.Contains("ColumnDefinitions=\"304,*\"", xaml);
+            Assert.Contains("ColumnDefinitions=\"232,*\"", xaml);
             Assert.Contains("md3.surface-container-low", xaml);
             Assert.DoesNotContain("md3.primary-container", xaml);
             // 密度字号阶梯（主界面基准：标题 28 / 空态 16 / 副标 14 / 正文 13 / 分组 12 / 次要 11.5 / 徽标 11）
-            foreach (double size in new[] { 28.0, 16.0, 14.0, 13.0, 12.0, 11.5, 11.0 }) {
+            foreach (double size in new[] { 22.0, 16.0, 13.0, 12.0, 11.5, 11.0 }) {
                 string s = size.ToString(System.Globalization.CultureInfo.InvariantCulture);
                 Assert.True(xaml.Contains($"FontSize=\"{s}\"", StringComparison.Ordinal)
                     || xaml.Contains($"<Setter Property=\"FontSize\" Value=\"{s}\"/>", StringComparison.Ordinal),
@@ -84,7 +84,7 @@ namespace OpenUtau.Test.App {
             Assert.Contains("<Setter Property=\"Height\" Value=\"56\"/>", xaml);
             Assert.Contains("<Setter Property=\"Height\" Value=\"24\"/>", xaml);
             Assert.Contains("<Setter Property=\"Height\" Value=\"28\"/>", xaml);
-            Assert.Contains("<Setter Property=\"Height\" Value=\"72\"/>", xaml);
+            Assert.Contains("<Setter Property=\"Height\" Value=\"64\"/>", xaml);
             Assert.Contains("<Setter Property=\"Width\" Value=\"240\"/>", xaml);
             Assert.Contains("<Setter Property=\"Width\" Value=\"56\"/>", xaml);
             Assert.Contains($"Height=\"{WelcomeArt.WaveBandHeight.ToString(System.Globalization.CultureInfo.InvariantCulture)}\"", xaml);
@@ -144,7 +144,7 @@ namespace OpenUtau.Test.App {
                 Assert.Equal(Stretch.Fill, wave.Stretch);
                 Assert.NotNull(wave.Fill);
                 Assert.Equal(WelcomeArt.WaveBandHeight, wave.Bounds.Height, 1);
-                Assert.Equal(0.4, wave.Opacity, 3);
+                Assert.Equal(0.2, wave.Opacity, 3);
             });
         }
 
@@ -167,7 +167,7 @@ namespace OpenUtau.Test.App {
                 Assert.Equal(6, navs.Count);   // 最近/新建/打开/模板 + 偏好设置/包管理器
                 for (int i = 0; i < navs.Count; i++) {
                     Assert.True(navs[i].IsVisible, $"{width}x{height}: 第 {i + 1} 个导航项不可见");
-                    Assert.True(navs[i].Bounds.Width > 0 && navs[i].Bounds.Height >= 40,
+                    Assert.True(navs[i].Bounds.Width > 0 && navs[i].Bounds.Height == 36,
                         $"{width}x{height}: 第 {i + 1} 个导航项被夹扁（{navs[i].Bounds.Width}x{navs[i].Bounds.Height}）");
                 }
                 var pages = view.GetVisualDescendants().OfType<Control>()
@@ -186,8 +186,8 @@ namespace OpenUtau.Test.App {
         /// <summary>
         /// W50（MD3 重建）：波形从"左栏中段弹性大图（132…200）"改成**右栏页头右侧的装饰带**。
         /// 契约：高度恒为 `WelcomeArt.WaveBandHeight`（±1 —— 常量与 XAML 不许分叉）、
-        /// `Stretch=Fill`（时基→宽 / 幅度→高）、低强调（Opacity 0.4）、几何仍是生成器产物
-        /// （资源键 `welcome-waveform`）、且落在**右栏**（x ≥ 304 左栏宽）。
+        /// `Stretch=Fill`（时基→宽 / 幅度→高）、低强调（Opacity 0.2）、几何仍是生成器产物
+        /// （资源键 `welcome-waveform`）、且落在**右栏**（x ≥ 232 左栏宽）。
         /// 三个窗口尺寸下都不被压扁：装饰带不参与弹性布局，版面让给信息。
         /// </summary>
         [AvaloniaTheory]
@@ -205,11 +205,11 @@ namespace OpenUtau.Test.App {
                 Assert.NotNull(wave.Data);                  // 资源键 welcome-waveform 必须解析到
                 Assert.Equal(WelcomeArt.WaveBandHeight, wave.Bounds.Height, 1);
                 Assert.Equal(Stretch.Fill, wave.Stretch);
-                Assert.Equal(0.4, wave.Opacity, 3);
+                Assert.Equal(0.2, wave.Opacity, 3);
                 Assert.NotNull(wave.Fill);
                 var origin = wave.TranslatePoint(new Point(0, 0), view);
                 Assert.NotNull(origin);
-                Assert.True(origin!.Value.X >= 304,
+                Assert.True(origin!.Value.X >= 232,
                     $"{width}x{height}: 波形带应落在右栏（x={origin.Value.X:F1}）");
             } finally {
                 window.Close();

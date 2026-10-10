@@ -16,12 +16,12 @@ namespace OpenUtau.App.Views {
     ///
     /// 波形是**真实一小节演唱的响度几何**（生成器产物 `Assets/WelcomeWaveform.axaml`，单一来源、可重生成）。
     /// W50 起它从"左栏中段弹性大图（132–200）"改为**右栏页头右侧的装饰带**：装饰不再与导航抢层级，
-    /// 版面全部让给信息（对齐主界面 MD3 的页头 28+14 规格）。
+    /// 版面全部让给信息（对齐主界面 MD3 的页头 22+13 规格）。
     /// 放在视图层而不是 VM：它是静态版式，不含业务状态。
     /// </summary>
     public static class WelcomeArt {
         /// <summary>页头波形装饰带的高度（XAML 里的 Height 必须与此一致；测试把两者钉在一起防漂移）。</summary>
-        public const double WaveBandHeight = 64.0;
+        public const double WaveBandHeight = 32.0;
 
         /// <summary>
         /// 欢迎页「最近」的搜索语义（**纯函数**，便于单测钉死；VM 的 ApplyWelcomeSearch 调它）：

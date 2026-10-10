@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,7 +16,7 @@ using Xunit;
 namespace OpenUtau.Test.App {
     /// <summary>
     /// 偏好设置契约（全屏视图，设计稿 6-Preferences）：
-    /// 几何（导航 304 / 内容 32 / 卡片 16）· 颜色只走颜色池 · 文案键可解析 · 分段控件与色板结构在位。
+    /// 几何（导航 232 / 内容 24 / 卡片 12）· 颜色只走颜色池 · 文案键可解析 · 分段控件与色板结构在位。
     /// </summary>
     [Collection("Theme")]   // 会初始化颜色池，与其它主题用例串行
     public class PreferencesViewTests {
@@ -33,16 +33,18 @@ namespace OpenUtau.Test.App {
         [AvaloniaFact]
         public void PreferencesView_UsesDesignGeometry() {
             string xaml = ReadXaml();
-            Assert.Contains("ColumnDefinitions=\"304,*\"", xaml);   // 左导航 304
-            Assert.Contains("Margin=\"32\"", xaml);                 // 内容内边距 32
-            Assert.Contains("FontSize=\"28\"", xaml);               // 页标题 28
-            Assert.Contains("<Setter Property=\"CornerRadius\" Value=\"16\"/>", xaml);    // 卡片 16
-            Assert.Contains("<Setter Property=\"Height\" Value=\"44\"/>", xaml);          // 导航项/选择行 44
-            Assert.Contains("<Setter Property=\"Height\" Value=\"40\"/>", xaml);          // 分段控件 40
+            Assert.Contains("ColumnDefinitions=\"232,*\"", xaml);   // 左导航 232
+            Assert.Contains("Margin=\"24\"", xaml);                 // 内容内边距 24
+            Assert.Contains("FontSize=\"22\"", xaml);               // 页标题 22
+            Assert.Contains("<Setter Property=\"CornerRadius\" Value=\"12\"/>", xaml);    // 卡片 12
+            Assert.Contains("<Setter Property=\"Height\" Value=\"36\"/>", xaml);          // 导航项/选择行 36
+            Assert.Contains("<Setter Property=\"Height\" Value=\"36\"/>", xaml);          // 分段控件 36
             // 分段控件 = 圆角胶囊容器 + 选中项 secondary-container + ✓
             Assert.Contains("Selector=\"Border.segmented\"", xaml);
-            Assert.Contains("RadioButton.chip:checked /template/ Border#PART_ChipBg", xaml);
-            Assert.Contains("md3.secondary-container", xaml);
+            Assert.Contains("WorkspaceSegmentTheme", xaml);
+            Assert.Contains("<c:AdaptiveColumns x:Name=\"PagePlayback\"", xaml);
+            Assert.DoesNotContain("RowDefinitions=\"56,*\"", xaml);
+            Assert.Contains("md3.secondary-container", File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "WorkspacePages.axaml")));
             // 色板：36 圆 + 选中打勾
             Assert.Contains("Selector=\"Button.swatch\"", xaml);
             Assert.Contains("SelectAccentCommand", xaml);

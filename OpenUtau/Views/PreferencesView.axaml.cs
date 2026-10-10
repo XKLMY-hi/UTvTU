@@ -108,6 +108,19 @@ namespace OpenUtau.App.Views {
         }
 
         private void ShowPage(string tag, Button selected) {
+            // The page heading describes the selected configuration area, rather
+            // than repeating the generic screen caption for every category.
+            PageHeading.Text = ThemeManager.GetString(tag switch {
+                "audio" => "prefs.nav.audio",
+                "playback" => "prefs.playback",
+                "library" => "prefs.nav.library",
+                "appearance" => "prefs.appearance",
+                "editor" => "prefs.editing",
+                "general" => "prefs.general",
+                "midi" => "prefs.nav.midi",
+                "about" => "prefs.nav.about",
+                _ => "prefs.caption",
+            });
             PageAudio.IsVisible = tag == "audio";
             PagePlayback.IsVisible = tag == "playback";
             PageLibrary.IsVisible = tag == "library";

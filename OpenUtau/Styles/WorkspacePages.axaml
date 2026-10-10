@@ -1,0 +1,62 @@
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:OpenUtau.App.Controls"
+        xmlns:views="clr-namespace:OpenUtau.App.Views">
+  <Styles.Resources>
+    <ControlTheme x:Key="WorkspaceSegmentTheme" TargetType="RadioButton" BasedOn="{StaticResource DawButtonTheme}">
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Grid>
+            <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"/>
+            <Border Name="PART_StateLayer" Background="{TemplateBinding Foreground}" Opacity="0"
+                    CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False"/>
+            <!-- Symmetric reserved icon space prevents the label moving when selected. -->
+            <Grid ColumnDefinitions="16,*,16" Margin="6,0">
+              <c:DawIcon Name="PART_Check" Data="{StaticResource icon-check}" Width="12" Height="12"
+                         VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="False"
+                         Fill="{TemplateBinding Foreground}"/>
+              <TextBlock Grid.Column="1" Name="PART_Label" Text="{TemplateBinding Content}"
+                         Foreground="{TemplateBinding Foreground}" FontFamily="{TemplateBinding FontFamily}"
+                         FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}"
+                         VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"
+                         TextTrimming="CharacterEllipsis" UseLayoutRounding="False"/>
+            </Grid>
+            <Border Name="PART_FocusRing" BorderThickness="1" BorderBrush="{DynamicResource md3.primary}"
+                    CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False" Opacity="0"/>
+          </Grid>
+        </ControlTemplate>
+      </Setter>
+      <Style Selector="^:checked">
+        <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+        <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+      </Style>
+      <Style Selector="^:checked /template/ c|DawIcon#PART_Check">
+        <Setter Property="IsVisible" Value="True"/>
+      </Style>
+    </ControlTheme>
+  </Styles.Resources>
+  <!-- Scoped to the two workspace pages; other dialogs keep their own density. -->
+  <Style Selector="views|WelcomeView Button.navItem,views|PreferencesView Button.navItem">
+    <Setter Property="Theme" Value="{StaticResource DawButtonTheme}"/>
+    <Setter Property="Height" Value="36"/>
+    <Setter Property="MinHeight" Value="36"/>
+    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="Padding" Value="12,0"/>
+    <Setter Property="CornerRadius" Value="999"/>
+  </Style>
+  <Style Selector="views|WelcomeView Button.pageAction">
+    <Setter Property="Theme" Value="{StaticResource DawTextButtonTheme}"/>
+    <Setter Property="Height" Value="36"/>
+    <Setter Property="MinHeight" Value="36"/>
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="Padding" Value="16,0"/>
+    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="CornerRadius" Value="999"/>
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+  </Style>
+  <Style Selector="views|WelcomeView Button.pageAction.emphasized">
+    <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
+  </Style>
+</Styles>

@@ -19,7 +19,8 @@
       <Setter Property="Template">
         <ControlTemplate>
           <Grid>
-            <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"/>
+            <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"
+                    BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"/>
             <Border Name="PART_StateLayer" Background="{TemplateBinding Foreground}" Opacity="0"
                     CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False"/>
             <ContentPresenter Name="PART_ContentPresenter" Margin="{TemplateBinding Padding}"
@@ -51,7 +52,8 @@
       <Setter Property="Template">
         <ControlTemplate>
           <Grid>
-            <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"/>
+            <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"
+                    BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"/>
             <Border Name="PART_StateLayer" Background="{TemplateBinding Foreground}" Opacity="0"
                     CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False"/>
             <!-- Keep fractional text origins: an odd-height line in an even-height
