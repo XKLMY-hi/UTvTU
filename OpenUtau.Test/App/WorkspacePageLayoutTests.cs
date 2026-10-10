@@ -41,6 +41,33 @@ namespace OpenUtau.Test.App {
         }
 
         [AvaloniaTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void SelectedPageTitlesFollowResourceChanges_WithoutRecreatingTheView(bool preferences) {
+            UserControl view = preferences ? new PreferencesView() : new WelcomeView();
+            var window = new Window { Width = 800, Height = 660, Content = view };
+            string key = preferences ? "prefs.playback" : "welcome.new";
+            string heading = preferences ? "PageHeading" : "PageTitle";
+            try {
+                window.Resources[key] = "First title";
+                window.Show(); Settle(window);
+                Activate(view.FindControl<Button>(preferences ? "NavPlayback" : "NavNew")!); Settle(window);
+                var title = view.FindControl<TextBlock>(heading)!;
+                Assert.Equal("First title", title.Text);
+                window.Resources[key] = "Updated title"; Settle(window);
+                Assert.Equal("Updated title", title.Text);
+                window.Content = null;
+                window.Resources[key] = "After remount";
+                window.Content = view; Settle(window);
+                Assert.Equal("After remount", title.Text);
+                if (!preferences) {
+                    window.Resources["welcome.new.description"] = "Updated subtitle"; Settle(window);
+                    Assert.Equal("Updated subtitle", view.FindControl<TextBlock>("PageSubtitle")!.Text);
+                }
+            } finally { window.Close(); if (view is PreferencesView settings) settings.ReleaseSession(); }
+        }
+
+        [AvaloniaTheory]
         [InlineData(800, 660)]
         [InlineData(1440, 900)]
         public void Preferences_CategoriesRemainReadable_AndReflowWithoutRecreatingControls(double width, double height) {

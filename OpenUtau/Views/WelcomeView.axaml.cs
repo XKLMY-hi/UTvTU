@@ -2,6 +2,7 @@ using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Markup.Xaml.MarkupExtensions;
 using OpenUtau.App.ViewModels;
 
 namespace OpenUtau.App.Views {
@@ -52,12 +53,14 @@ namespace OpenUtau.App.Views {
             SetSelected(NavOpen, index == 2);
             SetSelected(NavTemplates, index == 3);
 
-            (PageTitle.Text, PageSubtitle.Text) = index switch {
-                0 => (Str("welcome.recent"), Str("welcome.greeting.sub")),
-                1 => (Str("welcome.new"), Str("welcome.new.description")),
-                2 => (Str("welcome.open"), Str("welcome.open.description")),
-                _ => (Str("welcome.template"), Str("welcome.template.description")),
+            var (titleKey, subtitleKey) = index switch {
+                0 => ("welcome.recent", "welcome.greeting.sub"),
+                1 => ("welcome.new", "welcome.new.description"),
+                2 => ("welcome.open", "welcome.open.description"),
+                _ => ("welcome.template", "welcome.template.description"),
             };
+            PageTitle[!TextBlock.TextProperty] = new DynamicResourceExtension(titleKey);
+            PageSubtitle[!TextBlock.TextProperty] = new DynamicResourceExtension(subtitleKey);
             if (index == 0) {
                 SearchBox.Focus();   // 进「最近」直接可搜（工具习惯）
             }
@@ -73,8 +76,6 @@ namespace OpenUtau.App.Views {
                 button.Classes.Remove("selected");
             }
         }
-
-        private static string Str(string key) => ThemeManager.GetString(key);
 
         // ── 工程动作 ──
         void OnNewProject(object? sender, RoutedEventArgs args) => Host?.WelcomeNewProject();

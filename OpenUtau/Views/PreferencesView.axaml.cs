@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Platform.Storage;
 using OpenUtau.App.Controls;
 using OpenUtau.App.ViewModels;
@@ -110,7 +111,7 @@ namespace OpenUtau.App.Views {
         private void ShowPage(string tag, Button selected) {
             // The page heading describes the selected configuration area, rather
             // than repeating the generic screen caption for every category.
-            PageHeading.Text = ThemeManager.GetString(tag switch {
+            PageHeading[!TextBlock.TextProperty] = new DynamicResourceExtension(tag switch {
                 "audio" => "prefs.nav.audio",
                 "playback" => "prefs.playback",
                 "library" => "prefs.nav.library",
