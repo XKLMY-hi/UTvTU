@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Disposables;
 using Avalonia.Media;
 using OpenUtau.Core;
 using OpenUtau.Core.Format;
@@ -12,9 +13,19 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using SharpCompress;
 using OpenUtau.Api;
+using OpenUtau.App.Editing;
 
 namespace OpenUtau.App.ViewModels {
-    public class NotePropertiesViewModel : ViewModelBase, ICmdSubscriber {
+    public class NotePropertiesViewModel : ViewModelBase, ICmdSubscriber, IDisposable {
+        readonly CompositeDisposable subscriptions = new();
+        volatile bool disposed;
+        NotePropertyEditSession? activeInput;
+        readonly OpenUtau.App.UiThreadAffinity affinity = new();
+        int selectionVersion;
+        int refreshDepth;
+        internal bool IsRefreshingInputs => refreshDepth > 0;
+        readonly HashSet<NotePropertyEditSession> inputSessions = new();
+        public bool IsDisposed => disposed;
         public string Title { get => ThemeManager.GetString("noteproperty") + " (" + selectedNotes.Count + " notes)"; }
         [Reactive] public string Lyric { get; set; } = string.Empty;
         [Reactive] public string Tone { get; set; } = string.Empty;
@@ -87,86 +98,116 @@ namespace OpenUtau.App.ViewModels {
         private static bool AllowNoteEdit { get => PanelControlPressed && !NoteLoading; }
 
         public NotePropertiesViewModel() {
-            PortamentoPresets = new ObservableCollection<NotePresets.PortamentoPreset>(NotePresets.Default.PortamentoPresets);
-            VibratoPresets = new ObservableCollection<NotePresets.VibratoPreset>(NotePresets.Default.VibratoPresets);
+            try {
+                PortamentoPresets = new ObservableCollection<NotePresets.PortamentoPreset>(NotePresets.Default.PortamentoPresets);
+                VibratoPresets = new ObservableCollection<NotePresets.VibratoPreset>(NotePresets.Default.VibratoPresets);
 
-            this.WhenAnyValue(vm => vm.ApplyPortamentoPreset)
-                .WhereNotNull()
-                .Subscribe(portamentoPreset => {
-                    if (portamentoPreset != null) {
-                        PortamentoLength = portamentoPreset.PortamentoLength;
-                        PortamentoStart = portamentoPreset.PortamentoStart;
+                this.WhenAnyValue(vm => vm.ApplyPortamentoPreset)
+                    .WhereNotNull()
+                    .Subscribe(portamentoPreset => {
+                        if (disposed) return;
+                        if (portamentoPreset != null) {
+                            PortamentoLength = portamentoPreset.PortamentoLength;
+                            PortamentoStart = portamentoPreset.PortamentoStart;
 
-                        DocManager.Inst.StartUndoGroup("command.pitch.editpoint");
-                        PanelControlPressed = true;
-                        SetNoteParams("PortamentoLength", portamentoPreset.PortamentoLength);
-                        SetNoteParams("PortamentoStart", portamentoPreset.PortamentoStart);
-                        PanelControlPressed = false;
-                        DocManager.Inst.EndUndoGroup();
-                    }
+                            DocManager.Inst.StartUndoGroup("command.pitch.editpoint");
+                            PanelControlPressed = true;
+                            SetNoteParams("PortamentoLength", portamentoPreset.PortamentoLength);
+                            SetNoteParams("PortamentoStart", portamentoPreset.PortamentoStart);
+                            PanelControlPressed = false;
+                            DocManager.Inst.EndUndoGroup();
+                        }
+                    }).DisposeWith(subscriptions);
+                this.WhenAnyValue(vm => vm.ApplyVibratoPreset)
+                    .WhereNotNull()
+                    .Subscribe(vibratoPreset => {
+                        if (disposed) return;
+                        if (vibratoPreset != null) {
+                            DocManager.Inst.StartUndoGroup("command.vibrato.edit");
+                            PanelControlPressed = true;
+                            SetNoteParams("VibratoLength", Math.Max(0, Math.Min(100, vibratoPreset.VibratoLength)));
+                            SetNoteParams("VibratoPeriod", Math.Max(5, Math.Min(500, vibratoPreset.VibratoPeriod)));
+                            SetNoteParams("VibratoDepth", Math.Max(5, Math.Min(200, vibratoPreset.VibratoDepth)));
+                            SetNoteParams("VibratoIn", Math.Max(0, Math.Min(100, vibratoPreset.VibratoIn)));
+                            SetNoteParams("VibratoOut", Math.Max(0, Math.Min(100, vibratoPreset.VibratoOut)));
+                            SetNoteParams("VibratoShift", Math.Max(0, Math.Min(100, vibratoPreset.VibratoShift)));
+                            SetNoteParams("VibratoDrift", Math.Max(-100, Math.Min(100, vibratoPreset.VibratoDrift)));
+                            SetNoteParams("VibratoVolLink", Math.Max(0, Math.Min(100, vibratoPreset.VibratoVolLink)));
+                            PanelControlPressed = false;
+                            DocManager.Inst.EndUndoGroup();
+                        }
+                    }).DisposeWith(subscriptions);
+                this.WhenAnyValue(vm => vm.PitchCurveShape)
+                    .WhereNotNull()
+                    .Subscribe(shape => {
+                        if (disposed) return;
+                        if (shape >= 0) {
+                            DocManager.Inst.StartUndoGroup("command.pitch.editpoint");
+                            PanelControlPressed = true;
+                            SetNoteParams("PitchCurveShape", shape);
+                            PanelControlPressed = false;
+                            DocManager.Inst.EndUndoGroup();
+                        }
+                    }).DisposeWith(subscriptions);
+                SelectPhonemizerCommand = ReactiveCommand.Create<string?>(name => {
+                    if (disposed) return;
+                    DocManager.Inst.StartUndoGroup("command.property.edit");
+                    PanelControlPressed = true;
+                    SetNoteParams("PhonemizerOverride", name);
+                    PanelControlPressed = false;
+                    DocManager.Inst.EndUndoGroup();
                 });
-            this.WhenAnyValue(vm => vm.ApplyVibratoPreset)
-                .WhereNotNull()
-                .Subscribe(vibratoPreset => {
-                    if (vibratoPreset != null) {
-                        DocManager.Inst.StartUndoGroup("command.vibrato.edit");
-                        PanelControlPressed = true;
-                        SetNoteParams("VibratoLength", Math.Max(0, Math.Min(100, vibratoPreset.VibratoLength)));
-                        SetNoteParams("VibratoPeriod", Math.Max(5, Math.Min(500, vibratoPreset.VibratoPeriod)));
-                        SetNoteParams("VibratoDepth", Math.Max(5, Math.Min(200, vibratoPreset.VibratoDepth)));
-                        SetNoteParams("VibratoIn", Math.Max(0, Math.Min(100, vibratoPreset.VibratoIn)));
-                        SetNoteParams("VibratoOut", Math.Max(0, Math.Min(100, vibratoPreset.VibratoOut)));
-                        SetNoteParams("VibratoShift", Math.Max(0, Math.Min(100, vibratoPreset.VibratoShift)));
-                        SetNoteParams("VibratoDrift", Math.Max(-100, Math.Min(100, vibratoPreset.VibratoDrift)));
-                        SetNoteParams("VibratoVolLink", Math.Max(0, Math.Min(100, vibratoPreset.VibratoVolLink)));
-                        PanelControlPressed = false;
-                        DocManager.Inst.EndUndoGroup();
-                    }
-                });
-            this.WhenAnyValue(vm => vm.PitchCurveShape)
-                .WhereNotNull()
-                .Subscribe(shape => {
-                    if (shape >= 0) {
-                        DocManager.Inst.StartUndoGroup("command.pitch.editpoint");
-                        PanelControlPressed = true;
-                        SetNoteParams("PitchCurveShape", shape);
-                        PanelControlPressed = false;
-                        DocManager.Inst.EndUndoGroup();
-                    }
-                });
-            SelectPhonemizerCommand = ReactiveCommand.Create<string?>(name => {
-                DocManager.Inst.StartUndoGroup("command.property.edit");
-                PanelControlPressed = true;
-                SetNoteParams("PhonemizerOverride", name);
-                PanelControlPressed = false;
-                DocManager.Inst.EndUndoGroup();
-            });
+                SelectPhonemizerCommand.DisposeWith(subscriptions);
 
-            MessageBus.Current.Listen<NotesSelectionEvent>()
-                .Subscribe(e => {
-                    if (PanelControlPressed) {
-                        PanelControlPressed = false;
-                        DocManager.Inst.EndUndoGroup();
-                    }
+                MessageBus.Current.Listen<NotesSelectionEvent>()
+                    .Subscribe(e => affinity.Post(() => {
+                        if (disposed) return;
+                        CancelInputEdits();
+                        selectionVersion++;
+                        if (PanelControlPressed) {
+                            PanelControlPressed = false;
+                            DocManager.Inst.EndUndoGroup();
+                        }
+                    bool previousLoading = NoteLoading;
                     NoteLoading = true;
+                    try {
+                        selectedNotes.Clear();
+                        selectedNotes.UnionWith(e.selectedNotes);
+                        selectedNotes.UnionWith(e.tempSelectedNotes);
+                        OnSelectNotes();
+                    } finally { NoteLoading = previousLoading; }
+                    })).DisposeWith(subscriptions);
 
-                    selectedNotes.Clear();
-                    selectedNotes.UnionWith(e.selectedNotes);
-                    selectedNotes.UnionWith(e.tempSelectedNotes);
-                    OnSelectNotes();
+                DocManager.Inst.AddSubscriber(this);
+            } catch { Dispose(); throw; }
+        }
 
-                    NoteLoading = false;
-                });
-
-            DocManager.Inst.AddSubscriber(this);
+        public void Dispose() {
+            if (disposed) return;
+            CancelInputEdits();
+            disposed = true;
+            subscriptions.Dispose();
+            DocManager.Inst.RemoveSubscriber(this);
+            foreach (var expression in Expressions) expression.Dispose();
+            Expressions.Clear();
+            selectedNotes.Clear();
+            Part = null;
         }
 
         // note -> panel
-        private void OnSelectNotes() {
+        private void OnSelectNotes(bool resetSelectionMetadata = true) {
+            refreshDepth++;
+            try { OnSelectNotesCore(resetSelectionMetadata); }
+            finally { refreshDepth--; }
+        }
+
+        private void OnSelectNotesCore(bool resetSelectionMetadata) {
             this.RaisePropertyChanged(nameof(Title));
-            ApplyPortamentoPreset = null;
-            ApplyVibratoPreset = null;
-            PitchCurveShape = -1;
+            if (resetSelectionMetadata) {
+                ApplyPortamentoPreset = null;
+                ApplyVibratoPreset = null;
+                PitchCurveShape = -1;
+            }
 
             if (selectedNotes.Count > 0) {
                 IsNoteSelected = true;
@@ -217,16 +258,25 @@ namespace OpenUtau.App.ViewModels {
                 VibratoDrift = NotePresets.Default.DefaultVibrato.VibratoDrift;
                 VibratoVolLink = NotePresets.Default.DefaultVibrato.VibratoVolLink;
             }
-            AutoVibratoNoteLength = NotePresets.Default.AutoVibratoNoteDuration;
-            AutoVibratoToggle = NotePresets.Default.AutoVibratoToggle;
+            if (resetSelectionMetadata) {
+                AutoVibratoNoteLength = NotePresets.Default.AutoVibratoNoteDuration;
+                AutoVibratoToggle = NotePresets.Default.AutoVibratoToggle;
+            }
 
             AttachExpressions();
         }
 
         public void LoadPart(UPart? part) {
+            if (disposed) return;
+            CancelInputEdits();
+            selectionVersion++;
+            foreach (var expression in Expressions) expression.Dispose();
             Expressions.Clear();
-            if (part != null && part is UVoicePart) {
+            if (part is UVoicePart && DocManager.Inst.Project.parts.Contains(part) &&
+                part.trackNo >= 0 && part.trackNo < DocManager.Inst.Project.tracks.Count) {
                 this.Part = part as UVoicePart;
+                selectedNotes.RemoveWhere(note => !this.Part!.notes.Contains(note));
+                IsNoteSelected = selectedNotes.Count > 0;
                 var track = DocManager.Inst.Project.tracks[part.trackNo];
                 foreach (var descriptor in track.GetSupportedExps(DocManager.Inst.Project)) {
                     if (descriptor.type != UExpressionType.Curve) {
@@ -244,6 +294,8 @@ namespace OpenUtau.App.ViewModels {
                 RefreshPhonemizers();
             } else {
                 this.Part = null;
+                selectedNotes.Clear();
+                IsNoteSelected = false;
             }
         }
 
@@ -258,6 +310,7 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public void RefreshPhonemizers() {
+            if (disposed) return;
             var items = new List<MenuItemViewModel>();
 
             string defaultHeader = "Default";
@@ -353,6 +406,25 @@ namespace OpenUtau.App.ViewModels {
 
         #region ICmdSubscriber
         public void OnNext(UCommand cmd, bool isUndo) {
+            if (disposed) return;
+            affinity.Post(() => {
+                if (disposed) return;
+                refreshDepth++;
+                try { OnNextCore(cmd, isUndo); }
+                finally { refreshDepth--; }
+            });
+        }
+
+        void OnNextCore(UCommand cmd, bool isUndo) {
+            if (cmd is LoadPartNotification notification) {
+                LoadPart(notification.part);
+                return;
+            }
+            if (cmd is LoadProjectNotification) {
+                selectedNotes.Clear();
+                LoadPart(null);
+                return;
+            }
             var note = selectedNotes.FirstOrDefault();
             if (cmd is TrackChangePhonemizerCommand) {
                 RefreshPhonemizers();
@@ -458,11 +530,12 @@ namespace OpenUtau.App.ViewModels {
 
         // panel -> note
         public void SetNoteParams(string tag, object? obj) {
-            if (AllowNoteEdit && Part != null && selectedNotes.Count > 0) {
+            if (disposed) return;
+            if ((AllowNoteEdit || activeInput?.IsCurrent == true) && Part != null && selectedNotes.Count > 0) {
                 if (tag == "Lyric") {
                     if (obj is string s && !string.IsNullOrEmpty(s)) {
                         foreach (UNote note in selectedNotes) {
-                            DocManager.Inst.ExecuteCmd(new ChangeNoteLyricCommand(Part, note, s));
+                            ExecuteEditCommand(new ChangeNoteLyricCommand(Part, note, s));
                         }
                     } else {
                         var note = selectedNotes.FirstOrDefault();
@@ -475,13 +548,13 @@ namespace OpenUtau.App.ViewModels {
                         newOverride = null;
                     }
                     
-                    DocManager.Inst.StartUndoGroup("command.property.edit");
+                    if (activeInput == null) DocManager.Inst.StartUndoGroup("command.property.edit");
                     foreach (UNote note in selectedNotes) {
                         if (note.PhonemizerOverride != newOverride) {
-                            DocManager.Inst.ExecuteCmd(new ChangeNotePhonemizerCommand(Part, note, newOverride)); 
+                            ExecuteEditCommand(new ChangeNotePhonemizerCommand(Part, note, newOverride));
                         }
                     }
-                    DocManager.Inst.EndUndoGroup();
+                    if (activeInput == null) DocManager.Inst.EndUndoGroup();
                 } else if (tag == "Tone") {
                     try {
                         if (obj is string s && !string.IsNullOrEmpty(s)) {
@@ -489,11 +562,11 @@ namespace OpenUtau.App.ViewModels {
 
                             if ((s.StartsWith("+") || s.StartsWith("-")) && int.TryParse(s, out int i) && i != 0) {
                                 foreach (UNote note in selectedNotes) {
-                                    DocManager.Inst.ExecuteCmd(new MoveNoteCommand(Part, note, 0, i));
+                                    ExecuteEditCommand(new MoveNoteCommand(Part, note, 0, i));
                                 }
                             } else if (tone >= 0) {
                                 foreach (UNote note in selectedNotes) {
-                                    DocManager.Inst.ExecuteCmd(new MoveNoteCommand(Part, note, 0, tone - note.tone));
+                                    ExecuteEditCommand(new MoveNoteCommand(Part, note, 0, tone - note.tone));
                                 }
                             } else {
                                 throw new FormatException();
@@ -514,7 +587,7 @@ namespace OpenUtau.App.ViewModels {
                         value = 0;
                     }
                     foreach (UNote note in selectedNotes) {
-                        DocManager.Inst.ExecuteCmd(new ChangeNoteTuningCommand(Part, note, value));
+                        ExecuteEditCommand(new ChangeNoteTuningCommand(Part, note, value));
                     }
                 } else if (tag == "PortamentoLength" || tag == "PortamentoLength_TextBox") {
                     PortamentoLength = ParseValue(obj, tag, 2, 320, NotePresets.Default.DefaultPortamento.PortamentoLength);
@@ -532,7 +605,7 @@ namespace OpenUtau.App.ViewModels {
                             var newX = firstPoint.X + (pitchPoint.X - firstPoint.X) * scale;
                             var deltaX = newX - pitchPoint.X;
                             if (deltaX != 0) {
-                                DocManager.Inst.ExecuteCmd(new MovePitchPointCommand(Part, pitchPoint, deltaX, 0));
+                                ExecuteEditCommand(new MovePitchPointCommand(Part, pitchPoint, deltaX, 0));
                             }
                         }
                     }
@@ -544,13 +617,13 @@ namespace OpenUtau.App.ViewModels {
                     if (deltaX != 0) {
                         foreach (var note in selectedNotes) {
                             foreach (var pitchPoint in note.pitch.data) {
-                                DocManager.Inst.ExecuteCmd(new MovePitchPointCommand(Part, pitchPoint, deltaX, 0));
+                                ExecuteEditCommand(new MovePitchPointCommand(Part, pitchPoint, deltaX, 0));
                             }
                         }
                     }
                 } else if (tag == "PitchCurveShape") {
                     if (obj != null && (obj is int value || int.TryParse(obj.ToString(), out value)) && Enum.IsDefined(typeof(PitchPointShape), value)) {
-                        DocManager.Inst.ExecuteCmd(new SetPitchPointShapeCommand(Part, selectedNotes, (PitchPointShape)value));
+                        ExecuteEditCommand(new SetPitchPointShapeCommand(Part, selectedNotes, (PitchPointShape)value));
                     }
                 } else if (tag == "VibratoLength") {
                     float value;
@@ -563,10 +636,10 @@ namespace OpenUtau.App.ViewModels {
                     foreach (UNote note in selectedNotes) {
                         if (note != first && AutoVibratoToggle && note.duration < AutoVibratoNoteLength) {
                             if (note.vibrato.length != 0) {
-                                DocManager.Inst.ExecuteCmd(new VibratoLengthCommand(Part, note, 0));
+                                ExecuteEditCommand(new VibratoLengthCommand(Part, note, 0));
                             }
                         } else {
-                            DocManager.Inst.ExecuteCmd(new VibratoLengthCommand(Part, note, value));
+                            ExecuteEditCommand(new VibratoLengthCommand(Part, note, value));
                         }
                     }
                     if (first.vibrato.length > 0) {
@@ -582,7 +655,7 @@ namespace OpenUtau.App.ViewModels {
                         value = NotePresets.Default.DefaultVibrato.VibratoPeriod;
                     }
                     foreach (UNote note in selectedNotes) {
-                        DocManager.Inst.ExecuteCmd(new VibratoPeriodCommand(Part, note, value));
+                        ExecuteEditCommand(new VibratoPeriodCommand(Part, note, value));
                     }
                 } else if (tag == "VibratoDepth") {
                     float value;
@@ -592,7 +665,7 @@ namespace OpenUtau.App.ViewModels {
                         value = NotePresets.Default.DefaultVibrato.VibratoDepth;
                     }
                     foreach (UNote note in selectedNotes) {
-                        DocManager.Inst.ExecuteCmd(new VibratoDepthCommand(Part, note, value));
+                        ExecuteEditCommand(new VibratoDepthCommand(Part, note, value));
                     }
                 } else if (tag == "VibratoIn") {
                     float value;
@@ -602,7 +675,7 @@ namespace OpenUtau.App.ViewModels {
                         value = NotePresets.Default.DefaultVibrato.VibratoIn;
                     }
                     foreach (UNote note in selectedNotes) {
-                        DocManager.Inst.ExecuteCmd(new VibratoFadeInCommand(Part, note, value));
+                        ExecuteEditCommand(new VibratoFadeInCommand(Part, note, value));
                     }
                 } else if (tag == "VibratoOut") {
                     float value;
@@ -612,7 +685,7 @@ namespace OpenUtau.App.ViewModels {
                         value = NotePresets.Default.DefaultVibrato.VibratoOut;
                     }
                     foreach (UNote note in selectedNotes) {
-                        DocManager.Inst.ExecuteCmd(new VibratoFadeOutCommand(Part, note, value));
+                        ExecuteEditCommand(new VibratoFadeOutCommand(Part, note, value));
                     }
                 } else if (tag == "VibratoShift") {
                     float value;
@@ -622,7 +695,7 @@ namespace OpenUtau.App.ViewModels {
                         value = NotePresets.Default.DefaultVibrato.VibratoShift;
                     }
                     foreach (UNote note in selectedNotes) {
-                        DocManager.Inst.ExecuteCmd(new VibratoShiftCommand(Part, note, value));
+                        ExecuteEditCommand(new VibratoShiftCommand(Part, note, value));
                     }
                 } else if (tag == "VibratoDrift") {
                     float value;
@@ -632,7 +705,7 @@ namespace OpenUtau.App.ViewModels {
                         value = NotePresets.Default.DefaultVibrato.VibratoDrift;
                     }
                     foreach (UNote note in selectedNotes) {
-                        DocManager.Inst.ExecuteCmd(new VibratoDriftCommand(Part, note, value));
+                        ExecuteEditCommand(new VibratoDriftCommand(Part, note, value));
                     }
                 } else if (tag == "VibratoVolLink") {
                     float value;
@@ -642,12 +715,13 @@ namespace OpenUtau.App.ViewModels {
                         value = NotePresets.Default.DefaultVibrato.VibratoVolLink;
                     }
                     foreach (UNote note in selectedNotes) {
-                        DocManager.Inst.ExecuteCmd(new VibratoVolumeLinkCommand(Part, note, value));
+                        ExecuteEditCommand(new VibratoVolumeLinkCommand(Part, note, value));
                     }
                 }
             }
         }
         public void SetVibratoEnable() {
+            if (disposed) return;
             if (Part != null && selectedNotes.Count > 0) {
                 DocManager.Inst.StartUndoGroup("command.vibrato.edit");
                 bool enable = VibratoEnable;
@@ -656,16 +730,16 @@ namespace OpenUtau.App.ViewModels {
                 foreach (UNote note in selectedNotes) {
                     if (enable) {
                         if (note.vibrato.length != 0) {
-                            DocManager.Inst.ExecuteCmd(new VibratoLengthCommand(Part, note, 0));
+                            ExecuteEditCommand(new VibratoLengthCommand(Part, note, 0));
                         }
                     } else {
                         if (note != first && AutoVibratoToggle && note.duration < AutoVibratoNoteLength) {
                             if (note.vibrato.length != 0) {
-                                DocManager.Inst.ExecuteCmd(new VibratoLengthCommand(Part, note, 0));
+                                ExecuteEditCommand(new VibratoLengthCommand(Part, note, 0));
                             }
                         } else {
                             if (note.vibrato.length != NotePresets.Default.DefaultVibrato.VibratoLength) {
-                                DocManager.Inst.ExecuteCmd(new VibratoLengthCommand(Part, note, NotePresets.Default.DefaultVibrato.VibratoLength));
+                                ExecuteEditCommand(new VibratoLengthCommand(Part, note, NotePresets.Default.DefaultVibrato.VibratoLength));
                             }
                         }
                     }
@@ -673,7 +747,82 @@ namespace OpenUtau.App.ViewModels {
                 DocManager.Inst.EndUndoGroup();
             }
         }
+        internal NotePropertyEditSession BeginInputEdit() => new(this);
+
+        internal void CancelInputEdits() {
+            foreach (var session in inputSessions.ToArray()) session.Dispose();
+        }
+
+        void ExecuteEditCommand(UCommand command) {
+            if (activeInput != null) activeInput.Execute(command);
+            else DocManager.Inst.ExecuteCmd(command);
+        }
+
+        internal sealed class NotePropertyEditSession : IDisposable {
+            readonly NotePropertiesViewModel owner;
+            readonly UProject project;
+            readonly UVoicePart? part;
+            readonly UTrack? track;
+            readonly UNote[] notes;
+            readonly int selectionVersion;
+            readonly DocumentEditGesture gesture;
+
+            internal NotePropertyEditSession(NotePropertiesViewModel owner) {
+                this.owner = owner;
+                project = DocManager.Inst.Project;
+                part = owner.Part;
+                track = part != null && part.trackNo >= 0 && part.trackNo < project.tracks.Count
+                    ? project.tracks[part.trackNo] : null;
+                notes = owner.selectedNotes.ToArray();
+                selectionVersion = owner.selectionVersion;
+                gesture = new DocumentEditGesture(project, "command.property.edit");
+                owner.inputSessions.Add(this);
+            }
+
+            internal bool IsCurrent => gesture.CanExecute && !owner.disposed && part != null && track != null &&
+                ReferenceEquals(part, owner.Part) && selectionVersion == owner.selectionVersion &&
+                project.parts.Contains(part) && part.trackNo >= 0 && part.trackNo < project.tracks.Count &&
+                ReferenceEquals(project.tracks[part.trackNo], track) && notes.Length > 0 &&
+                owner.selectedNotes.SetEquals(notes) && notes.All(part.notes.Contains);
+
+            internal bool Execute(UCommand command) => IsCurrent && gesture.Execute(command);
+
+            internal bool ApplyExpression(NotePropertyExpViewModel expression, object? input) {
+                if (!IsCurrent || expression.IsDisposed || !ReferenceEquals(expression.parentViewmodel, owner) ||
+                    !expression.TryParseNumerical(input, out var value)) return false;
+                var targetTrack = track!;
+                if (targetTrack.TryGetExpDescriptor(project, expression.abbr, out var descriptor) && descriptor.CustomDefaultValue == value)
+                    value = null;
+                if (notes.All(note => {
+                    var oldValues = note.GetExpressionNoteHas(project, targetTrack, expression.abbr);
+                    return oldValues.Length == 0 ? value == null : oldValues.All(old => old == value);
+                }))
+                    return true;
+                return Execute(new SetNotesSameExpressionCommand(project, targetTrack, part!, notes, expression.abbr, value));
+            }
+
+            internal bool ApplyParameter(string tag, object? input) {
+                if (!IsCurrent) return false;
+                if (tag != "Lyric" && tag != "Tone" && tag != "PhonemizerOverride" && input != null &&
+                    !string.IsNullOrWhiteSpace(input.ToString()) &&
+                    (!float.TryParse(input.ToString(), out var number) || !float.IsFinite(number))) return false;
+                var previous = owner.activeInput;
+                owner.activeInput = this;
+                try { owner.SetNoteParams(tag, input); }
+                finally { owner.activeInput = previous; }
+                return true;
+            }
+
+            public void Dispose() {
+                gesture.Dispose();
+                owner.inputSessions.Remove(this);
+            }
+        }
+
+        internal void RefreshInputs() { if (!disposed) OnSelectNotes(resetSelectionMetadata: false); }
+
         public void SetNumericalExpressionsChanges(string abbr, float? value) {
+            if (disposed) return;
             if (AllowNoteEdit && Part != null && selectedNotes.Count > 0) {
                 var track = DocManager.Inst.Project.tracks[Part.trackNo];
                 if (track.TryGetExpDescriptor(DocManager.Inst.Project, abbr, out UExpressionDescriptor descriptor) && descriptor.CustomDefaultValue == value) {
@@ -683,6 +832,7 @@ namespace OpenUtau.App.ViewModels {
             }
         }
         public void SetOptionalExpressionsChanges(string abbr, int? value) {
+            if (disposed) return;
             if (!NoteLoading && Part != null && selectedNotes.Count > 0) {
                 var track = DocManager.Inst.Project.tracks[Part.trackNo];
                 if (track.TryGetExpDescriptor(DocManager.Inst.Project, abbr, out UExpressionDescriptor descriptor) && descriptor.defaultValue == value) {
@@ -696,6 +846,7 @@ namespace OpenUtau.App.ViewModels {
 
         // presets
         public void SavePortamentoPreset(string name) {
+            if (disposed) return;
             if (string.IsNullOrEmpty(name)) {
                 return;
             }
@@ -704,6 +855,7 @@ namespace OpenUtau.App.ViewModels {
             PortamentoPresets = new ObservableCollection<NotePresets.PortamentoPreset>(NotePresets.Default.PortamentoPresets);
         }
         public void RemoveAppliedPortamentoPreset() {
+            if (disposed) return;
             if (appliedPortamentoPreset == null) {
                 return;
             }
@@ -712,6 +864,7 @@ namespace OpenUtau.App.ViewModels {
             PortamentoPresets = new ObservableCollection<NotePresets.PortamentoPreset>(NotePresets.Default.PortamentoPresets);
         }
         public void SaveVibratoPreset(string name) {
+            if (disposed) return;
             if (string.IsNullOrEmpty(name)) {
                 return;
             }
@@ -720,6 +873,7 @@ namespace OpenUtau.App.ViewModels {
             VibratoPresets = new ObservableCollection<NotePresets.VibratoPreset>(NotePresets.Default.VibratoPresets);
         }
         public void RemoveAppliedVibratoPreset() {
+            if (disposed) return;
             if (appliedVibratoPreset == null) {
                 return;
             }
@@ -729,7 +883,9 @@ namespace OpenUtau.App.ViewModels {
         }
     }
 
-    public class NotePropertyExpViewModel : ViewModelBase {
+    public class NotePropertyExpViewModel : ViewModelBase, IDisposable {
+        readonly CompositeDisposable subscriptions = new();
+        public bool IsDisposed { get; private set; }
         public string Name { get; set; }
         public bool IsNumerical { get; set; } = false;
         public bool IsOptions { get; set; } = false;
@@ -746,7 +902,7 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public bool HasValue { get; set; } = false;
         [Reactive] public FontWeight NameFontWeight { get; set; }
 
-        private NotePropertiesViewModel parentViewmodel;
+        internal readonly NotePropertiesViewModel parentViewmodel;
 
         public NotePropertyExpViewModel(UExpressionDescriptor descriptor, NotePropertiesViewModel parent) {
             Name = descriptor.name;
@@ -770,32 +926,46 @@ namespace OpenUtau.App.ViewModels {
             if (IsOptions) {
                 this.WhenAnyValue(vm => vm.SelectedOption)
                     .Subscribe(value => {
-                        if (value >= 0 && DropDownOpen) {
+                        if (!IsDisposed && value >= 0 && DropDownOpen) {
                             parentViewmodel.SetOptionalExpressionsChanges(abbr, value);
                         }
-                    });
+                    }).DisposeWith(subscriptions);
             }
 
             this.WhenAnyValue(vm => vm.HasValue)
                 .Subscribe(value => {
+                    if (IsDisposed) return;
                     if (value) {
                         NameFontWeight = FontWeight.Bold;
                     } else {
                         NameFontWeight = FontWeight.Normal;
                     }
-                });
+                }).DisposeWith(subscriptions);
         }
 
         public void SetNumericalExpressions(object? obj) {
-            float? value = null;
-            if (obj != null && (obj is float f || float.TryParse(obj.ToString(), out f))) {
-                if (f < Min && f > Max) {
-                    return;
-                }
-                value = f;
-            }
+            if (IsDisposed || !TryParseNumerical(obj, out var value)) return;
             parentViewmodel.SetNumericalExpressionsChanges(abbr, value);
             this.RaisePropertyChanged(nameof(Value));
+        }
+
+        internal bool TryParseNumerical(object? obj, out float? value) {
+            value = null;
+            if (obj == null || string.IsNullOrWhiteSpace(obj.ToString())) return true;
+            if (!(obj is float f || float.TryParse(obj.ToString(), out f)) || !float.IsFinite(f) || f < Min || f > Max)
+                return false;
+            value = f;
+            return true;
+        }
+
+        internal NotePropertiesViewModel.NotePropertyEditSession BeginInputEdit() => parentViewmodel.BeginInputEdit();
+
+        internal void RefreshInput() => parentViewmodel.RefreshInputs();
+
+        public void Dispose() {
+            if (IsDisposed) return;
+            IsDisposed = true;
+            subscriptions.Dispose();
         }
 
         public override string ToString() {
