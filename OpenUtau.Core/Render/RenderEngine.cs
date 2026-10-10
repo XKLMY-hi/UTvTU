@@ -17,9 +17,16 @@ namespace OpenUtau.Core.Render {
         int notifiedCount = 0;
         long lastNotifyMs = 0;
         readonly object lockObj = new();
+        readonly UProject project;
+        readonly CancellationToken cancellation;
+        long publicationVersion;
 
-        public Progress(int total) {
+        public Progress(int total) : this(total, DocManager.Inst.Project, CancellationToken.None) { }
+
+        internal Progress(int total, UProject project, CancellationToken cancellation) {
             this.total = total;
+            this.project = project;
+            this.cancellation = cancellation;
         }
 
         public void Complete(int n, string info) {
@@ -35,7 +42,7 @@ namespace OpenUtau.Core.Render {
                     notify = true;
                 }
             }
-            if (notify) Notify(done * 100.0 / total, info);
+            if (notify) Notify(total > 0 ? Math.Clamp(done * 100.0 / total, 0, 100) : 0, info);
         }
 
         public void Clear() {
@@ -43,9 +50,10 @@ namespace OpenUtau.Core.Render {
         }
 
         private void Notify(double progress, string info) {
-            var notif = new ProgressBarNotification(progress, info);
-            var task = new Task(() => DocManager.Inst.ExecuteCmd(notif));
-            task.Start(DocManager.Inst.MainScheduler);
+            long version = Interlocked.Increment(ref publicationVersion);
+            RenderNotificationPublisher.Queue(project, cancellation,
+                new ProgressBarNotification(progress, info),
+                () => version == Interlocked.Read(ref publicationVersion));
         }
     }
 
@@ -366,7 +374,7 @@ namespace OpenUtau.Core.Render {
                     .Concat(tuples.Where(tuple => tuple.Item1.end <= startTick))
                     .ToArray();
             }
-            var progress = new Progress(tuples.Sum(t => t.Item1.phones.Length));
+            var progress = new Progress(tuples.Sum(t => t.Item1.phones.Length), project, cancellation.Token);
             // 短语级并行：DOP = NumRenderThreads（默认 2，渲染器线程安全未验证前保守）
             int dop = Math.Clamp(Preferences.Default.NumRenderThreads, 1, 8);
             using var sem = new SemaphoreSlim(dop);
@@ -449,7 +457,7 @@ namespace OpenUtau.Core.Render {
             double startMs = project.timeAxis.TickPosToMsPos(startTick);
             int windowEndTick = project.timeAxis.MsPosToTickPos(startMs + 10000);
             int batch1Count = tuples.Count(t => t.Item1.end > startTick && t.Item1.end <= windowEndTick);
-            var progress = new Progress(tuples.Sum(t => t.Item1.phones.Length));
+            var progress = new Progress(tuples.Sum(t => t.Item1.phones.Length), project, cancellation.Token);
 
             await RenderBatchAsync(tuples.Take(batch1Count).ToArray(), cancellation, progress);
             var batch2 = tuples.Skip(batch1Count).ToArray();
@@ -463,11 +471,12 @@ namespace OpenUtau.Core.Render {
             // 批 2 后台继续；完成时收尾（进度清零 + 机会性 Flush）。
             // 异常必须观察：批 2 渲染失败此前被静默吞掉（播放头后方无提示静音）
             var renderOperation = renderLifetime.Acquire();
+            var token = cancellation.Token;
             _ = RenderBatchAsync(batch2, cancellation, progress).ContinueWith(t => {
                 using var operation = renderOperation;
                 if (t.IsFaulted && !cancellation.IsCancellationRequested) {
                     Log.Error(t.Exception.Flatten(), "Failed to render background batch.");
-                    DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(
+                    RenderNotificationPublisher.Queue(project, token, new ErrorMessageNotification(
                         new MessageCustomizableException("Failed to render.", "<translate:errors.failed.render>", t.Exception.Flatten())));
                 }
                 if (!cancellation.IsCancellationRequested) progress.Clear();
