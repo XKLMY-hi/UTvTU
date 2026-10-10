@@ -236,13 +236,15 @@ namespace OpenUtau.App.Controls {
 
         private void RunForAttachment(CompositeDisposable lifetime, Action action) {
             if (!ReferenceEquals(subscriptions, lifetime)) return;
-            if (!Dispatcher.UIThread.CheckAccess()) {
+            if (!affinity.IsOwner) {
                 var targetPart = eventPart;
                 Dispatcher.UIThread.Post(() => {
                     if (ReferenceEquals(subscriptions, lifetime) && ReferenceEquals(Part, targetPart)) action();
                 });
             } else action();
         }
+
+        readonly UiThreadAffinity affinity = new();
 
         private void StopListening() {
             var lifetime = subscriptions;

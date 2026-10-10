@@ -20,13 +20,16 @@ $resultName=[Guid]::NewGuid().ToString('N')+'.trx'
 $proc=Start-Process -FilePath (Get-Command dotnet).Source -ArgumentList @(
     'test','OpenUtau.Test/OpenUtau.Test.csproj','--no-build','--filter',$Filter,
     '--logger','console;verbosity=normal','--logger',"trx;LogFileName=$resultName",
-    '--results-directory','.dsh/light-test-results'
+    '--results-directory','.dsh/light-test-results',
+    '--','xUnit.ParallelizeTestCollections=false'
 ) -WorkingDirectory $repo -WindowStyle Hidden -RedirectStandardOutput $log -RedirectStandardError $err -PassThru
 $started=$proc.StartTime
 $watch=[Diagnostics.Stopwatch]::StartNew()
 $aborted=$false
+$peakMemoryMb=0
 while (-not $proc.HasExited) {
     $tests=@(Get-Process -Name OpenUtau.Test -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $runner -and $_.StartTime -ge $started })
+    foreach ($test in $tests) { $peakMemoryMb=[Math]::Max($peakMemoryMb, $test.WorkingSet64/1MB) }
     if ($watch.Elapsed.TotalSeconds -gt $Seconds -or @($tests | Where-Object { $_.WorkingSet64 -gt $MemoryMb*1MB }).Count) {
         $aborted=$true
         Write-Output "Stopped selected tests: time limit=$Seconds s; memory limit=$MemoryMb MB."
@@ -53,5 +56,5 @@ if ($summary.outcome -ne 'Completed' -or [int]$summary.Counters.executed -eq 0 -
     [int]$summary.Counters.failed -gt 0 -or (Select-String -LiteralPath $log,$err -Pattern 'FATAL ERROR' -Quiet)) {
     throw 'The test result was incomplete or failed.'
 }
-Write-Output "Selected tests passed: $($summary.Counters.passed); elapsed=$([math]::Round($watch.Elapsed.TotalSeconds,1)) s."
+Write-Output "Selected tests passed: $($summary.Counters.passed); elapsed=$([math]::Round($watch.Elapsed.TotalSeconds,1)) s; peak runner=$([math]::Round($peakMemoryMb,1)) MB; collections=serial."
 exit 0
