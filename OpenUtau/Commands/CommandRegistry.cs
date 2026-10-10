@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Avalonia.Controls;
 using Avalonia.Input;
 using OpenUtau.App.ViewModels;
-using OpenUtau.App.Views;
 
 namespace OpenUtau.App.Commands {
     /// <summary>命令分组（快捷键总览按它分区；与菜单一/二级结构对齐但不强绑）。</summary>
@@ -39,8 +37,8 @@ namespace OpenUtau.App.Commands {
     /// <param name="Group">分组（总览分区）。</param>
     /// <param name="Gesture">默认手势；<c>null</c> = 无默认绑定。主修饰键统一写 <see cref="KeyModifiers.Control"/>，
     /// 运行时由 <see cref="CommandRegistry.Resolve"/> 按平台换成 Meta（macOS）。</param>
-    /// <param name="Execute">处理体。<c>MainWindow</c> 由分发器传入（窗口级命令都作用在窗口上）。</param>
-    /// <param name="CanExecute">启用条件；<c>null</c> = 恒可用。仅用于总览显示与将来的命令面板，**不改变现有分发行为**。</param>
+    /// <param name="Execute">处理体。分发器提供明确的编辑与窗口操作上下文。</param>
+    /// <param name="CanExecute">启用条件；<c>null</c> = 恒可用；分发器检查后再执行。</param>
     /// <param name="Scope">作用域。</param>
     /// <param name="PreFocus">true = 在**焦点检查之前**分发（隧道 + 冒泡都会走；当前只有 Ctrl+M / Ctrl+W / Ctrl+S 三条）。</param>
     /// <param name="Note">备注（总览里显示"为什么没有快捷键"之类）。</param>
@@ -49,8 +47,8 @@ namespace OpenUtau.App.Commands {
         string NameKey,
         CommandGroup Group,
         KeyGesture? Gesture,
-        Action<MainWindow> Execute,
-        Func<MainWindow, bool>? CanExecute = null,
+        Action<WorkspaceCommandContext> Execute,
+        Func<WorkspaceCommandContext, bool>? CanExecute = null,
         CommandScope Scope = CommandScope.Window,
         bool PreFocus = false,
         string? Note = null);
@@ -69,7 +67,7 @@ namespace OpenUtau.App.Commands {
 
         static CommandDefinition Cmd(
             string id, string nameKey, CommandGroup group, KeyGesture? gesture,
-            Action<MainWindow> execute, Func<MainWindow, bool>? canExecute = null,
+            Action<WorkspaceCommandContext> execute, Func<WorkspaceCommandContext, bool>? canExecute = null,
             CommandScope scope = CommandScope.Window, bool preFocus = false, string? note = null) =>
             new(id, nameKey, group, gesture, execute, canExecute, scope, preFocus, note);
 
@@ -77,85 +75,85 @@ namespace OpenUtau.App.Commands {
         public static readonly IReadOnlyList<CommandDefinition> All = new[] {
             // ── File ────────────────────────────────────────────────────────────
             Cmd("file.new", "menu.file.new", CommandGroup.File,
-                new KeyGesture(Key.N, PrimaryModifier), w => w.NewProject()),
+                new KeyGesture(Key.N, PrimaryModifier), w => w.Window.NewProject()),
             Cmd("file.open", "menu.file.open", CommandGroup.File,
-                new KeyGesture(Key.O, PrimaryModifier), w => w.Open()),
+                new KeyGesture(Key.O, PrimaryModifier), w => w.Window.Open()),
             Cmd("file.save", "menu.file.save", CommandGroup.File,
-                new KeyGesture(Key.S, PrimaryModifier), w => _ = w.Save(), preFocus: true),
+                new KeyGesture(Key.S, PrimaryModifier), w => _ = w.Window.Save(), preFocus: true),
             Cmd("file.saveas", "menu.file.saveas", CommandGroup.File,
-                new KeyGesture(Key.S, PrimaryModifier | KeyModifiers.Shift), w => _ = w.SaveAs()),
+                new KeyGesture(Key.S, PrimaryModifier | KeyModifiers.Shift), w => _ = w.Window.SaveAs()),
             Cmd("file.render", "menu.file.render", CommandGroup.File,
                 new KeyGesture(Key.R, PrimaryModifier | KeyModifiers.Shift),
-                w => w.OnMenuRender(w, new Avalonia.Interactivity.RoutedEventArgs())),
+                w => w.Window.Render()),
 
             // ── Edit ────────────────────────────────────────────────────────────
             Cmd("edit.undo", "menu.edit.undo", CommandGroup.Edit,
-                new KeyGesture(Key.Z, PrimaryModifier), w => w.ViewModel.Undo(),
-                w => w.ViewModel.CanUndo),
+                new KeyGesture(Key.Z, PrimaryModifier), w => w.Editing.Undo(),
+                w => w.Editing.CanUndo),
             Cmd("edit.redo", "menu.edit.redo", CommandGroup.Edit,
-                new KeyGesture(Key.Y, PrimaryModifier), w => w.ViewModel.Redo(),
-                w => w.ViewModel.CanRedo),
+                new KeyGesture(Key.Y, PrimaryModifier), w => w.Editing.Redo(),
+                w => w.Editing.CanRedo),
             // Ctrl+Shift+Z 是 Redo 的第二手势：注册表显式登记，总览会把它标成"同一命令"的别名而不是冲突
             Cmd("edit.redo.alt", "menu.edit.redo", CommandGroup.Edit,
-                new KeyGesture(Key.Z, PrimaryModifier | KeyModifiers.Shift), w => w.ViewModel.Redo(),
-                w => w.ViewModel.CanRedo, scope: CommandScope.Window, note: "别名手势（Redo）"),
+                new KeyGesture(Key.Z, PrimaryModifier | KeyModifiers.Shift), w => w.Editing.Redo(),
+                w => w.Editing.CanRedo, scope: CommandScope.Window, note: "别名手势（Redo）"),
             Cmd("edit.selectallparts", "menu.edit.selectall", CommandGroup.Edit,
-                new KeyGesture(Key.A, PrimaryModifier), w => w.ViewModel.TracksViewModel.SelectAllParts()),
+                new KeyGesture(Key.A, PrimaryModifier), w => w.Editing.SelectAllParts()),
             Cmd("edit.cutparts", "menu.edit.cut", CommandGroup.Edit,
-                new KeyGesture(Key.X, PrimaryModifier), w => w.ViewModel.TracksViewModel.CutParts()),
+                new KeyGesture(Key.X, PrimaryModifier), w => w.Editing.CutParts()),
             Cmd("edit.copyparts", "menu.edit.copy", CommandGroup.Edit,
-                new KeyGesture(Key.C, PrimaryModifier), w => w.ViewModel.TracksViewModel.CopyParts()),
+                new KeyGesture(Key.C, PrimaryModifier), w => w.Editing.CopyParts()),
             Cmd("edit.pasteparts", "menu.edit.paste", CommandGroup.Edit,
-                new KeyGesture(Key.V, PrimaryModifier), w => w.ViewModel.TracksViewModel.PasteParts()),
+                new KeyGesture(Key.V, PrimaryModifier), w => w.Editing.PasteParts()),
             Cmd("edit.deleteparts", "menu.edit.delete", CommandGroup.Edit,
-                new KeyGesture(Key.Delete), w => w.ViewModel.TracksViewModel.DeleteSelectedParts()),
+                new KeyGesture(Key.Delete), w => w.Editing.DeleteSelectedParts()),
 
             // ── Project ─────────────────────────────────────────────────────────
             Cmd("track.solopart", "command.track.solopart", CommandGroup.Project,
-                new KeyGesture(Key.S, KeyModifiers.Shift), w => w.SoloSelectedPart()),
+                new KeyGesture(Key.S, KeyModifiers.Shift), w => w.Editing.SoloSelectedPart()),
             Cmd("track.mutepart", "command.track.mutepart", CommandGroup.Project,
-                new KeyGesture(Key.M, KeyModifiers.Shift), w => w.MuteSelectedPart()),
+                new KeyGesture(Key.M, KeyModifiers.Shift), w => w.Editing.MuteSelectedPart()),
 
             // ── Tools ───────────────────────────────────────────────────────────
             Cmd("tools.mixer", "menu.tools.mixer", CommandGroup.Tools,
                 new KeyGesture(Key.M, PrimaryModifier),
-                w => w.OnMenuMixer(w, new Avalonia.Interactivity.RoutedEventArgs()), preFocus: true),
+                w => w.Window.ToggleMixer(), preFocus: true),
             Cmd("tools.mixerattach", "command.view.mixerattach", CommandGroup.Tools,
-                new KeyGesture(Key.W, PrimaryModifier), w => w.ToggleMixerWindow(), preFocus: true),
+                new KeyGesture(Key.W, PrimaryModifier), w => w.Window.ToggleMixerWindow(), preFocus: true),
             Cmd("tools.fullscreen", "menu.tools.fullscreen", CommandGroup.Tools,
                 new KeyGesture(Key.F11),
-                w => w.OnMenuFullScreen(w, new Avalonia.Interactivity.RoutedEventArgs())),
+                w => w.Window.ToggleFullScreen()),
             Cmd("tools.shortcutoverview", "command.shortcutoverview", CommandGroup.Tools, null,
-                w => ShortcutOverviewWindow.Open(w), note: "只读总览（本表生成，含冲突标记）"),
+                w => w.Window.ShowShortcutOverview(), note: "只读总览（本表生成，含冲突标记）"),
 
             // ── 视图切换（W48）：与顶栏胶囊**同源**（同一条 ViewSwitcher.SwitchTo）
             //    ✅ 已接线（W47 落地后复核）：MainWindow.HandleGlobalShortcut → TryExecuteShortcut 已是纯注册表分发
-            //    （按 PreFocus + Scope==Window + 手势匹配直接 def.Execute(this)），手写 switch 与
+            //    （按 PreFocus + Scope==Window + 手势匹配直接 commandContext.TryExecute(def)），手写 switch 与
             //    MapGlobalShortcut 白名单都不在生产路径 ⇒ 加进注册表即生效。
             Cmd("view.workspace", "command.view.gotoworkspace", CommandGroup.View,
                 new KeyGesture(Key.D1, PrimaryModifier),
-                w => w.ViewModel.ViewSwitcher.SwitchTo(AppSurface.Workspace), preFocus: true),
+                w => w.Editing.SwitchTo(AppSurface.Workspace), preFocus: true),
             Cmd("view.pianoroll", "command.view.gotopiano", CommandGroup.View,
                 new KeyGesture(Key.D2, PrimaryModifier),
-                w => w.ViewModel.ViewSwitcher.SwitchTo(AppSurface.PianoRoll), preFocus: true),
+                w => w.Editing.SwitchTo(AppSurface.PianoRoll), preFocus: true),
             Cmd("view.mixer", "command.view.gotomixer", CommandGroup.View,
                 new KeyGesture(Key.D3, PrimaryModifier),
-                w => w.ViewModel.ViewSwitcher.SwitchTo(AppSurface.Mixer), preFocus: true),
+                w => w.Editing.SwitchTo(AppSurface.Mixer), preFocus: true),
 
             // ── View / 播放 ─────────────────────────────────────────────────────
             Cmd("playback.playpause", "command.playback.playpause", CommandGroup.View,
-                new KeyGesture(Key.Space), w => w.PlayOrPause()),
+                new KeyGesture(Key.Space), w => w.Window.PlayOrPause()),
             Cmd("playback.gohome", "command.playback.gohome", CommandGroup.View,
-                new KeyGesture(Key.Home), w => w.ViewModel.PlaybackViewModel.MovePlayPos(0)),
+                new KeyGesture(Key.Home), w => w.Editing.MovePlayPosToStart()),
             Cmd("playback.goend", "command.playback.goend", CommandGroup.View,
-                new KeyGesture(Key.End), w => w.MovePlayPosToEnd()),
+                new KeyGesture(Key.End), w => w.Editing.MovePlayPosToEnd()),
 
             // ── 窗口级杂项 ──────────────────────────────────────────────────────
             Cmd("window.escape", "command.window.escape", CommandGroup.View,
-                new KeyGesture(Key.Escape), w => w.CloseOverlay(), canExecute: null, scope: CommandScope.Overlay,
+                new KeyGesture(Key.Escape), w => w.Window.CloseOverlay(), canExecute: null, scope: CommandScope.Overlay,
                 note: "遮罩打开时生效（欢迎页 / 偏好设置）"),
             Cmd("window.quit", "command.window.quit", CommandGroup.File,
-                new KeyGesture(Key.F4, KeyModifiers.Alt), w => w.QuitApplication()),
+                new KeyGesture(Key.F4, KeyModifiers.Alt), w => w.Window.QuitApplication()),
         };
 
         static readonly Dictionary<string, CommandDefinition> ById =

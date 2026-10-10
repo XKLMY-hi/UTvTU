@@ -42,7 +42,9 @@ namespace OpenUtau.App.Views {
             OS.IsMacOS() ? KeyModifiers.Meta : KeyModifiers.Control;
         private readonly MainWindowViewModel viewModel;
 
-        /// <summary>命令层（W28/M09）：命令处理体统一经注册表作用在窗口上，需要视图模型入口。</summary>
+        readonly WorkspaceCommandContext commandContext;
+
+        /// <summary>Workspace view model for hosted views.</summary>
         internal MainWindowViewModel ViewModel => viewModel;
 
         // 编排区平滑滚动/缩放（上游 1c43dc2b 的"轨道视图那半"；卷帘侧由 W15 落地同一套
@@ -101,6 +103,7 @@ namespace OpenUtau.App.Views {
                 // give the viewmodel a way to prompt/save using the view's existing method
                 AskIfSaveAndContinue = AskIfSaveAndContinue
             };
+            commandContext = new WorkspaceCommandContext(viewModel, this);
             // 阶段 E4：侧栏素材库 VM（歌手列表 + 伴奏库）
             sidebarViewModel = new SidebarViewModel();
             SingersPanel.DataContext = sidebarViewModel;
@@ -1598,38 +1601,6 @@ namespace OpenUtau.App.Views {
         // 原先是只写在 OnKeyDown 的 switch 里的内联分支；现抽成方法 ⇒ 注册表的处理体
         // 与键盘分发共用同一份实现（消除"显示一套 / 行为另一套"）。
 
-        /// <summary>播放头跳到工程末尾（原 Key.End 分支，语义不变）。</summary>
-        internal void MovePlayPosToEnd() {
-            var parts = viewModel.TracksViewModel.Parts;
-            if (parts.Count > 0) {
-                viewModel.PlaybackViewModel.MovePlayPos(parts.Max(part => part.End));
-            }
-        }
-
-        /// <summary>独奏当前选中片段所在轨道（原 Shift+S 分支，语义不变）。</summary>
-        internal void SoloSelectedPart() {
-            var selected = viewModel.TracksViewModel.SelectedParts;
-            if (selected.Count == 0 || DocManager.Inst.Project == null) {
-                return;
-            }
-            var part = selected.First();
-            var track = DocManager.Inst.Project.tracks[part.trackNo];
-            using var edits = new OpenUtau.App.Editing.TrackMixEditSession(track);
-            edits.SetSolo(!track.Solo);
-        }
-
-        /// <summary>静音当前选中片段所在轨道（原 Shift+M 分支，语义不变）。</summary>
-        internal void MuteSelectedPart() {
-            var selected = viewModel.TracksViewModel.SelectedParts;
-            if (selected.Count == 0) {
-                return;
-            }
-            var part = selected.First();
-            var track = DocManager.Inst.Project.tracks[part.trackNo];
-            using var edits = new OpenUtau.App.Editing.TrackMixEditSession(track);
-            edits.SetMute(!track.Mute);
-        }
-
         /// <summary>快捷键总览（W28/M09）：数据源 = 命令注册表，只读。</summary>
         internal void OnMenuShortcutOverview(object? sender, RoutedEventArgs args) {
             ShortcutOverviewWindow.Open(this);
@@ -1693,10 +1664,8 @@ namespace OpenUtau.App.Views {
                 }
                 handledShortcutArgs = args;
             }
-            if (def.CanExecute?.Invoke(this) == false) {
-                return true;   // 命中但当前不可用：按键仍算已处理（与菜单 IsEnabled=false 的观感一致）
-            }
-            def.Execute(this);
+            // A disabled match remains handled, like a disabled menu item.
+            commandContext.TryExecute(def);
             return true;
         }
 

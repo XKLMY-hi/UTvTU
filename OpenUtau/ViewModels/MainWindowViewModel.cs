@@ -104,7 +104,7 @@ namespace OpenUtau.App.ViewModels {
         }
     }
 
-    public class MainWindowViewModel : ViewModelBase, ICmdSubscriber, IDisposable {
+    public partial class MainWindowViewModel : ViewModelBase, ICmdSubscriber, IDisposable {
         readonly CompositeDisposable subscriptions = new();
         bool disposed;
         public string Title => !ProjectSaved
