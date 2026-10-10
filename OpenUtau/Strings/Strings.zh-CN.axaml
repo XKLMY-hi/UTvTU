@@ -1392,5 +1392,15 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="welcome.template.tip">选择模板</system:String>
   <system:String x:Key="welcome.recent.empty">还没有最近工程 —— 用下面的“新建工程”开始一个。</system:String>
   <system:String x:Key="welcome.template.empty">暂无模板。</system:String>
+  <system:String x:Key="welcome.nav.start">开始</system:String>
+  <system:String x:Key="welcome.empty.folder">双击工程打开，或把文件拖进来。</system:String>
+  <system:String x:Key="welcome.nav.links">链接</system:String>
+  <system:String x:Key="welcome.nav.other">其他</system:String>
+  <system:String x:Key="welcome.new.shortcut">Ctrl + N</system:String>
+  <system:String x:Key="welcome.open.browse">浏览文件…</system:String>
+  <system:String x:Key="welcome.search.noresult">没有匹配的工程。</system:String>
+  <system:String x:Key="welcome.open.supported">支持 .ustx / .ustxp / .ust / .mid / .vsqx / .musicxml</system:String>
+  <system:String x:Key="welcome.search.placeholder">搜索最近工程…</system:String>
+  <system:String x:Key="welcome.new.blank">新建空白工程</system:String>
   <!-- /welcome -->
 </ResourceDictionary>

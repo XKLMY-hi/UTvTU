@@ -112,6 +112,33 @@ namespace OpenUtau.App.ViewModels {
 
         // 阶段 E3：欢迎页独立成 WelcomeWindow，Page（Carousel 索引）移除
         public ObservableCollectionExtended<RecentFileInfo> RecentFiles { get; } = new ObservableCollectionExtended<RecentFileInfo>();
+
+        /// <summary>欢迎页「最近」的搜索词（空 = 不过滤）。用户 2026-10 裁决：新欢迎页要像专业工具 ⇒ 加搜索。</summary>
+        [Reactive] public string WelcomeSearch { get; set; } = string.Empty;
+
+        /// <summary>过滤后的最近工程（欢迎页列表绑这个；<see cref="RecentFiles"/> 始终是全量）。</summary>
+        public ObservableCollectionExtended<RecentFileInfo> FilteredRecentFiles { get; } = new ObservableCollectionExtended<RecentFileInfo>();
+
+        /// <summary>完全没有最近工程（空态 A）。</summary>
+        [Reactive] public bool WelcomeNoRecent { get; set; }
+
+        /// <summary>有最近工程但搜索无匹配（空态 B —— 与"还没工程"必须区分，不能都显示成同一句话）。</summary>
+        [Reactive] public bool WelcomeNoMatch { get; set; }
+
+        /// <summary>按搜索词重建过滤集合：匹配工程名或所在目录，忽略大小写。</summary>
+        public void ApplyWelcomeSearch() {
+            string q = (WelcomeSearch ?? string.Empty).Trim();
+            IEnumerable<RecentFileInfo> src = RecentFiles;
+            if (q.Length > 0) {
+                src = src.Where(f =>
+                    (f.Name?.Contains(q, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (f.Directory?.Contains(q, StringComparison.OrdinalIgnoreCase) ?? false));
+            }
+            FilteredRecentFiles.Clear();
+            FilteredRecentFiles.AddRange(src);
+            WelcomeNoRecent = RecentFiles.Count == 0;
+            WelcomeNoMatch = RecentFiles.Count > 0 && FilteredRecentFiles.Count == 0;
+        }
         // 模板列表：欢迎页「模板」卡片的下拉要绑定它——公开是绑定可见性的保证（Avalonia 按公开属性解析绑定）
         public ObservableCollectionExtended<RecentFileInfo> TemplateFiles { get; } = new ObservableCollectionExtended<RecentFileInfo>();
         [Reactive] public bool HasRecovery { get; set; } = false;
@@ -208,6 +235,8 @@ namespace OpenUtau.App.ViewModels {
             RecentFiles.AddRange(Preferences.Default.RecentFiles
                 .Select(file => new RecentFileInfo(file))
                 .OrderByDescending(f => f.LastWriteTime));
+            ApplyWelcomeSearch();   // 初始化过滤集合（欢迎页列表绑定 FilteredRecentFiles）
+            this.WhenAnyValue(x => x.WelcomeSearch).Subscribe(_ => ApplyWelcomeSearch());
             TemplateFiles.Clear();
             Directory.CreateDirectory(PathManager.Inst.TemplatesPath);
             var templates = Directory.GetFiles(PathManager.Inst.TemplatesPath, "*.ustxp")

@@ -1261,5 +1261,15 @@ General
   <system:String x:Key="welcome.template.tip">Pick a template</system:String>
   <system:String x:Key="welcome.recent.empty">No recent projects yet — start one with New project below.</system:String>
   <system:String x:Key="welcome.template.empty">No templates yet.</system:String>
+  <system:String x:Key="welcome.nav.start">Start</system:String>
+  <system:String x:Key="welcome.empty.folder">Double-click a project to open it, or drop a file here.</system:String>
+  <system:String x:Key="welcome.nav.links">Links</system:String>
+  <system:String x:Key="welcome.nav.other">Other</system:String>
+  <system:String x:Key="welcome.new.shortcut">Ctrl + N</system:String>
+  <system:String x:Key="welcome.open.browse">Browse files…</system:String>
+  <system:String x:Key="welcome.search.noresult">No matching projects.</system:String>
+  <system:String x:Key="welcome.open.supported">Supports .ustx / .ustxp / .ust / .mid / .vsqx / .musicxml</system:String>
+  <system:String x:Key="welcome.search.placeholder">Search recent projects…</system:String>
+  <system:String x:Key="welcome.new.blank">New blank project</system:String>
   <!-- /welcome -->
 </ResourceDictionary>
