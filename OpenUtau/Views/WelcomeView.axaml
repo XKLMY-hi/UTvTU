@@ -312,8 +312,31 @@
       <!-- Expressive sample: stronger title hierarchy and state-linked source geometry.
            Decorative shapes never replace the brand or represent audio levels. -->
       <Border Grid.Row="0" Background="{DynamicResource md3.primary-container}"
-              CornerRadius="{DynamicResource Md3ShapeExtraLarge}" Padding="24">
+              CornerRadius="{DynamicResource Md3ShapeExtraLarge}" Padding="24" ClipToBounds="True">
         <Grid ColumnDefinitions="*,Auto" MinHeight="144">
+          <!-- Static source-shape contours connect the open space to the hero.
+               The inset protects the title; clipping naturally crops them on narrow windows. -->
+          <Grid x:Name="HeaderContours" Grid.ColumnSpan="2" Margin="260,-24,-24,-24"
+                Height="192" VerticalAlignment="Center"
+                ClipToBounds="True" IsHitTestVisible="False" Opacity="0.16">
+            <Path Data="{x:Static c:MaterialShape.ArchPath}" Stretch="Uniform"
+                  Width="320" Height="320" Margin="0,0,410,0"
+                  HorizontalAlignment="Right" VerticalAlignment="Center"
+                  Stroke="{DynamicResource md3.on-primary-container}" StrokeThickness="1"
+                  RenderTransformOrigin="0.5,0.5">
+              <Path.RenderTransform><RotateTransform Angle="-22"/></Path.RenderTransform>
+            </Path>
+            <Path Data="{x:Static c:MaterialShape.SquarePath}" Stretch="Uniform"
+                  Width="380" Height="380" Margin="0,0,190,0"
+                  HorizontalAlignment="Right" VerticalAlignment="Center"
+                  Stroke="{DynamicResource md3.on-primary-container}" StrokeThickness="1"
+                  RenderTransformOrigin="0.5,0.5">
+              <Path.RenderTransform><RotateTransform Angle="24"/></Path.RenderTransform>
+            </Path>
+            <Ellipse Width="420" Height="420" Margin="0,0,-140,0"
+                     HorizontalAlignment="Right" VerticalAlignment="Center"
+                     Stroke="{DynamicResource md3.on-primary-container}" StrokeThickness="1"/>
+          </Grid>
           <StackPanel Grid.Column="0" Spacing="{DynamicResource Md3Spacing2}" VerticalAlignment="Center">
             <TextBlock x:Name="PageTitle" Classes="pageTitle" Text="{DynamicResource welcome.recent}"
                        TextWrapping="Wrap" Foreground="{DynamicResource md3.on-primary-container}"/>
