@@ -10,6 +10,7 @@ using Avalonia.Threading;
 using OpenUtau.App;
 using OpenUtau.App.Views;
 using OpenUtau.Core;
+using OpenUtau.Core.Export;
 using OpenUtau.Core.Ustx;
 using OpenUtau.Core.Util;
 using OpenUtau.Test.TestSupport;
@@ -33,6 +34,47 @@ namespace OpenUtau.Test.App {
             typeof(DocManager).GetProperty(nameof(DocManager.Project))!.SetValue(DocManager.Inst, project);
         }
         static T Field<T>(RenderWindow window, string name) where T : Control => window.FindControl<T>(name)!;
+        static ExportDeliveryPlan Plan(RenderWindow window) {
+            object?[] arguments = { null, null };
+            var valid = typeof(RenderWindow).GetMethod("TryPlan", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .Invoke(window, arguments);
+            Assert.True(Assert.IsType<bool>(valid));
+            return Assert.IsType<ExportDeliveryPlan>(arguments[0]);
+        }
+        [AvaloniaFact]
+        public void ProcessingDefaultsToOfflineAndManualChoiceUpdatesThePlanAndSummary() {
+            var window = new RenderWindow();
+            try {
+                window.Show();
+                Dispatcher.UIThread.RunJobs();
+                var processing = Field<ComboBox>(window, "ProcessingModeCombo");
+                Assert.Equal("Offline", Assert.IsType<ComboBoxItem>(processing.SelectedItem).Tag);
+                Assert.Equal(ExportProcessingMode.Offline, Plan(window).Audio.ProcessingMode);
+                Assert.Contains(ThemeManager.GetString("render.processing.offline"), Field<TextBlock>(window, "OutputSummaryText").Text);
+                processing.SelectedIndex = 1;
+                Assert.Equal(ExportProcessingMode.Realtime, Plan(window).Audio.ProcessingMode);
+                Assert.Contains(ThemeManager.GetString("render.processing.realtime"), Field<TextBlock>(window, "OutputSummaryText").Text);
+                processing.SelectedIndex = 0;
+                Assert.Equal(ExportProcessingMode.Offline, Plan(window).Audio.ProcessingMode);
+            } finally { window.Close(); }
+        }
+        [AvaloniaFact]
+        public void ProcessingChoiceSurvivesOutputModeAndEffectChangesWithoutAutomaticFallback() {
+            var window = new RenderWindow();
+            try {
+                window.Show();
+                var processing = Field<ComboBox>(window, "ProcessingModeCombo");
+                processing.SelectedIndex = 1;
+                Field<RadioButton>(window, "RadioPerTrack").IsChecked = true;
+                Field<CheckBox>(window, "ChkVst").IsChecked = true;
+                Assert.Equal(ExportProcessingMode.Realtime, Plan(window).Audio.ProcessingMode);
+                processing.SelectedIndex = 0;
+                Field<RadioButton>(window, "RadioMixdown").IsChecked = true;
+                Assert.True(Plan(window).Audio.VstEffects);
+                Assert.Equal(ExportProcessingMode.Offline, Plan(window).Audio.ProcessingMode);
+                Assert.Contains(ThemeManager.GetString("render.processing.offline"), Field<TextBlock>(window, "OutputSummaryText").Text);
+            } finally { window.Close(); }
+        }
         [AvaloniaFact]
         public void ModeRangeTrackSelectionAndInvalidInputControlTheRealStartButton() {
             var window = new RenderWindow { Width = 620, Height = 480 };
@@ -76,6 +118,7 @@ namespace OpenUtau.Test.App {
                 Field<ComboBox>(window, "SampleRateCombo").SelectedIndex = 1;
                 window.OnStartRender(null, new RoutedEventArgs());
                 Assert.False(Field<StackPanel>(window, "InputPanel").IsEnabled);
+                Assert.False(Field<ComboBox>(window, "ProcessingModeCombo").IsEffectivelyEnabled);
                 Assert.True(Field<Button>(window, "CancelBtn").IsEnabled);
                 var watch = System.Diagnostics.Stopwatch.StartNew();
                 while (Field<StackPanel>(window, "InputPanel").IsEnabled == false && watch.Elapsed.TotalSeconds < 5) {

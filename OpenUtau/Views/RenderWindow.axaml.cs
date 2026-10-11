@@ -87,7 +87,9 @@ namespace OpenUtau.App.Views {
                     string format = plan!.Audio.Format switch { ExportWaveFormat.Pcm16 => "WAV 16-bit", ExportWaveFormat.Pcm24 => "WAV 24-bit", _ => "WAV 32-bit float" };
                     OutputSummaryText.Text = string.Format(ThemeManager.GetString("render.summary.detail"), plan.PerTrack ? plan.Targets.Count : 1,
                         plan.Targets.Count, plan.StartSeconds.ToString("0.###"), (plan.StartSeconds + plan.DurationSeconds).ToString("0.###"),
-                        plan.Audio.TailSeconds.ToString("0.###"), format, plan.Audio.SampleRate) + Environment.NewLine +
+                        plan.Audio.TailSeconds.ToString("0.###"), format, plan.Audio.SampleRate,
+                        ThemeManager.GetString(plan.Audio.ProcessingMode == ExportProcessingMode.Realtime
+                            ? "render.processing.realtime" : "render.processing.offline")) + Environment.NewLine +
                         string.Join(Environment.NewLine, (plan.PerTrack ? plan.Targets : plan.Targets.Take(1)).Select(t => t.Path));
                 } else {
                     ValidationText.IsVisible = true;
@@ -113,7 +115,9 @@ namespace OpenUtau.App.Views {
                 if (!selected.Any(t => !t.Muted && project.parts.Any(p => p.trackNo == project.tracks.IndexOf(t)))) { error = ThemeManager.GetString("render.validation.tracks"); return false; }
                 string tag = (FormatCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Wav24";
                 string rate = (SampleRateCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "44100";
+                string processing = (ProcessingModeCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Offline";
                 var audio = new ExportAudioOptions {
+                    ProcessingMode = processing == "Realtime" ? ExportProcessingMode.Realtime : ExportProcessingMode.Offline,
                     Format = tag switch { "Wav16" => ExportWaveFormat.Pcm16, "Wav32" => ExportWaveFormat.Float32, _ => ExportWaveFormat.Pcm24 },
                     SampleRate = int.Parse(rate, CultureInfo.InvariantCulture), StartTick = start, EndTick = end, TailSeconds = tail,
                     VstEffects = ChkVst.IsChecked == true, BuiltInEffects = ChkBuiltinFx.IsChecked == true,

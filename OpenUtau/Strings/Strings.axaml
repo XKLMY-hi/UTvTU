@@ -1104,6 +1104,10 @@ General
   <system:String x:Key="render.section.destination">Delivery</system:String>
   <system:String x:Key="render.section.range">Time range</system:String>
   <system:String x:Key="render.section.processing">Processing</system:String>
+  <system:String x:Key="render.processing.method">Processing method</system:String>
+  <system:String x:Key="render.processing.offline">Offline (faster)</system:String>
+  <system:String x:Key="render.processing.realtime">Real-time compatibility</system:String>
+  <system:String x:Key="render.processing.hint">Use real-time compatibility if your plugin requires it.</system:String>
   <system:String x:Key="render.section.summary">Delivery summary</system:String>
   <system:String x:Key="render.startseconds">Start (seconds)</system:String>
   <system:String x:Key="render.endseconds">End (seconds)</system:String>
@@ -1119,7 +1123,7 @@ General
   <system:String x:Key="render.outputcount">Output files</system:String>
   <system:String x:Key="render.summary.detail">{0} file(s) · {1} track(s)
 Range {2}–{3} s · Tail {4} s
-{5} · {6} Hz · Stereo</system:String>
+{5} · {6} Hz · Stereo · {7}</system:String>
   <system:String x:Key="render.validation.project">This window belongs to a previous project. Reopen Render for the current project.</system:String>
   <system:String x:Key="render.validation.range">Choose a nonempty full song, a valid selection, or an end time after the start.</system:String>
   <system:String x:Key="render.validation.tail">Effect tail must be a finite value between 0 and 30 seconds.</system:String>

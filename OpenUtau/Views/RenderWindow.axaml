@@ -100,6 +100,14 @@
           </StackPanel>
           <StackPanel Grid.Column="2" Spacing="8">
             <TextBlock Classes="renderSectionTitle" Text="{DynamicResource render.section.processing}"/>
+            <StackPanel Spacing="6">
+              <TextBlock Classes="renderFieldLabel" Text="{DynamicResource render.processing.method}"/>
+              <ComboBox Name="ProcessingModeCombo" Classes="renderInput" SelectedIndex="0" SelectionChanged="OnOptionsChanged">
+                <ComboBoxItem Content="{DynamicResource render.processing.offline}" Tag="Offline"/>
+                <ComboBoxItem Content="{DynamicResource render.processing.realtime}" Tag="Realtime"/>
+              </ComboBox>
+              <TextBlock Classes="renderHint" Text="{DynamicResource render.processing.hint}"/>
+            </StackPanel>
             <StackPanel>
               <CheckBox Name="ChkVst" Classes="renderCheck" IsChecked="True" IsCheckedChanged="OnOptionsChanged" Content="{DynamicResource render.effects.vst}"/>
               <CheckBox Name="ChkBuiltinFx" Classes="renderCheck" IsChecked="True" IsCheckedChanged="OnOptionsChanged" Content="{DynamicResource render.effects.builtin}"/>
