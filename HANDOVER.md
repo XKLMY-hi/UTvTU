@@ -8,8 +8,8 @@
 - 实际重新挂载查出并修复 OtoPlot 卸载后留已释放位图引用的问题；清引用/缓存，加载时按现有WaveFile恢复必要频谱。
 - 保持用户主程序打开，在独立OutDir构建：SDK9完整引用build4 0错148警告，测试收尾build5 0错145警告。**54项**两组轻量全绿，16.2/15.9秒、225/192MB，仍30秒/384MB/串行。UI lint0/0、diff通过；头像headless只验绑定与生命周期，不冒称像素/真实解码，未自截图、全套、推理或音频压力。
 - 原主程序目录的 OpenUtau.dll 已原子替换为测试过的新文件，原二进制备份在`.dsh/controls-polish-previous-binaries/`；embedded调试符号无需单独pdb。标准测试目录也更新，产品DLL哈希同为E08F01A86E183DD846C6B2C7B344DB36F967C9D5801918F8E6A17B8B9043A2B8。
-- **当前仍开着PID6932、15:51:33+08的旧内存版本，响应正常，NeedsRestartForUpdate=true**（`.dsh/workspace-preview.json`）。下方“无预览”是历史状态。下次用户要启动，应核实exe+StartTime，正常退出旧实例并从原目录无参数启动；若有未保存提示，等用户处理，不能强杀。用户已明确不要预览工程/测试参数。
-- 本轮仍核实G:/xklmy文件夹/vibe coding/UTvTU及origin；移动盘下轮仍须重新核实。新二进制尚未重新开真机窗，默认交用户看。
+- 用户处理未保存提示并正常关闭旧实例后，已从原目录**无参数启动更新版PID12096**；响应正常、窗口句柄有效、启动日志0 ERR/FTL，运行产品哈希E08F01A86E183DD846C6B2C7B344DB36F967C9D5801918F8E6A17B8B9043A2B8，NeedsRestartForUpdate=false（`.dsh/workspace-preview.json`）。PID只记录本次启动，后续须核实exe+StartTime；不要预览工程/测试参数，退出时仍不得强杀未保存实例。
+- 本轮仍核实G:/xklmy文件夹/vibe coding/UTvTU及origin；移动盘下轮仍须重新核实。新二进制已打开真机主窗，默认交用户看，未自行截图。
 
 ## 2026-10-11 全界面MD3重构（最新请求，已交付）
 
