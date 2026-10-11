@@ -366,7 +366,10 @@ namespace OpenUtau.Test.App {
         public void RenderWindow_AccentButtonUsesPoolForeground() {
             string xaml = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Views", "RenderWindow.axaml"));
             Assert.DoesNotContain("PlusBrushTextOnAccent", xaml);
-            Assert.Contains("md3.on-primary", xaml);
+            Assert.Contains("/Styles/RenderWorkspace.axaml", xaml);
+            string styles = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "RenderWorkspace.axaml"));
+            Assert.Contains("md3.on-primary", styles);
+            Assert.Contains("DawTextButtonTheme", styles);
         }
 
         // ───────────────────────── W31：应用级 /template/ 补丁归位 ─────────────────────────

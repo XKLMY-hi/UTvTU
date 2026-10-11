@@ -1,253 +1,143 @@
 <controls:WindowEx xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:controls="clr-namespace:OpenUtau.App.Controls"
-        x:Class="OpenUtau.App.Views.RenderWindow"
-        Icon="/Assets/brand/utvtu.ico"
-        Title="{DynamicResource menu.file.render}"
-        Width="780" Height="660" MinWidth="560" MinHeight="500"
-        WindowStartupLocation="CenterOwner">
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:controls="clr-namespace:OpenUtau.App.Controls"
+                   x:Class="OpenUtau.App.Views.RenderWindow"
+                   Icon="/Assets/brand/utvtu.ico"
+                   Title="{DynamicResource menu.file.render}"
+                   Background="{DynamicResource md3.surface}"
+                   Width="900" Height="790" MinWidth="620" MinHeight="480"
+                   WindowStartupLocation="CenterOwner">
   <Window.Styles>
-    <!-- 阶段 E 风格：卡片圆角 10 + Surface 系 -->
-    <Style Selector="Border.renderCard">
-      <Setter Property="Background" Value="{DynamicResource md3.color.surface-container-high}"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource PlusBorderSubtle}"/>
-      <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="CornerRadius" Value="10"/>
-      <Setter Property="Padding" Value="16,12"/>
-    </Style>
-    <Style Selector="TextBlock.cardTitle">
-      <Setter Property="FontSize" Value="12"/>
-      <Setter Property="FontWeight" Value="SemiBold"/>
-      <Setter Property="Opacity" Value="0.55"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
-      <Setter Property="Margin" Value="0,0,0,6"/>
-    </Style>
-    <!-- Phosphor 为 fill 图标（非 Stroke） -->
-    <Style Selector="Path.cardIcon">
-      <Setter Property="Width" Value="14"/>
-      <Setter Property="Height" Value="14"/>
-      <Setter Property="Stretch" Value="Uniform"/>
-      <Setter Property="Fill" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
-      <Setter Property="Margin" Value="0,0,6,0"/>
-    </Style>
-    <Style Selector="RadioButton.renderOption">
-      <Setter Property="FontSize" Value="12"/>
-      <Setter Property="Margin" Value="0,0,20,2"/>
-    </Style>
-    <Style Selector="ComboBox.renderCombo">
-      <Setter Property="FontSize" Value="12"/>
-      <Setter Property="Height" Value="26"/>
-      <Setter Property="Margin" Value="0,0,0,6"/>
-    </Style>
-    <!-- 主按钮：accent 实心 + 深色文字（#B0C4DE 浅底白字对比差）。
-         T10-A：前景改用颜色池的 md3.on-primary —— T9 修好 Button 文字转发后，这条前景
-         会**真的渲染**；固定的 #ffffff 在深色池（md3.primary 是浅紫）下只有 ≈1.6:1。 -->
-    <Style Selector="Button.renderBtn">
-      <Setter Property="Height" Value="34"/>
-      <Setter Property="FontSize" Value="13"/>
-      <Setter Property="FontWeight" Value="SemiBold"/>
-      <Setter Property="Padding" Value="24,0"/>
-      <Setter Property="CornerRadius" Value="8"/>
-      <Setter Property="Background" Value="{DynamicResource AccentBrush1}"/>
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
-      <Setter Property="BorderThickness" Value="0"/>
-    </Style>
-    <Style Selector="Button.renderBtn:pointerover">
-      <Setter Property="Background" Value="{DynamicResource AccentBrush2}"/>
-    </Style>
-    <Style Selector="Button.renderBtn:disabled">
-      <Setter Property="Opacity" Value="0.4"/>
-    </Style>
-    <Style Selector="Button.secondaryBtn">
-      <Setter Property="Height" Value="28"/>
-      <Setter Property="FontSize" Value="11"/>
-      <Setter Property="Padding" Value="12,0"/>
-      <Setter Property="CornerRadius" Value="6"/>
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource PlusBorderSubtle}"/>
-      <Setter Property="BorderThickness" Value="1"/>
-    </Style>
-    <Style Selector="ProgressBar.renderProgress">
-      <Setter Property="Height" Value="6"/>
-      <Setter Property="CornerRadius" Value="3"/>
-      <Setter Property="Foreground" Value="{DynamicResource AccentBrush1}"/>
-    </Style>
-    <Style Selector="TextBlock.subLabel">
-      <Setter Property="FontSize" Value="10"/>
-      <Setter Property="Opacity" Value="0.4"/>
-    </Style>
-    <Style Selector="Path.btnIcon">
-      <Setter Property="Width" Value="12"/>
-      <Setter Property="Height" Value="12"/>
-      <Setter Property="Stretch" Value="Uniform"/>
-      <Setter Property="Fill" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
+    <StyleInclude Source="/Styles/RenderWorkspace.axaml"/>
   </Window.Styles>
-
-  <DockPanel LastChildFill="True">
-    <Border>
-    <DockPanel Margin="16" LastChildFill="True">
-      <StackPanel Name="InputPanel" DockPanel.Dock="Top">
-
-      <!-- ═══ 1. Output Mode ═══ -->
-      <Border Classes="renderCard" Margin="0,0,0,8">
-        <StackPanel>
-          <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-            <Path Classes="cardIcon" Data="{StaticResource icon-layout}"/>
-            <TextBlock Classes="cardTitle" Text="{DynamicResource render.mode}"/>
-          </StackPanel>
-          <StackPanel Orientation="Horizontal">
-            <RadioButton Classes="renderOption" GroupName="OutMode"
-                         Name="RadioMixdown" IsChecked="True"
-                         Content="{DynamicResource render.mixdown}"/>
-            <RadioButton Classes="renderOption" GroupName="OutMode"
-                         Name="RadioPerTrack"
-                         Content="{DynamicResource render.pertrack}"/>
-          </StackPanel>
-          <TextBlock Name="ModeContractHint" FontSize="11" TextWrapping="Wrap"
-                     Foreground="{DynamicResource md3.on-surface-variant}" Margin="0,6,0,0"
-                     Text="{DynamicResource render.contract.mixdown}"/>
-        </StackPanel>
-      </Border>
-
-      <!-- ═══ 2. Range + Format ═══ -->
-      <Grid Margin="0,0,0,8">
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="*"/>
-          <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-
-        <!-- Range -->
-        <Border Grid.Column="0" Classes="renderCard" Margin="0,0,4,0">
-          <StackPanel Name="RangeOptions">
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-              <Path Classes="cardIcon" Data="{StaticResource icon-play}"/>
-              <TextBlock Classes="cardTitle" Text="{DynamicResource render.range}"/>
-            </StackPanel>
-            <RadioButton Classes="renderOption" GroupName="Range"
-                         Name="RadioFullSong" IsChecked="True" Content="{DynamicResource render.fullsong}"/>
-            <RadioButton Classes="renderOption" GroupName="Range"
-                         Name="RadioLoop" Content="{DynamicResource render.loop}"/>
-            <RadioButton Classes="renderOption" GroupName="Range"
-                         Name="RadioCustom" Content="{DynamicResource render.custom}"/>
-            <TextBox Name="CustomRangeBox" FontSize="11" Height="22"
-                     PlaceholderText="{DynamicResource render.custom.placeholder}" Margin="0,4,0,0" IsVisible="False"/>
-          </StackPanel>
-        </Border>
-
-        <!-- Format -->
-        <Border Grid.Column="1" Classes="renderCard" Margin="4,0,0,0">
-          <StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-              <Path Classes="cardIcon" Data="{StaticResource icon-save}"/>
-              <TextBlock Classes="cardTitle" Text="{DynamicResource render.format}"/>
-            </StackPanel>
-            <TextBlock Classes="subLabel" Text="{DynamicResource render.formatlabel}"/>
-            <ComboBox Classes="renderCombo" Name="FormatCombo" IsEnabled="False"/>
-            <TextBlock Classes="subLabel" Text="{DynamicResource render.samplerate}"/>
-            <ComboBox Classes="renderCombo" Name="SampleRateCombo" IsEnabled="False"/>
-          </StackPanel>
-        </Border>
-      </Grid>
-
-      <!-- ═══ 3. Tracks + Effects ═══ -->
-      <Grid Margin="0,0,0,8">
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="*"/>
-          <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-
-        <!-- Track selection -->
-        <Border Grid.Column="0" Classes="renderCard" Margin="0,0,4,0">
-          <DockPanel LastChildFill="True">
-            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,4">
-              <Path Classes="cardIcon" Data="{StaticResource icon-music}"/>
-              <TextBlock Classes="cardTitle" Text="{DynamicResource render.tracks}"/>
-            </StackPanel>
-            <ScrollViewer MaxHeight="120" VerticalScrollBarVisibility="Auto">
-              <StackPanel Name="TrackCheckPanel"/>
-            </ScrollViewer>
-          </DockPanel>
-        </Border>
-
-        <!-- Effects -->
-        <Border Grid.Column="1" Classes="renderCard" Margin="4,0,0,0">
-          <StackPanel Spacing="4">
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-              <Path Classes="cardIcon" Data="{StaticResource icon-equalizer}"/>
-              <TextBlock Classes="cardTitle" Text="{DynamicResource render.effects}"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-              <CheckBox Name="ChkVst" IsChecked="True" IsEnabled="False" VerticalAlignment="Center"/>
-              <TextBlock Text="{DynamicResource render.effects.vst}" FontSize="12" VerticalAlignment="Center" Margin="6,0,0,0"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-              <CheckBox Name="ChkBuiltinFx" IsChecked="True" IsEnabled="False" VerticalAlignment="Center"/>
-              <TextBlock Text="{DynamicResource render.effects.builtin}" FontSize="12" VerticalAlignment="Center" Margin="6,0,0,0"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-              <CheckBox Name="ChkVolume" IsChecked="True" IsEnabled="False" VerticalAlignment="Center"/>
-              <TextBlock Text="{DynamicResource render.effects.volume}" FontSize="12" VerticalAlignment="Center" Margin="6,0,0,0"/>
-            </StackPanel>
-          </StackPanel>
-        </Border>
-      </Grid>
-
-      <!-- ═══ 4. Output path ═══ -->
-      <Border Classes="renderCard" Margin="0,0,0,10">
-        <StackPanel>
-          <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-            <Path Classes="cardIcon" Data="{StaticResource icon-folder-open}"/>
-            <TextBlock Classes="cardTitle" Text="{DynamicResource render.outputpath}"/>
-          </StackPanel>
-          <Grid ColumnDefinitions="*,Auto">
-            <TextBox Grid.Column="0" Name="OutputPathBox" FontSize="11"
-                     Height="24" Margin="0,0,8,0" VerticalAlignment="Center"
-                     PlaceholderText="{DynamicResource render.outputpath.placeholder}"/>
-            <Button Grid.Column="1" Classes="secondaryBtn" Content="{DynamicResource button.open}"
-                    Click="OnBrowsePath"/>
+  <Grid RowDefinitions="Auto,*,Auto">
+    <StackPanel Grid.Row="0" Margin="24,20,24,16" Spacing="4">
+      <TextBlock Classes="renderTitle" Text="{DynamicResource render.page.title}"/>
+      <TextBlock Classes="renderSubtitle" Text="{DynamicResource render.page.subtitle}"/>
+    </StackPanel>
+    <!-- One constrained viewport scrolls all settings; job actions stay visible. -->
+    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Name="InputPanel" Margin="24,0,24,20">
+        <TextBlock Classes="renderSectionTitle" Text="{DynamicResource render.section.destination}" Margin="0,0,0,12"/>
+        <Border Classes="renderSegment">
+          <Grid ColumnDefinitions="*,*">
+            <RadioButton Grid.Column="0" Name="RadioMixdown" Classes="renderSegmentItem" GroupName="OutMode"
+                         IsChecked="True" IsCheckedChanged="OnOptionsChanged" Content="{DynamicResource render.mixdown}"/>
+            <RadioButton Grid.Column="1" Name="RadioPerTrack" Classes="renderSegmentItem" GroupName="OutMode"
+                         IsCheckedChanged="OnOptionsChanged" Content="{DynamicResource render.pertrack}"/>
           </Grid>
+        </Border>
+        <TextBlock Name="ModeContractHint" Classes="renderHint" Text="{DynamicResource render.mode.mixhint}" Margin="0,8,0,16"/>
+        <TextBlock Classes="renderFieldLabel" Text="{DynamicResource render.outputpath}" Margin="0,0,0,6"/>
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBox Grid.Column="0" Name="OutputPathBox" Classes="renderInput" TextChanged="OnOptionsChanged"
+                   Margin="0,0,8,0" PlaceholderText="{DynamicResource render.outputpath.placeholder}"/>
+          <Button Grid.Column="1" Name="BrowsePathBtn" Classes="renderAction" Content="{DynamicResource button.open}" Click="OnBrowsePath"/>
+        </Grid>
+        <Grid ColumnDefinitions="*,12,*" Margin="0,12,0,0">
+          <StackPanel Grid.Column="0" Spacing="6">
+            <TextBlock Classes="renderFieldLabel" Text="{DynamicResource render.formatlabel}"/>
+            <ComboBox Name="FormatCombo" Classes="renderInput" SelectedIndex="0" SelectionChanged="OnOptionsChanged">
+              <ComboBoxItem Content="WAV 16-bit" Tag="Wav16"/>
+              <ComboBoxItem Content="WAV 24-bit" Tag="Wav24"/>
+              <ComboBoxItem Content="WAV 32-bit float" Tag="Wav32"/>
+            </ComboBox>
+          </StackPanel>
+          <StackPanel Grid.Column="2" Spacing="6">
+            <TextBlock Classes="renderFieldLabel" Text="{DynamicResource render.samplerate}"/>
+            <ComboBox Name="SampleRateCombo" Classes="renderInput" SelectedIndex="0" SelectionChanged="OnOptionsChanged">
+              <ComboBoxItem Content="44100 Hz" Tag="44100"/>
+              <ComboBoxItem Content="48000 Hz" Tag="48000"/>
+              <ComboBoxItem Content="96000 Hz" Tag="96000"/>
+            </ComboBox>
+          </StackPanel>
+        </Grid>
+        <TextBlock Classes="renderHint" Text="{DynamicResource render.samplerate.hint}" Margin="0,8,0,0"/>
+        <Border Classes="renderDivider"/>
+        <StackPanel Name="RangeOptions" Spacing="12">
+          <TextBlock Classes="renderSectionTitle" Text="{DynamicResource render.section.range}"/>
+          <Border Classes="renderSegment">
+            <Grid ColumnDefinitions="*,*,*">
+              <RadioButton Grid.Column="0" Name="RadioFullSong" Classes="renderSegmentItem" GroupName="Range"
+                           IsChecked="True" IsCheckedChanged="OnOptionsChanged" Content="{DynamicResource render.fullsong}"/>
+              <RadioButton Grid.Column="1" Name="RadioLoop" Classes="renderSegmentItem" GroupName="Range"
+                           IsCheckedChanged="OnOptionsChanged" Content="{DynamicResource render.loop}"/>
+              <RadioButton Grid.Column="2" Name="RadioCustom" Classes="renderSegmentItem" GroupName="Range"
+                           IsCheckedChanged="OnOptionsChanged" Content="{DynamicResource render.custom}"/>
+            </Grid>
+          </Border>
+          <Grid Name="CustomSecondsPanel" ColumnDefinitions="*,12,*" IsVisible="False">
+            <StackPanel Grid.Column="0" Spacing="6">
+              <TextBlock Classes="renderFieldLabel" Text="{DynamicResource render.startseconds}"/>
+              <TextBox Name="CustomStartSecondsBox" Classes="renderInput" Text="0" TextChanged="OnOptionsChanged"/>
+            </StackPanel>
+            <StackPanel Grid.Column="2" Spacing="6">
+              <TextBlock Classes="renderFieldLabel" Text="{DynamicResource render.endseconds}"/>
+              <TextBox Name="CustomEndSecondsBox" Classes="renderInput" TextChanged="OnOptionsChanged"/>
+            </StackPanel>
+          </Grid>
+          <StackPanel Spacing="6" Width="240" HorizontalAlignment="Left">
+            <TextBlock Classes="renderFieldLabel" Text="{DynamicResource render.tailseconds}"/>
+            <TextBox Name="TailSecondsBox" Classes="renderInput" Text="0" TextChanged="OnOptionsChanged"/>
+          </StackPanel>
         </StackPanel>
-      </Border>
+        <Border Classes="renderDivider"/>
+        <Grid ColumnDefinitions="*,20,*">
+          <StackPanel Grid.Column="0" Spacing="8">
+            <TextBlock Classes="renderSectionTitle" Text="{DynamicResource render.tracks}"/>
+            <WrapPanel Orientation="Horizontal">
+              <Button Name="TrackSelectAllBtn" Classes="renderAction subtle" Margin="0,0,4,0"
+                      Content="{DynamicResource render.selectall}" Click="OnSelectAllTracks"/>
+              <Button Name="TrackSelectNoneBtn" Classes="renderAction subtle"
+                      Content="{DynamicResource render.selectnone}" Click="OnSelectNoTracks"/>
+            </WrapPanel>
+            <Border Background="{DynamicResource md3.surface-container-high}" BorderBrush="{DynamicResource md3.outline-variant}"
+                    BorderThickness="1" CornerRadius="12" Padding="10,6">
+              <ScrollViewer MaxHeight="208" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Name="TrackCheckPanel"/>
+              </ScrollViewer>
+            </Border>
+          </StackPanel>
+          <StackPanel Grid.Column="2" Spacing="8">
+            <TextBlock Classes="renderSectionTitle" Text="{DynamicResource render.section.processing}"/>
+            <StackPanel>
+              <CheckBox Name="ChkVst" Classes="renderCheck" IsChecked="True" IsCheckedChanged="OnOptionsChanged" Content="{DynamicResource render.effects.vst}"/>
+              <CheckBox Name="ChkBuiltinFx" Classes="renderCheck" IsChecked="True" IsCheckedChanged="OnOptionsChanged" Content="{DynamicResource render.effects.builtin}"/>
+              <CheckBox Name="ChkVolume" Classes="renderCheck" IsChecked="True" IsCheckedChanged="OnOptionsChanged" Content="{DynamicResource render.effects.volume}"/>
+              <Border Name="MasterOptionsHost">
+                <CheckBox Name="ChkMaster" Classes="renderCheck" IsChecked="True" IsCheckedChanged="OnOptionsChanged" Content="{DynamicResource render.master}"/>
+              </Border>
+            </StackPanel>
+          </StackPanel>
+        </Grid>
+        <Border Classes="renderDivider"/>
+        <StackPanel Spacing="10">
+          <TextBlock Classes="renderSectionTitle" Text="{DynamicResource render.section.summary}"/>
+          <Border Background="{DynamicResource md3.surface-container}" CornerRadius="12" Padding="16,12">
+            <TextBlock Name="OutputSummaryText" Classes="renderSummary" Text="{DynamicResource render.summary.placeholder}"/>
+          </Border>
+        </StackPanel>
       </StackPanel>
-
-      <!-- ═══ 5. Bottom: progress + buttons ═══ -->
-      <Border DockPanel.Dock="Bottom" Padding="0" Background="Transparent">
-        <StackPanel Spacing="6">
-          <ProgressBar Classes="renderProgress" Name="ProgressBarControl"
-                       Value="0" Minimum="0" Maximum="100"/>
-          <Grid ColumnDefinitions="Auto,*,Auto,Auto">
-            <StackPanel Grid.Column="0" VerticalAlignment="Center">
-              <TextBlock Name="ProgressLabel" FontSize="11" Opacity="0.7" Text="{DynamicResource render.ready}"/>
-              <TextBlock Name="ProgressSubLabel" FontSize="10" Opacity="0.4" IsVisible="False"/>
-            </StackPanel>
-            <Border Grid.Column="1"/>
-            <!-- 打开文件夹 -->
-            <Button Grid.Column="2" Classes="secondaryBtn"
-                    Click="OnOpenFolder" Margin="0,0,8,0">
-              <StackPanel Orientation="Horizontal" Spacing="4">
-                <Path Classes="btnIcon" Data="{StaticResource icon-folder-open}"/>
-                <TextBlock Text="{DynamicResource render.openfolder}" FontSize="11" VerticalAlignment="Center"/>
-              </StackPanel>
-            </Button>
-            <!-- 开始渲染 -->
-            <Button Grid.Column="3" Classes="renderBtn"
-                    Name="StartBtn" Click="OnStartRender">
-              <StackPanel Orientation="Horizontal" Spacing="6">
-                <!-- T10-A：图标与文字都跟随池前景（原来是固定 #ffffff，深色池浅紫底上 ≈1.6:1） -->
-                <Path Classes="btnIcon" Fill="{DynamicResource md3.on-primary}"
-                      Data="{StaticResource icon-play}"/>
-                <TextBlock Text="{DynamicResource render.start}" FontSize="13" FontWeight="SemiBold"
-                           Foreground="{DynamicResource md3.on-primary}" VerticalAlignment="Center"/>
-              </StackPanel>
-            </Button>
-          </Grid>
-        </StackPanel>
-      </Border>
-
-    </DockPanel>
-  </Border>
-  </DockPanel>
+    </ScrollViewer>
+    <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource md3.outline-variant}"
+            Background="{DynamicResource md3.surface-container-low}" Padding="24,12,24,16">
+      <StackPanel Spacing="8">
+        <TextBlock Name="ValidationText" Classes="renderError" IsVisible="False"/>
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Grid.Column="0" Name="ProgressLabel" Classes="renderHint" Text="{DynamicResource render.ready}"/>
+          <TextBlock Grid.Column="1" Name="ProgressPercentText" Classes="renderHint" Text="0%" Margin="12,0,0,0"/>
+        </Grid>
+        <ProgressBar Name="ProgressBarControl" Classes="renderProgress" Value="0" Minimum="0" Maximum="100"/>
+        <TextBlock Name="ProgressSubLabel" Classes="renderHint" IsVisible="False"/>
+        <Grid ColumnDefinitions="*,Auto,8,Auto">
+          <Button Grid.Column="0" Name="OpenFolderBtn" Classes="renderAction" HorizontalAlignment="Left"
+                  Content="{DynamicResource render.openfolder}" Click="OnOpenFolder"/>
+          <Button Grid.Column="1" Name="CancelBtn" Classes="renderAction" IsEnabled="False"
+                  Content="{DynamicResource render.cancel}" Click="OnCancelRender"/>
+          <Button Grid.Column="3" Name="StartBtn" Classes="renderAction primary"
+                  Content="{DynamicResource render.start}" Click="OnStartRender"/>
+        </Grid>
+      </StackPanel>
+    </Border>
+  </Grid>
 </controls:WindowEx>

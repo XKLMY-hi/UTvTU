@@ -44,6 +44,12 @@ namespace OpenUtau.App.Views {
             });
         }
 
+        internal void CancelCurrent() {
+            Job? job;
+            lock (sync) job = current;
+            job?.Cancel();
+        }
+
         internal void Close() {
             Job? job;
             lock (sync) {

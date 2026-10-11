@@ -1,301 +1,219 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Layout;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using OpenUtau.App.Controls;
 using OpenUtau.Core;
 using OpenUtau.Core.Export;
-using OpenUtau.Core.Render;
-using OpenUtau.Core.SignalChain;
+using OpenUtau.Core.Ustx;
 using OpenUtau.Core.Util;
 using Serilog;
 
 namespace OpenUtau.App.Views {
-    public partial class RenderWindow : WindowEx {
-        private readonly RenderWindowJobOwner jobs;
-        private readonly Core.Ustx.UProject project;
-        private bool closed;
-        private int browseVersion;
-        private bool rendering;
-        private bool refreshingContract;
-        private bool showingMixdown = true;
-        private readonly Dictionary<Core.Ustx.UTrack, bool> stemSelections = new();
-        private readonly List<(CheckBox cb, Core.Ustx.UTrack track)> _trackChecks = new();
-
-        /// <summary>
-        /// 渲染进度/收尾的 UI 编组。判据用 `UiThreadAffinity`（锚定**本窗口构造时所属线程**）
-        /// 而非 `CheckAccess()`（headless 会误判）或 `Dispatcher.UIThread.Invoke`（同步等待）。
-        /// 后台进度和最终状态由 RenderWindowJobOwner 投递，排队前与执行时都校验所属作业。
-        /// 完成、失败、取消与按钮恢复在同一个最终回调发布，旧作业不能覆盖新作业状态。
-        /// </summary>
-        private readonly UiThreadAffinity ui = new UiThreadAffinity();
+    public partial class RenderWindow : WindowEx, ICmdSubscriber {
+        readonly UiThreadAffinity ui = new();
+        readonly RenderWindowJobOwner jobs;
+        readonly UProject project;
+        readonly List<(CheckBox Check, UTrack Track)> tracks = new();
+        bool ready, refreshing, rendering, closed, showingMixdown = true;
+        int browseVersion;
+        string? deliveredDirectory;
 
         public RenderWindow() {
             InitializeComponent();
             jobs = new RenderWindowJobOwner(ui.Post);
             project = DocManager.Inst.Project;
-
-            // Range radio — show/hide custom box
-            RadioFullSong.IsCheckedChanged += (_, _) => CustomRangeBox.IsVisible = false;
-            RadioLoop.IsCheckedChanged += (_, _) => CustomRangeBox.IsVisible = false;
-            RadioCustom.IsCheckedChanged += (_, _) => CustomRangeBox.IsVisible = RadioCustom.IsChecked == true;
-
-            // Default output path
-            var proj = project;
-            if (!string.IsNullOrEmpty(proj.FilePath)) {
-                var dir = Path.GetDirectoryName(proj.FilePath) ?? "";
-                var name = Path.GetFileNameWithoutExtension(proj.FilePath);
-                OutputPathBox.Text = Path.Combine(dir, $"{name}.wav");
-            }
-
-            BuildTrackList();
-            RadioMixdown.IsCheckedChanged += (_, _) => {
-                if (RadioMixdown.IsChecked == true) RefreshModeContract();
-            };
-            RadioPerTrack.IsCheckedChanged += (_, _) => {
-                if (RadioPerTrack.IsChecked == true) RefreshModeContract();
-            };
-            RefreshModeContract();
+            string directory = string.IsNullOrWhiteSpace(project.FilePath) ? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) : Path.GetDirectoryName(project.FilePath)!;
+            string name = string.IsNullOrWhiteSpace(project.FilePath) ? "Untitled" : Path.GetFileNameWithoutExtension(project.FilePath);
+            OutputPathBox.Text = Path.Combine(directory, name + ".wav");
+            CustomStartSecondsBox.Text = "0";
+            CustomEndSecondsBox.Text = (project.timeAxis.TickPosToMsPos(project.EndTick) / 1000).ToString("0.###", CultureInfo.CurrentCulture);
+            TailSecondsBox.Text = "0";
+            SyncTracks();
+            DocManager.Inst.AddSubscriber(this);
+            ready = true;
+            RefreshOptions();
         }
 
-        // ═══════════════════════════════════════════════════════════════
-        //  Track checkboxes
-        // ═══════════════════════════════════════════════════════════════
-
-        void BuildTrackList() {
-            TrackCheckPanel.Children.Clear();
-            _trackChecks.Clear();
-            foreach (var t in project.tracks) {
-                var row = new StackPanel {
-                    Orientation = Orientation.Horizontal,
-                    Margin = new Thickness(0, 2)
-                };
-                var cb = new CheckBox {
-                    IsChecked = true,
-                    VerticalAlignment = VerticalAlignment.Center,
-                };
-                var label = new TextBlock {
-                    Text = t.TrackName,
-                    FontSize = 12,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Margin = new Thickness(4, 0, 0, 0),
-                };
-                row.Children.Add(cb);
-                row.Children.Add(label);
-                TrackCheckPanel.Children.Add(row);
-                _trackChecks.Add((cb, t));
-                stemSelections[t] = true;
-            }
+        public void OnOptionsChanged(object? sender, RoutedEventArgs args) {
+            if (ready && !refreshing && !rendering && !closed) RefreshOptions();
         }
-
-        void RefreshModeContract() {
-            if (closed || refreshingContract) return;
-            refreshingContract = true;
-            try {
-                if (!showingMixdown) {
-                    foreach (var (cb, track) in _trackChecks) stemSelections[track] = cb.IsChecked == true;
+        void SyncTracks() {
+            if (!ReferenceEquals(project, DocManager.Inst.Project)) return;
+            if (!tracks.Select(t => t.Track).SequenceEqual(project.tracks)) {
+                var selected = tracks.ToDictionary(t => t.Track, t => t.Check.IsChecked == true);
+                tracks.Clear();
+                TrackCheckPanel.Children.Clear();
+                foreach (var track in project.tracks) {
+                    var check = new CheckBox { Content = track.TrackName, IsChecked = !track.Muted && (!selected.TryGetValue(track, out bool value) || value), MinHeight = 32 };
+                    check.Classes.Add("renderCheck");
+                    check.IsCheckedChanged += OnOptionsChanged;
+                    ToolTip.SetTip(check, track.TrackName);
+                    TrackCheckPanel.Children.Add(check);
+                    tracks.Add((check, track));
                 }
-                bool mixdown = rendering ? showingMixdown : RadioMixdown.IsChecked == true;
-                var policy = new RenderWindowModePolicy(mixdown, AudioSettings.SampleRate, rendering);
-                showingMixdown = mixdown;
-                RadioMixdown.IsChecked = mixdown;
-                RadioPerTrack.IsChecked = !mixdown;
-                InputPanel.IsEnabled = policy.InputsEnabled;
-                TrackCheckPanel.IsEnabled = policy.TrackSelectionEnabled;
-                RangeOptions.IsEnabled = policy.RangeSelectionEnabled;
-                if (!mixdown) RadioFullSong.IsChecked = true;
-                FormatCombo.ItemsSource = new[] { policy.FormatLabel };
-                FormatCombo.SelectedIndex = 0;
-                SampleRateCombo.ItemsSource = new[] { policy.SampleRateLabel };
-                SampleRateCombo.SelectedIndex = 0;
-                ChkVst.IsChecked = policy.IncludesEffects;
-                ChkBuiltinFx.IsChecked = policy.IncludesEffects;
-                ChkVolume.IsChecked = policy.IncludesTrackVolumeAndPan;
-                var displayed = policy.DisplayTrackSelection(_trackChecks.Select(x => stemSelections[x.track]));
-                for (int i = 0; i < _trackChecks.Count; i++) _trackChecks[i].cb.IsChecked = displayed[i];
-                ModeContractHint[!TextBlock.TextProperty] = new DynamicResourceExtension(policy.HintKey);
-            } finally {
-                refreshingContract = false;
+            }
+            foreach (var (check, track) in tracks) {
+                check.Content = track.TrackName;
+                check.IsEnabled = !track.Muted;
+                if (track.Muted) check.IsChecked = false;
             }
         }
-
-        // ═══════════════════════════════════════════════════════════════
-        //  Browse output path
-        // ═══════════════════════════════════════════════════════════════
-
+        void RefreshOptions() {
+            if (!ready || closed || refreshing) return;
+            refreshing = true;
+            try {
+                if (!rendering) SyncTracks();
+                bool mixdown = RadioMixdown.IsChecked == true;
+                if (showingMixdown != mixdown) {
+                    showingMixdown = mixdown;
+                    ChkVst.IsChecked = ChkBuiltinFx.IsChecked = ChkVolume.IsChecked = ChkMaster.IsChecked = mixdown;
+                }
+                ChkMaster.IsEnabled = mixdown;
+                MasterOptionsHost.Opacity = mixdown ? 1 : .45;
+                CustomSecondsPanel.IsVisible = RadioCustom.IsChecked == true;
+                InputPanel.IsEnabled = !rendering;
+                CancelBtn.IsEnabled = rendering;
+                ModeContractHint[!TextBlock.TextProperty] = new DynamicResourceExtension(mixdown ? "render.mode.mixhint" : "render.mode.stemhint");
+                if (rendering) return;
+                if (TryPlan(out var plan, out var error)) {
+                    ValidationText.IsVisible = false;
+                    StartBtn.IsEnabled = true;
+                    string format = plan!.Audio.Format switch { ExportWaveFormat.Pcm16 => "WAV 16-bit", ExportWaveFormat.Pcm24 => "WAV 24-bit", _ => "WAV 32-bit float" };
+                    OutputSummaryText.Text = string.Format(ThemeManager.GetString("render.summary.detail"), plan.PerTrack ? plan.Targets.Count : 1,
+                        plan.Targets.Count, plan.StartSeconds.ToString("0.###"), (plan.StartSeconds + plan.DurationSeconds).ToString("0.###"),
+                        plan.Audio.TailSeconds.ToString("0.###"), format, plan.Audio.SampleRate) + Environment.NewLine +
+                        string.Join(Environment.NewLine, (plan.PerTrack ? plan.Targets : plan.Targets.Take(1)).Select(t => t.Path));
+                } else {
+                    ValidationText.IsVisible = true;
+                    ValidationText.Text = error;
+                    StartBtn.IsEnabled = false;
+                    OutputSummaryText.Text = ThemeManager.GetString("render.summary.placeholder");
+                }
+            } finally { refreshing = false; }
+        }
+        bool TryPlan(out ExportDeliveryPlan? plan, out string error) {
+            plan = null;
+            error = string.Empty;
+            try {
+                if (!ReferenceEquals(project, DocManager.Inst.Project)) { error = ThemeManager.GetString("render.validation.project"); return false; }
+                int mode = RadioCustom.IsChecked == true ? 2 : RadioLoop.IsChecked == true ? 1 : 0;
+                if (!RenderInputParser.TryRange(project, mode, CustomStartSecondsBox.Text, CustomEndSecondsBox.Text,
+                    DocManager.Inst.rangeStartTick, DocManager.Inst.rangeEndTick, out int start, out int end)) {
+                    error = ThemeManager.GetString("render.validation.range"); return false;
+                }
+                if (!RenderInputParser.TrySeconds(TailSecondsBox.Text, out double tail) || tail > 30) { error = ThemeManager.GetString("render.validation.tail"); return false; }
+                if (string.IsNullOrWhiteSpace(OutputPathBox.Text)) { error = ThemeManager.GetString("render.validation.path"); return false; }
+                var selected = tracks.Where(x => x.Check.IsChecked == true).Select(x => x.Track).ToArray();
+                if (!selected.Any(t => !t.Muted && project.parts.Any(p => p.trackNo == project.tracks.IndexOf(t)))) { error = ThemeManager.GetString("render.validation.tracks"); return false; }
+                string tag = (FormatCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Wav24";
+                string rate = (SampleRateCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "44100";
+                var audio = new ExportAudioOptions {
+                    Format = tag switch { "Wav16" => ExportWaveFormat.Pcm16, "Wav32" => ExportWaveFormat.Float32, _ => ExportWaveFormat.Pcm24 },
+                    SampleRate = int.Parse(rate, CultureInfo.InvariantCulture), StartTick = start, EndTick = end, TailSeconds = tail,
+                    VstEffects = ChkVst.IsChecked == true, BuiltInEffects = ChkBuiltinFx.IsChecked == true,
+                    TrackVolumeAndPan = ChkVolume.IsChecked == true,
+                    MasterGain = RadioMixdown.IsChecked == true && ChkMaster.IsChecked == true ? PlaybackManager.Inst.ExportMasterGain : 1,
+                };
+                plan = new ExportDeliveryPlan(project, OutputPathBox.Text!, RadioPerTrack.IsChecked == true, audio, selected);
+                return true;
+            } catch (Exception ex) when (ex is ArgumentException or IOException or UnauthorizedAccessException or OverflowException) {
+                error = ThemeManager.GetString("render.validation.path") + " " + ex.Message;
+                return false;
+            }
+        }
+        public void OnSelectAllTracks(object? sender, RoutedEventArgs args) => SelectTracks(true);
+        public void OnSelectNoTracks(object? sender, RoutedEventArgs args) => SelectTracks(false);
+        void SelectTracks(bool value) {
+            if (rendering || closed) return;
+            refreshing = true;
+            foreach (var item in tracks) item.Check.IsChecked = value;
+            refreshing = false;
+            RefreshOptions();
+        }
         public async void OnBrowsePath(object? sender, RoutedEventArgs args) {
             if (closed || rendering) return;
             int version = ++browseVersion;
             var file = await FilePicker.SaveFile(this, "menu.file.exportmixdown", FilePicker.WAV);
-            if (!closed && version == browseVersion && ReferenceEquals(project, DocManager.Inst.Project) && !string.IsNullOrEmpty(file))
-                OutputPathBox.Text = file;
+            if (!closed && !rendering && version == browseVersion && ReferenceEquals(project, DocManager.Inst.Project) && !string.IsNullOrWhiteSpace(file)) OutputPathBox.Text = file;
         }
-
-        // ═══════════════════════════════════════════════════════════════
-        //  Start render
-        // ═══════════════════════════════════════════════════════════════
-
-        public void OnStartRender(object? sender, RoutedEventArgs args) {
-            if (closed || rendering) return;
-            if (!ReferenceEquals(project, DocManager.Inst.Project)) {
-                ProgressLabel.Text = ThemeManager.GetString("render.status.cancelled");
-                ProgressSubLabel.IsVisible = false;
-                return;
-            }
-            RefreshModeContract();
-            string path = OutputPathBox.Text ?? "";
-            if (string.IsNullOrWhiteSpace(path)) {
-                var proj = project;
-                var dir = Path.GetDirectoryName(proj.FilePath)
-                    ?? Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                var name = Path.GetFileNameWithoutExtension(proj.FilePath) ?? "Untitled";
-                path = Path.Combine(dir, $"{name}.wav");
-                OutputPathBox.Text = path;
-            }
-
-            bool isMixdown = RadioMixdown.IsChecked == true;
-            var policy = new RenderWindowModePolicy(isMixdown, AudioSettings.SampleRate, false);
-
-            // 渲染范围 → tick（此前范围单选是死 UI——恒整曲）
-            int rangeStart = 0, rangeEnd = -1;
-            if (RadioLoop.IsChecked == true) {
-                rangeStart = DocManager.Inst.rangeStartTick;
-                rangeEnd = DocManager.Inst.rangeEndTick;
-            } else if (RadioCustom.IsChecked == true
-                       && ParseRange(CustomRangeBox.Text, out double rStartMs, out double rEndMs)) {
-                rangeStart = project.timeAxis.MsPosToTickPos(rStartMs);
-                rangeEnd = project.timeAxis.MsPosToTickPos(rEndMs);
-            }
-            var selTrackNos = policy.TrackFilter(_trackChecks.Where(x => x.cb.IsChecked == true)
-                .Where(x => project.tracks.Contains(x.track))
-                .Select(x => x.track.TrackNo));
-
+        public async void OnStartRender(object? sender, RoutedEventArgs args) {
+            if (closed || rendering || !TryPlan(out var plan, out _)) { RefreshOptions(); return; }
             var job = jobs.TryBegin(project.tracks.Select(t => t.TrackName));
             if (job == null) return;
             rendering = true;
-            RefreshModeContract();
-            browseVersion++; // A previously opened picker cannot rename the running job's destination.
+            browseVersion++;
+            InputPanel.IsEnabled = false;
             StartBtn.IsEnabled = false;
-            ProgressLabel.Text = ThemeManager.GetString("render.status.preparing");
+            CancelBtn.IsEnabled = true;
+            ValidationText.IsVisible = false;
+            ProgressLabel.Text = ThemeManager.GetString("render.phase.preparing");
             ProgressSubLabel.IsVisible = true;
+            ProgressSubLabel.Classes.Remove("renderError");
             ProgressSubLabel.Text = string.Empty;
             ProgressBarControl.Value = 0;
-
-            Task.Run(async () => {
-                Exception? error = null;
-                try {
-                    job.Token.ThrowIfCancellationRequested();
-                    if (isMixdown) {
-                        // ── 录制式混音导出：设备播放驱动，与预览完全同路径 ──
-                        //（同一信号链/VST 激活时序——导出的就是预览听到的）
-                        await PlaybackManager.Inst.RecordMixdown(project, path, rangeStart, rangeEnd,
-                            new RenderWindowJobOwner.CallbackProgress<double>(p => jobs.PostProgress(job, () => {
-                                if (!double.IsFinite(p)) return;
-                                ProgressLabel.Text = p < 0.4
-                                    ? ThemeManager.GetString("render.status.mixdown")
-                                    : ThemeManager.GetString("render.status.writing");
-                                ProgressBarControl.Value = Math.Clamp(p, 0, 1) * 100;
-                            })), job.Token);
-                    } else {
-                        var session = new ExportSession(project, path,
-                            new ExportSession.Options {
-                                PerTrack = true,
-                                ApplyMixFx = false,
-                                TrackFilter = selTrackNos,
-                                StartTick = rangeStart,
-                                EndTick = rangeEnd,
-                            });
-
-                        await session.RunAsync(new RenderWindowJobOwner.CallbackProgress<ExportSession.ProgressInfo>(info => {
-                            // Capture the report before queuing, including a safe immutable track label.
-                            int index = info.TrackIndex, count = info.TrackCount;
-                            double percent = info.Percent;
-                            string? name = job.TrackName(index);
-                            jobs.PostProgress(job, () => {
-                                if (!double.IsFinite(percent)) return;
-                                if (name != null) {
-                                    ProgressLabel.Text = string.Format(ThemeManager.GetString("render.status.exporting"), index + 1, count, name);
-                                    ProgressBarControl.Value = Math.Clamp(20 + (60d * index / Math.Max(1, count)), 0, 100);
-                                } else {
-                                    ProgressLabel.Text = percent < 0.4
-                                        ? ThemeManager.GetString("render.status.mixdown")
-                                        : ThemeManager.GetString("render.status.writing");
-                                    ProgressBarControl.Value = Math.Clamp(percent, 0, 1) * 100;
-                                }
-                            });
-                        }), job.Token);
-                    }
-                } catch (OperationCanceledException ex) {
-                    error = ex;
-                } catch (Exception ex) {
-                    error = ex;
-                    if (!job.Token.IsCancellationRequested) Log.Error(ex, "[RenderWindow] Render failed");
-                } finally {
-                    jobs.Finish(job, error, outcome => {
-                        rendering = false;
-                        RefreshModeContract();
-                        StartBtn.IsEnabled = true;
-                        ProgressLabel.Text = ThemeManager.GetString(outcome switch {
-                            RenderWindowJobOwner.Outcome.Completed => "render.status.done",
-                            RenderWindowJobOwner.Outcome.Cancelled => "render.status.cancelled",
-                            _ => "render.status.failed",
-                        });
-                        ProgressSubLabel.IsVisible = outcome == RenderWindowJobOwner.Outcome.Failed;
-                        ProgressSubLabel.Text = outcome == RenderWindowJobOwner.Outcome.Failed ? error?.Message : string.Empty;
-                        if (outcome == RenderWindowJobOwner.Outcome.Completed) ProgressBarControl.Value = 100;
+            ProgressPercentText.Text = "0%";
+            Exception? failure = null;
+            try {
+                await new ConfiguredExportSession(plan!).RunAsync(new RenderWindowJobOwner.CallbackProgress<ExportDeliveryProgress>(p => jobs.PostProgress(job, () => {
+                    ProgressLabel.Text = ThemeManager.GetString("render.phase." + p.Phase);
+                    ProgressSubLabel.Text = $"{p.FileIndex}/{p.FileCount} · {Path.GetFileName(p.File)}";
+                    ProgressBarControl.Value = p.Fraction * 100;
+                    ProgressPercentText.Text = (p.Fraction * 100).ToString("0", CultureInfo.CurrentCulture) + "%";
+                })), job.Token);
+            } catch (OperationCanceledException ex) { failure = ex; }
+            catch (Exception ex) { failure = ex; if (!job.Token.IsCancellationRequested) Log.Error(ex, "Render delivery failed"); }
+            finally {
+                jobs.Finish(job, failure, outcome => {
+                    rendering = false;
+                    CancelBtn.IsEnabled = false;
+                    RefreshOptions();
+                    ProgressLabel.Text = ThemeManager.GetString(outcome switch {
+                        RenderWindowJobOwner.Outcome.Completed => "render.status.done",
+                        RenderWindowJobOwner.Outcome.Cancelled => "render.status.cancelled",
+                        _ => "render.status.failed",
                     });
-                }
-            }); // Always enter finally, including cancellation before the worker starts.
-        }
-
-        // ═══════════════════════════════════════════════════════════════
-        //  Helpers
-        // ═══════════════════════════════════════════════════════════════
-
-        /// <summary>解析自定义范围 "0:00 ~ 3:45"（分:秒 或 时:分:秒）。</summary>
-        static bool ParseRange(string? text, out double startMs, out double endMs) {
-            startMs = 0; endMs = 0;
-            if (string.IsNullOrWhiteSpace(text)) return false;
-            var parts = text.Split('~');
-            if (parts.Length != 2) return false;
-            return TryParseTime(parts[0], out startMs) && TryParseTime(parts[1], out endMs) && endMs > startMs;
-        }
-
-        static bool TryParseTime(string s, out double ms) {
-            ms = 0;
-            var parts = s.Trim().Split(':');
-            if (parts.Length == 2 && int.TryParse(parts[0], out int m) && double.TryParse(parts[1], out double sec)) {
-                ms = (m * 60 + sec) * 1000;
-                return true;
+                    ProgressSubLabel.IsVisible = true;
+                    if (outcome == RenderWindowJobOwner.Outcome.Failed) ProgressSubLabel.Classes.Add("renderError");
+                    ProgressSubLabel.Text = outcome == RenderWindowJobOwner.Outcome.Completed ? ThemeManager.GetString("render.delivery.complete")
+                        : outcome == RenderWindowJobOwner.Outcome.Cancelled ? ThemeManager.GetString("render.delivery.cancelled") : failure?.Message;
+                    if (outcome == RenderWindowJobOwner.Outcome.Completed) {
+                        deliveredDirectory = Path.GetDirectoryName(plan!.Targets[0].Path);
+                        ProgressBarControl.Value = 100;
+                        ProgressPercentText.Text = "100%";
+                    }
+                });
             }
-            if (parts.Length == 3 && int.TryParse(parts[0], out int h)
-                && int.TryParse(parts[1], out int mm) && double.TryParse(parts[2], out double ss)) {
-                ms = ((h * 60 + mm) * 60 + ss) * 1000;
-                return true;
-            }
-            return false;
         }
-
+        public void OnCancelRender(object? sender, RoutedEventArgs args) {
+            if (closed || !rendering) return;
+            CancelBtn.IsEnabled = false;
+            ProgressLabel.Text = ThemeManager.GetString("render.status.cancelling");
+            jobs.CancelCurrent();
+        }
         public void OnOpenFolder(object? sender, RoutedEventArgs args) {
-            string path = OutputPathBox.Text ?? "";
-            if (!string.IsNullOrEmpty(path)) {
-                try {
-                    string? dir = Path.GetDirectoryName(path);
-                    if (dir != null && Directory.Exists(dir))
-                        OS.OpenFolder(dir);
-                } catch { }
-            }
+            try {
+                string? directory = deliveredDirectory ?? Path.GetDirectoryName(OutputPathBox.Text);
+                if (!string.IsNullOrWhiteSpace(directory) && Directory.Exists(directory)) OS.OpenFolder(directory);
+            } catch (Exception ex) { Log.Warning(ex, "Could not open export directory"); }
         }
-
+        public void OnNext(UCommand cmd, bool isUndo) {
+            if (cmd is ProgressBarNotification) return;
+            ui.Post(() => {
+                if (closed) return;
+                if (!ReferenceEquals(project, DocManager.Inst.Project)) jobs.CancelCurrent();
+                if (!rendering) RefreshOptions();
+            });
+        }
         protected override void OnClosed(EventArgs e) {
             closed = true;
             browseVersion++;
+            DocManager.Inst.RemoveSubscriber(this);
             jobs.Close();
             base.OnClosed(e);
         }
