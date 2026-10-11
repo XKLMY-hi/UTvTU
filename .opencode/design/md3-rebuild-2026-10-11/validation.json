@@ -1,0 +1,75 @@
+{
+  "renderedAt": "2026-10-11T06:59:08.399Z",
+  "browser": "155.0.4283.45",
+  "captures": [
+    "welcome-purple-light-1440.png",
+    "welcome-purple-dark-1440.png",
+    "welcome-green-light-1440.png",
+    "welcome-green-dark-1440.png",
+    "welcome-amber-light-1440.png",
+    "welcome-amber-dark-1440.png",
+    "welcome-empty-amber-dark-1440.png",
+    "three-seed-gallery-1440.png",
+    "welcome-purple-dark-800.png"
+  ],
+  "computed": [
+    {
+      "seed": "#6750A4",
+      "dark": false,
+      "primary": "#65558F",
+      "surface": "#FDF7FF"
+    },
+    {
+      "seed": "#6750A4",
+      "dark": true,
+      "primary": "#CFBDFE",
+      "surface": "#141218"
+    },
+    {
+      "seed": "#006C4C",
+      "dark": false,
+      "primary": "#1F6A4E",
+      "surface": "#F5FBF5"
+    },
+    {
+      "seed": "#006C4C",
+      "dark": true,
+      "primary": "#8DD5B3",
+      "surface": "#0F1512"
+    },
+    {
+      "seed": "#8F4E00",
+      "dark": false,
+      "primary": "#88521C",
+      "surface": "#FFF8F5"
+    },
+    {
+      "seed": "#8F4E00",
+      "dark": true,
+      "primary": "#FFB77A",
+      "surface": "#19120C"
+    }
+  ],
+  "schemeCount": 6,
+  "rolesPerScheme": 49,
+  "searchEmpty": true,
+  "narrow": {
+    "viewport": 800,
+    "documentWidth": 800,
+    "heroWidth": 520,
+    "contentWidth": 568,
+    "scrollable": false
+  },
+  "compact": {
+    "viewport": 640,
+    "documentWidth": 640,
+    "heroWidth": 428
+  },
+  "nativeIconsVerified": 14,
+  "shapeProductPathsIdentical": true,
+  "welcomeNamesRetained": 17,
+  "welcomeClickBindingsRetained": 19,
+  "brandSourceUnchanged": true,
+  "pageErrors": [],
+  "welcomeBaseline": "196922bd4886e1940075db1f60c4923b48c7c51d"
+}
