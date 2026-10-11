@@ -1,218 +1,139 @@
 # UTvTU
 
-> **UTvTU** — formerly **OpenUTAU Plus**. Renamed and fully migrated to this repository in 2026-10;
-> the previous repo ([OpenUTAU-Plus](https://github.com/XKLMY-hi/OpenUTAU-Plus)) is kept as a historical archive.
-> **The rename does not affect code or your user data directory** (still `OpenUtau Plus`, no migration needed).
+[简体中文](README.md)
 
-An enhanced fork of **OpenUTAU** — a vocal synthesis workstation with DAW-style mixer and VST3 plugin support.
+**UTvTU is a vocal production workstation based on [OpenUTAU](https://github.com/openutau/OpenUtau)**, bringing vocal editing, synthesis, mixing and audio delivery into one workflow. Development continues on the existing UTvTU codebase, with upstream OpenUTAU as a technical reference.
 
-Based on [OpenUTAU](https://github.com/openutau/OpenUtau) (MIT License)
+The current target is **Windows 10 / 11 x64**. Its own Material Design 3 themes and controls combine dynamic colours and consistent interactions with the density needed for DAW editing.
 
----
+> Formerly **OpenUTAU Plus**, renamed in 2026-10. The [previous repository](https://github.com/XKLMY-hi/OpenUTAU-Plus) remains an archive. The user data directory is still `OpenUtau Plus`; the rename requires no data migration.
 
-## What's New
+## Download and Install
 
-### 🎨 Material Design 3 System (2026-09 rework)
-- Design-pack driven: colours, sizes and structure taken from the delivered specs; MD3 colour pool
-  generated from a dynamic seed, container-tier backgrounds, own control themes
-- Single-window views (welcome / editor / preferences) sharing one app bar and status bar
-- Motion uses Avalonia's built-in Transitions; **the in-house theme system has been removed entirely**
+Download published builds from [GitHub Releases](https://github.com/XKLMY-hi/UTvTU/releases). This README describes the current `plus-develop` branch; check each release's notes for the features included in its installer.
 
-### 🪟 Modern UI Overhaul (2026-08 stage, partly superseded)
-- **Avalonia 12.1** — UI framework upgraded from 11.2.4 (rendering architecture rewrite, Skia 3.0, official drawn-decorations API)
-- **Self-drawn window chrome** — implemented with the official **WindowDrawnDecorations** API (replacing the hand-rolled title bar): 1px border + shadow layering, unified title bar (icon / title / Min / Max / Close) across 30+ windows
-- **Warm-gray dark theme** — custom palette (base `#1e1e28` · surface `#282838` · accent `#c73a3f`)
-- **HarmonyOS Sans SC** fonts + **Heroicons Solid** icons + 8px unified corner radius
-- **Full Chinese localization**
+- `UTvTU-<version>.exe` includes the runtime; no separate .NET installation is needed.
+- Installation is per user by default. An existing OpenUTAU Plus installation path is reused, preserving user data, projects and voicebanks.
+- `UTvTU-Uninstall.exe` in the installation directory removes the application and preserves user data by default.
 
-### 🎚️ DAW-Style Mixer
-- Vertical faders, -24dB ~ +12dB
-- 30fps real-time peak meters (LevelTracker)
-- Mute / Solo buttons with color indicators
-- Double-click numeric editing (volume / pan)
-- **Ctrl+M** shortcut to toggle
+## Production Workflow
 
-### 🔌 VST3 Audio Effect Support
-- Load any VST3 audio effect (compressors, EQs, reverbs, delays, etc.)
-- **Native GUI popup** — standalone Win32 window embedding the plugin interface
-- **Real-time parameter sync** — GUI knob changes immediately affect audio output
-- **Instrument filtering** — automatically excludes synths/samplers (no audio input plugins)
-- Up to 8 plugin slots per track, processed in series
-- 3 built-in effects: EQ / Compressor / Reverb (based on upstream "Audition Effect", redesigned with collapsible panels and bypass toggles)
+1. Create or open a project from the welcome page, then install and select a voicebank.
+2. Arrange tracks and backing audio; edit notes, lyrics, pitch and expressions in the piano roll.
+3. Adjust faders, pan, mute and solo in the mixer, and process vocals with built-in or VST3 effects.
+4. Select tracks, a time range and file settings on the render page; export a mixdown or individual stems.
 
-### 📦 .ustxp Project Format
-- Plus-native format, `ustxpVersion: 1.0`
-- VST plugin parameter persistence — re-open a project and all plugin settings are restored
-- Backward-compatible with `.ustx`
----
+## Features
 
-## 2026-08 Framework Upgrade: Avalonia 12
+### Editing and Projects
 
-- **Avalonia 12.1.0** (from 11.2.4) — rendering architecture rewrite (significant FPS gains on complex visual trees), Skia 3.0 pipeline, compiled bindings, official drawn window decorations
-- **Window chrome rewritten** — the official **WindowDrawnDecorations** API replaces the hand-rolled title bar: 1px border + shadow layering everywhere, border removed on maximize, drag / caption buttons / fullscreen hover bar handled by the framework
-- **Dependency migration** — `Avalonia.ReactiveUI` → `ReactiveUI.Avalonia` (Rx-compatible line, zero ViewModel changes), xunit v2 → v3, HarfBuzz text shaping added
-- Paves the way for a UI component library (Semi.Avalonia candidate)
+- OpenUTAU vocal editing, phonemizers and synthesis, including classic UTAU voicebanks and engines such as DiffSinger.
+- Arrangement, piano roll and mixer views share the main window. Piano roll and mixer views can also be detached.
+- `.ustxp` projects persist UTvTU settings and VST state, with `.ustx` compatibility and upstream project import capabilities.
+- Undo / redo for track and effect-chain edits.
 
----
+### Mixing and Effects
 
-## Design Goals
+- Track faders, pan, mute / solo, live meters and master output controls.
+- Built-in EQ, compressor and reverb with live adjustment, bypass and a collapsible effects panel.
+- VST3 audio-effect scanning, loading, native editors and state persistence; chain insertion, removal, bypass and reordering.
+- A library for voicebanks, backing audio and effects, with search and applicable audition / drag-and-drop operations.
 
-UTvTU aims to evolve OpenUTAU from a vocal synthesis editor into a **vocal-centric DAW workstation**, enabling the full mixing, mastering, and effects workflow without leaving the application.
+### Rendering and Delivery
 
-### Near-term (v1.x)
+- **Offline export by default**, with separate plugin instances for the export job. Audio delivery does not require silent playback through an output device.
+- Stereo mixdown or stems, whole-project / loop / custom ranges, track selection and configurable effect tails.
+- WAV 16-bit, 24-bit and 32-bit float; 44.1 / 48 / 96 kHz output sample rates.
+- Options for VST, built-in effects, track gain / pan and master settings, plus progress, cancellation and output-folder access.
+- A manually selected real-time compatibility mode for plugins that cannot process offline. Failures are reported without automatically changing the processing mode.
 
-- ✅ Mixer console (per-track faders, pan, mute/solo, meters)
-- ✅ VST3 audio effect support (loading, GUI, real-time parameters)
-- ✅ `.ustxp` project format (VST parameter persistence)
-- ✅ Export/render with VST effects (silent-playback recording)
-- 🚧 VST instrument support (loading synths/samplers as sound sources)
-- 🚧 macOS / Linux cross-platform support
+Output sample rate is a delivery setting; synthesis and effects use the internal project rate. Offline export aligns selected tracks for plugin latency. Full playback delay compensation remains future work.
 
-### Long-term Vision
+### Material Design 3 Interface
 
-- Send tracks / Aux buses / Sidechain compression
-- Plugin delay compensation (PDC)
-- Track groups and VCA faders
-- MIDI control surface mapping
-- Built-in sampler and drum machine
+- HCT / CAM16 role colours from a custom seed or the Windows accent, with light / dark themes, palette variants and contrast settings.
+- Shared container, shape, outline and control-state roles, with compact DAW editor controls.
+- Consistent buttons, inputs, selectors, sliders, menus and overlays, including keyboard focus and reduced motion.
+- Welcome and preferences pages share the page system; rendering, voicebank resources and package management use the main-window tool workspace.
+- Context tools use the bottom panel or main-window overlays. Native VST editors and system file pickers remain separate windows.
+- Voicebank lists display real voicebank avatars, with a fallback icon when no avatar is available.
 
----
+## Current Scope
 
-## Quick Start
+Development prioritizes the **Windows vocal production workflow**, stability, project compatibility and control interactions. macOS / Linux are outside the current development and validation focus.
 
-```bash
-git clone https://github.com/XKLMY-hi/UTvTU.git
+| Boundary | Status |
+|---|---|
+| VST instruments | Synths and samplers cannot be used as project sound sources; the host currently supports audio effects |
+| Routing | Aux / send buses, sidechains and track groups remain future work |
+| Latency compensation | Offline track alignment exists; complete playback PDC remains future work |
+| Plugin compatibility | Offline support depends on the plugin; not all third-party plugins have been validated |
+| Metering | Unimplemented loudness metrics are shown as unavailable; full mastering metering is not yet provided |
+
+Future directions include sends and sidechains, full plugin delay compensation, track groups and MIDI control mapping. Availability follows implementation and validation.
+
+## Build and Run
+
+Use **.NET SDK 9** to build. The application targets .NET 8; Avalonia 12 analyzers require a newer Roslyn compiler, so installing only the .NET 8 Runtime or pinning SDK 8.x is insufficient.
+
+```powershell
+git clone --branch plus-develop https://github.com/XKLMY-hi/UTvTU.git
 cd UTvTU
-dotnet restore
-dotnet run --project OpenUtau
+dotnet restore OpenUtau.sln -m:1
+dotnet build OpenUtau.sln --no-restore -m:1
+dotnet run --project OpenUtau --no-build
 ```
 
-Requires [.NET 8.0 Runtime](https://dotnet.microsoft.com/download/dotnet/8.0).
+Install voicebanks and engine dependencies as needed after launching. Windows native libraries are included; normal C# / UI development does not require rebuilding the C++ bridge.
 
-> **Platform Support**: UTvTU is built with C# / Avalonia and runs on Windows / macOS / Linux. However, **the VST3 bridge DLL is currently only compiled for Windows x64**. VST features are unavailable on macOS and Linux for now.
+## Development and Validation
 
----
+Build the test project, then run a relevant small group with the guarded runner:
 
-## Limitations & Known Gaps
-
-These are design decisions or work-in-progress items. **Please read before using**:
-
-| Limitation | Details |
-|------------|---------|
-| ~~Export excludes VST effects~~ **✅ Resolved** | Real-time recording mode: silent-playback full signal chain capture, including VST + built-in FX + volume/pan |
-| **No VST instrument support** | VST synths/samplers (instrument plugins) cannot be loaded as sound sources. The scanner automatically filters them out |
-| **Windows x64 only** | The bridge DLL is compiled for Windows x64 only. macOS / Linux users cannot use VST features |
-| **No send/Aux buses** | Aux buses and sidechain compression are not yet implemented |
-| **Single-threaded rendering** | The render engine processes tracks serially; parallelization is not yet introduced |
-
-Solutions for all of the above are planned in the [Design Goals](#design-goals) roadmap.
-
----
-
-## Building the VST Bridge DLL (Optional)
-
-Only needed when modifying bridge C++ code:
-
-```bat
-cd runtimes\vst_bridge
-build.bat
+```powershell
+dotnet build OpenUtau.Test/OpenUtau.Test.csproj --no-restore -m:1
+pwsh -File scripts/Test-Light.ps1 -Filter 'FullyQualifiedName~ResourceCenterTests'
 ```
 
-Requires **Visual Studio 2022** (Community Edition is fine) with the "Desktop development with C++" workload.
+The default limits are 30 seconds and 384 MB per test process, with test collections run serially. Documentation changes only need Markdown and link checks.
 
----
+For VST bridge C++ changes, install Visual Studio 2022 with the Desktop development with C++ workload, then run:
 
-## Architecture
-
-```
-C# (Avalonia UI)                         C++ (VST3 Bridge)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-VstPluginRegistry  ─── scans system VST3 directories
-       │
-VstPluginManager   ─── per-track instance management (UI loads, audio reads-only)
-       │
-VstEffect : IEffect ─── inserted into EffectChain
-       │                    │
-       │ [P/Invoke]         │ EffectChain.Mix()
-       ▼                    ▼
-  VstBridge.cs          fx.Process(scratch)
-       │
-       ▼ [DllImport]
-  vst_bridge.dll (Steinberg VST3 SDK v3.8.0)
-       │
-       ├─ IComponent / IAudioProcessor ── audio processing
-       ├─ IEditController / createView ── native GUI
-       └─ performEdit → atomic queue → inputParameterChanges
+```powershell
+cd runtimes/vst_bridge
+./build.bat
 ```
 
-### Parameter Flow
-
-```
-Plugin GUI knob turn
-  → Controller::setParamNormalized()
-    → BridgeCompHandler::performEdit()
-      → atomic ring buffer (lock-free, SPSC)
-        → consumed by vst_process()
-          → ProcessData::inputParameterChanges
-            → IAudioProcessor::process() → real-time audio change ✅
-```
-
----
+- [AGENTS.md](AGENTS.md): workspace rules and build / validation requirements.
+- [HANDOVER.md](HANDOVER.md): current development context.
+- [Offline export notes](.opencode/plans/offline-export-2026-10-11.md): processing modes, plugin lifetime and validation boundaries.
+- [Workspace integration notes](.opencode/plans/workspace-integration-2026-10-11.md): tool hosting and sessions.
+- [MD3 implementation notes](.opencode/plans/md3-rebuild-2026-10-11.md): design sources, coverage and validation.
 
 ## Project Structure
 
-```
+```text
 OpenUtau.sln
-├── OpenUtau/               # Main app UI (Avalonia)
-│   ├── Views/              # MainWindow, MixerWindow, VstEditorWindow, etc.
-│   ├── ViewModels/         # MVVM
-│   └── Controls/           # Custom controls (MixerTrackStrip, etc.)
-├── OpenUtau.Core/          # Core logic
-│   ├── Ustx/               # Data model
-│   ├── Render/             # Render engine
-│   ├── SignalChain/        # Audio signal chain (EffectChain, LevelTracker, Fader)
-│   └── Vst/                # VST host (VstEffect, VstBridge, VstPluginManager)
-├── OpenUtau.Plugin.Builtin/
-├── OpenUtau.Test/
-├── runtimes/               # Native platform libraries
-│   ├── vst_bridge/         # C++ bridge project (CMake)
-│   └── win-x64/native/     # vst_bridge.dll + worldline.dll
-└── VstTest/                # VST compatibility test suite
+├── OpenUtau/                 # Avalonia views, view models, controls and themes
+├── OpenUtau.Core/            # Project models, synthesis, audio, export and VST hosting
+├── OpenUtau.Plugin.Builtin/  # Built-in phonemizers
+├── OpenUtau.Test/            # Unit and UI contract tests
+├── VstProbe/                 # Out-of-process plugin discovery
+├── runtimes/                 # Native libraries and VST3 bridge source
+└── scripts/                  # Development and guarded test scripts
 ```
-
----
-
-## Development
-
-```bash
-dotnet build                                  # Build all
-dotnet run --project OpenUtau                 # Run
-dotnet test                                   # Unit tests
-dotnet run --project VstTest                  # VST compatibility tests
-```
-
-See [CLAUDE.md](./CLAUDE.md) for the full architecture and development guide.
-
----
 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
-| Runtime | .NET 8.0 / C# 12 |
-| UI Framework | Avalonia 12.x + ReactiveUI MVVM |
-| Audio Playback | NAudio (WASAPI) / MiniAudio |
-| Audio DSP | NWaves |
-| Signal Chain | Custom ISignalSource / IEffect interface |
-| VST3 Host | C++ / Steinberg VST3 SDK v3.8.0 |
-| AI Inference | ONNX Runtime (DirectML GPU acceleration) |
-| Icons | Lucide Icons |
-| Serialization | YamlDotNet / Newtonsoft.Json |
-| Logging | Serilog |
-| Testing | xUnit |
-
----
+|---|---|
+| Runtime / build | .NET 8 / C#, built with .NET SDK 9 |
+| Interface | Avalonia 12.1.0, ReactiveUI.Avalonia 14.7.1, own MD3 themes and controls |
+| Audio | NAudio / MiniAudio, NWaves, own signal chain |
+| Plugin hosting | C++ / Steinberg VST3 SDK, out-of-process discovery |
+| Synthesis inference | ONNX Runtime |
+| Data and logging | YamlDotNet, Newtonsoft.Json, Serilog |
+| Tests | xUnit v3 |
 
 ## Open Source Libraries
 
@@ -223,7 +144,7 @@ This project is built with the following open source libraries. We are grateful 
 | Library | Version | License | Purpose |
 |----|------|------|------|
 | [Avalonia UI](https://avaloniaui.net/) | 12.1.0 | MIT | Cross-platform UI framework |
-| [ReactiveUI](https://www.reactiveui.net/) | 19.5 | MIT | MVVM reactive framework |
+| [ReactiveUI.Avalonia](https://github.com/reactiveui/ReactiveUI) | 14.7.1 | MIT | Reactive MVVM integration |
 | [NAudio](https://github.com/naudio/NAudio) | 2.2.1 | MIT | Windows audio playback & processing |
 | [NWaves](https://github.com/ar1st0crat/NWaves) | 0.9.6 | MIT | Audio signal processing / DSP |
 | [ONNX Runtime](https://onnxruntime.ai/) | 1.23 | MIT | Machine learning inference engine |
@@ -244,7 +165,7 @@ This project is built with the following open source libraries. We are grateful 
 
 | Library | Version | License | Purpose |
 |----|------|------|------|
-| [Heroicons](https://heroicons.com/) | — | MIT | User interface icons |
+| [Phosphor](https://phosphoricons.com) | — | MIT | User interface icons |
 | [Dotnet.Bundle](https://github.com/egramtel/dotnet-bundle) | 0.9.13 | MIT | macOS app bundling |
 
 ### File Formats / MIDI
@@ -285,7 +206,7 @@ This project is built with the following open source libraries. We are grateful 
 
 | Resource | License | Source |
 |------|------|------|
-| Lucide Icons | ISC | https://lucide.dev/ |
+| Phosphor | MIT | https://phosphoricons.com |
 
 ---
 
@@ -295,7 +216,7 @@ Based on [OpenUTAU](https://github.com/openutau/OpenUtau), MIT License.
 
 The VST3 bridge uses [Steinberg VST3 SDK v3.8.0](https://github.com/steinbergmedia/vst3sdk), dual-licensed MIT / GPL-3 (this project uses the MIT-licensed portions).
 
-Lucide icons are ISC licensed.
+Phosphor icons are MIT licensed.
 
 ---
 
@@ -304,4 +225,4 @@ Lucide icons are ISC licensed.
 - [OpenUTAU](https://github.com/openutau/OpenUtau) original project and all contributors
 - Steinberg for the VST3 SDK
 - The vocal synthesis community
-- This project was developed through **Vibe Coding** — using DeepSeek V4 Pro AI to assist with architecture design, code generation, and debugging
+- This project was developed through **Vibe Coding** — using AI assistance for architecture design, code, and debugging
