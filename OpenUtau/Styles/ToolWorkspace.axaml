@@ -33,4 +33,5 @@
     <Setter Property="FontSize" Value="13"/>
   </Style>
   <Style Selector="Button.resourceAction"><Setter Property="Margin" Value="0,0,8,8"/><Setter Property="Height" Value="32"/></Style>
+  <Style Selector="Button.toolClose"><Setter Property="Padding" Value="0"/><Setter Property="MinWidth" Value="32"/></Style>
 </Styles>

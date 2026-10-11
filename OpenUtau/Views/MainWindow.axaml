@@ -23,6 +23,7 @@
   <!-- 窗口装饰已交还系统（原生标题栏），内容不再为自绘标题栏留白 -->
   <Border Padding="0">
   <Grid>
+    <Grid Name="WorkspaceSurface">
     <!-- MainGrid：主内容（overlay 时模糊目标） -->
     <Grid x:Name="MainGrid" RowDefinitions="Auto,*,32">
       <!-- Original UTvTU group hierarchy, with a second row only when groups cannot fit. -->
@@ -896,9 +897,15 @@
         <Border Name="ContextToolPanel" Grid.Row="2" IsVisible="False" Background="{DynamicResource md3.surface-container-low}">
           <Grid RowDefinitions="40,*">
             <Border BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1" Padding="16,0">
-              <Grid ColumnDefinitions="*,Auto">
+              <Grid ColumnDefinitions="*,Auto,Auto">
                 <TextBlock Name="ContextToolTitle" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                <Button Grid.Column="1" Classes="toolClose" Width="32" Height="32" Click="OnCloseContextTool"
+                <Button Name="CollapseContextButton" Grid.Column="1" Classes="toolAction" Height="32" Margin="0,0,8,0" Click="OnToggleContextTool">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <c:DawIcon Name="ContextCollapseIcon" Data="{StaticResource icon-chevron-down}" Width="14" Height="14" Fill="{Binding $parent[Button].Foreground}"/>
+                    <TextBlock Name="ContextCollapseText" Text="{DynamicResource workspace.collapse}" VerticalAlignment="Center"/>
+                  </StackPanel>
+                </Button>
+                <Button Grid.Column="2" Classes="toolClose" Width="32" Height="32" Click="OnCloseContextTool"
                         AutomationProperties.Name="{DynamicResource button.cancel}">
                   <c:DawIcon Data="{StaticResource icon-x}" Width="14" Height="14" Fill="{Binding $parent[Button].Foreground}"/>
                 </Button>
@@ -946,6 +953,7 @@
 
 
     <ContentControl Name="ToolWorkspaceHost" IsVisible="False" ZIndex="995" Focusable="True"/>
+    </Grid>
     <views:WorkspaceDialogHost Name="ToolDialogHost" ZIndex="1200"/>
 
     <!-- Overlay layer: in-window modal dialog host -->

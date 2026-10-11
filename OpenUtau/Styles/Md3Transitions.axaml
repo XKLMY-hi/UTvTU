@@ -54,7 +54,7 @@
   </Style>
 
   <!-- 减少动效：窗口加 .no-motion 时全部置空（立即到位） -->
-  <Style x:SetterTargetType="Visual" Selector="Window.no-motion .md3-fade, Window.no-motion .md3-pop">
+  <Style x:SetterTargetType="Visual" Selector=".no-motion .md3-fade, .no-motion .md3-pop">
     <Setter Property="Transitions" Value="{x:Null}"/>
   </Style>
 

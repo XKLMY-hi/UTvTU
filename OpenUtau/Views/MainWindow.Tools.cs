@@ -20,12 +20,14 @@ public partial class MainWindow : IWorkspaceToolHost {
     ToolWorkspaceView? toolPages;
     WorkspaceToolView? contextTool;
     IDisposable? contextTitleBinding;
+    bool contextCollapsed;
+    double contextExpandedHeight;
 
     void IWorkspaceToolHost.PresentTool(WorkspaceToolView tool) => PresentTool(tool);
     void InitializeToolHosting() {
+        ToolDialogHost.BackgroundSurface = WorkspaceSurface;
         ToolDialogHost.DialogsChanged = () => {
-            bool enabled = !ToolDialogHost.HasDialogs;
-            MainGrid.IsEnabled = WelcomeHost.IsEnabled = PreferencesHost.IsEnabled = ToolWorkspaceHost.IsEnabled = OverlayLayer.IsEnabled = enabled;
+            OverlayLayer.IsEnabled = !ToolDialogHost.IsBlocking;
             RefreshDetachedEditing();
         };
     }
@@ -82,20 +84,27 @@ public partial class MainWindow : IWorkspaceToolHost {
             case SingersDialog: EnsureToolPages(); toolPages!.SetContent("singers", tool); EnterToolWorkspace("singers"); break;
             case PackageManagerDialog: EnsureToolPages(); toolPages!.SetContent("packages", tool); EnterToolWorkspace("packages"); break;
             case TrackSettingsDialog or MixFxDialog or LyricsDialog or ExpressionsDialog or TrackEffectRack:
+                FinishPartEdit();
+                pianoRoll?.CancelActiveInput();
                 HideToolWorkspace();
-                if (!ReferenceEquals(contextTool, tool)) contextTool?.Close();
+                bool sameTool = ReferenceEquals(contextTool, tool);
+                if (!sameTool) contextTool?.Close();
                 contextTool = tool;
                 tool.Width = tool.Height = double.NaN;
                 contextTitleBinding?.Dispose();
                 contextTitleBinding = ContextToolTitle.Bind(TextBlock.TextProperty, tool.GetObservable(WorkspaceToolView.TitleProperty));
                 ContextToolHost.Content = tool;
                 ContextToolPanel.IsVisible = true;
-                EditorToolsLayout.RowDefinitions[2].Height = new GridLength(Math.Clamp(Bounds.Height * .43, 220, 480));
-                ContextToolSplitter.IsVisible = true;
+                if (!sameTool) contextExpandedHeight = Math.Clamp(Bounds.Height * .43, 220, 480);
+                if (!sameTool || contextCollapsed) SetContextCollapsed(false);
                 tool.RemoveFromHost = RemoveContextTool;
                 tool.Focus();
                 break;
-            default: ToolDialogHost.Push(tool); break;
+            default:
+                FinishPartEdit();
+                pianoRoll?.CancelActiveInput();
+                ToolDialogHost.Push(tool);
+                break;
         }
     }
     void OnToolClosed(object? sender, EventArgs e) { if (sender is WorkspaceToolView tool) { tools.Remove(tool); tool.Closed -= OnToolClosed; } }
@@ -110,6 +119,19 @@ public partial class MainWindow : IWorkspaceToolHost {
         Focus();
     }
     void OnCloseContextTool(object? sender, RoutedEventArgs e) => contextTool?.Close();
+    void OnToggleContextTool(object? sender, RoutedEventArgs e) => SetContextCollapsed(!contextCollapsed);
+    void SetContextCollapsed(bool collapsed) {
+        if (contextTool == null) return;
+        if (collapsed && !contextCollapsed) contextExpandedHeight = Math.Max(160, ContextToolPanel.Bounds.Height);
+        contextCollapsed = collapsed;
+        ContextToolHost.IsVisible = !collapsed;
+        ContextToolSplitter.IsVisible = !collapsed;
+        double height = Math.Min(contextExpandedHeight, Math.Max(160, EditorToolsLayout.Bounds.Height - 126));
+        EditorToolsLayout.RowDefinitions[2].Height = new GridLength(collapsed ? 40 : height);
+        ContextCollapseText[!TextBlock.TextProperty] = new DynamicResourceExtension(collapsed ? "workspace.expand" : "workspace.collapse");
+        ContextCollapseIcon[!DawIcon.DataProperty] = new DynamicResourceExtension(collapsed ? "icon-chevron-up" : "icon-chevron-down");
+        if (collapsed) CollapseContextButton.Focus();
+    }
     internal void HideToolWorkspace() {
         ToolWorkspaceHost.IsVisible = false;
         if (shellDisposed) return;
@@ -126,7 +148,7 @@ public partial class MainWindow : IWorkspaceToolHost {
         RefreshDetachedEditing();
     }
     void RefreshDetachedEditing() {
-        bool enabled = !ToolDialogHost.HasDialogs && renderTool?.IsRendering != true;
+        bool enabled = !ToolDialogHost.IsBackgroundBlocked && renderTool?.IsRendering != true;
         if (pianoRollWindow != null) pianoRollWindow.IsEnabled = enabled;
         if (mixerWindow != null) mixerWindow.IsEnabled = enabled;
     }

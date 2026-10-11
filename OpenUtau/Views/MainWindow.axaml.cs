@@ -1530,7 +1530,7 @@ namespace OpenUtau.App.Views {
         private KeyEventArgs? handledShortcutArgs;
 
         private void HandleGlobalShortcut(KeyEventArgs args) {
-            if (ToolDialogHost.HasDialogs || ToolWorkspaceHost.IsVisible || ContextToolHost.IsKeyboardFocusWithin || renderTool?.IsRendering == true) return;
+            if (ToolDialogHost.IsBlocking || ToolWorkspaceHost.IsVisible || ContextToolHost.IsKeyboardFocusWithin || renderTool?.IsRendering == true) return;
             // W47：隧道路径同样先做焦点让位判定（对 Ctrl 组合是空操作，纯为把规则收在一处）
             if (ShouldYieldShortcutToFocus(FocusManager?.GetFocusedElement(), args.Key, args.KeyModifiers)) {
                 return;
@@ -1558,7 +1558,7 @@ namespace OpenUtau.App.Views {
         }
 
         void OnKeyDown(object sender, KeyEventArgs args) {
-            if (ToolDialogHost.HasDialogs) return;
+            if (ToolDialogHost.IsBlocking) return;
             if (ToolWorkspaceHost.IsVisible) {
                 if (args.Key == Key.Escape) { HideToolWorkspace(); args.Handled = true; }
                 return;
@@ -1629,7 +1629,7 @@ namespace OpenUtau.App.Views {
         }
 
         void OnPointerPressed(object? sender, PointerPressedEventArgs args) {
-            if (ToolDialogHost.HasDialogs || ToolWorkspaceHost.IsVisible || ContextToolPanel.IsPointerOver || PreferencesHost.IsVisible) return;
+            if (ToolDialogHost.IsBlocking || ToolWorkspaceHost.IsVisible || ContextToolPanel.IsPointerOver || PreferencesHost.IsVisible) return;
             // 卷帘正在显示时点它内部不该抢走焦点；其余视图点空白一律把焦点收回窗口
             bool pianoRollShown = viewModel.ViewSwitcher.ShowPianoRoll && PianoRollContainer.IsPointerOver;
             if (!pianoRollShown && !args.Handled && args.ClickCount == 1) {
@@ -1638,7 +1638,7 @@ namespace OpenUtau.App.Views {
         }
 
         async void OnDrop(object? sender, DragEventArgs args) {
-            if (ToolDialogHost.HasDialogs || ToolWorkspaceHost.IsVisible || renderTool?.IsRendering == true) { args.Handled = true; return; }
+            if (ToolDialogHost.IsBlocking || ToolWorkspaceHost.IsVisible || renderTool?.IsRendering == true) { args.Handled = true; return; }
             // 阶段 E4：侧栏素材库拖拽——自定义数据格式优先（歌手 / 伴奏）
             var dragSinger = args.DataTransfer.TryGetValue(SingerDragFormat);
             if (dragSinger != null) {
@@ -2775,7 +2775,7 @@ namespace OpenUtau.App.Views {
             OverlayLayer.IsVisible = true;
             overlayGeneration++;
             // 覆盖层：主内容模糊 + 卡片弹出（.md3-pop）+ 遮罩淡入（.md3-fade）
-            MainGrid.Effect = new Avalonia.Media.BlurEffect { Radius = 24 };
+            ToolDialogHost.SetExternalModalVisible(true);
             SetShown(OverlayCard, true);
             SetShown(OverlayBackdrop, true);
         }
@@ -2807,7 +2807,7 @@ namespace OpenUtau.App.Views {
 
         private void HideOverlayNow() {
             OverlayLayer.IsVisible = false;
-            MainGrid.Effect = null;
+            ToolDialogHost.SetExternalModalVisible(false);
             OverlayContent.Content = null;
             // 复位过渡状态：下次打开时重新播放弹入（元素此刻不可见，复位不会造成闪烁）
             SetShown(OverlayCard, false);
@@ -2893,7 +2893,7 @@ namespace OpenUtau.App.Views {
                 return;
             }
             OverlayLayer.IsVisible = false;
-            MainGrid.Effect = null;
+            ToolDialogHost.SetExternalModalVisible(false);
             OverlayContent.Content = null;
             overlayTcs?.TrySetResult(result);
             overlayTcs = null;

@@ -1322,4 +1322,6 @@ Range {2}–{3} s · Tail {4} s
   <system:String x:Key="workspace.resources">Resource center</system:String>
   <system:String x:Key="workspace.resources.hint">Manage voicebanks and dependency packages in one workspace.</system:String>
   <system:String x:Key="workspace.oto.keys">1–5: timing points · W/S: zoom · A/D: pan · Q/E: select sample</system:String>
+  <system:String x:Key="workspace.collapse">Collapse</system:String>
+  <system:String x:Key="workspace.expand">Expand</system:String>
 </ResourceDictionary>
