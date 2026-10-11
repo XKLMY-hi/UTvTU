@@ -7,7 +7,7 @@ namespace OpenUtau.Core.Vst {
     /// Guards non-Windows platforms so callers get graceful defaults instead of
     /// DllNotFoundException.
     /// </summary>
-    public sealed class RealVstBridge : IVstBridge {
+    public sealed class RealVstBridge : IVstBridge, IVstExportBridge {
         public static readonly RealVstBridge Instance = new();
         private RealVstBridge() { }
 
@@ -17,6 +17,11 @@ namespace OpenUtau.Core.Vst {
         public void Unload(IntPtr handle) { if (IsWin) VstBridge.Unload(handle); }
         public string? LastError() => IsWin ? VstBridge.LastError() : null;
         public bool Setup(IntPtr handle, double sr, int block) => IsWin && VstBridge.Setup(handle, sr, block);
+        public bool SetupExport(IntPtr handle, double sr, int block, bool offline) => IsWin && VstBridge.SetupExport(handle, sr, block, offline);
+        public bool ProcessExport(IntPtr handle, float[] buffer, int frames, VstExportContext context) => IsWin && VstBridge.ProcessExport(handle, buffer, frames, context);
+        public int GetLatencySamples(IntPtr handle) => IsWin ? VstBridge.GetLatencySamples(handle) : 0;
+        public VstExportParameter[] CaptureExportParameters(IntPtr handle) => VstBridge.CaptureExportParameters(handle);
+        public bool RestoreExportParameters(IntPtr handle, VstExportParameter[] parameters) => VstBridge.RestoreExportParameters(handle, parameters);
         public bool Activate(IntPtr handle, bool enable) => IsWin && VstBridge.Activate(handle, enable);
         public void Process(IntPtr handle, float[] buf, int frames) { if (IsWin) VstBridge.Process(handle, buf, frames); }
         public void Reset(IntPtr handle) { if (IsWin) VstBridge.Reset(handle); }

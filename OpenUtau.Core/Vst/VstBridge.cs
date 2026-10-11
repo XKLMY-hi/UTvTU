@@ -69,6 +69,40 @@ namespace OpenUtau.Core.Vst {
             return vst_activate(handle, enable ? 1 : 0) == 0;
         }
 
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int vst_setup_export(IntPtr handle, double sampleRate, int maxBlockSize, int offline);
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int vst_process_export(IntPtr handle, float[] buffer, int frames, long samplePosition,
+            double quarterNotes, double tempo, int numerator, int denominator);
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int vst_get_latency_samples(IntPtr handle);
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int vst_get_export_parameter(IntPtr handle, int index, out int id, out float value);
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int vst_set_export_parameter(IntPtr handle, int id, float value);
+
+        public static bool SetupExport(IntPtr handle, double rate, int block, bool offline) => vst_setup_export(handle, rate, block, offline ? 1 : 0) == 0;
+        public static bool ProcessExport(IntPtr handle, float[] buffer, int frames, VstExportContext c) =>
+            vst_process_export(handle, buffer, frames, c.SamplePosition, c.QuarterNotes, c.Tempo, c.Numerator, c.Denominator) == 0;
+        public static int GetLatencySamples(IntPtr handle) => vst_get_latency_samples(handle);
+        public static VstExportParameter[] CaptureExportParameters(IntPtr handle) {
+            var values = new System.Collections.Generic.List<VstExportParameter>();
+            int count = GetNumParams(handle);
+            for (int i = 0; i < count; i++) {
+                int result = vst_get_export_parameter(handle, i, out int id, out float value);
+                if (result == 1) continue; // Read-only output meters are not a settings snapshot.
+                if (result != 0)
+                    throw new InvalidOperationException("Could not capture a VST parameter.");
+                values.Add(new VstExportParameter(id, value));
+            }
+            return values.ToArray();
+        }
+        public static bool RestoreExportParameters(IntPtr handle, VstExportParameter[] values) {
+            foreach (var value in values)
+                if (vst_set_export_parameter(handle, value.Id, value.Value) != 0) return false;
+            return true;
+        }
+
         // ── Audio Processing ──────────────────────────────────────
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]

@@ -18,6 +18,8 @@
 #include "public.sdk/source/common/memorystream.h"
 #include "pluginterfaces/vst/ivstaudioprocessor.h"
 #include "pluginterfaces/vst/ivstcomponent.h"
+#include "pluginterfaces/vst/ivstprocesscontext.h"
+#include "pluginterfaces/vst/vstspeaker.h"
 #include "pluginterfaces/vst/ivsteditcontroller.h"
 #include "pluginterfaces/vst/vsttypes.h"
 #include "pluginterfaces/gui/iplugview.h"
@@ -32,6 +34,8 @@
 #include <string>
 #include <vector>
 #include <thread>
+#include <cmath>
+#include <limits>
 
 #ifdef _WIN32
 #  include <windows.h>
@@ -138,6 +142,8 @@ struct VstBridgeInstance {
     Vst::PlugProvider*          plugProvider = nullptr;
 
     bool        isActivated  = false;
+    bool        isProcessing = false;
+    int         processMode = Vst::kRealtime;
     int         numInputs    = 2;
     int         numOutputs   = 2;
     int         maxBlockSize = 4096;
@@ -160,6 +166,7 @@ struct VstBridgeInstance {
 
     // Drain scratch (reused to avoid per-frame allocation)
     std::vector<std::pair<int,float>> drainedParams;
+    std::vector<std::pair<int,float>> exportParams;
 };
 
 tresult PLUGIN_API BridgeCompHandler::performEdit(Vst::ParamID id, Vst::ParamValue v) {
@@ -272,6 +279,7 @@ extern "C" VstBridgeInstance* vst_load(const wchar_t* bundlePath) {
 
 extern "C" void vst_unload(VstBridgeInstance* inst) {
     if (!inst) return;
+    if (inst->isProcessing && inst->processor) inst->processor->setProcessing(false);
     if (inst->isActivated && inst->component)
         inst->component->setActive(false);
     vst_close_editor(inst);
@@ -290,11 +298,12 @@ extern "C" void vst_unload(VstBridgeInstance* inst) {
 
 extern "C" int vst_setup(VstBridgeInstance* inst, double sr, int maxBlock) {
     if (!inst || !inst->processor || !inst->component) return -1;
+    if (!std::isfinite(sr) || sr <= 0 || maxBlock <= 0) return -1;
     g_lastError[0] = '\0';
     inst->sampleRate = sr; inst->maxBlockSize = maxBlock;
 
     Vst::ProcessSetup ps {};
-    ps.processMode = Vst::kRealtime; ps.symbolicSampleSize = Vst::kSample32;
+    ps.processMode = inst->processMode; ps.symbolicSampleSize = Vst::kSample32;
     ps.maxSamplesPerBlock = maxBlock; ps.sampleRate = sr;
     tresult r = inst->processor->setupProcessing(ps);
     if (r != kResultOk && r != kResultTrue) {
@@ -322,6 +331,10 @@ extern "C" int vst_setup(VstBridgeInstance* inst, double sr, int maxBlock) {
 extern "C" int vst_activate(VstBridgeInstance* inst, int enable) {
     if (!inst || !inst->component) return -1;
     g_lastError[0] = '\0';
+    if (!enable && inst->isProcessing) {
+        inst->processor->setProcessing(false);
+        inst->isProcessing = false;
+    }
     tresult r = inst->component->setActive(enable != 0);
     if (r != kResultOk && r != kResultTrue) {
         setError("setActive(%d) 0x%08X", enable, r); return -1;
@@ -333,24 +346,30 @@ extern "C" int vst_activate(VstBridgeInstance* inst, int enable) {
 
 // B6: SEH-safe wrapper — must be in its own function (no local objects with dtors)
 // so the compiler allows __try/__except.
-static void call_process_safe(VstBridgeInstance* inst, Vst::ProcessData& pd) {
+static tresult call_process_safe(VstBridgeInstance* inst, Vst::ProcessData& pd) {
 #ifdef _WIN32
     __try {
-        inst->processor->process(pd);
+        return inst->processor->process(pd);
     } __except (EXCEPTION_EXECUTE_HANDLER) {
         setError("vst_process: plugin crashed (SEH)");
         inst->isActivated = false;
+        return kResultFalse;
     }
 #else
-    inst->processor->process(pd);
+    return inst->processor->process(pd);
 #endif
 }
 // ═════════════════════════════════════════════════════════════════════
 //  Audio Processing  (with param queue consumption)
 // ═════════════════════════════════════════════════════════════════════
 
-extern "C" void vst_process(VstBridgeInstance* inst, float* buffer, int frames) {
-    if (!inst || !inst->processor || !inst->isActivated || frames <= 0) return;
+static int process_audio(VstBridgeInstance* inst, float* buffer, int frames, Vst::ProcessContext* context) {
+    if (!inst || !inst->processor || !inst->isActivated || frames < 0 || !buffer) return -1;
+    if (!inst->isProcessing) {
+        tresult r = inst->processor->setProcessing(true);
+        if (r != kResultOk && r != kNotImplemented) { setError("setProcessing failed"); return -1; }
+        inst->isProcessing = true;
+    }
     int nf = frames > inst->maxBlockSize ? inst->maxBlockSize : frames;
 
     // Deinterleave
@@ -379,31 +398,98 @@ extern "C" void vst_process(VstBridgeInstance* inst, float* buffer, int frames) 
             q->addPoint(0, (Vst::ParamValue)value, ptIdx);
         }
     }
+    for (auto& [pid, value] : inst->exportParams) {
+        int32 idx = 0;
+        if (auto* q = inputChanges.addParameterData((Vst::ParamID)pid, idx)) {
+            int32 point = 0;
+            q->addPoint(0, value, point);
+        }
+    }
+    inst->exportParams.clear();
 
     Vst::ProcessData pd {};
-    pd.processMode = Vst::kRealtime; pd.symbolicSampleSize = Vst::kSample32;
+    pd.processMode = inst->processMode; pd.symbolicSampleSize = Vst::kSample32;
     pd.numSamples = nf; pd.numInputs = 1; pd.numOutputs = 1;
     pd.inputs = &ib; pd.outputs = &ob;
     pd.inputParameterChanges = &inputChanges;
+    pd.processContext = context;
 
-    call_process_safe(inst, pd);
-    if (!inst->isActivated) return;  // plugin crashed in SEH
+    auto result = call_process_safe(inst, pd);
+    if (!inst->isActivated || result != kResultOk) {
+        setError("Plugin failed during process"); return -1;
+    }
 
     // Re-interleave
     for (int i = 0; i < nf; ++i) { buffer[i*2] = ch0[i]; buffer[i*2+1] = ch1[i]; }
+    return 0;
+}
+
+extern "C" void vst_process(VstBridgeInstance* inst, float* buffer, int frames) {
+    process_audio(inst, buffer, frames, nullptr);
+}
+
+extern "C" int vst_setup_export(VstBridgeInstance* inst, double sr, int block, int offline) {
+    if (!inst || !inst->processor || inst->isActivated) return -1;
+    inst->processMode = offline ? Vst::kOffline : Vst::kRealtime;
+    Vst::SpeakerArrangement stereo = Vst::SpeakerArr::kStereo;
+    inst->processor->setBusArrangements(&stereo, 1, &stereo, 1);
+    if (vst_setup(inst, sr, block) != 0) return -1;
+    if (inst->numInputs != 2 || inst->numOutputs != 2) {
+        setError("Export requires a stereo effect bus"); return -1;
+    }
+    return 0;
+}
+
+extern "C" int vst_process_export(VstBridgeInstance* inst, float* buffer, int frames,
+    long long position, double quarters, double tempo, int numerator, int denominator) {
+    if (!inst || frames > inst->maxBlockSize || !std::isfinite(quarters) || !std::isfinite(tempo)
+        || tempo <= 0 || numerator <= 0 || denominator <= 0) return -1;
+    Vst::ProcessContext context {};
+    context.state = Vst::ProcessContext::kPlaying | Vst::ProcessContext::kContTimeValid
+        | Vst::ProcessContext::kProjectTimeMusicValid | Vst::ProcessContext::kTempoValid
+        | Vst::ProcessContext::kTimeSigValid;
+    context.sampleRate = inst->sampleRate;
+    context.projectTimeSamples = context.continousTimeSamples = position;
+    context.projectTimeMusic = quarters;
+    context.tempo = tempo;
+    context.timeSigNumerator = numerator;
+    context.timeSigDenominator = denominator;
+    return process_audio(inst, buffer, frames, &context);
+}
+
+extern "C" int vst_get_latency_samples(VstBridgeInstance* inst) {
+    if (!inst || !inst->processor) return -1;
+    auto latency = inst->processor->getLatencySamples();
+    return latency <= (uint32)std::numeric_limits<int>::max() ? (int)latency : -1;
+}
+
+extern "C" int vst_get_export_parameter(VstBridgeInstance* inst, int index, int* id, float* value) {
+    if (!inst || !inst->controller || !id || !value) return -1;
+    Vst::ParameterInfo info {};
+    if (inst->controller->getParameterInfo(index, info) != kResultOk) return -1;
+    if (info.flags & Vst::ParameterInfo::kIsReadOnly) return 1;
+    *id = (int)info.id;
+    *value = (float)inst->controller->getParamNormalized(info.id);
+    return 0;
+}
+
+extern "C" int vst_set_export_parameter(VstBridgeInstance* inst, int id, float value) {
+    if (!inst || !inst->controller || !std::isfinite(value)) return -1;
+    if (inst->controller->setParamNormalized((Vst::ParamID)id, value) != kResultOk) return -1;
+    // Unlike the bounded realtime queue, this one-time restore cannot drop large parameter sets.
+    inst->exportParams.emplace_back(id, value);
+    return 0;
 }
 
 extern "C" void vst_reset(VstBridgeInstance* inst) {
     if (!inst || !inst->component) return;
     bool was = inst->isActivated;
-    if (was) inst->component->setActive(false);
-    inst->processor->setupProcessing(Vst::ProcessSetup{});
+    if (was) vst_activate(inst, false);
     Vst::ProcessSetup ps {};
-    ps.processMode = Vst::kRealtime; ps.symbolicSampleSize = Vst::kSample32;
+    ps.processMode = inst->processMode; ps.symbolicSampleSize = Vst::kSample32;
     ps.maxSamplesPerBlock = inst->maxBlockSize; ps.sampleRate = inst->sampleRate;
     inst->processor->setupProcessing(ps);
-    if (was) inst->component->setActive(true);
-    inst->isActivated = was;
+    if (was) vst_activate(inst, true);
 }
 
 // ═════════════════════════════════════════════════════════════════════

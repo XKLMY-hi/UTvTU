@@ -249,7 +249,10 @@ namespace OpenUtau.Core.Render {
 
                 // Collect VST effects — lock-free read from pre-loaded instances
                 var vstEffects = new System.Collections.Generic.List<SignalChain.Effects.IEffect>();
-                if (mode != MixFxMode.Off && export?.VstEffects != false && track.VstSlots != null) {
+                Vst.VstEffect[] ownedEffects = null;
+                if (export?.OwnedVstEffects != null) {
+                    if (export.OwnedVstEffects.TryGetValue(i, out ownedEffects)) vstEffects.AddRange(ownedEffects);
+                } else if (mode != MixFxMode.Off && export?.VstEffects != false && track.VstSlots != null) {
                     var active = Vst.VstPluginManager.Inst.GetActiveEffects(track.TrackNo);
                     if (active.Count == 0 && track.VstSlots.Any(s => s.IsLoaded && !s.Bypassed)) {
                         // 兜底：槽位有插件但实例未加载（异步加载未触发/未完成/工程
@@ -271,6 +274,8 @@ namespace OpenUtau.Core.Render {
                 ISignalSource trackSignal = export?.TrackVolumeAndPan == false ? trackMix : fader;
                 ISignalSource trackOut = export == null ? WrapTrackFx(fader, track, mode, vstEffects.ToArray())
                     : EffectChain.Build(export.BuiltInEffects ? MixFxSource.WrapWith(trackSignal, parameters != null ? parameters.Effects : track.MixFx) : trackSignal, vstEffects.ToArray());
+                if (export?.OwnedVstEffects != null)
+                    trackOut = new ExportTrackSource(trackOut, ownedEffects ?? Array.Empty<Vst.VstEffect>(), export.Cancellation);
 
                 // LevelTracker wraps the FINAL per-track output (fader + FX),
                 // so the mixer meter shows the actual audible signal.

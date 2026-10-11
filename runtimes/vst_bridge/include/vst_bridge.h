@@ -35,6 +35,12 @@ VSTBRIDGE_API void vst_unload(VstBridgeInstance* inst);
 VSTBRIDGE_API int vst_setup(VstBridgeInstance* inst,
                             double sampleRate,
                             int maxBlockSize);
+VSTBRIDGE_API int vst_setup_export(VstBridgeInstance* inst, double sampleRate, int maxBlockSize, int offline);
+VSTBRIDGE_API int vst_process_export(VstBridgeInstance* inst, float* buffer, int frames,
+    long long samplePosition, double quarterNotes, double tempo, int numerator, int denominator);
+VSTBRIDGE_API int vst_get_latency_samples(VstBridgeInstance* inst);
+VSTBRIDGE_API int vst_get_export_parameter(VstBridgeInstance* inst, int index, int* id, float* value);
+VSTBRIDGE_API int vst_set_export_parameter(VstBridgeInstance* inst, int id, float value);
 
 /// Start/stop processing.  Call vst_activate(true) before the first
 /// process call of a playback session; call vst_activate(false) after.

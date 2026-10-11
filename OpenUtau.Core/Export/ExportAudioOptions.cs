@@ -7,10 +7,12 @@ using OpenUtau.Core.Ustx;
 
 namespace OpenUtau.Core.Export {
     public enum ExportWaveFormat { Pcm16, Pcm24, Float32 }
+    public enum ExportProcessingMode { Offline, Realtime }
 
     // A job owns these values; later UI changes cannot redirect a running export.
     public sealed record ExportAudioOptions {
         public ExportWaveFormat Format { get; init; } = ExportWaveFormat.Pcm24;
+        public ExportProcessingMode ProcessingMode { get; init; } = ExportProcessingMode.Offline;
         public int SampleRate { get; init; } = 44100;
         public int StartTick { get; init; }
         public int EndTick { get; init; } = -1;
@@ -21,9 +23,11 @@ namespace OpenUtau.Core.Export {
         public double MasterGain { get; init; } = 1;
         public IReadOnlyCollection<int>? TrackIndices { get; init; }
         internal IReadOnlyDictionary<int, ExportTrackParameters>? TrackParameters { get; init; }
+        internal IReadOnlyDictionary<int, Vst.VstEffect[]>? OwnedVstEffects { get; init; }
+        internal System.Threading.CancellationToken Cancellation { get; init; }
 
         public void Validate() {
-            if (!Enum.IsDefined(Format) || SampleRate is not (44100 or 48000 or 96000))
+            if (!Enum.IsDefined(Format) || !Enum.IsDefined(ProcessingMode) || SampleRate is not (44100 or 48000 or 96000))
                 throw new ArgumentException("Unsupported WAV format or sample rate.");
             if (StartTick < 0 || (EndTick != -1 && EndTick <= StartTick))
                 throw new ArgumentException("The export range must end after its start.");

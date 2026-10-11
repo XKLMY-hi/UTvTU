@@ -18,6 +18,10 @@ namespace OpenUtau.Core.Vst {
         private bool _isActivated;
         private int _maxBlockSize = 4096;
         private float[] _processScratch = Array.Empty<float>();
+        private IVstExportBridge? _exportBridge;
+        private Func<long, VstExportContext>? _exportClock;
+        private long _exportPosition;
+        public int LatencySamples => _exportBridge?.GetLatencySamples(_handle) ?? 0;
         // 原生编辑器窗口是否打开——Dispose 时必须先关闭（否则窗口悬空引用已卸载 handle）
         private bool _editorOpen;
         // 专用 VST 线程：controller 创建/attached/编辑器消息循环同线程（插件线程敏感 + 消息泵）
@@ -74,6 +78,43 @@ namespace OpenUtau.Core.Vst {
 
         // ── IEffect ────────────────────────────────────────────
 
+        internal (byte[] State, VstExportParameter[] Parameters) CaptureExportState() => VstThread.Invoke(() => {
+            if (_bridge is not IVstExportBridge export)
+                throw new NotSupportedException("The VST bridge does not support independent export.");
+            var state = _bridge.SaveState(_handle) ?? throw new InvalidOperationException($"Could not capture '{DisplayName}' for export.");
+            return (state, export.CaptureExportParameters(_handle));
+        });
+
+        internal void SetupForExport(double sampleRate, int blockSize, bool offline,
+            VstExportParameter[] parameters, Func<long, VstExportContext> clock) {
+            if (_bridge is not IVstExportBridge export)
+                throw new NotSupportedException("The VST bridge does not support independent export.");
+            _processScratch = new float[checked(blockSize * 2)];
+            VstThread.Invoke(() => {
+                if (!export.SetupExport(_handle, sampleRate, blockSize, offline))
+                    throw new InvalidOperationException($"'{DisplayName}' rejected {(offline ? "offline" : "realtime")} processing.");
+                if (!export.RestoreExportParameters(_handle, parameters))
+                    throw new InvalidOperationException($"Could not restore '{DisplayName}' parameters.");
+                if (!_bridge.Activate(_handle, true))
+                    throw new InvalidOperationException($"Could not activate '{DisplayName}' for export.");
+                _isActivated = true; // Cleanup must deactivate even if parameter flushing fails.
+                if (!export.ProcessExport(_handle, _processScratch, 0, clock(0)))
+                    throw new InvalidOperationException($"Could not initialize '{DisplayName}' export parameters.");
+            });
+            _maxBlockSize = blockSize;
+            _exportBridge = export;
+            _exportClock = clock;
+            _isSetup = _isActivated = true;
+        }
+
+        internal void SetExportPosition(long position) => _exportPosition = position;
+        void ProcessBlock(float[] buffer, int frames) {
+            if (_exportBridge == null) { _bridge.Process(_handle, buffer, frames); return; }
+            if (!_exportBridge.ProcessExport(_handle, buffer, frames, _exportClock!(_exportPosition)))
+                throw new InvalidOperationException($"'{DisplayName}' failed during export.");
+            _exportPosition += frames;
+        }
+
         public bool IsBypassed => _slot.Bypassed;
         public void Process(float[] buffer, int offset, int count) {
             if (_slot.Bypassed || _handle == IntPtr.Zero) return;
@@ -85,7 +126,7 @@ namespace OpenUtau.Core.Vst {
             // Device reads can be larger; split them without leaving a dry suffix.
             // Keep the usual small, offset-zero audio callback allocation-free.
             if (offset == 0 && frames <= _maxBlockSize && buffer.Length >= count) {
-                _bridge.Process(_handle, buffer, frames);
+                ProcessBlock(buffer, frames);
             } else {
                 if (_processScratch.Length < _maxBlockSize * 2)
                     _processScratch = new float[_maxBlockSize * 2];
@@ -94,7 +135,7 @@ namespace OpenUtau.Core.Vst {
                     int blockSamples = blockFrames * 2;
                     int sourceOffset = offset + processed * 2;
                     Array.Copy(buffer, sourceOffset, _processScratch, 0, blockSamples);
-                    _bridge.Process(_handle, _processScratch, blockFrames);
+                    ProcessBlock(_processScratch, blockFrames);
                     Array.Copy(_processScratch, 0, buffer, sourceOffset, blockSamples);
                     processed += blockFrames;
                 }
@@ -171,9 +212,10 @@ namespace OpenUtau.Core.Vst {
                 VstThread.Invoke(() => _bridge.Unload(_handle));
                 Log.Information($"[VstEffect] Disposed '{_entry.Name}' (0x{_handle:X})");
                 _handle = IntPtr.Zero;
-                _vstThread?.Dispose();
-                _vstThread = null;
             }
+            // Failed Load still created a dedicated thread, even though the handle is zero.
+            _vstThread?.Dispose();
+            _vstThread = null;
         }
     }
 }

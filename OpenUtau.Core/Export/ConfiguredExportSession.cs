@@ -14,7 +14,15 @@ namespace OpenUtau.Core.Export {
         readonly ExportDeliveryPlan plan;
         public ConfiguredExportSession(ExportDeliveryPlan plan) => this.plan = plan;
 
-        public Task RunAsync(IProgress<ExportDeliveryProgress> progress, CancellationToken ct = default) => Task.Run(async () => {
+        public async Task RunAsync(IProgress<ExportDeliveryProgress> progress, CancellationToken ct = default) {
+            ct.ThrowIfCancellationRequested();
+            plan.ValidateTargets();
+            // Capture live editor parameters once, before yielding from the start action.
+            var snapshots = ExportVstSession.Capture(plan);
+            var clock = plan.Project.timeAxis.Clone();
+            int resolution = plan.Project.resolution;
+            var bridge = VstPluginManager.Inst.Bridge;
+            await Task.Run(async () => {
             int count = plan.PerTrack ? plan.Targets.Count : 1;
             for (int i = 0; i < count; i++) {
                 ct.ThrowIfCancellationRequested();
@@ -28,8 +36,10 @@ namespace OpenUtau.Core.Export {
                 CancellationTokenSource cancellation = null;
                 string floatPath = Path.Combine(Path.GetDirectoryName(target.Path)!, ".utvtu-render-" + Guid.NewGuid().ToString("N") + ".wav");
                 try {
+                    using var effects = new ExportVstSession(snapshots, options, clock, resolution, bridge, ct);
+                    options = options with { OwnedVstEffects = effects.Effects, Cancellation = ct };
                     double duration = plan.DurationSeconds + options.TailSeconds;
-                    if (plan.NeedsDevice(options)) {
+                    if (options.ProcessingMode == ExportProcessingMode.Realtime && plan.NeedsDevice(options)) {
                         await PlaybackManager.Inst.RecordExport(plan.Project, floatPath, options, plan.StartSeconds, duration,
                             new InlineProgress<double>(p => Report(p * .9, "recording")), ct).ConfigureAwait(false);
                         ct.ThrowIfCancellationRequested();
@@ -55,7 +65,8 @@ namespace OpenUtau.Core.Export {
                     VstPluginManager.Inst.TryFlushAllPendingDispose();
                 }
             }
-        }, ct);
+            }, ct).ConfigureAwait(false);
+        }
 
         sealed class InlineProgress<T>(Action<T> report) : IProgress<T> {
             public void Report(T value) => report(value);
