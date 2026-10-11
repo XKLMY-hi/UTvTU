@@ -652,7 +652,7 @@ Warning: this option removes custom presets.</system:String>
   <system:String x:Key="prefs.nav.midi">MIDI Devices</system:String>
   <system:String x:Key="prefs.page.sub">Audio engine, voicebank libraries and appearance.</system:String>
   <system:String x:Key="prefs.card.audioout">Audio Output</system:String>
-  <system:String x:Key="prefs.card.audioout.sub">Choose the device and format of the audio engine.</system:String>
+  <system:String x:Key="prefs.card.audioout.sub">Choose the output device for playback and preview.</system:String>
   <system:String x:Key="prefs.card.playback">Playback &amp; Latency</system:String>
   <system:String x:Key="prefs.card.playback.sub">Tune how responsive the singing preview feels.</system:String>
   <system:String x:Key="prefs.card.voicebank">Voicebank &amp; Library Locations</system:String>
@@ -1360,4 +1360,24 @@ Range {2}–{3} s · Tail {4} s
   <system:String x:Key="prefs.color.role.tertiary">Tertiary</system:String>
   <system:String x:Key="prefs.motion.reduce">Reduce interface motion</system:String>
   <x:String x:Key="prefs.color.seed.placeholder">#RRGGBB</x:String>
+  <!-- Preferences category descriptions and concise option labels. -->
+  <system:String x:Key="prefs.description.audio">Choose your playback device, audio backend and output test.</system:String>
+  <system:String x:Key="prefs.description.playback">Adjust preview scrolling, playback position and the metronome.</system:String>
+  <system:String x:Key="prefs.description.library">Manage voicebank and sample folders, and view detected singers.</system:String>
+  <system:String x:Key="prefs.description.appearance">Customize themes, colors, language and piano roll visuals.</system:String>
+  <system:String x:Key="prefs.description.editor">Configure lyric editing, recent file formats and rendering.</system:String>
+  <system:String x:Key="prefs.description.general">Configure UTAU, DiffSinger and plugin scanning.</system:String>
+  <system:String x:Key="prefs.description.midi">View MIDI device support in this version.</system:String>
+  <system:String x:Key="prefs.description.shortcuts">Find commands, keyboard shortcuts and gesture conflicts.</system:String>
+  <system:String x:Key="prefs.description.about">Version, project information and related links.</system:String>
+  <system:String x:Key="prefs.card.backend">Audio backend and test</system:String>
+  <system:String x:Key="prefs.card.backend.sub">Choose a playback backend and test the current output settings.</system:String>
+  <system:String x:Key="prefs.card.language">Language and sorting</system:String>
+  <system:String x:Key="prefs.singers.empty">No singers detected yet. Add a voicebank to a singer folder, then refresh.</system:String>
+  <system:String x:Key="prefs.save.hint">Close to save your preferences.</system:String>
+  <system:String x:Key="prefs.option.pause.keep">Keep position</system:String>
+  <system:String x:Key="prefs.option.pause.reset">Reset view + cursor</system:String>
+  <system:String x:Key="prefs.option.pause.cursor">Reset cursor</system:String>
+  <system:String x:Key="prefs.option.degree.solfege">Solfege</system:String>
+  <system:String x:Key="prefs.option.degree.numbered">Numbered</system:String>
 </ResourceDictionary>

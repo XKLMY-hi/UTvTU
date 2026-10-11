@@ -482,7 +482,7 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="prefs.nav.midi">MIDI 设备</system:String>
   <system:String x:Key="prefs.page.sub">音频引擎、音源素材库与界面外观。</system:String>
   <system:String x:Key="prefs.card.audioout">音频输出</system:String>
-  <system:String x:Key="prefs.card.audioout.sub">选择音频引擎的设备与格式。</system:String>
+  <system:String x:Key="prefs.card.audioout.sub">选择用于播放和预览的输出设备。</system:String>
   <system:String x:Key="prefs.card.playback">播放与延迟</system:String>
   <system:String x:Key="prefs.card.playback.sub">调整演唱预览的响应灵敏度。</system:String>
   <system:String x:Key="prefs.card.voicebank">音源与素材库位置</system:String>
@@ -1488,4 +1488,24 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="prefs.color.role.tertiary">第三色</system:String>
   <system:String x:Key="prefs.motion.reduce">减少界面动效</system:String>
   <x:String x:Key="prefs.color.seed.placeholder">#RRGGBB</x:String>
+  <!-- Preferences category descriptions and concise option labels. -->
+  <system:String x:Key="prefs.description.audio">选择播放设备、音频后端并测试输出。</system:String>
+  <system:String x:Key="prefs.description.playback">调整预览滚动、播放位置与节拍器。</system:String>
+  <system:String x:Key="prefs.description.library">管理音源与伴奏文件夹，查看已检测到的音源。</system:String>
+  <system:String x:Key="prefs.description.appearance">设置主题、配色、语言与钢琴窗显示。</system:String>
+  <system:String x:Key="prefs.description.editor">调整歌词编辑、最近文件与渲染选项。</system:String>
+  <system:String x:Key="prefs.description.general">配置 UTAU、DiffSinger 与插件扫描。</system:String>
+  <system:String x:Key="prefs.description.midi">查看当前版本的 MIDI 设备支持信息。</system:String>
+  <system:String x:Key="prefs.description.shortcuts">查找命令、快捷键与手势冲突。</system:String>
+  <system:String x:Key="prefs.description.about">版本、项目信息与相关链接。</system:String>
+  <system:String x:Key="prefs.card.backend">音频后端与测试</system:String>
+  <system:String x:Key="prefs.card.backend.sub">选择播放后端，测试当前输出设置。</system:String>
+  <system:String x:Key="prefs.card.language">语言与排序</system:String>
+  <system:String x:Key="prefs.singers.empty">尚未检测到音源。将音源放入音源文件夹后刷新。</system:String>
+  <system:String x:Key="prefs.save.hint">关闭时保存设置。</system:String>
+  <system:String x:Key="prefs.option.pause.keep">保持当前位置</system:String>
+  <system:String x:Key="prefs.option.pause.reset">回退标记与视图</system:String>
+  <system:String x:Key="prefs.option.pause.cursor">仅回退标记</system:String>
+  <system:String x:Key="prefs.option.degree.solfege">唱名</system:String>
+  <system:String x:Key="prefs.option.degree.numbered">简谱</system:String>
 </ResourceDictionary>

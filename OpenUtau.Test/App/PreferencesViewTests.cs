@@ -35,8 +35,8 @@ namespace OpenUtau.Test.App {
             string xaml = ReadXaml();
             Assert.Contains("ColumnDefinitions=\"232,*\"", xaml);   // 左导航 232
             Assert.Contains("Margin=\"24\"", xaml);                 // 内容内边距 24
-            Assert.Contains("FontSize=\"{DynamicResource Md3TypeTitleLarge}\"", xaml);
-            Assert.Contains("<Setter Property=\"CornerRadius\" Value=\"{DynamicResource Md3ShapeMedium}\"/>", xaml);
+            Assert.Contains("FontSize=\"{DynamicResource Md3TypeDisplaySmall}\"", xaml);
+            Assert.Contains("<Setter Property=\"CornerRadius\" Value=\"{DynamicResource Md3ShapeExtraLarge}\"/>", xaml);
             Assert.Contains("<Setter Property=\"Height\" Value=\"{DynamicResource Md3WorkspaceControlHeight}\"/>", xaml);
             // 分段控件 = 圆角胶囊容器 + 选中项 secondary-container + ✓
             Assert.Contains("Selector=\"Border.segmented\"", xaml);

@@ -112,6 +112,26 @@ namespace OpenUtau.App.Views {
         }
 
         private void ShowPage(string tag, Button selected) {
+            SettingsScroll.Offset = default;
+            PageDescription[!TextBlock.TextProperty] = new DynamicResourceExtension("prefs.description." + tag);
+            SettingsShape.Kind = tag switch {
+                "audio" or "editor" => MaterialShapeKind.Arch,
+                "appearance" or "about" => MaterialShapeKind.Cookie7,
+                "playback" or "midi" => MaterialShapeKind.Sunny,
+                _ => MaterialShapeKind.Square,
+            };
+            SettingsIcon[!DawIcon.DataProperty] = new DynamicResourceExtension(tag switch {
+                "audio" => "icon-volume-x",
+                "playback" => "icon-play",
+                "library" => "icon-book-open",
+                "appearance" => "icon-palette",
+                "editor" => "icon-pencil",
+                "general" => "icon-sliders",
+                "midi" => "icon-music",
+                "about" => "icon-info",
+                "shortcuts" => "icon-list",
+                _ => "icon-settings",
+            });
             // The page heading describes the selected configuration area, rather
             // than repeating the generic screen caption for every category.
             PageHeading[!TextBlock.TextProperty] = new DynamicResourceExtension(tag switch {
