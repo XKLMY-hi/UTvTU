@@ -1,10 +1,13 @@
 {
-  "renderedAt": "2026-10-11T05:13:44.143Z",
+  "renderedAt": "2026-10-11T05:19:45.391Z",
   "browser": "155.0.4283.45",
   "captures": [
     "render-dark-1440.png",
     "resources-dark-1440.png",
     "context-dark-1440.png",
+    "context-expressions-dark-1440.png",
+    "context-lyrics-dark-1440.png",
+    "context-track-dark-1440.png",
     "overlays-dark-1440.png",
     "render-light-1440.png",
     "render-dark-800.png"
@@ -22,6 +25,17 @@
   "inputRestored": true,
   "matchingRows": 1,
   "emptyState": true,
+  "dockInitial": {
+    "height": 387,
+    "headHeight": 40,
+    "width": 1440,
+    "editorHeight": 386
+  },
+  "dockResized": 411,
+  "dockCollapsed": 40,
+  "expressionTool": true,
+  "lyricsTool": true,
+  "trackTool": true,
   "popupFocused": true,
   "focusRestored": true,
   "pageErrors": []
