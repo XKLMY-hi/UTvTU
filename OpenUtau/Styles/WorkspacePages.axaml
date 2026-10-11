@@ -14,7 +14,7 @@
             </Border>
             <!-- Symmetric reserved icon space prevents the label moving when selected. -->
             <Grid ColumnDefinitions="16,*,16" Margin="6,0">
-              <c:DawIcon Name="PART_Check" Data="{StaticResource icon-check}" Width="12" Height="12"
+              <c:DawIcon Name="PART_Check" Data="{StaticResource icon-checkmark}" Width="12" Height="12"
                          VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="False"
                          Fill="{TemplateBinding Foreground}"/>
               <TextBlock Grid.Column="1" Name="PART_Label" Text="{TemplateBinding Content}"
