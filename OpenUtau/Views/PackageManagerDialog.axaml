@@ -1,4 +1,4 @@
-<controls:WindowEx xmlns="https://github.com/avaloniaui"
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
         xmlns:controls="clr-namespace:OpenUtau.App.Controls"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,8 +6,7 @@
         xmlns:vm="using:OpenUtau.App.ViewModels"
         mc:Ignorable="d"
         x:Class="OpenUtau.App.Views.PackageManagerDialog"
-        Icon="/Assets/brand/utvtu.ico"
-        Title="{DynamicResource packages.caption}" Width="900" Height="600" WindowStartupLocation="CenterScreen">
+        Title="{DynamicResource packages.caption}" Focusable="True">
   <Design.DataContext>
     <vm:PackageManagerViewModel/>
   </Design.DataContext>
@@ -52,4 +51,4 @@
   </Grid>
       </Border>
     </DockPanel>
-</controls:WindowEx>
+</controls:WorkspaceToolView>

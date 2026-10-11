@@ -15,7 +15,7 @@ using OpenUtau.Core.Util;
 using Serilog;
 
 namespace OpenUtau.App.Views {
-    public partial class RenderWindow : WindowEx, ICmdSubscriber {
+    public partial class RenderWindow : WorkspaceToolView, ICmdSubscriber {
         readonly UiThreadAffinity ui = new();
         readonly RenderWindowJobOwner jobs;
         readonly UProject project;
@@ -23,6 +23,11 @@ namespace OpenUtau.App.Views {
         bool ready, refreshing, rendering, closed, showingMixdown = true;
         int browseVersion;
         string? deliveredDirectory;
+        public event Action? JobStateChanged;
+        public bool IsRendering => rendering;
+        public bool HasJobStatus { get; private set; }
+        public string? Status => ProgressLabel.Text;
+        public UProject Project => project;
 
         public RenderWindow() {
             InitializeComponent();
@@ -143,7 +148,7 @@ namespace OpenUtau.App.Views {
         public async void OnBrowsePath(object? sender, RoutedEventArgs args) {
             if (closed || rendering) return;
             int version = ++browseVersion;
-            var file = await FilePicker.SaveFile(this, "menu.file.exportmixdown", FilePicker.WAV);
+            var file = await FilePicker.SaveFile(WindowHost, "menu.file.exportmixdown", FilePicker.WAV);
             if (!closed && !rendering && version == browseVersion && ReferenceEquals(project, DocManager.Inst.Project) && !string.IsNullOrWhiteSpace(file)) OutputPathBox.Text = file;
         }
         public async void OnStartRender(object? sender, RoutedEventArgs args) {
@@ -151,12 +156,15 @@ namespace OpenUtau.App.Views {
             var job = jobs.TryBegin(project.tracks.Select(t => t.TrackName));
             if (job == null) return;
             rendering = true;
+            HasJobStatus = true;
+            JobStateChanged?.Invoke();
             browseVersion++;
             InputPanel.IsEnabled = false;
             StartBtn.IsEnabled = false;
             CancelBtn.IsEnabled = true;
             ValidationText.IsVisible = false;
             ProgressLabel.Text = ThemeManager.GetString("render.phase.preparing");
+            JobStateChanged?.Invoke();
             ProgressSubLabel.IsVisible = true;
             ProgressSubLabel.Classes.Remove("renderError");
             ProgressSubLabel.Text = string.Empty;
@@ -169,6 +177,7 @@ namespace OpenUtau.App.Views {
                     ProgressSubLabel.Text = $"{p.FileIndex}/{p.FileCount} · {Path.GetFileName(p.File)}";
                     ProgressBarControl.Value = p.Fraction * 100;
                     ProgressPercentText.Text = (p.Fraction * 100).ToString("0", CultureInfo.CurrentCulture) + "%";
+                    JobStateChanged?.Invoke();
                 })), job.Token);
             } catch (OperationCanceledException ex) { failure = ex; }
             catch (Exception ex) { failure = ex; if (!job.Token.IsCancellationRequested) Log.Error(ex, "Render delivery failed"); }
@@ -191,6 +200,7 @@ namespace OpenUtau.App.Views {
                         ProgressBarControl.Value = 100;
                         ProgressPercentText.Text = "100%";
                     }
+                    JobStateChanged?.Invoke();
                 });
             }
         }
@@ -198,6 +208,7 @@ namespace OpenUtau.App.Views {
             if (closed || !rendering) return;
             CancelBtn.IsEnabled = false;
             ProgressLabel.Text = ThemeManager.GetString("render.status.cancelling");
+            JobStateChanged?.Invoke();
             jobs.CancelCurrent();
         }
         public void OnOpenFolder(object? sender, RoutedEventArgs args) {
@@ -219,6 +230,9 @@ namespace OpenUtau.App.Views {
             browseVersion++;
             DocManager.Inst.RemoveSubscriber(this);
             jobs.Close();
+            rendering = false;
+            JobStateChanged?.Invoke();
+            JobStateChanged = null;
             base.OnClosed(e);
         }
     }

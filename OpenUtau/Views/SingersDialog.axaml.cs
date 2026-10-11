@@ -18,7 +18,7 @@ using OpenUtau.Core.Ustx;
 using Serilog;
 
 namespace OpenUtau.App.Views {
-    public partial class SingersDialog : WindowEx, ICmdSubscriber {
+    public partial class SingersDialog : WorkspaceToolView, ICmdSubscriber {
         private bool editingCell = false;
 
         WaveFile? wav;
@@ -26,7 +26,7 @@ namespace OpenUtau.App.Views {
 
         public SingersDialog() {
             InitializeComponent();
-            DocManager.Inst.AddSubscriber(this);
+            Opened += (_, _) => DocManager.Inst.AddSubscriber(this);
         }
 
         protected override void OnClosed(EventArgs e) {
@@ -62,7 +62,7 @@ namespace OpenUtau.App.Views {
                 return;
             }
             var file = await FilePicker.OpenFile(
-                this, "singers.setimage",
+                WindowHost, "singers.setimage",
                 viewModel.Singer.Location,
                 FilePickerFileTypes.ImageAll);
             if (file == null) {
@@ -78,7 +78,7 @@ namespace OpenUtau.App.Views {
                 viewModel.SetImage(Path.GetRelativePath(viewModel.Singer.Location, file));
             } catch (Exception e) {
                 Log.Error(e, "Failed to set image");
-                _ = await MessageBox.ShowError(this, e);
+                _ = await MessageBox.ShowError(WindowHost, e);
             }
         }
 
@@ -88,7 +88,7 @@ namespace OpenUtau.App.Views {
                 return;
             }
             var file = await FilePicker.OpenFile(
-                this, "singers.setportrait",
+                WindowHost, "singers.setportrait",
                 viewModel.Singer.Location,
                 FilePickerFileTypes.ImageAll);
             if (file == null) {
@@ -104,7 +104,7 @@ namespace OpenUtau.App.Views {
                 viewModel.SetPortrait(Path.GetRelativePath(viewModel.Singer.Location, file));
             } catch (Exception e) {
                 Log.Error(e, "Failed to set portrait");
-                _ = await MessageBox.ShowError(this, e);
+                _ = await MessageBox.ShowError(WindowHost, e);
             }
         }
 
@@ -115,7 +115,7 @@ namespace OpenUtau.App.Views {
             }
             var dialog = new SingerPublishDialog();
             dialog.DataContext = new SingerPublishViewModel(viewModel.Singer);
-            await dialog.ShowDialog(this);
+            await dialog.ShowDialog(WindowHost);
         }
 
         async void OnMerge(object sender, RoutedEventArgs args) {
@@ -129,7 +129,7 @@ namespace OpenUtau.App.Views {
             }
             var dialog = new MergeVoicebankDialog();
             dialog.DataContext = new MergeVoicebankViewModel(classicSinger);
-            await dialog.ShowDialog(this);
+            await dialog.ShowDialog(WindowHost);
         }
 
         void OnSetUseFilenameAsAlias(object sender, RoutedEventArgs args) {
@@ -150,7 +150,7 @@ namespace OpenUtau.App.Views {
             if (playbackState == PlaybackState.Playing) {
                 playBack.Stop();
             }
-            await dialog.ShowDialog(this);
+            await dialog.ShowDialog(WindowHost);
         }
 
         void OnSelectedSingerChanged(object sender, SelectionChangedEventArgs e) {
@@ -223,7 +223,7 @@ namespace OpenUtau.App.Views {
             string path = Core.Util.Preferences.Default.VLabelerPath;
             if (string.IsNullOrEmpty(path) || !OS.AppExists(path)) {
                 MessageBox.Show(
-                    this,
+                    WindowHost,
                     ThemeManager.GetString("singers.editoto.setvlabelerpath"),
                     ThemeManager.GetString("errors.caption"),
                     MessageBox.MessageBoxButtons.Ok);
@@ -233,7 +233,7 @@ namespace OpenUtau.App.Views {
                 Integrations.VLabelerClient.Inst.GotoOto(singer, oto);
             } catch (Exception e) {
                 MessageBox.Show(
-                    this,
+                    WindowHost,
                     e.ToString(),
                     ThemeManager.GetString("errors.caption"),
                     MessageBox.MessageBoxButtons.Ok);
@@ -265,7 +265,7 @@ namespace OpenUtau.App.Views {
             string path = Core.Util.Preferences.Default.SetParamPath;
             if (string.IsNullOrEmpty(path) || !File.Exists(path)) {
                 MessageBox.Show(
-                    this,
+                    WindowHost,
                     ThemeManager.GetString("singers.editoto.setsetparampath"),
                     ThemeManager.GetString("errors.caption"),
                     MessageBox.MessageBoxButtons.Ok);
@@ -289,7 +289,7 @@ namespace OpenUtau.App.Views {
                 }
             } catch (Exception e) {
                 MessageBox.Show(
-                    this,
+                    WindowHost,
                     e.ToString(),
                     ThemeManager.GetString("errors.caption"),
                     MessageBox.MessageBoxButtons.Ok);
@@ -308,7 +308,7 @@ namespace OpenUtau.App.Views {
                     p.Start();
                 } else {
                     MessageBox.Show(
-                        this,
+                        WindowHost,
                         ThemeManager.GetString("singers.readme.notfound"),
                         ThemeManager.GetString("errors.caption"),
                         MessageBox.MessageBoxButtons.Ok);
@@ -377,7 +377,7 @@ namespace OpenUtau.App.Views {
                 MessageBox? msgbox = null;
                 string text = ThemeManager.GetString("singers.editoto.regenfrq.regenerating");
                 if (files.Length > 1) {
-                    msgbox = MessageBox.ShowModal(this, text, text);
+                    msgbox = MessageBox.ShowModal(WindowHost, text, text);
                 }
                 var scheduler = TaskScheduler.FromCurrentSynchronizationContext();
                 viewModel.RegenFrq(files, control.Tag as string, count => {
@@ -385,7 +385,7 @@ namespace OpenUtau.App.Views {
                 }).ContinueWith(task => {
                     msgbox?.Close();
                     if (task.IsFaulted && task.Exception != null) {
-                        MessageBox.ShowError(this, task.Exception);
+                        MessageBox.ShowError(WindowHost, task.Exception);
                     } else {
                         DrawOto(viewModel.SelectedOto);
                     }
@@ -442,7 +442,7 @@ namespace OpenUtau.App.Views {
         }
 
         void OnKeyDown(object sender, KeyEventArgs args) {
-            if (args.Handled || editingCell || (FocusManager?.GetFocusedElement() is TextBox)) {
+            if (args.Handled || editingCell || (WindowHost.FocusManager?.GetFocusedElement() is TextBox)) {
                 return;
             }
             var viewModel = DataContext as SingersViewModel;
@@ -505,7 +505,7 @@ namespace OpenUtau.App.Views {
         public void OnNext(UCommand cmd, bool isUndo) {
             if (cmd is LoadingNotification loadingNotif && loadingNotif.window == typeof(SingersDialog)) {
                 if (loadingNotif.startLoading) {
-                    LoadingWindow.BeginLoading(this);
+                    LoadingWindow.BeginLoading(WindowHost);
                 } else {
                     LoadingWindow.EndLoading();
                 }

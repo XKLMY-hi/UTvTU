@@ -440,8 +440,8 @@ namespace OpenUtau.Test.App {
         [AvaloniaFact]
         public void DialogXaml_StylesAreScopedInline_NoAppOrStylesFileNeeded() {
             string xaml = DialogXaml();
-            // 样式全部内联在窗口里（不新增 Styles 文件、不动 App.axaml）
-            Assert.Contains("<Window.Styles>", xaml);
+            // Module styles stay scoped to the embedded tool, independent of its host.
+            Assert.Contains("<controls:WorkspaceToolView.Styles>", xaml);
             Assert.Contains("x:Class=\"OpenUtau.App.Views.MixFxDialog\"", xaml);
             // 纯类选择器必须带 x:SetterTargetType（本仓 Avalonia 12 约定）——
             // 这里断言的是"没有裸的纯类选择器"：所有选择器都以类型名开头。

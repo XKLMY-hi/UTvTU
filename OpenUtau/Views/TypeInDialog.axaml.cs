@@ -1,15 +1,16 @@
-﻿using System;
+using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 using OpenUtau.App.Controls;
 using Avalonia.Interactivity;
 
 namespace OpenUtau.App.Views {
-    public partial class TypeInDialog : WindowEx {
+    public partial class TypeInDialog : WorkspaceToolView {
         public Action<string>? onFinish;
 
         public TypeInDialog() {
             InitializeComponent();
+            Width = 360;
             OkButton.Click += OkButtonClick;
             TextBox.AttachedToVisualTree += (s, e) => { TextBox.SelectAll(); TextBox.Focus(); };
         }

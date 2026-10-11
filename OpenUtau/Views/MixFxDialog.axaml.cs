@@ -25,7 +25,7 @@ namespace OpenUtau.App.Views {
     /// 提交语义：确定 = 保留；取消 / ESC = 恢复到窗口打开时的设置快照；
     /// 直接点标题栏关闭 = 保留（等同确定，只是不写库偏好）。
     /// </summary>
-    public partial class MixFxDialog : WindowEx, ICmdSubscriber {
+    public partial class MixFxDialog : WorkspaceToolView, ICmdSubscriber {
         static readonly Dictionary<UTrack, MixFxDialog> open = new Dictionary<UTrack, MixFxDialog>();
 
         readonly MixFxViewModel viewModel;
@@ -142,7 +142,7 @@ namespace OpenUtau.App.Views {
                 if (!string.IsNullOrWhiteSpace(name)) captured = name;
             };
             dialog.Closed += (_, __) => tcs.TrySetResult(captured);
-            dialog.ShowDialog(this);
+            dialog.ShowDialog(WindowHost);
             return tcs.Task;
         }
 

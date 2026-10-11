@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:OpenUtau.App.Controls" x:Class="OpenUtau.App.Views.ToolWorkspaceView"
+             Background="{DynamicResource md3.surface}">
+  <UserControl.Styles><StyleInclude Source="/Styles/ToolWorkspace.axaml"/></UserControl.Styles>
+  <Grid RowDefinitions="56,*">
+    <Border BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1" Padding="16,0">
+      <Grid ColumnDefinitions="Auto,12,*,Auto">
+        <Button Name="BackButton" Classes="toolAction" Content="{DynamicResource workspace.return}" Click="OnBack"/>
+        <TextBlock Grid.Column="2" FontSize="16" FontWeight="Medium" VerticalAlignment="Center"
+                   Text="{DynamicResource workspace.production}"/>
+        <Button Grid.Column="3" Classes="toolAction" Content="{DynamicResource menu.tools.prefs}" Click="OnPreferences"/>
+      </Grid>
+    </Border>
+    <Grid Grid.Row="1" ColumnDefinitions="232,*">
+      <Border Background="{DynamicResource md3.surface-container-low}" BorderBrush="{DynamicResource md3.outline-variant}"
+              BorderThickness="0,0,1,0" Padding="16,24">
+        <StackPanel Spacing="8">
+          <TextBlock Classes="toolCaption" Text="{DynamicResource workspace.delivery}" Margin="12,0,0,4"/>
+          <Button Name="RenderTab" Classes="toolNav" Content="{DynamicResource render.page.title}" Tag="render" Click="OnNavigate"/>
+          <TextBlock Classes="toolCaption" Text="{DynamicResource workspace.resources}" Margin="12,20,0,4"/>
+          <Button Name="SingersTab" Classes="toolNav" Content="{DynamicResource sidebar.singers}" Tag="singers" Click="OnNavigate"/>
+          <Button Name="PackagesTab" Classes="toolNav" Content="{DynamicResource menu.tools.packages}" Tag="packages" Click="OnNavigate"/>
+          <TextBlock Name="JobStatus" Classes="toolHint" TextWrapping="Wrap" Margin="12,24,12,0"/>
+        </StackPanel>
+      </Border>
+      <Grid Grid.Column="1">
+        <ContentControl Name="RenderContent" IsVisible="False"/>
+        <Grid Name="ResourceContent" IsVisible="False" RowDefinitions="Auto,*" Margin="24,20,24,16">
+          <StackPanel Spacing="4" Margin="0,0,0,16">
+            <TextBlock FontSize="22" FontWeight="Medium" Text="{DynamicResource workspace.resources}"/>
+            <TextBlock Classes="toolHint" Text="{DynamicResource workspace.resources.hint}"/>
+          </StackPanel>
+          <ContentControl Grid.Row="1" Name="SingersContent" IsVisible="False"/>
+          <ContentControl Grid.Row="1" Name="PackagesContent" IsVisible="False"/>
+        </Grid>
+      </Grid>
+    </Grid>
+  </Grid>
+</UserControl>

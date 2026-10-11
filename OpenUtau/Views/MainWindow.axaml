@@ -14,6 +14,7 @@
         Focusable="True" KeyDown="OnKeyDown" PointerPressed="OnPointerPressed" Closing="WindowClosing"
         SizeChanged="OnWindowSizeChanged"
         DragDrop.AllowDrop="True">
+  <controls:WindowEx.Styles><StyleInclude Source="/Styles/ToolWorkspace.axaml"/></controls:WindowEx.Styles>
   <!-- 沿用 GitHub 原版的胶囊分组与 56 DIP 顶栏；窄窗自适应为 56 + 44。
        品牌、菜单、工程命令与当前导航生命周期保持同一入口。 -->
   <Window.Styles>
@@ -296,7 +297,9 @@
            两列都是 Auto：宽度由面板自己的 Width="{Binding XxxPanel.Width}" 决定（默认值见 PanelLayoutPreferences，
            拖拽/双击复位由 PanelSplitter 负责），折叠时面板 IsVisible=false ⇒ 列宽 0，不留空白也不留窄条。
            中央列 `*`（MinWidth=320）保证拖宽面板时不会把编排区挤没。 -->
-      <Grid Grid.Row="1" x:Name="MainLayout" ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+      <Grid Grid.Row="1" Name="EditorToolsLayout">
+        <Grid.RowDefinitions><RowDefinition Height="*" MinHeight="120"/><RowDefinition Height="Auto"/><RowDefinition Height="0"/></Grid.RowDefinitions>
+      <Grid Grid.Row="0" x:Name="MainLayout" ColumnDefinitions="Auto,Auto,*,Auto,Auto">
         <!-- ── 左：轨道头（仅工作台视图；面板本体带宽度绑定 + 折叠可见性） ── -->
         <Border Grid.Column="0" IsVisible="{Binding ViewSwitcher.ShowWorkspace}">
         <!-- 面板容器：宽与显隐都取自分隔条（夹紧后的有效宽 / 放不下自动折叠），不直接绑 VM 的意图值 -->
@@ -885,10 +888,26 @@
         </Panel>
       </Grid>
 
+        <GridSplitter Name="ContextToolSplitter" Grid.Row="1" Height="6" HorizontalAlignment="Stretch" IsVisible="False"
+                      ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" Background="{DynamicResource md3.outline-variant}"/>
+        <Border Name="ContextToolPanel" Grid.Row="2" IsVisible="False" Background="{DynamicResource md3.surface-container-low}">
+          <Grid RowDefinitions="40,*">
+            <Border BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1" Padding="16,0">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Name="ContextToolTitle" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <Button Grid.Column="1" Classes="toolClose" Width="32" Height="32" Content="×" Click="OnCloseContextTool"
+                        AutomationProperties.Name="{DynamicResource button.cancel}"/>
+              </Grid>
+            </Border>
+            <ContentControl Name="ContextToolHost" Grid.Row="1"/>
+          </Grid>
+        </Border>
+      </Grid>
+
       <!-- ══════════ 状态条 32：左侧引擎/进度 · 右侧版本 ══════════ -->
       <Border x:Name="ShellStatusRow" Grid.Row="2" Background="{DynamicResource md3.surface-container-low}"
               BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,1,0,0">
-        <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,0">
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto" Margin="16,0">
           <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
             <Border Width="7" Height="7" CornerRadius="999" VerticalAlignment="Center"
                     Background="{DynamicResource md3.primary}"/>
@@ -899,7 +918,11 @@
           <ProgressBar Grid.Column="1" Height="4" VerticalAlignment="Center" Margin="16,0"
                        Minimum="0" Maximum="100" Value="{Binding Progress}"
                        Background="Transparent"/>
-          <TextBlock Grid.Column="2" VerticalAlignment="Center" FontSize="10"
+          <Button Name="DeliveryStatusButton" Grid.Column="2" Classes="toolAction" IsVisible="False"
+                  Height="28" MinHeight="28" Margin="8,0" Click="OnReturnToDelivery">
+            <TextBlock Name="DeliveryStatusText" FontSize="11" MaxWidth="220" TextTrimming="CharacterEllipsis"/>
+          </Button>
+          <TextBlock Grid.Column="3" VerticalAlignment="Center" FontSize="10"
                      Foreground="{DynamicResource md3.on-surface-variant}"
                      Text="{Binding AppVersion}"/>
         </Grid>
@@ -916,6 +939,9 @@
 
     <!-- 偏好设置（全屏视图；模态覆盖层仍在其上） -->
 
+
+    <ContentControl Name="ToolWorkspaceHost" IsVisible="False" ZIndex="995" Focusable="True"/>
+    <views:WorkspaceDialogHost Name="ToolDialogHost" ZIndex="1200"/>
 
     <!-- Overlay layer: in-window modal dialog host -->
     <Grid Name="OverlayLayer" IsVisible="False" ZIndex="1000" Background="Transparent">

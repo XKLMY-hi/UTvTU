@@ -1,16 +1,15 @@
-﻿<controls:WindowEx xmlns="https://github.com/avaloniaui"
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
         xmlns:controls="clr-namespace:OpenUtau.App.Controls"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" MinWidth="420" MinHeight="240" Width="560" Height="340"
-        x:Class="OpenUtau.App.Views.LyricsDialog" WindowStartupLocation="CenterOwner"
-        Icon="/Assets/brand/utvtu.ico"
+        mc:Ignorable="d"
+        x:Class="OpenUtau.App.Views.LyricsDialog"
         Title="{DynamicResource lyrics.caption}"
-        Opened="OnOpened">
-  <controls:WindowEx.Styles>
+        Opened="OnOpened" Focusable="True">
+  <controls:WorkspaceToolView.Styles>
     <StyleInclude Source="/Controls/PianoRollStyles.axaml"/>
-  </controls:WindowEx.Styles>
+  </controls:WorkspaceToolView.Styles>
 <DockPanel LastChildFill="True">
       <Border>
   <Grid Margin="10,10,10,4" RowDefinitions="*,6,Auto,4,Auto">
@@ -74,4 +73,4 @@
   </Grid>
       </Border>
     </DockPanel>
-</controls:WindowEx>
+</controls:WorkspaceToolView>

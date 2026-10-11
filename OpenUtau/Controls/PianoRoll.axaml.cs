@@ -770,9 +770,6 @@ namespace OpenUtau.App.Controls {
                 DataContext = new ExpressionsViewModel(notesVM.Project.tracks[notesVM.Part.trackNo]),
             };
             dialog.ShowDialog(RootWindow);
-            if (dialog.Position.Y < 0) {
-                dialog.Position = dialog.Position.WithY(0);
-            }
         }
 
         public void KeyboardPointerWheelChanged(object sender, PointerWheelEventArgs args) {

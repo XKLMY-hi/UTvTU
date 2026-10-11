@@ -1,17 +1,15 @@
-<controls:WindowEx xmlns="https://github.com/avaloniaui"
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
         xmlns:controls="clr-namespace:OpenUtau.App.Controls"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         x:Class="OpenUtau.App.Views.TrackSettingsDialog"
-        Icon="/Assets/brand/utvtu.ico"
-        Title="{DynamicResource dialogs.tracksettings.caption}"
-        Width="360" SizeToContent="Height" WindowStartupLocation="CenterOwner" CanResize="False">
+        Title="{DynamicResource dialogs.tracksettings.caption}" Focusable="True">
 <DockPanel LastChildFill="True">
       <Border>
   <Border>
-    <StackPanel Margin="8">
+    <StackPanel Margin="16" Spacing="8">
       <TextBlock Text="{DynamicResource warning.renderer}" IsVisible="{Binding IsNotClassic}"/>
       <TextBlock Text="{DynamicResource prefs.rendering.resampler}" IsVisible="{Binding NeedsResampler}"/>
       <ComboBox Grid.Column="0" HorizontalAlignment="Stretch" IsVisible="{Binding NeedsResampler}"
@@ -39,4 +37,4 @@
   </Border>
       </Border>
     </DockPanel>
-</controls:WindowEx>
+</controls:WorkspaceToolView>

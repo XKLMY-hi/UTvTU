@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -7,7 +7,7 @@ using OpenUtau.Core;
 using OpenUtau.App.Controls;
 
 namespace OpenUtau.App.Views {
-    public partial class PackageManagerDialog : WindowEx {
+    public partial class PackageManagerDialog : WorkspaceToolView {
         public PackageManagerDialog() {
             InitializeComponent();
         }
@@ -19,12 +19,12 @@ namespace OpenUtau.App.Views {
                         if (row.IsInstalled && !row.IsUpToDate) {
                             var msg = string.Format(ThemeManager.GetString("packages.confirm.update.message"), row.Id, row.Version);
                             var caption = ThemeManager.GetString("packages.confirm.update.caption");
-                            var result = await MessageBox.Show(this, msg, caption, MessageBox.MessageBoxButtons.YesNo);
+                            var result = await MessageBox.Show(WindowHost, msg, caption, MessageBox.MessageBoxButtons.YesNo);
                             if (result != MessageBox.MessageBoxResult.Yes) return;
                         } else {
                             var msg = string.Format(ThemeManager.GetString("packages.confirm.install.message"), row.Id);
                             var caption = ThemeManager.GetString("packages.confirm.install.caption");
-                            var result = await MessageBox.Show(this, msg, caption, MessageBox.MessageBoxButtons.YesNo);
+                            var result = await MessageBox.Show(WindowHost, msg, caption, MessageBox.MessageBoxButtons.YesNo);
                             if (result != MessageBox.MessageBoxResult.Yes) return;
                         }
                         await vm.InstallAsync(row);
@@ -41,7 +41,7 @@ namespace OpenUtau.App.Views {
                     if (sender is Button b && b.DataContext is PackageRowViewModel row) {
                         var msg = string.Format(ThemeManager.GetString("packages.confirm.uninstall.message"), row.Id);
                         var caption = ThemeManager.GetString("packages.confirm.uninstall.caption");
-                        var result = await MessageBox.Show(this, msg, caption, MessageBox.MessageBoxButtons.YesNo);
+                        var result = await MessageBox.Show(WindowHost, msg, caption, MessageBox.MessageBoxButtons.YesNo);
                         if (result != MessageBox.MessageBoxResult.Yes) return;
                         await vm.UninstallAsync(row);
                     }
@@ -54,7 +54,7 @@ namespace OpenUtau.App.Views {
         async void OnInstallFromFile(object sender, RoutedEventArgs e) {
             try {
                 var file = await FilePicker.OpenFile(
-                    this, "menu.tools.dependency.install", FilePicker.OUDEP);
+                    WindowHost, "menu.tools.dependency.install", FilePicker.OUDEP);
                 if (file == null) return;
                 if (file.EndsWith(PackageManager.OudepExt)) {
                     await PackageManager.Inst.InstallFromFileAsync(file);

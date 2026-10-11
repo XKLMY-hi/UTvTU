@@ -97,6 +97,7 @@ namespace OpenUtau.App.Views {
         public MainWindow() {
             Log.Information("Creating main window.");
             InitializeComponent();
+            InitializeToolHosting();
             Log.Information("Initialized main window component.");
             Closed += OnShellClosed;
             DataContext = viewModel = new MainWindowViewModel {
@@ -550,8 +551,7 @@ namespace OpenUtau.App.Views {
         }
 
         internal void OnMenuRender(object sender, RoutedEventArgs args) {
-            var renderWindow = new RenderWindow();
-            renderWindow.ShowDialog(this);
+            ShowRenderWorkspace();
         }
 
         async void OnMenuExportMixdown(object sender, RoutedEventArgs args) {
@@ -703,9 +703,6 @@ namespace OpenUtau.App.Views {
                 DataContext = new ExpressionsViewModel(),
             };
             dialog.ShowDialog(this);
-            if (dialog.Position.Y < 0) {
-                dialog.Position = dialog.Position.WithY(0);
-            }
         }
 
         async void OnMenuSingers(object sender, RoutedEventArgs args) {
@@ -724,47 +721,9 @@ namespace OpenUtau.App.Views {
             return null;
         }
 
-        public async Task OpenSingersWindowAsync() {
-            var lifetime = Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
-            if (lifetime == null) {
-                return;
-            }
-
-            LoadingWindow.BeginLoadingImmediate(this);
-            var dialog = await Task.Run(() => lifetime.Windows.FirstOrDefault(w => w is SingersDialog));
-            try {
-                if (dialog == null) {
-                    SingersViewModel vm = await Task.Run<SingersViewModel>(() => {
-                        USinger? singer = null;
-                        if (viewModel.TracksViewModel.SelectedParts.Count > 0) {
-                            singer = TrackSingerIfFound(viewModel.TracksViewModel.Tracks[viewModel.TracksViewModel.SelectedParts.First().trackNo]);
-                        }
-                        if (singer == null && viewModel.TracksViewModel.Tracks.Count > 0) {
-                            singer = TrackSingerIfFound(viewModel.TracksViewModel.Tracks.First());
-                        }
-                        var vm = new SingersViewModel();
-
-                        if (singer != null) {
-                            vm.Singer = singer;
-                        }
-
-                        return vm;
-                    });
-
-                    dialog = new SingersDialog() { DataContext = vm };
-                    dialog.Show();
-                }
-                if (dialog.Position.Y < 0) {
-                    dialog.Position = dialog.Position.WithY(0);
-                }
-            } catch (Exception e) {
-                DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e));
-            } finally {
-                LoadingWindow.EndLoading();
-            }
-            if (dialog != null) {
-                dialog.Activate();
-            }
+        public Task OpenSingersWindowAsync() {
+            ShowResourceCenter(false);
+            return Task.CompletedTask;
         }
 
         async void OnMenuInstallSinger(object sender, RoutedEventArgs args) {
@@ -798,15 +757,7 @@ namespace OpenUtau.App.Views {
             }
         }
 
-        void OnMenuPackageManager(object sender, RoutedEventArgs args) {
-            try {
-                var dialog = new PackageManagerDialog() { DataContext = new PackageManagerViewModel() };
-                dialog.Show();
-                if (dialog.Position.Y < 0) dialog.Position = dialog.Position.WithY(0);
-            } catch (Exception e) {
-                DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e));
-            }
-        }
+        void OnMenuPackageManager(object sender, RoutedEventArgs args) => ShowResourceCenter(true);
 
         async void OnMenuInstallWavtoolResampler(object sender, RoutedEventArgs args) {
             var filter = OS.IsWindows()
@@ -852,6 +803,7 @@ namespace OpenUtau.App.Views {
 
         /// <summary>切到某个工作视图（卷帘 / 混音台的宿主控件由调用方保证已就绪）。</summary>
         private void SwitchToView(AppSurface view) {
+            HideToolWorkspace();
             FinishPartEdit();
             if (view != AppSurface.PianoRoll) pianoRoll?.CancelActiveInput();
             if (view != AppSurface.PianoRoll) ++pianoRollOpenGeneration;
@@ -967,6 +919,8 @@ namespace OpenUtau.App.Views {
 
         /// <summary>偏好设置（全屏视图，设计稿 6-Preferences）。</summary>
         public void ShowPreferences() {
+            if (renderTool?.IsRendering == true) return;
+            HideToolWorkspace();
             FinishPartEdit();
             pianoRoll?.CancelActiveInput();
             ++pianoRollOpenGeneration;
@@ -1612,6 +1566,12 @@ namespace OpenUtau.App.Views {
         }
 
         void OnKeyDown(object sender, KeyEventArgs args) {
+            if (ToolDialogHost.HasDialogs) return;
+            if (ToolWorkspaceHost.IsVisible) {
+                if (args.Key == Key.Escape) { HideToolWorkspace(); args.Handled = true; }
+                return;
+            }
+            if (ContextToolHost.IsKeyboardFocusWithin) return;
             // Modal overlay open — block shortcuts, Esc dismisses
             if (OverlayLayer.IsVisible) {
                 if (args.Key == Key.Escape) {
@@ -2796,6 +2756,7 @@ namespace OpenUtau.App.Views {
             timer.Stop();
             autosaveTimer.Stop();
             PreferencesHost.ReleaseSession();
+            ShutdownTools();
             pianoRoll?.Dispose();
             sidebarViewModel.Dispose();
             viewModel.Dispose();
@@ -2958,6 +2919,7 @@ namespace OpenUtau.App.Views {
 
         public void OnNext(UCommand cmd, bool isUndo) {
             if (cmd is LoadProjectNotification) {
+                ResetProjectTools();
                 FinishPartEdit();
             } else if (cmd is ErrorMessageNotification notif) {
                 switch (notif.e) {

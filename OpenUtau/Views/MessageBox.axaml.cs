@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -39,7 +39,7 @@ namespace OpenUtau.App.Views {
         }
 
         private TextBlock? _contentText;
-        private Window? _window;
+        private WorkspaceToolView? _window;
         private bool _closeRequested;
 
         /// <summary>窗口关闭时触发（ShowModal 调用方用它感知取消）。</summary>
@@ -279,18 +279,12 @@ namespace OpenUtau.App.Views {
         /// 组装 MD3 对话框窗口：标题 16 medium、正文 13、右下角按钮（主操作实心胶囊）。
         /// ESC = 默认按钮；回车 = 第一个主操作按钮。
         /// </summary>
-        private static Window BuildWindow(string title, Control content, List<DialogButton> buttons, MessageBox messageBox, MessageBoxResult escapeResult) {
+        private static WorkspaceToolView BuildWindow(string title, Control content, List<DialogButton> buttons, MessageBox messageBox, MessageBoxResult escapeResult) {
             var root = new StackPanel {
-                Margin = new Thickness(24),
+                Margin = new Thickness(0),
                 Spacing = 16,
                 MinWidth = 360,
             };
-            root.Children.Add(new TextBlock {
-                Text = title,
-                FontSize = 16,
-                FontWeight = FontWeight.Medium,
-                TextWrapping = TextWrapping.Wrap,
-            });
             root.Children.Add(content);
 
             var buttonRow = new StackPanel {
@@ -312,20 +306,17 @@ namespace OpenUtau.App.Views {
                         await captured.Action();
                     }
                     messageBox.Result = captured.Result;
-                    messageBox._window?.Close();
+                    messageBox.Close();
                 };
                 buttonRow.Children.Add(button);
             }
             root.Children.Add(buttonRow);
 
-            var window = new WindowEx {
+            var window = new WorkspaceToolView {
                 Title = title,
                 Content = root,
-                SizeToContent = SizeToContent.WidthAndHeight,
-                CanResize = false,
-                ShowInTaskbar = false,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                MaxWidth = 640,
+                Width = 560,
+                Focusable = true,
             };
             window.KeyDown += (_, e) => {
                 if (e.Key == Key.Escape) {
@@ -341,7 +332,8 @@ namespace OpenUtau.App.Views {
         private MessageBoxResult Result { get; set; } = MessageBoxResult.Cancel;
 
         /// <summary>显示并等待关闭，返回结果（关闭窗口/ESC → escapeResult 已由调用方设定）。</summary>
-        private static async Task<MessageBoxResult> ShowDialogAsync(Window parent, Window window, MessageBox messageBox, MessageBoxResult escapeResult) {
+        private static async Task<MessageBoxResult> ShowDialogAsync(Window parent, WorkspaceToolView window, MessageBox messageBox, MessageBoxResult escapeResult) {
+            messageBox.Result = escapeResult;
             messageBox._window = window;
             if (messageBox._closeRequested) {
                 messageBox._closeRequested = false;

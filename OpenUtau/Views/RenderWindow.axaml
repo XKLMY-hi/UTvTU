@@ -1,16 +1,13 @@
-<controls:WindowEx xmlns="https://github.com/avaloniaui"
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                    xmlns:controls="clr-namespace:OpenUtau.App.Controls"
                    x:Class="OpenUtau.App.Views.RenderWindow"
-                   Icon="/Assets/brand/utvtu.ico"
                    Title="{DynamicResource menu.file.render}"
-                   Background="{DynamicResource md3.surface}"
-                   Width="900" Height="790" MinWidth="620" MinHeight="480"
-                   WindowStartupLocation="CenterOwner">
-  <Window.Styles>
+                   Background="{DynamicResource md3.surface}" Focusable="True">
+  <controls:WorkspaceToolView.Styles>
     <StyleInclude Source="/Styles/RenderWorkspace.axaml"/>
-  </Window.Styles>
-  <Grid RowDefinitions="Auto,*,Auto">
+  </controls:WorkspaceToolView.Styles>
+  <Grid RowDefinitions="Auto,*,Auto" MaxWidth="1040" HorizontalAlignment="Stretch">
     <StackPanel Grid.Row="0" Margin="24,20,24,16" Spacing="4">
       <TextBlock Classes="renderTitle" Text="{DynamicResource render.page.title}"/>
       <TextBlock Classes="renderSubtitle" Text="{DynamicResource render.page.subtitle}"/>
@@ -148,4 +145,4 @@
       </StackPanel>
     </Border>
   </Grid>
-</controls:WindowEx>
+</controls:WorkspaceToolView>

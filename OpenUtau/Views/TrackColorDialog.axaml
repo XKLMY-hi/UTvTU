@@ -1,13 +1,12 @@
-<controls:WindowEx xmlns="https://github.com/avaloniaui"
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
         xmlns:controls="clr-namespace:OpenUtau.App.Controls"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" Width="450" Height="130"
-        x:Class="OpenUtau.App.Views.TrackColorDialog" WindowStartupLocation="CenterOwner"
-        Icon="/Assets/brand/utvtu.ico"
+        mc:Ignorable="d"
+        x:Class="OpenUtau.App.Views.TrackColorDialog"
         Title="{DynamicResource tracks.trackcolor}"
-        KeyDown="OnKeyDown">
+        KeyDown="OnKeyDown" Focusable="True">
 <DockPanel LastChildFill="True">
       <Border>
   <Grid RowDefinitions="*,50" >
@@ -39,4 +38,4 @@
   </Grid>
       </Border>
     </DockPanel>
-</controls:WindowEx>
+</controls:WorkspaceToolView>

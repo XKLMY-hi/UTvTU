@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using OpenUtau.App.ViewModels;
@@ -6,7 +6,7 @@ using OpenUtau.Core.Ustx;
 using OpenUtau.App.Controls;
 
 namespace OpenUtau.App.Views {
-    public partial class ExpressionsDialog : WindowEx {
+    public partial class ExpressionsDialog : WorkspaceToolView {
         public ExpressionsDialog() {
             InitializeComponent();
         }
@@ -16,7 +16,7 @@ namespace OpenUtau.App.Views {
                 (DataContext as ExpressionsViewModel)?.Apply();
                 Close();
             } catch (Exception e) {
-                MessageBox.ShowError(this, e);
+                MessageBox.ShowError(WindowHost, e);
             }
         }
 

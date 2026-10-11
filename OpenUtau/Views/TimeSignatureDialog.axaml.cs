@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Controls;
@@ -7,7 +7,7 @@ using ReactiveUI.Fody.Helpers;
 using OpenUtau.App.Controls;
 
 namespace OpenUtau.App.Views {
-    public partial class TimeSignatureDialog : WindowEx {
+    public partial class TimeSignatureDialog : WorkspaceToolView {
         static readonly List<int> beatPerBars = Enumerable.Range(1, 32).ToList();
         static readonly List<int> beatUnits = new List<int> { 1, 2, 4, 8, 16, 32 };
 
@@ -21,6 +21,7 @@ namespace OpenUtau.App.Views {
 
         public TimeSignatureDialog(int beatPerBar, int beatUnit) {
             InitializeComponent();
+            Width = 360;
             BeatPerBar = beatPerBar;
             BeatUnit = beatUnit;
             DataContext = this;

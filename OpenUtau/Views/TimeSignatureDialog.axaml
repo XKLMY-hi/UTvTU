@@ -1,13 +1,11 @@
-<controls:WindowEx xmlns="https://github.com/avaloniaui"
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
         xmlns:controls="clr-namespace:OpenUtau.App.Controls"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         x:Class="OpenUtau.App.Views.TimeSignatureDialog"
-        Icon="/Assets/brand/utvtu.ico"
-        Title="{DynamicResource dialogs.timesig.caption}"
-        Height="100" Width="320" WindowStartupLocation="CenterOwner">
+        Title="{DynamicResource dialogs.timesig.caption}" Focusable="True">
 <DockPanel LastChildFill="True">
       <Border>
   <StackPanel VerticalAlignment="Center">
@@ -24,4 +22,4 @@
   </StackPanel>
       </Border>
     </DockPanel>
-</controls:WindowEx>
+</controls:WorkspaceToolView>

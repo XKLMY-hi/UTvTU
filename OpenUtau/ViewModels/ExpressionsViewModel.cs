@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -118,6 +118,7 @@ namespace OpenUtau.App.ViewModels {
     }
 
     public class ExpressionsViewModel : ViewModelBase {
+        readonly UProject capturedProject = DocManager.Inst.Project;
         [Reactive] public string WindowTitle { get; set; } = "Expressions";
         [Reactive] public bool IsTrackOverride { get; set; }
         [Reactive] public string CustomDefaultLabel { get; set; } = ThemeManager.GetString("exps.projectdefault");
@@ -196,6 +197,9 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public void Apply() {
+            if (!ReferenceEquals(capturedProject, DocManager.Inst.Project) || (track != null && !capturedProject.tracks.Contains(track))) return;
+            using var edits = new OpenUtau.App.Editing.DocumentEditGesture(capturedProject, track != null ? "command.track.exp" : "command.project.exp");
+            if (!edits.CanExecute) return;
             var invalid = expressionsSourceProject.FirstOrDefault(builder => builder.Validate() != null);
             if (invalid != null) {
                 Expression = invalid;
@@ -226,18 +230,14 @@ namespace OpenUtau.App.ViewModels {
                 if (flags.Count() > 0) {
                     throw new MessageCustomizableException("", $"<translate:errors.expression.flagunique>: {string.Join(", ", flags)}", new ArgumentException($"Flags must be unique: {string.Join(", ", flags)}"), false);
                 }
-                DocManager.Inst.StartUndoGroup("command.track.exp");
-                DocManager.Inst.ExecuteCmd(new ConfigureExpressionsCommand(
+                edits.Execute(new ConfigureExpressionsCommand(
                     DocManager.Inst.Project, 
                     expressionsSourceProject.Select(builder => builder.Build()).ToArray(),
                     track,
                     expressionsSourceTrack.Select(builder => builder.Build()).ToArray()));
-                DocManager.Inst.EndUndoGroup();
                 return;
             }
-            DocManager.Inst.StartUndoGroup("command.project.exp");
-            DocManager.Inst.ExecuteCmd(new ConfigureExpressionsCommand(DocManager.Inst.Project, expressionsSourceProject.Select(builder => builder.Build()).ToArray()));
-            DocManager.Inst.EndUndoGroup();
+            edits.Execute(new ConfigureExpressionsCommand(DocManager.Inst.Project, expressionsSourceProject.Select(builder => builder.Build()).ToArray()));
         }
 
         public void Add() {
