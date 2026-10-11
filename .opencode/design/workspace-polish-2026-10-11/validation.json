@@ -1,0 +1,38 @@
+{
+  "renderedAt": "2026-10-11T05:58:32.685Z",
+  "browser": "155.0.4283.45",
+  "captures": [
+    "singers-oto-dark-1440.png",
+    "singers-subbanks-dark-1440.png",
+    "singers-oto-light-1440.png",
+    "packages-dark-1440.png",
+    "singers-empty-dark-1440.png",
+    "singers-oto-dark-800.png",
+    "singers-wave-dark-800.png",
+    "context-collapsed-dark-1440.png",
+    "overlay-blur-dark-1440.png"
+  ],
+  "searchPreservesTarget": true,
+  "otherType": true,
+  "editDirty": true,
+  "availableCount": 2,
+  "narrow": {
+    "documentWidth": 800,
+    "viewportWidth": 800,
+    "tableScrollable": false,
+    "detailWidth": 616
+  },
+  "compactTable": true,
+  "initialDock": 387,
+  "collapsedHeight": 40,
+  "restoredDock": 387,
+  "popup": {
+    "backgroundFilter": "blur(3px)",
+    "opacity": "1",
+    "focused": "lyric",
+    "transition": "0.18s"
+  },
+  "reducedMotion": true,
+  "nativeIconsVerified": 16,
+  "pageErrors": []
+}
