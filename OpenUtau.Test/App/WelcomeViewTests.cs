@@ -313,7 +313,7 @@ namespace OpenUtau.Test.App {
                 Assert.Equal(6, buttons.Count(b => HasClass(b, "navItem")));   // 4 主导航 + 偏好设置 + 包管理器
                 Assert.Equal(4, buttons.Count(b => HasClass(b, "railLink")));  // 4 条外链（12px 小字行）
                 Assert.Equal(2, buttons.Count(b => HasClass(b, "primary")));   // 新建空白工程 / 浏览文件
-                Assert.Equal(3, buttons.Count(b => HasClass(b, "tonal")));   // 快速打开 / 模板 / 导入音频
+                Assert.Equal(2, buttons.Count(b => HasClass(b, "tonal")));   // 模板 / 导入音频
                 Assert.All(buttons, b => Assert.True(b.Focusable, "入口必须可聚焦（Tab 可达）"));
             });
             // 数据驱动的行（最近 / 模板）在 headless 无 VM 数据时不会实例化 ⇒ 只能断"模板里声明了该类 + 是 Button"
@@ -331,7 +331,7 @@ namespace OpenUtau.Test.App {
                 var buttons = Buttons(view);
                 int lastRail = buttons.FindLastIndex(b => HasClass(b, "navItem") || HasClass(b, "railLink"));
                 int firstContent = buttons.FindIndex(b =>
-                    HasClass(b, "primary") || HasClass(b, "tonal") || HasClass(b, "recentRow"));
+                    HasClass(b, "startCard") || HasClass(b, "primary") || HasClass(b, "tonal") || HasClass(b, "recentRow"));
                 Assert.True(lastRail >= 0 && firstContent > lastRail,
                     $"右栏动作应排在左栏之后（左栏末 idx={lastRail}，右栏首 idx={firstContent}）");
                 Assert.True(HasClass(buttons[0], "navItem"), "左栏第一个入口应是导航项");

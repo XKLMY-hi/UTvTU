@@ -34,6 +34,25 @@
       <Setter Property="Height" Value="{DynamicResource Md3ControlHeight}"/>
       <Setter Property="MinHeight" Value="{DynamicResource Md3ControlHeight}"/>
     </Style>
+    <Style Selector="Button.startCard">
+      <Setter Property="Theme" Value="{StaticResource DawButtonTheme}"/>
+      <Setter Property="Height" Value="156"/>
+      <Setter Property="Padding" Value="20"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeExtraLarge}"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+      <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+    </Style>
+    <Style Selector="Button.startCard.featured">
+      <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+    </Style>
+    <Style Selector="Button.startCard TextBlock">
+      <Setter Property="Foreground" Value="{Binding $parent[Button].Foreground}"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
     <Style Selector="Button.primary TextBlock,Button.tonal TextBlock,Button.outline TextBlock">
       <Setter Property="Foreground" Value="{Binding $parent[Button].Foreground}"/>
     </Style>
@@ -365,22 +384,68 @@
       <Grid Grid.Row="1" Margin="0,24,0,0">
 
         <!-- ── 页 1：最近（搜索 + 恢复条 + 列表 + 双空态） ── -->
-        <Grid x:Name="PageRecent" RowDefinitions="Auto,Auto,Auto,*">
-          <StackPanel x:Name="RecentActions" Grid.Row="0" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}" Margin="0,0,0,12">
-            <Button x:Name="QuickNew" Classes="pageAction emphasized filled" Content="{DynamicResource welcome.new.blank}" Click="OnNewProject"/>
-            <Button x:Name="QuickOpen" Classes="pageAction tonal" Content="{DynamicResource welcome.open.browse}" Click="OnOpenProject"/>
-          </StackPanel>
-          <Grid Grid.Row="1" Margin="0,0,0,12">
+        <Grid x:Name="PageRecent" RowDefinitions="Auto,*">
+          <Grid x:Name="RecentActions" Grid.Row="0" ColumnDefinitions="*,*,*" Margin="0,0,0,20">
+            <Button x:Name="QuickNew" Classes="startCard featured" Margin="0,0,12,0" Click="OnNewProject"
+                    AutomationProperties.Name="{DynamicResource welcome.new.blank}">
+              <Grid RowDefinitions="Auto,*,Auto">
+                <Grid Width="44" Height="44" HorizontalAlignment="Left">
+                  <c:MaterialShape Kind="Arch" Fill="{DynamicResource md3.primary}"/>
+                  <c:DawIcon Data="{StaticResource icon-plus}" Width="20" Height="20"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource md3.on-primary}"/>
+                </Grid>
+                <TextBlock Grid.Row="1" Margin="0,12,0,0" FontSize="{DynamicResource Md3TypeTitleMedium}"
+                           FontWeight="Medium" Text="{DynamicResource welcome.new.blank}"/>
+                <TextBlock Grid.Row="2" Classes="caption" Text="{DynamicResource welcome.new.shortcut}"/>
+              </Grid>
+            </Button>
+            <Button x:Name="QuickOpen" Grid.Column="1" Classes="startCard" Margin="0,0,12,0" Click="OnOpenProject"
+                    AutomationProperties.Name="{DynamicResource welcome.open}">
+              <Grid RowDefinitions="Auto,*,Auto">
+                <Grid Width="44" Height="44" HorizontalAlignment="Left">
+                  <c:MaterialShape Kind="Sunny" Fill="{DynamicResource md3.tertiary-container}"/>
+                  <c:DawIcon Data="{StaticResource icon-folder-open}" Width="20" Height="20"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource md3.on-tertiary-container}"/>
+                </Grid>
+                <TextBlock Grid.Row="1" Margin="0,12,0,0" FontSize="{DynamicResource Md3TypeTitleMedium}"
+                           FontWeight="Medium" Text="{DynamicResource welcome.open}"/>
+                <TextBlock Grid.Row="2" Classes="caption" Text="{DynamicResource welcome.open.description}"/>
+              </Grid>
+            </Button>
+            <Button x:Name="QuickTemplates" Grid.Column="2" Classes="startCard" Click="OnShowTemplates"
+                    AutomationProperties.Name="{DynamicResource welcome.template}">
+              <Grid RowDefinitions="Auto,*,Auto">
+                <Grid Width="44" Height="44" HorizontalAlignment="Left">
+                  <c:MaterialShape Kind="Square" Fill="{DynamicResource md3.secondary-container}"/>
+                  <c:DawIcon Data="{StaticResource icon-layout}" Width="20" Height="20"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource md3.on-secondary-container}"/>
+                </Grid>
+                <TextBlock Grid.Row="1" Margin="0,12,0,0" FontSize="{DynamicResource Md3TypeTitleMedium}"
+                           FontWeight="Medium" Text="{DynamicResource welcome.template}"/>
+                <TextBlock Grid.Row="2" Classes="caption" Text="{DynamicResource welcome.template.description}"/>
+              </Grid>
+            </Button>
+          </Grid>
+          <Border x:Name="RecentPanel" Grid.Row="1" Padding="20" MaxHeight="440"
+                  Background="{DynamicResource md3.surface-container-low}"
+                  BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="1"
+                  CornerRadius="{DynamicResource Md3ShapeExtraLarge}">
+          <Grid RowDefinitions="Auto,Auto,*">
+          <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="0,0,0,16">
+            <TextBlock Text="{DynamicResource welcome.recent}" FontSize="{DynamicResource Md3TypeTitleLarge}"
+                       Foreground="{DynamicResource md3.on-surface}" VerticalAlignment="Center"/>
+            <Grid Grid.Column="1" Margin="24,0,0,0" Width="300" HorizontalAlignment="Right">
             <TextBox x:Name="SearchBox" Height="{DynamicResource Md3ControlHeight}" MinHeight="{DynamicResource Md3ControlHeight}" Margin="0" CornerRadius="{DynamicResource Md3ShapeSmall}" Padding="40,0,12,0" FontSize="{DynamicResource Md3TypeBodyMedium}"
                      Text="{Binding WelcomeSearch, Mode=TwoWay}"
                      PlaceholderText="{DynamicResource welcome.search.placeholder}"/>
             <c:DawIcon Data="{StaticResource icon-search}" Width="18" Height="18"
                   Margin="14,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"
                   IsHitTestVisible="False" Fill="{DynamicResource md3.on-surface-variant}"/>
+            </Grid>
           </Grid>
 
           <!-- 恢复条（原版能力；只在有恢复项时出现） -->
-          <Button Grid.Row="2" IsVisible="{Binding HasRecovery}" Click="OnRecovery"
+          <Button Grid.Row="1" IsVisible="{Binding HasRecovery}" Click="OnRecovery"
                   Margin="0,0,0,12" CornerRadius="{DynamicResource Md3ShapeMedium}" Padding="16,12" MinHeight="0"
                   HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch"
                   Background="{DynamicResource md3.error-container}" Cursor="Hand">
@@ -388,7 +453,7 @@
                        Foreground="{DynamicResource md3.on-error-container}"/>
           </Button>
 
-          <ScrollViewer Grid.Row="3" AllowAutoHide="False" HorizontalScrollBarVisibility="Disabled"
+          <ScrollViewer x:Name="RecentList" Grid.Row="2" AllowAutoHide="False" HorizontalScrollBarVisibility="Disabled"
                         VerticalScrollBarVisibility="Auto"
                         IsVisible="{Binding FilteredRecentFiles.Count}">
             <ItemsControl ItemsSource="{Binding FilteredRecentFiles}">
@@ -422,7 +487,7 @@
           </ScrollViewer>
 
           <!-- 空态 A：一个工程都没有 -->
-          <StackPanel Grid.Row="3" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center"
+          <StackPanel x:Name="EmptyRecent" Grid.Row="2" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center"
                       MaxWidth="440" IsVisible="{Binding WelcomeNoRecent}">
             <Grid Classes="emptyIcon" HorizontalAlignment="Center">
               <c:MaterialShape Kind="Sunny" Fill="{DynamicResource md3.secondary-container}"/>
@@ -437,7 +502,7 @@
           </StackPanel>
 
           <!-- 空态 B：有工程但搜索无匹配（必须与 A 区分，否则用户以为工程丢了） -->
-          <StackPanel Grid.Row="3" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center"
+          <StackPanel x:Name="EmptySearch" Grid.Row="2" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center"
                       MaxWidth="360" IsVisible="{Binding WelcomeNoMatch}">
             <Grid Classes="emptyIcon" HorizontalAlignment="Center">
               <c:MaterialShape Kind="Square" Fill="{DynamicResource md3.secondary-container}"/>
@@ -448,6 +513,8 @@
             <TextBlock Classes="emptyTitle" HorizontalAlignment="Center" TextWrapping="Wrap"
                        Text="{DynamicResource welcome.search.noresult}"/>
           </StackPanel>
+          </Grid>
+          </Border>
         </Grid>
 
         <!-- ── 页 2：新建 ── -->
