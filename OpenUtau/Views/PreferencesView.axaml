@@ -371,6 +371,28 @@
         <Border x:Name="SettingsHeader" Background="{DynamicResource md3.surface-container-high}"
                 CornerRadius="{DynamicResource Md3ShapeExtraLarge}" Padding="20" ClipToBounds="True">
           <Grid ColumnDefinitions="*,Auto" MinHeight="64">
+            <!-- Native source outlines occupy the open area without intercepting input. -->
+            <Grid x:Name="SettingsContours" Grid.ColumnSpan="2" Margin="360,-20,-20,-20"
+                  Height="104" VerticalAlignment="Center" ClipToBounds="True"
+                  IsHitTestVisible="False" Opacity="0.42">
+              <Path Data="{x:Static c:MaterialShape.ArchPath}" Stretch="Uniform"
+                    Width="240" Height="240" Margin="0,0,340,0"
+                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                    Stroke="{DynamicResource md3.primary}" StrokeThickness="1.5"
+                    RenderTransformOrigin="0.5,0.5">
+                <Path.RenderTransform><RotateTransform Angle="-22"/></Path.RenderTransform>
+              </Path>
+              <Path Data="{x:Static c:MaterialShape.SquarePath}" Stretch="Uniform"
+                    Width="280" Height="280" Margin="0,0,140,0"
+                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                    Stroke="{DynamicResource md3.primary}" StrokeThickness="1.5"
+                    RenderTransformOrigin="0.5,0.5">
+                <Path.RenderTransform><RotateTransform Angle="24"/></Path.RenderTransform>
+              </Path>
+              <Ellipse Width="240" Height="240" Margin="0,0,-80,0"
+                       HorizontalAlignment="Right" VerticalAlignment="Center"
+                       Stroke="{DynamicResource md3.primary}" StrokeThickness="1.5"/>
+            </Grid>
             <StackPanel Spacing="{DynamicResource Md3Spacing1}" VerticalAlignment="Center" Margin="0,0,16,0">
               <TextBlock x:Name="PageHeading" Text="{DynamicResource prefs.nav.audio}" FontSize="{DynamicResource Md3TypeDisplaySmall}" FontWeight="SemiBold"
                          TextWrapping="Wrap" Foreground="{DynamicResource md3.on-surface}"/>
@@ -1002,12 +1024,12 @@
         <!-- ══ 关于页（徽标 + 版本说明 + 仓库链接 + 页尾署名） ══ -->
         <ContentControl Name="PageShortcuts" IsVisible="False" Height="540"/>
         <Grid x:Name="PageAbout" IsVisible="False">
-          <StackPanel Spacing="{DynamicResource Md3Spacing3}" MaxWidth="560" HorizontalAlignment="Center">
-            <Border Classes="card" Padding="32">
-              <StackPanel Spacing="{DynamicResource Md3Spacing4}" HorizontalAlignment="Center">
+          <StackPanel x:Name="AboutContent" Spacing="{DynamicResource Md3Spacing3}">
+            <Border Classes="card">
+              <StackPanel x:Name="AboutDetails" Spacing="{DynamicResource Md3Spacing4}">
                 <!-- 关于页品牌锁定：与主窗顶栏同一套件，按 cap 24 放大（主窗数值 × 1.6 = 24/15）
                      —— 旧的 96 圆角瓦片 + 音符图标是 W40 前的品牌，已退役。 -->
-                <StackPanel Orientation="Horizontal" Spacing="10.08" HorizontalAlignment="Center"
+                <StackPanel x:Name="AboutBrand" Orientation="Horizontal" Spacing="10.08" HorizontalAlignment="Left"
                             VerticalAlignment="Center">
                   <Viewbox Width="33.4" Height="33.4" Stretch="Uniform">
                     <Path Data="{StaticResource brand-mark}"
@@ -1025,27 +1047,27 @@
                           Canvas.Left="40.05" Canvas.Top="8.70"/>
                   </Canvas>
                 </StackPanel>
-                <StackPanel Spacing="{DynamicResource Md3Spacing1}" HorizontalAlignment="Center">
-                  <TextBlock Text="{DynamicResource prefs.about.version}" FontSize="{DynamicResource Md3TypeLabelSmall}" HorizontalAlignment="Center"
+                <StackPanel Spacing="{DynamicResource Md3Spacing1}" HorizontalAlignment="Left">
+                  <TextBlock Text="{DynamicResource prefs.about.version}" FontSize="{DynamicResource Md3TypeLabelSmall}" HorizontalAlignment="Left"
                              Foreground="{DynamicResource md3.on-surface-variant}"/>
-                  <TextBlock Text="{x:Static core:PlusInfo.VersionString}" FontSize="{DynamicResource Md3TypeBodyMedium}" HorizontalAlignment="Center"
+                  <TextBlock Text="{x:Static core:PlusInfo.VersionString}" FontSize="{DynamicResource Md3TypeBodyMedium}" HorizontalAlignment="Left"
                              Foreground="{DynamicResource md3.on-surface}"/>
                 </StackPanel>
                 <TextBlock Text="{DynamicResource dialogs.about.message}" FontSize="{DynamicResource Md3TypeBodyMedium}" LineHeight="20"
-                           TextWrapping="Wrap" TextAlignment="Center" MaxWidth="420"
+                           TextWrapping="Wrap" TextAlignment="Left" MaxWidth="720" HorizontalAlignment="Left"
                            Foreground="{DynamicResource md3.on-surface-variant}"/>
-                <TextBlock Text="{DynamicResource prefs.about.basedon}" FontSize="{DynamicResource Md3TypeLabelSmall}" HorizontalAlignment="Center"
+                <TextBlock Text="{DynamicResource prefs.about.basedon}" FontSize="{DynamicResource Md3TypeLabelSmall}" HorizontalAlignment="Left"
                            Foreground="{DynamicResource md3.on-surface-variant}"/>
-                <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}" HorizontalAlignment="Center">
+                <StackPanel x:Name="AboutLinks" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}" HorizontalAlignment="Left">
                   <Button Classes="filledPill" MinWidth="96" Content="GitHub" Click="OnOpenGithub"
                           ToolTip.Tip="{DynamicResource prefs.about.repo}"/>
                   <Button Classes="outlinePill" MinWidth="96" Content="README" Click="OnOpenReadme"/>
                 </StackPanel>
               </StackPanel>
             </Border>
-            <Border Classes="card" Padding="16">
-              <TextBlock Text="{DynamicResource prefs.about.credit}" FontSize="{DynamicResource Md3TypeLabelSmall}" TextAlignment="Center"
-                         TextWrapping="Wrap" HorizontalAlignment="Center"
+            <Border Classes="card">
+              <TextBlock x:Name="AboutCredit" Text="{DynamicResource prefs.about.credit}" FontSize="{DynamicResource Md3TypeLabelSmall}" TextAlignment="Left"
+                         TextWrapping="Wrap" HorizontalAlignment="Left"
                          Foreground="{DynamicResource md3.on-surface-variant}"/>
             </Border>
           </StackPanel>
