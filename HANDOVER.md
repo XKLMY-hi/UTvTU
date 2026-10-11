@@ -1,4 +1,15 @@
-# HANDOVER — 新会话交接（2026-10-11 全界面MD3重构完成）
+# HANDOVER — 新会话交接（2026-10-11 控件背景与真实声库头像）
+
+## 2026-10-11 截图反馈修复（最新状态）
+
+- 用户指出控件背景溢出、资源声库列表应显示真实图标。产品已提交 **`a04807e9` / `1e6b6cc5`**，plus-develop，未推送；[修复与验证](.opencode/plans/control-background-avatar-2026-10-11.md)。
+- WorkspaceToolView 取消方形页面默认底色，BPM 等嵌入浮层共用宿主卡片表面；完整页显式背景保留。声库侧栏12圆角裁切、去重复列表框；原生勾选子路径取代分段中带方框图标。
+- SingerAvatar 只为实现的行解码72宽/36格真实 AvatarData 或 Avatar 文件；不 EnsureLoaded，不启动合成/全局订阅/计时器。缺失或读取失败默认图标，回收释放，AvatarRevision 同步加载/刷新/设置头像。USinger 列表和筛选选择语义不变。
+- 实际重新挂载查出并修复 OtoPlot 卸载后留已释放位图引用的问题；清引用/缓存，加载时按现有WaveFile恢复必要频谱。
+- 保持用户主程序打开，在独立OutDir构建：SDK9完整引用build4 0错148警告，测试收尾build5 0错145警告。**54项**两组轻量全绿，16.2/15.9秒、225/192MB，仍30秒/384MB/串行。UI lint0/0、diff通过；头像headless只验绑定与生命周期，不冒称像素/真实解码，未自截图、全套、推理或音频压力。
+- 原主程序目录的 OpenUtau.dll 已原子替换为测试过的新文件，原二进制备份在`.dsh/controls-polish-previous-binaries/`；embedded调试符号无需单独pdb。标准测试目录也更新，产品DLL哈希同为E08F01A86E183DD846C6B2C7B344DB36F967C9D5801918F8E6A17B8B9043A2B8。
+- **当前仍开着PID6932、15:51:33+08的旧内存版本，响应正常，NeedsRestartForUpdate=true**（`.dsh/workspace-preview.json`）。下方“无预览”是历史状态。下次用户要启动，应核实exe+StartTime，正常退出旧实例并从原目录无参数启动；若有未保存提示，等用户处理，不能强杀。用户已明确不要预览工程/测试参数。
+- 本轮仍核实G:/xklmy文件夹/vibe coding/UTvTU及origin；移动盘下轮仍须重新核实。新二进制尚未重新开真机窗，默认交用户看。
 
 ## 2026-10-11 全界面MD3重构（最新请求，已交付）
 
