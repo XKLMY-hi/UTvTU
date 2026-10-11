@@ -8,3 +8,6 @@
 *.csproj   text eol=crlf
 *.xaml     text eol=crlf
 *.axaml    text eol=crlf
+
+# Preserve downloaded AndroidX source bytes for provenance SHA-256 checks.
+.opencode/design/**/*.kt.txt -text
