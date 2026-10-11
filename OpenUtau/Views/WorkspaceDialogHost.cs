@@ -38,7 +38,7 @@ public sealed class WorkspaceDialogHost : UserControl {
         card.BorderThickness = new Thickness(1);
         var icon = new DawIcon { Width = 14, Height = 14 };
         icon[!DawIcon.DataProperty] = new DynamicResourceExtension("icon-x");
-        icon[!DawIcon.StrokeProperty] = new DynamicResourceExtension("md3.on-surface-variant");
+        icon[!DawIcon.FillProperty] = new DynamicResourceExtension("md3.on-surface-variant");
         close.Content = icon;
         close.Classes.Add("toolClose");
         close[!AutomationProperties.NameProperty] = new DynamicResourceExtension("button.cancel");
