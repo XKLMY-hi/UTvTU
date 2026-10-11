@@ -127,6 +127,48 @@ namespace OpenUtau.Test.Render {
                 Assert.InRange(sample[0], format == ExportWaveFormat.Float32 ? 1.999f : .999f, format == ExportWaveFormat.Float32 ? 2.001f : 1f);
             }
         }
+        [Theory]
+        [InlineData(true, .4988f)]
+        [InlineData(false, .25f)]
+        public async Task BuiltInEffectsToggleUsesCapturedSettings(bool enabled, float expected) {
+            using var dispatcher = DocManagerTestSetup.EnterScopedDispatcher();
+            var project = Project();
+            project.tracks[0].MixFx = new UMixFx { Enabled = true, EqEnabled = false, ReverbEnabled = false,
+                CompEnabled = true, CompRatio = 1, CompThresholdDb = 0, CompMakeupDb = 6 };
+            var options = new ExportAudioOptions { Format = ExportWaveFormat.Float32, VstEffects = false,
+                BuiltInEffects = enabled, TrackVolumeAndPan = false };
+            var plan = new ExportDeliveryPlan(project, Destination, false, options, project.tracks);
+            project.tracks[0].MixFx.CompMakeupDb = 0;
+            await new ConfiguredExportSession(plan).RunAsync(new Reports());
+            using var reader = new WaveFileReader(Destination);
+            var samples = new float[2];
+            reader.ToSampleProvider().Read(samples, 0, 2);
+            Assert.InRange(samples[0], expected - .001f, expected + .001f);
+        }
+        [Fact]
+        public void CancellationDuringConfiguredEncodingPreservesOldDelivery() {
+            File.WriteAllBytes(Destination, new byte[] { 6, 7, 8 });
+            using var cancellation = new CancellationTokenSource();
+            var source = new ExportRangeProvider(new ConstantSource(), 0, .1, 1, cancellation.Token);
+            Assert.ThrowsAny<OperationCanceledException>(() => ExportWaveWriter.Write(Destination, source,
+                new ExportAudioOptions(), cancellation.Token, _ => cancellation.Cancel(), .1));
+            Assert.Equal(new byte[] { 6, 7, 8 }, File.ReadAllBytes(Destination));
+            Assert.Empty(Directory.GetFiles(directory, "*.tmp"));
+        }
+        [Fact]
+        public async Task AlreadyCancelledConfiguredRecordingLeavesTheAudioDeviceAndDestinationUntouched() {
+            using var cancellation = new CancellationTokenSource();
+            cancellation.Cancel();
+            var manager = PlaybackManager.Inst;
+            var output = manager.AudioOutput;
+            File.WriteAllBytes(Destination, new byte[] { 1, 5, 9 });
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => manager.RecordExport(Project(), Destination,
+                new ExportAudioOptions(), 0, .1, null, cancellation.Token));
+            Assert.Same(output, manager.AudioOutput);
+            Assert.False(manager.IsRecording);
+            Assert.Equal(new byte[] { 1, 5, 9 }, File.ReadAllBytes(Destination));
+        }
+
         sealed class Reports : IProgress<ExportDeliveryProgress> { public void Report(ExportDeliveryProgress value) { Assert.InRange(value.Fraction, 0, 1); } }
         sealed class ConstantSource(float value = .5f) : ISignalSource {
             public int Count;

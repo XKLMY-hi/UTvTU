@@ -314,6 +314,8 @@ namespace OpenUtau.Core.Render {
             var requests = engine.PrepareRequests()
                 .Where(r => options.TrackIndices == null || options.TrackIndices.Contains(r.trackNo)).ToArray();
             var outputs = engine.BuildTrackOutputs(requests, MixFxMode.Snapshot, new List<Fader>(), options);
+            // VST instances are reused from playback. Each delivery starts with empty time-domain state.
+            foreach (var output in outputs) output.Reset();
             engine.RenderRequestsAsync(requests, lifetime.Source).GetAwaiter().GetResult();
             token.ThrowIfCancellationRequested();
             return new WaveMix(outputs);

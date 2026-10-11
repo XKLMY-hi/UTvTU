@@ -21,7 +21,8 @@ namespace OpenUtau.Core.Vst {
         private int _activateCalls;
         public int ActivateCalls => _activateCalls;
         public bool Activate(IntPtr handle, bool enable) { _activateCalls++; return true; }
-        public void Process(IntPtr handle, float[] buf, int frames) { }
+        public Action<float[], int>? ProcessCallback { get; set; }
+        public void Process(IntPtr handle, float[] buf, int frames) { ProcessCallback?.Invoke(buf, frames); }
         public void Reset(IntPtr handle) { }
         public int GetNumParams(IntPtr handle) => 0;
         public float GetParam(IntPtr handle, int id) => 0f;

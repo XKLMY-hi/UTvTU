@@ -48,7 +48,10 @@ namespace OpenUtau.Core.Export {
                     Report(1, "done");
                 } finally {
                     RenderCancellationLease.Retire(ref cancellation);
-                    if (File.Exists(floatPath)) File.Delete(floatPath);
+                    try { if (File.Exists(floatPath)) File.Delete(floatPath); }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) {
+                        Serilog.Log.Warning(ex, "Could not remove export intermediate {Path}", floatPath);
+                    }
                     VstPluginManager.Inst.TryFlushAllPendingDispose();
                 }
             }
