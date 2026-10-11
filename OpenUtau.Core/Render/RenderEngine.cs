@@ -8,6 +8,7 @@ using OpenUtau.Core.SignalChain;
 using OpenUtau.Core.Ustx;
 using OpenUtau.Core.Util;
 using OpenUtau.Classic;
+using OpenUtau.Core.Export;
 using Serilog;
 
 namespace OpenUtau.Core.Render {
@@ -209,7 +210,8 @@ namespace OpenUtau.Core.Render {
         /// 逐轨构建信号链（WaveMix → Fader → MixFxSource(内置三件套) → EffectChain(VST) → LevelTracker）。
         /// 同步操作，不含任何渲染。播放与导出共用，效果接线由 <paramref name="mode"/> 决定。
         /// </summary>
-        private List<ISignalSource> BuildTrackOutputs(RenderPartRequest[] requests, MixFxMode mode, List<Fader> faders) {
+        private List<ISignalSource> BuildTrackOutputs(RenderPartRequest[] requests, MixFxMode mode, List<Fader> faders,
+            ExportAudioOptions export = null) {
             // 每轨各自持有 UMixFx（没有全局 FX 总线）。Off 时整条效果链不接；
             // Snapshot/Live 下轨道空转（无 FX / 主开关关 / 模块全透传）原样透传。
             var trackOutputs = new List<ISignalSource>();
@@ -217,6 +219,7 @@ namespace OpenUtau.Core.Render {
                 if (trackNo != -1 && trackNo != i) {
                     continue;
                 }
+                if (export?.TrackIndices != null && !export.TrackIndices.Contains(i)) continue;
                 var track = project.tracks[i];
                 var trackRequests = requests
                     .Where(req => req.trackNo == i)
@@ -229,17 +232,22 @@ namespace OpenUtau.Core.Render {
                     .Select(part => part as UWavePart)
                     .Where(part => part.Samples != null)
                     .Select(part => part.TrimSamples(project)));
-                var trackMix = new WaveMix(trackSources);
+                ISignalSource trackMix = new WaveMix(trackSources);
+                if (export != null) {
+                    int end = checked((int)Math.Round(project.timeAxis.TickPosToMsPos(export.EndTick) * AudioSettings.SampleRate / 1000)) * AudioSettings.Channels;
+                    trackMix = new ExportInputBoundary(trackMix, end);
+                }
 
                 var fader = new Fader(trackMix);
-                fader.Scale = PlaybackManager.DecibelToVolume(track.Muted ? -24 : track.Volume);
-                fader.Pan = (float)track.Pan;
+                fader.Scale = export != null ? (export.TrackVolumeAndPan ? PlaybackManager.DecibelToVolume(track.Volume) : 1)
+                    : PlaybackManager.DecibelToVolume(track.Muted ? -24 : track.Volume);
+                fader.Pan = export?.TrackVolumeAndPan == false ? 0 : (float)track.Pan;
                 fader.SetScaleToTarget();
                 faders.Add(fader);
 
                 // Collect VST effects — lock-free read from pre-loaded instances
                 var vstEffects = new System.Collections.Generic.List<SignalChain.Effects.IEffect>();
-                if (mode != MixFxMode.Off && track.VstSlots != null) {
+                if (mode != MixFxMode.Off && export?.VstEffects != false && track.VstSlots != null) {
                     var active = Vst.VstPluginManager.Inst.GetActiveEffects(track.TrackNo);
                     if (active.Count == 0 && track.VstSlots.Any(s => s.IsLoaded && !s.Bypassed)) {
                         // 兜底：槽位有插件但实例未加载（异步加载未触发/未完成/工程
@@ -255,7 +263,10 @@ namespace OpenUtau.Core.Render {
                         vstEffects.Add(fx);
                 }
 
-                ISignalSource trackOut = WrapTrackFx(fader, track, mode, vstEffects.ToArray());
+                // Bypass the fader entirely for dry stems, including its equal-power center pan law.
+                ISignalSource trackSignal = export?.TrackVolumeAndPan == false ? trackMix : fader;
+                ISignalSource trackOut = export == null ? WrapTrackFx(fader, track, mode, vstEffects.ToArray())
+                    : EffectChain.Build(export.BuiltInEffects ? MixFxSource.WrapWith(trackSignal, track.MixFx) : trackSignal, vstEffects.ToArray());
 
                 // LevelTracker wraps the FINAL per-track output (fader + FX),
                 // so the mixer meter shows the actual audible signal.
@@ -288,6 +299,22 @@ namespace OpenUtau.Core.Render {
         }
 
         // for export
+        /// <summary>Configurable export owns its chain and waits for synthesis before consuming any audio.</summary>
+        public static ISignalSource RenderExport(UProject project, TaskScheduler scheduler,
+            ref CancellationTokenSource cancellation, ExportAudioOptions options, CancellationToken token) {
+            options.Validate();
+            if (options.EndTick == -1) options = options with { EndTick = project.EndTick };
+            var engine = new RenderEngine(project, options.StartTick, options.EndTick);
+            using var lifetime = RenderCancellationLease.Replace(ref cancellation, token);
+            token.ThrowIfCancellationRequested();
+            var requests = engine.PrepareRequests()
+                .Where(r => options.TrackIndices == null || options.TrackIndices.Contains(r.trackNo)).ToArray();
+            var outputs = engine.BuildTrackOutputs(requests, MixFxMode.Snapshot, new List<Fader>(), options);
+            engine.RenderRequestsAsync(requests, lifetime.Source).GetAwaiter().GetResult();
+            token.ThrowIfCancellationRequested();
+            return new WaveMix(outputs);
+        }
+
         public List<WaveMix> RenderTracks(TaskScheduler uiScheduler, ref CancellationTokenSource cancellation) =>
             RenderTracks(uiScheduler, ref cancellation, default);
 

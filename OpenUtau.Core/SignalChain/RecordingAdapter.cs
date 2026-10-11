@@ -14,7 +14,8 @@ namespace OpenUtau.Core.SignalChain {
     public class RecordingAdapter : ISampleProvider {
         private readonly ISampleProvider source;
         private readonly WaveFileWriter? writer;
-        private int position;
+        private long samplesWritten;
+        public long SamplesWritten => System.Threading.Interlocked.Read(ref samplesWritten);
 
         /// <summary>If true, returns silence instead of real audio to the caller.</summary>
         public bool SilentOutput { get; set; }
@@ -38,6 +39,7 @@ namespace OpenUtau.Core.SignalChain {
             if (read > 0 && writer != null) {
                 writer.WriteSamples(buffer, offset, read);
             }
+            System.Threading.Interlocked.Add(ref samplesWritten, read);
 
             // Optionally blank out the output (silent playback)
             if (SilentOutput) {

@@ -321,6 +321,7 @@ namespace OpenUtau.Core {
 
         // 混音台主推子（masterMix 创建前暂存，StartPlayback 时应用）
         private double masterVolumeDb = 0;
+        public double ExportMasterGain => MasterMuted ? 0 : DecibelToVolume(masterVolumeDb);
         public bool MasterMuted { get; private set; }
 
         public void ApplyMasterVolume(double db) {
@@ -726,6 +727,58 @@ namespace OpenUtau.Core {
                 }
             }); // Always execute cleanup, even when cancellation wins before scheduling.
             return task;
+        }
+
+        /// <summary>Device-paced VST delivery, with a finite sample count and an independent export chain.</summary>
+        public Task RecordExport(UProject project, string floatPath, Export.ExportAudioOptions options,
+            double startSeconds, double durationSeconds, IProgress<double>? progress, CancellationToken ct) {
+            options.Validate();
+            if (ct.IsCancellationRequested) return Task.FromCanceled(ct);
+            if (Interlocked.CompareExchange(ref recordingSession, 1, 0) != 0)
+                return Task.FromException(new InvalidOperationException("An export recording is already running."));
+            return Task.Run(() => {
+                var savedOutput = AudioOutput;
+                CancellationTokenSource cancellation = null;
+                try {
+                    ct.ThrowIfCancellationRequested();
+                    StopPlayback();
+                    AudioOutput = new Audio.DummyAudioOutput();
+                    using var gate = RenderGate.Enter();
+                    var mix = RenderEngine.RenderExport(project, DocManager.Inst.MainScheduler, ref cancellation, options, ct);
+                    var source = new Export.ExportRangeProvider(mix, startSeconds, durationSeconds, options.MasterGain, ct);
+                    progress?.Report(.1);
+                    AtomicFile.Write(floatPath, temporary => {
+                        using var writer = new WaveFileWriter(temporary, source.WaveFormat);
+                        var recorder = new RecordingAdapter(source, writer, silentOutput: true);
+                        using var finished = new ManualResetEventSlim();
+                        Exception failure = null;
+                        using var output = new WasapiOut(NAudio.CoreAudioApi.AudioClientShareMode.Shared, 100);
+                        output.PlaybackStopped += (_, args) => { failure = args.Exception; finished.Set(); };
+                        output.Init(new SampleToWaveProvider16(recorder));
+                        output.Play();
+                        try {
+                            long previous = 0;
+                            var stalled = System.Diagnostics.Stopwatch.StartNew();
+                            while (!finished.Wait(50)) {
+                                ct.ThrowIfCancellationRequested();
+                                long written = recorder.SamplesWritten;
+                                if (written != previous) { previous = written; stalled.Restart(); }
+                                if (stalled.Elapsed.TotalSeconds > 30) throw new IOException("The export audio device stopped delivering samples.");
+                                progress?.Report(.1 + .8 * written / source.TotalSamples);
+                            }
+                            ct.ThrowIfCancellationRequested();
+                            if (failure != null) throw new IOException("The export audio device failed.", failure);
+                            if (recorder.SamplesWritten != source.TotalSamples)
+                                throw new IOException("The export audio device ended before the delivery was complete.");
+                        } finally { output.Stop(); }
+                    });
+                    progress?.Report(1);
+                } finally {
+                    AudioOutput = savedOutput;
+                    RenderCancellationLease.Retire(ref cancellation);
+                    Volatile.Write(ref recordingSession, 0);
+                }
+            });
         }
 
         // Exporting each tracks
