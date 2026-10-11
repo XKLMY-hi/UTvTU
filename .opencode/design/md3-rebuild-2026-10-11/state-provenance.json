@@ -1,0 +1,14 @@
+{
+  "downloadedDate": "2026-10-11",
+  "license": "Apache-2.0; original header preserved",
+  "file": "assets/StateTokens.kt.txt",
+  "url": "https://raw.githubusercontent.com/androidx/androidx/androidx-main/compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/tokens/StateTokens.kt",
+  "version": "v0_210",
+  "sha256": "F9BDDB282A3CA50E0C05BDA6B5AA713441F885E3FE16866BFB44CEE42059552F",
+  "values": {
+    "hover": 0.08,
+    "focus": 0.1,
+    "pressed": 0.1,
+    "dragged": 0.16
+  }
+}

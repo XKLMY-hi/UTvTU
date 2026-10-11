@@ -1,4 +1,15 @@
-# HANDOVER — 新会话交接（2026-10-11 MD3设计审查与官方实例）
+# HANDOVER — 新会话交接（2026-10-11 全界面MD3重构完成）
+
+## 2026-10-11 全界面MD3重构（最新请求，已交付）
+
+- 用户授权“按MD3真实设计重构所有界面”；产品已完成 `53adc142` + `87ce1a33` + **`f4c6e524`**，设计 `34dde3f8`，plus-develop，未推送。[完整实施与验证](.opencode/plans/md3-rebuild-2026-10-11.md)。本段取代下方“尚未实施”“只审查”“浮层200ms”等旧状态。
+- 共同Theming/Md3Tokens：形状、排版、间距、状态透明度、Standard spring；按钮/输入/选择/列表/菜单/反馈与71份XAML覆盖，44份直接用共同令牌，其余继承。页面40高、DAW32/24等紧凑密度保留；已修42高/160宽窄轨道溢出。
+- 偏好→外观增加Windows强调色/自定义HEX、TonalSpot/Vibrant/Neutral和对比度；Windows在启动/主题改变/点击刷新时读DWM，尚无系统颜色常驻监听。HCT/CAM16+49角色保留，修池重建丢订阅与静态投影先于角色生成。主/次/危险操作配对、rich-content图标与文字转发、选中分段配对统一。
+- 欢迎Arch/Square原生Google几何用于页头/空状态；品牌原路径与音乐数据颜色保留。`MaterialShape`无定时器/主题或文档订阅。HTML+9PNG在`.opencode/design/md3-rebuild-2026-10-11/`，HTML/SVG几何权威、PNG是设计稿而非产品截图。
+- 效果动效damping1、空间.9，官方Standard stiffness原值、有限过渡0.001收束；Avalonia原生负责时钟/打断，不冒称Compose引擎。状态取StateTokens v0_210 .08/.10/.10/.16，源码/许可/hash落盘。浮层28圆角/surface-container-high/level3/32%遮罩、3DIP背景模糊，关闭后还焦点。减少动效实时覆盖已有窗口/菜单/效果架/音符光晕和播放弹跳；静态播放高亮保留。
+- SDK9.0.317单节点完整依赖build8通过（0错148警告）；**214项互不重复轻量回归**10组串行通过，10–15.8秒、峰值139–301MB，保护仍30秒/384MB。相关最终修正组已复跑；合并组超30秒后拆组，没有放宽保护。详见`product-validation.json`里的TRX/用例/哈希。UI lint ERROR0/WARN0、diff通过。未跑全套/真实推理/插件试听/压力，不自行产品截图。
+- Windows隐藏启动smoke：2026-10-11 15:41:17+08、本树PID10628，两轨加载/响应/关闭exit0、峰值256MB、ERR/FTL0，**已退出，无预览进程**。`.dsh/workspace-preview.json`更新；下方PID12360是旧状态，不能复用。任何进程操作必须重核exe+StartTime。
+- 本轮工作区G:/xklmy文件夹/vibe coding/UTvTU、origin XKLMY-hi/UTvTU已核实，下轮移动盘仍须核实。默认交用户实机看，不自截图；用户若下一步要“启动”则启动本树最新exe。
 
 ## 2026-10-11 MD3设计风格审查（最新请求）
 

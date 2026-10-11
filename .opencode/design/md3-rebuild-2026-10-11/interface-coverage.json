@@ -1,0 +1,575 @@
+{
+  "scope": "Avalonia application-owned interfaces; OS file pickers and plugin GUI internals are externally owned",
+  "verification": "Source coverage, not product screenshots or pixel validation",
+  "files": [
+    {
+      "file": "OpenUtau/Views/ControlGalleryWindow.axaml",
+      "sharedTokens": 24,
+      "colorRoles": 14,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/DebugWindow.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/DsScriptExportDialog.axaml",
+      "sharedTokens": 2,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/EditSubbanksDialog.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/ExeSetupDialog.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/ExpressionsDialog.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/LoadingWindow.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 1,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/LyricsDialog.axaml",
+      "sharedTokens": 1,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/LyricsReplaceDialog.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/MainWindow.axaml",
+      "sharedTokens": 54,
+      "colorRoles": 56,
+      "controlThemes": [
+        "DawButtonTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/MergeVoicebankDialog.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/MixerWindow.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/MixFxDialog.axaml",
+      "sharedTokens": 18,
+      "colorRoles": 26,
+      "controlThemes": [
+        "DawTextButtonTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/NoteDefaultsDialog.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/PackageManagerDialog.axaml",
+      "sharedTokens": 2,
+      "colorRoles": 2,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/PasteParamDialog.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/PhoneticAssistant.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/PianoRollDetachedWindow.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/PreferencesView.axaml",
+      "sharedTokens": 138,
+      "colorRoles": 79,
+      "controlThemes": [
+        "DawButtonTheme",
+        "DawTextButtonTheme",
+        "WorkspaceSegmentTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/RenderWindow.axaml",
+      "sharedTokens": 7,
+      "colorRoles": 6,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/ShortcutOverviewWindow.axaml",
+      "sharedTokens": 9,
+      "colorRoles": 8,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/SingerPublishDialog.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/SingersDialog.axaml",
+      "sharedTokens": 11,
+      "colorRoles": 12,
+      "controlThemes": [
+        "DawButtonTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/SingerSetupDialog.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/SliderDialog.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/SplashWindow.axaml",
+      "sharedTokens": 1,
+      "colorRoles": 7,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/ThemeEditorWindow.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "retained inactive editor"
+    },
+    {
+      "file": "OpenUtau/Views/TimeSignatureDialog.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/ToolWorkspaceView.axaml",
+      "sharedTokens": 4,
+      "colorRoles": 4,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/TrackColorDialog.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/TrackEffectRack.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/TrackSettingsDialog.axaml",
+      "sharedTokens": 6,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/TranscribeDialog.axaml",
+      "sharedTokens": 3,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/TypeInDialog.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/UpdaterDialog.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 3,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/VoiceColorMappingDialog.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Views/VstEditorWindow.axaml",
+      "sharedTokens": 13,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "native plugin host chrome"
+    },
+    {
+      "file": "OpenUtau/Views/WelcomeView.axaml",
+      "sharedTokens": 64,
+      "colorRoles": 60,
+      "controlThemes": [
+        "DawButtonTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/DawValueField.axaml",
+      "sharedTokens": 3,
+      "colorRoles": 3,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/ExpSelector.axaml",
+      "sharedTokens": 3,
+      "colorRoles": 1,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/FxChainPanel.axaml",
+      "sharedTokens": 4,
+      "colorRoles": 9,
+      "controlThemes": [
+        "DawButtonTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/FxChainRow.axaml",
+      "sharedTokens": 12,
+      "colorRoles": 21,
+      "controlThemes": [
+        "DawButtonTheme",
+        "FxChainPowerTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/LyricBox.axaml",
+      "sharedTokens": 1,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/MasterStrip.axaml",
+      "sharedTokens": 18,
+      "colorRoles": 34,
+      "controlThemes": [
+        "DawMixButtonTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/MixerControl.axaml",
+      "sharedTokens": 5,
+      "colorRoles": 7,
+      "controlThemes": [
+        "DawButtonTheme",
+        "DawTextButtonTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/MixerTrackStrip.axaml",
+      "sharedTokens": 15,
+      "colorRoles": 32,
+      "controlThemes": [
+        "DawMixButtonTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/NotePropertiesControl.axaml",
+      "sharedTokens": 1,
+      "colorRoles": 2,
+      "controlThemes": [
+        "DawTextButtonTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/NotePropertyExpression.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/PanelRevealTab.axaml",
+      "sharedTokens": 4,
+      "colorRoles": 9,
+      "controlThemes": [
+        "DawButtonTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/PanelSplitter.axaml",
+      "sharedTokens": 1,
+      "colorRoles": 3,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/PanKnob.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/PianoRoll.axaml",
+      "sharedTokens": 6,
+      "colorRoles": 1,
+      "controlThemes": [
+        "DawButtonTheme",
+        "DawTextButtonTheme",
+        "DawTextToolToggleTheme",
+        "DawToolToggleTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/PianoRollStyles.axaml",
+      "sharedTokens": 9,
+      "colorRoles": 16,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/ResizerBar.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/SearchBar.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/TrackAdder.axaml",
+      "sharedTokens": 1,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/TrackHeader.axaml",
+      "sharedTokens": 15,
+      "colorRoles": 4,
+      "controlThemes": [
+        "DawTextButtonTheme",
+        "TrackHeaderActionTheme",
+        "TrackHeaderEffectsTheme",
+        "TrackHeaderFaderTheme",
+        "TrackHeaderTextButtonTheme",
+        "TrackHeaderToggleTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Controls/ViewScaler.axaml",
+      "sharedTokens": 0,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Styles/DawControls.axaml",
+      "sharedTokens": 11,
+      "colorRoles": 29,
+      "controlThemes": [
+        "DawButtonTheme",
+        "DawMixButtonTheme",
+        "DawTextButtonTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Styles/Md3Controls.axaml",
+      "sharedTokens": 14,
+      "colorRoles": 38,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Styles/Md3ControlThemes.axaml",
+      "sharedTokens": 9,
+      "colorRoles": 10,
+      "controlThemes": [
+        "DawButtonTheme",
+        "Md3ButtonTheme",
+        "Md3ListBoxItemTheme",
+        "Md3ToggleButtonTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Styles/Md3InputThemes.axaml",
+      "sharedTokens": 1,
+      "colorRoles": 2,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Styles/Md3Menus.axaml",
+      "sharedTokens": 7,
+      "colorRoles": 12,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Styles/Md3SelectionThemes.axaml",
+      "sharedTokens": 30,
+      "colorRoles": 36,
+      "controlThemes": [
+        "Md3CheckBoxTheme",
+        "Md3ProgressBarTheme",
+        "Md3RadioButtonTheme",
+        "Md3SliderTheme",
+        "Md3ToggleSwitchTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Styles/Md3Transitions.axaml",
+      "sharedTokens": 5,
+      "colorRoles": 0,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Styles/RenderWorkspace.axaml",
+      "sharedTokens": 21,
+      "colorRoles": 19,
+      "controlThemes": [
+        "DawTextButtonTheme",
+        "WorkspaceSegmentTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Styles/Styles.axaml",
+      "sharedTokens": 27,
+      "colorRoles": 2,
+      "controlThemes": [],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Styles/ToolWorkspace.axaml",
+      "sharedTokens": 17,
+      "colorRoles": 10,
+      "controlThemes": [
+        "DawButtonTheme",
+        "Md3ButtonTheme",
+        "Md3ToggleButtonTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Styles/TrackHeaderControls.axaml",
+      "sharedTokens": 5,
+      "colorRoles": 7,
+      "controlThemes": [
+        "DawButtonTheme",
+        "DawMixToggleTheme",
+        "DawTextButtonTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Styles/WorkspacePages.axaml",
+      "sharedTokens": 10,
+      "colorRoles": 7,
+      "controlThemes": [
+        "DawButtonTheme",
+        "DawTextButtonTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    },
+    {
+      "file": "OpenUtau/Styles/WorkspaceShell.axaml",
+      "sharedTokens": 20,
+      "colorRoles": 21,
+      "controlThemes": [
+        "DawButtonTheme",
+        "DawTextButtonTheme"
+      ],
+      "ownership": "shared application themes and local DAW density"
+    }
+  ]
+}

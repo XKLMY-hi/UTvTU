@@ -1,6 +1,6 @@
 # MD3 重构 · 欢迎场景与三种种子图库
 
-`index.html` + 9张PNG是设计两件套，HTML的角色值、SVG路径和CSS是权威。PNG来自新HTML的隔离无头浏览器，不是UTvTU产品截图。欢迎页只有限落地到 `WelcomeView.axaml` 与新 `MaterialShape.cs`；全局主题、控件主题和动效由root负责，没有新增WelcomeGeometry或修改App/偏好/编辑器。
+`index.html` + 9张PNG是设计两件套，HTML的角色值、SVG路径和CSS是权威。PNG来自新HTML的隔离无头浏览器，不是UTvTU产品截图。欢迎场景已落地到 `WelcomeView.axaml` 与新 `MaterialShape.cs`；全局主题、控件状态、动态来源及其余界面已同步完成，见[完整实施记录](../../plans/md3-rebuild-2026-10-11.md)。
 
 ## 真实配色与语义
 
@@ -42,4 +42,5 @@ Arch64 + mic24用于页头视觉识别；Square72承托无工程、无搜索匹�
 
 运行 `node geometry.cjs`、`node design.cjs`、`node render.cjs`，只产生本目录设计文件；不会修改产品。render使用bundled Playwright隔离启动Edge，不连接现有浏览器/应用。`validation.json` 记录三种种子明暗角色核对、9图、空状态/四页切换、800/640宽边界、14原生图标、HTML/产品两条shape路径一致、品牌与命令绑定保留、pageErrors=0。图像已逐张查看并修复品牌资源路径与图库末行裁切。
 
-尚未执行产品构建、测试或真实窗口截图；root统一验证MaterialShape和欢迎XAML。浏览器图不是Avalonia字体、产品布局、可访问性或原生设备的验收证据。
+产品SDK9单节点构建通过；214项互不重复轻量回归通过（10组串行、≤30秒/384MB），包含欢迎/偏好布局、真正的选中色配对、焦点优先级、减少动效、窄轨道密度、资源操作、效果器事务和离线导出。`product-validation.json` 保存分组、TRX路径、用例名和产品/测试DLL哈希。隐藏启动检查加载两轨工程、正常响应与退出，峰值256MB、ERR/FTL=0。未抓真实窗口截图；浏览器图不是Avalonia字体、产品像素或原生设备的验收证据。
+共同状态层采用AndroidX `StateTokens.kt` v0_210：hover .08、focus .10、pressed .10、dragged .16；原生源码快照与许可保存在 `assets/StateTokens.kt.txt`，出处/日期/SHA-256见 `state-provenance.json`。`interface-coverage.json` 逐文件列出71份XAML的共同令牌/角色与主题挂载，44份直接消费共同令牌，其余继承应用主题；这是源码覆盖，不是71页的逐像素验收。
