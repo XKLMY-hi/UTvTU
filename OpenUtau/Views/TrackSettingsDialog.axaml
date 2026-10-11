@@ -6,35 +6,31 @@
         mc:Ignorable="d"
         x:Class="OpenUtau.App.Views.TrackSettingsDialog"
         Title="{DynamicResource dialogs.tracksettings.caption}" Focusable="True">
-<DockPanel LastChildFill="True">
-      <Border>
-  <Border>
-    <StackPanel Margin="16" Spacing="8">
-      <TextBlock Text="{DynamicResource warning.renderer}" IsVisible="{Binding IsNotClassic}"/>
-      <TextBlock Text="{DynamicResource prefs.rendering.resampler}" IsVisible="{Binding NeedsResampler}"/>
-      <ComboBox Grid.Column="0" HorizontalAlignment="Stretch" IsVisible="{Binding NeedsResampler}"
-                ItemsSource="{Binding Resamplers}"
-                SelectedItem="{Binding Resampler}"/>
-      <Grid ColumnDefinitions="*,8,*" IsVisible="{Binding NeedsResampler}">
-        <Button Grid.Column="0" Content="{DynamicResource dialogs.tracksettings.location}"
-                HorizontalAlignment="Stretch" Command="{Binding OpenResamplerLocation}"/>
-        <Button Grid.Column="2" Content="{DynamicResource dialogs.tracksettings.setasdefault}"
-                HorizontalAlignment="Stretch" Command="{Binding SetDefaultResampler}"/>
-      </Grid>
-      <TextBlock Text="{DynamicResource prefs.rendering.wavtool}" IsVisible="{Binding NeedsWavtool}"/>
-      <ComboBox Grid.Column="1" HorizontalAlignment="Stretch" IsVisible="{Binding NeedsWavtool}"
-                ItemsSource="{Binding Wavtools}"
-                SelectedItem="{Binding Wavtool}"/>
-      <Grid ColumnDefinitions="*,8,*" IsVisible="{Binding NeedsWavtool}">
-        <Button Grid.Column="0" Content="{DynamicResource dialogs.tracksettings.location}"
-                HorizontalAlignment="Stretch" Command="{Binding OpenWavtoolLocation}"/>
-        <Button Grid.Column="2" Content="{DynamicResource dialogs.tracksettings.setasdefault}"
-                HorizontalAlignment="Stretch" Command="{Binding SetDefaultWavtool}"/>
-      </Grid>
-      <Button Grid.Column="2" Content="{DynamicResource button.ok}"
-              HorizontalAlignment="Stretch" Click="OnOkClicked"/>
-    </StackPanel>
-  </Border>
-      </Border>
-    </DockPanel>
+  <Grid Margin="16" RowDefinitions="*,Auto">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Spacing="16" MaxWidth="1040" HorizontalAlignment="Stretch">
+        <TextBlock Classes="toolHint" TextWrapping="Wrap" Text="{DynamicResource warning.renderer}" IsVisible="{Binding IsNotClassic}"/>
+        <controls:AdaptiveColumns MinimumColumnWidth="340" Spacing="24">
+          <StackPanel Spacing="12" IsVisible="{Binding NeedsResampler}">
+            <TextBlock FontSize="13" FontWeight="SemiBold" Text="{DynamicResource prefs.rendering.resampler}"/>
+            <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Resamplers}" SelectedItem="{Binding Resampler}"/>
+            <WrapPanel Orientation="Horizontal">
+              <Button Classes="toolAction resourceAction" Content="{DynamicResource dialogs.tracksettings.location}" Command="{Binding OpenResamplerLocation}"/>
+              <Button Classes="toolAction resourceAction" Content="{DynamicResource dialogs.tracksettings.setasdefault}" Command="{Binding SetDefaultResampler}"/>
+            </WrapPanel>
+          </StackPanel>
+          <StackPanel Spacing="12" IsVisible="{Binding NeedsWavtool}">
+            <TextBlock FontSize="13" FontWeight="SemiBold" Text="{DynamicResource prefs.rendering.wavtool}"/>
+            <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Wavtools}" SelectedItem="{Binding Wavtool}"/>
+            <WrapPanel Orientation="Horizontal">
+              <Button Classes="toolAction resourceAction" Content="{DynamicResource dialogs.tracksettings.location}" Command="{Binding OpenWavtoolLocation}"/>
+              <Button Classes="toolAction resourceAction" Content="{DynamicResource dialogs.tracksettings.setasdefault}" Command="{Binding SetDefaultWavtool}"/>
+            </WrapPanel>
+          </StackPanel>
+        </controls:AdaptiveColumns>
+      </StackPanel>
+    </ScrollViewer>
+    <Button Name="ApplyButton" Grid.Row="1" Classes="toolAction" MinWidth="80" Margin="0,12,0,0" HorizontalAlignment="Right"
+            Content="{DynamicResource button.ok}" Click="OnOkClicked"/>
+  </Grid>
 </controls:WorkspaceToolView>
