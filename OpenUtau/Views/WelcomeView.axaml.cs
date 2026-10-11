@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using OpenUtau.App.ViewModels;
+using OpenUtau.App.Controls;
 
 namespace OpenUtau.App.Views {
     /// <summary>
@@ -43,6 +44,12 @@ namespace OpenUtau.App.Views {
 
         /// <summary>0 最近 / 1 新建 / 2 打开 / 3 模板。同一时刻只有一个分页可见。</summary>
         private void ShowPage(int index) {
+            HeaderShape.Kind = index switch {
+                0 => MaterialShapeKind.Cookie7,
+                1 => MaterialShapeKind.Arch,
+                2 => MaterialShapeKind.Sunny,
+                _ => MaterialShapeKind.Square,
+            };
             PageRecent.IsVisible = index == 0;
             PageNew.IsVisible = index == 1;
             PageOpen.IsVisible = index == 2;

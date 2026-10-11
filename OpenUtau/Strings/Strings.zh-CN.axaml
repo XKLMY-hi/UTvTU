@@ -563,6 +563,7 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="progress.cachecleared">缓存已清除</system:String>
   <system:String x:Key="progress.clearingcache">正在清除缓存...</system:String>
   <system:String x:Key="progress.loadingsingers">正在加载歌手...</system:String>
+  <system:String x:Key="loading.wait">正在处理，请稍候…</system:String>
   <system:String x:Key="progress.saved">工程已保存 {0}</system:String>
   <system:String x:Key="progress.waitingrendering">等待渲染</system:String>
 
@@ -1426,7 +1427,7 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="welcome.import.description">从音频文件加入一条轨道</system:String>
   <system:String x:Key="welcome.template.description">从已保存的模板开始</system:String>
   <system:String x:Key="welcome.template.tip">选择模板</system:String>
-  <system:String x:Key="welcome.recent.empty">还没有最近工程 —— 用下面的“新建工程”开始一个。</system:String>
+  <system:String x:Key="welcome.recent.empty">还没有最近工程，从“新建空白工程”开始吧。</system:String>
   <system:String x:Key="welcome.template.empty">暂无模板。</system:String>
   <system:String x:Key="welcome.nav.start">开始</system:String>
   <system:String x:Key="welcome.empty.folder">双击工程打开，或把文件拖进来。</system:String>

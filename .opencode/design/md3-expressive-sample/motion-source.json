@@ -1,0 +1,13 @@
+{
+  "url": "https://raw.githubusercontent.com/androidx/androidx/androidx-main/compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/tokens/ExpressiveMotionTokens.kt",
+  "sha256": "deefcefc93405c69445071b40e4d9894458bb20cff18b805192c90aea5ba6c73",
+  "spatialDefault": {
+    "stiffness": 380,
+    "damping": 0.8
+  },
+  "spatialFast": {
+    "stiffness": 800,
+    "damping": 0.6
+  },
+  "adapter": "Finite normalized spring response evaluated by Avalonia; no Compose dependency."
+}

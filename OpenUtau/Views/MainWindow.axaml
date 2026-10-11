@@ -155,10 +155,10 @@
                 <c:DawIcon Data="{StaticResource icon-skip-back}" Width="16" Height="16"
                       Fill="{Binding $parent[Button].Foreground}"/>
               </Button>
-              <Button Classes="tpPlay" AutomationProperties.Name="{DynamicResource command.playback.playpause}" ToolTip.Tip="{DynamicResource command.playback.playpause}" Click="OnPlayOrPause">
-                <c:DawIcon Data="{StaticResource icon-play}" Width="16" Height="16"
-                      Fill="{DynamicResource md3.on-primary}"/>
-              </Button>
+              <c:PlayPauseButton x:Name="TransportPlay" Classes="tpPlay"
+                                IsPlaying="{Binding PlaybackViewModel.IsPlaying}"
+                                AutomationProperties.Name="{DynamicResource command.playback.playpause}"
+                                ToolTip.Tip="{DynamicResource command.playback.playpause}" Click="OnPlayOrPause"/>
               <Button Classes="tpBtn" AutomationProperties.Name="{DynamicResource command.playback.playpause}" ToolTip.Tip="{DynamicResource command.playback.playpause}" Command="{Binding PlaybackViewModel.Pause}">
                 <c:DawIcon Data="{StaticResource icon-pause}" Width="16" Height="16"
                       Fill="{Binding $parent[Button].Foreground}"/>

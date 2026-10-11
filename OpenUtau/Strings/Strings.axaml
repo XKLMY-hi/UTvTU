@@ -734,6 +734,7 @@ Warning: this option removes custom presets.</system:String>
   <system:String x:Key="progress.cachecleared">Cache cleared.</system:String>
   <system:String x:Key="progress.clearingcache">Clearing cache...</system:String>
   <system:String x:Key="progress.loadingsingers">Loading Singers...</system:String>
+  <system:String x:Key="loading.wait">Please wait…</system:String>
   <system:String x:Key="progress.saved">Project saved. {0}</system:String>
   <system:String x:Key="progress.waitingrendering">Waiting Rendering</system:String>
 
@@ -1298,7 +1299,7 @@ Range {2}–{3} s · Tail {4} s
   <system:String x:Key="welcome.import.description">Add a track from an audio file</system:String>
   <system:String x:Key="welcome.template.description">Start from a saved template</system:String>
   <system:String x:Key="welcome.template.tip">Pick a template</system:String>
-  <system:String x:Key="welcome.recent.empty">No recent projects yet — start one with New project below.</system:String>
+  <system:String x:Key="welcome.recent.empty">No recent projects yet — start with a new blank project.</system:String>
   <system:String x:Key="welcome.template.empty">No templates yet.</system:String>
   <system:String x:Key="welcome.nav.start">Start</system:String>
   <system:String x:Key="welcome.empty.folder">Double-click a project to open it, or drop a file here.</system:String>

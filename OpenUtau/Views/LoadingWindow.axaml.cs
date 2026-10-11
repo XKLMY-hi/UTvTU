@@ -25,7 +25,6 @@ namespace OpenUtau.App.Views {
             loadingDialog = new LoadingWindow() {
                 Title = "Loading"
             };
-            loadingDialog.Text.Text = "Loading...";
         }
 
         private static void ShowLoadingWindow(Window parent) {

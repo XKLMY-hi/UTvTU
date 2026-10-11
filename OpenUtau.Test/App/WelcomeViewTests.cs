@@ -74,10 +74,11 @@ namespace OpenUtau.Test.App {
             Assert.Contains("md3.surface-container-low", xaml);
             Assert.Contains("md3.primary-container", xaml);
             Assert.Contains("md3.on-primary-container", xaml);
-            Assert.Contains("Kind=\"Arch\"", xaml);
+            Assert.Contains("Kind=\"Cookie7\"", xaml);
+            Assert.Contains("Kind=\"Sunny\"", xaml);
             Assert.Contains("Kind=\"Square\"", xaml);
             // 密度字号阶梯（主界面基准：标题 28 / 空态 16 / 副标 14 / 正文 13 / 分组 12 / 次要 11.5 / 徽标 11）
-            foreach (string role in new[] { "TitleLarge", "TitleMedium", "BodyMedium", "BodySmall", "LabelSmall" }) {
+            foreach (string role in new[] { "DisplaySmall", "TitleMedium", "BodyMedium", "BodySmall", "LabelSmall" }) {
                 Assert.Contains("{DynamicResource Md3Type" + role + "}", xaml);
             }
             // 关键尺寸：最近行 56 / 格式徽标 24 / 音源 chip 28 / 模板卡 240×72 / 空态图标容器 56 / 波形带 64
@@ -144,7 +145,7 @@ namespace OpenUtau.Test.App {
                 Assert.Equal(Stretch.Fill, wave.Stretch);
                 Assert.NotNull(wave.Fill);
                 Assert.Equal(WelcomeArt.WaveBandHeight, wave.Bounds.Height, 1);
-                Assert.Equal(0.16, wave.Opacity, 3);
+                Assert.Equal(0.12, wave.Opacity, 3);
             });
         }
 
@@ -205,7 +206,7 @@ namespace OpenUtau.Test.App {
                 Assert.NotNull(wave.Data);                  // 资源键 welcome-waveform 必须解析到
                 Assert.Equal(WelcomeArt.WaveBandHeight, wave.Bounds.Height, 1);
                 Assert.Equal(Stretch.Fill, wave.Stretch);
-                Assert.Equal(0.16, wave.Opacity, 3);
+                Assert.Equal(0.12, wave.Opacity, 3);
                 Assert.NotNull(wave.Fill);
                 var origin = wave.TranslatePoint(new Point(0, 0), view);
                 Assert.NotNull(origin);
@@ -217,11 +218,11 @@ namespace OpenUtau.Test.App {
         }
 
         /// <summary>
-        /// 页头波形带必须**宽度弹性**（2026-10 fx-ui 复核 A⑤：原先 `Width="300"` 是固定宽 ⇒ 窄窗不收缩/会挤压标题）。
-        /// 断言：窄窗宽度 &lt; 宽窗宽度，且带子完全落在视图内（不溢出），窄窗下也不至于压到不可辨。
+        /// Expressive 样板的波形与几何共用固定 168 DIP 单元；宽窄窗均不能溢出。
+        /// 断言：宽窄窗口的插图单元等宽，且带子完全落在视图内。
         /// </summary>
         [AvaloniaFact]
-        public void WelcomeView_WaveformBand_WidthIsElastic_AndNeverOverflows() {
+        public void WelcomeView_WaveformBand_FixedArtCellNeverOverflows() {
             double BandWidthAt(double w, double h) {
                 UsePool();
                 var view = new WelcomeView();
@@ -241,7 +242,7 @@ namespace OpenUtau.Test.App {
             }
             double narrow = BandWidthAt(1000, 660);
             double wide = BandWidthAt(1400, 900);
-            Assert.True(narrow < wide, $"波形带应随窗口弹性（窄 {narrow:F1} / 宽 {wide:F1}）");
+            Assert.Equal(narrow, wide);
             Assert.True(narrow > 100, $"窄窗下不应压到不可辨（{narrow:F1}）");
         }
 

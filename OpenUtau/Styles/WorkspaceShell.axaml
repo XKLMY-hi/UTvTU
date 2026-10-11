@@ -122,6 +122,22 @@
     <Setter Property="Focusable" Value="True"/>
     <Setter Property="VerticalAlignment" Value="Center"/>
   </Style>
+  <!-- Fixed transport hit/layout box, state-specific expressive silhouette. -->
+  <Style Selector="Button.tpPlay.expressivePlay">
+    <Setter Property="CornerRadius" Value="18"/>
+    <Setter Property="Transitions"><Transitions>
+      <CornerRadiusTransition Property="CornerRadius" Duration="{DynamicResource Md3MotionSpatialFast}"
+                              Easing="{StaticResource Md3SpatialFastEasing}"/>
+    </Transitions></Setter>
+  </Style>
+  <Style Selector="Button.tpPlay.expressivePlay:playing">
+    <Setter Property="CornerRadius" Value="12"/>
+    <Setter Property="Background" Value="{DynamicResource md3.tertiary-container}"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-tertiary-container}"/>
+  </Style>
+  <Style Selector="Button.tpPlay.expressivePlay:pressed"><Setter Property="CornerRadius" Value="10"/></Style>
+  <Style Selector="Button.tpPlay.expressivePlay:playing:pressed"><Setter Property="CornerRadius" Value="8"/></Style>
+  <Style Selector="Button.tpPlay.expressivePlay:reduced-motion"><Setter Property="Transitions" Value="{x:Null}"/></Style>
   <Style Selector="Border.shellRow">
     <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>

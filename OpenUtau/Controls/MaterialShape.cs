@@ -7,6 +7,9 @@ namespace OpenUtau.App.Controls {
     public enum MaterialShapeKind {
         Arch,
         Square,
+        Circle,
+        Sunny,
+        Cookie7,
     }
 
     /// <summary>
@@ -16,7 +19,9 @@ namespace OpenUtau.App.Controls {
     /// Square = unit rectangle, rounding .3. Both use zero smoothing.
     /// Source parameters, the circular-arc calculation and provenance are recorded
     /// in .opencode/design/md3-rebuild-2026-10-11/geometry.json.
-    /// No raster tracing, brand geometry, theme subscriptions or animation timers.
+    /// Circle/Sunny/Cookie7 paths are generated from source parameters recorded in
+    /// .opencode/design/md3-expressive-sample/geometry.json. This control stays static;
+    /// MaterialMorph supplies the optional state animation. No raster tracing.
     /// </summary>
     public sealed class MaterialShape : Control {
         // AndroidX source: Copyright 2024 The Android Open Source Project,
@@ -29,8 +34,8 @@ namespace OpenUtau.App.Controls {
         public static readonly StyledProperty<IBrush?> FillProperty =
             AvaloniaProperty.Register<MaterialShape, IBrush?>(nameof(Fill));
 
-        static readonly Geometry arch = Geometry.Parse(ArchPath);
-        static readonly Geometry square = Geometry.Parse(SquarePath);
+        static readonly Geometry[] shapes = Array.ConvertAll(MaterialShapeProfiles.Paths, Geometry.Parse);
+        internal static Geometry Source(MaterialShapeKind kind) => shapes[(int)kind];
         Geometry? rendered;
 
         static MaterialShape() {
@@ -60,7 +65,7 @@ namespace OpenUtau.App.Controls {
             if (rendered == null) {
                 double scale = Math.Min(Bounds.Width, Bounds.Height) / 100;
                 if (!double.IsFinite(scale) || scale <= 0) return;
-                rendered = (Kind == MaterialShapeKind.Square ? square : arch).Clone();
+                rendered = Source(Kind).Clone();
                 rendered.Transform = new MatrixTransform(Matrix.CreateScale(scale, scale) *
                     Matrix.CreateTranslation((Bounds.Width - 100 * scale) / 2,
                         (Bounds.Height - 100 * scale) / 2));

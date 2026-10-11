@@ -43,7 +43,7 @@
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
     </Style>
     <Style Selector="TextBlock.pageTitle">
-      <Setter Property="FontSize" Value="{DynamicResource Md3TypeTitleLarge}"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeDisplaySmall}"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     </Style>
@@ -309,27 +309,32 @@
     <!-- ══════════ 右：内容区（内边距 24 / 页头 22+13 / 单页聚焦） ══════════ -->
     <Grid Grid.Column="1" RowDefinitions="Auto,*,Auto" Margin="24,24,24,0">
 
-      <!-- A single primary-container header establishes page identity. The Arch is
-           official source-derived geometry, not a new brand mark or an audio meter. -->
+      <!-- Expressive sample: stronger title hierarchy and state-linked source geometry.
+           Decorative shapes never replace the brand or represent audio levels. -->
       <Border Grid.Row="0" Background="{DynamicResource md3.primary-container}"
               CornerRadius="{DynamicResource Md3ShapeExtraLarge}" Padding="24">
-        <Grid ColumnDefinitions="3*,2*">
-          <StackPanel Grid.Column="0" Spacing="{DynamicResource Md3Spacing1}" VerticalAlignment="Center">
+        <Grid ColumnDefinitions="*,Auto" MinHeight="144">
+          <StackPanel Grid.Column="0" Spacing="{DynamicResource Md3Spacing2}" VerticalAlignment="Center">
             <TextBlock x:Name="PageTitle" Classes="pageTitle" Text="{DynamicResource welcome.recent}"
-                       Foreground="{DynamicResource md3.on-primary-container}"/>
+                       TextWrapping="Wrap" Foreground="{DynamicResource md3.on-primary-container}"/>
             <TextBlock x:Name="PageSubtitle" Classes="pageSub" Text="{DynamicResource welcome.greeting.sub}"
                        Foreground="{DynamicResource md3.on-primary-container}"/>
           </StackPanel>
-          <Grid Grid.Column="1" Margin="16,0,0,0" IsHitTestVisible="False">
-            <c:MaterialShape Kind="Arch" Width="64" Height="64" HorizontalAlignment="Right"
-                             Fill="{DynamicResource md3.primary}"/>
-            <c:DawIcon Data="{StaticResource icon-mic}" Width="24" Height="24" Margin="0,0,20,0"
-                       HorizontalAlignment="Right" VerticalAlignment="Center"
-                       Fill="{DynamicResource md3.on-primary}"/>
-            <Path x:Name="WaveformBars" Height="32" Margin="0,0,80,0"
-                  VerticalAlignment="Center" HorizontalAlignment="Stretch"
+          <Grid Grid.Column="1" Width="168" Height="144" Margin="16,0,0,0" IsHitTestVisible="False">
+            <Path x:Name="WaveformBars" Height="64" Width="168"
+                  VerticalAlignment="Center" HorizontalAlignment="Center"
                   Data="{DynamicResource welcome-waveform}" Stretch="Fill"
-                  Fill="{DynamicResource md3.on-primary-container}" Opacity="0.16"/>
+                  Fill="{DynamicResource md3.on-primary-container}" Opacity="0.12"/>
+            <c:MaterialMorph x:Name="HeaderShape" Kind="Cookie7" Width="144" Height="144"
+                             HorizontalAlignment="Center" Fill="{DynamicResource md3.primary}"/>
+            <c:DawIcon Data="{StaticResource icon-mic}" Width="36" Height="36"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{DynamicResource md3.on-primary}"/>
+            <c:MaterialShape Kind="Circle" Width="32" Height="32" Margin="0,0,4,4"
+                             HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                             Fill="{DynamicResource md3.tertiary-container}"/>
+            <c:DawIcon Data="{StaticResource icon-music}" Width="16" Height="16" Margin="0,0,12,12"
+                       HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                       Fill="{DynamicResource md3.on-tertiary-container}"/>
           </Grid>
         </Grid>
       </Border>
@@ -395,16 +400,16 @@
 
           <!-- 空态 A：一个工程都没有 -->
           <StackPanel Grid.Row="3" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center"
-                      MaxWidth="360" IsVisible="{Binding WelcomeNoRecent}">
+                      MaxWidth="440" IsVisible="{Binding WelcomeNoRecent}">
             <Grid Classes="emptyIcon" HorizontalAlignment="Center">
-              <c:MaterialShape Kind="Square" Fill="{DynamicResource md3.secondary-container}"/>
+              <c:MaterialShape Kind="Sunny" Fill="{DynamicResource md3.secondary-container}"/>
               <c:DawIcon Data="{StaticResource icon-file-plus}" Width="26" Height="26"
                     HorizontalAlignment="Center" VerticalAlignment="Center"
                     Fill="{DynamicResource md3.on-secondary-container}"/>
             </Grid>
             <TextBlock Classes="emptyTitle" HorizontalAlignment="Center" TextWrapping="Wrap"
                        Text="{DynamicResource welcome.recent.empty}"/>
-            <TextBlock Classes="caption" FontSize="{DynamicResource Md3TypeBodyMedium}" HorizontalAlignment="Center" TextWrapping="Wrap"
+            <TextBlock Classes="caption" FontSize="{DynamicResource Md3TypeBodyMedium}" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"
                        Text="{DynamicResource welcome.empty.folder}"/>
           </StackPanel>
 
