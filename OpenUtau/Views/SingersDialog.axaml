@@ -15,18 +15,20 @@
 
   <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
     <Grid Name="SingerLayout" MinWidth="440" Height="650" ColumnDefinitions="232,24,*">
-      <Grid Name="SingerBrowser" RowDefinitions="Auto,Auto,*,Auto" Background="{DynamicResource md3.surface-container-low}" Margin="0" >
+      <Border Name="SingerBrowserSurface" CornerRadius="{DynamicResource Md3ShapeMedium}" ClipToBounds="True"
+              Background="{DynamicResource md3.surface-container-low}" IsVisible="{Binding #SingerBrowser.IsVisible}">
+      <Grid Name="SingerBrowser" RowDefinitions="Auto,Auto,*,Auto" Margin="0">
         <TextBox Margin="12" Text="{Binding SearchSinger}" PlaceholderText="{DynamicResource workspace.singers.search}"/>
         <Grid Grid.Row="1" Margin="12,0,12,8" ColumnDefinitions="*,Auto">
           <TextBlock Classes="toolCaption" Text="{DynamicResource singers.caption}"/>
           <TextBlock Grid.Column="1" Classes="toolCaption" Text="{Binding SingerCount}"/>
         </Grid>
         <Grid Grid.Row="2">
-          <ListBox Name="SingerList" ItemsSource="{Binding FilteredSingers}" SelectedItem="{Binding Singer, Mode=OneWay}" SelectionChanged="OnSingerListChanged" Background="Transparent">
+          <ListBox Name="SingerList" ItemsSource="{Binding FilteredSingers}" SelectedItem="{Binding Singer, Mode=OneWay}" SelectionChanged="OnSingerListChanged" Background="Transparent" BorderThickness="0">
             <ListBox.ItemTemplate><DataTemplate>
               <Grid ColumnDefinitions="36,12,*" Height="56">
-                <Border CornerRadius="{DynamicResource Md3ShapeSmall}" Height="36" Background="{DynamicResource md3.surface-container-high}" VerticalAlignment="Center">
-                  <c:DawIcon Data="{StaticResource icon-mic}" Width="20" Height="20" Fill="{DynamicResource md3.primary}"/>
+                <Border CornerRadius="{DynamicResource Md3ShapeSmall}" Height="36" ClipToBounds="True" Background="{DynamicResource md3.surface-container-high}" VerticalAlignment="Center">
+                  <c:SingerAvatar Singer="{Binding}" Revision="{Binding $parent[ListBox].DataContext.AvatarRevision}"/>
                 </Border>
                 <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
                   <TextBlock Text="{Binding LocalizedName}" TextTrimming="CharacterEllipsis" FontWeight="Medium"/>
@@ -39,6 +41,7 @@
         </Grid>
         <Button Grid.Row="3" Classes="toolAction primary" Margin="12" Content="{DynamicResource menu.tools.singer.install}" Click="OnInstallSinger"/>
       </Grid>
+      </Border>
       <Grid Grid.Column="2" RowDefinitions="Auto,Auto,40,*">
         <Grid Name="SingerPicker" IsVisible="False" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
           <ComboBox Name="name" HorizontalAlignment="Stretch" ItemsSource="{Binding Singers}" SelectedItem="{Binding Singer}" SelectionChanged="OnSelectedSingerChanged">

@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Markup.Xaml.Styling;
 using OpenUtau.App.Views;
 
@@ -27,7 +26,8 @@ public class WorkspaceToolView : UserControl {
     internal Action<WorkspaceToolView>? RemoveFromHost;
 
     public WorkspaceToolView() {
-        this[!BackgroundProperty] = new DynamicResourceExtension("md3.surface");
+        // Embedded tools share their host's surface; a page explicitly opts into its own background.
+        // Painting a page surface here leaves a square inside rounded dialog cards.
         Styles.Add(new StyleInclude(new Uri("avares://OpenUtau/")) {
             Source = new Uri("avares://OpenUtau/Styles/ToolWorkspace.axaml"),
         });

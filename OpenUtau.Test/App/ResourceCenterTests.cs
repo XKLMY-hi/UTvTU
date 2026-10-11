@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Headless.XUnit;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using OpenUtau.App.ViewModels;
@@ -32,6 +35,61 @@ public sealed class ResourceCenterTests {
         public override IList<USubbank> Subbanks => Array.Empty<USubbank>();
         public IList<UOto> Samples { get; set; }
         public override IList<UOto> Otos => Samples ??= new[] { UOto.OfDummy(id + "-a") };
+        public byte[] ImageData { get; set; }
+        public string ImagePath { get; set; }
+        public int LoadCalls { get; private set; }
+        public bool FailImageRead { get; set; }
+        public override byte[] AvatarData => FailImageRead ? throw new IOException("thumbnail unavailable") : ImageData;
+        public override string Avatar => ImagePath;
+        public override void EnsureLoaded() => LoadCalls++;
+    }
+
+    [AvaloniaFact]
+    public void VoicebankRowsShowRealSmallAvatarsWithoutLoadingUnselectedBanksAndRefreshAfterReload() {
+        // A real PNG fixture: headless drawing's Save is a no-op and its decoder is a stub.
+        var bytes = Convert.FromBase64String("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGBgAAAABQABpfZFQAAAAABJRU5ErkJggg==");
+        var file = Path.Combine(Path.GetTempPath(), "utvtu-avatar-" + Guid.NewGuid() + ".png");
+        File.WriteAllBytes(file, bytes);
+        var alpha = new Singer("Alpha") { ImageData = bytes };
+        var beta = new Singer("Beta") { ImagePath = file };
+        var missing = new Singer("Missing");
+        using var vm = new SingersViewModel(new[] { alpha, beta, missing });
+        var page = new SingersDialog { DataContext = vm };
+        var window = new WindowEx { Width = 1200, Height = 800, Content = page };
+        try {
+            window.Show(); Dispatcher.UIThread.RunJobs(); window.UpdateLayout();
+            var avatars = page.GetVisualDescendants().OfType<SingerAvatar>().ToArray();
+            Assert.Equal(3, avatars.Length);
+            var a = avatars.Single(c => c.Singer == alpha);
+            var b = avatars.Single(c => c.Singer == beta);
+            var m = avatars.Single(c => c.Singer == missing);
+            var ai = a.GetVisualDescendants().OfType<Image>().Single();
+            var bi = b.GetVisualDescendants().OfType<Image>().Single();
+            Assert.InRange(Assert.IsType<Bitmap>(ai.Source).PixelSize.Width, 1, 72);
+            Assert.InRange(Assert.IsType<Bitmap>(bi.Source).PixelSize.Width, 1, 72);
+            Assert.Equal(0, beta.LoadCalls);
+            Assert.Null(m.GetVisualDescendants().OfType<Image>().Single().Source);
+            Assert.True(m.GetVisualDescendants().OfType<DawIcon>().Single().IsVisible);
+            Assert.False(a.GetVisualDescendants().OfType<DawIcon>().Single().IsVisible);
+            alpha.ImageData = null; vm.RefreshSinger(); Dispatcher.UIThread.RunJobs();
+            Assert.Null(ai.Source);
+            Assert.True(a.GetVisualDescendants().OfType<DawIcon>().Single().IsVisible);
+            alpha.ImageData = bytes; vm.RefreshSinger(); Dispatcher.UIThread.RunJobs();
+            Assert.IsType<Bitmap>(ai.Source);
+            beta.FailImageRead = true; vm.AvatarRevision++; Dispatcher.UIThread.RunJobs();
+            Assert.Null(bi.Source);
+            Assert.True(b.GetVisualDescendants().OfType<DawIcon>().Single().IsVisible);
+            beta.FailImageRead = false; vm.AvatarRevision++; Dispatcher.UIThread.RunJobs();
+            Assert.IsType<Bitmap>(bi.Source);
+            var previous = bi.Source;
+            window.Content = null; Dispatcher.UIThread.RunJobs();
+            Assert.Null(ai.Source); Assert.Null(bi.Source);
+            window.Content = page; Dispatcher.UIThread.RunJobs(); window.UpdateLayout();
+            var remounted = page.GetVisualDescendants().OfType<SingerAvatar>().Single(c => c.Singer == beta)
+                .GetVisualDescendants().OfType<Image>().Single();
+            Assert.IsType<Bitmap>(remounted.Source); Assert.NotSame(previous, remounted.Source);
+            Assert.Equal(0, beta.LoadCalls);
+        } finally { window.Close(); File.Delete(file); }
     }
 
     [AvaloniaFact]
@@ -76,6 +134,9 @@ public sealed class ResourceCenterTests {
         try {
             Dispatcher.UIThread.RunJobs();
             Assert.True(page.FindControl<Grid>("SingerBrowser")!.IsVisible);
+            var surface = page.FindControl<Border>("SingerBrowserSurface")!;
+            Assert.True(surface.IsVisible); Assert.True(surface.ClipToBounds);
+            Assert.Equal(new CornerRadius(12), surface.CornerRadius);
             var options = page.FindControl<Button>("SingerOptions")!;
             Assert.Same(options.Content, Assert.Single(options.GetVisualDescendants().OfType<DawIcon>()));
             var search = page.FindControl<TextBox>("AliasSearch")!; search.Text = "retained";
@@ -83,6 +144,7 @@ public sealed class ResourceCenterTests {
             Assert.True(page.FindControl<DataGrid>("SubbanksGrid")!.IsVisible);
             window.Width = 800; Dispatcher.UIThread.RunJobs();
             Assert.False(page.FindControl<Grid>("SingerBrowser")!.IsVisible);
+            Assert.False(surface.IsVisible);
             Assert.True(page.FindControl<Grid>("SingerPicker")!.IsVisible);
             Assert.True(page.FindControl<DataGrid>("SubbanksGrid")!.IsVisible);
             page.FindControl<Button>("OtoTab")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));

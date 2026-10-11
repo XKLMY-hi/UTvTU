@@ -1,9 +1,13 @@
 using System;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
 using Avalonia.Headless.XUnit;
 using Avalonia.Media;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
+using System.Linq;
 using OpenUtau.App.Controls;
 using OpenUtau.App.Views;
 using OpenUtau.Core.Util;
@@ -75,6 +79,27 @@ public sealed class WorkspaceDialogPresentationTests : IDisposable {
             host.Dialogs.SetExternalModalVisible(false);
             Assert.True(host.Surface.IsEnabled);
             Assert.Null(host.Surface.Effect);
+        } finally { host.Dialogs.Shutdown(); host.Close(); }
+    }
+    [AvaloniaFact]
+    public void EmbeddedInputToolSharesTheCardSurfaceInsteadOfPaintingASquare() {
+        var host = new Host(); host.Show();
+        try {
+            var tool = new TypeInDialog { Title = "BPM" };
+            tool.Show(host); Dispatcher.UIThread.RunJobs(); host.UpdateLayout();
+            Assert.True(tool.Background == null || tool.Background is ISolidColorBrush { Color.A: 0 });
+            var card = host.Dialogs.GetVisualDescendants().OfType<Border>().Single(b => b.Classes.Contains("md3-pop"));
+            var position = tool.TranslatePoint(default, card)!.Value;
+            Assert.True(position.X >= card.Padding.Left);
+            Assert.True(position.Y >= card.Padding.Top);
+            Assert.True(position.X + tool.Bounds.Width <= card.Bounds.Width - card.Padding.Right + .01);
+            Assert.True(position.Y + tool.Bounds.Height <= card.Bounds.Height - card.Padding.Bottom + .01);
+            var button = tool.FindControl<Button>("OkButton")!;
+            var presenter = button.GetVisualDescendants().OfType<ContentPresenter>().Single(p => p.Name == "PART_ContentPresenter");
+            Assert.True(presenter.Background == null || presenter.Background is ISolidColorBrush { Color.A: 0 });
+            var root = button.GetVisualDescendants().OfType<Border>().Single(b => b.Name == "PART_Root");
+            Assert.Equal(button.Bounds.Size, root.Bounds.Size);
+            Assert.Equal(button.CornerRadius, root.CornerRadius);
         } finally { host.Dialogs.Shutdown(); host.Close(); }
     }
     public void Dispose() => Preferences.Default.ReduceMotion = previousMotion;

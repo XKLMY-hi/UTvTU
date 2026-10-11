@@ -419,6 +419,15 @@ namespace OpenUtau.App.Controls {
             base.OnUnloaded(e);
             wavBitmap?.Dispose();
             melBitmap?.Dispose();
+            wavBitmap = null;
+            wavBitmapData = null;
+            melBitmap = null;
+        }
+
+        protected override void OnLoaded(RoutedEventArgs e) {
+            base.OnLoaded(e);
+            if (melBitmap == null && WaveFile != null) UpdateMel(WaveFile);
+            InvalidateVisual();
         }
     }
 }

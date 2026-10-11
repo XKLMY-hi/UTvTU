@@ -35,6 +35,7 @@ namespace OpenUtau.App.ViewModels {
         public bool HasSinger => Singer != null;
         [Reactive] public USinger? Singer { get; set; }
         [Reactive] public Bitmap? Avatar { get; set; }
+        [Reactive] public int AvatarRevision { get; set; }
         [Reactive] public string? Info { get; set; }
         [Reactive] public bool HasWebsite { get; set; }
         public bool IsClassic => Singer != null && Singer.SingerType == USingerType.Classic;
@@ -114,6 +115,7 @@ namespace OpenUtau.App.ViewModels {
                         var previousAvatar = Avatar;
                         Avatar = LoadAvatar(singer);
                         previousAvatar?.Dispose();
+                        AvatarRevision++;
                         SelectedOto = null;
                         SelectedIndex = -1;
                         Otos.Clear();
@@ -396,6 +398,7 @@ namespace OpenUtau.App.ViewModels {
             var previousAvatar = Avatar;
             Avatar = LoadAvatar(Singer);
             previousAvatar?.Dispose();
+            AvatarRevision++;
             Otos.Clear();
             Otos.AddRange(Singer.Otos);
             Search();
