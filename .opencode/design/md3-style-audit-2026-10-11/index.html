@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UTvTU · Google MD3 官方实例参考板</title>
+<style>
+/* Reference-board layout only. These are not proposed UTvTU theme tokens or traced Google geometry. */
+:root{color-scheme:light;--paper:#f7f8fa;--ink:#20242b;--muted:#59616b;--line:#dce1e6;--card:#fff;--accent:#215d55}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:"HarmonyOS Sans SC","Microsoft YaHei",sans-serif;font-size:15px;line-height:1.7}
+main{max-width:1440px;margin:auto;padding:44px 52px}header{max-width:1120px;margin-bottom:28px}.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--accent);font-weight:700}h1{font-size:32px;line-height:1.3;letter-spacing:-.025em;margin:10px 0 14px}h2{font-size:20px;line-height:1.4;margin:0 0 8px}h3{font-size:16px;margin:0 0 8px}p{margin:0 0 12px}a{color:var(--accent);text-underline-offset:4px}a:focus-visible{outline:3px solid var(--accent);outline-offset:4px}small,.muted{color:var(--muted)}.note{padding:14px 18px;background:#eaf1ef;border-left:3px solid var(--accent);border-radius:0 12px 12px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.card{background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;min-width:0}.head{padding:24px 26px 0}.number{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.08em}.frame{margin:18px 22px;background:#faf9fc;border-radius:12px;display:flex;align-items:center;justify-content:center;height:460px;padding:14px}.frame img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}.caption{padding:0 26px 24px}.caption p{font-size:14px}.caption small{display:block;font-size:11px;line-height:1.55}.links{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;margin:12px 0}.shape-card{margin-top:22px;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(260px,1fr);gap:12px;padding:26px}.shape-card img{width:100%;height:auto;display:block}.shape-copy{padding:10px 12px}.shape-copy p{font-size:14px}.shape-copy small{font-size:11px;display:block}.divider{height:1px;background:var(--line);margin:24px 0}.audit{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:22px 0}.audit article{border-top:3px solid #8aaca4;padding:18px 0}.audit p{font-size:13px;color:var(--muted)}.further{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;padding:24px 26px}.further p{font-size:13px;color:var(--muted)}footer{padding-top:24px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+@media(max-width:900px){main{padding:28px 22px}.grid{grid-template-columns:1fr}.shape-card{grid-template-columns:1fr}.audit{grid-template-columns:1fr 1fr}.further{grid-template-columns:1fr}.frame{height:420px}h1{font-size:27px}}
+@media(max-width:480px){.audit{grid-template-columns:1fr}.frame{height:340px}}
+@media print{main{padding:20px}a{color:inherit}.card{break-inside:avoid}body{background:white}.frame{height:390px}}
+</style>
+</head>
+<body><main>
+<header><div class="eyebrow">UTvTU / OFFICIAL REFERENCES / 2026.10.11</div>
+<h1>从 Google 的真实实例，审查我们的 MD3 表达</h1>
+<p class="muted">已取得官方配色实例、动态主题对照、35 种几何图形及原生源码。下图均为 Google 官方原图；本页是参考板，不是 UTvTU 产品截图或下一版界面设计稿。</p>
+<div class="note">审查判断：现有 HCT 配色底层值得保留；下一步应统一颜色角色、操作层级、形状与动效。DAW 编辑区保持稳定，欢迎与任务流程承担更鲜明的表达。</div>
+</header>
+<section class="grid" aria-label="Google官方配色实例">
+<article class="card"><div class="head"><div class="number">01 / 完整界面</div><h2>Reply：颜色承担信息层级</h2><p class="muted">观察侧栏、选中项、内容面和主要操作之间的关系。</p></div>
+<div class="frame"><img src="assets/reply.png" width="841" height="701" alt="Google Reply官方M3邮件应用，包含导航、列表和详情"></div>
+<div class="caption"><p>对 UTvTU 的启发：开始渲染、导航选中、工具容器各有明确角色；常规编辑内容仍保持克制。</p><div class="links"><a href="https://developer.android.com/develop/ui/compose/designsystems/material3">官方说明与原图</a><a href="https://github.com/android/compose-samples/tree/main/Reply">官方应用源码</a></div><small>Google / Android Developers · 原图未经修改。文档内容通常采用 CC BY 4.0；具体例外见来源页。</small></div></article>
+<article class="card"><div class="head"><div class="number">02 / 动态主题</div><h2>同一结构，成套配色变化</h2><p class="muted">取色后，背景、容器、选中项及操作一起建立新的关系。</p></div>
+<div class="frame"><img src="assets/reply-dynamic.png" width="878" height="950" alt="Google Reply默认配色与动态配色的官方对照图"></div>
+<div class="caption"><p>对 UTvTU 的启发：提供明确的主题来源，并验证整套语义角色。Android 壁纸取色机制不能直接套到 Windows。</p><div class="links"><a href="https://developer.android.com/develop/ui/compose/designsystems/material3#dynamic_color_schemes">动态配色说明</a><a href="https://github.com/material-foundation/material-color-utilities">Google 配色算法源码</a></div><small>Google / Android Developers · 原图未经修改。参照同一来源页的许可说明。</small></div></article>
+</section>
+<article class="card shape-card" aria-label="Google官方几何图形库">
+<div><img src="assets/material-shapes.png" width="1435" height="1260" alt="Google MaterialShapes官方35种图形，含Circle、Arch、Cookie、Clover、Flower、Puffy、Heart等"></div>
+<div class="shape-copy"><div class="number">03 / 原生几何</div><h2>MaterialShapes：有规则的形状表达</h2><p>官方提供归一化的 RoundedPolygon 图形和 Morph 变形入口。原图用于比较观感，原始 Kotlin 参数才是后续移植的几何依据。</p>
+<div class="links"><a href="https://developer.android.com/reference/kotlin/androidx/compose/material3/MaterialShapes">官方图形 API</a><a href="assets/MaterialShapes.kt.txt">已保存原生源码</a></div>
+<div class="divider"></div><h3>适合 UTvTU 的位置</h3><p>欢迎页、无工程空状态、渲染完成状态、音源封面的局部容器。图形应帮助识别功能与状态。</p><h3>制作区的取舍</h3><p>音符、时间轴、自动化曲线与频谱继续使用精确几何。基础控件优先建立统一的形状尺度，避免大量装饰增加视觉噪声。</p><h3>实现依据</h3><p>当前 AndroidX API 标注为实验性。Avalonia 实现需要保留坐标、圆角与平滑参数；本次未移植、未从 PNG 描摹。</p><small>Google / Android Developers · 原图未经修改。AndroidX 源码 Apache-2.0，原版权头保留；抓取日期及 SHA-256 已记录。</small></div>
+</article>
+<section class="audit" aria-label="审查发现摘要">
+<article><div class="number">颜色</div><h3>底层完整，入口偏窄</h3><p>真实动态角色已安装；产品仍固定 Tonal Spot 与六个种子选项，容器强调的使用缺少统一策略。</p></article>
+<article><div class="number">控件</div><h3>语义变体没有收敛</h3><p>不同主题的默认高度、圆角、悬停反馈并存；工具操作普遍使用中性填充，主次动作需明确。</p></article>
+<article><div class="number">形状</div><h3>局部参数多，共同尺度少</h3><p>8、12、999 圆角广泛散落。形状应按密度、分组、选中和状态定义，再加入少量表达图形。</p></article>
+<article><div class="number">动效</div><h3>淡入已有，体系尚缺</h3><p>时长令牌未被实际引用，空间与效果动画未分类；减少动效规则尚未覆盖全部菜单与控件过渡。</p></article>
+</section>
+<section class="card further" aria-label="Google官方延伸案例">
+<article><div class="number">04 / EXPRESSIVE</div><h3><a href="https://design.google/library/expressive-material-design-google-research?pubDate=20250521">Google 的真实研究案例</a></h3><p>查看邮件发送动作前后对比及 Expressive 界面。研究也提示，表达强度必须服务任务与产品语境。</p><div class="links"><a href="https://storage.googleapis.com/gd-prod/images/14f564f3-4c8f-4fc1-a111-0e78ee2a6b1a.799a99c1196c2fd4.webp">发送动作：原布局</a><a href="https://storage.googleapis.com/gd-prod/images/d651bb02-a503-448d-b70e-968ecfaa266c.799a99c1196c2fd4.webp">发送动作：强化布局</a></div></article>
+<article><div class="number">05 / MOTION</div><h3><a href="https://m3.material.io/styles/motion">空间运动与效果变化</a></h3><p>官方区分 spatial 与 effects，并提供不同速度及 Standard / Expressive 方案。建议 DAW 采用 Standard，关键任务反馈局部增强。</p><div class="links"><a href="https://m3.material.io/components/button-groups/overview">按钮组案例入口</a></div></article>
+<article><div class="number">06 / ICONS &amp; ROLES</div><h3><a href="https://developers.google.com/fonts/docs/material_symbols">图标的光学尺寸与状态</a></h3><p>参考 Material Symbols 的尺寸、字重与填充状态思路。UTvTU 的现有原生图标和品牌几何仍可继续使用。</p><div class="links"><a href="https://m3.material.io/styles/color/the-color-system">官方颜色角色</a><a href="../../plans/md3-style-audit-2026-10-11.md">完整项目审查</a></div></article>
+</section>
+<footer>2026-10-11 · 基于 UTvTU 产品提交 dc220e2e 的源码审查。原图来源、尺寸、文件哈希见 <a href="references.json">references.json</a>；静态统计见 <a href="source-metrics.json">source-metrics.json</a>。本页离线展示三张已取得的官方原图；延伸案例与规范链接需联网。</footer>
+</main></body></html>

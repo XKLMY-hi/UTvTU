@@ -1,0 +1,3 @@
+# Preserve collected official source bytes so the recorded SHA-256 survives checkout.
+assets/MaterialShapes.kt.txt -text
+assets/MaterialShapes.LICENSE.txt -text

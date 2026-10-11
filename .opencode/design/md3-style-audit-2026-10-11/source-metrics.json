@@ -1,0 +1,701 @@
+{
+  "scope": "Static XAML source references only, comments removed. Counts are not pixel area, runtime contrast or computed style coverage. C# drawing and legacy aliases are excluded.",
+  "groups": {
+    "Views": {
+      "files": 38,
+      "roles": {
+        "on-surface-variant": 68,
+        "on-surface": 42,
+        "outline-variant": 35,
+        "primary": 34,
+        "surface-container-high": 18,
+        "surface-container-low": 10,
+        "surface": 9,
+        "surface-container": 8,
+        "on-primary": 8,
+        "surface-container-highest": 6,
+        "outline": 6,
+        "on-secondary-container": 5,
+        "on-tertiary-container": 4,
+        "secondary-container": 3,
+        "tertiary-container": 2,
+        "tertiary": 2,
+        "error-container": 2,
+        "on-error-container": 2,
+        "secondary": 1,
+        "error": 1
+      },
+      "literalRadii": {
+        "999": 16,
+        "8": 12,
+        "12": 12,
+        "5": 5,
+        "6": 4,
+        "16": 2,
+        "4": 2,
+        "10": 1,
+        "5,0,0,5": 1,
+        "0,5,5,0": 1,
+        "14": 1,
+        "11.5,11.5,0,0": 1,
+        "0": 1,
+        "2": 1
+      },
+      "literalFontSizes": {
+        "11": 37,
+        "13": 25,
+        "12": 23,
+        "10": 10,
+        "14": 7,
+        "16": 4,
+        "9": 4,
+        "15": 3,
+        "22": 3,
+        "11.5": 3,
+        "18": 2,
+        "20": 1
+      },
+      "literalDurations": {},
+      "perFile": {
+        "OpenUtau/Views/ControlGalleryWindow.axaml": {
+          "roles": {
+            "tertiary-container": 1,
+            "surface-container": 2,
+            "outline-variant": 3,
+            "on-surface": 2,
+            "on-surface-variant": 4,
+            "on-tertiary-container": 1
+          },
+          "directRoleReferences": 13
+        },
+        "OpenUtau/Views/DebugWindow.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/DsScriptExportDialog.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/EditSubbanksDialog.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/ExeSetupDialog.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/ExpressionsDialog.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/LoadingWindow.axaml": {
+          "roles": {
+            "primary": 1
+          },
+          "directRoleReferences": 1
+        },
+        "OpenUtau/Views/LyricsDialog.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/LyricsReplaceDialog.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/MainWindow.axaml": {
+          "roles": {
+            "primary": 4,
+            "on-surface": 7,
+            "on-surface-variant": 23,
+            "on-primary": 1,
+            "outline-variant": 8,
+            "surface-container-low": 4,
+            "surface": 3,
+            "surface-container-high": 3,
+            "secondary-container": 1,
+            "on-secondary-container": 1
+          },
+          "directRoleReferences": 55
+        },
+        "OpenUtau/Views/MergeVoicebankDialog.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/MixerWindow.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/MixFxDialog.axaml": {
+          "roles": {
+            "primary": 4,
+            "tertiary": 2,
+            "secondary": 1,
+            "on-surface-variant": 5,
+            "on-surface": 3,
+            "surface-container-highest": 1,
+            "outline": 2,
+            "on-primary": 1,
+            "surface-container": 1,
+            "outline-variant": 4,
+            "surface-container-low": 1,
+            "surface-container-high": 1
+          },
+          "directRoleReferences": 26
+        },
+        "OpenUtau/Views/NoteDefaultsDialog.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/PackageManagerDialog.axaml": {
+          "roles": {
+            "on-surface-variant": 1,
+            "outline-variant": 1
+          },
+          "directRoleReferences": 2
+        },
+        "OpenUtau/Views/PasteParamDialog.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/PhoneticAssistant.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/PianoRollDetachedWindow.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/PreferencesView.axaml": {
+          "roles": {
+            "primary": 11,
+            "surface-container-highest": 4,
+            "outline": 3,
+            "on-primary": 3,
+            "surface-container": 1,
+            "outline-variant": 9,
+            "on-surface": 12,
+            "on-surface-variant": 20,
+            "surface-container-high": 5,
+            "tertiary-container": 1,
+            "surface": 2,
+            "surface-container-low": 1,
+            "on-tertiary-container": 3
+          },
+          "directRoleReferences": 75
+        },
+        "OpenUtau/Views/RenderWindow.axaml": {
+          "roles": {
+            "surface": 1,
+            "surface-container-high": 1,
+            "outline-variant": 2,
+            "surface-container": 1,
+            "surface-container-low": 1
+          },
+          "directRoleReferences": 6
+        },
+        "OpenUtau/Views/ShortcutOverviewWindow.axaml": {
+          "roles": {
+            "primary": 2,
+            "on-surface": 1,
+            "on-surface-variant": 1,
+            "surface-container": 1,
+            "error-container": 1,
+            "on-error-container": 1,
+            "surface-container-high": 1
+          },
+          "directRoleReferences": 8
+        },
+        "OpenUtau/Views/SingerPublishDialog.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/SingersDialog.axaml": {
+          "roles": {
+            "surface-container-low": 1,
+            "surface-container-high": 2,
+            "primary": 3,
+            "on-surface-variant": 1,
+            "on-surface": 3,
+            "outline-variant": 2,
+            "error": 1,
+            "surface": 1
+          },
+          "directRoleReferences": 14
+        },
+        "OpenUtau/Views/SingerSetupDialog.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/SliderDialog.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/SplashWindow.axaml": {
+          "roles": {
+            "surface-container": 1,
+            "outline-variant": 1,
+            "primary": 2,
+            "on-surface": 3
+          },
+          "directRoleReferences": 7
+        },
+        "OpenUtau/Views/ThemeEditorWindow.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/TimeSignatureDialog.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/ToolWorkspaceView.axaml": {
+          "roles": {
+            "surface": 1,
+            "outline-variant": 2,
+            "surface-container-low": 1
+          },
+          "directRoleReferences": 4
+        },
+        "OpenUtau/Views/TrackColorDialog.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/TrackEffectRack.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/TrackSettingsDialog.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/TranscribeDialog.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/TypeInDialog.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/UpdaterDialog.axaml": {
+          "roles": {
+            "primary": 1,
+            "on-surface": 2
+          },
+          "directRoleReferences": 3
+        },
+        "OpenUtau/Views/VoiceColorMappingDialog.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/VstEditorWindow.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Views/WelcomeView.axaml": {
+          "roles": {
+            "on-surface": 9,
+            "outline": 1,
+            "primary": 6,
+            "on-primary": 3,
+            "on-surface-variant": 13,
+            "surface-container-high": 5,
+            "surface-container-highest": 1,
+            "secondary-container": 2,
+            "outline-variant": 3,
+            "surface-container": 1,
+            "surface": 1,
+            "surface-container-low": 1,
+            "error-container": 1,
+            "on-error-container": 1,
+            "on-secondary-container": 4
+          },
+          "directRoleReferences": 52
+        }
+      }
+    },
+    "Controls": {
+      "files": 20,
+      "roles": {
+        "primary": 29,
+        "outline-variant": 28,
+        "on-surface-variant": 27,
+        "on-surface": 15,
+        "surface-container-highest": 14,
+        "surface-container-high": 6,
+        "on-primary": 5,
+        "on-primary-container": 4,
+        "surface-container-lowest": 3,
+        "surface-container": 2,
+        "outline": 2,
+        "error": 2,
+        "on-error": 2,
+        "surface": 1,
+        "primary-container": 1,
+        "surface-container-low": 1
+      },
+      "literalRadii": {
+        "999": 19,
+        "4": 11,
+        "8": 8,
+        "12": 6,
+        "8,0,0,8": 1,
+        "3": 1
+      },
+      "literalFontSizes": {
+        "10": 15,
+        "9": 14,
+        "11": 7,
+        "12": 6,
+        "8": 6,
+        "13": 2,
+        "16": 1,
+        "15": 1
+      },
+      "literalDurations": {
+        "0:0:0.12": 1
+      },
+      "perFile": {
+        "OpenUtau/Controls/DawValueField.axaml": {
+          "roles": {
+            "on-surface": 1,
+            "primary": 2
+          },
+          "directRoleReferences": 3
+        },
+        "OpenUtau/Controls/ExpSelector.axaml": {
+          "roles": {
+            "primary": 1
+          },
+          "directRoleReferences": 1
+        },
+        "OpenUtau/Controls/FxChainPanel.axaml": {
+          "roles": {
+            "on-surface": 1,
+            "outline-variant": 1,
+            "on-surface-variant": 2,
+            "surface-container-highest": 1,
+            "primary": 3,
+            "surface-container": 1
+          },
+          "directRoleReferences": 9
+        },
+        "OpenUtau/Controls/FxChainRow.axaml": {
+          "roles": {
+            "surface-container-highest": 4,
+            "on-surface-variant": 6,
+            "primary": 4,
+            "on-primary": 1,
+            "on-surface": 2,
+            "outline": 2,
+            "surface-container-high": 1,
+            "outline-variant": 1
+          },
+          "directRoleReferences": 21
+        },
+        "OpenUtau/Controls/LyricBox.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Controls/MasterStrip.axaml": {
+          "roles": {
+            "surface-container-highest": 4,
+            "on-surface-variant": 6,
+            "error": 1,
+            "on-error": 1,
+            "surface-container-high": 1,
+            "primary": 4,
+            "on-surface": 7,
+            "surface-container-lowest": 1,
+            "outline-variant": 9
+          },
+          "directRoleReferences": 34
+        },
+        "OpenUtau/Controls/MixerControl.axaml": {
+          "roles": {
+            "surface-container-high": 2,
+            "surface-container-lowest": 1,
+            "on-surface-variant": 4
+          },
+          "directRoleReferences": 7
+        },
+        "OpenUtau/Controls/MixerTrackStrip.axaml": {
+          "roles": {
+            "primary": 8,
+            "surface-container-high": 2,
+            "on-surface-variant": 2,
+            "error": 1,
+            "on-error": 1,
+            "on-primary": 1,
+            "on-surface": 3,
+            "surface-container": 1,
+            "surface-container-lowest": 1,
+            "outline-variant": 10,
+            "surface-container-highest": 2
+          },
+          "directRoleReferences": 32
+        },
+        "OpenUtau/Controls/NotePropertiesControl.axaml": {
+          "roles": {
+            "outline-variant": 1,
+            "on-surface": 1
+          },
+          "directRoleReferences": 2
+        },
+        "OpenUtau/Controls/NotePropertyExpression.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Controls/PanelRevealTab.axaml": {
+          "roles": {
+            "surface-container-highest": 1,
+            "outline-variant": 1,
+            "primary": 3,
+            "on-surface-variant": 1,
+            "on-primary": 3
+          },
+          "directRoleReferences": 9
+        },
+        "OpenUtau/Controls/PanelSplitter.axaml": {
+          "roles": {
+            "outline-variant": 1,
+            "primary": 2
+          },
+          "directRoleReferences": 3
+        },
+        "OpenUtau/Controls/PanKnob.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Controls/PianoRoll.axaml": {
+          "roles": {
+            "surface": 1
+          },
+          "directRoleReferences": 1
+        },
+        "OpenUtau/Controls/PianoRollStyles.axaml": {
+          "roles": {
+            "on-surface-variant": 4,
+            "on-primary-container": 4,
+            "primary": 2,
+            "surface-container-highest": 2,
+            "outline-variant": 3,
+            "primary-container": 1
+          },
+          "directRoleReferences": 16
+        },
+        "OpenUtau/Controls/ResizerBar.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Controls/SearchBar.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Controls/TrackAdder.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Controls/TrackHeader.axaml": {
+          "roles": {
+            "surface-container-low": 1,
+            "outline-variant": 1,
+            "on-surface-variant": 2
+          },
+          "directRoleReferences": 4
+        },
+        "OpenUtau/Controls/ViewScaler.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        }
+      }
+    },
+    "Styles": {
+      "files": 13,
+      "roles": {
+        "primary": 44,
+        "surface-container-high": 28,
+        "on-surface": 23,
+        "surface-container-highest": 17,
+        "on-surface-variant": 14,
+        "outline-variant": 14,
+        "secondary-container": 13,
+        "on-secondary-container": 13,
+        "on-primary": 10,
+        "outline": 10,
+        "error": 8,
+        "on-error": 4,
+        "surface-container": 3,
+        "tertiary": 1
+      },
+      "literalRadii": {
+        "999": 29,
+        "8": 15,
+        "4": 11,
+        "2": 5,
+        "12": 4,
+        "6": 3,
+        "0": 2,
+        "1": 1,
+        "7": 1,
+        "3": 1,
+        "0,4,4,0": 1,
+        "10": 1
+      },
+      "literalFontSizes": {
+        "13": 39,
+        "12": 7,
+        "11": 7,
+        "10": 3,
+        "14": 2,
+        "22": 1,
+        "16": 1
+      },
+      "literalDurations": {
+        "0:0:0.12": 21,
+        "0:0:0.2": 3,
+        "0:0:1.8": 2,
+        "0:0:0.15": 1
+      },
+      "perFile": {
+        "OpenUtau/Styles/DawControls.axaml": {
+          "roles": {
+            "on-surface-variant": 1,
+            "primary": 4,
+            "secondary-container": 2,
+            "on-secondary-container": 2,
+            "surface-container-high": 1,
+            "error": 2,
+            "on-error": 2,
+            "on-primary": 2
+          },
+          "directRoleReferences": 16
+        },
+        "OpenUtau/Styles/Md3Controls.axaml": {
+          "roles": {
+            "primary": 12,
+            "surface-container-highest": 7,
+            "outline": 3,
+            "on-primary": 1,
+            "surface-container-high": 3,
+            "outline-variant": 5,
+            "surface-container": 1,
+            "on-surface": 1,
+            "on-surface-variant": 2,
+            "secondary-container": 1,
+            "on-secondary-container": 3
+          },
+          "directRoleReferences": 39
+        },
+        "OpenUtau/Styles/Md3ControlThemes.axaml": {
+          "roles": {
+            "on-surface": 3,
+            "outline-variant": 1,
+            "surface-container-high": 2,
+            "outline": 2,
+            "surface-container-highest": 2,
+            "primary": 3,
+            "on-primary": 1,
+            "error": 5,
+            "on-error": 2,
+            "secondary-container": 4,
+            "on-secondary-container": 2
+          },
+          "directRoleReferences": 27
+        },
+        "OpenUtau/Styles/Md3InputThemes.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Styles/Md3Menus.axaml": {
+          "roles": {
+            "on-surface": 2,
+            "on-surface-variant": 2,
+            "surface-container-high": 3,
+            "outline-variant": 3,
+            "surface-container-highest": 2
+          },
+          "directRoleReferences": 12
+        },
+        "OpenUtau/Styles/Md3SelectionThemes.axaml": {
+          "roles": {
+            "on-surface": 8,
+            "outline": 4,
+            "primary": 15,
+            "surface-container-highest": 5,
+            "on-primary": 3,
+            "tertiary": 1
+          },
+          "directRoleReferences": 36
+        },
+        "OpenUtau/Styles/Md3Transitions.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Styles/RenderWorkspace.axaml": {
+          "roles": {
+            "on-surface": 5,
+            "on-surface-variant": 3,
+            "error": 1,
+            "outline-variant": 2,
+            "surface-container-high": 2,
+            "primary": 4,
+            "outline": 1,
+            "on-primary": 1,
+            "surface-container-highest": 1
+          },
+          "directRoleReferences": 20
+        },
+        "OpenUtau/Styles/Styles.axaml": {
+          "roles": {},
+          "directRoleReferences": 0
+        },
+        "OpenUtau/Styles/ToolWorkspace.axaml": {
+          "roles": {
+            "on-surface": 1,
+            "surface-container-high": 1,
+            "secondary-container": 1,
+            "on-secondary-container": 1,
+            "on-surface-variant": 3,
+            "primary": 2
+          },
+          "directRoleReferences": 9
+        },
+        "OpenUtau/Styles/TrackHeaderControls.axaml": {
+          "roles": {
+            "on-surface": 1,
+            "surface-container-high": 2,
+            "secondary-container": 1,
+            "on-secondary-container": 1,
+            "outline-variant": 1,
+            "primary": 1
+          },
+          "directRoleReferences": 7
+        },
+        "OpenUtau/Styles/WorkspacePages.axaml": {
+          "roles": {
+            "primary": 2,
+            "secondary-container": 1,
+            "on-secondary-container": 1,
+            "surface-container-high": 1,
+            "on-surface": 1,
+            "on-primary": 1
+          },
+          "directRoleReferences": 7
+        },
+        "OpenUtau/Styles/WorkspaceShell.axaml": {
+          "roles": {
+            "on-surface": 1,
+            "surface-container-high": 13,
+            "on-secondary-container": 3,
+            "secondary-container": 3,
+            "on-primary": 1,
+            "primary": 1,
+            "surface-container": 2,
+            "outline-variant": 2,
+            "on-surface-variant": 3
+          },
+          "directRoleReferences": 29
+        }
+      }
+    }
+  }
+}

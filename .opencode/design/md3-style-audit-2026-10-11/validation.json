@@ -1,0 +1,38 @@
+{
+  "renderedAt": "2026-10-11T06:43:47.778Z",
+  "browser": "155.0.4283.45",
+  "images": [
+    {
+      "src": "assets/reply.png",
+      "loaded": true,
+      "width": 841,
+      "height": 701
+    },
+    {
+      "src": "assets/reply-dynamic.png",
+      "loaded": true,
+      "width": 878,
+      "height": 950
+    },
+    {
+      "src": "assets/material-shapes.png",
+      "loaded": true,
+      "width": 1435,
+      "height": 1260
+    }
+  ],
+  "originalImageHashesVerified": 3,
+  "nativeSourceHashVerified": true,
+  "localLinksVerified": 4,
+  "wide": {
+    "width": 1440,
+    "scrollWidth": 1440,
+    "height": 2230
+  },
+  "narrow": {
+    "width": 800,
+    "scrollWidth": 800
+  },
+  "pageErrors": [],
+  "productCaptured": false
+}

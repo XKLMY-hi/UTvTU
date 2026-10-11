@@ -1,4 +1,15 @@
-# HANDOVER — 新会话交接（2026-10-11 14:10 资源与浮层反馈修复）
+# HANDOVER — 新会话交接（2026-10-11 MD3设计审查与官方实例）
+
+## 2026-10-11 MD3设计风格审查（最新请求）
+
+- 用户要求审查控件、设计、动效与动态取色，并获取Google几何设计实例。本轮**只做审查和资料交付**，未修改产品，未启动新重构、构建或产品测试。
+- 完整结论：[MD3设计审查](.opencode/plans/md3-style-audit-2026-10-11.md)。现有HCT/CAM16和49角色是可保留的真实MD3底层；问题集中在来源入口、颜色与操作语义、控件主题分叉、散落的形状/排版参数及未收敛的动效策略。
+- 确认产品固定TonalSpot、六种种子；Core的Expressive变体仅为配色，不能等同M3 Expressive完整系统。Md3MotionFast/Base/View仅有定义，实际时长写死；no-motion样式只覆盖fade/pop，菜单与控件过渡覆盖不足。均为源码发现，不假称完成运行时对比度/像素审查。
+- Google官方参考板：`.opencode/design/md3-style-audit-2026-10-11/index.html` + `reference-board.png`。已取得Reply完整实例、默认/动态主题对照、35种MaterialShapes官方原图和原生Kotlin几何快照；研究前后案例/动效/按钮组/图标均附官方链接。出处、原图和源码SHA-256、许可与日期已落盘，不描摹PNG。
+- 参考板单页独立headless浏览器离线渲染，3原图与源码哈希核对、4本地链接、1440/800无溢出、pageErrors0。PNG是参考汇编，不是UTvTU产品截图或新界面设计稿；未抓产品图。轻量资料脚本不运行推理/测试。
+- 推荐下一轮先共同控件图库+主题角色/密度/形状令牌，再主题来源与操作变体、共同motion/reduced-motion策略，最后欢迎/空状态/渲染结果局部表达几何；DAW数据颜色、精确编辑几何与即时反馈保持稳定。方案细节与验收见审查报告，尚未实施。
+- 上轮用户“启动看看”之后已显示本树预览：`.dsh/workspace-preview.json`记录PID12360、启动14:11:46.866+08、refactor-smoke.ustxp；本轮没有关闭或重启。下方“无预览进程”仅是更早smoke结束时状态；后续操作必须重核exe路径+启动时间，不能直接沿用PID。
+- 本轮实际路径G:/xklmy文件夹/vibe coding/UTvTU、origin XKLMY-hi/UTvTU、plus-develop已核实；下轮仍需核实移动盘路径。产品基线dc220e2e，前次docs e6f2dcc7；参考资料审查独立提交，未推送。
 
 ## 2026-10-11 收起、资源中心与浮层效果（最高优先级）
 

@@ -1,0 +1,71 @@
+[
+  {
+    "id": "reply",
+    "title": "Reply · Google官方完整M3实例",
+    "page": "https://developer.android.com/develop/ui/compose/designsystems/material3",
+    "image": "https://developer.android.com/static/develop/ui/compose/images/m3-sampleapp.png",
+    "file": "reply.png",
+    "size": [
+      841,
+      701
+    ],
+    "bytes": 172462,
+    "sha256": "7621fc4855f93ce6e8171723b115e2381d1d9bbfd938164e07328bd6aa282246",
+    "attribution": "Google / Android Developers. Original image; see source page for content license (CC BY 4.0 unless otherwise noted).",
+    "retrievedDate": "2026-10-11"
+  },
+  {
+    "id": "dynamic",
+    "title": "Reply · 默认配色与动态配色对照",
+    "page": "https://developer.android.com/develop/ui/compose/designsystems/material3#dynamic_color_schemes",
+    "image": "https://developer.android.com/static/develop/ui/compose/images/m3-dynamic.png",
+    "file": "reply-dynamic.png",
+    "size": [
+      878,
+      950
+    ],
+    "bytes": 430279,
+    "sha256": "315ee60fcc681be86c8ffcc815a7af765190b2214500dea16aa062c9ee377289",
+    "attribution": "Google / Android Developers. Original image; see source page for content license (CC BY 4.0 unless otherwise noted).",
+    "retrievedDate": "2026-10-11"
+  },
+  {
+    "id": "shapes",
+    "title": "MaterialShapes · Google官方几何图形库",
+    "page": "https://developer.android.com/reference/kotlin/androidx/compose/material3/MaterialShapes?hl=en",
+    "image": "https://developer.android.com/images/reference/androidx/compose/material3/shapes.png",
+    "file": "material-shapes.png",
+    "size": [
+      1435,
+      1260
+    ],
+    "bytes": 89393,
+    "sha256": "8605ac92c07ac7fc71c25a7d511b51b68ec20b2becd8cd548a73e16692b9790d",
+    "attribution": "Google / Android Developers. Original image; see source page for content license (CC BY 4.0 unless otherwise noted).",
+    "retrievedDate": "2026-10-11"
+  },
+  {
+    "id": "expressive",
+    "title": "Google研究 · M3 Expressive界面案例",
+    "page": "https://design.google/library/expressive-material-design-google-research?pubDate=20250521",
+    "image": "https://storage.googleapis.com/gd-prod/images/9eb4679b-45ac-4202-9749-deae98c5b904.799a99c1196c2fd4.webp",
+    "attribution": "Google Design · original image linked from the original article; not a UTvTU design.",
+    "retrievedDate": "2026-10-11"
+  },
+  {
+    "id": "email-before",
+    "title": "Google研究 · 发送动作原布局",
+    "page": "https://design.google/library/expressive-material-design-google-research?pubDate=20250521",
+    "image": "https://storage.googleapis.com/gd-prod/images/14f564f3-4c8f-4fc1-a111-0e78ee2a6b1a.799a99c1196c2fd4.webp",
+    "attribution": "Google Design · original image linked from the original article.",
+    "retrievedDate": "2026-10-11"
+  },
+  {
+    "id": "email-after",
+    "title": "Google研究 · 发送动作强化布局",
+    "page": "https://design.google/library/expressive-material-design-google-research?pubDate=20250521",
+    "image": "https://storage.googleapis.com/gd-prod/images/d651bb02-a503-448d-b70e-968ecfaa266c.799a99c1196c2fd4.webp",
+    "attribution": "Google Design · original image linked from the original article.",
+    "retrievedDate": "2026-10-11"
+  }
+]
