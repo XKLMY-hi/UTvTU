@@ -21,7 +21,8 @@ namespace OpenUtau.Core.Vst {
         private IVstExportBridge? _exportBridge;
         private Func<long, VstExportContext>? _exportClock;
         private long _exportPosition;
-        public int LatencySamples => _exportBridge?.GetLatencySamples(_handle) ?? 0;
+        private int _exportLatency;
+        public int LatencySamples => _exportLatency;
         // 原生编辑器窗口是否打开——Dispose 时必须先关闭（否则窗口悬空引用已卸载 handle）
         private bool _editorOpen;
         // 专用 VST 线程：controller 创建/attached/编辑器消息循环同线程（插件线程敏感 + 消息泵）
@@ -100,6 +101,8 @@ namespace OpenUtau.Core.Vst {
                 _isActivated = true; // Cleanup must deactivate even if parameter flushing fails.
                 if (!export.ProcessExport(_handle, _processScratch, 0, clock(0)))
                     throw new InvalidOperationException($"Could not initialize '{DisplayName}' export parameters.");
+                _exportLatency = export.GetLatencySamples(_handle);
+                if (_exportLatency < 0) throw new InvalidOperationException($"'{DisplayName}' reported invalid latency.");
             });
             _maxBlockSize = blockSize;
             _exportBridge = export;
@@ -112,6 +115,8 @@ namespace OpenUtau.Core.Vst {
             if (_exportBridge == null) { _bridge.Process(_handle, buffer, frames); return; }
             if (!_exportBridge.ProcessExport(_handle, buffer, frames, _exportClock!(_exportPosition)))
                 throw new InvalidOperationException($"'{DisplayName}' failed during export.");
+            if (_exportBridge.GetLatencySamples(_handle) != _exportLatency)
+                throw new InvalidOperationException($"'{DisplayName}' changed latency during export. The delivery was stopped to preserve alignment.");
             _exportPosition += frames;
         }
 

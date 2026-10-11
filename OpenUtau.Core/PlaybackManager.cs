@@ -626,7 +626,13 @@ namespace OpenUtau.Core {
         // Exporting mixdown
         public async Task RenderMixdown(UProject project, string exportPath) {
             try {
-                await RecordMixdown(project, exportPath, 0, -1, null, default);
+                var options = new Export.ExportAudioOptions {
+                    Format = Export.ExportWaveFormat.Float32,
+                    SampleRate = SignalChain.AudioSettings.SampleRate,
+                    MasterGain = ExportMasterGain,
+                };
+                var plan = new Export.ExportDeliveryPlan(project, exportPath, false, options, project.tracks);
+                await new Export.ConfiguredExportSession(plan).RunAsync(new Progress<Export.ExportDeliveryProgress>());
             } catch (IOException ioe) {
                 var customEx = new MessageCustomizableException($"Failed to export {exportPath}.", $"<translate:errors.failed.export>: {exportPath}", ioe);
                 DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(customEx));

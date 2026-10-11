@@ -46,7 +46,7 @@ namespace OpenUtau.Core.Export {
                         throw new InvalidOperationException($"Could not restore '{effect.DisplayName}' state for export.");
                     effect.SetupForExport(AudioSettings.SampleRate, AudioSettings.BlockSize,
                         options.ProcessingMode == ExportProcessingMode.Offline, snapshot.Parameters, position => {
-                            double tick = clock.MsPosToTickPos(position * 1000d / AudioSettings.SampleRate);
+                            double tick = clock.MsPosToNonExactTickPos(position * 1000d / AudioSettings.SampleRate);
                             var signature = clock.TimeSignatureAtTick((int)Math.Floor(tick));
                             return new VstExportContext(position, tick / resolution, clock.GetBpmAtTick((int)Math.Floor(tick)), signature.beatPerBar, signature.beatUnit);
                         });

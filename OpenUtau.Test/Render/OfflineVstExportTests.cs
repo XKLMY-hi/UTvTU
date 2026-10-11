@@ -118,6 +118,44 @@ namespace OpenUtau.Test.Render {
             Assert.Equal(new[] { false }, bridge.Modes);
         }
 
+        [Fact]
+        public async Task DirectMixdownMenuAlsoUsesOfflineWithoutAnAudioDevice() {
+            using var dispatcher = DocManagerTestSetup.EnterScopedDispatcher();
+            var device = PlaybackManager.Inst.AudioOutput;
+            await PlaybackManager.Inst.RenderMixdown(Project(), Destination);
+            using var reader = new WaveFileReader(Destination);
+            Assert.Equal(WaveFormatEncoding.IeeeFloat, reader.WaveFormat.Encoding);
+            Assert.Equal(new[] { true }, bridge.Modes);
+            Assert.Same(device, PlaybackManager.Inst.AudioOutput);
+            Assert.Single(bridge.Unloaded);
+        }
+
+        [Fact]
+        public async Task ContextUsesCapturedTempoMapAndFractionalMusicalPositions() {
+            using var dispatcher = DocManagerTestSetup.EnterScopedDispatcher();
+            var project = Project();
+            project.tempos.Add(new UTempo(48, 60));
+            project.timeAxis.BuildSegments(project);
+            var plan = Plan(project);
+            await new ConfiguredExportSession(plan).RunAsync(new Reports(_ => {
+                project.tempos[0].bpm = 90;
+                project.timeAxis.BuildSegments(project);
+            }));
+            Assert.Contains(bridge.Contexts, c => c.SamplePosition > 2205 && c.Tempo == 60);
+            Assert.Contains(bridge.Contexts, c => c.Tempo == 120);
+            Assert.Contains(bridge.Contexts, c => Math.Abs(c.QuarterNotes * project.resolution - Math.Round(c.QuarterNotes * project.resolution)) > .01);
+        }
+
+        [Fact]
+        public async Task LatencyChangeFailsInsteadOfPublishingMisalignedTracks() {
+            using var dispatcher = DocManagerTestSetup.EnterScopedDispatcher();
+            bridge.ChangeLatency = true;
+            File.WriteAllBytes(Destination, new byte[] { 4, 7 });
+            await Assert.ThrowsAsync<InvalidOperationException>(() => new ConfiguredExportSession(Plan(Project())).RunAsync(new Reports()));
+            Assert.Equal(new byte[] { 4, 7 }, File.ReadAllBytes(Destination));
+            Assert.Single(bridge.Unloaded);
+        }
+
         sealed class Reports(Action<ExportDeliveryProgress>? callback = null) : IProgress<ExportDeliveryProgress> {
             public void Report(ExportDeliveryProgress value) => callback?.Invoke(value);
         }
@@ -126,6 +164,7 @@ namespace OpenUtau.Test.Render {
             public float EditorGain = 1;
             public string Failure = "";
             public Action? OnProcess;
+            public bool ChangeLatency;
             public readonly List<bool> Modes = new();
             public readonly List<VstExportContext> Contexts = new();
             readonly Dictionary<IntPtr, int> latencies = new();
@@ -150,7 +189,10 @@ namespace OpenUtau.Test.Render {
                     queue.Enqueue(buffer[i] * gains[handle]);
                     buffer[i] = queue.Dequeue();
                 }
-                if (frames > 0) OnProcess?.Invoke();
+                if (frames > 0) {
+                    OnProcess?.Invoke();
+                    if (ChangeLatency) latencies[handle]++;
+                }
                 return frames == 0 || Failure != "process";
             }
         }
