@@ -299,6 +299,8 @@ namespace OpenUtau.App.Views {
                 };
                 if (descriptor.Primary) {
                     button.Classes.Add("primary");
+                } else {
+                    button.Classes.Add("text");
                 }
                 var captured = descriptor;
                 button.Click += async (_, _) => {

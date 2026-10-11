@@ -77,26 +77,24 @@ namespace OpenUtau.Test.App {
                 Assert.NotNull(btn.Theme);
                 Assert.Equal(typeof(Button), btn.Theme!.TargetType);
                 Assert.NotNull(TemplateRoot(btn));
-                Assert.Equal(new CornerRadius(8), btn.CornerRadius);
-                Assert.Equal(new Thickness(14, 6, 14, 6), btn.Padding);
-                Assert.Equal(32, btn.MinHeight);
+                Assert.Equal(new CornerRadius(999), btn.CornerRadius);
+                Assert.Equal(new Thickness(24, 0, 24, 0), btn.Padding);
+                Assert.Equal(40, btn.MinHeight);
                 Assert.Equal(13, btn.FontSize);
-                // T9-B 契约更新：base 标签色从 md3.primary 改成 md3.on-surface。
-                // 理由：那个 md3.primary 在转发修复前**从未真正渲染过**（一直被应用级
-                // TextBlock 前景压住，用户实际看到的普通按钮文字就是 on-surface）；
-                // 转发修好后若仍用 primary，全 App 普通按钮标签会一起变 indigo —— 属
-                // 需要用户先过目的视觉决策（MD3 规范确实是 primary），故本轮保持既有观感。
-                Assert.Equal(PoolBrush("md3.on-surface"), (btn.Foreground as ISolidColorBrush)?.Color);
-                Assert.Equal(PoolBrush("md3.outline-variant"), (btn.BorderBrush as ISolidColorBrush)?.Color);
+                // M3 outlined default: primary label, outline stroke, full shape and 40-DIP height.
+                Assert.Equal(PoolBrush("md3.primary"), (btn.Foreground as ISolidColorBrush)?.Color);
+                Assert.Equal(PoolBrush("md3.outline"), (btn.BorderBrush as ISolidColorBrush)?.Color);
             } finally {
                 win.Close();
             }
             // 状态写在主题内部（单一来源）：悬浮/按下由主题的嵌套样式提供
             string theme = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "Md3ControlThemes.axaml"));
             Assert.Contains("x:Key=\"Md3ButtonTheme\"", theme);
-            Assert.Contains("Selector=\"^:pointerover\"", theme);
-            Assert.Contains("Selector=\"^:pressed\"", theme);
-            Assert.Contains("Selector=\"^.primary\"", theme);
+            Assert.Contains("BasedOn=\"{StaticResource DawButtonTheme}\"", theme);
+            string common = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "DawControls.axaml"));
+            Assert.Contains("Selector=\"^:pointerover /template/ Border#PART_StateLayer\"", common);
+            Assert.Contains("Selector=\"^:pressed /template/ Border#PART_StateLayer\"", common);
+            Assert.Contains("Selector=\"^.primary,^.filled\"", common);
         }
 
         /// <summary>
@@ -220,9 +218,9 @@ namespace OpenUtau.Test.App {
             try {
                 foreach (bool isDark in new[] { false, true }) {
                     var cases = new (string Name, string[] Classes, Md3Role Expect)[] {
-                        ("base", Array.Empty<string>(), Md3Role.OnSurface),
+                        ("base", Array.Empty<string>(), Md3Role.Primary),
                         ("primary", new[] { "primary" }, Md3Role.OnPrimary),
-                        ("outline", new[] { "outline" }, Md3Role.OnSurface),
+                        ("outline", new[] { "outline" }, Md3Role.Primary),
                         ("danger", new[] { "danger" }, Md3Role.Error),
                     };
                     foreach (var (name, classes, expect) in cases) {

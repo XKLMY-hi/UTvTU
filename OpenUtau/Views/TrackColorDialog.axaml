@@ -32,8 +32,8 @@
       </ListBox.Styles>
     </ListBox>
     <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Top">
-      <Button Content="{DynamicResource button.cancel}" MinWidth="50" Click="OnCancel"/>
-      <Button Content="{DynamicResource button.apply}" MinWidth="50" Click="OnFinish"/>
+      <Button Classes="text" Content="{DynamicResource button.cancel}" MinWidth="50" Click="OnCancel"/>
+      <Button Classes="primary" Content="{DynamicResource button.apply}" MinWidth="50" Click="OnFinish"/>
     </StackPanel>
   </Grid>
       </Border>

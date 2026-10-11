@@ -3,14 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Headless.XUnit;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using OpenUtau.App.ViewModels;
 using OpenUtau.App.Controls;
 using OpenUtau.App.Views;
 using OpenUtau.Core;
+using OpenUtau.Core.Theming;
+using OpenUtau.Theming;
 using OpenUtau.Core.Ustx;
 using Xunit;
 
@@ -39,6 +43,17 @@ public sealed class ResourceCenterTests {
         try {
             Dispatcher.UIThread.RunJobs();
             Assert.Same(alpha, vm.Singer);
+            window.UpdateLayout();
+            var mel = page.GetVisualDescendants().OfType<ToggleButton>().Single(b => b.Classes.Contains("toolAction"));
+            Assert.Equal(40, mel.Bounds.Height);
+            mel.IsChecked = true; Dispatcher.UIThread.RunJobs();
+            Assert.True(vm.ZoomInMel);
+            Assert.Equal(ColorPool.Current.Color(Md3Role.OnSecondaryContainer), Assert.IsAssignableFrom<ISolidColorBrush>(mel.Foreground).Color);
+            Assert.Equal(ColorPool.Current.Color(Md3Role.SecondaryContainer), Assert.IsAssignableFrom<ISolidColorBrush>(mel.Background).Color);
+            foreach (var action in page.GetVisualDescendants().OfType<Button>().Where(b => b.Content is StackPanel && b.Classes.Contains("resourceAction"))) {
+                Assert.Equal(action.Foreground, action.GetVisualDescendants().OfType<DawIcon>().Single().Fill);
+                Assert.Equal(action.Foreground, action.GetVisualDescendants().OfType<TextBlock>().Single().Foreground);
+            }
             vm.SearchSinger = "  BETA  "; Dispatcher.UIThread.RunJobs();
             Assert.Same(beta, Assert.Single(vm.FilteredSingers));
             Assert.Same(alpha, vm.Singer);

@@ -11,14 +11,14 @@
     
     <TextBox Grid.Column="2" Name="box" Padding="4,3" Margin="0" Height="24" VerticalAlignment="Center" HorizontalAlignment="Stretch"
              Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
-             Text="{Binding SearchWord}" Focusable="True" Watermark="{Binding Watermark}"
+             Text="{Binding SearchWord}" Focusable="True" PlaceholderText="{Binding Watermark}"
              GotFocus="Box_GotFocus"  KeyDown="Box_KeyDown"/>
     
     <TextBlock Grid.Column="3" Text="{Binding ResultCount}" Width="54" VerticalAlignment="Center" TextAlignment="Center"/>
     
     <Button Grid.Column="4" Command="{Binding SelectCommand}" CommandParameter="prev"
       ToolTip.Tip="{DynamicResource pianoroll.menu.searchnote.prev}"
-      Width="24" Height="24" Margin="2,2,2,2"
+      Width="24" Height="24" MinHeight="24" Margin="2,2,2,2"
       Background="Transparent" BorderThickness="0">
       <!-- icon source: https://github.com/microsoft/vscode-icons/blob/main/icons/light/arrow-left.svg -->
       <Path  Classes="clear" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -35,7 +35,7 @@
     
     <Button Grid.Column="5" Command="{Binding SelectCommand}" CommandParameter="next"
       ToolTip.Tip="{DynamicResource pianoroll.menu.searchnote.next}"
-      Width="24" Height="24" Margin="2,2,2,2"
+      Width="24" Height="24" MinHeight="24" Margin="2,2,2,2"
       Background="Transparent" BorderThickness="0">
       <!-- icon source: https://github.com/microsoft/vscode-icons/blob/main/icons/light/arrow-right.svg -->
       <Path  Classes="clear" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -52,7 +52,7 @@
     
     <Button Grid.Column="6" Command="{Binding SelectCommand}"  CommandParameter="all"
       ToolTip.Tip="{DynamicResource pianoroll.menu.searchnote.all}"
-      Width="24" Height="24" Margin="2,2,2,2"
+      Width="24" Height="24" MinHeight="24" Margin="2,2,2,2"
       Background="Transparent" BorderThickness="0">
       <!-- icon source: https://github.com/microsoft/vscode-icons/blob/main/icons/light/new-folder.svg -->
       <Path  Classes="clear" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -69,7 +69,7 @@
     
     <Button Grid.Column="7" Click="OnClose"
       ToolTip.Tip="{DynamicResource pianoroll.menu.searchnote.close}"
-      Width="24" Height="24" Margin="2,2,2,2"
+      Width="24" Height="24" MinHeight="24" Margin="2,2,2,2"
       Background="Transparent" BorderThickness="0">
       <!-- icon source: https://github.com/microsoft/vscode-icons/blob/main/icons/light/close.svg -->
       <Path  Classes="clear" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center"

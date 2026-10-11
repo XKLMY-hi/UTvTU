@@ -149,7 +149,7 @@ namespace OpenUtau.Test.App {
 
                 sw.ForcedVisual = Md3RackVisual.Pressed;
                 Assert.Equal(Pool(Md3Role.SurfaceContainerHigh), ColorOf(body.Background));
-                Assert.Equal(0.12, layer.Opacity, 3);                              // 12%
+                Assert.Equal(0.10, layer.Opacity, 3);                              // Google StateTokens v0_210 pressed
 
                 sw.ForcedVisual = Md3RackVisual.Focus;
                 Assert.True(ring.IsVisible);

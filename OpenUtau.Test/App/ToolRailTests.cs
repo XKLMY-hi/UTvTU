@@ -301,12 +301,12 @@ namespace OpenUtau.Test.App {
                 Assert.Equal(0, overlay.Opacity, 3);                       // 静止：叠加层不可见
                 pseudo.Set(":pointerover", true);
                 Settle(window);
-                Assert.Equal(0.12, overlay.Opacity, 3);                    // 悬停 = primary 12% 叠加
+                Assert.Equal(0.08, overlay.Opacity, 3);                    // Google hover state layer
                 Assert.Equal("md3.primary", overlay.Background is ISolidColorBrush b0 ? "md3.primary" : "?");
                 pseudo.Set(":pressed", true);
                 Settle(window);
-                Assert.Equal(0.16, overlay.Opacity, 3);                    // 按下 = 16% + 轻微不透明度
-                Assert.True(item.Opacity < 1.0, $"按下应有不透明度变化，实际 {item.Opacity}");
+                Assert.Equal(0.10, overlay.Opacity, 3);                    // Google pressed state layer
+                Assert.Equal(1, item.Opacity);                            // Keep content and container roles stable.
                 pseudo.Set(":pressed", false);
                 pseudo.Set(":pointerover", false);
                 Settle(window);

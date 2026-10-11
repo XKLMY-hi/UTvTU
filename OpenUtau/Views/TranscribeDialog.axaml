@@ -28,12 +28,12 @@
 <DockPanel LastChildFill="True">
       <Border>
   <Border>
-    <StackPanel Margin="12" Spacing="8">
+    <StackPanel Margin="12" Spacing="{DynamicResource Md3Spacing2}">
 
       <!-- Algorithm selection -->
       <TextBlock Text="{DynamicResource dialogs.transcribe.midialgorithm}"
                  FontWeight="SemiBold"/>
-      <StackPanel Orientation="Horizontal" Spacing="16">
+      <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing4}">
         <Panel ToolTip.Tip="{Binding GameNotFoundTip}">
           <RadioButton Content="GAME"
                        IsChecked="{Binding UseGame}"
@@ -74,7 +74,7 @@
       <!-- GAME options panel, shown when GAME is selected and available -->
       <Border IsVisible="{Binding GameOptionsVisible}"
               BorderThickness="1" BorderBrush="{DynamicResource SystemControlForegroundBaseHighBrush}"
-              CornerRadius="4" Padding="8">
+              CornerRadius="{DynamicResource Md3ShapeExtraSmall}" Padding="8">
         <StackPanel Spacing="6">
           <TextBlock Text="{DynamicResource dialogs.transcribe.game.options}"
                      FontWeight="SemiBold"/>
@@ -165,11 +165,11 @@
 
       <!-- OK / Cancel -->
       <Grid ColumnDefinitions="*,8,*" Margin="0,4,0,0">
-        <Button Grid.Column="0" Content="{DynamicResource button.ok}"
+        <Button Classes="primary" Grid.Column="0" Content="{DynamicResource button.ok}"
                 HorizontalAlignment="Stretch" Name="OkButton"
                 Click="OnOkClicked"
                 IsEnabled="{Binding CanRun}"/>
-        <Button Grid.Column="2" Content="{DynamicResource button.cancel}"
+        <Button Classes="text" Grid.Column="2" Content="{DynamicResource button.cancel}"
                 HorizontalAlignment="Stretch"
                 Click="OnCancelClicked"/>
       </Grid>

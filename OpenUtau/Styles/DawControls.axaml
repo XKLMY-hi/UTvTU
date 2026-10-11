@@ -77,10 +77,13 @@
         <Setter Property="Padding" Value="{DynamicResource Md3CompactButtonPadding}"/>
       </Style>
       <Style Selector="^:pointerover /template/ Border#PART_StateLayer">
-        <Setter Property="Opacity" Value="0.08"/>
+        <Setter Property="Opacity" Value="{DynamicResource Md3StateHoverOpacity}"/>
+      </Style>
+      <Style Selector="^:focus-visible /template/ Border#PART_StateLayer">
+        <Setter Property="Opacity" Value="{DynamicResource Md3StateFocusOpacity}"/>
       </Style>
       <Style Selector="^:pressed /template/ Border#PART_StateLayer">
-        <Setter Property="Opacity" Value="0.12"/>
+        <Setter Property="Opacity" Value="{DynamicResource Md3StatePressedOpacity}"/>
       </Style>
       <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
         <Setter Property="Opacity" Value="1"/>
@@ -129,8 +132,8 @@
     </ControlTheme>
     <ControlTheme x:Key="DawMixButtonTheme" TargetType="Button" BasedOn="{StaticResource DawTextButtonTheme}">
       <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-      <Setter Property="CornerRadius" Value="4"/>
-      <Setter Property="FontSize" Value="10"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeExtraSmall}"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelTiny}"/>
       <Setter Property="FontWeight" Value="Bold"/>
       <Style Selector="^.muteOn">
         <Setter Property="Background" Value="{DynamicResource md3.error}"/>

@@ -77,7 +77,7 @@ namespace OpenUtau.Test.App {
             Layout(win, 200, 200);
             try {
                 // 小 Button 被主题 MinHeight=32 顶高（这正是 W10 的结论）
-                Assert.Equal(32, bare.Bounds.Height);
+                Assert.Equal(40, bare.Bounds.Height);
                 // ToggleButton 既不吃 Button 主题的 MinHeight，也不吃应用级 Margin
                 // （Avalonia 类型选择器精确匹配）⇒ 保持 20、竖向 margin 为 0
                 Assert.Equal(20, toggle.Bounds.Height);
@@ -109,7 +109,7 @@ namespace OpenUtau.Test.App {
             // 应用级 `Button { Margin: 0,4 }` 由上面的 GeneralRule 用例以 bare.Margin.Top==4
             // 断言（Styles/Styles.axaml 未复制到测试输出，故走可执行断言而非读文件）。
             string themes = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "Md3ControlThemes.axaml"));
-            Assert.Contains("<Setter Property=\"MinHeight\" Value=\"32\"/>", themes);
+            Assert.Contains("<Setter Property=\"MinHeight\" Value=\"{DynamicResource Md3ControlHeight}\"/>", themes);
         }
 
         // ══════════════ ② 复刻宿主实量：胶囊 30 / 36，页签 28 ══════════════
@@ -139,7 +139,7 @@ namespace OpenUtau.Test.App {
                 Assert.Equal(36, capsule.Bounds.Height);
                 // 对照臂（不压 MinHeight）：按钮 Bounds 仍是 32、在 36 的胶囊里上下各溢 1px，
                 // 而内区 30 与胶囊 36 都不变 —— 即"Measure 可被父夹紧、Arrange 仍尊重 MinHeight"
-                Assert.Equal(32, ((Button)trapTabs.Children[0]).Bounds.Height);
+                Assert.Equal(40, ((Button)trapTabs.Children[0]).Bounds.Height);
                 Assert.Equal(30, trapTabs.Bounds.Height);
                 Assert.Equal(36, trapCapsule.Bounds.Height);
             } finally {

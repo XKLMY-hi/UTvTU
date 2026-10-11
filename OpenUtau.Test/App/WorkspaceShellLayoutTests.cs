@@ -11,6 +11,7 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Markup.Xaml.Styling;
+using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Threading;
@@ -87,6 +88,10 @@ namespace OpenUtau.Test.App {
                         NamedControls.Add(value, control);
                     } else if (key == "Classes") {
                         foreach (var cls in value.Split(' ', StringSplitOptions.RemoveEmptyEntries)) control.Classes.Add(cls);
+                    } else if (value.StartsWith("{DynamicResource Md3", StringComparison.Ordinal)) {
+                        string resourceKey = value.Substring("{DynamicResource ".Length).TrimEnd('}');
+                        var property = AvaloniaPropertyRegistry.Instance.FindRegistered(control.GetType(), key);
+                        if (property != null) control[!property] = new DynamicResourceExtension(resourceKey);
                     } else if (!value.StartsWith("{", StringComparison.Ordinal)) {
                         ApplyLiteral(control, key, value);
                     }

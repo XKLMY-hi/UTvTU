@@ -30,8 +30,8 @@
     </ScrollViewer>
 
     <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Center" Spacing="10">
-      <Button Content="{DynamicResource button.ok}" Click="Ok_OnClick" Width="100" />
-      <Button Content="{DynamicResource button.cancel}" Click="Cancel_OnClick" Width="100"/>
+      <Button Classes="primary" Content="{DynamicResource button.ok}" Click="Ok_OnClick" Width="100" />
+      <Button Classes="text" Content="{DynamicResource button.cancel}" Click="Cancel_OnClick" Width="100"/>
     </StackPanel>
   </Grid>
       </Border>

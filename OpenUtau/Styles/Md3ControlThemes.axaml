@@ -32,10 +32,10 @@
     <ControlTheme x:Key="Md3ListBoxItemTheme" TargetType="ListBoxItem">
       <Setter Property="Background" Value="Transparent"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
-      <Setter Property="CornerRadius" Value="6"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3DawCornerRadius}"/>
       <Setter Property="Padding" Value="8,4"/>
       <Setter Property="MinHeight" Value="26"/>
-      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
       <Setter Property="Transitions">
         <Transitions>
           <BrushTransition Property="Background" Duration="{DynamicResource Md3MotionEffectsFast}" Easing="{StaticResource Md3EffectsFastEasing}"/>

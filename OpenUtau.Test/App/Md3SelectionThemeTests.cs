@@ -143,7 +143,10 @@ namespace OpenUtau.Test.App {
             var keys = Regex.Matches(xaml, @"\{DynamicResource ([^}]+)\}")
                 .Select(m => m.Groups[1].Value.Trim()).Distinct().ToList();
             Assert.NotEmpty(keys);
-            var offenders = keys.Where(k => !k.StartsWith("md3.", StringComparison.Ordinal)).ToList();
+            var offenders = keys.Where(k => !k.StartsWith("md3.", StringComparison.Ordinal)
+                && !k.StartsWith("Md3Shape", StringComparison.Ordinal)
+                && !k.StartsWith("Md3Type", StringComparison.Ordinal)
+                && !k.StartsWith("Md3Motion", StringComparison.Ordinal)).ToList();
             Assert.True(offenders.Count == 0, "非颜色池资源键：" + string.Join(", ", offenders));
             // 画刷键必须真的在色池里（防拼错角色名导致静默无色）
             foreach (string key in keys) {
@@ -282,8 +285,10 @@ namespace OpenUtau.Test.App {
                 moving.Transitions = null;
 
                 // 几何：轨道 40×20、圆钮画布 20×20 ⇒ 位移协议 40-20 = 20（改尺寸会让开关"跑出去"）
-                Assert.Equal(new Size(40, 20), trackOff.Bounds.Size);
-                Assert.Equal(new Size(20, 20), knob.Bounds.Size);
+                Assert.Equal(new Size(52, 32), trackOff.Bounds.Size);
+                Assert.Equal(new Size(20, 32), knob.Bounds.Size);
+                Assert.Equal(24, knobOn.Width);
+                Assert.Equal(16, knobOff.Width);
 
                 // 关：关态轨道可见、开态底与开钮隐藏、文案显示 Off
                 Assert.Equal(1d, trackOff.Opacity);

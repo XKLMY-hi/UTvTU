@@ -15,7 +15,7 @@
     <StackPanel Orientation="Horizontal" Grid.Row="0">
       <TextBlock Text="{DynamicResource lyricsreplace.before}" />
       <TextBox Text="{Binding OldValue}" MinWidth="200" Margin="10,0"
-               Watermark="{DynamicResource lyricsreplace.regex}"/>
+               PlaceholderText="{DynamicResource lyricsreplace.regex}"/>
     </StackPanel>
 
     <StackPanel Orientation="Horizontal" Grid.Row="2">
@@ -36,7 +36,7 @@
     </StackPanel>
 
     <StackPanel Grid.Row="8" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
-      <Button Content="{DynamicResource button.apply}" Margin="0" MinWidth="50" Click="OnFinish"/>
+      <Button Classes="primary" Content="{DynamicResource button.apply}" Margin="0" MinWidth="50" Click="OnFinish"/>
     </StackPanel>
   </Grid>
       </Border>

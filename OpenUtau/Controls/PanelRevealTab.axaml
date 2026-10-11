@@ -34,7 +34,7 @@
     <Style Selector="Border.revealChrome">
       <Setter Property="Width" Value="14"/>
       <Setter Property="Height" Value="48"/>
-      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeSmall}"/>
       <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
       <Setter Property="BorderThickness" Value="1"/>
@@ -49,13 +49,13 @@
     </Style>
     <Style Selector="Button.revealTab:pointerover Border.revealChrome">
       <Setter Property="Width" Value="92"/>
-      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
       <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
       <Setter Property="BorderThickness" Value="0"/>
     </Style>
     <Style Selector="Button.revealTab:focus Border.revealChrome">
       <Setter Property="Width" Value="92"/>
-      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
       <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
       <Setter Property="BorderThickness" Value="0"/>
     </Style>
@@ -110,7 +110,7 @@
     </Style>
     <Style Selector="TextBlock.revealLabel">
       <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
-      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelSmall}"/>
       <Setter Property="IsVisible" Value="False"/>
       <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
       <Setter Property="MaxWidth" Value="68"/>

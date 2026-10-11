@@ -10,6 +10,8 @@ using Avalonia.Threading;
 using OpenUtau.App.Controls;
 using OpenUtau.App.ViewModels;
 using OpenUtau.Core.Ustx;
+using OpenUtau.Core.Util;
+using OpenUtau.Theming;
 using ReactiveUI;
 using Xunit;
 
@@ -17,6 +19,33 @@ namespace OpenUtau.Test.App {
     // No PianoRoll, NotesViewModel, project loading, audio, or text layout.
     [Collection("WorkspaceSession")]
     public class NotesCanvasLifetimeTests {
+        [AvaloniaFact]
+        public void ReducedMotionSettlesHoverAndStopsDecorationTimersWithoutChangingNoteSelection() {
+            bool oldHover = Preferences.Default.NoteHoverGlow;
+            bool oldMotion = Preferences.Default.ReduceMotion;
+            var canvas = new NotesCanvas();
+            var window = Mount(canvas);
+            try {
+                Preferences.Default.NoteHoverGlow = true;
+                Preferences.Default.ReduceMotion = false;
+                Md3Motion.SetReduced(canvas, false);
+                var note = UNote.Create();
+                SendSelection(note);
+                Call(canvas, "SetHoveredNote", note);
+                Assert.True(State<DispatcherTimer>(canvas, "hoverTimer").IsEnabled);
+                Md3Motion.SetReduced(canvas, true);
+                Assert.False(State<DispatcherTimer>(canvas, "hoverTimer").IsEnabled);
+                Assert.False(State<DispatcherTimer>(canvas, "highlightTimer").IsEnabled);
+                Assert.Equal(1, State<float>(canvas, "hoverGlow"));
+                Assert.Contains(note, Selection(canvas));
+                Call(canvas, "SetHoveredNote", new object[] { null! });
+                Assert.Equal(0, State<float>(canvas, "hoverGlow"));
+            } finally {
+                window.Close();
+                Preferences.Default.NoteHoverGlow = oldHover;
+                Preferences.Default.ReduceMotion = oldMotion;
+            }
+        }
         const BindingFlags PrivateInstance = BindingFlags.Instance | BindingFlags.NonPublic;
 
         static T State<T>(NotesCanvas canvas, string name) =>

@@ -8,7 +8,7 @@
     <StyleInclude Source="/Styles/RenderWorkspace.axaml"/>
   </controls:WorkspaceToolView.Styles>
   <Grid RowDefinitions="Auto,*,Auto" MaxWidth="1040" HorizontalAlignment="Stretch">
-    <StackPanel Grid.Row="0" Margin="24,20,24,16" Spacing="4">
+    <StackPanel Grid.Row="0" Margin="24,20,24,16" Spacing="{DynamicResource Md3Spacing1}">
       <TextBlock Classes="renderTitle" Text="{DynamicResource render.page.title}"/>
       <TextBlock Classes="renderSubtitle" Text="{DynamicResource render.page.subtitle}"/>
     </StackPanel>
@@ -51,7 +51,7 @@
         </Grid>
         <TextBlock Classes="renderHint" Text="{DynamicResource render.samplerate.hint}" Margin="0,8,0,0"/>
         <Border Classes="renderDivider"/>
-        <StackPanel Name="RangeOptions" Spacing="12">
+        <StackPanel Name="RangeOptions" Spacing="{DynamicResource Md3Spacing3}">
           <TextBlock Classes="renderSectionTitle" Text="{DynamicResource render.section.range}"/>
           <Border Classes="renderSegment">
             <Grid ColumnDefinitions="*,*,*">
@@ -80,7 +80,7 @@
         </StackPanel>
         <Border Classes="renderDivider"/>
         <Grid ColumnDefinitions="*,20,*">
-          <StackPanel Grid.Column="0" Spacing="8">
+          <StackPanel Grid.Column="0" Spacing="{DynamicResource Md3Spacing2}">
             <TextBlock Classes="renderSectionTitle" Text="{DynamicResource render.tracks}"/>
             <WrapPanel Orientation="Horizontal">
               <Button Name="TrackSelectAllBtn" Classes="renderAction subtle" Margin="0,0,4,0"
@@ -89,13 +89,13 @@
                       Content="{DynamicResource render.selectnone}" Click="OnSelectNoTracks"/>
             </WrapPanel>
             <Border Background="{DynamicResource md3.surface-container-high}" BorderBrush="{DynamicResource md3.outline-variant}"
-                    BorderThickness="1" CornerRadius="12" Padding="10,6">
+                    BorderThickness="1" CornerRadius="{DynamicResource Md3ShapeMedium}" Padding="10,6">
               <ScrollViewer MaxHeight="208" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Name="TrackCheckPanel"/>
               </ScrollViewer>
             </Border>
           </StackPanel>
-          <StackPanel Grid.Column="2" Spacing="8">
+          <StackPanel Grid.Column="2" Spacing="{DynamicResource Md3Spacing2}">
             <TextBlock Classes="renderSectionTitle" Text="{DynamicResource render.section.processing}"/>
             <StackPanel Spacing="6">
               <TextBlock Classes="renderFieldLabel" Text="{DynamicResource render.processing.method}"/>
@@ -118,7 +118,7 @@
         <Border Classes="renderDivider"/>
         <StackPanel Spacing="10">
           <TextBlock Classes="renderSectionTitle" Text="{DynamicResource render.section.summary}"/>
-          <Border Background="{DynamicResource md3.surface-container}" CornerRadius="12" Padding="16,12">
+          <Border Background="{DynamicResource md3.surface-container}" CornerRadius="{DynamicResource Md3ShapeMedium}" Padding="16,12">
             <TextBlock Name="OutputSummaryText" Classes="renderSummary" Text="{DynamicResource render.summary.placeholder}"/>
           </Border>
         </StackPanel>
@@ -126,7 +126,7 @@
     </ScrollViewer>
     <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource md3.outline-variant}"
             Background="{DynamicResource md3.surface-container-low}" Padding="24,12,24,16">
-      <StackPanel Spacing="8">
+      <StackPanel Spacing="{DynamicResource Md3Spacing2}">
         <TextBlock Name="ValidationText" Classes="renderError" IsVisible="False"/>
         <Grid ColumnDefinitions="*,Auto">
           <TextBlock Grid.Column="0" Name="ProgressLabel" Classes="renderHint" Text="{DynamicResource render.ready}"/>

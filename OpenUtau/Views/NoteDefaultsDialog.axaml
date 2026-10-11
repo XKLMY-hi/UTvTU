@@ -34,7 +34,7 @@
                       <Label Content="{DynamicResource notedefaults.preset}"/>
                       <ComboBox Grid.Column="2" ItemsSource="{Binding PortamentoPresets}"
                       SelectedItem="{Binding ApplyPortamentoPreset}" HorizontalAlignment="Stretch"/>
-                      <Button Grid.Column="4" Content="{DynamicResource button.save}"
+                      <Button Classes="primary" Grid.Column="4" Content="{DynamicResource button.save}"
                       HorizontalAlignment="Stretch" Click="OnSavePortamentoPreset"
                       ToolTip.Tip="{DynamicResource notedefaults.preset.save.tooltip}"/>
                       <Button Grid.Column="6" Content="{DynamicResource button.remove}"
@@ -72,7 +72,7 @@
                       <Label Content="{DynamicResource notedefaults.preset}"/>
                       <ComboBox Grid.Column="2" ItemsSource="{Binding VibratoPresets}"
                       SelectedItem="{Binding ApplyVibratoPreset}" HorizontalAlignment="Stretch" />
-                      <Button Grid.Column="4" Content="{DynamicResource button.save}"
+                      <Button Classes="primary" Grid.Column="4" Content="{DynamicResource button.save}"
                       HorizontalAlignment="Stretch" Click="OnSaveVibratoPreset"
                       ToolTip.Tip="{DynamicResource notedefaults.preset.save.tooltip}"/>
                       <Button Grid.Column="6" Content="{DynamicResource button.remove}"

@@ -14,11 +14,11 @@
     </Style>
   </UserControl.Styles>
   <Grid MinHeight="16">
-    <TextBlock Name="Readout" FontSize="9" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"
+    <TextBlock Name="Readout" FontSize="{DynamicResource Md3DawTypeReadout}" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"
                FontFamily="{DynamicResource PlusFontFamilyMono}"/>
     <TextBox Name="Editor" IsVisible="False" MinHeight="16" Height="16" MinWidth="0"
-             FontSize="9" FontFamily="{DynamicResource PlusFontFamilyMono}"
-             Padding="2,0" Margin="0" TextAlignment="Center" CornerRadius="4" VerticalContentAlignment="Center"
+             FontSize="{DynamicResource Md3DawTypeReadout}" FontFamily="{DynamicResource PlusFontFamilyMono}"
+             Padding="2,0" Margin="0" TextAlignment="Center" CornerRadius="{DynamicResource Md3ShapeExtraSmall}" VerticalContentAlignment="Center"
              KeyDown="OnEditorKeyDown" LostFocus="OnEditorLostFocus"/>
   </Grid>
 </UserControl>

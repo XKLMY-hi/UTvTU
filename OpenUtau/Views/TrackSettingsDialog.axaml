@@ -8,19 +8,19 @@
         Title="{DynamicResource dialogs.tracksettings.caption}" Focusable="True">
   <Grid Margin="16" RowDefinitions="*,Auto">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-      <StackPanel Spacing="16" MaxWidth="1040" HorizontalAlignment="Stretch">
+      <StackPanel Spacing="{DynamicResource Md3Spacing4}" MaxWidth="1040" HorizontalAlignment="Stretch">
         <TextBlock Classes="toolHint" TextWrapping="Wrap" Text="{DynamicResource warning.renderer}" IsVisible="{Binding IsNotClassic}"/>
-        <controls:AdaptiveColumns MinimumColumnWidth="340" Spacing="24">
-          <StackPanel Spacing="12" IsVisible="{Binding NeedsResampler}">
-            <TextBlock FontSize="13" FontWeight="SemiBold" Text="{DynamicResource prefs.rendering.resampler}"/>
+        <controls:AdaptiveColumns MinimumColumnWidth="340" Spacing="{DynamicResource Md3Spacing6}">
+          <StackPanel Spacing="{DynamicResource Md3Spacing3}" IsVisible="{Binding NeedsResampler}">
+            <TextBlock FontSize="{DynamicResource Md3TypeBodyMedium}" FontWeight="SemiBold" Text="{DynamicResource prefs.rendering.resampler}"/>
             <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Resamplers}" SelectedItem="{Binding Resampler}"/>
             <WrapPanel Orientation="Horizontal">
               <Button Classes="toolAction resourceAction" Content="{DynamicResource dialogs.tracksettings.location}" Command="{Binding OpenResamplerLocation}"/>
               <Button Classes="toolAction resourceAction" Content="{DynamicResource dialogs.tracksettings.setasdefault}" Command="{Binding SetDefaultResampler}"/>
             </WrapPanel>
           </StackPanel>
-          <StackPanel Spacing="12" IsVisible="{Binding NeedsWavtool}">
-            <TextBlock FontSize="13" FontWeight="SemiBold" Text="{DynamicResource prefs.rendering.wavtool}"/>
+          <StackPanel Spacing="{DynamicResource Md3Spacing3}" IsVisible="{Binding NeedsWavtool}">
+            <TextBlock FontSize="{DynamicResource Md3TypeBodyMedium}" FontWeight="SemiBold" Text="{DynamicResource prefs.rendering.wavtool}"/>
             <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Wavtools}" SelectedItem="{Binding Wavtool}"/>
             <WrapPanel Orientation="Horizontal">
               <Button Classes="toolAction resourceAction" Content="{DynamicResource dialogs.tracksettings.location}" Command="{Binding OpenWavtoolLocation}"/>
@@ -30,7 +30,7 @@
         </controls:AdaptiveColumns>
       </StackPanel>
     </ScrollViewer>
-    <Button Name="ApplyButton" Grid.Row="1" Classes="toolAction" MinWidth="80" Margin="0,12,0,0" HorizontalAlignment="Right"
+    <Button Name="ApplyButton" Grid.Row="1" Classes="toolAction primary" MinWidth="80" Margin="0,12,0,0" HorizontalAlignment="Right"
             Content="{DynamicResource button.ok}" Click="OnOkClicked"/>
   </Grid>
 </controls:WorkspaceToolView>

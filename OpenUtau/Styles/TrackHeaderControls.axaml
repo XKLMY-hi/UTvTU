@@ -1,4 +1,4 @@
-﻿<Styles xmlns="https://github.com/avaloniaui"
+<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <!-- Templates and state layers belong to these control themes. Legacy clear/toolbar/fader
        classes are deliberately absent: their application-level setters would override themes. -->
@@ -7,15 +7,15 @@
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
       <Setter Property="HorizontalContentAlignment" Value="Left"/>
       <Setter Property="VerticalContentAlignment" Value="Center"/>
-      <Setter Property="CornerRadius" Value="4"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeExtraSmall}"/>
     </ControlTheme>
     <ControlTheme x:Key="TrackHeaderActionTheme" TargetType="Button" BasedOn="{StaticResource DawButtonTheme}">
       <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-      <Setter Property="CornerRadius" Value="4"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeExtraSmall}"/>
     </ControlTheme>
     <ControlTheme x:Key="TrackHeaderEffectsTheme" TargetType="Button" BasedOn="{StaticResource DawTextButtonTheme}">
       <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-      <Setter Property="CornerRadius" Value="4"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeExtraSmall}"/>
       <Style Selector="^.fxOn">
         <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
         <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
@@ -59,14 +59,14 @@
                        Background="{TemplateBinding Foreground}" BorderThickness="0">
                   <Thumb.Template>
                     <ControlTemplate>
-                      <Border Background="{TemplateBinding Background}" CornerRadius="999"/>
+                      <Border Background="{TemplateBinding Background}" CornerRadius="{DynamicResource Md3ShapeFull}"/>
                     </ControlTemplate>
                   </Thumb.Template>
                 </Thumb>
               </Track>
               <!-- Focus stays within the 16 DIP row, so narrow/short cards never expand. -->
               <Border Name="PART_FocusRing" BorderBrush="{DynamicResource md3.primary}" BorderThickness="1"
-                      CornerRadius="4" Opacity="0" IsHitTestVisible="False"/>
+                      CornerRadius="{DynamicResource Md3ShapeExtraSmall}" Opacity="0" IsHitTestVisible="False"/>
             </Grid>
           </DataValidationErrors>
         </ControlTemplate>

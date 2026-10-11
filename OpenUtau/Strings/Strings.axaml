@@ -1358,4 +1358,5 @@ Range {2}–{3} s · Tail {4} s
   <system:String x:Key="prefs.color.role.secondary">Secondary</system:String>
   <system:String x:Key="prefs.color.role.tertiary">Tertiary</system:String>
   <system:String x:Key="prefs.motion.reduce">Reduce interface motion</system:String>
+  <x:String x:Key="prefs.color.seed.placeholder">#RRGGBB</x:String>
 </ResourceDictionary>

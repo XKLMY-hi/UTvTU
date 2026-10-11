@@ -24,7 +24,7 @@
         </MultiBinding>
       </TextBlock.Text>
     </TextBlock>
-    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="4">
+    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing1}">
       <TextBlock Text="{StaticResource lyrics.separators}" Margin="0,2"/>
       <Border CornerRadius="5"
               Background="{DynamicResource MenuFlyoutItemBackgroundPointerOver}">
@@ -67,8 +67,8 @@
     </StackPanel>
     <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
       <Button Content="{DynamicResource button.reset}" Margin="0" Command="{Binding Reset}"/>
-      <Button Content="{DynamicResource button.cancel}" Margin="0" Click="OnCancel"/>
-      <Button Content="{DynamicResource button.apply}" Margin="0" Click="OnFinish"/>
+      <Button Classes="text" Content="{DynamicResource button.cancel}" Margin="0" Click="OnCancel"/>
+      <Button Classes="primary" Content="{DynamicResource button.apply}" Margin="0" Click="OnFinish"/>
     </StackPanel>
   </Grid>
       </Border>

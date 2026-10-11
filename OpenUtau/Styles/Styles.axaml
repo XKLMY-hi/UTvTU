@@ -12,10 +12,10 @@
   </Style>
   <!-- Rounded popup overlays -->
   <Style Selector="Popup > Border">
-    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeSmall}"/>
   </Style>
   <Style Selector="ContextMenu">
-    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeSmall}"/>
   </Style>
   <!-- W31 后续：此处原有 `MenuFlyoutPresenter { CornerRadius=8 }` —— 该属性**模板不读**（圆角真值来自
        Styles/Md3Menus.axaml 的 `PART_PopupBorder` = 12）⇒ 是死属性，已删，免得日后被误当生效值。 -->
@@ -54,7 +54,7 @@
   </Style>
   <Style Selector="MenuItem">
     <Setter Property="Background" Value="Transparent"/>
-    <Setter Property="FontSize" Value="12"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodySmall}"/>
     <Setter Property="Height" Value="24"/>
     <Setter Property="Padding" Value="8,2,8,2"/>
   </Style>
@@ -87,7 +87,7 @@
 
   <Style Selector="ContextMenu MenuItem">
     <Setter Property="Background" Value="Transparent"/>
-    <Setter Property="FontSize" Value="12"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodySmall}"/>
     <Setter Property="Padding" Value="4,2,4,2"/>
   </Style>
 
@@ -108,22 +108,22 @@
   </Style>
 
   <Style Selector="TextBlock">
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
   </Style>
   <Style Selector="Label">
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
   </Style>
   <Style Selector="TextBox">
     <Setter Property="MinHeight" Value="32"/>
     <Setter Property="Height" Value="32"/>
     <Setter Property="Padding" Value="8,4"/>
     <Setter Property="Margin" Value="0,0,0,4"/>
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="VerticalAlignment" Value="Top"/>
     <Setter Property="VerticalContentAlignment" Value="Center"/>
     <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
-    <Setter Property="SelectionForegroundBrush" Value="White"/>
-    <Setter Property="SelectionBrush" Value="{DynamicResource AccentBrush1Semi}"/>
+    <Setter Property="SelectionForegroundBrush" Value="{DynamicResource md3.on-secondary-container}"/>
+    <Setter Property="SelectionBrush" Value="{DynamicResource md3.secondary-container}"/>
   </Style>
   <Style Selector="TextBox:focus">
     <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush1}"/>
@@ -147,7 +147,7 @@
 
   <Style Selector="Button.clear">
     <Setter Property="BorderThickness" Value="0"/>
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="Height" Value="32"/>
     <Setter Property="Margin" Value="0,4"/>
     <Setter Property="Padding" Value="8,0"/>
@@ -177,7 +177,7 @@
 
   <Style Selector="ToggleButton.normal">
     <Setter Property="BorderThickness" Value="0"/>
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="Height" Value="32"/>
     <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
     <Setter Property="Margin" Value="0,4"/>
@@ -207,7 +207,7 @@
 
   <Style Selector="ToggleButton.toolbar">
     <Setter Property="BorderThickness" Value="0"/>
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="Height" Value="32"/>
     <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
     <Setter Property="Margin" Value="0,4"/>
@@ -248,7 +248,7 @@
   </Style>
 
   <Style Selector="ToggleButton.switch">
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="Padding" Value="8,4"/>
     <Setter Property="BorderThickness" Value="0"/>
   </Style>
@@ -259,7 +259,7 @@
 
   <Style Selector="ComboBox">
     <Setter Property="Background" Value="{DynamicResource PlusBrushSurfaceControl}"/>
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="MinHeight" Value="32"/>
     <Setter Property="Height" Value="32"/>
     <Setter Property="Margin" Value="0,4"/>
@@ -268,7 +268,7 @@
     <Setter Property="VerticalContentAlignment" Value="Center"/>
   </Style>
   <Style Selector="ComboBoxItem">
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="MinHeight" Value="28"/>
     <Setter Property="Height" Value="28"/>
     <Setter Property="Margin" Value="0"/>
@@ -285,8 +285,8 @@
     <Setter Property="Height" Value="28"/>
     <Setter Property="Padding" Value="8,4"/>
     <Setter Property="Margin" Value="0"/>
-    <Setter Property="FontSize" Value="13"/>
-    <Setter Property="CornerRadius" Value="4"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeExtraSmall}"/>
   </Style>
   <!-- 选中态配色已由 Md3ListBoxItemTheme 的 ^:selected 拥有（secondary-container + on-secondary-container，
        实测对比度 7.19:1）。此处曾有应用级补丁 `ListBoxItem:selected /template/ ContentPresenter
@@ -300,7 +300,7 @@
   <Style Selector="CheckBox">
     <Setter Property="MinHeight" Value="28" />
     <Setter Property="MinWidth" Value="28" />
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
   </Style>
 
   <!-- W31：`.menu` 的"无框只显示勾"外观迁进 Md3SelectionThemes.axaml 的 Md3CheckBoxTheme
@@ -310,13 +310,13 @@
   </Style>
 
   <Style Selector="DataGridColumnHeader">
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="MinHeight" Value="28" />
     <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
   </Style>
   <Style Selector="DataGridCell">
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="MinHeight" Value="28" />
     <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
   </Style>
@@ -336,14 +336,14 @@
   </Style>
 
   <Style Selector="Border.playback">
-    <Setter Property="CornerRadius" Value="4"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeExtraSmall}"/>
     <Setter Property="BorderThickness" Value="1"/>
     <Setter Property="BorderBrush" Value="{DynamicResource NeutralAccentBrushSemi}"/>
     <Setter Property="Height" Value="20"/>
   </Style>
   <Style Selector="Border.playback TextBlock">
     <Setter Property="Padding" Value="6,0,0,1"/>
-    <Setter Property="FontSize" Value="11"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelSmall}"/>
     <Setter Property="FontFamily" Value="{DynamicResource PlusFontFamily}"/>
     <Setter Property="VerticalAlignment" Value="Center"/>
     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -361,7 +361,7 @@
   </Style>
 
   <Style Selector="Border.tips">
-    <Setter Property="CornerRadius" Value="4"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeExtraSmall}"/>
     <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource NeutralAccentBrushSemi}"/>
     <Setter Property="BorderThickness" Value="1"/>
@@ -397,7 +397,7 @@
             </Border>
             <Border Grid.RowSpan="2" Grid.ColumnSpan="2" Margin="0,8,0,0" Padding="12,12,12,8"
                 BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1"
-                    CornerRadius="8">
+                    CornerRadius="{DynamicResource Md3ShapeSmall}">
               <ContentPresenter Content="{TemplateBinding Content}" />
             </Border>
           </Grid>
@@ -496,7 +496,7 @@
 
   <!-- TabItem -->
   <Style Selector="TabItem">
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="Padding" Value="12,6"/>
     <Setter Property="Background" Value="Transparent"/>
   </Style>
@@ -506,16 +506,16 @@
 
   <!-- RadioButton (global) -->
   <Style Selector="RadioButton">
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="Margin" Value="0,2"/>
     <Setter Property="MinHeight" Value="28"/>
   </Style>
 
   <!-- ToolTip -->
   <Style Selector="ToolTip">
-    <Setter Property="FontSize" Value="12"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodySmall}"/>
     <Setter Property="Padding" Value="8,4"/>
-    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3DawCornerRadius}"/>
     <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
   </Style>
@@ -539,7 +539,7 @@
     <Setter Property="Padding" Value="0"/>
     <Setter Property="HorizontalContentAlignment" Value="Center"/>
     <Setter Property="VerticalContentAlignment" Value="Center"/>
-    <Setter Property="CornerRadius" Value="0"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeNone}"/>
   </Style>
 
   <!-- Close button: red hover only (min / max stay flat).

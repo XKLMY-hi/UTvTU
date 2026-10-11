@@ -13,7 +13,7 @@
   <Grid RowDefinitions="Auto,Auto,*,Auto">
     <WrapPanel Orientation="Horizontal">
       <TextBox Name="PackageSearch" Width="260" Margin="0,0,8,8" Text="{Binding SearchText}" PlaceholderText="{DynamicResource workspace.packages.search}"/>
-      <Button Classes="toolAction resourceAction" Content="{DynamicResource packages.installfromfile}" Click="OnInstallFromFile"/>
+      <Button Classes="toolAction resourceAction primary" Content="{DynamicResource packages.installfromfile}" Click="OnInstallFromFile"/>
       <Button Classes="toolAction resourceAction" Content="{DynamicResource packages.openinstalllocation}" Click="OpenLocation"/>
       <Button Classes="toolAction resourceAction" Content="{DynamicResource packages.refresh}" Command="{Binding RefreshCommand}"/>
     </WrapPanel>
@@ -23,7 +23,7 @@
         <ComboBoxItem Content="{DynamicResource workspace.packages.installed}"/>
         <ComboBoxItem Content="{DynamicResource workspace.packages.updates}"/>
       </ComboBox>
-      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center"><TextBlock Text="{Binding MatchCount}" Classes="toolHint"/><TextBlock Text="{DynamicResource workspace.packages.count}" Classes="toolHint"/></StackPanel>
+      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}" VerticalAlignment="Center"><TextBlock Text="{Binding MatchCount}" Classes="toolHint"/><TextBlock Text="{DynamicResource workspace.packages.count}" Classes="toolHint"/></StackPanel>
     </Grid>
     <Grid Grid.Row="2">
       <DataGrid Name="PackagesGrid"  RowHeight="56" Margin="0" ItemsSource="{Binding FilteredAvailable}" AutoGenerateColumns="False" CanUserSortColumns="False"
@@ -37,15 +37,15 @@
             <DataGridTemplateColumn.CellTemplate>
               <DataTemplate>
                 <StackPanel Orientation="Horizontal" Spacing="6">
-                  <Button Classes="toolAction" Height="32" Content="{Binding PrimaryActionLabel}" Click="OnPrimaryActionClick" IsVisible="{Binding CanInstallOrUpdate}"/>
-                  <Button Classes="toolAction" Height="32" Content="{DynamicResource packages.uninstall}" Click="OnUninstallClick" IsVisible="{Binding CanUninstall}"/>
+                  <Button Classes="toolAction" Height="32" MinHeight="32" Content="{Binding PrimaryActionLabel}" Click="OnPrimaryActionClick" IsVisible="{Binding CanInstallOrUpdate}"/>
+                  <Button Classes="toolAction" Height="32" MinHeight="32" Content="{DynamicResource packages.uninstall}" Click="OnUninstallClick" IsVisible="{Binding CanUninstall}"/>
                 </StackPanel>
               </DataTemplate>
             </DataGridTemplateColumn.CellTemplate>
           </DataGridTemplateColumn>
         </DataGrid.Columns>
       </DataGrid>
-      <StackPanel IsVisible="{Binding NoMatches}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12" Margin="24">
+      <StackPanel IsVisible="{Binding NoMatches}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="{DynamicResource Md3Spacing3}" Margin="24">
         <controls:DawIcon Data="{StaticResource icon-package}" Width="32" Height="32" Fill="{DynamicResource md3.on-surface-variant}"/>
         <TextBlock Classes="toolHint" Text="{DynamicResource workspace.resources.nomatches}" TextWrapping="Wrap"/>
       </StackPanel>

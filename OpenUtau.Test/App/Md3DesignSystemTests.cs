@@ -11,6 +11,7 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using OpenUtau.App;
 using OpenUtau.App.Controls;
+using OpenUtau.App.Views;
 using OpenUtau.Core.Theming;
 using OpenUtau.Core.Util;
 using OpenUtau.Theming;
@@ -20,6 +21,60 @@ namespace OpenUtau.Test.App;
 
 [Collection("Theme")]
 public class Md3DesignSystemTests {
+    [Theory]
+    [InlineData(0xFF6750A4u, false)]
+    [InlineData(0xFF6750A4u, true)]
+    [InlineData(0xFF006C4Cu, false)]
+    [InlineData(0xFF006C4Cu, true)]
+    [InlineData(0xFF8F4E00u, false)]
+    [InlineData(0xFF8F4E00u, true)]
+    public void GeneratedPageAndActionRolePairsRemainReadable(uint seed, bool dark) {
+        static double Luminance(uint color) {
+            static double Channel(uint channel) {
+                double value = channel / 255.0;
+                return value <= 0.04045 ? value / 12.92 : Math.Pow((value + 0.055) / 1.055, 2.4);
+            }
+            return 0.2126 * Channel((color >> 16) & 255) + 0.7152 * Channel((color >> 8) & 255) + 0.0722 * Channel(color & 255);
+        }
+        foreach (var scheme in new[] { Md3SchemeVariant.TonalSpot, Md3SchemeVariant.Vibrant, Md3SchemeVariant.Neutral }) {
+            var colors = Md3SchemeColors.Create(seed, scheme, dark);
+            foreach (var (surface, foreground) in new[] {
+                (Md3Role.Primary, Md3Role.OnPrimary), (Md3Role.PrimaryContainer, Md3Role.OnPrimaryContainer),
+                (Md3Role.SecondaryContainer, Md3Role.OnSecondaryContainer),
+                (Md3Role.SurfaceContainerHigh, Md3Role.OnSurface), (Md3Role.Surface, Md3Role.OnSurfaceVariant),
+                (Md3Role.Error, Md3Role.OnError),
+            }) {
+                double a = Luminance(colors.Get(surface)), b = Luminance(colors.Get(foreground));
+                Assert.True((Math.Max(a, b) + 0.05) / (Math.Min(a, b) + 0.05) >= 4.5, $"{scheme}/{dark}/{surface}/{foreground}");
+            }
+        }
+    }
+
+    [AvaloniaFact]
+    public void HostedToolsPreserveRichConfirmContentAndDialogRoles() {
+        var old = ColorPool.Current;
+        try {
+            foreach (bool dark in new[] { false, true }) {
+                ColorPool.Initialize(0xFF8F4E00, Md3SchemeVariant.Vibrant, dark);
+                var label = new TextBlock { Text = "Apply" };
+                var button = new Button { Content = new StackPanel { Children = { label } }, Classes = { "toolAction", "primary" } };
+                var tool = new WorkspaceToolView { Title = "Tool", Content = button };
+                var host = new WorkspaceDialogHost();
+                var window = new WindowEx { Width = 600, Height = 400, Content = host };
+                window.Show(); host.Push(tool); Dispatcher.UIThread.RunJobs();
+                try {
+                    Assert.Equal(ColorPool.Current.Color(Md3Role.OnPrimary), Assert.IsAssignableFrom<ISolidColorBrush>(label.Foreground).Color);
+                    Assert.Equal(ColorPool.Current.Color(Md3Role.Primary), Assert.IsAssignableFrom<ISolidColorBrush>(button.Background).Color);
+                    Assert.Equal(40, button.Bounds.Height);
+                    var card = host.GetVisualDescendants().OfType<Border>().Single(b => b.Classes.Contains("md3-pop"));
+                    Assert.Equal(new CornerRadius(28), card.CornerRadius);
+                    Assert.Equal(ColorPool.Current.Color(Md3Role.SurfaceContainerHigh), Assert.IsAssignableFrom<ISolidColorBrush>(card.Background).Color);
+                    Assert.False(card.BoxShadow.Count == 0);
+                } finally { host.Shutdown(); window.Close(); }
+            }
+        } finally { ColorPool.Initialize(old.Seed, old.Scheme, old.IsDark, old.ContrastLevel); }
+    }
+
     [Theory]
     [InlineData("#6750A4", 0xFF6750A4u)]
     [InlineData(" 006c4c ", 0xFF006C4Cu)]
@@ -86,7 +141,8 @@ public class Md3DesignSystemTests {
             Md3Motion.ApplyPreference();
             var toggle = new ToggleSwitch();
             var progress = new ProgressBar { IsIndeterminate = true, Width = 240 };
-            window = new WindowEx { Width = 320, Height = 180, Content = new StackPanel { Children = { toggle, progress } } };
+            var rackSwitch = new Md3PowerSwitch();
+            window = new WindowEx { Width = 320, Height = 180, Content = new StackPanel { Children = { toggle, progress, rackSwitch } } };
             window.Show();
             toggle.ApplyTemplate(); progress.ApplyTemplate(); Dispatcher.UIThread.RunJobs();
             Preferences.Default.ReduceMotion = true;
@@ -96,6 +152,7 @@ public class Md3DesignSystemTests {
             Assert.Contains(":reduced-motion", progress.Classes);
             Assert.True(progress.IsIndeterminate); // Reduce visual motion, never change busy semantics.
             Assert.Equal(TimeSpan.Zero, Md3Motion.EffectsFast);
+            Assert.All(rackSwitch.GetVisualDescendants().OfType<Control>(), node => Assert.Null(node.Transitions));
             foreach (var node in toggle.GetVisualDescendants().OfType<Control>()) {
                 if (node.Transitions != null)
                     foreach (var transition in node.Transitions) Assert.Equal(TimeSpan.Zero, Assert.IsAssignableFrom<TransitionBase>(transition).Duration);
@@ -132,7 +189,14 @@ public class Md3DesignSystemTests {
                     Assert.Equal(ColorPool.Current.Color(Md3Role.OnPrimary), Assert.IsAssignableFrom<ISolidColorBrush>(label.Foreground).Color);
                     Assert.Equal(ColorPool.Current.Color(Md3Role.SecondaryContainer), Assert.IsAssignableFrom<ISolidColorBrush>(tonal.Background).Color);
                     Assert.Equal(ColorPool.Current.Color(Md3Role.OnSecondaryContainer), Assert.IsAssignableFrom<ISolidColorBrush>(tonal.Foreground).Color);
-                    Assert.NotNull(primary.GetVisualDescendants().OfType<Border>().FirstOrDefault(b => b.Name == "PART_StateLayer"));
+                    var state = primary.GetVisualDescendants().OfType<Border>().Single(b => b.Name == "PART_StateLayer");
+                    state.Transitions = null;
+                    ((IPseudoClasses)primary.Classes).Set(":pointerover", true);
+                    Dispatcher.UIThread.RunJobs(); Assert.Equal(.08, state.Opacity);
+                    ((IPseudoClasses)primary.Classes).Set(":focus-visible", true);
+                    Dispatcher.UIThread.RunJobs(); Assert.Equal(.10, state.Opacity);
+                    ((IPseudoClasses)primary.Classes).Set(":pressed", true);
+                    Dispatcher.UIThread.RunJobs(); Assert.Equal(.10, state.Opacity);
                     Assert.Equal(40, primary.MinHeight);
                 } finally { window.Close(); }
             }

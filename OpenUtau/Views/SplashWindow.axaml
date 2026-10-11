@@ -22,7 +22,7 @@
        · 字标已接**真矢量**：U/T 用 `brand-wordmark`（Fill；源 = extracted/wordmark-ut.svg，
          已按 EvenOdd 重划）、切角 v 用 `brand-v-chevron` **单独描边**（v 是自交单环，描边不经填充规则）。
          不接任何描摹/派生版字标（`out/` 已标 derived，不作产品用）。 -->
-  <Border CornerRadius="12" Background="{DynamicResource md3.surface-container}"
+  <Border CornerRadius="{DynamicResource Md3ShapeMedium}" Background="{DynamicResource md3.surface-container}"
           BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="1">
     <Grid RowDefinitions="*,Auto">
       <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center"

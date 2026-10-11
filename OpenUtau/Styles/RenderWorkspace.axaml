@@ -1,40 +1,40 @@
 <Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <!-- Local to the export window; shared workspace geometry and native theme roles. -->
   <Style Selector="TextBlock.renderTitle">
-    <Setter Property="FontSize" Value="22"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeTitleLarge}"/>
     <Setter Property="FontWeight" Value="SemiBold"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     <Setter Property="TextWrapping" Value="Wrap"/>
   </Style>
   <Style Selector="TextBlock.renderSubtitle,TextBlock.renderHint">
-    <Setter Property="FontSize" Value="12"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodySmall}"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
     <Setter Property="TextWrapping" Value="Wrap"/>
     <Setter Property="LineHeight" Value="18"/>
   </Style>
   <Style Selector="TextBlock.renderSubtitle">
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
   </Style>
   <Style Selector="TextBlock.renderSectionTitle">
-    <Setter Property="FontSize" Value="16"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeTitleMedium}"/>
     <Setter Property="FontWeight" Value="Medium"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     <Setter Property="TextWrapping" Value="Wrap"/>
   </Style>
   <Style Selector="TextBlock.renderFieldLabel">
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="FontWeight" Value="Medium"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
     <Setter Property="TextWrapping" Value="Wrap"/>
   </Style>
   <Style Selector="TextBlock.renderSummary">
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     <Setter Property="TextWrapping" Value="Wrap"/>
     <Setter Property="LineHeight" Value="20"/>
   </Style>
   <Style Selector="TextBlock.renderError">
-    <Setter Property="FontSize" Value="12"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodySmall}"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.error}"/>
     <Setter Property="TextWrapping" Value="Wrap"/>
   </Style>
@@ -45,31 +45,30 @@
   </Style>
   <Style Selector="Border.renderSegment">
     <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-    <Setter Property="CornerRadius" Value="999"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
     <Setter Property="Padding" Value="3"/>
   </Style>
   <Style Selector="RadioButton.renderSegmentItem">
     <Setter Property="Theme" Value="{StaticResource WorkspaceSegmentTheme}"/>
-    <Setter Property="Height" Value="36"/>
-    <Setter Property="MinHeight" Value="36"/>
+    <Setter Property="Height" Value="{DynamicResource Md3WorkspaceControlHeight}"/>
+    <Setter Property="MinHeight" Value="{DynamicResource Md3WorkspaceControlHeight}"/>
     <Setter Property="MinWidth" Value="0"/>
     <Setter Property="Margin" Value="0"/>
     <Setter Property="Padding" Value="4,0"/>
-    <Setter Property="FontSize" Value="13"/>
-    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="ToolTip.Tip" Value="{Binding $self.Content}"/>
   </Style>
   <Style Selector="TextBox.renderInput,ComboBox.renderInput">
-    <Setter Property="Height" Value="36"/>
-    <Setter Property="MinHeight" Value="36"/>
+    <Setter Property="Height" Value="{DynamicResource Md3WorkspaceControlHeight}"/>
+    <Setter Property="MinHeight" Value="{DynamicResource Md3WorkspaceControlHeight}"/>
     <Setter Property="MinWidth" Value="0"/>
     <Setter Property="Margin" Value="0"/>
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
     <Setter Property="BorderThickness" Value="1"/>
-    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeSmall}"/>
   </Style>
   <Style Selector="TextBox.renderInput">
     <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -85,19 +84,19 @@
     <Setter Property="MinHeight" Value="32"/>
     <Setter Property="Margin" Value="0"/>
     <Setter Property="Padding" Value="0"/>
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     <Setter Property="VerticalContentAlignment" Value="Center"/>
   </Style>
   <Style Selector="Button.renderAction">
     <Setter Property="Theme" Value="{StaticResource DawTextButtonTheme}"/>
-    <Setter Property="Height" Value="36"/>
-    <Setter Property="MinHeight" Value="36"/>
+    <Setter Property="Height" Value="{DynamicResource Md3WorkspaceControlHeight}"/>
+    <Setter Property="MinHeight" Value="{DynamicResource Md3WorkspaceControlHeight}"/>
     <Setter Property="MinWidth" Value="0"/>
     <Setter Property="Margin" Value="0"/>
     <Setter Property="Padding" Value="16,0"/>
-    <Setter Property="CornerRadius" Value="999"/>
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource md3.outline}"/>
     <Setter Property="BorderThickness" Value="1"/>
@@ -111,7 +110,7 @@
     <Setter Property="Height" Value="32"/>
     <Setter Property="MinHeight" Value="32"/>
     <Setter Property="Padding" Value="12,0"/>
-    <Setter Property="FontSize" Value="12"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodySmall}"/>
     <Setter Property="BorderThickness" Value="0"/>
   </Style>
   <Style Selector="ProgressBar.renderProgress">

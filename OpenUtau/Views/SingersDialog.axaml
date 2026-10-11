@@ -25,7 +25,7 @@
           <ListBox Name="SingerList" ItemsSource="{Binding FilteredSingers}" SelectedItem="{Binding Singer, Mode=OneWay}" SelectionChanged="OnSingerListChanged" Background="Transparent">
             <ListBox.ItemTemplate><DataTemplate>
               <Grid ColumnDefinitions="36,12,*" Height="56">
-                <Border CornerRadius="8" Height="36" Background="{DynamicResource md3.surface-container-high}" VerticalAlignment="Center">
+                <Border CornerRadius="{DynamicResource Md3ShapeSmall}" Height="36" Background="{DynamicResource md3.surface-container-high}" VerticalAlignment="Center">
                   <c:DawIcon Data="{StaticResource icon-mic}" Width="20" Height="20" Fill="{DynamicResource md3.primary}"/>
                 </Border>
                 <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
@@ -37,27 +37,27 @@
           </ListBox>
           <TextBlock Classes="toolHint" Text="{DynamicResource workspace.resources.nomatches}" TextWrapping="Wrap" Margin="16" IsVisible="{Binding NoSingerMatches}" HorizontalAlignment="Center" VerticalAlignment="Top"/>
         </Grid>
-        <Button Grid.Row="3" Classes="toolAction" Margin="12" Content="{DynamicResource menu.tools.singer.install}" Click="OnInstallSinger"/>
+        <Button Grid.Row="3" Classes="toolAction primary" Margin="12" Content="{DynamicResource menu.tools.singer.install}" Click="OnInstallSinger"/>
       </Grid>
       <Grid Grid.Column="2" RowDefinitions="Auto,Auto,40,*">
         <Grid Name="SingerPicker" IsVisible="False" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
           <ComboBox Name="name" HorizontalAlignment="Stretch" ItemsSource="{Binding Singers}" SelectedItem="{Binding Singer}" SelectionChanged="OnSelectedSingerChanged">
             <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding LocalizedName}"/></DataTemplate></ComboBox.ItemTemplate>
           </ComboBox>
-          <Button Grid.Column="1" Classes="toolAction" Margin="8,0,0,0" Content="{DynamicResource menu.tools.singer.install}" Click="OnInstallSinger"/>
+          <Button Grid.Column="1" Classes="toolAction primary" Margin="8,0,0,0" Content="{DynamicResource menu.tools.singer.install}" Click="OnInstallSinger"/>
         </Grid>
         <Grid Name="SingerHeader" Grid.Row="1" RowDefinitions="Auto,Auto" ColumnDefinitions="64,16,*,Auto" Margin="0,0,0,12">
-          <Border CornerRadius="12" Width="64" Height="64" ClipToBounds="True" Background="{DynamicResource md3.surface-container-high}" VerticalAlignment="Top">
+          <Border CornerRadius="{DynamicResource Md3ShapeMedium}" Width="64" Height="64" ClipToBounds="True" Background="{DynamicResource md3.surface-container-high}" VerticalAlignment="Top">
             <Grid><c:DawIcon Data="{StaticResource icon-mic}" Width="24" Height="24" Fill="{DynamicResource md3.primary}"/>
               <Image Source="{Binding Avatar}" Stretch="UniformToFill"/>
             </Grid>
           </Border>
           <StackPanel Grid.Column="2" Spacing="3">
-            <TextBlock Text="{Binding Singer.LocalizedName}" FontSize="20" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+            <TextBlock Text="{Binding Singer.LocalizedName}" FontSize="{DynamicResource Md3TypeTitleLarge}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
             <TextBlock Text="{Binding Singer.SingerType}" Classes="toolHint"/>
-            <TextBlock Text="{Binding Singer.Location}" FontSize="11" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Singer.Location}" Foreground="{DynamicResource md3.on-surface-variant}"/>
+            <TextBlock Text="{Binding Singer.Location}" FontSize="{DynamicResource Md3TypeLabelSmall}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Singer.Location}" Foreground="{DynamicResource md3.on-surface-variant}"/>
           </StackPanel>
-          <Button Name="SingerOptions" Grid.Column="3" Classes="toolAction toolClose" Width="32" Height="32" Click="OnSingerMenuButton" IsEnabled="{Binding HasSinger}" AutomationProperties.Name="{DynamicResource dialogs.tracksettings.caption}">
+          <Button Name="SingerOptions" Grid.Column="3" Classes="toolAction toolClose" Width="32" Height="32" MinHeight="32" Click="OnSingerMenuButton" IsEnabled="{Binding HasSinger}" AutomationProperties.Name="{DynamicResource dialogs.tracksettings.caption}">
             <c:DawIcon Data="{StaticResource icon-settings}" Width="16" Height="16" Fill="{DynamicResource md3.on-surface}"/>
             <Button.ContextMenu>
           <ContextMenu Name="SingerMenu" Placement="Bottom">
@@ -80,12 +80,12 @@
         </Button.ContextMenu>
           </Button>
           <WrapPanel Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,12,0,0" IsEnabled="{Binding HasSinger}">
-            <Button Classes="toolAction resourceAction" Theme="{StaticResource DawButtonTheme}" Padding="12,0" Command="{Binding OpenLocation}"><StackPanel Orientation="Horizontal" Spacing="8"><c:DawIcon Data="{StaticResource icon-folder-open}" Width="16" Height="16" Fill="{DynamicResource md3.on-surface}"/><TextBlock Text="{DynamicResource singers.location}"/></StackPanel></Button>
-            <Button Classes="toolAction resourceAction" Theme="{StaticResource DawButtonTheme}" Padding="12,0" Click="OnPlayCharacterSample"><StackPanel Orientation="Horizontal" Spacing="8"><c:DawIcon Data="{StaticResource icon-play}" Width="16" Height="16" Fill="{DynamicResource md3.on-surface}"/><TextBlock Text="{DynamicResource singers.playsample}"/></StackPanel></Button>
+            <Button Classes="toolAction resourceAction" Theme="{StaticResource DawButtonTheme}" Padding="12,0" Command="{Binding OpenLocation}"><StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}"><c:DawIcon Data="{StaticResource icon-folder-open}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/><TextBlock Text="{DynamicResource singers.location}"/></StackPanel></Button>
+            <Button Classes="toolAction resourceAction" Theme="{StaticResource DawButtonTheme}" Padding="12,0" Click="OnPlayCharacterSample"><StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}"><c:DawIcon Data="{StaticResource icon-play}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/><TextBlock Text="{DynamicResource singers.playsample}"/></StackPanel></Button>
           </WrapPanel>
         </Grid>
         <Border Grid.Row="2" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource md3.outline-variant}">
-          <StackPanel Orientation="Horizontal" Spacing="4">
+          <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing1}">
             <Button Name="OtoTab" Classes="resourceTab selected" Content="{DynamicResource workspace.singers.oto}" Tag="oto" Click="OnDetailTab"/>
             <Button Name="SubbanksTab" Classes="resourceTab" Content="{DynamicResource workspace.singers.subbanks}" Tag="subbanks" Click="OnDetailTab"/>
             <Button Name="InfoTab" Classes="resourceTab" Content="{DynamicResource workspace.singers.info}" Tag="info" Click="OnDetailTab"/>
@@ -135,7 +135,7 @@
             <GridSplitter Grid.Row="2" Height="6" HorizontalAlignment="Stretch" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext"/>
             <Grid Grid.Row="3" RowDefinitions="28,*">
               <TextBlock Classes="toolCaption" VerticalAlignment="Center" Text="{Binding SelectedOto.DisplayFile}" TextTrimming="CharacterEllipsis"/>
-              <Border Grid.Row="1" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource md3.outline-variant}" ClipToBounds="True"><c:OtoPlot Name="OtoPlot" ZoomInMel="{Binding ZoomInMel}"/></Border>
+              <Border Grid.Row="1" CornerRadius="{DynamicResource Md3ShapeSmall}" BorderThickness="1" BorderBrush="{DynamicResource md3.outline-variant}" ClipToBounds="True"><c:OtoPlot Name="OtoPlot" ZoomInMel="{Binding ZoomInMel}"/></Border>
             </Grid>
             <WrapPanel Grid.Row="4" Orientation="Horizontal" Margin="0,4,0,0">
               <Button Classes="toolAction resourceAction" Content="{DynamicResource singers.playselectedfile}" Click="OnPlaySelectedFile"/>
@@ -156,7 +156,7 @@
     </DataGrid>
           </Grid>
           <ScrollViewer Name="InfoPage" IsVisible="False" Margin="0,16,0,0">
-            <StackPanel Spacing="12">
+            <StackPanel Spacing="{DynamicResource Md3Spacing3}">
               <Grid ColumnDefinitions="80,*" RowDefinitions="Auto,Auto,Auto,Auto">
                 <TextBlock Classes="toolHint" Text="{DynamicResource workspace.singers.author}"/><TextBlock Grid.Column="1" Text="{Binding Singer.Author}" TextWrapping="Wrap"/>
                 <TextBlock Grid.Row="1" Classes="toolHint" Text="{DynamicResource workspace.singers.voice}"/><TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Singer.Voice}" TextWrapping="Wrap"/>
@@ -170,11 +170,11 @@
           </ScrollViewer>
         </Grid>
         <Border Grid.RowSpan="4" Background="{DynamicResource md3.surface}" IsVisible="{Binding !HasSinger, FallbackValue=False}">
-          <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12" Margin="24" MaxWidth="360">
+          <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="{DynamicResource Md3Spacing3}" Margin="24" MaxWidth="360">
             <c:DawIcon Data="{StaticResource icon-mic}" Width="32" Height="32" Fill="{DynamicResource md3.primary}"/>
-            <TextBlock Text="{DynamicResource workspace.singers.empty.title}" FontSize="18" FontWeight="Medium" TextAlignment="Center"/>
+            <TextBlock Text="{DynamicResource workspace.singers.empty.title}" FontSize="{DynamicResource Md3TypeTitleMedium}" FontWeight="Medium" TextAlignment="Center"/>
             <TextBlock Text="{DynamicResource workspace.singers.empty.hint}" Classes="toolHint" TextAlignment="Center" TextWrapping="Wrap"/>
-            <Button Classes="toolAction" HorizontalAlignment="Center" Content="{DynamicResource menu.tools.singer.install}" Click="OnInstallSinger"/>
+            <Button Classes="toolAction primary" HorizontalAlignment="Center" Content="{DynamicResource menu.tools.singer.install}" Click="OnInstallSinger"/>
           </StackPanel>
         </Border>
       </Grid>

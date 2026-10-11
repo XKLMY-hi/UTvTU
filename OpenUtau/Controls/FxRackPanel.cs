@@ -1,3 +1,4 @@
+using OpenUtau.Theming;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -255,11 +256,14 @@ public class FxRackPanel : TemplatedControl {
 
     private Control BuildTemplate(FxRackPanel control, INameScope scope) {
         var title = new TextBlock { Name = "PART_Title", FontSize = 15, FontWeight = FontWeight.Medium };
+        Md3RackKit.Paint(title, TextBlock.FontSizeProperty, "Md3TypeTitleMedium");
         Md3RackKit.PaintText(title, "fxrack.title");
 
         var subtitle = new TextBlock { Name = "PART_Subtitle", FontSize = 11 };
+        Md3RackKit.Paint(subtitle, TextBlock.FontSizeProperty, "Md3TypeLabelSmall");
 
         var masterText = new TextBlock { Name = "PART_MasterText", FontSize = 10, FontWeight = FontWeight.Medium };
+        Md3RackKit.Paint(masterText, TextBlock.FontSizeProperty, "Md3TypeLabelTiny");
         var masterChip = new Border {
             Name = "PART_MasterChip",
             CornerRadius = new CornerRadius(6),
@@ -270,6 +274,7 @@ public class FxRackPanel : TemplatedControl {
         };
 
         var badgeText = new TextBlock { Name = "PART_BadgeText", FontSize = 10, FontWeight = FontWeight.Medium };
+        Md3RackKit.Paint(badgeText, TextBlock.FontSizeProperty, "Md3TypeLabelTiny");
         Md3RackKit.PaintText(badgeText, "fxrack.readonly");
         var badge = new Border {
             Name = "PART_Badge",
@@ -297,10 +302,12 @@ public class FxRackPanel : TemplatedControl {
         Grid.SetColumn(badge, 2);
 
         var hint = new TextBlock { Name = "PART_Hint", FontSize = 11, TextWrapping = TextWrapping.Wrap };
+        Md3RackKit.Paint(hint, TextBlock.FontSizeProperty, "Md3TypeLabelSmall");
         Md3RackKit.PaintText(hint, "fxrack.hint.drag");
 
         var items = new StackPanel { Name = "PART_Items", Spacing = 6 };
         var empty = new TextBlock { Name = "PART_Empty", FontSize = 12, Margin = new Thickness(2, 6), IsVisible = false };
+        Md3RackKit.Paint(empty, TextBlock.FontSizeProperty, "Md3TypeBodySmall");
         Md3RackKit.PaintText(empty, "fxrack.empty");
 
         var panel = new Border {
@@ -333,6 +340,7 @@ public class FxRackPanel : TemplatedControl {
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
         base.OnPropertyChanged(change);
+        if (change.Property == Md3Motion.ReducedProperty) ApplyMotion();
         if (change.Property == TrackProperty) {
             Rebuild();
         } else if (change.Property == SelectedIndexProperty) {
@@ -382,6 +390,7 @@ public class FxRackPanel : TemplatedControl {
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
         };
+        Md3RackKit.Paint(orderText, TextBlock.FontSizeProperty, "Md3TypeLabelSmall");
         var orderBox = new Border {
             Name = "PART_Order",
             Width = 20,
@@ -408,6 +417,7 @@ public class FxRackPanel : TemplatedControl {
             VerticalAlignment = VerticalAlignment.Center,
             TextTrimming = TextTrimming.CharacterEllipsis,
         };
+        Md3RackKit.Paint(title, TextBlock.FontSizeProperty, "Md3TypeBodyMedium");
         if (entry.TitleKey != null) {
             Md3RackKit.PaintText(title, entry.TitleKey);
         }
@@ -439,9 +449,11 @@ public class FxRackPanel : TemplatedControl {
             TextTrimming = TextTrimming.CharacterEllipsis,
             IsVisible = !string.IsNullOrEmpty(entry.Detail),
         };
+        Md3RackKit.Paint(detail, TextBlock.FontSizeProperty, "Md3TypeLabelSmall");
         var texts = new StackPanel { Spacing = 1, VerticalAlignment = VerticalAlignment.Center, Children = { titleRow, detail } };
 
         var stateText = new TextBlock { Name = "PART_StateText", FontSize = 10, FontWeight = FontWeight.Medium };
+        Md3RackKit.Paint(stateText, TextBlock.FontSizeProperty, "Md3TypeLabelTiny");
         var state = new Border {
             Name = "PART_State",
             CornerRadius = new CornerRadius(6),

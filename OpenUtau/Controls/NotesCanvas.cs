@@ -11,6 +11,7 @@ using OpenUtau.App.ViewModels;
 using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
 using OpenUtau.Core.Util;
+using OpenUtau.Theming;
 using ReactiveUI;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -156,7 +157,7 @@ namespace OpenUtau.App.Controls {
         private bool invalidatePending;
         private CompositeDisposable? subscriptions;
 
-        private const double HoverGlowDuration = 0.12;
+        private bool MotionReduced => Preferences.Default.ReduceMotion || Md3Motion.GetReduced(this);
         private const float PlaybackHighlightFadeInPerSecond = 8.0f;
         private const float PlaybackHighlightFadeOutPerSecond = 6.2f;
         private const float PlaybackNoteBounceDuration = 0.25f;
@@ -288,6 +289,10 @@ namespace OpenUtau.App.Controls {
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
             base.OnPropertyChanged(change);
+            if (change.Property == Md3Motion.ReducedProperty && MotionReduced) {
+                SettleHover();
+                UpdatePlaybackHighlight(true);
+            }
             if (change.Property == PartProperty) {
                 eventPart = part;
                 selectedNotes.Clear();
@@ -374,15 +379,25 @@ namespace OpenUtau.App.Controls {
             hoverNote = note;
             hoverGlow = 0;
             hoverLastFrame = DateTime.UtcNow;
-            hoverTimer.Start();
+            if (MotionReduced) SettleHover();
+            else hoverTimer.Start();
+        }
+
+        void SettleHover() {
+            hoverTimer?.Stop();
+            hoverGlow = hoverNote == null ? 0 : 1;
+            fadingHoverNote = null;
+            hoverFadeGlow = 0;
+            InvalidateVisual();
         }
 
         void UpdateHoverGlow() {
             if (subscriptions == null) return;
+            if (MotionReduced) { SettleHover(); return; }
             var now = DateTime.UtcNow;
             float dt = (float)Math.Clamp((now - hoverLastFrame).TotalSeconds, 0, 0.1);
             hoverLastFrame = now;
-            float step = dt / (float)HoverGlowDuration;
+            float step = dt / (float)Md3Motion.EffectsFast.TotalSeconds;
             bool changed = false;
             float newActive = MoveTowards(hoverGlow, hoverNote == null ? 0f : 1f, step);
             if (newActive != hoverGlow) {
@@ -521,6 +536,19 @@ namespace OpenUtau.App.Controls {
             var target = ((!ShowPlaybackNoteHighlight && !ShowPlaybackNoteBounce) || !PlaybackManager.Inst.PlayingMaster)
                 ? null
                 : seek || activePlaybackNote == null ? FindPlaybackNote() : activePlaybackNote;
+            if (MotionReduced) {
+                bool highlightChanged = activePlaybackNote != target ||
+                    activeHighlight != (ShowPlaybackNoteHighlight && target != null ? 1 : 0) ||
+                    fadingPlaybackNote != null;
+                activePlaybackNote = target;
+                activeHighlight = ShowPlaybackNoteHighlight && target != null ? 1 : 0;
+                fadingPlaybackNote = null;
+                fadingHighlight = 0;
+                activeBounceElapsed = PlaybackNoteBounceDuration;
+                highlightTimer.Stop();
+                if (highlightChanged && !renderPassActive) InvalidateVisual();
+                return;
+            }
             bool changed = false;
             if (target != activePlaybackNote) {
                 if (activePlaybackNote != null && activeHighlight > 0.001f) {
@@ -587,7 +615,7 @@ namespace OpenUtau.App.Controls {
         }
 
         private Vector GetPlaybackBounceOffset(UNote note) {
-            if (!ShowPlaybackNoteBounce || note != activePlaybackNote || !PlaybackManager.Inst.PlayingMaster) {
+            if (MotionReduced || !ShowPlaybackNoteBounce || note != activePlaybackNote || !PlaybackManager.Inst.PlayingMaster) {
                 return default;
             }
             double progress = Math.Clamp(activeBounceElapsed / PlaybackNoteBounceDuration, 0, 1);

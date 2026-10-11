@@ -15,7 +15,7 @@
        ═══════════════════════════════════════════════════════════════════════ -->
   <UserControl.Styles>
     <Style Selector="TextBlock.chainHeader">
-      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
       <Setter Property="FontWeight" Value="Medium"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
       <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
@@ -31,8 +31,8 @@
       <Setter Property="Width" Value="36"/>
       <Setter Property="Height" Value="36"/>
       <Setter Property="Padding" Value="0"/>
-      <Setter Property="CornerRadius" Value="999"/>
-      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeTitleMedium}"/>
       <Setter Property="Background" Value="Transparent"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
@@ -46,7 +46,7 @@
       <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
     </Style>
     <Style Selector="TextBlock.chainHint">
-      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelSmall}"/>
       <Setter Property="LineHeight" Value="16"/>
       <Setter Property="TextWrapping" Value="Wrap"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>

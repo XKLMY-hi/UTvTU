@@ -1486,4 +1486,5 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="prefs.color.role.secondary">次色</system:String>
   <system:String x:Key="prefs.color.role.tertiary">第三色</system:String>
   <system:String x:Key="prefs.motion.reduce">减少界面动效</system:String>
+  <x:String x:Key="prefs.color.seed.placeholder">#RRGGBB</x:String>
 </ResourceDictionary>

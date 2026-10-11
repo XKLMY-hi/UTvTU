@@ -18,7 +18,7 @@
 <DockPanel LastChildFill="True">
       <Border>
   <Border>
-    <StackPanel Margin="12" Spacing="8">
+    <StackPanel Margin="12" Spacing="{DynamicResource Md3Spacing2}">
 
       <!-- Curves -->
       <TextBlock Text="{DynamicResource dialogs.exportds.curves}"
@@ -32,17 +32,17 @@
         <TextBlock Grid.Column="1" Text="{DynamicResource dialogs.exportds.variance}" Margin="6,0,0,0"/>
       </Grid>
       <TextBlock Text="{DynamicResource dialogs.exportds.variance.hint}"
-                 FontSize="12"
+                 FontSize="{DynamicResource Md3TypeBodySmall}"
                  Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
                  TextWrapping="Wrap"
                  IsVisible="{Binding !TensorCacheEnabled}"/>
 
       <!-- OK / Cancel -->
       <Grid ColumnDefinitions="*,8,*" Margin="0,4,0,0">
-        <Button Grid.Column="0" Content="{DynamicResource button.ok}"
+        <Button Classes="primary" Grid.Column="0" Content="{DynamicResource button.ok}"
                 HorizontalAlignment="Stretch"
                 Click="OnOkClicked"/>
-        <Button Grid.Column="2" Content="{DynamicResource button.cancel}"
+        <Button Classes="text" Grid.Column="2" Content="{DynamicResource button.cancel}"
                 HorizontalAlignment="Stretch"
                 Click="OnCancelClicked"/>
       </Grid>

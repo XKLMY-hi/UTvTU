@@ -37,22 +37,22 @@
       <Setter Property="Foreground" Value="{DynamicResource md3.on-error}"/>
     </Style>
   </UserControl.Styles>
-  <Border Name="MasterCard" Padding="8" CornerRadius="12"
+  <Border Name="MasterCard" Padding="8" CornerRadius="{DynamicResource Md3ShapeMedium}"
           Background="{DynamicResource md3.surface-container-high}">
     <Grid Name="RootGrid" RowSpacing="6" RowDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto">
 
       <!-- 692 · 强调色条 -->
-      <Border Grid.Row="0" Name="MasterAccentBar" Height="3" CornerRadius="999"
+      <Border Grid.Row="0" Name="MasterAccentBar" Height="3" CornerRadius="{DynamicResource Md3ShapeFull}"
               HorizontalAlignment="Stretch" Background="{DynamicResource md3.primary}"/>
 
       <!-- 693 · 名称 12px bold（右侧：主输出静音 —— 设计稿无此键，见文件头「有意偏离」） -->
       <Grid Grid.Row="1" Name="MasterNameRow" ColumnDefinitions="*,Auto" ColumnSpacing="6">
-        <TextBlock Name="MasterNameLabel" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"
+        <TextBlock Name="MasterNameLabel" FontSize="{DynamicResource Md3TypeBodySmall}" FontWeight="Bold" VerticalAlignment="Center"
                    TextTrimming="CharacterEllipsis"
                    Foreground="{DynamicResource md3.on-surface}"
                    Text="{DynamicResource mixer.master}"/>
-        <Button Grid.Column="1" Name="MuteBtn" Classes="masterMuteBtn" Width="24" Height="20"
-                CornerRadius="4" FontSize="10" FontWeight="Bold" VerticalAlignment="Center"
+        <Button Grid.Column="1" Name="MuteBtn" Classes="masterMuteBtn" Width="24" Height="20" MinHeight="20"
+                CornerRadius="{DynamicResource Md3ShapeExtraSmall}" FontSize="{DynamicResource Md3TypeLabelTiny}" FontWeight="Bold" VerticalAlignment="Center"
                 Content="{DynamicResource mixer.mute}" Click="OnMuteClick"/>
       </Grid>
 
@@ -63,14 +63,14 @@
                  Text="{DynamicResource mixer.bus.subtitle}"/>
 
       <!-- 697 · Bus Info：四行参数（容器满宽 / padding 10 / gap 8 / 圆角 8；底 = surface-container-lowest） -->
-      <Border Grid.Row="3" Name="BusInfo" Padding="10" CornerRadius="8"
+      <Border Grid.Row="3" Name="BusInfo" Padding="10" CornerRadius="{DynamicResource Md3ShapeSmall}"
               Background="{DynamicResource md3.surface-container-lowest}">
-        <Grid RowSpacing="8" RowDefinitions="Auto,Auto,Auto,Auto">
+        <Grid RowSpacing="{DynamicResource Md3Spacing2}" RowDefinitions="Auto,Auto,Auto,Auto">
           <Grid Grid.Row="0" Name="BusRowIntegrated" Height="14" ColumnDefinitions="Auto,*">
             <TextBlock Name="IntegratedLabel" FontSize="8" VerticalAlignment="Center"
                        Foreground="{DynamicResource md3.on-surface-variant}"
                        Text="{DynamicResource mixer.bus.integrated}"/>
-            <TextBlock Grid.Column="1" Name="IntegratedValue" FontSize="9" VerticalAlignment="Center"
+            <TextBlock Grid.Column="1" Name="IntegratedValue" FontSize="{DynamicResource Md3DawTypeReadout}" VerticalAlignment="Center"
                        HorizontalAlignment="Right"
                        Foreground="{DynamicResource md3.on-surface}" Text="—"/>
           </Grid>
@@ -78,7 +78,7 @@
             <TextBlock Name="TruePeakLabel" FontSize="8" VerticalAlignment="Center"
                        Foreground="{DynamicResource md3.on-surface-variant}"
                        Text="{DynamicResource mixer.bus.truepeak}"/>
-            <TextBlock Grid.Column="1" Name="TruePeakValue" FontSize="9" VerticalAlignment="Center"
+            <TextBlock Grid.Column="1" Name="TruePeakValue" FontSize="{DynamicResource Md3DawTypeReadout}" VerticalAlignment="Center"
                        HorizontalAlignment="Right"
                        Foreground="{DynamicResource md3.on-surface}" Text="—"/>
           </Grid>
@@ -86,7 +86,7 @@
             <TextBlock Name="LimiterLabel" FontSize="8" VerticalAlignment="Center"
                        Foreground="{DynamicResource md3.on-surface-variant}"
                        Text="{DynamicResource mixer.bus.limiter}"/>
-            <TextBlock Grid.Column="1" Name="LimiterValue" FontSize="9" VerticalAlignment="Center"
+            <TextBlock Grid.Column="1" Name="LimiterValue" FontSize="{DynamicResource Md3DawTypeReadout}" VerticalAlignment="Center"
                        HorizontalAlignment="Right"
                        Foreground="{DynamicResource md3.on-surface}" Text="—"/>
           </Grid>
@@ -94,7 +94,7 @@
             <TextBlock Name="DitherLabel" FontSize="8" VerticalAlignment="Center"
                        Foreground="{DynamicResource md3.on-surface-variant}"
                        Text="{DynamicResource mixer.bus.dither}"/>
-            <TextBlock Grid.Column="1" Name="DitherValue" FontSize="9" VerticalAlignment="Center"
+            <TextBlock Grid.Column="1" Name="DitherValue" FontSize="{DynamicResource Md3DawTypeReadout}" VerticalAlignment="Center"
                        HorizontalAlignment="Right"
                        Foreground="{DynamicResource md3.on-surface}" Text="—"/>
           </Grid>
@@ -110,21 +110,21 @@
                          AutomationProperties.Name="{DynamicResource mixer.master}"
                          ToolTip.Tip="{DynamicResource controls.fader.tip}">
         <Border Name="MeterBarL" Width="10" Height="500" Canvas.Left="24" Canvas.Top="0"
-                CornerRadius="999" ClipToBounds="True"
+                CornerRadius="{DynamicResource Md3ShapeFull}" ClipToBounds="True"
                 Background="{DynamicResource md3.surface-container-highest}">
-          <Border Name="MeterFillL" Width="10" Height="0" CornerRadius="999"
+          <Border Name="MeterFillL" Width="10" Height="0" CornerRadius="{DynamicResource Md3ShapeFull}"
                   VerticalAlignment="Bottom" Background="{DynamicResource md3.primary}"/>
         </Border>
         <Border Name="MeterBarR" Width="10" Height="500" Canvas.Left="38" Canvas.Top="0"
-                CornerRadius="999" ClipToBounds="True"
+                CornerRadius="{DynamicResource Md3ShapeFull}" ClipToBounds="True"
                 Background="{DynamicResource md3.surface-container-highest}">
-          <Border Name="MeterFillR" Width="10" Height="0" CornerRadius="999"
+          <Border Name="MeterFillR" Width="10" Height="0" CornerRadius="{DynamicResource Md3ShapeFull}"
                   VerticalAlignment="Bottom" Background="{DynamicResource md3.primary}"/>
         </Border>
         <Border Name="FaderTrack" Width="4" Height="500" Canvas.Left="74" Canvas.Top="0"
-                CornerRadius="999" Background="{DynamicResource md3.surface-container-highest}"/>
+                CornerRadius="{DynamicResource Md3ShapeFull}" Background="{DynamicResource md3.surface-container-highest}"/>
         <Border Name="FaderHandle" Width="24" Height="16" Canvas.Left="64" Canvas.Top="116"
-                CornerRadius="4" Background="{DynamicResource md3.on-surface}"/>
+                CornerRadius="{DynamicResource Md3ShapeExtraSmall}" Background="{DynamicResource md3.on-surface}"/>
         <Border Name="FaderTick1" Width="8" Height="1" Canvas.Left="96" Canvas.Top="0"
                 Background="{DynamicResource md3.outline-variant}"/>
         <Border Name="FaderTick2" Width="5" Height="1" Canvas.Left="96" Canvas.Top="62"
@@ -146,7 +146,7 @@
       </controls:DawFader>
 
       <!-- 735 · 峰值读数 13px semibold -->
-      <TextBlock Grid.Row="6" Name="MasterPeakLabel" FontSize="13" FontWeight="SemiBold"
+      <TextBlock Grid.Row="6" Name="MasterPeakLabel" FontSize="{DynamicResource Md3TypeBodyMedium}" FontWeight="SemiBold"
                  Foreground="{DynamicResource md3.on-surface}" Text="-∞ dB"/>
     </Grid>
   </Border>

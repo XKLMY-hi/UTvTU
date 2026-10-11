@@ -1,3 +1,4 @@
+using OpenUtau.Theming;
 using System;
 using System.Globalization;
 using Avalonia;
@@ -230,6 +231,7 @@ public class Md3NumericReadout : TemplatedControl {
             FontSize = 11,
             IsVisible = false,
         };
+        Md3RackKit.Paint(label, TextBlock.FontSizeProperty, "Md3TypeLabelSmall");
         var value = new TextBlock {
             Name = "PART_Value",
             FontSize = 18,
@@ -243,6 +245,7 @@ public class Md3NumericReadout : TemplatedControl {
             VerticalAlignment = VerticalAlignment.Bottom,
             IsVisible = false,
         };
+        Md3RackKit.Paint(unit, TextBlock.FontSizeProperty, "Md3TypeLabelSmall");
         var valueRow = new StackPanel {
             Name = "PART_ValueRow",
             Orientation = Orientation.Horizontal,
@@ -284,6 +287,7 @@ public class Md3NumericReadout : TemplatedControl {
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
         base.OnPropertyChanged(change);
+        if (change.Property == Md3Motion.ReducedProperty) ApplyMotion();
         if (change.Property == ValueProperty) {
             ApplyState();
             ValueChanged?.Invoke(this, change.GetNewValue<double>());

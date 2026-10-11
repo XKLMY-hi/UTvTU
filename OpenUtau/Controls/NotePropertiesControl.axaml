@@ -14,7 +14,7 @@
       <Setter Property="Theme" Value="{StaticResource DawTextButtonTheme}"/>
       <Setter Property="MinHeight" Value="32"/>
       <Setter Property="Padding" Value="14,6"/>
-      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeSmall}"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
@@ -96,7 +96,7 @@
                 SelectedItem="{Binding ApplyPortamentoPreset}" HorizontalAlignment="Stretch"/>
             </Grid>
             <Grid ColumnDefinitions="123,20,*,20,*">
-              <Button Grid.Column="2" Content="{DynamicResource button.save}"
+              <Button Classes="primary" Grid.Column="2" Content="{DynamicResource button.save}"
                       HorizontalAlignment="Stretch" Click="OnSavePortamentoPreset"
                       ToolTip.Tip="{DynamicResource notedefaults.preset.save.tooltip}"/>
               <Button Grid.Column="4" Content="{DynamicResource button.remove}"
@@ -140,7 +140,7 @@
                 SelectedItem="{Binding ApplyVibratoPreset}" HorizontalAlignment="Stretch" />
             </Grid>
             <Grid ColumnDefinitions="123,20,*,20,*">
-              <Button Grid.Column="2" Content="{DynamicResource button.save}"
+              <Button Classes="primary" Grid.Column="2" Content="{DynamicResource button.save}"
                       HorizontalAlignment="Stretch" Click="OnSaveVibratoPreset"
                       ToolTip.Tip="{DynamicResource notedefaults.preset.save.tooltip}"/>
               <Button Grid.Column="4" Content="{DynamicResource button.remove}"

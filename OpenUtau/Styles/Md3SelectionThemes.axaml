@@ -18,7 +18,7 @@
        · 勾选框 CheckBox：18×18 圆角 4 盒；未选 = 2px outline 描边、透明底；
          选中/半选 = primary 实底无描边 + on-primary 勾/横杠；行高 28、标签间距 8。
        · 单选框 RadioButton：18×18 圆环（2px outline）；选中 = primary 环 + primary 10px 实心点。
-       · 开关 ToggleSwitch：40×20 全圆角轨道；关 = surface-container-highest 底 + 2px outline 描边 + outline 圆钮；
+       · 开关 ToggleSwitch：52×32 全圆角轨道；关 = surface-container-highest 底 + 2px outline 描边 + outline 圆钮；
          开 = primary 底 + on-primary 圆钮；圆钮位移 20（与轨道同宽的一半，沿用 Fluent 的位移协议）。
        · 滑条 Slider：4px 全圆角轨道（未选 surface-container-highest / 已选 primary），16px primary 圆钮（悬浮 18px）。
        · 进度条 ProgressBar：全圆角；轨道 surface-container-highest、指示条 primary；不定态双指示条。
@@ -43,10 +43,10 @@
     <!-- ───────────────────────── CheckBox ───────────────────────── -->
     <ControlTheme x:Key="Md3CheckBoxTheme" TargetType="CheckBox">
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
-      <Setter Property="CornerRadius" Value="4"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeExtraSmall}"/>
       <Setter Property="Padding" Value="8,0,0,0"/>
       <Setter Property="MinHeight" Value="28"/>
-      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
       <Setter Property="Cursor" Value="Hand"/>
       <Setter Property="HorizontalContentAlignment" Value="Left"/>
       <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -157,7 +157,7 @@
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
       <Setter Property="Padding" Value="8,0,0,0"/>
       <Setter Property="MinHeight" Value="28"/>
-      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
       <Setter Property="Cursor" Value="Hand"/>
       <Setter Property="HorizontalContentAlignment" Value="Left"/>
       <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -171,7 +171,7 @@
                 <!-- 选中实心点 -->
                 <Ellipse Name="CheckGlyph" Width="10" Height="10"/>
                 <!-- 焦点环 -->
-                <Border Name="PART_FocusRing" Margin="-3" CornerRadius="999"
+                <Border Name="PART_FocusRing" Margin="-3" CornerRadius="{DynamicResource Md3ShapeFull}"
                         BorderThickness="2" IsHitTestVisible="False"/>
               </Grid>
               <ContentPresenter Name="PART_ContentPresenter" Grid.Column="1"
@@ -229,8 +229,8 @@
     <!-- ───────────────────────── ToggleSwitch ───────────────────────── -->
     <ControlTheme x:Key="Md3ToggleSwitchTheme" TargetType="ToggleSwitch">
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
-      <Setter Property="FontSize" Value="13"/>
-      <Setter Property="MinHeight" Value="28"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
+      <Setter Property="MinHeight" Value="32"/>
       <Setter Property="Cursor" Value="Hand"/>
       <Setter Property="Template">
         <ControlTemplate>
@@ -248,35 +248,35 @@
               <Grid Name="SwitchAreaGrid" Grid.Row="0" Grid.Column="0"
                     Grid.RowSpan="3" Grid.ColumnSpan="3" Margin="0,5,0,5" Background="Transparent"/>
               <!-- 开 / 关文案（沿用 Fluent 的同名部件，On/OffContent 绑定不变） -->
-              <ContentPresenter Name="PART_OffContentPresenter" Grid.Row="0" Grid.Column="2"
+              <ContentPresenter Name="PART_OffContentPresenter" Grid.Row="1" Grid.Column="2"
                                 Content="{TemplateBinding OffContent}"
                                 ContentTemplate="{TemplateBinding OffContentTemplate}"
                                 Foreground="{TemplateBinding Foreground}"
                                 HorizontalAlignment="Left" VerticalAlignment="Center"/>
-              <ContentPresenter Name="PART_OnContentPresenter" Grid.Row="0" Grid.Column="2"
+              <ContentPresenter Name="PART_OnContentPresenter" Grid.Row="1" Grid.Column="2"
                                 Content="{TemplateBinding OnContent}"
                                 ContentTemplate="{TemplateBinding OnContentTemplate}"
                                 Foreground="{TemplateBinding Foreground}"
                                 HorizontalAlignment="Left" VerticalAlignment="Center"/>
               <!-- 关态轨道 -->
-              <Border Name="OuterBorder" Grid.Row="1" Grid.Column="0" Width="40" Height="20"
-                      CornerRadius="999" BorderThickness="2"/>
+              <Border Name="OuterBorder" Grid.Row="1" Grid.Column="0" Width="52" Height="32"
+                      CornerRadius="{DynamicResource Md3ShapeFull}" BorderThickness="2"/>
               <!-- 开态轨道（开关切换即两者交叉淡出/淡入） -->
-              <Border Name="SwitchKnobBounds" Grid.Row="1" Grid.Column="0" Width="40" Height="20"
-                      CornerRadius="999" BorderThickness="0"/>
-              <!-- 圆钮：Canvas 宽 = 轨道宽一半 ⇒ 位移 40-20 = 20（沿用 Fluent 的位移协议） -->
+              <Border Name="SwitchKnobBounds" Grid.Row="1" Grid.Column="0" Width="52" Height="32"
+                      CornerRadius="{DynamicResource Md3ShapeFull}" BorderThickness="0"/>
+              <!-- 圆钮：52×32轨道、32×32画布 ⇒ 位移 52-32 = 20（沿用 Fluent 的位移协议） -->
               <Canvas Name="PART_SwitchKnob" Grid.Row="1" Grid.Column="0"
-                      Width="20" Height="20" HorizontalAlignment="Left">
-                <Grid Name="PART_MovingKnobs" Width="20" Height="20">
-                  <Ellipse Name="SwitchKnobOn" Width="14" Height="14"
+                      Width="20" Height="32" HorizontalAlignment="Left">
+                <Grid Name="PART_MovingKnobs" Width="32" Height="32">
+                  <Ellipse Name="SwitchKnobOn" Width="24" Height="24"
                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                  <Ellipse Name="SwitchKnobOff" Width="14" Height="14"
+                  <Ellipse Name="SwitchKnobOff" Width="16" Height="16"
                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Grid>
               </Canvas>
               <!-- 键盘焦点环（T8-C）：与 CheckBox/RadioButton 同一范式，仅 :focus-visible 出现 -->
               <Border Name="PART_FocusRing" Grid.Row="1" Grid.Column="0" Margin="-3"
-                      CornerRadius="999" BorderThickness="2" IsHitTestVisible="False"/>
+                      CornerRadius="{DynamicResource Md3ShapeFull}" BorderThickness="2" IsHitTestVisible="False"/>
             </Grid>
           </Grid>
         </ControlTemplate>
@@ -405,7 +405,7 @@
                                     Background="{TemplateBinding Foreground}">
                         <RepeatButton.Template>
                           <ControlTemplate>
-                            <Border Height="4" Background="{TemplateBinding Background}" CornerRadius="999"/>
+                            <Border Height="4" Background="{TemplateBinding Background}" CornerRadius="{DynamicResource Md3ShapeFull}"/>
                           </ControlTemplate>
                         </RepeatButton.Template>
                       </RepeatButton>
@@ -415,7 +415,7 @@
                                     Background="{TemplateBinding Background}">
                         <RepeatButton.Template>
                           <ControlTemplate>
-                            <Border Height="4" Background="{TemplateBinding Background}" CornerRadius="999"/>
+                            <Border Height="4" Background="{TemplateBinding Background}" CornerRadius="{DynamicResource Md3ShapeFull}"/>
                           </ControlTemplate>
                         </RepeatButton.Template>
                       </RepeatButton>
@@ -423,7 +423,7 @@
                     <Thumb Name="thumb" Background="{TemplateBinding Foreground}" BorderThickness="0">
                       <Thumb.Template>
                         <ControlTemplate>
-                          <Border Background="{TemplateBinding Background}" CornerRadius="999"/>
+                          <Border Background="{TemplateBinding Background}" CornerRadius="{DynamicResource Md3ShapeFull}"/>
                         </ControlTemplate>
                       </Thumb.Template>
                     </Thumb>
@@ -431,7 +431,7 @@
                 </Grid>
                 <!-- 键盘焦点环（T8-C）：套在整条滑轨上。
                      不能放进 Thumb 内部 —— ControlTheme 里的选择器只允许一次 /template/ 穿越 -->
-                <Border Name="PART_FocusRing" Margin="-3,-1" CornerRadius="999"
+                <Border Name="PART_FocusRing" Margin="-3,-1" CornerRadius="{DynamicResource Md3ShapeFull}"
                         BorderThickness="2" IsHitTestVisible="False"/>
               </Grid>
             </Border>
@@ -475,7 +475,7 @@
     <ControlTheme x:Key="Md3ProgressBarTheme" TargetType="ProgressBar">
       <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
       <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
-      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
       <Setter Property="MinHeight" Value="6"/>
       <Setter Property="Template">
         <ControlTemplate>
@@ -515,7 +515,7 @@
             </Border>
             <!-- 键盘焦点环（T8-C）：进度条默认 Focusable=false（非交互指示器，不该进 Tab 序），
                  视图显式打开 Focusable 时此环立即生效 -->
-            <Border Name="PART_FocusRing" Margin="-2" CornerRadius="999"
+            <Border Name="PART_FocusRing" Margin="-2" CornerRadius="{DynamicResource Md3ShapeFull}"
                     BorderThickness="2" IsHitTestVisible="False"/>
           </Panel>
         </ControlTemplate>

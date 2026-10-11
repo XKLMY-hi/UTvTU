@@ -24,7 +24,7 @@
       <Setter Property="Margin" Value="0"/>
       <Setter Property="Padding" Value="0"/>
       <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="CornerRadius" Value="4"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeExtraSmall}"/>
       <Setter Property="Background" Value="Transparent"/>
       <Setter Property="HorizontalContentAlignment" Value="Center"/>
       <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -43,13 +43,13 @@
         <!-- 28 高工具行（设计稿无此元素，spec-digest C-6 自定）：MinHeight 必须显式压到 28，
              否则全局 Md3ButtonTheme 的 MinHeight=32 会把 Height 顶成 32；Margin 必须清零，
              否则应用级 `Button { Margin: 0,4 }`（Styles.axaml:159）再撑 8px。 -->
-        <Button Grid.Column="0" Name="AddTrackBtn" Theme="{StaticResource DawTextButtonTheme}" Height="28" MinHeight="28" Margin="0" CornerRadius="999"
-                Padding="12,0" FontSize="11" FontWeight="SemiBold"
+        <Button Grid.Column="0" Name="AddTrackBtn" Theme="{StaticResource DawTextButtonTheme}" Height="28" MinHeight="28" Margin="0" CornerRadius="{DynamicResource Md3ShapeFull}"
+                Padding="12,0" FontSize="{DynamicResource Md3TypeLabelSmall}" FontWeight="SemiBold"
                 Content="{DynamicResource mixer.addtrack}" Click="OnAddTrackClick"
                 Background="{DynamicResource md3.surface-container-high}"
                 Foreground="{DynamicResource md3.on-surface-variant}"
                 BorderThickness="0"/>
-        <TextBlock Grid.Column="2" Name="StatusText" FontSize="10" VerticalAlignment="Center"
+        <TextBlock Grid.Column="2" Name="StatusText" FontSize="{DynamicResource Md3TypeLabelTiny}" VerticalAlignment="Center"
                    Foreground="{DynamicResource md3.on-surface-variant}"/>
         <Button Grid.Column="3" Name="ChainToggleBtn" Theme="{StaticResource DawButtonTheme}" Classes="chainToggle" Margin="8,0,0,0"
                 Click="OnToggleChainPanel" ToolTip.Tip="{DynamicResource panel.collapse.fxchain}"
@@ -70,7 +70,7 @@
     <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto,Auto">
       <ScrollViewer Grid.Column="0" Name="StripsScroll"
                     HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-        <StackPanel Name="TrackStripsPanel" Orientation="Horizontal" Spacing="8"
+        <StackPanel Name="TrackStripsPanel" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}"
                     Margin="16,16,8,16" HorizontalAlignment="Left">
           <!-- 通道条按轨道动态生成 -->
         </StackPanel>

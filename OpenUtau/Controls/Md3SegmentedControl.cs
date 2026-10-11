@@ -1,3 +1,4 @@
+using OpenUtau.Theming;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -139,6 +140,7 @@ public class Md3SegmentedControl : TemplatedControl {
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
         base.OnPropertyChanged(change);
+        if (change.Property == Md3Motion.ReducedProperty) ApplyMotion();
         if (change.Property == OptionsProperty) {
             optionList.Clear();
             if (Options != null) {

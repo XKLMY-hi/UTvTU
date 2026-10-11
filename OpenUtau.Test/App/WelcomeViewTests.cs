@@ -72,13 +72,13 @@ namespace OpenUtau.Test.App {
             // （W50 用户裁决「这套方案肯定要重设计的，不然和主界面的MD3不搭」⇒ 旧 432 品牌栏版作废）
             Assert.Contains("ColumnDefinitions=\"232,*\"", xaml);
             Assert.Contains("md3.surface-container-low", xaml);
-            Assert.DoesNotContain("md3.primary-container", xaml);
+            Assert.Contains("md3.primary-container", xaml);
+            Assert.Contains("md3.on-primary-container", xaml);
+            Assert.Contains("Kind=\"Arch\"", xaml);
+            Assert.Contains("Kind=\"Square\"", xaml);
             // 密度字号阶梯（主界面基准：标题 28 / 空态 16 / 副标 14 / 正文 13 / 分组 12 / 次要 11.5 / 徽标 11）
-            foreach (double size in new[] { 22.0, 16.0, 13.0, 12.0, 11.5, 11.0 }) {
-                string s = size.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                Assert.True(xaml.Contains($"FontSize=\"{s}\"", StringComparison.Ordinal)
-                    || xaml.Contains($"<Setter Property=\"FontSize\" Value=\"{s}\"/>", StringComparison.Ordinal),
-                    $"缺字号 {s}");
+            foreach (string role in new[] { "TitleLarge", "TitleMedium", "BodyMedium", "BodySmall", "LabelSmall" }) {
+                Assert.Contains("{DynamicResource Md3Type" + role + "}", xaml);
             }
             // 关键尺寸：最近行 56 / 格式徽标 24 / 音源 chip 28 / 模板卡 240×72 / 空态图标容器 56 / 波形带 64
             Assert.Contains("<Setter Property=\"Height\" Value=\"56\"/>", xaml);
@@ -86,7 +86,7 @@ namespace OpenUtau.Test.App {
             Assert.Contains("<Setter Property=\"Height\" Value=\"28\"/>", xaml);
             Assert.Contains("<Setter Property=\"Height\" Value=\"64\"/>", xaml);
             Assert.Contains("<Setter Property=\"Width\" Value=\"240\"/>", xaml);
-            Assert.Contains("<Setter Property=\"Width\" Value=\"56\"/>", xaml);
+            Assert.Contains("<Setter Property=\"Width\" Value=\"72\"/>", xaml);
             Assert.Contains($"Height=\"{WelcomeArt.WaveBandHeight.ToString(System.Globalization.CultureInfo.InvariantCulture)}\"", xaml);
             // 导航项走**应用级共享** `Button.navItem`（Md3Controls.axaml）——本页不得再本地定义一套（防两页漂移）
             Assert.Contains("Classes=\"navItem", xaml);
@@ -97,7 +97,7 @@ namespace OpenUtau.Test.App {
             Assert.Contains("<Style Selector=\"Button.railLink TextBlock\">", xaml);
             // 按钮走现成主题变体（`Md3ButtonTheme` 的 .primary / .outline），页面不自造按钮几何
             Assert.Contains("Classes=\"primary\"", xaml);
-            Assert.Contains("Classes=\"outline\"", xaml);
+            Assert.Contains("Classes=\"tonal\"", xaml);
             // 波形仍是生成器产物的真实包络（几何来源 + 缩放口径不许回退）
             Assert.Contains("welcome-waveform", xaml);
             Assert.Contains("Stretch=\"Fill\"", xaml);
@@ -144,7 +144,7 @@ namespace OpenUtau.Test.App {
                 Assert.Equal(Stretch.Fill, wave.Stretch);
                 Assert.NotNull(wave.Fill);
                 Assert.Equal(WelcomeArt.WaveBandHeight, wave.Bounds.Height, 1);
-                Assert.Equal(0.2, wave.Opacity, 3);
+                Assert.Equal(0.16, wave.Opacity, 3);
             });
         }
 
@@ -167,7 +167,7 @@ namespace OpenUtau.Test.App {
                 Assert.Equal(6, navs.Count);   // 最近/新建/打开/模板 + 偏好设置/包管理器
                 for (int i = 0; i < navs.Count; i++) {
                     Assert.True(navs[i].IsVisible, $"{width}x{height}: 第 {i + 1} 个导航项不可见");
-                    Assert.True(navs[i].Bounds.Width > 0 && navs[i].Bounds.Height == 36,
+                    Assert.True(navs[i].Bounds.Width > 0 && navs[i].Bounds.Height == 40,
                         $"{width}x{height}: 第 {i + 1} 个导航项被夹扁（{navs[i].Bounds.Width}x{navs[i].Bounds.Height}）");
                 }
                 var pages = view.GetVisualDescendants().OfType<Control>()
@@ -205,7 +205,7 @@ namespace OpenUtau.Test.App {
                 Assert.NotNull(wave.Data);                  // 资源键 welcome-waveform 必须解析到
                 Assert.Equal(WelcomeArt.WaveBandHeight, wave.Bounds.Height, 1);
                 Assert.Equal(Stretch.Fill, wave.Stretch);
-                Assert.Equal(0.2, wave.Opacity, 3);
+                Assert.Equal(0.16, wave.Opacity, 3);
                 Assert.NotNull(wave.Fill);
                 var origin = wave.TranslatePoint(new Point(0, 0), view);
                 Assert.NotNull(origin);
@@ -312,7 +312,7 @@ namespace OpenUtau.Test.App {
                 Assert.Equal(6, buttons.Count(b => HasClass(b, "navItem")));   // 4 主导航 + 偏好设置 + 包管理器
                 Assert.Equal(4, buttons.Count(b => HasClass(b, "railLink")));  // 4 条外链（12px 小字行）
                 Assert.Equal(2, buttons.Count(b => HasClass(b, "primary")));   // 新建空白工程 / 浏览文件
-                Assert.Equal(2, buttons.Count(b => HasClass(b, "outline")));   // 模板 / 导入音频
+                Assert.Equal(3, buttons.Count(b => HasClass(b, "tonal")));   // 快速打开 / 模板 / 导入音频
                 Assert.All(buttons, b => Assert.True(b.Focusable, "入口必须可聚焦（Tab 可达）"));
             });
             // 数据驱动的行（最近 / 模板）在 headless 无 VM 数据时不会实例化 ⇒ 只能断"模板里声明了该类 + 是 Button"
@@ -330,7 +330,7 @@ namespace OpenUtau.Test.App {
                 var buttons = Buttons(view);
                 int lastRail = buttons.FindLastIndex(b => HasClass(b, "navItem") || HasClass(b, "railLink"));
                 int firstContent = buttons.FindIndex(b =>
-                    HasClass(b, "primary") || HasClass(b, "outline") || HasClass(b, "recentRow"));
+                    HasClass(b, "primary") || HasClass(b, "tonal") || HasClass(b, "recentRow"));
                 Assert.True(lastRail >= 0 && firstContent > lastRail,
                     $"右栏动作应排在左栏之后（左栏末 idx={lastRail}，右栏首 idx={firstContent}）");
                 Assert.True(HasClass(buttons[0], "navItem"), "左栏第一个入口应是导航项");
@@ -498,6 +498,11 @@ namespace OpenUtau.Test.App {
                 if (md3Keys.Contains(key) || md3ColorKeys.Contains(key) || nonColorResourceKeys.Contains(key)) {
                     continue;
                 }
+                if (key.StartsWith("Md3", StringComparison.Ordinal)) {
+                    Assert.True(Application.Current!.TryFindResource(key, out object? token), $"令牌未解析：{key}");
+                    Assert.True(token is double or CornerRadius or Thickness or TimeSpan, $"几何/文字令牌不能混入画刷：{key}");
+                    continue;
+                }
                 if (key.StartsWith("md3.", StringComparison.Ordinal)) {
                     foreign.Add(key + "（md3 前缀但不在颜色池键集合内）");
                     continue;
@@ -514,7 +519,7 @@ namespace OpenUtau.Test.App {
             Application app = Application.Current!;
             var dynamicKeys = KeysOf(ReadXaml("WelcomeView.axaml"), "DynamicResource");
             // 视图里的文案键应当能在字符串资源里解析（welcome.* / singers.* / menu.* 等）
-            var textKeys = dynamicKeys.Where(k => !k.StartsWith("md3.", StringComparison.Ordinal)).ToList();
+            var textKeys = dynamicKeys.Where(k => !(k.StartsWith("md3.", StringComparison.Ordinal) || k.StartsWith("Md3", StringComparison.Ordinal))).ToList();
             Assert.NotEmpty(textKeys);
             foreach (string key in textKeys) {
                 Assert.True(app.TryFindResource(key, out _), $"文案键未解析：{key}");

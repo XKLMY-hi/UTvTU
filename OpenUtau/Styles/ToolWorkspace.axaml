@@ -1,42 +1,61 @@
 <Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:c="clr-namespace:OpenUtau.App.Controls">
   <Style Selector="Button.toolAction,Button.toolNav,Button.toolClose">
-    <Setter Property="Theme" Value="{StaticResource DawTextButtonTheme}"/>
-    <Setter Property="FontSize" Value="13"/><Setter Property="Height" Value="36"/>
+    <Setter Property="Theme" Value="{StaticResource Md3ButtonTheme}"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/><Setter Property="Height" Value="{DynamicResource Md3WorkspaceControlHeight}"/>
     <Setter Property="MinHeight" Value="32"/><Setter Property="Margin" Value="0"/>
-    <Setter Property="Padding" Value="16,0"/><Setter Property="CornerRadius" Value="999"/>
+    <Setter Property="Padding" Value="16,0"/><Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
     <Setter Property="VerticalAlignment" Value="Center"/>
-    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
   </Style>
-  <Style Selector="Button.toolAction"><Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/></Style>
-  <Style Selector="Button.toolNav"><Setter Property="HorizontalContentAlignment" Value="Left"/></Style>
+  <Style Selector="Button.toolAction:not(.primary):not(.text):not(.danger)">
+    <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+    <Setter Property="BorderThickness" Value="0"/>
+  </Style>
+  <Style Selector="ToggleButton.toolAction">
+    <Setter Property="Theme" Value="{StaticResource Md3ToggleButtonTheme}"/>
+    <Setter Property="Height" Value="{DynamicResource Md3WorkspaceControlHeight}"/>
+    <Setter Property="MinHeight" Value="{DynamicResource Md3WorkspaceControlHeight}"/>
+    <Setter Property="Padding" Value="16,0"/>
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+  </Style>
+  <Style Selector="Button.toolNav">
+    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+  </Style>
   <Style Selector="Button.toolNav.selected">
     <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
   </Style>
   <Style Selector="TextBlock.toolCaption">
-    <Setter Property="FontSize" Value="11"/><Setter Property="FontWeight" Value="SemiBold"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelSmall}"/><Setter Property="FontWeight" Value="SemiBold"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
   </Style>
-  <Style Selector="TextBlock.toolHint"><Setter Property="FontSize" Value="13"/>
+  <Style Selector="TextBlock.toolHint"><Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/></Style>
   <Style Selector=":is(c|WorkspaceToolView) Button">
-    <Setter Property="Theme" Value="{StaticResource DawTextButtonTheme}"/>
-    <Setter Property="MinHeight" Value="32"/><Setter Property="FontSize" Value="13"/>
-    <Setter Property="CornerRadius" Value="999"/><Setter Property="Margin" Value="0"/>
+    <Setter Property="Theme" Value="{StaticResource Md3ButtonTheme}"/>
+    <Setter Property="MinHeight" Value="{DynamicResource Md3ControlHeight}"/><Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/><Setter Property="Margin" Value="0"/>
   </Style>
   <Style Selector=":is(c|WorkspaceToolView) TextBox,:is(c|WorkspaceToolView) ComboBox">
-    <Setter Property="MinHeight" Value="36"/><Setter Property="FontSize" Value="13"/>
+    <Setter Property="MinHeight" Value="{DynamicResource Md3WorkspaceControlHeight}"/><Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
   </Style>
   <Style Selector=":is(c|WorkspaceToolView) DataGrid">
     <Setter Property="RowHeight" Value="36"/><Setter Property="ColumnHeaderHeight" Value="36"/>
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
   </Style>
   <Style Selector="Button.resourceAction"><Setter Property="Margin" Value="0,0,8,8"/><Setter Property="Height" Value="32"/></Style>
   <Style Selector="Button.toolClose"><Setter Property="Theme" Value="{StaticResource DawButtonTheme}"/>
+    <Setter Property="Height" Value="32"/><Setter Property="MinHeight" Value="32"/>
     <Setter Property="Padding" Value="0"/><Setter Property="MinWidth" Value="32"/></Style>
   <Style Selector="Button.resourceTab">
-    <Setter Property="Height" Value="40"/><Setter Property="CornerRadius" Value="0"/>
+    <Setter Property="Height" Value="40"/><Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeNone}"/>
     <Setter Property="Padding" Value="14,0"/><Setter Property="BorderThickness" Value="0,0,0,3"/>
     <Setter Property="BorderBrush" Value="Transparent"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
@@ -48,6 +67,6 @@
   <Style Selector="ListBox#SingerList ListBoxItem">
     <Setter Property="MinHeight" Value="56"/><Setter Property="Padding" Value="12,0"/>
     <Setter Property="Margin" Value="0"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeSmall}"/>
   </Style>
 </Styles>

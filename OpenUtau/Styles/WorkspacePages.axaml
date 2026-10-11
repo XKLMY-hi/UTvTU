@@ -3,13 +3,15 @@
         xmlns:views="clr-namespace:OpenUtau.App.Views">
   <Styles.Resources>
     <ControlTheme x:Key="WorkspaceSegmentTheme" TargetType="RadioButton" BasedOn="{StaticResource DawButtonTheme}">
-      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
       <Setter Property="Template">
         <ControlTemplate>
           <Grid>
             <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"/>
             <Border Name="PART_StateLayer" Background="{TemplateBinding Foreground}" Opacity="0"
-                    CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False"/>
+                    CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False">
+              <Border.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="{DynamicResource Md3MotionEffectsFast}" Easing="{StaticResource Md3EffectsFastEasing}"/></Transitions></Border.Transitions>
+            </Border>
             <!-- Symmetric reserved icon space prevents the label moving when selected. -->
             <Grid ColumnDefinitions="16,*,16" Margin="6,0">
               <c:DawIcon Name="PART_Check" Data="{StaticResource icon-check}" Width="12" Height="12"
@@ -21,7 +23,7 @@
                          VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"
                          TextTrimming="CharacterEllipsis" UseLayoutRounding="False"/>
             </Grid>
-            <Border Name="PART_FocusRing" BorderThickness="1" BorderBrush="{DynamicResource md3.primary}"
+            <Border Name="PART_FocusRing" BorderThickness="2" BorderBrush="{DynamicResource md3.primary}"
                     CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False" Opacity="0"/>
           </Grid>
         </ControlTemplate>
@@ -38,22 +40,22 @@
   <!-- Scoped to the two workspace pages; other dialogs keep their own density. -->
   <Style Selector="views|WelcomeView Button.navItem,views|PreferencesView Button.navItem">
     <Setter Property="Theme" Value="{StaticResource DawButtonTheme}"/>
-    <Setter Property="Height" Value="36"/>
-    <Setter Property="MinHeight" Value="36"/>
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="Height" Value="{DynamicResource Md3WorkspaceControlHeight}"/>
+    <Setter Property="MinHeight" Value="{DynamicResource Md3WorkspaceControlHeight}"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="Padding" Value="12,0"/>
-    <Setter Property="CornerRadius" Value="999"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
   </Style>
   <Style Selector="views|WelcomeView Button.pageAction">
     <Setter Property="Theme" Value="{StaticResource DawTextButtonTheme}"/>
-    <Setter Property="Height" Value="36"/>
-    <Setter Property="MinHeight" Value="36"/>
+    <Setter Property="Height" Value="{DynamicResource Md3WorkspaceControlHeight}"/>
+    <Setter Property="MinHeight" Value="{DynamicResource Md3WorkspaceControlHeight}"/>
     <Setter Property="Margin" Value="0"/>
     <Setter Property="Padding" Value="16,0"/>
-    <Setter Property="FontSize" Value="13"/>
-    <Setter Property="CornerRadius" Value="999"/>
-    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
+    <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
   </Style>
   <Style Selector="views|WelcomeView Button.pageAction.emphasized">
     <Setter Property="Background" Value="{DynamicResource md3.primary}"/>

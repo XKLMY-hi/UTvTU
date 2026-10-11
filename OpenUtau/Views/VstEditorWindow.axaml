@@ -9,33 +9,33 @@
     <Border>
     <DockPanel Margin="14" LastChildFill="True">
       <!-- Plugin info header -->
-      <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10" Spacing="4">
-        <TextBlock FontWeight="SemiBold" FontSize="15" Name="TitleLabel"/>
+      <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10" Spacing="{DynamicResource Md3Spacing1}">
+        <TextBlock FontWeight="SemiBold" FontSize="{DynamicResource Md3TypeTitleMedium}" Name="TitleLabel"/>
         <StackPanel Orientation="Horizontal" Spacing="6">
-          <Border Name="TypeBadge" CornerRadius="6" Padding="5,1"
+          <Border Name="TypeBadge" CornerRadius="{DynamicResource Md3DawCornerRadius}" Padding="5,1"
                   Background="{DynamicResource AccentBrush1Semi}">
-            <TextBlock Name="TypeLabel" FontSize="10" Foreground="{DynamicResource AccentBrush1}" FontWeight="SemiBold"/>
+            <TextBlock Name="TypeLabel" FontSize="{DynamicResource Md3TypeLabelTiny}" Foreground="{DynamicResource AccentBrush1}" FontWeight="SemiBold"/>
           </Border>
-          <TextBlock Name="VendorLabel" FontSize="11" Opacity="0.6" VerticalAlignment="Center"/>
+          <TextBlock Name="VendorLabel" FontSize="{DynamicResource Md3TypeLabelSmall}" Opacity="0.6" VerticalAlignment="Center"/>
         </StackPanel>
       </StackPanel>
 
       <!-- Metadata -->
       <StackPanel DockPanel.Dock="Top" Margin="0,0,0,8" Spacing="2">
-        <TextBlock Name="SubsLabel" FontSize="11" Opacity="0.5" TextWrapping="Wrap"/>
-        <TextBlock Name="PathLabel" FontSize="9" Opacity="0.3" TextWrapping="Wrap"/>
+        <TextBlock Name="SubsLabel" FontSize="{DynamicResource Md3TypeLabelSmall}" Opacity="0.5" TextWrapping="Wrap"/>
+        <TextBlock Name="PathLabel" FontSize="{DynamicResource Md3DawTypeReadout}" Opacity="0.3" TextWrapping="Wrap"/>
       </StackPanel>
 
       <!-- Parameter list area -->
       <Border DockPanel.Dock="Bottom" BorderThickness="0"
               BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
-              CornerRadius="8" Margin="0,4,0,4"
+              CornerRadius="{DynamicResource Md3ShapeSmall}" Margin="0,4,0,4"
               Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
         <DockPanel Margin="8" LastChildFill="True">
-          <TextBlock DockPanel.Dock="Top" FontSize="9" Opacity="0.4"
+          <TextBlock DockPanel.Dock="Top" FontSize="{DynamicResource Md3DawTypeReadout}" Opacity="0.4"
                      Text="{DynamicResource vsteditor.pluginparams}" Margin="0,0,0,4"/>
           <ScrollViewer Height="160" VerticalScrollBarVisibility="Auto">
-            <TextBlock Name="NativeStatus" FontSize="10" Opacity="0.6"
+            <TextBlock Name="NativeStatus" FontSize="{DynamicResource Md3TypeLabelTiny}" Opacity="0.6"
                        FontFamily="{DynamicResource PlusFontFamilyMono}" Text="{DynamicResource vsteditor.loading}"
                        TextWrapping="NoWrap"/>
           </ScrollViewer>
@@ -44,12 +44,12 @@
 
       <!-- Action buttons -->
       <StackPanel DockPanel.Dock="Bottom" Spacing="6" Margin="0,6,0,0">
-        <TextBlock Name="ParamInfo" FontSize="10" Opacity="0.4" TextAlignment="Center"/>
+        <TextBlock Name="ParamInfo" FontSize="{DynamicResource Md3TypeLabelTiny}" Opacity="0.4" TextAlignment="Center"/>
         <Button Name="OpenEditorBtn" Content="{DynamicResource vsteditor.opengui}"
-                Height="32" FontSize="12" FontWeight="SemiBold"
+                Height="32" MinHeight="32" FontSize="{DynamicResource Md3TypeBodySmall}" FontWeight="SemiBold"
                 Click="OnOpenEditorClick"
                 IsEnabled="False"/>
-        <Button Content="{DynamicResource vsteditor.close}" Height="28" FontSize="11"
+        <Button Content="{DynamicResource vsteditor.close}" Height="28" MinHeight="28" FontSize="{DynamicResource Md3TypeLabelSmall}"
                 Click="OnCloseClick"/>
       </StackPanel>
     </DockPanel>

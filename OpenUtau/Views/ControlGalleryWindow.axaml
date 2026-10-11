@@ -32,22 +32,22 @@
       <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="CornerRadius" Value="16"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeLarge}"/>
       <Setter Property="Padding" Value="16"/>
     </Style>
     <Style Selector="TextBlock.gallerySectionTitle">
-      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeTitleMedium}"/>
       <Setter Property="FontWeight" Value="Medium"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     </Style>
     <Style Selector="TextBlock.galleryNote">
-      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodySmall}"/>
       <Setter Property="LineHeight" Value="18"/>
       <Setter Property="TextWrapping" Value="Wrap"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
     </Style>
     <Style Selector="TextBlock.galleryStripCaption">
-      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelSmall}"/>
       <Setter Property="FontWeight" Value="Medium"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
     </Style>
@@ -62,34 +62,34 @@
             Padding="20,14">
       <StackPanel Spacing="6">
         <StackPanel Orientation="Horizontal" Spacing="10">
-          <Border Width="34" Height="34" CornerRadius="10"
+          <Border Width="34" Height="34" CornerRadius="{DynamicResource Md3ShapeSmall}"
                   Background="{StaticResource GalleryEmblemBrush}"
                   VerticalAlignment="Center">
-            <TextBlock Text="FX" FontSize="13" FontWeight="Bold"
+            <TextBlock Text="FX" FontSize="{DynamicResource Md3TypeBodyMedium}" FontWeight="Bold"
                        HorizontalAlignment="Center" VerticalAlignment="Center"
                        Foreground="{DynamicResource md3.on-tertiary-container}"/>
           </Border>
           <TextBlock Text="{DynamicResource controlgallery.title}"
-                     FontSize="18" FontWeight="Bold" VerticalAlignment="Center"
+                     FontSize="{DynamicResource Md3TypeTitleMedium}" FontWeight="Bold" VerticalAlignment="Center"
                      Foreground="{DynamicResource md3.on-surface}"/>
           <Border Width="1" Height="20" VerticalAlignment="Center" Margin="6,0"
                   Background="{DynamicResource md3.outline-variant}"/>
           <TextBlock Text="{DynamicResource controlgallery.caption}"
-                     FontSize="12" VerticalAlignment="Center"
+                     FontSize="{DynamicResource Md3TypeBodySmall}" VerticalAlignment="Center"
                      Foreground="{DynamicResource md3.on-surface-variant}"/>
         </StackPanel>
         <TextBlock Text="{DynamicResource controlgallery.states}"
-                   FontSize="11" Foreground="{DynamicResource md3.on-surface-variant}"/>
+                   FontSize="{DynamicResource Md3TypeLabelSmall}" Foreground="{DynamicResource md3.on-surface-variant}"/>
       </StackPanel>
     </Border>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-      <StackPanel Margin="20" Spacing="16">
+      <StackPanel Margin="20" Spacing="{DynamicResource Md3Spacing4}">
 
         <!-- ══ 1. 电源开关 ══ -->
         <Border Classes="gallerySection">
-          <StackPanel Spacing="12">
-            <StackPanel Spacing="4">
+          <StackPanel Spacing="{DynamicResource Md3Spacing3}">
+            <StackPanel Spacing="{DynamicResource Md3Spacing1}">
               <TextBlock Classes="gallerySectionTitle" Text="{DynamicResource controlgallery.section.power}"/>
               <TextBlock Classes="galleryNote" Text="{DynamicResource controlgallery.note.power}"/>
             </StackPanel>
@@ -109,15 +109,15 @@
             </StackPanel>
             <StackPanel Spacing="6">
               <TextBlock Classes="galleryStripCaption" Text="{DynamicResource controlgallery.states}"/>
-              <StackPanel Name="PowerStateStrip" Orientation="Horizontal" Spacing="4"/>
+              <StackPanel Name="PowerStateStrip" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing1}"/>
             </StackPanel>
           </StackPanel>
         </Border>
 
         <!-- ══ 2. 分段选择器 ══ -->
         <Border Classes="gallerySection">
-          <StackPanel Spacing="12">
-            <StackPanel Spacing="4">
+          <StackPanel Spacing="{DynamicResource Md3Spacing3}">
+            <StackPanel Spacing="{DynamicResource Md3Spacing1}">
               <TextBlock Classes="gallerySectionTitle" Text="{DynamicResource controlgallery.section.segmented}"/>
               <TextBlock Classes="galleryNote" Text="{DynamicResource controlgallery.note.segmented}"/>
             </StackPanel>
@@ -128,15 +128,15 @@
             </StackPanel>
             <StackPanel Spacing="6">
               <TextBlock Classes="galleryStripCaption" Text="{DynamicResource controlgallery.states}"/>
-              <StackPanel Name="SegmentedStateStrip" Orientation="Horizontal" Spacing="16"/>
+              <StackPanel Name="SegmentedStateStrip" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing4}"/>
             </StackPanel>
           </StackPanel>
         </Border>
 
         <!-- ══ 3. 参数读数 ══ -->
         <Border Classes="gallerySection">
-          <StackPanel Spacing="12">
-            <StackPanel Spacing="4">
+          <StackPanel Spacing="{DynamicResource Md3Spacing3}">
+            <StackPanel Spacing="{DynamicResource Md3Spacing1}">
               <TextBlock Classes="gallerySectionTitle" Text="{DynamicResource controlgallery.section.readout}"/>
               <TextBlock Classes="galleryNote" Text="{DynamicResource controlgallery.note.readout}"/>
             </StackPanel>
@@ -162,15 +162,15 @@
             </StackPanel>
             <StackPanel Spacing="6">
               <TextBlock Classes="galleryStripCaption" Text="{DynamicResource controlgallery.states}"/>
-              <StackPanel Name="ReadoutStateStrip" Orientation="Horizontal" Spacing="12"/>
+              <StackPanel Name="ReadoutStateStrip" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}"/>
             </StackPanel>
           </StackPanel>
         </Border>
 
         <!-- ══ 4. 模块面板 ══ -->
         <Border Classes="gallerySection">
-          <StackPanel Spacing="12">
-            <StackPanel Spacing="4">
+          <StackPanel Spacing="{DynamicResource Md3Spacing3}">
+            <StackPanel Spacing="{DynamicResource Md3Spacing1}">
               <TextBlock Classes="gallerySectionTitle" Text="{DynamicResource controlgallery.section.card}"/>
               <TextBlock Classes="galleryNote" Text="{DynamicResource controlgallery.note.card}"/>
             </StackPanel>
@@ -222,15 +222,15 @@
             </Grid>
             <StackPanel Spacing="6">
               <TextBlock Classes="galleryStripCaption" Text="{DynamicResource controlgallery.states}"/>
-              <StackPanel Name="CardStateStrip" Orientation="Horizontal" Spacing="12"/>
+              <StackPanel Name="CardStateStrip" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}"/>
             </StackPanel>
           </StackPanel>
         </Border>
 
         <!-- ══ 5. 机架列表 ══ -->
         <Border Classes="gallerySection">
-          <StackPanel Spacing="12">
-            <StackPanel Spacing="4">
+          <StackPanel Spacing="{DynamicResource Md3Spacing3}">
+            <StackPanel Spacing="{DynamicResource Md3Spacing1}">
               <TextBlock Classes="gallerySectionTitle" Text="{DynamicResource controlgallery.section.rack}"/>
               <TextBlock Classes="galleryNote" Text="{DynamicResource controlgallery.note.rack}"/>
             </StackPanel>

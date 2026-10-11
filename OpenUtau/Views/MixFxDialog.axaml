@@ -29,21 +29,21 @@
   <controls:WorkspaceToolView.Styles>
     <!-- ══ 顶部 / 底部栏文字 ══ -->
     <Style Selector="TextBlock.rackCaption">
-      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelSmall}"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
       <Setter Property="LetterSpacing" Value="1"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
     </Style>
     <Style Selector="TextBlock.rackTitle">
-      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeTitleMedium}"/>
       <Setter Property="FontWeight" Value="Medium"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
       <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     </Style>
     <Style Selector="TextBlock.hint">
-      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodySmall}"/>
       <Setter Property="LineHeight" Value="16"/>
       <Setter Property="TextWrapping" Value="Wrap"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
@@ -55,16 +55,16 @@
          规则抓到的 Height="20" 是模板内部 Border（开关轨道），不是按钮自身 ⇒ 无需中和。 -->
     <Style Selector="ToggleButton.md3switch">
       <Setter Property="Cursor" Value="Hand"/>
-      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodySmall}"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
       <Setter Property="Template">
         <ControlTemplate>
-          <StackPanel Orientation="Horizontal" Spacing="8" Background="Transparent">
-            <Border Name="SwitchTrack" Width="36" Height="20" CornerRadius="999"
+          <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}" Background="Transparent">
+            <Border Name="SwitchTrack" Width="36" Height="20" CornerRadius="{DynamicResource Md3ShapeFull}"
                     Background="{DynamicResource md3.surface-container-highest}"
                     BorderBrush="{DynamicResource md3.outline}" BorderThickness="1"
                     VerticalAlignment="Center">
-              <Border Name="SwitchThumb" Width="14" Height="14" CornerRadius="999"
+              <Border Name="SwitchThumb" Width="14" Height="14" CornerRadius="{DynamicResource Md3ShapeFull}"
                       Margin="2,0" HorizontalAlignment="Left" VerticalAlignment="Center"
                       Background="{DynamicResource md3.outline}"/>
             </Border>
@@ -109,19 +109,19 @@
       <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="CornerRadius" Value="16"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeLarge}"/>
       <Setter Property="Padding" Value="16"/>
       <Setter Property="HorizontalAlignment" Value="Stretch"/>
     </Style>
     <Style Selector="Border.accent">
       <Setter Property="Width" Value="3"/>
       <Setter Property="Height" Value="16"/>
-      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
       <Setter Property="Margin" Value="0,0,8,0"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
     <Style Selector="TextBlock.moduleTitle">
-      <Setter Property="FontSize" Value="15"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeTitleMedium}"/>
       <Setter Property="FontWeight" Value="Medium"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
@@ -138,17 +138,17 @@
       <Setter Property="Background" Value="{DynamicResource md3.surface-container-low}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeMedium}"/>
       <Setter Property="ClipToBounds" Value="True"/>
       <Setter Property="HorizontalAlignment" Value="Stretch"/>
     </Style>
     <Style Selector="ComboBox.preset">
       <Setter Property="HorizontalAlignment" Value="Stretch"/>
-      <Setter Property="CornerRadius" Value="0"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeNone}"/>
       <Setter Property="BorderThickness" Value="0,1,0,0"/>
       <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
       <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodySmall}"/>
       <Setter Property="MinHeight" Value="30"/>
       <Setter Property="Padding" Value="10,0"/>
     </Style>
@@ -162,7 +162,7 @@
       <Setter Property="Spacing" Value="2"/>
     </Style>
     <Style Selector="TextBlock.knobLabel">
-      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelSmall}"/>
       <Setter Property="FontWeight" Value="Medium"/>
       <Setter Property="HorizontalAlignment" Value="Center"/>
       <Setter Property="TextAlignment" Value="Center"/>
@@ -170,7 +170,7 @@
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
     </Style>
     <Style Selector="TextBlock.knobValue">
-      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelSmall}"/>
       <Setter Property="FontFamily" Value="{DynamicResource PlusFontFamilyMono}"/>
       <Setter Property="HorizontalAlignment" Value="Center"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
@@ -227,7 +227,7 @@
         <Button Theme="{StaticResource DawTextButtonTheme}" Grid.Column="3" Margin="8,0,0,0" Content="{DynamicResource mixfx.library.delete}"
                 Command="{Binding DeleteUserPresetCommand}"
                 IsEnabled="{Binding CanDeleteSelectedPreset}"/>
-        <Button Theme="{StaticResource DawTextButtonTheme}" Grid.Column="5" Content="{DynamicResource button.cancel}"
+        <Button Classes="text" Theme="{StaticResource DawTextButtonTheme}" Grid.Column="5" Content="{DynamicResource button.cancel}"
                 MinWidth="90" Margin="0,0,8,0" Click="OnCancelClicked"/>
         <Button Theme="{StaticResource DawTextButtonTheme}" Grid.Column="6" Classes="primary" Content="{DynamicResource button.ok}"
                 MinWidth="90" Click="OnOkClicked"/>
@@ -239,7 +239,7 @@
 
       <!-- ── EQ ── -->
       <Border Grid.Column="0" Classes="module">
-        <StackPanel Spacing="12">
+        <StackPanel Spacing="{DynamicResource Md3Spacing3}">
           <Grid ColumnDefinitions="Auto,*,Auto">
             <Border Grid.Column="0" Classes="accent" Background="{DynamicResource RackAccentEq}"/>
             <TextBlock Grid.Column="1" Classes="moduleTitle" Text="{DynamicResource mixfx.eq}"/>
@@ -290,7 +290,7 @@
 
       <!-- ── 压缩 ── -->
       <Border Grid.Column="2" Classes="module">
-        <StackPanel Spacing="12">
+        <StackPanel Spacing="{DynamicResource Md3Spacing3}">
           <Grid ColumnDefinitions="Auto,*,Auto">
             <Border Grid.Column="0" Classes="accent" Background="{DynamicResource RackAccentComp}"/>
             <TextBlock Grid.Column="1" Classes="moduleTitle" Text="{DynamicResource mixfx.compressor}"/>
@@ -335,7 +335,7 @@
 
       <!-- ── 混响 ── -->
       <Border Grid.Column="4" Classes="module">
-        <StackPanel Spacing="12">
+        <StackPanel Spacing="{DynamicResource Md3Spacing3}">
           <Grid ColumnDefinitions="Auto,*,Auto">
             <Border Grid.Column="0" Classes="accent" Background="{DynamicResource RackAccentReverb}"/>
             <TextBlock Grid.Column="1" Classes="moduleTitle" Text="{DynamicResource mixfx.reverb}"/>

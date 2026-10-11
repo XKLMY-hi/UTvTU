@@ -16,7 +16,7 @@
     <Style Selector="Border#PanHitArea:focus-visible">
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
-      <Setter Property="CornerRadius" Value="4"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeExtraSmall}"/>
     </Style>
     <Style Selector="Border#PanHitArea:pointerover">
       <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
@@ -66,22 +66,22 @@
   </UserControl.Styles>
 
   <!-- 通道条底 = surface-container（spec-digest §9.1：通道条不加 1px 描边） -->
-  <Border Name="StripCard" Padding="8" CornerRadius="12"
+  <Border Name="StripCard" Padding="8" CornerRadius="{DynamicResource Md3ShapeMedium}"
           Background="{DynamicResource md3.surface-container}">
     <Grid Name="RootGrid" RowSpacing="6"
           RowDefinitions="Auto,Auto,Auto,14,Auto,*,Auto,Auto">
 
       <!-- 0 · 强调色条（44：满宽 3px 圆角 999） -->
-      <Border Grid.Row="0" Name="AccentBar" Height="3" CornerRadius="999"
+      <Border Grid.Row="0" Name="AccentBar" Height="3" CornerRadius="{DynamicResource Md3ShapeFull}"
               HorizontalAlignment="Stretch" Background="{DynamicResource md3.primary}"/>
 
       <!-- 1 · 通道名（45：11px / 行高 12 / semibold） -->
-      <TextBlock Grid.Row="1" Name="TrackNameLabel" FontSize="11" LineHeight="12"
+      <TextBlock Grid.Row="1" Name="TrackNameLabel" FontSize="{DynamicResource Md3TypeLabelSmall}" LineHeight="12"
                  FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
                  Text="--"/>
 
       <!-- 2 · EQ 曲线屏（47-49：80×76 圆角 8；零线 80×1 在 top 38） -->
-      <Border Grid.Row="2" Name="EqDisplay" Width="80" Height="76" CornerRadius="8"
+      <Border Grid.Row="2" Name="EqDisplay" Width="80" Height="76" CornerRadius="{DynamicResource Md3ShapeSmall}"
               ClipToBounds="True" Background="{DynamicResource md3.surface-container-lowest}">
         <Canvas>
           <c:MixerEqCurve Name="EqCurve" Width="80" Height="76"
@@ -105,7 +105,7 @@
             <TextBlock Name="PanLabel" FontSize="8" VerticalAlignment="Center"
                        Foreground="{DynamicResource md3.on-surface-variant}"
                        Text="{DynamicResource mixer.pan}"/>
-            <TextBlock Grid.Column="1" Name="PanValueLabel" FontSize="9" VerticalAlignment="Center"
+            <TextBlock Grid.Column="1" Name="PanValueLabel" FontSize="{DynamicResource Md3DawTypeReadout}" VerticalAlignment="Center"
                        HorizontalAlignment="Right"
                        Foreground="{DynamicResource md3.on-surface}" Text="C"/>
           </Grid>
@@ -113,12 +113,12 @@
       </Border>
 
       <!-- 4 · Mute / Solo（70-76：高 20、圆角 4、font 10 bold、间距 4；裁定 R3 不做 R 键） -->
-      <Grid Grid.Row="4" Name="MsRow" ColumnDefinitions="*,*" ColumnSpacing="4">
-        <Button Grid.Column="0" Name="MuteBtn" Classes="mixerBtn" Height="20" CornerRadius="4"
-                FontSize="10" FontWeight="Bold" Click="OnMuteClick"
+      <Grid Grid.Row="4" Name="MsRow" ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource Md3Spacing1}">
+        <Button Grid.Column="0" Name="MuteBtn" Classes="mixerBtn" Height="20" MinHeight="20" CornerRadius="{DynamicResource Md3ShapeExtraSmall}"
+                FontSize="{DynamicResource Md3TypeLabelTiny}" FontWeight="Bold" Click="OnMuteClick"
                 Content="{DynamicResource mixer.mute}"/>
-        <Button Grid.Column="1" Name="SoloBtn" Classes="mixerBtn" Height="20" CornerRadius="4"
-                FontSize="10" FontWeight="Bold" Click="OnSoloClick"
+        <Button Grid.Column="1" Name="SoloBtn" Classes="mixerBtn" Height="20" MinHeight="20" CornerRadius="{DynamicResource Md3ShapeExtraSmall}"
+                FontSize="{DynamicResource Md3TypeLabelTiny}" FontWeight="Bold" Click="OnSoloClick"
                 Content="{DynamicResource mixer.solo}"/>
       </Grid>
 
@@ -132,15 +132,15 @@
                          AutomationProperties.Name="{DynamicResource controls.volume}"
                          ToolTip.Tip="{DynamicResource controls.fader.tip}">
         <Border Name="MeterBar" Width="8" Height="500" Canvas.Left="4" Canvas.Top="0"
-                CornerRadius="999" ClipToBounds="True"
+                CornerRadius="{DynamicResource Md3ShapeFull}" ClipToBounds="True"
                 Background="{DynamicResource md3.surface-container-highest}">
-          <Border Name="MeterFill" Width="8" Height="0" CornerRadius="999"
+          <Border Name="MeterFill" Width="8" Height="0" CornerRadius="{DynamicResource Md3ShapeFull}"
                   VerticalAlignment="Bottom" Background="{DynamicResource md3.primary}"/>
         </Border>
         <Border Name="FaderTrack" Width="4" Height="500" Canvas.Left="34" Canvas.Top="0"
-                CornerRadius="999" Background="{DynamicResource md3.surface-container-highest}"/>
+                CornerRadius="{DynamicResource Md3ShapeFull}" Background="{DynamicResource md3.surface-container-highest}"/>
         <Border Name="FaderHandle" Width="24" Height="14" Canvas.Left="24" Canvas.Top="146"
-                CornerRadius="4"/>
+                CornerRadius="{DynamicResource Md3ShapeExtraSmall}"/>
         <!-- 刻度 9 条（86-94）：宽 8/5 交替、left 52、top 0/62/125/187/249/311/374/436/498 -->
         <Border Name="FaderTick1" Width="8" Height="1" Canvas.Left="52" Canvas.Top="0"
                 Background="{DynamicResource md3.outline-variant}"/>

@@ -20,11 +20,11 @@ namespace OpenUtau.App.Views;
 public sealed class WorkspaceDialogHost : UserControl {
     readonly List<(WorkspaceToolView Tool, IInputElement? Focus, double Width)> stack = new();
     public Action? DialogsChanged;
-    readonly Border card = new() { CornerRadius = new CornerRadius(12), Padding = new Thickness(16),
+    readonly Border card = new() { Padding = new Thickness(16),
         HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center,
         Margin = new Thickness(24), MaxWidth = 680 };
     readonly ContentControl body = new();
-    readonly Border backdrop = new() { Background = new SolidColorBrush(Color.FromArgb(72, 0, 0, 0)) };
+    readonly Border backdrop = new();
     readonly Button close = new() { Width = 32, Height = 32, Margin = new Thickness(0) };
     int generation;
     bool shuttingDown, externalModal;
@@ -54,9 +54,11 @@ public sealed class WorkspaceDialogHost : UserControl {
         IsVisible = false;
         backdrop.Classes.Add("md3-fade");
         card.Classes.Add("md3-pop");
-        card[!Border.BackgroundProperty] = new DynamicResourceExtension("md3.surface-container-low");
-        card[!Border.BorderBrushProperty] = new DynamicResourceExtension("md3.outline-variant");
-        card.BorderThickness = new Thickness(1);
+        card[!Border.BackgroundProperty] = new DynamicResourceExtension("md3.surface-container-high");
+        card[!Border.CornerRadiusProperty] = new DynamicResourceExtension("Md3ShapeExtraLarge");
+        card[!Border.BoxShadowProperty] = new DynamicResourceExtension("Md3ElevationLevel3");
+        backdrop[!Border.BackgroundProperty] = new DynamicResourceExtension("Md3DialogScrim");
+        title[!TextBlock.FontSizeProperty] = new DynamicResourceExtension("Md3TypeTitleMedium");
         var icon = new DawIcon { Width = 14, Height = 14 };
         icon[!DawIcon.DataProperty] = new DynamicResourceExtension("icon-x");
         icon[!DawIcon.FillProperty] = new DynamicResourceExtension("md3.on-surface-variant");

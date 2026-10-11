@@ -44,7 +44,7 @@
   </Style>
 
   <Style Selector="ListBox.toolbar">
-    <Setter Property="FontSize" Value="12"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodySmall}"/>
     <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
   </Style>
 
@@ -56,7 +56,7 @@
        颜色一律取 md3.* 池键（无字面量）；工具 tooltip 沿用既有字符串键（零新增翻译）。
        ══════════════════════════════════════════════════════════════════════════ -->
   <Style Selector="Border.toolRail">
-    <Setter Property="CornerRadius" Value="12"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeMedium}"/>
     <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
     <Setter Property="BorderThickness" Value="1"/>
@@ -77,17 +77,14 @@
     <Setter Property="Padding" Value="0"/>
     <Setter Property="Margin" Value="0"/>
     <Setter Property="BorderThickness" Value="0"/>
-    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeSmall}"/>
     <Setter Property="Background" Value="Transparent"/>
     <Setter Property="ContextFlyout" Value="{Binding $self.(FlyoutBase.AttachedFlyout)}"/>
     <Style Selector="^:pointerover /template/ Border#PART_HoverOverlay">
-      <Setter Property="Opacity" Value="0.12"/>
+      <Setter Property="Opacity" Value="{DynamicResource Md3StateHoverOpacity}"/>
     </Style>
     <Style Selector="^:pressed /template/ Border#PART_HoverOverlay">
-      <Setter Property="Opacity" Value="0.16"/>
-    </Style>
-    <Style Selector="^:pressed">
-      <Setter Property="Opacity" Value="0.85"/>
+      <Setter Property="Opacity" Value="{DynamicResource Md3StatePressedOpacity}"/>
     </Style>
     <Style Selector="^:selected /template/ Border#PART_LayoutRoot">
       <Setter Property="Background" Value="{DynamicResource md3.primary-container}"/>
@@ -128,13 +125,13 @@
     <Setter Property="Template">
       <ControlTemplate>
         <Border Name="PART_LayoutRoot"
-                CornerRadius="8"
+                CornerRadius="{DynamicResource Md3ShapeSmall}"
                 Background="{TemplateBinding Background}"
                 BorderBrush="{TemplateBinding BorderBrush}"
                 BorderThickness="{TemplateBinding BorderThickness}"
                 ClipToBounds="True">
           <Grid>
-            <Border Name="PART_HoverOverlay" CornerRadius="8" Opacity="0"
+            <Border Name="PART_HoverOverlay" CornerRadius="{DynamicResource Md3ShapeSmall}" Opacity="0"
                     Background="{DynamicResource md3.primary}"/>
             <Grid Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center">
               <c:DawIcon Name="PART_ToolIcon" Classes="filled" Width="18" Height="18"/>
@@ -160,7 +157,7 @@
     <Style Selector="^ FlyoutPresenter">
       <Setter Property="Padding" Value="4"/>
       <Setter Property="MinWidth" Value="0"/>
-      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeMedium}"/>
       <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
       <Setter Property="BorderThickness" Value="1"/>
@@ -328,7 +325,7 @@
 
   <Style Selector="RadioButton">
     <Setter Property="Padding" Value="0"/>
-    <Setter Property="FontSize" Value="12"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodySmall}"/>
     <Setter Property="Template">
       <ControlTemplate TargetType="RadioButton">
         <StackPanel Orientation="Horizontal">

@@ -20,7 +20,7 @@
     <ControlTheme x:Key="FxChainPowerTheme" TargetType="ToggleButton" BasedOn="{StaticResource DawButtonTheme}">
       <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
-      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
       <Setter Property="Template">
         <ControlTemplate>
           <Grid>
@@ -29,7 +29,7 @@
                     Background="{TemplateBinding Background}"/>
             <Border Name="PART_StateLayer" Background="{TemplateBinding Foreground}" Opacity="0"
                     CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False"/>
-            <Border Name="PART_Thumb" Width="14" Height="14" CornerRadius="999"
+            <Border Name="PART_Thumb" Width="14" Height="14" CornerRadius="{DynamicResource Md3ShapeFull}"
                     Margin="3,0" HorizontalAlignment="Left" VerticalAlignment="Center"
                     Background="{TemplateBinding Foreground}" IsHitTestVisible="False"/>
             <Border Name="PART_FocusRing" BorderBrush="{DynamicResource md3.primary}" BorderThickness="1"
@@ -48,30 +48,30 @@
   </UserControl.Resources>
   <UserControl.Styles>
     <Style Selector="TextBlock.rowOrder">
-      <Setter Property="FontSize" Value="10"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelTiny}"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
       <Setter Property="TextAlignment" Value="Center"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
     </Style>
     <Style Selector="TextBlock.rowName">
-      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodySmall}"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
       <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     </Style>
     <Style Selector="TextBlock.rowDetail">
-      <Setter Property="FontSize" Value="10"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelTiny}"/>
       <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
     </Style>
     <Style Selector="TextBlock.rowBadgeText">
-      <Setter Property="FontSize" Value="9"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3DawTypeReadout}"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
     <Style Selector="TextBlock.rowChipText">
-      <Setter Property="FontSize" Value="9"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3DawTypeReadout}"/>
       <Setter Property="FontWeight" Value="Medium"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
@@ -88,8 +88,8 @@
       <Setter Property="Width" Value="22"/>
       <Setter Property="Height" Value="22"/>
       <Setter Property="Padding" Value="0"/>
-      <Setter Property="CornerRadius" Value="999"/>
-      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelSmall}"/>
       <Setter Property="Background" Value="Transparent"/>
       <Setter Property="BorderThickness" Value="0"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
@@ -115,7 +115,7 @@
   </UserControl.Styles>
 
   <Border Name="RowRoot" Classes="rowRoot" MinHeight="44"
-          CornerRadius="12" BorderThickness="1" Padding="10,6"
+          CornerRadius="{DynamicResource Md3ShapeMedium}" BorderThickness="1" Padding="10,6"
           Background="{DynamicResource md3.surface-container-high}"
           BorderBrush="{DynamicResource md3.outline-variant}"
           PointerPressed="OnRowPointerPressed">
@@ -139,7 +139,7 @@
         <Grid ColumnDefinitions="*,Auto">
           <TextBlock Name="NameText" Classes="rowName" UseLayoutRounding="False"
                      FontFamily="{Binding $parent[UserControl].FontFamily}"/>
-          <Border Name="BadgeChip" Grid.Column="1" Margin="6,0,0,0" CornerRadius="999" Padding="6,1" VerticalAlignment="Center"
+          <Border Name="BadgeChip" Grid.Column="1" Margin="6,0,0,0" CornerRadius="{DynamicResource Md3ShapeFull}" Padding="6,1" VerticalAlignment="Center"
                   Background="{DynamicResource md3.surface-container-highest}">
             <TextBlock Name="BadgeLabel" Classes="rowBadgeText" UseLayoutRounding="False"
                        FontFamily="{Binding $parent[UserControl].FontFamily}"
@@ -151,7 +151,7 @@
       </StackPanel>
 
       <!-- 状态角标：不过声（旁通 / 模块关 / 总电源关）时出现 -->
-      <Border Name="StateChip" Grid.Column="3" Height="22" CornerRadius="999" Padding="10,0"
+      <Border Name="StateChip" Grid.Column="3" Height="22" CornerRadius="{DynamicResource Md3ShapeFull}" Padding="10,0"
               Margin="6,0,0,0" VerticalAlignment="Center" IsVisible="False"
               Background="{DynamicResource md3.surface-container-highest}">
         <TextBlock Name="StateChipText" Classes="rowChipText" UseLayoutRounding="False"

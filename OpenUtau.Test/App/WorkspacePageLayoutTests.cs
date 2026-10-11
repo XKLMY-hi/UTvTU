@@ -5,11 +5,14 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using OpenUtau.App;
 using OpenUtau.App.Controls;
 using OpenUtau.App.Views;
+using OpenUtau.Core.Theming;
+using OpenUtau.Theming;
 using Xunit;
 namespace OpenUtau.Test.App {
     [Collection("Theme")]
@@ -29,7 +32,7 @@ namespace OpenUtau.Test.App {
 
         static void NavPresentation(UserControl view) {
             foreach (var button in view.GetVisualDescendants().OfType<Button>().Where(b => b.Classes.Contains("navItem"))) {
-                Assert.Equal(36, button.Bounds.Height);
+                Assert.Equal(40, button.Bounds.Height);
                 var label = button.GetVisualDescendants().OfType<TextBlock>().Single();
                 var icon = button.GetVisualDescendants().OfType<DawIcon>().Single();
                 Assert.Equal(13, label.FontSize);
@@ -97,6 +100,9 @@ namespace OpenUtau.Test.App {
                     chip.IsChecked = true; Settle(window);
                     Assert.Equal(before, label.Bounds);
                     Assert.Equal(chip.Foreground, label.Foreground);
+                    Assert.Equal(ColorPool.Current.Color(Md3Role.OnSecondaryContainer), Assert.IsAssignableFrom<ISolidColorBrush>(chip.Foreground).Color);
+                    Assert.Equal(ColorPool.Current.Color(Md3Role.SecondaryContainer), Assert.IsAssignableFrom<ISolidColorBrush>(chip.Background).Color);
+                    Assert.Single(chip.GetVisualDescendants().OfType<Border>().Single(b => b.Name == "PART_StateLayer").Transitions!);
                     Assert.True(chip.GetVisualDescendants().OfType<DawIcon>().Single().IsVisible);
                     var center = label.TranslatePoint(new Point(label.Bounds.Width / 2, label.Bounds.Height / 2), chip)!.Value;
                     Assert.Equal(chip.Bounds.Width / 2, center.X, 3);
@@ -125,7 +131,7 @@ namespace OpenUtau.Test.App {
                 window.Show(); Settle(window);
                 NavPresentation(view);
                 var search = view.FindControl<TextBox>("SearchBox")!;
-                Assert.Equal(36, search.Bounds.Height);
+                Assert.Equal(40, search.Bounds.Height);
                 var actions = view.FindControl<StackPanel>("RecentActions")!;
                 var newButton = view.FindControl<Button>("QuickNew")!;
                 var openButton = view.FindControl<Button>("QuickOpen")!;

@@ -16,7 +16,7 @@
       <Setter Property="Background" Value="{DynamicResource md3.outline-variant}"/>
       <Setter Property="Transitions">
         <Transitions>
-          <BrushTransition Property="Background" Duration="0:0:0.12"/>
+          <BrushTransition Property="Background" Duration="{DynamicResource Md3MotionEffectsFast}" Easing="{StaticResource Md3EffectsFastEasing}"/>
         </Transitions>
       </Setter>
     </Style>

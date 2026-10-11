@@ -40,7 +40,7 @@
   </Styles.Resources>
 
   <Style Selector="Window">
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
   </Style>
 
   <!-- ══ 按钮 / 列表项：外观（基础·变体·悬浮·按下·选中）已由 Styles/Md3ControlThemes.axaml
@@ -48,26 +48,26 @@
 
   <!-- 文本框 / 下拉 / 复选框 / 单选 / 开关：规格与池色（模板与状态由各控件主题提供） -->
   <Style Selector="TextBox">
-    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeSmall}"/>
     <Setter Property="MinHeight" Value="32"/>
     <Setter Property="Padding" Value="10,0"/>
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
     <Setter Property="BorderThickness" Value="1"/>
     <Setter Property="VerticalContentAlignment" Value="Center"/>
   </Style>
   <Style Selector="ComboBox">
-    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeSmall}"/>
     <Setter Property="MinHeight" Value="32"/>
     <Setter Property="Padding" Value="12,0"/>
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
     <Setter Property="BorderThickness" Value="1"/>
   </Style>
   <Style Selector="CheckBox, RadioButton">
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="MinHeight" Value="28"/>
     <Setter Property="Padding" Value="8,0,0,0"/>
   </Style>
@@ -77,9 +77,9 @@
   </Style>
   <!-- ══ 列表容器 / 滑条 / 进度条 / 提示 / 分隔线：与设计稿同规格、颜色走池 ══ -->
   <Style Selector="ListBox">
-    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeSmall}"/>
     <Setter Property="Padding" Value="4"/>
-    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
     <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
     <Setter Property="BorderThickness" Value="1"/>
@@ -91,7 +91,7 @@
   </Style>
   <Style Selector="ProgressBar">
     <Setter Property="MinHeight" Value="6"/>
-    <Setter Property="CornerRadius" Value="999"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
     <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
   </Style>
@@ -102,8 +102,8 @@
     <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
-    <Setter Property="CornerRadius" Value="8"/>
-    <Setter Property="FontSize" Value="12"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeSmall}"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodySmall}"/>
   </Style>
 
   <!-- T10-B：列表项内的文本必须跟随 ListBoxItem.Foreground（选中行 = on-secondary-container，
@@ -131,16 +131,13 @@
       <Setter Property="Margin" Value="0"/>
       <Setter Property="Background" Value="Transparent"/>
       <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="CornerRadius" Value="999"/>
-      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyLarge}"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
       <Setter Property="HorizontalAlignment" Value="Stretch"/>
       <Setter Property="HorizontalContentAlignment" Value="Left"/>
       <Setter Property="VerticalContentAlignment" Value="Center"/>
       <Setter Property="Cursor" Value="Hand"/>
-    </Style>
-    <Style Selector="Button.navItem:pointerover">
-      <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
     </Style>
     <Style Selector="Button.navItem.selected">
       <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
@@ -152,7 +149,7 @@
          （导航项本想 14、实际渲染 13）。凡"设在按钮上、期望子元素跟随"的字体/前景，都必须
          用 `X TextBlock { … }` 显式声明。下面这条就是修正。 -->
     <Style Selector="Button.navItem TextBlock">
-      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyLarge}"/>
     </Style>
     <!-- 选中药丸里的**文字**必须与图标同色：应用级 `TextBlock{Foreground}` 会显式覆盖继承，
          不加这条会出现"底色变、图标变绿、文字还是白"的三不像（fx-ui 复核 A②；两页同时受益）。 -->
@@ -170,5 +167,4 @@
     </Style>
     <Style Selector="Button.navItem:focus-visible">
       <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
-      <Setter Property="BorderThickness" Value="2"/>
     </Style></Styles>

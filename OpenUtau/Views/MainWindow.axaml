@@ -114,7 +114,7 @@
 
               </MenuFlyout>
             </Button.Flyout>
-            <StackPanel Orientation="Horizontal" Spacing="12">
+            <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}">
               <!-- W40：顶栏品牌 = 「标志 + 字标，无括号」。cap 15 落在品牌阶梯的 14–23 档 ⇒ 按规则**去括号**；
                    原音符瓦片（md3.primary-container + icon-music）与文字 UTvTU 已删。
                    尺寸与 SplashWindow 同一套口径（缩放 s = cap / 277.4707 = 15/277.4707 = 0.054060）：
@@ -142,15 +142,15 @@
                 </Canvas>
               </StackPanel>
 
-              <TextBlock x:Name="ScreenTitle" Text="{DynamicResource view.workspace}" FontSize="11"
+              <TextBlock x:Name="ScreenTitle" Text="{DynamicResource view.workspace}" FontSize="{DynamicResource Md3TypeLabelSmall}"
                          VerticalAlignment="Center" MaxWidth="100" TextTrimming="CharacterEllipsis"
                          Foreground="{DynamicResource md3.on-surface-variant}"/>
             </StackPanel>
           </Button>
-          <StackPanel x:Name="TransportGroup" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+          <StackPanel x:Name="TransportGroup" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}" VerticalAlignment="Center">
           <!-- 原设计：40 DIP 胶囊与 36 DIP 圆形按钮。 -->
           <Border x:Name="TransportPill" Classes="transportPill">
-            <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing1}" VerticalAlignment="Center">
               <Button Classes="tpBtn" AutomationProperties.Name="{DynamicResource command.playback.gohome}" ToolTip.Tip="{DynamicResource command.playback.gohome}" Command="{Binding PlaybackViewModel.SeekStart}">
                 <c:DawIcon Data="{StaticResource icon-skip-back}" Width="16" Height="16"
                       Fill="{Binding $parent[Button].Foreground}"/>
@@ -178,15 +178,15 @@
           <!-- 播放位置：等宽读数。 -->
           <Border x:Name="TimeReadout" Classes="tpReadout" Padding="10,0">
             <TextBlock Text="{Binding Path=PlaybackViewModel.PlayPosTime, StringFormat={}{0:mm\\:ss\\.fff}}"
-                       FontSize="14" FontFamily="Consolas" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"
+                       FontSize="{DynamicResource Md3TypeBodyLarge}" FontFamily="Consolas" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"
                        Foreground="{DynamicResource md3.on-surface}"/>
           </Border>
 
           <!-- 工程速度 / 拍号，沿用现有编辑入口。 -->
           <Border x:Name="TempoReadout" Classes="tpChip" Padding="8,0">
-            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}" VerticalAlignment="Center">
               <TextBlock ToolTip.Tip="BPM" Background="Transparent" PointerPressed="OnEditBpm" Cursor="Hand"
-                         FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"
+                         FontSize="{DynamicResource Md3TypeBodyLarge}" FontWeight="SemiBold" VerticalAlignment="Center"
                          Foreground="{DynamicResource md3.primary}">
                 <TextBlock.Text>
                   <MultiBinding StringFormat="{}{0:#0.00}">
@@ -194,10 +194,10 @@
                   </MultiBinding>
                 </TextBlock.Text>
               </TextBlock>
-              <TextBlock Text="BPM" FontSize="10" VerticalAlignment="Center"
+              <TextBlock Text="BPM" FontSize="{DynamicResource Md3TypeLabelTiny}" VerticalAlignment="Center"
                          Foreground="{DynamicResource md3.on-surface-variant}"/>
               <TextBlock Background="Transparent" PointerPressed="OnEditTimeSignature" Cursor="Hand"
-                         FontSize="14" VerticalAlignment="Center"
+                         FontSize="{DynamicResource Md3TypeBodyLarge}" VerticalAlignment="Center"
                          Foreground="{DynamicResource md3.on-surface}">
                 <TextBlock.Text>
                   <MultiBinding StringFormat="{}{0} / {1}">
@@ -210,7 +210,7 @@
           </Border>
 
           </StackPanel>
-          <StackPanel x:Name="ViewSwitcherGroup" Orientation="Horizontal" Spacing="8"
+          <StackPanel x:Name="ViewSwitcherGroup" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}"
                       HorizontalAlignment="Left" VerticalAlignment="Center">
             <Border x:Name="ViewSwitcher" Classes="viewSwitch">
               <StackPanel Orientation="Horizontal" Spacing="3">
@@ -232,7 +232,7 @@
                     Fill="{Binding $parent[Button].Foreground}"/>
             </Button>
           </StackPanel>
-          <StackPanel x:Name="TopRightCluster" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+          <StackPanel x:Name="TopRightCluster" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing1}" VerticalAlignment="Center">
             <Button x:Name="ShellSaveButton" Classes="topBtn" Click="OnMenuSave" AutomationProperties.Name="{DynamicResource menu.file.save}" ToolTip.Tip="{DynamicResource menu.file.save}">
               <c:DawIcon Data="{StaticResource icon-save}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
             </Button>
@@ -313,10 +313,10 @@
                 BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,1,0">
           <Grid RowDefinitions="34,16,*">
             <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="12,0">
-              <TextBlock Text="{DynamicResource command.import.track}" FontSize="11" FontWeight="SemiBold"
+              <TextBlock Text="{DynamicResource command.import.track}" FontSize="{DynamicResource Md3TypeLabelSmall}" FontWeight="SemiBold"
                          VerticalAlignment="Center"
                          Foreground="{DynamicResource md3.on-surface-variant}"/>
-              <Button Grid.Column="1" Classes="panelToggle" Width="24" Height="24" Click="OnAddTrack"
+              <Button Grid.Column="1" Classes="panelToggle" Width="24" Height="24" MinHeight="24" Click="OnAddTrack"
                       AutomationProperties.Name="{DynamicResource command.track.add}" ToolTip.Tip="{DynamicResource command.track.add}">
                 <c:DawIcon Data="{StaticResource icon-plus}" Width="12" Height="12"
                       Fill="{Binding $parent[Button].Foreground}"/>
@@ -495,7 +495,7 @@
                     ClipToBounds="True" IsHitTestVisible="False">
               <Border HorizontalAlignment="Center" VerticalAlignment="Center" Padding="10,5"
                       IsVisible="{Binding TracksViewModel.PlayPosWaitingRendering}" Background="{DynamicResource BackgroundBrushSemi}">
-                <TextBlock Text="{DynamicResource progress.waitingrendering}" FontSize="15"/>
+                <TextBlock Text="{DynamicResource progress.waitingrendering}" FontSize="{DynamicResource Md3TypeTitleMedium}"/>
               </Border>
             </Border>
           </Grid>
@@ -534,10 +534,10 @@
             <!-- 表头 -->
             <Border Grid.Row="0" BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1">
               <Grid ColumnDefinitions="*,Auto,Auto" Margin="12,0">
-              <TextBlock Text="{DynamicResource sidebar.library}" FontSize="11" FontWeight="SemiBold"
+              <TextBlock Text="{DynamicResource sidebar.library}" FontSize="{DynamicResource Md3TypeLabelSmall}" FontWeight="SemiBold"
                          VerticalAlignment="Center"
                          Foreground="{DynamicResource md3.on-surface-variant}"/>
-              <Button Grid.Column="1" Classes="panelToggle" Width="24" Height="24" VerticalAlignment="Center"
+              <Button Grid.Column="1" Classes="panelToggle" Width="24" Height="24" MinHeight="24" VerticalAlignment="Center"
                       AutomationProperties.Name="{DynamicResource sidebar.refresh}" ToolTip.Tip="{DynamicResource sidebar.refresh}">
                 <Button.Flyout>
                   <MenuFlyout Placement="BottomEdgeAlignedRight">
@@ -577,7 +577,7 @@
               <Grid x:Name="SingersPanel" RowDefinitions="Auto,*">
                 <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,2">
                   <TextBlock Classes="sideHeading" Text="{DynamicResource sidebar.singers}"/>
-                  <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24" Click="OnRefreshSingers"
+                  <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24" MinHeight="24" Click="OnRefreshSingers"
                           AutomationProperties.Name="{DynamicResource sidebar.refresh}" ToolTip.Tip="{DynamicResource sidebar.refresh}">
                     <c:DawIcon Data="{StaticResource icon-refresh-cw}" Width="12" Height="12"
                           Fill="{Binding $parent[Button].Foreground}"/>
@@ -597,22 +597,22 @@
                               PointerPressed="OnSidebarPointerPressed" PointerMoved="OnSidebarPointerMoved">
                         <Grid RowDefinitions="*,Auto" Background="Transparent">
                           <Grid Grid.Row="0" ColumnDefinitions="34,8,*" Background="Transparent">
-                            <Border Grid.Column="0" Width="34" Height="34" CornerRadius="8"
+                            <Border Grid.Column="0" Width="34" Height="34" CornerRadius="{DynamicResource Md3ShapeSmall}"
                                     ClipToBounds="True" Background="{DynamicResource md3.surface-container-high}"
                                     VerticalAlignment="Center">
                               <Panel>
                                 <Image Source="{Binding Avatar}" Width="34" Height="34" Stretch="UniformToFill"/>
-                                <TextBlock Text="{Binding AvatarFallback}" FontSize="14" FontWeight="SemiBold"
+                                <TextBlock Text="{Binding AvatarFallback}" FontSize="{DynamicResource Md3TypeBodyLarge}" FontWeight="SemiBold"
                                            Foreground="{DynamicResource md3.on-surface-variant}"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            IsVisible="{Binding ShowAvatarFallback}"/>
                               </Panel>
                             </Border>
-                            <TextBlock Grid.Column="2" FontSize="12" VerticalAlignment="Center"
+                            <TextBlock Grid.Column="2" FontSize="{DynamicResource Md3TypeBodySmall}" VerticalAlignment="Center"
                                        Foreground="{DynamicResource md3.on-surface}"
                                        Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
                           </Grid>
-                          <TextBlock Grid.Row="1" FontSize="10" Margin="42,0,0,0"
+                          <TextBlock Grid.Row="1" FontSize="{DynamicResource Md3TypeLabelTiny}" Margin="42,0,0,0"
                                      Foreground="{DynamicResource md3.on-surface-variant}"
                                      Text="{Binding SingerTypeText}"/>
                         </Grid>
@@ -626,7 +626,7 @@
                       <c:DawIcon Data="{StaticResource icon-mic}" Width="14" Height="14"
                             Fill="{DynamicResource md3.on-surface-variant}"
                             HorizontalAlignment="Left" Margin="0,0,0,6"/>
-                      <TextBlock FontSize="11" TextWrapping="Wrap"
+                      <TextBlock FontSize="{DynamicResource Md3TypeLabelSmall}" TextWrapping="Wrap"
                                  Foreground="{DynamicResource md3.on-surface-variant}"
                                  Text="{DynamicResource sidebar.singers.empty}"/>
                     </StackPanel>
@@ -638,7 +638,7 @@
               <Grid x:Name="SamplesPanel" IsVisible="False" RowDefinitions="Auto,*">
                 <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,2">
                   <TextBlock Classes="sideHeading" Text="{DynamicResource sidebar.samples}"/>
-                  <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24" Click="OnRefreshSamples"
+                  <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24" MinHeight="24" Click="OnRefreshSamples"
                           AutomationProperties.Name="{DynamicResource sidebar.refresh}" ToolTip.Tip="{DynamicResource sidebar.refresh}">
                     <c:DawIcon Data="{StaticResource icon-refresh-cw}" Width="12" Height="12"
                           Fill="{Binding $parent[Button].Foreground}"/>
@@ -651,22 +651,22 @@
                       <Border Classes="sideItem small" DoubleTapped="OnSampleDoubleTap"
                               PointerPressed="OnSidebarPointerPressed" PointerMoved="OnSidebarPointerMoved">
                         <Grid ColumnDefinitions="26,8,*,Auto,4,Auto" Background="Transparent">
-                          <Border Grid.Column="0" Width="26" Height="26" CornerRadius="6"
+                          <Border Grid.Column="0" Width="26" Height="26" CornerRadius="{DynamicResource Md3DawCornerRadius}"
                                   Background="{DynamicResource md3.surface-container-high}" HorizontalAlignment="Left">
                             <c:DawIcon Data="{StaticResource icon-music}" Width="13" Height="13"
                                   Fill="{DynamicResource md3.on-surface-variant}"
                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
                           </Border>
-                          <TextBlock Grid.Column="2" FontSize="12" VerticalAlignment="Center"
+                          <TextBlock Grid.Column="2" FontSize="{DynamicResource Md3TypeBodySmall}" VerticalAlignment="Center"
                                      Foreground="{DynamicResource md3.on-surface}"
                                      Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
                           <Border Grid.Column="3" Background="{DynamicResource md3.secondary-container}"
-                                  CornerRadius="4" Padding="4,1" VerticalAlignment="Center">
-                            <TextBlock FontSize="9" FontWeight="SemiBold"
+                                  CornerRadius="{DynamicResource Md3ShapeExtraSmall}" Padding="4,1" VerticalAlignment="Center">
+                            <TextBlock FontSize="{DynamicResource Md3DawTypeReadout}" FontWeight="SemiBold"
                                        Foreground="{DynamicResource md3.on-secondary-container}"
                                        Text="{Binding Format}"/>
                           </Border>
-                          <Button Grid.Column="5" Classes="iconBtn" Width="26" Height="26" Margin="4,0,0,0"
+                          <Button Grid.Column="5" Classes="iconBtn" Width="26" Height="26" MinHeight="26" Margin="4,0,0,0"
                                   Click="OnSamplePlay" AutomationProperties.Name="{DynamicResource sidebar.play}" ToolTip.Tip="{DynamicResource sidebar.play}">
                             <Panel>
                               <c:DawIcon Data="{StaticResource icon-play}" Width="11" Height="11"
@@ -688,7 +688,7 @@
                       <c:DawIcon Data="{StaticResource icon-music}" Width="14" Height="14"
                             Fill="{DynamicResource md3.on-surface-variant}"
                             HorizontalAlignment="Left" Margin="0,0,0,6"/>
-                      <TextBlock FontSize="11" TextWrapping="Wrap"
+                      <TextBlock FontSize="{DynamicResource Md3TypeLabelSmall}" TextWrapping="Wrap"
                                  Foreground="{DynamicResource md3.on-surface-variant}"
                                  Text="{DynamicResource sidebar.samples.empty}"/>
                     </StackPanel>
@@ -697,13 +697,13 @@
               </Grid>
 
               <!-- MIDI（占位：本页尚未实现） -->
-              <StackPanel x:Name="MidiPanel" IsVisible="False" Spacing="8">
+              <StackPanel x:Name="MidiPanel" IsVisible="False" Spacing="{DynamicResource Md3Spacing2}">
                 <Border Classes="sideCard">
                   <StackPanel>
                     <c:DawIcon Data="{StaticResource icon-music}" Width="14" Height="14"
                           Fill="{DynamicResource md3.on-surface-variant}"
                           HorizontalAlignment="Left" Margin="0,0,0,6"/>
-                    <TextBlock FontSize="11" TextWrapping="Wrap"
+                    <TextBlock FontSize="{DynamicResource Md3TypeLabelSmall}" TextWrapping="Wrap"
                                Foreground="{DynamicResource md3.on-surface-variant}"
                                Text="{DynamicResource sidebar.library.empty}"/>
                   </StackPanel>
@@ -717,15 +717,15 @@
                 <!-- 搜索框 36 胶囊 + 重新扫描 -->
                 <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,2,0,6">
                   <Panel Grid.Column="0" Height="36">
-                    <TextBox x:Name="PluginSearchBox" Height="36" CornerRadius="999" Padding="30,0,10,0"
-                             FontSize="11" VerticalContentAlignment="Center"
+                    <TextBox x:Name="PluginSearchBox" Height="36" CornerRadius="{DynamicResource Md3ShapeFull}" Padding="30,0,10,0"
+                             FontSize="{DynamicResource Md3TypeLabelSmall}" VerticalContentAlignment="Center"
                              Text="{Binding SearchText, Mode=TwoWay}"
-                             Watermark="{DynamicResource sidebar.effects.search}"/>
+                             PlaceholderText="{DynamicResource sidebar.effects.search}"/>
                     <c:DawIcon Data="{StaticResource icon-search}" Width="13" Height="13"
                           Fill="{DynamicResource md3.on-surface-variant}" IsHitTestVisible="False"
                           HorizontalAlignment="Left" VerticalAlignment="Center" Margin="11,0,0,0"/>
                   </Panel>
-                  <Button Grid.Column="1" Classes="iconBtn" Width="36" Height="36" Margin="6,0,0,0"
+                  <Button Grid.Column="1" Classes="iconBtn" Width="36" Height="36" MinHeight="36" Margin="6,0,0,0"
                           Click="OnRescanVstFromLibrary" AutomationProperties.Name="{DynamicResource prefs.vst.rescan}" ToolTip.Tip="{DynamicResource prefs.vst.rescan}">
                     <c:DawIcon Data="{StaticResource icon-refresh-cw}" Width="13" Height="13"
                           Fill="{Binding $parent[Button].Foreground}"/>
@@ -734,14 +734,14 @@
 
                 <!-- 计数 / 扫描中 + 路径管理开关 -->
                 <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,4">
-                  <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4"
+                  <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing1}"
                               IsVisible="{Binding ShowCount}">
                     <TextBlock Classes="sideHeading" Text="{Binding PluginCount}"/>
                     <TextBlock Classes="sideHeading" Text="{DynamicResource sidebar.effects.countlabel}"/>
                   </StackPanel>
                   <TextBlock Grid.Column="0" Classes="sideHeading" IsVisible="{Binding IsScanning}"
                              Text="{DynamicResource sidebar.effects.scanning}"/>
-                  <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24"
+                  <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24" MinHeight="24"
                           Click="OnToggleVstPathManager"
                           AutomationProperties.Name="{DynamicResource sidebar.effects.paths.manage}" ToolTip.Tip="{DynamicResource sidebar.effects.paths.manage}">
                     <c:DawIcon Data="{StaticResource icon-folder}" Width="12" Height="12"
@@ -752,24 +752,24 @@
                 <!-- 插件扫描路径（折叠面板；与偏好设置同一份数据） -->
                 <Border Grid.Row="2" x:Name="VstPathManager" Classes="sideCard" IsVisible="False"
                         Margin="0,0,0,6">
-                  <StackPanel Spacing="8">
+                  <StackPanel Spacing="{DynamicResource Md3Spacing2}">
                     <TextBlock Classes="sideHeading" Margin="0"
                                Text="{DynamicResource sidebar.effects.paths}"/>
                     <ListBox x:Name="VstPathsList" Height="72" Background="Transparent" BorderThickness="0"
                              ItemsSource="{Binding ScanPaths}"/>
                     <Grid ColumnDefinitions="*,Auto,Auto">
-                      <TextBox Grid.Column="0" x:Name="LibraryNewVstPath" Height="28" FontSize="11"
+                      <TextBox Grid.Column="0" x:Name="LibraryNewVstPath" Height="28" FontSize="{DynamicResource Md3TypeLabelSmall}"
                                VerticalContentAlignment="Center"
                                Text="{Binding NewPath, Mode=TwoWay}"
-                               Watermark="{DynamicResource sidebar.effects.paths.watermark}"/>
-                      <Button Grid.Column="1" Height="28" Padding="10,0" FontSize="11" Margin="6,0,0,0"
+                               PlaceholderText="{DynamicResource sidebar.effects.paths.watermark}"/>
+                      <Button Grid.Column="1" Height="28" MinHeight="28" Padding="10,0" FontSize="{DynamicResource Md3TypeLabelSmall}" Margin="6,0,0,0"
                               Content="{DynamicResource prefs.vst.add}"
                               Click="OnAddVstPathFromLibrary"/>
-                      <Button Grid.Column="2" Height="28" Padding="10,0" FontSize="11" Margin="6,0,0,0"
+                      <Button Grid.Column="2" Height="28" MinHeight="28" Padding="10,0" FontSize="{DynamicResource Md3TypeLabelSmall}" Margin="6,0,0,0"
                               Content="{DynamicResource prefs.vst.remove}"
                               Click="OnRemoveVstPathFromLibrary"/>
                     </Grid>
-                    <TextBlock FontSize="10" TextWrapping="Wrap"
+                    <TextBlock FontSize="{DynamicResource Md3TypeLabelTiny}" TextWrapping="Wrap"
                                Foreground="{DynamicResource md3.on-surface-variant}"
                                Text="{DynamicResource sidebar.effects.paths.hint}"/>
                   </StackPanel>
@@ -793,17 +793,17 @@
                                 PointerMoved="OnPluginPointerMoved">
                           <Grid ColumnDefinitions="*,Auto">
                             <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                              <TextBlock Text="{Binding Name}" FontSize="12" TextTrimming="CharacterEllipsis"
+                              <TextBlock Text="{Binding Name}" FontSize="{DynamicResource Md3TypeBodySmall}" TextTrimming="CharacterEllipsis"
                                          Foreground="{DynamicResource md3.on-surface}"/>
-                              <TextBlock Text="{Binding Vendor}" FontSize="10" Margin="0,1,0,0"
+                              <TextBlock Text="{Binding Vendor}" FontSize="{DynamicResource Md3TypeLabelTiny}" Margin="0,1,0,0"
                                          TextTrimming="CharacterEllipsis"
                                          IsVisible="{Binding HasVendor}"
                                          Foreground="{DynamicResource md3.on-surface-variant}"/>
                             </StackPanel>
-                            <Border Grid.Column="1" CornerRadius="6" Padding="6,2" Margin="6,0,0,0"
+                            <Border Grid.Column="1" CornerRadius="{DynamicResource Md3DawCornerRadius}" Padding="6,2" Margin="6,0,0,0"
                                     VerticalAlignment="Center"
                                     Background="{DynamicResource md3.surface-container-high}">
-                              <TextBlock Text="{Binding Badge}" FontSize="9" FontWeight="SemiBold"
+                              <TextBlock Text="{Binding Badge}" FontSize="{DynamicResource Md3DawTypeReadout}" FontWeight="SemiBold"
                                          Foreground="{DynamicResource md3.on-surface-variant}"/>
                             </Border>
                           </Grid>
@@ -815,14 +815,14 @@
                   <!-- 空态：一个效果器也没扫到（W11：给「添加标准路径并扫描」出口） -->
                   <StackPanel IsVisible="{Binding ShowNoPlugins}">
                     <Border Classes="sideCard">
-                      <StackPanel Spacing="8">
+                      <StackPanel Spacing="{DynamicResource Md3Spacing2}">
                         <c:DawIcon Data="{StaticResource icon-sliders}" Width="14" Height="14"
                               Fill="{DynamicResource md3.on-surface-variant}"
                               HorizontalAlignment="Left" Margin="0,0,0,2"/>
-                        <TextBlock FontSize="11" TextWrapping="Wrap"
+                        <TextBlock FontSize="{DynamicResource Md3TypeLabelSmall}" TextWrapping="Wrap"
                                    Foreground="{DynamicResource md3.on-surface-variant}"
                                    Text="{DynamicResource sidebar.effects.empty}"/>
-                        <Button Height="28" FontSize="11" Padding="10,0"
+                        <Button Height="28" MinHeight="28" FontSize="{DynamicResource Md3TypeLabelSmall}" Padding="10,0"
                                 HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
                                 Content="{DynamicResource sidebar.effects.addstandard}"
                                 Click="OnAddStandardVstPathsFromLibrary"/>
@@ -837,7 +837,7 @@
                         <c:DawIcon Data="{StaticResource icon-search}" Width="14" Height="14"
                               Fill="{DynamicResource md3.on-surface-variant}"
                               HorizontalAlignment="Left" Margin="0,0,0,6"/>
-                        <TextBlock FontSize="11" TextWrapping="Wrap"
+                        <TextBlock FontSize="{DynamicResource Md3TypeLabelSmall}" TextWrapping="Wrap"
                                    Foreground="{DynamicResource md3.on-surface-variant}"
                                    Text="{DynamicResource sidebar.effects.nomatch}"/>
                       </StackPanel>
@@ -898,14 +898,14 @@
           <Grid RowDefinitions="40,*">
             <Border BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1" Padding="16,0">
               <Grid ColumnDefinitions="*,Auto,Auto">
-                <TextBlock Name="ContextToolTitle" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <TextBlock Name="ContextToolTitle" FontSize="{DynamicResource Md3TypeBodyMedium}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                 <Button Name="CollapseContextButton" Grid.Column="1" Classes="toolAction" Theme="{StaticResource DawButtonTheme}" Height="32" Margin="0,0,8,0" Padding="12,0" Click="OnToggleContextTool">
                   <StackPanel Orientation="Horizontal" Spacing="6">
                     <c:DawIcon Name="ContextCollapseIcon" Data="{StaticResource icon-chevron-down}" Width="14" Height="14" Fill="{Binding $parent[Button].Foreground}"/>
                     <TextBlock Name="ContextCollapseText" Text="{DynamicResource workspace.collapse}" VerticalAlignment="Center"/>
                   </StackPanel>
                 </Button>
-                <Button Grid.Column="2" Classes="toolClose" Width="32" Height="32" Click="OnCloseContextTool"
+                <Button Grid.Column="2" Classes="toolClose" Width="32" Height="32" MinHeight="32" Click="OnCloseContextTool"
                         AutomationProperties.Name="{DynamicResource button.cancel}">
                   <c:DawIcon Data="{StaticResource icon-x}" Width="14" Height="14" Fill="{Binding $parent[Button].Foreground}"/>
                 </Button>
@@ -920,10 +920,10 @@
       <Border x:Name="ShellStatusRow" Grid.Row="2" Background="{DynamicResource md3.surface-container-low}"
               BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,1,0,0">
         <Grid ColumnDefinitions="Auto,*,Auto,Auto" Margin="16,0">
-          <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-            <Border Width="7" Height="7" CornerRadius="999" VerticalAlignment="Center"
+          <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}" VerticalAlignment="Center">
+            <Border Width="7" Height="7" CornerRadius="{DynamicResource Md3ShapeFull}" VerticalAlignment="Center"
                     Background="{DynamicResource md3.primary}"/>
-            <TextBlock VerticalAlignment="Center" FontSize="10"
+            <TextBlock VerticalAlignment="Center" FontSize="{DynamicResource Md3TypeLabelTiny}"
                        Foreground="{DynamicResource md3.on-surface-variant}"
                        MaxWidth="400" TextTrimming="CharacterEllipsis" Text="{Binding ProgressText}"/>
           </StackPanel>
@@ -932,9 +932,9 @@
                        Background="Transparent"/>
           <Button Name="DeliveryStatusButton" Grid.Column="2" Classes="toolAction" IsVisible="False"
                   Height="28" MinHeight="28" Margin="8,0" Click="OnReturnToDelivery">
-            <TextBlock Name="DeliveryStatusText" FontSize="11" MaxWidth="220" TextTrimming="CharacterEllipsis"/>
+            <TextBlock Name="DeliveryStatusText" FontSize="{DynamicResource Md3TypeLabelSmall}" MaxWidth="220" TextTrimming="CharacterEllipsis"/>
           </Button>
-          <TextBlock Grid.Column="3" VerticalAlignment="Center" FontSize="10"
+          <TextBlock Grid.Column="3" VerticalAlignment="Center" FontSize="{DynamicResource Md3TypeLabelTiny}"
                      Foreground="{DynamicResource md3.on-surface-variant}"
                      Text="{Binding AppVersion}"/>
         </Grid>
@@ -958,26 +958,26 @@
 
     <!-- Overlay layer: in-window modal dialog host -->
     <Grid Name="OverlayLayer" IsVisible="False" ZIndex="1000" Background="Transparent">
-      <Border Name="OverlayBackdrop" Classes="md3-fade" Background="#A0000000" PointerPressed="OnOverlayBackdropPressed"/>
+      <Border Name="OverlayBackdrop" Classes="md3-fade" Background="{DynamicResource Md3DialogScrim}" PointerPressed="OnOverlayBackdropPressed"/>
       <Border Name="OverlayCard" Classes="md3-pop"
               HorizontalAlignment="Center" VerticalAlignment="Center"
               MinWidth="340"
               ClipToBounds="True"
-              Background="{DynamicResource PlusBrushDialogCard}"
+              Background="{DynamicResource md3.surface-container-high}"
               BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
-              BorderThickness="0" CornerRadius="14"
-              BoxShadow="0 8 32 0 #3F000000">
+              BorderThickness="0" CornerRadius="{DynamicResource Md3ShapeExtraLarge}"
+              BoxShadow="{DynamicResource Md3ElevationLevel3}">
         <Grid RowDefinitions="Auto,*">
           <!-- Optional dialog header (e.g. Preferences) -->
           <Border Name="OverlayHeader" Grid.Row="0" IsVisible="False"
                   Padding="16,10" CornerRadius="11.5,11.5,0,0">
             <Grid ColumnDefinitions="*,Auto">
               <TextBlock Name="OverlayHeaderTitle" Grid.Column="0"
-                         VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold"/>
+                         VerticalAlignment="Center" FontSize="{DynamicResource Md3TypeBodyLarge}" FontWeight="SemiBold"/>
               <Button Name="OverlayHeaderClose" Grid.Column="1" Content="✕"
                       Click="OnOverlayCloseClicked"
                       Margin="8,0,0,0" Padding="6,0" MinWidth="24" MinHeight="24"
-                      FontSize="12" Opacity="0.7" VerticalAlignment="Center"/>
+                      FontSize="{DynamicResource Md3TypeBodySmall}" Opacity="0.7" VerticalAlignment="Center"/>
             </Grid>
           </Border>
           <ContentControl Grid.Row="1" Name="OverlayContent"/>
@@ -985,7 +985,7 @@
           <Button Name="OverlayCloseButton" Content="✕"
                   HorizontalAlignment="Right" VerticalAlignment="Top"
                   Margin="0,10,12,0" Padding="6,0" MinWidth="24" MinHeight="24"
-                  FontSize="12" Opacity="0.7"
+                  FontSize="{DynamicResource Md3TypeBodySmall}" Opacity="0.7"
                   Click="OnOverlayCloseClicked"/>
         </Grid>
       </Border>

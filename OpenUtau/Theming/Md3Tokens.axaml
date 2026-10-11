@@ -22,6 +22,7 @@
   <x:Double x:Key="Md3TypeLabelMedium">12</x:Double>
   <x:Double x:Key="Md3TypeLabelSmall">11</x:Double>
   <x:Double x:Key="Md3TypeLabelTiny">10</x:Double>
+  <x:Double x:Key="Md3DawTypeReadout">9</x:Double>
   <x:Double x:Key="Md3ControlHeight">40</x:Double>
   <x:Double x:Key="Md3WorkspaceControlHeight">40</x:Double>
   <x:Double x:Key="Md3CompactControlHeight">32</x:Double>
@@ -32,6 +33,11 @@
   <x:Double x:Key="Md3Spacing4">16</x:Double>
   <x:Double x:Key="Md3Spacing6">24</x:Double>
   <x:Double x:Key="Md3Spacing8">32</x:Double>
+  <!-- Google StateTokens v0_210: dragged .16, focus/pressed .10, hover .08. -->
+  <x:Double x:Key="Md3StateHoverOpacity">0.08</x:Double>
+  <x:Double x:Key="Md3StateFocusOpacity">0.10</x:Double>
+  <x:Double x:Key="Md3StatePressedOpacity">0.10</x:Double>
+  <x:Double x:Key="Md3StateDraggedOpacity">0.16</x:Double>
   <Thickness x:Key="Md3PagePadding">24</Thickness>
   <Thickness x:Key="Md3CardPadding">16</Thickness>
   <Thickness x:Key="Md3ButtonPadding">24,0</Thickness>

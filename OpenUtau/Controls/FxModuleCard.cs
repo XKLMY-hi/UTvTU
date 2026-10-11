@@ -1,3 +1,4 @@
+using OpenUtau.Theming;
 using System;
 using Avalonia;
 using Avalonia.Animation;
@@ -166,7 +167,9 @@ public class FxModuleCard : TemplatedControl {
         };
 
         var title = new TextBlock { Name = "PART_Title", FontSize = 15, FontWeight = FontWeight.Medium };
+        Md3RackKit.Paint(title, TextBlock.FontSizeProperty, "Md3TypeTitleMedium");
         var subtitle = new TextBlock { Name = "PART_Subtitle", FontSize = 11, IsVisible = false };
+        Md3RackKit.Paint(subtitle, TextBlock.FontSizeProperty, "Md3TypeLabelSmall");
         var headerText = new StackPanel {
             Name = "PART_HeaderText",
             Spacing = 1,
@@ -175,6 +178,7 @@ public class FxModuleCard : TemplatedControl {
         };
 
         var stateText = new TextBlock { Name = "PART_StateText", FontSize = 10, FontWeight = FontWeight.Medium };
+        Md3RackKit.Paint(stateText, TextBlock.FontSizeProperty, "Md3TypeLabelTiny");
         var chip = new Border {
             Name = "PART_StateChip",
             CornerRadius = new CornerRadius(6),
@@ -242,6 +246,7 @@ public class FxModuleCard : TemplatedControl {
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
         base.OnPropertyChanged(change);
+        if (change.Property == Md3Motion.ReducedProperty) ApplyMotion();
         if (change.Property == TitleProperty) {
             AutomationProperties.SetName(this, Title ?? string.Empty);
         }

@@ -1,4 +1,4 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -71,13 +71,13 @@
   <Grid Margin="2,2,2,2">
     <!-- Main card -->
     <Border Name="MainCard" Margin="0" BorderThickness="1" BorderBrush="{Binding HeaderBorderBrush}"
-            CornerRadius="12" PointerPressed="HeaderPointerPressed"
+            CornerRadius="{DynamicResource Md3ShapeMedium}" PointerPressed="HeaderPointerPressed"
             Background="{DynamicResource md3.surface-container-low}">
       <Grid Name="HeaderContent" ColumnDefinitions="auto,*,auto" RowDefinitions="*" Margin="6,3,4,3">
 
         <!-- ── Left: Avatar（圆角矩形，竖居中）+ TrackNo badge（右下角不挡头像） ── -->
         <Border Name="AvatarCard" Grid.Column="0" VerticalAlignment="Top" Margin="0,2,6,0"
-                Width="44" Height="44" CornerRadius="8" ClipToBounds="True"
+                Width="44" Height="44" CornerRadius="{DynamicResource Md3ShapeSmall}" ClipToBounds="True"
                 BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0">
           <Image Source="{Binding Avatar}" Stretch="Uniform"
                  RenderOptions.BitmapInterpolationMode="HighQuality"
@@ -86,7 +86,7 @@
         <Border Background="{Binding TrackAccentColor}" Height="14" Width="20"
                 CornerRadius="3" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                 Margin="4,4" Grid.Column="0" ZIndex="1">
-          <TextBlock TextAlignment="Center" FontSize="10" FontWeight="Bold"
+          <TextBlock TextAlignment="Center" FontSize="{DynamicResource Md3TypeLabelTiny}" FontWeight="Bold"
                      Text="{Binding TrackNo}"
                      Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         </Border>
@@ -96,12 +96,12 @@
           <!-- Row 0: Track name（紧凑档下渲染器会内联到本行右侧，见 code-behind） -->
           <Button Name="TrackNameButton" Classes="trackHeaderText" Theme="{StaticResource TrackHeaderTextButtonTheme}" Grid.Row="0" Margin="2,0,0,0" Padding="2,0" Height="18"
                   HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Focusable="True"
-                  FontSize="11" FontWeight="SemiBold"
+                  FontSize="{DynamicResource Md3TypeLabelSmall}" FontWeight="SemiBold"
                   Content="{Binding TrackName}" Click="TrackNameButtonClicked"/>
 
           <!-- Row 1: Singer (visible when track is tall enough) -->
           <Button Classes="trackHeaderText" Theme="{StaticResource TrackHeaderTextButtonTheme}" Grid.Row="1" Margin="2,0,0,0" Padding="2,0" Height="16"
-                  FontSize="10" IsVisible="{Binding IsSingerVisible}"
+                  FontSize="{DynamicResource Md3TypeLabelTiny}" IsVisible="{Binding IsSingerVisible}"
                   HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Focusable="True"
                   Content="{Binding Singer, TargetNullValue={StaticResource tracks.selectsinger}}"
                   Click="SingerButtonClicked" ContextRequested="SingerButtonContextRequested"
@@ -109,7 +109,7 @@
 
           <!-- Row 2: Phonemizer -->
           <Button Classes="trackHeaderText" Theme="{StaticResource TrackHeaderTextButtonTheme}" Grid.Row="2" Margin="2,0,0,0" Padding="2,0" Height="16"
-                  FontSize="10" IsVisible="{Binding IsPhonemizerVisible}"
+                  FontSize="{DynamicResource Md3TypeLabelTiny}" IsVisible="{Binding IsPhonemizerVisible}"
                   HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Focusable="True"
                   Content="{Binding PhonemizerTag}" Click="PhonemizerButtonClicked"
                   ContextRequested="PhonemizerButtonContextRequested"
@@ -117,7 +117,7 @@
 
           <!-- Row 3: Renderer（W33：**恒可见**，不再按轨道高裁剪；命名供布局测试定位） -->
           <Button Name="RendererButton" Classes="trackHeaderText" Theme="{StaticResource TrackHeaderTextButtonTheme}" Grid.Row="3" Margin="2,0,0,0" Padding="2,0" Height="16"
-                  FontSize="10" IsVisible="{Binding IsRendererVisible}"
+                  FontSize="{DynamicResource Md3TypeLabelTiny}" IsVisible="{Binding IsRendererVisible}"
                   HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Focusable="True"
                   Content="{Binding Renderer}" Click="RendererButtonClicked"
                   ContextRequested="RendererButtonContextRequested"
@@ -138,7 +138,7 @@
                     PointerPressed="VolumeFaderPointerPressed" ValueChanged="VolumeOrPanSliderValueChanged"
                     ContextRequested="VolumeFaderContextRequested" IsEnabled="{Binding !Muted}"/>
             <TextBlock Grid.Column="2" HorizontalAlignment="Left" Background="Transparent" Margin="2,0"
-                       TextAlignment="Center" FontSize="9" Foreground="{DynamicResource md3.on-surface-variant}" FontFamily="{DynamicResource PlusFontFamilyMono}"
+                       TextAlignment="Center" FontSize="{DynamicResource Md3DawTypeReadout}" Foreground="{DynamicResource md3.on-surface-variant}" FontFamily="{DynamicResource PlusFontFamilyMono}"
                        PointerPressed="VolumePointerPressed">
               <TextBlock.Text>
                 <MultiBinding StringFormat="{}{0:+#00.0;-#00.0}">
@@ -148,7 +148,7 @@
             </TextBlock>
             <TextBox Grid.Column="2" Name="VolumeTextBox" MinWidth="28"
                      HorizontalAlignment="Left" BorderThickness="0" IsVisible="False" IsEnabled="False"
-                     TextAlignment="Right" FontSize="9" FontFamily="{DynamicResource PlusFontFamilyMono}"
+                     TextAlignment="Right" FontSize="{DynamicResource Md3DawTypeReadout}" FontFamily="{DynamicResource PlusFontFamilyMono}"
                      KeyDown="VolumeOrPanTextBoxKeyDown" LostFocus="VolumeOrPanTextBoxLostFocus"/>
 
             <!-- Pan -->
@@ -157,7 +157,7 @@
                     PointerPressed="PanFaderPointerPressed" ValueChanged="VolumeOrPanSliderValueChanged"
                     ContextRequested="PanFaderContextRequested" IsEnabled="{Binding !Muted}"/>
             <TextBlock Grid.Column="4" HorizontalAlignment="Stretch" Background="Transparent" Margin="1,0"
-                       TextAlignment="Center" FontSize="9" Foreground="{DynamicResource md3.on-surface-variant}" FontFamily="{DynamicResource PlusFontFamilyMono}"
+                       TextAlignment="Center" FontSize="{DynamicResource Md3DawTypeReadout}" Foreground="{DynamicResource md3.on-surface-variant}" FontFamily="{DynamicResource PlusFontFamilyMono}"
                        PointerPressed="PanPointerPressed">
               <TextBlock.Text>
                 <MultiBinding StringFormat="{}{0:00R;00L;C}">
@@ -166,7 +166,7 @@
               </TextBlock.Text>
             </TextBlock>
             <TextBox Grid.Column="4" Name="PanTextBox" MinWidth="26" HorizontalAlignment="Center"
-                     BorderThickness="0" IsVisible="False" IsEnabled="False" TextAlignment="Center" FontSize="9"
+                     BorderThickness="0" IsVisible="False" IsEnabled="False" TextAlignment="Center" FontSize="{DynamicResource Md3DawTypeReadout}"
                      FontFamily="{DynamicResource PlusFontFamilyMono}" KeyDown="VolumeOrPanTextBoxKeyDown" LostFocus="VolumeOrPanTextBoxLostFocus"/>
           </Grid>
         </Grid>
@@ -179,7 +179,7 @@
                触发条件从 `!IsRendererVisible` 改成 `ShowOverflow`（W33）：渲染器已恒显，
                若还挂渲染器那个条件就永远不显示了；同时**渲染器兜底项已删除**（同一入口两处呈现是隐患）。 -->
           <Button Name="OverflowButton" Classes="trackHeaderAction" Theme="{StaticResource DawTextButtonTheme}" Height="18" Width="17" Padding="0"
-                  Content="⋯" FontSize="12"
+                  Content="⋯" FontSize="{DynamicResource Md3TypeBodySmall}"
                   VerticalAlignment="Top" IsVisible="{Binding ShowOverflow}">
             <Button.Flyout>
               <Flyout>
@@ -203,7 +203,7 @@
           <ToggleButton Name="MuteButton" Classes="trackHeaderToggle mute" Theme="{StaticResource TrackHeaderToggleTheme}" MinHeight="0" Margin="0" Padding="0" Height="20" Width="24"
                         HorizontalAlignment="Center"
                         AutomationProperties.Name="{DynamicResource tracks.mute}" ToolTip.Tip="{DynamicResource tracks.mute}"
-                        IsChecked="{Binding Mute, Mode=OneWay}" Command="{Binding ToggleMute}" FontSize="10" FontWeight="Bold" Content="M">
+                        IsChecked="{Binding Mute, Mode=OneWay}" Command="{Binding ToggleMute}" FontSize="{DynamicResource Md3TypeLabelTiny}" FontWeight="Bold" Content="M">
             <ToggleButton.ContextMenu>
               <ContextMenu>
                 <MenuItem Classes="context" Header="{StaticResource tracks.mute}" Command="{Binding ToggleMute}"/>
@@ -218,7 +218,7 @@
           <ToggleButton Name="SoloButton" Classes="trackHeaderToggle solo" Theme="{StaticResource TrackHeaderToggleTheme}" MinHeight="0" Margin="0" Padding="0" Height="20" Width="24"
                         HorizontalAlignment="Center"
                         AutomationProperties.Name="{DynamicResource tracks.solo}" ToolTip.Tip="{DynamicResource tracks.solo}"
-                        IsChecked="{Binding Solo, Mode=OneWay}" Command="{Binding ToggleSolo}" FontSize="10" FontWeight="Bold" Content="S">
+                        IsChecked="{Binding Solo, Mode=OneWay}" Command="{Binding ToggleSolo}" FontSize="{DynamicResource Md3TypeLabelTiny}" FontWeight="Bold" Content="S">
             <ToggleButton.ContextMenu>
               <ContextMenu>
                 <MenuItem Classes="context" Header="{StaticResource tracks.solo.only}" Command="{Binding ToggleSolo}"/>
@@ -233,7 +233,7 @@
                   HorizontalAlignment="Center"
                   AutomationProperties.Name="{DynamicResource context.track.effects}" ToolTip.Tip="{DynamicResource context.track.effects}"
                   Classes.fxOn="{Binding MixFxEnabled}"
-                  Command="{Binding OpenMixFxDialog}" FontSize="9" FontWeight="SemiBold" Content="fx">
+                  Command="{Binding OpenMixFxDialog}" FontSize="{DynamicResource Md3DawTypeReadout}" FontWeight="SemiBold" Content="fx">
           </Button>
 
           <!-- 轨道设置按钮（重建：旧按钮点击无效——去 Separator、常显、明确布局） -->

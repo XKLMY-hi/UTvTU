@@ -6,11 +6,14 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Threading;
 using OpenUtau.App;
 using OpenUtau.App.Views;
 using OpenUtau.Core;
 using OpenUtau.Core.Export;
+using OpenUtau.Core.Theming;
+using OpenUtau.Theming;
 using OpenUtau.Core.Ustx;
 using OpenUtau.Core.Util;
 using OpenUtau.Test.TestSupport;
@@ -66,6 +69,7 @@ namespace OpenUtau.Test.App {
                 var processing = Field<ComboBox>(window, "ProcessingModeCombo");
                 processing.SelectedIndex = 1;
                 Field<RadioButton>(window, "RadioPerTrack").IsChecked = true;
+                Assert.Equal(ColorPool.Current.Color(Md3Role.OnSecondaryContainer), Assert.IsAssignableFrom<ISolidColorBrush>(Field<RadioButton>(window, "RadioPerTrack").Foreground).Color);
                 Field<CheckBox>(window, "ChkVst").IsChecked = true;
                 Assert.Equal(ExportProcessingMode.Realtime, Plan(window).Audio.ProcessingMode);
                 processing.SelectedIndex = 0;
@@ -103,7 +107,7 @@ namespace OpenUtau.Test.App {
                 Field<TextBox>(window, "TailSecondsBox").Text = "0";
                 Dispatcher.UIThread.RunJobs();
                 Assert.True(Field<Button>(window, "StartBtn").IsEnabled);
-                Assert.InRange(Field<Button>(window, "StartBtn").Bounds.Height, 35, 37);
+                Assert.Equal(40, Field<Button>(window, "StartBtn").Bounds.Height);
             } finally { window.Close(); }
         }
         [AvaloniaFact]

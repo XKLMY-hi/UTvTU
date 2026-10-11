@@ -17,7 +17,7 @@ using OpenUtau.Theming;
 // ═══════════════════════════════════════════════════════════════════════════════
 //  机架控件族（fx-rack）
 //
-//  背景：设计交付稿已作废，控件语言由我们自定。唯一基准是颜色池
+//  控件使用共享 MD3 颜色、形状与 Standard 动效令牌；颜色来源为颜色池
 //  （Theming/Md3ColorPool 的 md3.* / md3.color.* 资源键）+ 既有卡片语言
 //  （PreferencesView 的 Border.card：圆角 16 / surface-container / outline-variant）。
 //
@@ -45,7 +45,7 @@ public enum Md3RackVisual {
     Default,
     /// <summary>悬停：MD3 状态层 8%。</summary>
     Hover,
-    /// <summary>按下：MD3 状态层 12%。</summary>
+    /// <summary>按下：Google StateTokens v0_210 状态层 10%。</summary>
     Pressed,
     /// <summary>键盘焦点：primary 焦点环。</summary>
     Focus,
@@ -60,15 +60,19 @@ public enum Md3RackVisual {
 /// 仅本族使用——不跨族外扩，避免与样式层（fx-ctl）抢地盘。
 /// </summary>
 internal static class Md3RackKit {
+    internal static double HoverOpacity => StateOpacity("Md3StateHoverOpacity", 0.08);
+    internal static double PressedOpacity => StateOpacity("Md3StatePressedOpacity", 0.10);
+    static double StateOpacity(string key, double fallback) =>
+        Application.Current?.TryFindResource(key, out var value) == true && value is double opacity ? opacity : fallback;
     // ── 几何令牌（与 PreferencesView 的卡片语言同源：卡片 16 / 行 12 / 胶囊 999） ──
     internal const double RadiusPill = 999;
     internal const double RadiusCard = 16;
     internal const double RadiusRow = 12;
-    internal const double RadiusField = 10;
+    internal const double RadiusField = 8;
 
-    // ── 动效令牌（短 120ms / 中 200ms，与 Md3Transitions 的 0.15/0.2s 同量级） ──
-    internal static readonly TimeSpan FastMotion = TimeSpan.FromMilliseconds(120);
-    internal static readonly TimeSpan BaseMotion = TimeSpan.FromMilliseconds(200);
+    // Shared Standard motion: effects remain monotonic for precise DAW operation.
+    internal static TimeSpan FastMotion => Md3Motion.EffectsFast;
+    internal static TimeSpan BaseMotion => Md3Motion.EffectsDefault;
 
     /// <summary>颜色池**画刷**键（如 md3.surface-container-low）。</summary>
     internal static string BrushKey(Md3Role role) => ColorPool.Key(role);
@@ -108,7 +112,7 @@ internal static class Md3RackKit {
     /// 与 Styles/Md3Transitions.axaml 的约定一致（那边是把 Transitions 置空）。
     /// </summary>
     internal static bool MotionEnabled(StyledElement element) {
-        if (Core.Util.Preferences.Default.ReduceMotion) {
+        if (Core.Util.Preferences.Default.ReduceMotion || element is Control control && Md3Motion.GetReduced(control)) {
             return false;
         }
         for (Visual? v = element as Visual; v != null; v = v.GetVisualParent()) {
@@ -126,6 +130,9 @@ internal static class Md3RackKit {
         }
         var transitions = new Transitions();
         foreach (ITransition item in items) {
+            if (item is TransitionBase transition) {
+                transition.Easing = new Md3StandardSpringEasing { Stiffness = 3800, Damping = 1 };
+            }
             transitions.Add(item);
         }
         return transitions;
@@ -144,7 +151,7 @@ internal static class Md3RackKit {
 ///   · 圆形按钮 28×28（部件名 PART_Circle：避开面板容器的 PART_Body，同名会造成跨控件查找歧义），外圈留 3px 焦点环位（控件总尺寸 34×34，不裁剪、不溢出布局）；
 ///   · 关：底 surface-container-highest + 1px outline-variant 描边 + 电源符号 outline；
 ///   · 开：底 primary + 符号 on-primary（点亮）；
-///   · 悬停/按下：MD3 状态层（on-surface / on-primary，8% / 12%）+ 描边升到 outline；
+///   · 悬停/按下：MD3 状态层（on-surface / on-primary，8% / 10%）+ 描边升到 outline；
 ///   · 焦点：2px primary 外环（Tab 可见）；禁用：38% 不透明度；旁通：压暗去强调；
 ///   · 键位：Tab 聚焦，Space/Enter 切换，← 置关 / → 置开（开关惯例，便于盲操）。
 ///
@@ -262,6 +269,7 @@ public class Md3PowerSwitch : TemplatedControl {
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
         base.OnPropertyChanged(change);
+        if (change.Property == Md3Motion.ReducedProperty) ApplyMotion();
         if (change.Property == IsCheckedProperty) {
             bool value = change.GetNewValue<bool>();
             Md3RackKit.SetPseudo(this, ":checked", value);
@@ -330,8 +338,8 @@ public class Md3PowerSwitch : TemplatedControl {
         Md3RackKit.Paint(focusRing, Shape.StrokeProperty, "md3.primary");
 
         double layer = visual switch {
-            Md3RackVisual.Hover => 0.08,
-            Md3RackVisual.Pressed => 0.12,
+            Md3RackVisual.Hover => Md3RackKit.HoverOpacity,
+            Md3RackVisual.Pressed => Md3RackKit.PressedOpacity,
             _ => 0.0,
         };
         Md3RackKit.StateLayer(stateLayer, Shape.FillProperty, layer > 0, on ? "md3.on-primary" : "md3.on-surface", layer);

@@ -42,13 +42,13 @@
                           Background="{TemplateBinding Background}"
                           BorderBrush="{TemplateBinding BorderBrush}"
                           BorderThickness="{TemplateBinding BorderThickness}"
-                          CornerRadius="4" />
+                          CornerRadius="{DynamicResource Md3ShapeExtraSmall}" />
 
                   <c:DawIcon Name="PickerChevron" Data="{StaticResource icon-chevron-down}"
                              Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center"
                              Fill="{TemplateBinding Foreground}"/>
                   <Border Name="PickerFocus" BorderBrush="{DynamicResource md3.primary}" BorderThickness="1"
-                          CornerRadius="4" IsHitTestVisible="False" Opacity="0"/>
+                          CornerRadius="{DynamicResource Md3ShapeExtraSmall}" IsHitTestVisible="False" Opacity="0"/>
                   <Popup Name="PART_Popup"
                          WindowManagerAddShadowHint="False"
                          IsOpen="{TemplateBinding IsDropDownOpen, Mode=TwoWay}"
@@ -98,7 +98,7 @@
         </Style>
       </ComboBox.Styles>
     </ComboBox>
-    <TextBlock Margin="20,0,4,0" FontSize="11" UseLayoutRounding="False" VerticalAlignment="Center"
+    <TextBlock Margin="20,0,4,0" FontSize="{DynamicResource Md3TypeLabelSmall}" UseLayoutRounding="False" VerticalAlignment="Center"
                Foreground="{Binding TagBrush}" TextTrimming="CharacterEllipsis"
                TextAlignment="Right" Text="{Binding Header}"/>
   </Grid>

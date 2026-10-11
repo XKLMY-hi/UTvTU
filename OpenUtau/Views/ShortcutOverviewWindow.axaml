@@ -15,49 +15,49 @@
        ═══════════════════════════════════════════════════════════════════════ -->
   <controls:WorkspaceToolView.Styles>
     <Style Selector="TextBlock.groupTitle">
-      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodySmall}"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
       <Setter Property="LetterSpacing" Value="1"/>
       <Setter Property="Margin" Value="0,0,0,6"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
     </Style>
     <Style Selector="TextBlock.rowName">
-      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
       <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     </Style>
     <Style Selector="TextBlock.rowGesture">
-      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodySmall}"/>
       <Setter Property="FontFamily" Value="{DynamicResource PlusFontFamilyMono}"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
     </Style>
     <Style Selector="TextBlock.rowMeta">
-      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelSmall}"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
     </Style>
     <Style Selector="Border.row">
       <Setter Property="Padding" Value="10,6"/>
       <Setter Property="Margin" Value="0,0,0,2"/>
-      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeSmall}"/>
       <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
     </Style>
     <Style Selector="Border.conflictBadge">
       <Setter Property="Padding" Value="6,2"/>
-      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
       <Setter Property="Background" Value="{DynamicResource md3.error-container}"/>
     </Style>
     <Style Selector="TextBlock.conflictText">
-      <Setter Property="FontSize" Value="10"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelTiny}"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-error-container}"/>
     </Style>
     <Style Selector="Border.summary">
       <Setter Property="Padding" Value="10,6"/>
-      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeSmall}"/>
       <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
     </Style>
   </controls:WorkspaceToolView.Styles>
@@ -66,7 +66,7 @@
     <!-- 顶部：标题 + 冲突摘要 -->
     <Border DockPanel.Dock="Top" Classes="summary" Margin="0,0,0,10">
       <Grid ColumnDefinitions="*,Auto">
-        <TextBlock Grid.Column="0" Classes="rowName" FontWeight="Medium" FontSize="14"
+        <TextBlock Grid.Column="0" Classes="rowName" FontWeight="Medium" FontSize="{DynamicResource Md3TypeBodyLarge}"
                    Text="{DynamicResource shortcut.caption}"/>
         <TextBlock Grid.Column="1" x:Name="ConflictLabel" Classes="rowMeta"/>
       </Grid>
@@ -74,7 +74,7 @@
 
     <!-- 搜索 -->
     <TextBox DockPanel.Dock="Top" x:Name="SearchBox" Margin="0,0,0,10"
-             Watermark="{DynamicResource shortcut.search}"/>
+             PlaceholderText="{DynamicResource shortcut.search}"/>
 
     <!-- 底部提示 -->
     <TextBlock DockPanel.Dock="Bottom" Classes="rowMeta" Margin="0,10,0,0"

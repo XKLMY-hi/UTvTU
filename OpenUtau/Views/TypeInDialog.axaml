@@ -11,7 +11,7 @@
   <StackPanel VerticalAlignment="Center">
     <TextBlock Margin="20" Name="Prompt" IsVisible="False" TextWrapping="Wrap" MaxWidth="560"/>
     <TextBox Name="TextBox" Margin="4"/>
-    <Button Name="OkButton" Content="{DynamicResource button.ok}" Margin="4" HorizontalAlignment="Stretch"/>
+    <Button Classes="primary" Name="OkButton" Content="{DynamicResource button.ok}" Margin="4" HorizontalAlignment="Stretch"/>
   </StackPanel>
       </Border>
     </DockPanel>
