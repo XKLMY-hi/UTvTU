@@ -541,16 +541,8 @@
                 </StackPanel>
                 <StackPanel Spacing="8">
                   <TextBlock Classes="fieldLabel" Text="{DynamicResource prefs.appearance.theme}"/>
-                  <Grid ColumnDefinitions="*,Auto,Auto">
-                    <ComboBox Grid.Column="0" Classes="selectField" IsEnabled="{Binding !IsThemeEditorOpen}"
-                              ItemsSource="{Binding ThemeItems}" SelectedItem="{Binding ThemeName}"/>
-                    <Button Grid.Column="1" Classes="outlinePill" Margin="8,0,0,0" IsVisible="{Binding ThemeEditable}"
-                            IsEnabled="{Binding !IsThemeEditorOpen}" Content="✎" Click="OnEditCustomTheme"
-                            ToolTip.Tip="{DynamicResource prefs.appearance.customtheme.edit.title}"/>
-                    <Button Grid.Column="2" Classes="outlinePill" Margin="8,0,0,0" IsVisible="{Binding ThemeEditable}"
-                            IsEnabled="{Binding !IsThemeEditorOpen}" Content="＋" Click="OnCreateCustomTheme"
-                            ToolTip.Tip="{DynamicResource prefs.appearance.customtheme.create.title}"/>
-                  </Grid>
+                  <!-- Legacy theme authoring is retired; existing themes remain selectable. -->
+                  <ComboBox Classes="selectField" ItemsSource="{Binding ThemeItems}" SelectedItem="{Binding ThemeName}"/>
                 </StackPanel>
                 <StackPanel Spacing="8">
                   <TextBlock Classes="fieldLabel" Text="{DynamicResource prefs.field.accent}"/>

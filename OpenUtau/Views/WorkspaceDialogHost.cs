@@ -24,7 +24,8 @@ public sealed class WorkspaceDialogHost : UserControl {
     readonly ContentControl body = new();
     readonly Button close = new() { Width = 32, Height = 32, Margin = new Thickness(0) };
     IDisposable? titleBinding;
-    readonly TextBlock title = new() { FontSize = 16, FontWeight = FontWeight.Medium, TextWrapping = TextWrapping.Wrap };
+    readonly TextBlock title = new() { FontSize = 16, FontWeight = FontWeight.Medium, TextWrapping = TextWrapping.Wrap,
+        VerticalAlignment = VerticalAlignment.Center };
     void ConstrainBody() {
         card.MaxHeight = Math.Max(100, Bounds.Height - 48);
         if (HasDialogs) stack[^1].Tool.MaxHeight = Math.Max(100, Bounds.Height - 112);

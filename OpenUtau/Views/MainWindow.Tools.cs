@@ -142,6 +142,7 @@ public partial class MainWindow : IWorkspaceToolHost {
         HideToolWorkspace();
     }
     void ShutdownTools() {
+        LoadingWindow.EndLoading();
         foreach (var tool in tools.ToArray()) tool.Close();
         tools.Clear();
         ToolDialogHost.Shutdown();
