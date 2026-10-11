@@ -1452,4 +1452,19 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="workspace.oto.keys">1–5：定位参数 · W/S：缩放 · A/D：平移 · Q/E：选择样本</system:String>
   <system:String x:Key="workspace.collapse">收起</system:String>
   <system:String x:Key="workspace.expand">展开</system:String>
+  <system:String x:Key="workspace.singers.search">搜索音源名称或标识</system:String>
+  <system:String x:Key="workspace.resources.nomatches">没有匹配资源。可调整搜索、筛选条件，或安装资源。</system:String>
+  <system:String x:Key="workspace.singers.oto">OTO / 采样</system:String>
+  <system:String x:Key="workspace.singers.subbanks">子音源</system:String>
+  <system:String x:Key="workspace.singers.info">信息</system:String>
+  <system:String x:Key="workspace.singers.author">作者</system:String>
+  <system:String x:Key="workspace.singers.voice">声线</system:String>
+  <system:String x:Key="workspace.packages.search">搜索名称、开发者或版本</system:String>
+  <system:String x:Key="workspace.packages.all">全部包</system:String>
+  <system:String x:Key="workspace.packages.installed">已安装</system:String>
+  <system:String x:Key="workspace.packages.updates">可更新</system:String>
+  <system:String x:Key="workspace.packages.count">个包</system:String>
+  <system:String x:Key="workspace.packages.offline">暂时无法连接注册表，已显示本地安装的包。可刷新重试。</system:String>
+  <system:String x:Key="workspace.singers.empty.title">音源工作区</system:String>
+  <system:String x:Key="workspace.singers.empty.hint">安装音源后，可在这里管理采样、子音源与配置信息。</system:String>
 </ResourceDictionary>

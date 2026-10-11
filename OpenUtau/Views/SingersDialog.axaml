@@ -12,38 +12,54 @@
   <Design.DataContext>
     <vm:SingersViewModel/>
   </Design.DataContext>
+
   <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-    <Grid Name="SingerLayout" MinWidth="560" Height="650" RowDefinitions="Auto,Auto,*,Auto,176,Auto">
-      <Grid Name="SingerHeader" ColumnDefinitions="68,16,*,16,280">
-        <Border CornerRadius="12" Width="68" Height="68" ClipToBounds="True" Background="{DynamicResource md3.surface-container-high}" VerticalAlignment="Top">
-          <Image Width="68" Height="68" Source="{Binding Avatar}" Stretch="UniformToFill"/>
-        </Border>
-        <StackPanel Grid.Column="2" Spacing="8">
-          <ComboBox Name="name" MinHeight="36" HorizontalAlignment="Stretch" ItemsSource="{Binding Singers}"
-                    SelectedItem="{Binding Singer}" SelectionChanged="OnSelectedSingerChanged">
+    <Grid Name="SingerLayout" MinWidth="440" Height="650" ColumnDefinitions="232,24,*">
+      <Grid Name="SingerBrowser" RowDefinitions="Auto,Auto,*,Auto" Background="{DynamicResource md3.surface-container-low}" Margin="0" >
+        <TextBox Margin="12" Text="{Binding SearchSinger}" PlaceholderText="{DynamicResource workspace.singers.search}"/>
+        <Grid Grid.Row="1" Margin="12,0,12,8" ColumnDefinitions="*,Auto">
+          <TextBlock Classes="toolCaption" Text="{DynamicResource singers.caption}"/>
+          <TextBlock Grid.Column="1" Classes="toolCaption" Text="{Binding SingerCount}"/>
+        </Grid>
+        <Grid Grid.Row="2">
+          <ListBox Name="SingerList" ItemsSource="{Binding FilteredSingers}" SelectedItem="{Binding Singer, Mode=OneWay}" SelectionChanged="OnSingerListChanged" Background="Transparent">
+            <ListBox.ItemTemplate><DataTemplate>
+              <Grid ColumnDefinitions="36,12,*" Height="56">
+                <Border CornerRadius="8" Height="36" Background="{DynamicResource md3.surface-container-high}" VerticalAlignment="Center">
+                  <c:DawIcon Data="{StaticResource icon-mic}" Width="20" Height="20" Fill="{DynamicResource md3.primary}"/>
+                </Border>
+                <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
+                  <TextBlock Text="{Binding LocalizedName}" TextTrimming="CharacterEllipsis" FontWeight="Medium"/>
+                  <TextBlock Text="{Binding SingerType}" Classes="toolCaption"/>
+                </StackPanel>
+              </Grid>
+            </DataTemplate></ListBox.ItemTemplate>
+          </ListBox>
+          <TextBlock Classes="toolHint" Text="{DynamicResource workspace.resources.nomatches}" TextWrapping="Wrap" Margin="16" IsVisible="{Binding NoSingerMatches}" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        </Grid>
+        <Button Grid.Row="3" Classes="toolAction" Margin="12" Content="{DynamicResource menu.tools.singer.install}" Click="OnInstallSinger"/>
+      </Grid>
+      <Grid Grid.Column="2" RowDefinitions="Auto,Auto,40,*">
+        <Grid Name="SingerPicker" IsVisible="False" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
+          <ComboBox Name="name" HorizontalAlignment="Stretch" ItemsSource="{Binding Singers}" SelectedItem="{Binding Singer}" SelectionChanged="OnSelectedSingerChanged">
             <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding LocalizedName}"/></DataTemplate></ComboBox.ItemTemplate>
           </ComboBox>
-          <ScrollViewer MaxHeight="92"><TextBlock Name="info" FontSize="13" TextWrapping="Wrap" Text="{Binding Info}"/></ScrollViewer>
-        </StackPanel>
-<DataGrid Name="SubbanksGrid" Grid.Column="4" Height="140" Margin="0" CanUserSortColumns="False" BorderThickness="1"
-              BorderBrush="{DynamicResource SystemControlHighlightBaseMediumHighBrush}"
-              ItemsSource="{Binding Subbanks}" IsReadOnly="True">
-      <DataGrid.Columns>
-        <DataGridTextColumn Header="{StaticResource oto.prefix}" Binding="{Binding Prefix}"/>
-        <DataGridTextColumn Header="{StaticResource oto.suffix}" Binding="{Binding Suffix}"/>
-        <DataGridTextColumn Header="{StaticResource singers.subbanks.toneranges}" Binding="{Binding ToneRangesString}"/>
-        <DataGridTextColumn Header="{StaticResource singers.subbanks.color}" Binding="{Binding Color}"/>
-      </DataGrid.Columns>
-    </DataGrid>
-      </Grid>
-      <WrapPanel Grid.Row="1" Orientation="Horizontal" Margin="0,12,0,0">
-        <Button Classes="toolAction resourceAction" Content="{DynamicResource menu.tools.singer.install}" Click="OnInstallSinger"/>
-        <Button Classes="toolAction resourceAction" Content="{DynamicResource singers.location}" Command="{Binding OpenLocation}"
-                IsEnabled="{Binding Singer, Converter={x:Static ObjectConverters.IsNotNull}}"/>
-        <Button Classes="toolAction resourceAction" Click="OnSingerMenuButton" Width="36"
-                AutomationProperties.Name="{DynamicResource dialogs.tracksettings.caption}">
-          <c:DawIcon Data="{StaticResource icon-settings}" Width="16" Height="16" Fill="{DynamicResource md3.on-surface}"/>
-<Button.ContextMenu>
+          <Button Grid.Column="1" Classes="toolAction" Margin="8,0,0,0" Content="{DynamicResource menu.tools.singer.install}" Click="OnInstallSinger"/>
+        </Grid>
+        <Grid Name="SingerHeader" Grid.Row="1" RowDefinitions="Auto,Auto" ColumnDefinitions="64,16,*,Auto" Margin="0,0,0,12">
+          <Border CornerRadius="12" Width="64" Height="64" ClipToBounds="True" Background="{DynamicResource md3.surface-container-high}" VerticalAlignment="Top">
+            <Grid><c:DawIcon Data="{StaticResource icon-mic}" Width="24" Height="24" Fill="{DynamicResource md3.primary}"/>
+              <Image Source="{Binding Avatar}" Stretch="UniformToFill"/>
+            </Grid>
+          </Border>
+          <StackPanel Grid.Column="2" Spacing="3">
+            <TextBlock Text="{Binding Singer.LocalizedName}" FontSize="20" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+            <TextBlock Text="{Binding Singer.SingerType}" Classes="toolHint"/>
+            <TextBlock Text="{Binding Singer.Location}" FontSize="11" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Singer.Location}" Foreground="{DynamicResource md3.on-surface-variant}"/>
+          </StackPanel>
+          <Button Name="SingerOptions" Grid.Column="3" Classes="toolAction toolClose" Width="32" Height="32" Click="OnSingerMenuButton" IsEnabled="{Binding HasSinger}" AutomationProperties.Name="{DynamicResource dialogs.tracksettings.caption}">
+            <c:DawIcon Data="{StaticResource icon-settings}" Width="16" Height="16" Fill="{DynamicResource md3.on-surface}"/>
+            <Button.ContextMenu>
           <ContextMenu Name="SingerMenu" Placement="Bottom">
             <MenuItem Header="{DynamicResource singers.visitwebsite}" Click="OnVisitWebsite" IsEnabled="{Binding HasWebsite}"/>
             <MenuItem Header="{DynamicResource singers.setimage}" Click="OnSetImage"/>
@@ -62,19 +78,28 @@
             <MenuItem Header="{DynamicResource singers.refresh}" Command="{Binding Refresh}"/>
           </ContextMenu>
         </Button.ContextMenu>
-        </Button>
-        <Button Classes="toolAction resourceAction" Content="{DynamicResource singers.readme}" Click="OnOpenReadme"/>
-        <Button Classes="toolAction resourceAction" Content="{DynamicResource singers.playsample}" Click="OnPlayCharacterSample"/>
-        <Button Classes="toolAction resourceAction" Content="{DynamicResource singers.subbanks.edit}" Click="OnEditSubbanksButton"
-                IsEnabled="{Binding Singer, Converter={x:Static ObjectConverters.IsNotNull}}"/>
-        <Button Classes="toolAction resourceAction" Content="{DynamicResource singers.editoto.reset}" Command="{Binding RefreshSinger}" IsVisible="{Binding IsClassic}"/>
-        <Button Classes="toolAction resourceAction" Content="{DynamicResource singers.editoto.save}" Command="{Binding SaveOtos}"
-                IsVisible="{Binding IsClassic}" IsEnabled="{Binding Singer.OtoDirty}"/>
-        <Button Classes="toolAction resourceAction" Content="{DynamicResource singers.editoto.editinvlabeler}" Click="OnEditInVLabeler" IsVisible="{Binding IsClassic}"/>
-        <TextBox Name="AliasSearch" MinWidth="180" Margin="0,0,8,8" Text="{Binding SearchAlias}"
-                 PlaceholderText="{DynamicResource singers.editoto.searchalias}" IsVisible="{Binding UseSearchAlias}"/>
-      </WrapPanel>
-<DataGrid Name="OtoGrid" Grid.Row="2" Margin="0,12,0,0" RowHeight="32" CanUserResizeColumns="True" BorderThickness="1"
+          </Button>
+          <WrapPanel Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,12,0,0" IsEnabled="{Binding HasSinger}">
+            <Button Classes="toolAction resourceAction" Theme="{StaticResource DawButtonTheme}" Padding="12,0" Command="{Binding OpenLocation}"><StackPanel Orientation="Horizontal" Spacing="8"><c:DawIcon Data="{StaticResource icon-folder-open}" Width="16" Height="16" Fill="{DynamicResource md3.on-surface}"/><TextBlock Text="{DynamicResource singers.location}"/></StackPanel></Button>
+            <Button Classes="toolAction resourceAction" Theme="{StaticResource DawButtonTheme}" Padding="12,0" Click="OnPlayCharacterSample"><StackPanel Orientation="Horizontal" Spacing="8"><c:DawIcon Data="{StaticResource icon-play}" Width="16" Height="16" Fill="{DynamicResource md3.on-surface}"/><TextBlock Text="{DynamicResource singers.playsample}"/></StackPanel></Button>
+          </WrapPanel>
+        </Grid>
+        <Border Grid.Row="2" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource md3.outline-variant}">
+          <StackPanel Orientation="Horizontal" Spacing="4">
+            <Button Name="OtoTab" Classes="resourceTab selected" Content="{DynamicResource workspace.singers.oto}" Tag="oto" Click="OnDetailTab"/>
+            <Button Name="SubbanksTab" Classes="resourceTab" Content="{DynamicResource workspace.singers.subbanks}" Tag="subbanks" Click="OnDetailTab"/>
+            <Button Name="InfoTab" Classes="resourceTab" Content="{DynamicResource workspace.singers.info}" Tag="info" Click="OnDetailTab"/>
+          </StackPanel>
+        </Border>
+        <Grid Grid.Row="3">
+          <Grid Name="OtoPage" RowDefinitions="Auto,*,6,184,40">
+            <WrapPanel Orientation="Horizontal" Margin="0,12,0,0">
+              <TextBox Name="AliasSearch" Width="200" Margin="0,0,8,0" Text="{Binding SearchAlias}" PlaceholderText="{DynamicResource singers.editoto.searchalias}" IsVisible="{Binding UseSearchAlias}"/>
+              <Button Classes="toolAction resourceAction" Content="{DynamicResource singers.editoto.save}" Command="{Binding SaveOtos}" IsVisible="{Binding IsClassic}" IsEnabled="{Binding Singer.OtoDirty}"/>
+              <Button Classes="toolAction resourceAction" Content="{DynamicResource singers.editoto.reset}" Command="{Binding RefreshSinger}" IsVisible="{Binding IsClassic}"/>
+              <Button Classes="toolAction resourceAction" Content="vLabeler" ToolTip.Tip="{DynamicResource singers.editoto.editinvlabeler}" Click="OnEditInVLabeler" IsVisible="{Binding IsClassic}"/>
+            </WrapPanel>
+            <DataGrid Name="OtoGrid" Grid.Row="1" Margin="0,12,0,0" RowHeight="32" CanUserResizeColumns="True" BorderThickness="1"
               BorderBrush="{DynamicResource SystemControlHighlightBaseMediumHighBrush}"
               ItemsSource="{Binding DisplayedOtos}" SelectedItem="{Binding SelectedOto}" SelectedIndex="{Binding SelectedIndex}"
               SelectionChanged="OnSelectedOtoChanged"
@@ -107,15 +132,52 @@
         <DataGridTextColumn Header="{StaticResource oto.overlap}" Binding="{Binding Overlap}"/>
       </DataGrid.Columns>
     </DataGrid>
-      <GridSplitter Grid.Row="3" Height="6" HorizontalAlignment="Stretch" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext"/>
-      <Border Grid.Row="4" CornerRadius="12" BorderThickness="1" BorderBrush="{DynamicResource md3.outline-variant}" ClipToBounds="True">
-        <c:OtoPlot Name="OtoPlot" ZoomInMel="{Binding ZoomInMel}"/>
-      </Border>
-      <WrapPanel Grid.Row="5" Orientation="Horizontal" Margin="0,12,0,0">
-        <Button Classes="toolAction resourceAction" Content="{DynamicResource singers.playselectedfile}" Click="OnPlaySelectedFile"/>
-        <ToggleButton Classes="toolAction" IsChecked="{Binding ZoomInMel}" Content="{DynamicResource singers.otoview.zoomin}"/>
-        <TextBlock Classes="toolHint" VerticalAlignment="Center" Text="{DynamicResource workspace.oto.keys}"/>
-      </WrapPanel>
+            <GridSplitter Grid.Row="2" Height="6" HorizontalAlignment="Stretch" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext"/>
+            <Grid Grid.Row="3" RowDefinitions="28,*">
+              <TextBlock Classes="toolCaption" VerticalAlignment="Center" Text="{Binding SelectedOto.DisplayFile}" TextTrimming="CharacterEllipsis"/>
+              <Border Grid.Row="1" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource md3.outline-variant}" ClipToBounds="True"><c:OtoPlot Name="OtoPlot" ZoomInMel="{Binding ZoomInMel}"/></Border>
+            </Grid>
+            <WrapPanel Grid.Row="4" Orientation="Horizontal" Margin="0,4,0,0">
+              <Button Classes="toolAction resourceAction" Content="{DynamicResource singers.playselectedfile}" Click="OnPlaySelectedFile"/>
+              <ToggleButton Classes="toolAction" IsChecked="{Binding ZoomInMel}" Content="{DynamicResource singers.otoview.zoomin}"/>
+            </WrapPanel>
+          </Grid>
+          <Grid Name="SubbanksPage" IsVisible="False" RowDefinitions="Auto,*">
+            <Button Classes="toolAction" HorizontalAlignment="Left" Margin="0,12,0,0" Content="{DynamicResource singers.subbanks.edit}" Click="OnEditSubbanksButton" IsEnabled="{Binding HasSinger}"/>
+            <DataGrid Name="SubbanksGrid" Grid.Row="1" IsVisible="False" Margin="0,12,0,0" CanUserSortColumns="False" BorderThickness="1"
+              BorderBrush="{DynamicResource SystemControlHighlightBaseMediumHighBrush}"
+              ItemsSource="{Binding Subbanks}" IsReadOnly="True">
+      <DataGrid.Columns>
+        <DataGridTextColumn Header="{StaticResource oto.prefix}" Binding="{Binding Prefix}"/>
+        <DataGridTextColumn Header="{StaticResource oto.suffix}" Binding="{Binding Suffix}"/>
+        <DataGridTextColumn Header="{StaticResource singers.subbanks.toneranges}" Binding="{Binding ToneRangesString}"/>
+        <DataGridTextColumn Header="{StaticResource singers.subbanks.color}" Binding="{Binding Color}"/>
+      </DataGrid.Columns>
+    </DataGrid>
+          </Grid>
+          <ScrollViewer Name="InfoPage" IsVisible="False" Margin="0,16,0,0">
+            <StackPanel Spacing="12">
+              <Grid ColumnDefinitions="80,*" RowDefinitions="Auto,Auto,Auto,Auto">
+                <TextBlock Classes="toolHint" Text="{DynamicResource workspace.singers.author}"/><TextBlock Grid.Column="1" Text="{Binding Singer.Author}" TextWrapping="Wrap"/>
+                <TextBlock Grid.Row="1" Classes="toolHint" Text="{DynamicResource workspace.singers.voice}"/><TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Singer.Voice}" TextWrapping="Wrap"/>
+                <TextBlock Grid.Row="2" Classes="toolHint" Text="{DynamicResource packages.col.version}"/><TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Singer.Version}"/>
+                <TextBlock Grid.Row="3" Classes="toolHint" Text="{DynamicResource singers.visitwebsite}"/><TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Singer.Web}" TextWrapping="Wrap"/>
+              </Grid>
+              <TextBlock Text="{Binding Singer.OtherInfo}" TextWrapping="Wrap"/>
+              <ItemsControl ItemsSource="{Binding Singer.Errors}"><ItemsControl.ItemTemplate><DataTemplate><TextBlock Text="{Binding}" TextWrapping="Wrap" Foreground="{DynamicResource md3.error}"/></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+              <Button Classes="toolAction" HorizontalAlignment="Left" Content="{DynamicResource singers.readme}" Click="OnOpenReadme" IsEnabled="{Binding HasSinger}"/>
+            </StackPanel>
+          </ScrollViewer>
+        </Grid>
+        <Border Grid.RowSpan="4" Background="{DynamicResource md3.surface}" IsVisible="{Binding !HasSinger, FallbackValue=False}">
+          <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12" Margin="24" MaxWidth="360">
+            <c:DawIcon Data="{StaticResource icon-mic}" Width="32" Height="32" Fill="{DynamicResource md3.primary}"/>
+            <TextBlock Text="{DynamicResource workspace.singers.empty.title}" FontSize="18" FontWeight="Medium" TextAlignment="Center"/>
+            <TextBlock Text="{DynamicResource workspace.singers.empty.hint}" Classes="toolHint" TextAlignment="Center" TextWrapping="Wrap"/>
+            <Button Classes="toolAction" HorizontalAlignment="Center" Content="{DynamicResource menu.tools.singer.install}" Click="OnInstallSinger"/>
+          </StackPanel>
+        </Border>
+      </Grid>
     </Grid>
   </ScrollViewer>
 </controls:WorkspaceToolView>

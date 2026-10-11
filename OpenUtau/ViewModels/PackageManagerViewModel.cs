@@ -2,11 +2,15 @@ using System;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using OpenUtau.Core;
 using ReactiveUI.Fody.Helpers;
 using System.Reactive;
 using ReactiveUI;
+using Serilog;
 
 namespace OpenUtau.App.ViewModels {
     public class PackageRowViewModel : ViewModelBase {
@@ -62,26 +66,92 @@ namespace OpenUtau.App.ViewModels {
         }
     }
 
-    public class PackageManagerViewModel : ViewModelBase {
+    public class PackageManagerViewModel : ViewModelBase, IDisposable {
+        readonly CompositeDisposable subscriptions = new();
+        readonly HashSet<PackageRowViewModel> observedRows = new();
+        readonly Func<Task<List<RegistrySoftware>>> fetchRegistry;
+        readonly Func<Task<List<OudepMetadata>>> listInstalled;
+        bool disposed;
         public ObservableCollection<PackageRowViewModel> Available { get; } = new ObservableCollection<PackageRowViewModel>();
+        [Reactive] public string SearchText { get; set; } = string.Empty;
+        [Reactive] public int FilterIndex { get; set; }
+        public IEnumerable<PackageRowViewModel> FilteredAvailable => Available.Where(r =>
+            (FilterIndex != 1 || r.IsInstalled) &&
+            (FilterIndex != 2 || (r.IsInstalled && r.CanInstallOrUpdate)) &&
+            (string.IsNullOrWhiteSpace(SearchText) ||
+             r.Name.Contains(SearchText.Trim(), StringComparison.OrdinalIgnoreCase) ||
+             r.Id.Contains(SearchText.Trim(), StringComparison.OrdinalIgnoreCase) ||
+             r.Developer.Contains(SearchText.Trim(), StringComparison.OrdinalIgnoreCase) ||
+             r.Version.Contains(SearchText.Trim(), StringComparison.OrdinalIgnoreCase)));
+        public int MatchCount => FilteredAvailable.Count();
+        public bool NoMatches => MatchCount == 0;
         [Reactive] public string Status { get; set; } = string.Empty;
         public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
         public ReactiveCommand<PackageRowViewModel, Unit> InstallCommand { get; }
         public ReactiveCommand<PackageRowViewModel, Unit> UninstallCommand { get; }
 
-        public PackageManagerViewModel() {
+        public PackageManagerViewModel() : this(true) { }
+
+        public PackageManagerViewModel(bool refreshOnStart,
+            Func<Task<List<RegistrySoftware>>>? fetchRegistry = null,
+            Func<Task<List<OudepMetadata>>>? listInstalled = null) {
+            this.fetchRegistry = fetchRegistry ?? PackageManager.Inst.FetchRegistryAsync;
+            this.listInstalled = listInstalled ?? PackageManager.Inst.GetInstalledAsync;
             RefreshCommand = ReactiveCommand.CreateFromTask(RefreshAsync);
             InstallCommand = ReactiveCommand.CreateFromTask<PackageRowViewModel>(InstallAsync);
             UninstallCommand = ReactiveCommand.CreateFromTask<PackageRowViewModel>(UninstallAsync);
-            _ = RefreshAsync();
+            Available.CollectionChanged += OnAvailableChanged;
+            subscriptions.Add(this.WhenAnyValue(x => x.SearchText, x => x.FilterIndex).Subscribe(_ => RefreshFilter()));
+            if (refreshOnStart) _ = RefreshAsync();
+        }
+
+        void OnAvailableChanged(object? sender, NotifyCollectionChangedEventArgs e) {
+            if (e.Action == NotifyCollectionChangedAction.Reset) {
+                foreach (var row in observedRows) row.PropertyChanged -= OnRowChanged;
+                observedRows.Clear();
+            }
+            if (e.OldItems != null) foreach (PackageRowViewModel row in e.OldItems) {
+                row.PropertyChanged -= OnRowChanged; observedRows.Remove(row);
+            }
+            if (e.NewItems != null) foreach (PackageRowViewModel row in e.NewItems) {
+                if (observedRows.Add(row)) row.PropertyChanged += OnRowChanged;
+            }
+            RefreshFilter();
+        }
+        void OnRowChanged(object? sender, PropertyChangedEventArgs e) {
+            if (e.PropertyName == nameof(PackageRowViewModel.IsInstalled) ||
+                e.PropertyName == nameof(PackageRowViewModel.InstalledVersion)) RefreshFilter();
+        }
+        void RefreshFilter() {
+            this.RaisePropertyChanged(nameof(FilteredAvailable));
+            this.RaisePropertyChanged(nameof(MatchCount));
+            this.RaisePropertyChanged(nameof(NoMatches));
+        }
+
+        public void Dispose() {
+            disposed = true;
+            Available.CollectionChanged -= OnAvailableChanged;
+            foreach (var row in observedRows) row.PropertyChanged -= OnRowChanged;
+            observedRows.Clear();
+            subscriptions.Dispose();
+            RefreshCommand.Dispose(); InstallCommand.Dispose(); UninstallCommand.Dispose();
         }
 
         public async Task RefreshAsync() {
+            if (disposed) return;
             try {
                 Status = ThemeManager.GetString("packages.status.fetching");
-                var registry = await PackageManager.Inst.FetchRegistryAsync();
+                List<RegistrySoftware> registry;
+                bool offline = false;
+                try { registry = await fetchRegistry(); }
+                catch (Exception e) {
+                    Log.Warning(e, "Registry unavailable; listing locally installed packages.");
+                    registry = new(); offline = true;
+                }
+                if (disposed) return;
                 Status = ThemeManager.GetString("packages.status.listinginstalled");
-                var installed = await PackageManager.Inst.GetInstalledAsync();
+                var installed = await listInstalled();
+                if (disposed) return;
 
                 var installedById = installed.ToDictionary(i => i.id, i => i);
 
@@ -108,8 +178,9 @@ namespace OpenUtau.App.ViewModels {
                 Available.Clear();
                 foreach (var r in ordered) Available.Add(r);
 
-                Status = ThemeManager.GetString("packages.status.ready");
+                Status = ThemeManager.GetString(offline ? "workspace.packages.offline" : "packages.status.ready");
             } catch (Exception e) {
+                if (disposed) return;
                 Status = ThemeManager.GetString("packages.status.error");
                 DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e));
             }

@@ -33,5 +33,21 @@
     <Setter Property="FontSize" Value="13"/>
   </Style>
   <Style Selector="Button.resourceAction"><Setter Property="Margin" Value="0,0,8,8"/><Setter Property="Height" Value="32"/></Style>
-  <Style Selector="Button.toolClose"><Setter Property="Padding" Value="0"/><Setter Property="MinWidth" Value="32"/></Style>
+  <Style Selector="Button.toolClose"><Setter Property="Theme" Value="{StaticResource DawButtonTheme}"/>
+    <Setter Property="Padding" Value="0"/><Setter Property="MinWidth" Value="32"/></Style>
+  <Style Selector="Button.resourceTab">
+    <Setter Property="Height" Value="40"/><Setter Property="CornerRadius" Value="0"/>
+    <Setter Property="Padding" Value="14,0"/><Setter Property="BorderThickness" Value="0,0,0,3"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+  </Style>
+  <Style Selector="Button.resourceTab.selected">
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+  </Style>
+  <Style Selector="ListBox#SingerList ListBoxItem">
+    <Setter Property="MinHeight" Value="56"/><Setter Property="Padding" Value="12,0"/>
+    <Setter Property="Margin" Value="0"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    <Setter Property="CornerRadius" Value="8"/>
+  </Style>
 </Styles>

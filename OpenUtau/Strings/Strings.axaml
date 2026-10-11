@@ -1324,4 +1324,19 @@ Range {2}–{3} s · Tail {4} s
   <system:String x:Key="workspace.oto.keys">1–5: timing points · W/S: zoom · A/D: pan · Q/E: select sample</system:String>
   <system:String x:Key="workspace.collapse">Collapse</system:String>
   <system:String x:Key="workspace.expand">Expand</system:String>
+  <system:String x:Key="workspace.singers.search">Search voicebanks</system:String>
+  <system:String x:Key="workspace.resources.nomatches">No resources match. Change the search or filter, or install a resource.</system:String>
+  <system:String x:Key="workspace.singers.oto">OTO / samples</system:String>
+  <system:String x:Key="workspace.singers.subbanks">Subbanks</system:String>
+  <system:String x:Key="workspace.singers.info">Information</system:String>
+  <system:String x:Key="workspace.singers.author">Author</system:String>
+  <system:String x:Key="workspace.singers.voice">Voice</system:String>
+  <system:String x:Key="workspace.packages.search">Search name, developer or version</system:String>
+  <system:String x:Key="workspace.packages.all">All packages</system:String>
+  <system:String x:Key="workspace.packages.installed">Installed</system:String>
+  <system:String x:Key="workspace.packages.updates">Updates available</system:String>
+  <system:String x:Key="workspace.packages.count">packages</system:String>
+  <system:String x:Key="workspace.packages.offline">Registry unavailable. Showing locally installed packages; refresh to try again.</system:String>
+  <system:String x:Key="workspace.singers.empty.title">Your voicebank workspace</system:String>
+  <system:String x:Key="workspace.singers.empty.hint">Install a voicebank to manage its samples, subbanks and configuration here.</system:String>
 </ResourceDictionary>

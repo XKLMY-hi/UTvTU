@@ -8,6 +8,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Markup.Xaml.MarkupExtensions;
+using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -47,6 +48,9 @@ public sealed class WorkspaceDialogHost : UserControl {
         if (HasDialogs) stack[^1].Tool.MaxHeight = Math.Max(100, Bounds.Height - 112);
     }
     public WorkspaceDialogHost() {
+        Styles.Add(new StyleInclude(new Uri("avares://OpenUtau/")) {
+            Source = new Uri("avares://OpenUtau/Styles/ToolWorkspace.axaml"),
+        });
         IsVisible = false;
         backdrop.Classes.Add("md3-fade");
         card.Classes.Add("md3-pop");

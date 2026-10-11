@@ -30,11 +30,30 @@ namespace OpenUtau.App.Views {
             SizeChanged += (_, _) => {
                 // Keep the OTO table finite inside the outer narrow-window scroller.
                 SingerLayout.Height = Math.Max(650, Bounds.Height);
-                bool showSubbanks = Bounds.Width >= 860;
-                SubbanksGrid.IsVisible = showSubbanks;
-                SingerHeader.ColumnDefinitions[4].Width = new Avalonia.Controls.GridLength(showSubbanks ? 280 : 0);
-                SingerHeader.ColumnDefinitions[3].Width = new Avalonia.Controls.GridLength(showSubbanks ? 16 : 0);
+                bool showBrowser = Bounds.Width >= 1040;
+                SingerBrowser.IsVisible = showBrowser;
+                SingerPicker.IsVisible = !showBrowser;
+                SingerLayout.ColumnDefinitions[0].Width = new GridLength(showBrowser ? 232 : 0);
+                SingerLayout.ColumnDefinitions[1].Width = new GridLength(showBrowser ? 24 : 0);
             };
+        }
+
+        void OnSingerListChanged(object? sender, SelectionChangedEventArgs e) {
+            // Filtering must not replace the current voicebank or load a different one.
+            if (DataContext is SingersViewModel vm && e.AddedItems.Count > 0 &&
+                e.AddedItems[0] is OpenUtau.Core.Ustx.USinger singer && !ReferenceEquals(vm.Singer, singer)) {
+                vm.Singer = singer;
+            }
+        }
+
+        void OnDetailTab(object? sender, RoutedEventArgs e) {
+            if (sender is not Button { Tag: string tab }) return;
+            OtoPage.IsVisible = tab == "oto";
+            SubbanksPage.IsVisible = SubbanksGrid.IsVisible = tab == "subbanks";
+            InfoPage.IsVisible = tab == "info";
+            OtoTab.Classes.Set("selected", tab == "oto");
+            SubbanksTab.Classes.Set("selected", tab == "subbanks");
+            InfoTab.Classes.Set("selected", tab == "info");
         }
 
         void OnInstallSinger(object? sender, RoutedEventArgs e) {

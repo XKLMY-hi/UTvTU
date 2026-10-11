@@ -1,0 +1,144 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Controls;
+using Avalonia.Headless.XUnit;
+using Avalonia.Interactivity;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
+using OpenUtau.App.ViewModels;
+using OpenUtau.App.Controls;
+using OpenUtau.App.Views;
+using OpenUtau.Core;
+using OpenUtau.Core.Ustx;
+using Xunit;
+
+namespace OpenUtau.Test.App;
+
+[Collection("WorkspaceSession")]
+public sealed class ResourceCenterTests {
+    sealed class Singer : USinger {
+        readonly string id;
+        public Singer(string id) { this.id = id; found = loaded = true; }
+        public override string Id => id;
+        public override string Name => id;
+        public override USingerType SingerType => USingerType.Classic;
+        public override IList<string> Errors => Array.Empty<string>();
+        public override IList<USubbank> Subbanks => Array.Empty<USubbank>();
+        public IList<UOto> Samples { get; set; }
+        public override IList<UOto> Otos => Samples ??= new[] { UOto.OfDummy(id + "-a") };
+    }
+
+    [AvaloniaFact]
+    public void FilteringTheBrowserKeepsTheLoadedVoicebankUntilTheUserSelectsAnotherOne() {
+        var alpha = new Singer("Alpha"); var beta = new Singer("Beta");
+        using var vm = new SingersViewModel(new[] { alpha, beta });
+        var page = new SingersDialog { DataContext = vm };
+        var window = new WindowEx { Width = 1200, Height = 800, Content = page }; window.Show();
+        try {
+            Dispatcher.UIThread.RunJobs();
+            Assert.Same(alpha, vm.Singer);
+            vm.SearchSinger = "  BETA  "; Dispatcher.UIThread.RunJobs();
+            Assert.Same(beta, Assert.Single(vm.FilteredSingers));
+            Assert.Same(alpha, vm.Singer);
+            Assert.Equal("Alpha-a", Assert.Single(vm.DisplayedOtos).Alias);
+            vm.SearchSinger = "no-match"; Dispatcher.UIThread.RunJobs();
+            Assert.True(vm.NoSingerMatches); Assert.Same(alpha, vm.Singer);
+            vm.SearchSinger = "beta"; Dispatcher.UIThread.RunJobs();
+            page.FindControl<ListBox>("SingerList")!.SelectedItem = beta;
+            Dispatcher.UIThread.RunJobs();
+            Assert.Same(beta, vm.Singer);
+            Assert.Equal("Beta-a", Assert.Single(vm.DisplayedOtos).Alias);
+            Assert.All(vm.SetEncodingMenuItems, item => Assert.NotNull(item.Command));
+        } finally { window.Close(); }
+    }
+
+    [AvaloniaFact]
+    public void DetailsAndSearchSurviveResponsiveNavigationWithoutLosingOtoColumns() {
+        var page = new SingersDialog();
+        var window = new WindowEx { Width = 1200, Height = 800, Content = page }; window.Show();
+        try {
+            Dispatcher.UIThread.RunJobs();
+            Assert.True(page.FindControl<Grid>("SingerBrowser")!.IsVisible);
+            var options = page.FindControl<Button>("SingerOptions")!;
+            Assert.Same(options.Content, Assert.Single(options.GetVisualDescendants().OfType<DawIcon>()));
+            var search = page.FindControl<TextBox>("AliasSearch")!; search.Text = "retained";
+            page.FindControl<Button>("SubbanksTab")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Assert.True(page.FindControl<DataGrid>("SubbanksGrid")!.IsVisible);
+            window.Width = 800; Dispatcher.UIThread.RunJobs();
+            Assert.False(page.FindControl<Grid>("SingerBrowser")!.IsVisible);
+            Assert.True(page.FindControl<Grid>("SingerPicker")!.IsVisible);
+            Assert.True(page.FindControl<DataGrid>("SubbanksGrid")!.IsVisible);
+            page.FindControl<Button>("OtoTab")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal("retained", search.Text);
+            Assert.Equal(12, page.FindControl<DataGrid>("OtoGrid")!.Columns.Count);
+            Assert.InRange(page.FindControl<DataGrid>("OtoGrid")!.Bounds.Height, 1, 800);
+        } finally { window.Close(); }
+    }
+
+    static PackageRowViewModel RegistryRow(string id, string developer) => new(new RegistrySoftware {
+        id = id, names = new() { ["en"] = id }, developers = new[] { developer },
+        versions = new[] { new RegistryVersion { version = "2.0" } },
+    });
+
+    [AvaloniaFact]
+    public void ReloadAndVoicebankChangesReapplyTheAliasFilterToTheCurrentSamples() {
+        var alpha = new Singer("Alpha"); var beta = new Singer("Beta");
+        using var vm = new SingersViewModel(new[] { alpha, beta });
+        vm.SearchAlias = "  ALPHA  ";
+        Assert.Single(vm.DisplayedOtos);
+        vm.SelectedOto = vm.DisplayedOtos[0];
+        alpha.Samples = new[] { UOto.OfDummy("Alpha-new"), UOto.OfDummy("unrelated") };
+        vm.RefreshSinger();
+        Assert.Equal("Alpha-new", Assert.Single(vm.DisplayedOtos).Alias);
+        Assert.Same(vm.DisplayedOtos[0], vm.SelectedOto);
+        vm.Singer = beta;
+        Assert.Empty(vm.DisplayedOtos); Assert.Null(vm.SelectedOto);
+        vm.GotoOto(beta, beta.Otos[0]);
+        Assert.Equal(string.Empty, vm.SearchAlias);
+        Assert.Same(beta.Otos[0], vm.SelectedOto);
+    }
+
+    [AvaloniaFact]
+    public void PackageFiltersCombineSearchWithActualInstallationAndUpdateState() {
+        using var vm = new PackageManagerViewModel(false);
+        var fresh = RegistryRow("Fresh", "TeamA"); var update = RegistryRow("Update", "TeamB");
+        var current = RegistryRow("Current", "TeamB");
+        update.SetInstalled(new OudepMetadata { id = "Update", version = "1.0" });
+        current.SetInstalled(new OudepMetadata { id = "Current", version = "2.0" });
+        vm.Available.Add(fresh); vm.Available.Add(update); vm.Available.Add(current);
+        vm.SearchText = " teamb "; Assert.Equal(2, vm.MatchCount);
+        vm.FilterIndex = 2; Assert.Same(update, Assert.Single(vm.FilteredAvailable));
+        update.InstalledVersion = "2.0"; Assert.True(vm.NoMatches);
+        vm.FilterIndex = 1; Assert.Equal(2, vm.MatchCount);
+        vm.SearchText = "2.0"; Assert.Equal(2, vm.MatchCount);
+        current.IsInstalled = false; Assert.Equal(1, vm.MatchCount);
+        vm.SearchText = "no-match"; Assert.True(vm.NoMatches);
+    }
+
+    [AvaloniaFact]
+    public async Task AnUnavailableRegistryStillShowsLocalPackagesAndDoesNotInventUpdateAvailability() {
+        using var vm = new PackageManagerViewModel(false,
+            () => Task.FromException<List<RegistrySoftware>>(new InvalidOperationException("offline")),
+            () => Task.FromResult(new List<OudepMetadata> { new() { id = "local", version = "1.0" } }));
+        await vm.RefreshAsync();
+        var local = Assert.Single(vm.Available);
+        Assert.True(local.IsInstalled); Assert.False(local.CanInstallOrUpdate);
+        vm.FilterIndex = 1; Assert.Same(local, Assert.Single(vm.FilteredAvailable));
+        vm.FilterIndex = 2; Assert.True(vm.NoMatches);
+    }
+
+    [AvaloniaFact]
+    public async Task ClosingAResourceSessionDiscardsItsLateRegistryResponse() {
+        var response = new TaskCompletionSource<List<RegistrySoftware>>();
+        int localReads = 0;
+        var vm = new PackageManagerViewModel(false, () => response.Task, () => {
+            localReads++; return Task.FromResult(new List<OudepMetadata>());
+        });
+        var refresh = vm.RefreshAsync(); vm.Dispose();
+        response.SetResult(new() { new() { id = "late" } }); await refresh;
+        Assert.Empty(vm.Available); Assert.Equal(0, localReads);
+    }
+}

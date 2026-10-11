@@ -122,7 +122,8 @@ public partial class MainWindow : IWorkspaceToolHost {
     void OnToggleContextTool(object? sender, RoutedEventArgs e) => SetContextCollapsed(!contextCollapsed);
     void SetContextCollapsed(bool collapsed) {
         if (contextTool == null) return;
-        if (collapsed && !contextCollapsed) contextExpandedHeight = Math.Max(160, ContextToolPanel.Bounds.Height);
+        if (collapsed && !contextCollapsed && ContextToolPanel.Bounds.Height > 40)
+            contextExpandedHeight = Math.Max(160, ContextToolPanel.Bounds.Height);
         contextCollapsed = collapsed;
         ContextToolHost.IsVisible = !collapsed;
         ContextToolSplitter.IsVisible = !collapsed;

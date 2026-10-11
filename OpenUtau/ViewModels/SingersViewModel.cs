@@ -23,7 +23,16 @@ using Serilog;
 namespace OpenUtau.App.ViewModels {
     public class SingersViewModel : ViewModelBase, IDisposable {
         readonly CompositeDisposable subscriptions = new();
-        public IEnumerable<USinger> Singers => SingerManager.Inst.SingerGroups.Values.SelectMany(l => l);
+        readonly IEnumerable<USinger>? singerSource;
+        public IEnumerable<USinger> Singers => singerSource ?? SingerManager.Inst.SingerGroups.Values.SelectMany(l => l);
+        [Reactive] public string SearchSinger { get; set; } = "";
+        public IEnumerable<USinger> FilteredSingers => Singers.Where(s =>
+            string.IsNullOrWhiteSpace(SearchSinger) ||
+            s.LocalizedName.Contains(SearchSinger.Trim(), StringComparison.OrdinalIgnoreCase) ||
+            s.Id?.Contains(SearchSinger.Trim(), StringComparison.OrdinalIgnoreCase) == true);
+        public int SingerCount => FilteredSingers.Count();
+        public bool NoSingerMatches => SingerCount == 0;
+        public bool HasSinger => Singer != null;
         [Reactive] public USinger? Singer { get; set; }
         [Reactive] public Bitmap? Avatar { get; set; }
         [Reactive] public string? Info { get; set; }
@@ -54,13 +63,30 @@ namespace OpenUtau.App.ViewModels {
         private readonly ReactiveCommand<Api.PhonemizerFactory, Unit> setDefaultPhonemizerCommand;
         private List<MenuItemViewModel> setDefaultPhonemizerMenuItems;
 
-        public SingersViewModel() {
+        public SingersViewModel() : this(null) { }
+
+        public SingersViewModel(IEnumerable<USinger>? singers) {
+            singerSource = singers;
 #if DEBUG
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 #endif
             setEncodingMenuItems = new List<MenuItemViewModel>();
             setSingerTypeMenuItems = new List<MenuItemViewModel>();
             setDefaultPhonemizerMenuItems = new List<MenuItemViewModel>();
+            setEncodingCommand = ReactiveCommand.Create<Encoding>(SetEncoding);
+            setSingerTypeCommand = ReactiveCommand.Create<string>(SetSingerType);
+            setDefaultPhonemizerCommand = ReactiveCommand.Create<Api.PhonemizerFactory>(SetDefaultPhonemizer);
+            subscriptions.Add(this.WhenAnyValue(vm => vm.SearchSinger).Subscribe(_ => RefreshSingerFilter()));
+            subscriptions.Add(this.WhenAnyValue(vm => vm.Singer).Subscribe(singer => {
+                this.RaisePropertyChanged(nameof(HasSinger));
+                if (singer == null) {
+                    Avatar?.Dispose(); Avatar = null;
+                    Otos.Clear(); DisplayedOtos.Clear(); Subbanks.Clear();
+                    Info = string.Empty; HasWebsite = false; SelectedOto = null;
+                    this.RaisePropertyChanged(nameof(IsClassic));
+                    this.RaisePropertyChanged(nameof(UseSearchAlias));
+                }
+            }));
             if (Singers.Count() > 0) {
                 Singer = Singers.FirstOrDefault();
             }
@@ -88,10 +114,11 @@ namespace OpenUtau.App.ViewModels {
                         var previousAvatar = Avatar;
                         Avatar = LoadAvatar(singer);
                         previousAvatar?.Dispose();
+                        SelectedOto = null;
+                        SelectedIndex = -1;
                         Otos.Clear();
                         Otos.AddRange(singer.Otos);
-                        DisplayedOtos.Clear();
-                        DisplayedOtos.AddRange(singer.Otos);
+                        Search();
                         Info = $"Author: {singer.Author}\nVoice: {singer.Voice}\nWeb: {singer.Web}\nVersion: {singer.Version}\n{singer.OtherInfo}\n\n{string.Join("\n", singer.Errors)}";
                         HasWebsite = !string.IsNullOrEmpty(singer.Web);
                         if (Singer is ClassicSinger cSinger) {
@@ -144,15 +171,12 @@ namespace OpenUtau.App.ViewModels {
                 .Subscribe(alias => {
                     Search();
                 }));
-            setEncodingCommand = ReactiveCommand.Create<Encoding>(encoding => {
-                SetEncoding(encoding);
-            });
-            setSingerTypeCommand = ReactiveCommand.Create<string>(singerType => {
-                SetSingerType(singerType);
-            });
-            setDefaultPhonemizerCommand = ReactiveCommand.Create<Api.PhonemizerFactory>(factory => {
-                SetDefaultPhonemizer(factory);
-            });
+        }
+
+        void RefreshSingerFilter() {
+            this.RaisePropertyChanged(nameof(FilteredSingers));
+            this.RaisePropertyChanged(nameof(SingerCount));
+            this.RaisePropertyChanged(nameof(NoSingerMatches));
         }
 
         private void SetEncoding(Encoding encoding) {
@@ -308,6 +332,7 @@ namespace OpenUtau.App.ViewModels {
             DocManager.Inst.ExecuteCmd(new LoadingNotification(typeof(SingersDialog), true, "singer"));
             SingerManager.Inst.SearchAllSingers();
             this.RaisePropertyChanged(nameof(Singers));
+            RefreshSingerFilter();
             if (!string.IsNullOrEmpty(singerId) && SingerManager.Inst.Singers.TryGetValue(singerId, out var singer)) {
                 Singer = singer;
             } else {
@@ -373,13 +398,17 @@ namespace OpenUtau.App.ViewModels {
             previousAvatar?.Dispose();
             Otos.Clear();
             Otos.AddRange(Singer.Otos);
+            Search();
             LoadSubbanks();
 
             DocManager.Inst.ExecuteCmd(new SingersRefreshedNotification(Singer));
             DocManager.Inst.ExecuteCmd(new OtoChangedNotification());
-            if (Otos.Count > 0) {
-                index = Math.Clamp(index, 0, Otos.Count - 1);
+            if (DisplayedOtos.Count > 0) {
+                index = Math.Clamp(index, 0, DisplayedOtos.Count - 1);
                 SelectedIndex = index;
+                SelectedOto = DisplayedOtos[index];
+            } else {
+                SelectedIndex = -1; SelectedOto = null;
             }
         }
 
@@ -389,7 +418,7 @@ namespace OpenUtau.App.ViewModels {
                 DisplayedOtos.AddRange(Otos);
             } else {
                 DisplayedOtos.Clear();
-                DisplayedOtos.AddRange(Otos.Where(o => o.Alias.Contains(SearchAlias)));
+                DisplayedOtos.AddRange(Otos.Where(o => o.Alias.Contains(SearchAlias.Trim(), StringComparison.OrdinalIgnoreCase)));
             }
         }
 
@@ -478,6 +507,7 @@ namespace OpenUtau.App.ViewModels {
             if (Singers.Contains(singer)) {
                 Singer = singer;
                 if (oto != null && Singer.Otos.Contains(oto)) {
+                    if (!DisplayedOtos.Contains(oto)) SearchAlias = string.Empty;
                     SelectedOto = oto;
                 }
             }

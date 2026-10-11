@@ -12,6 +12,11 @@ namespace OpenUtau.App.Views {
             InitializeComponent();
         }
 
+        protected override void OnClosed(EventArgs e) {
+            base.OnClosed(e);
+            (DataContext as PackageManagerViewModel)?.Dispose();
+        }
+
         async void OnPrimaryActionClick(object sender, RoutedEventArgs e) {
             try {
                 if (DataContext is PackageManagerViewModel vm) {

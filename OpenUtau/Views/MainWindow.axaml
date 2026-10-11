@@ -899,7 +899,7 @@
             <Border BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1" Padding="16,0">
               <Grid ColumnDefinitions="*,Auto,Auto">
                 <TextBlock Name="ContextToolTitle" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                <Button Name="CollapseContextButton" Grid.Column="1" Classes="toolAction" Height="32" Margin="0,0,8,0" Click="OnToggleContextTool">
+                <Button Name="CollapseContextButton" Grid.Column="1" Classes="toolAction" Theme="{StaticResource DawButtonTheme}" Height="32" Margin="0,0,8,0" Padding="12,0" Click="OnToggleContextTool">
                   <StackPanel Orientation="Horizontal" Spacing="6">
                     <c:DawIcon Name="ContextCollapseIcon" Data="{StaticResource icon-chevron-down}" Width="14" Height="14" Fill="{Binding $parent[Button].Foreground}"/>
                     <TextBlock Name="ContextCollapseText" Text="{DynamicResource workspace.collapse}" VerticalAlignment="Center"/>

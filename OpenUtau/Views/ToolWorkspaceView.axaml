@@ -11,8 +11,8 @@
         <Button Name="PreferencesButton" Grid.Column="3" Classes="toolAction" Content="{DynamicResource menu.tools.prefs}" Click="OnPreferences"/>
       </Grid>
     </Border>
-    <Grid Grid.Row="1" ColumnDefinitions="232,*">
-      <Border Background="{DynamicResource md3.surface-container-low}" BorderBrush="{DynamicResource md3.outline-variant}"
+    <Grid Name="WorkspaceColumns" Grid.Row="1" ColumnDefinitions="232,*">
+      <Border Name="WorkspaceNavigation" Background="{DynamicResource md3.surface-container-low}" BorderBrush="{DynamicResource md3.outline-variant}"
               BorderThickness="0,0,1,0" Padding="16,24">
         <StackPanel Spacing="8">
           <TextBlock Classes="toolCaption" Text="{DynamicResource workspace.delivery}" Margin="12,0,0,4"/>

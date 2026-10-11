@@ -1,4 +1,5 @@
 using System;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 
@@ -7,7 +8,15 @@ namespace OpenUtau.App.Views;
 public partial class ToolWorkspaceView : UserControl {
     public Action<string>? Navigate;
     public Action? ReturnToEditor, Preferences;
-    public ToolWorkspaceView() => InitializeComponent();
+    public ToolWorkspaceView() {
+        InitializeComponent();
+        SizeChanged += (_, _) => {
+            var narrow = Bounds.Width <= 800;
+            WorkspaceColumns.ColumnDefinitions[0].Width = new GridLength(narrow ? 152 : Bounds.Width <= 1040 ? 180 : 232);
+            WorkspaceNavigation.Padding = new Thickness(narrow ? 12 : 16, 24);
+            ResourceContent.Margin = narrow ? new Thickness(16) : new Thickness(24, 20, 24, 16);
+        };
+    }
     void OnNavigate(object? sender, RoutedEventArgs e) { if (sender is Button { Tag: string page }) Navigate?.Invoke(page); }
     void OnBack(object? sender, RoutedEventArgs e) => ReturnToEditor?.Invoke();
     void OnPreferences(object? sender, RoutedEventArgs e) => Preferences?.Invoke();
