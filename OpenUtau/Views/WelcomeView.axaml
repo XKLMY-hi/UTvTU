@@ -6,18 +6,17 @@
              xmlns:c="clr-namespace:OpenUtau.App.Controls"
              mc:Ignorable="d" d:DesignWidth="1440" d:DesignHeight="900"
              x:Class="OpenUtau.App.Views.WelcomeView" Classes="professionalPage">
-  <!-- Engineering project hub: compact 232 DIP navigation, 22/13 page headings,
-       direct project actions and searchable recent files. Original brand paths and
-       the generated waveform remain authoritative; ordinary icons use DawIcon.
-       Buttons share the workspace content/state contract. No decorative data. -->
+  <!-- Material project hub: real project commands, shared semantic colors/type/shape,
+       filled main action and tonal secondary actions. MaterialShapes Arch/Square are
+       source-derived decorative geometry; brand paths and waveform stay unchanged. -->
   <UserControl.Styles>
-    <Style Selector="Button.primary,Button.outline">
+    <Style Selector="Button.primary,Button.tonal,Button.outline">
       <Setter Property="Theme" Value="{StaticResource DawButtonTheme}"/>
       <Setter Property="Margin" Value="0"/>
-      <Setter Property="Height" Value="36"/>
-      <Setter Property="MinHeight" Value="36"/>
-      <Setter Property="CornerRadius" Value="999"/>
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+      <Setter Property="Height" Value="{DynamicResource Md3ControlHeight}"/>
+      <Setter Property="MinHeight" Value="{DynamicResource Md3ControlHeight}"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource md3.outline}"/>
       <Setter Property="BorderThickness" Value="1"/>
     </Style>
@@ -26,26 +25,35 @@
       <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
       <Setter Property="BorderThickness" Value="0"/>
     </Style>
-    <Style Selector="Button.primary TextBlock,Button.outline TextBlock">
+    <Style Selector="Button.tonal">
+      <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+      <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="Button.pageAction">
+      <Setter Property="Height" Value="{DynamicResource Md3ControlHeight}"/>
+      <Setter Property="MinHeight" Value="{DynamicResource Md3ControlHeight}"/>
+    </Style>
+    <Style Selector="Button.primary TextBlock,Button.tonal TextBlock,Button.outline TextBlock">
       <Setter Property="Foreground" Value="{Binding $parent[Button].Foreground}"/>
     </Style>
-    <!-- ══ 文本层级（主界面基准：正文 13 / 次要 11.5 / 分组 12） ══ -->
+    <!-- Shared semantic typography: title 22, body 13/12, label 12/11. -->
     <Style Selector="TextBlock.groupLabel">
-      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelMedium}"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
     </Style>
     <Style Selector="TextBlock.pageTitle">
-      <Setter Property="FontSize" Value="22"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeTitleLarge}"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     </Style>
     <Style Selector="TextBlock.pageSub">
-      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
       <Setter Property="TextWrapping" Value="Wrap"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
     </Style>
     <Style Selector="TextBlock.caption">
-      <Setter Property="FontSize" Value="11.5"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodySmall}"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
     </Style>
 
@@ -57,12 +65,12 @@
       <Setter Property="MinHeight" Value="32"/>
       <Setter Property="Padding" Value="16,0"/>
       <Setter Property="Margin" Value="0"/>
-      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
       <!-- 常驻 1px 透明描边：焦点态只换颜色 ⇒ **零布局位移** -->
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="BorderBrush" Value="Transparent"/>
       <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelMedium}"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
       <Setter Property="HorizontalAlignment" Value="Stretch"/>
       <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -79,7 +87,7 @@
     <!-- ⚠ 与共享层同一条陷阱：应用级 `TextBlock{FontSize 13}` 压过继承 ⇒ 必须显式声明，
          否则"12px 小字行"实际渲染成 13px（fx-ui 复核第 3 条实测命中）。 -->
     <Style Selector="Button.railLink TextBlock">
-      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelMedium}"/>
     </Style>
     <Style Selector="Button.railLink:focus-visible">
       <!-- 只换颜色：厚度已由基础态定为 1px ⇒ 聚焦零布局位移 -->
@@ -92,7 +100,7 @@
       <Setter Property="Theme" Value="{StaticResource DawButtonTheme}"/>
       <Setter Property="Height" Value="56"/>
       <Setter Property="MinHeight" Value="56"/>
-      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeMedium}"/>
       <Setter Property="Padding" Value="12,0"/>
       <Setter Property="Margin" Value="0"/>
       <Setter Property="BorderThickness" Value="1"/>
@@ -111,51 +119,49 @@
     <Style Selector="Border.fileIcon">
       <Setter Property="Width" Value="32"/>
       <Setter Property="Height" Value="32"/>
-      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeMedium}"/>
       <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
     </Style>
 
     <!-- ══ 格式徽标 = assist chip（高 24 / 圆角 8 / label 11） ══ -->
     <Style Selector="Border.badge">
       <Setter Property="Height" Value="24"/>
-      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeSmall}"/>
       <Setter Property="Padding" Value="8,0"/>
       <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
     <Style Selector="Border.badge TextBlock">
-      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelSmall}"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
     </Style>
 
     <!-- ══ 音源 chip（高 28 / 圆角 999） ══ -->
     <Style Selector="Border.chip">
       <Setter Property="Height" Value="28"/>
-      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
       <Setter Property="Padding" Value="10,0"/>
       <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
 
-    <!-- ══ 空态（图标 26 放进 56 的 secondary-container 圆形容器 + 标题 16 + 说明 13） ══ -->
-    <Style Selector="Border.emptyIcon">
-      <Setter Property="Width" Value="56"/>
-      <Setter Property="Height" Value="56"/>
-      <Setter Property="CornerRadius" Value="999"/>
-      <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+    <!-- Source-derived Square empty state: 72 shape, 26 icon, title 16. -->
+    <Style Selector="Grid.emptyIcon">
+      <Setter Property="Width" Value="72"/>
+      <Setter Property="Height" Value="72"/>
     </Style>
     <Style Selector="TextBlock.emptyTitle">
-      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeTitleMedium}"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     </Style>
 
-    <!-- ══ 模板卡（240×72 / 圆角 16 / 1px outline-variant） ══ -->
+    <!-- Template rows retain 240x64 geometry and shared medium shape. -->
     <Style Selector="Button.templateCard">
       <Setter Property="Theme" Value="{StaticResource DawButtonTheme}"/>
       <Setter Property="Width" Value="240"/>
       <Setter Property="Height" Value="64"/>
       <Setter Property="MinHeight" Value="64"/>
-      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeMedium}"/>
       <Setter Property="Padding" Value="16,0"/>
       <Setter Property="Margin" Value="0,0,12,12"/>
       <Setter Property="BorderThickness" Value="1"/>
@@ -169,7 +175,7 @@
       <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
     </Style>
 
-    <!-- ══ 底部拖放提示条（48 高 / 顶边 1px 分隔） ══ -->
+    <!-- Existing drop hint: 32 high, one-pixel separator. -->
     <Style Selector="Border.dropStrip">
       <Setter Property="Height" Value="32"/>
       <Setter Property="BorderThickness" Value="0,1,0,0"/>
@@ -186,7 +192,7 @@
       <Grid RowDefinitions="Auto,*,Auto" Margin="0,20,0,16">
 
         <!-- 品牌锁定（cap 20 = 旧版 cap 24 的 0.8333 倍，比例逐项同源；几何取 Icons.axaml 冻结键） -->
-        <StackPanel Grid.Row="0" Margin="24,0,24,20" Spacing="4">
+        <StackPanel Grid.Row="0" Margin="24,0,24,20" Spacing="{DynamicResource Md3Spacing1}">
           <Canvas Width="118.43" Height="24.00" HorizontalAlignment="Left">
             <Path Canvas.Left="2.18" Canvas.Top="2.18" Width="8.73" Height="19.63" Stretch="Uniform"
                   Data="{StaticResource brand-brace}" Stroke="{DynamicResource md3.primary}"
@@ -214,28 +220,28 @@
             <TextBlock Classes="groupLabel" Margin="24,0,24,6" Text="{DynamicResource welcome.nav.start}"/>
             <StackPanel Margin="12,0" Spacing="2">
               <Button x:Name="NavRecent" Classes="navItem selected" Click="OnNavRecent">
-                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}" VerticalAlignment="Center">
                   <c:DawIcon Data="{StaticResource icon-clock}" Width="18" Height="18"
                         VerticalAlignment="Center" Fill="{Binding $parent[Button].Foreground}"/>
                   <TextBlock FontSize="{Binding $parent[Button].FontSize}" Foreground="{Binding $parent[Button].Foreground}" UseLayoutRounding="False" Text="{DynamicResource welcome.recent}" VerticalAlignment="Center"/>
                 </StackPanel>
               </Button>
               <Button x:Name="NavNew" Classes="navItem" Click="OnNavNew">
-                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}" VerticalAlignment="Center">
                   <c:DawIcon Data="{StaticResource icon-file-plus}" Width="18" Height="18"
                         VerticalAlignment="Center" Fill="{Binding $parent[Button].Foreground}"/>
                   <TextBlock FontSize="{Binding $parent[Button].FontSize}" Foreground="{Binding $parent[Button].Foreground}" UseLayoutRounding="False" Text="{DynamicResource welcome.new}" VerticalAlignment="Center"/>
                 </StackPanel>
               </Button>
               <Button x:Name="NavOpen" Classes="navItem" Click="OnNavOpen">
-                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}" VerticalAlignment="Center">
                   <c:DawIcon Data="{StaticResource icon-folder-open}" Width="18" Height="18"
                         VerticalAlignment="Center" Fill="{Binding $parent[Button].Foreground}"/>
                   <TextBlock FontSize="{Binding $parent[Button].FontSize}" Foreground="{Binding $parent[Button].Foreground}" UseLayoutRounding="False" Text="{DynamicResource welcome.open}" VerticalAlignment="Center"/>
                 </StackPanel>
               </Button>
               <Button x:Name="NavTemplates" Classes="navItem" Click="OnNavTemplates">
-                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}" VerticalAlignment="Center">
                   <c:DawIcon Data="{StaticResource icon-layout}" Width="18" Height="18"
                         VerticalAlignment="Center" Fill="{Binding $parent[Button].Foreground}"/>
                   <TextBlock FontSize="{Binding $parent[Button].FontSize}" Foreground="{Binding $parent[Button].Foreground}" UseLayoutRounding="False" Text="{DynamicResource welcome.template}" VerticalAlignment="Center"/>
@@ -246,14 +252,14 @@
             <TextBlock Classes="groupLabel" Margin="24,20,24,6" Text="{DynamicResource welcome.nav.other}"/>
             <StackPanel Margin="12,0" Spacing="2">
               <Button Classes="navItem" Click="OnPreferences">
-                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}" VerticalAlignment="Center">
                   <c:DawIcon Data="{StaticResource icon-settings}" Width="18" Height="18"
                         VerticalAlignment="Center" Fill="{Binding $parent[Button].Foreground}"/>
                   <TextBlock FontSize="{Binding $parent[Button].FontSize}" Foreground="{Binding $parent[Button].Foreground}" UseLayoutRounding="False" Text="{DynamicResource welcome.prefs}" VerticalAlignment="Center"/>
                 </StackPanel>
               </Button>
               <Button Classes="navItem" Click="OnPackages">
-                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}" VerticalAlignment="Center">
                   <c:DawIcon Data="{StaticResource icon-package}" Width="18" Height="18"
                         VerticalAlignment="Center" Fill="{Binding $parent[Button].Foreground}"/>
                   <TextBlock FontSize="{Binding $parent[Button].FontSize}" Foreground="{Binding $parent[Button].Foreground}" UseLayoutRounding="False" Text="{DynamicResource welcome.packages}" VerticalAlignment="Center"/>
@@ -264,28 +270,28 @@
             <TextBlock Classes="groupLabel" Margin="24,20,24,6" Text="{DynamicResource welcome.nav.links}"/>
             <StackPanel Margin="12,0" Spacing="2">
               <Button Classes="railLink" Click="OnWiki">
-                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}" VerticalAlignment="Center">
                   <c:DawIcon Data="{StaticResource icon-book-open}" Width="15" Height="15"
                         VerticalAlignment="Center" Fill="{Binding $parent[Button].Foreground}"/>
                   <TextBlock FontSize="{Binding $parent[Button].FontSize}" Foreground="{Binding $parent[Button].Foreground}" UseLayoutRounding="False" Text="{DynamicResource welcome.wiki}" VerticalAlignment="Center"/>
                 </StackPanel>
               </Button>
               <Button Classes="railLink" Click="OnReleases">
-                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}" VerticalAlignment="Center">
                   <c:DawIcon Data="{StaticResource icon-download}" Width="15" Height="15"
                         VerticalAlignment="Center" Fill="{Binding $parent[Button].Foreground}"/>
                   <TextBlock FontSize="{Binding $parent[Button].FontSize}" Foreground="{Binding $parent[Button].Foreground}" UseLayoutRounding="False" Text="{DynamicResource welcome.releases}" VerticalAlignment="Center"/>
                 </StackPanel>
               </Button>
               <Button Classes="railLink" Click="OnDiffsinger">
-                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}" VerticalAlignment="Center">
                   <c:DawIcon Data="{StaticResource icon-sparkles}" Width="15" Height="15"
                         VerticalAlignment="Center" Fill="{Binding $parent[Button].Foreground}"/>
                   <TextBlock FontSize="{Binding $parent[Button].FontSize}" Foreground="{Binding $parent[Button].Foreground}" UseLayoutRounding="False" Text="{DynamicResource welcome.diffsinger}" VerticalAlignment="Center"/>
                 </StackPanel>
               </Button>
               <Button Classes="railLink" Click="OnTeto">
-                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}" VerticalAlignment="Center">
                   <c:DawIcon Data="{StaticResource icon-globe}" Width="15" Height="15"
                         VerticalAlignment="Center" Fill="{Binding $parent[Button].Foreground}"/>
                   <TextBlock FontSize="{Binding $parent[Button].FontSize}" Foreground="{Binding $parent[Button].Foreground}" UseLayoutRounding="False" Text="{DynamicResource welcome.teto}" VerticalAlignment="Center"/>
@@ -303,29 +309,41 @@
     <!-- ══════════ 右：内容区（内边距 24 / 页头 22+13 / 单页聚焦） ══════════ -->
     <Grid Grid.Column="1" RowDefinitions="Auto,*,Auto" Margin="24,24,24,0">
 
-      <!-- 页头：标题 + 副标；右侧 = 响度波形装饰带（低强调，不与标题抢层级）
-           列宽 3*:2* ⇒ 装饰带**宽度弹性**（窄窗不挤压标题、也不会溢出；见 fx-ui 复核 A⑤） -->
-      <Grid Grid.Row="0" ColumnDefinitions="3*,2*">
-        <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
-          <TextBlock x:Name="PageTitle" Classes="pageTitle" Text="{DynamicResource welcome.recent}"/>
-          <TextBlock x:Name="PageSubtitle" Classes="pageSub" Text="{DynamicResource welcome.greeting.sub}"/>
-        </StackPanel>
-        <Path Grid.Column="1" x:Name="WaveformBars" Height="32" Margin="24,0,0,0"
-              VerticalAlignment="Center" HorizontalAlignment="Stretch"
-              Data="{DynamicResource welcome-waveform}" Stretch="Fill"
-              Fill="{DynamicResource md3.on-surface-variant}" Opacity="0.2"/>
-      </Grid>
+      <!-- A single primary-container header establishes page identity. The Arch is
+           official source-derived geometry, not a new brand mark or an audio meter. -->
+      <Border Grid.Row="0" Background="{DynamicResource md3.primary-container}"
+              CornerRadius="{DynamicResource Md3ShapeExtraLarge}" Padding="24">
+        <Grid ColumnDefinitions="3*,2*">
+          <StackPanel Grid.Column="0" Spacing="{DynamicResource Md3Spacing1}" VerticalAlignment="Center">
+            <TextBlock x:Name="PageTitle" Classes="pageTitle" Text="{DynamicResource welcome.recent}"
+                       Foreground="{DynamicResource md3.on-primary-container}"/>
+            <TextBlock x:Name="PageSubtitle" Classes="pageSub" Text="{DynamicResource welcome.greeting.sub}"
+                       Foreground="{DynamicResource md3.on-primary-container}"/>
+          </StackPanel>
+          <Grid Grid.Column="1" Margin="16,0,0,0" IsHitTestVisible="False">
+            <c:MaterialShape Kind="Arch" Width="64" Height="64" HorizontalAlignment="Right"
+                             Fill="{DynamicResource md3.primary}"/>
+            <c:DawIcon Data="{StaticResource icon-mic}" Width="24" Height="24" Margin="0,0,20,0"
+                       HorizontalAlignment="Right" VerticalAlignment="Center"
+                       Fill="{DynamicResource md3.on-primary}"/>
+            <Path x:Name="WaveformBars" Height="32" Margin="0,0,80,0"
+                  VerticalAlignment="Center" HorizontalAlignment="Stretch"
+                  Data="{DynamicResource welcome-waveform}" Stretch="Fill"
+                  Fill="{DynamicResource md3.on-primary-container}" Opacity="0.16"/>
+          </Grid>
+        </Grid>
+      </Border>
 
       <Grid Grid.Row="1" Margin="0,24,0,0">
 
         <!-- ── 页 1：最近（搜索 + 恢复条 + 列表 + 双空态） ── -->
         <Grid x:Name="PageRecent" RowDefinitions="Auto,Auto,Auto,*">
-          <StackPanel x:Name="RecentActions" Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,12">
-            <Button x:Name="QuickNew" Classes="pageAction emphasized" Content="{DynamicResource welcome.new.blank}" Click="OnNewProject"/>
-            <Button x:Name="QuickOpen" Classes="pageAction" Content="{DynamicResource welcome.open.browse}" Click="OnOpenProject"/>
+          <StackPanel x:Name="RecentActions" Grid.Row="0" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}" Margin="0,0,0,12">
+            <Button x:Name="QuickNew" Classes="pageAction emphasized filled" Content="{DynamicResource welcome.new.blank}" Click="OnNewProject"/>
+            <Button x:Name="QuickOpen" Classes="pageAction tonal" Content="{DynamicResource welcome.open.browse}" Click="OnOpenProject"/>
           </StackPanel>
           <Grid Grid.Row="1" Margin="0,0,0,12">
-            <TextBox x:Name="SearchBox" Height="36" MinHeight="36" Margin="0" CornerRadius="8" Padding="40,0,12,0" FontSize="13"
+            <TextBox x:Name="SearchBox" Height="{DynamicResource Md3ControlHeight}" MinHeight="{DynamicResource Md3ControlHeight}" Margin="0" CornerRadius="{DynamicResource Md3ShapeSmall}" Padding="40,0,12,0" FontSize="{DynamicResource Md3TypeBodyMedium}"
                      Text="{Binding WelcomeSearch, Mode=TwoWay}"
                      PlaceholderText="{DynamicResource welcome.search.placeholder}"/>
             <c:DawIcon Data="{StaticResource icon-search}" Width="18" Height="18"
@@ -335,10 +353,10 @@
 
           <!-- 恢复条（原版能力；只在有恢复项时出现） -->
           <Button Grid.Row="2" IsVisible="{Binding HasRecovery}" Click="OnRecovery"
-                  Margin="0,0,0,12" CornerRadius="12" Padding="16,12" MinHeight="0"
+                  Margin="0,0,0,12" CornerRadius="{DynamicResource Md3ShapeMedium}" Padding="16,12" MinHeight="0"
                   HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch"
                   Background="{DynamicResource md3.error-container}" Cursor="Hand">
-            <TextBlock Text="{Binding RecoveryString}" TextWrapping="Wrap" FontSize="12"
+            <TextBlock Text="{Binding RecoveryString}" TextWrapping="Wrap" FontSize="{DynamicResource Md3TypeLabelMedium}"
                        Foreground="{DynamicResource md3.on-error-container}"/>
           </Button>
 
@@ -356,10 +374,10 @@
                               Fill="{DynamicResource md3.on-surface-variant}"/>
                       </Border>
                       <StackPanel Grid.Column="1" Margin="14,0,12,0" VerticalAlignment="Center" Spacing="2">
-                        <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="Medium"
+                        <TextBlock Text="{Binding Name}" FontSize="{DynamicResource Md3TypeBodyMedium}" FontWeight="Medium"
                                    TextTrimming="CharacterEllipsis"
                                    Foreground="{DynamicResource md3.on-surface}"/>
-                        <TextBlock Text="{Binding Directory}" FontSize="11.5"
+                        <TextBlock Text="{Binding Directory}" FontSize="{DynamicResource Md3TypeBodySmall}"
                                    TextTrimming="CharacterEllipsis"
                                    Foreground="{DynamicResource md3.on-surface-variant}"/>
                       </StackPanel>
@@ -378,61 +396,63 @@
           <!-- 空态 A：一个工程都没有 -->
           <StackPanel Grid.Row="3" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center"
                       MaxWidth="360" IsVisible="{Binding WelcomeNoRecent}">
-            <Border Classes="emptyIcon" HorizontalAlignment="Center">
+            <Grid Classes="emptyIcon" HorizontalAlignment="Center">
+              <c:MaterialShape Kind="Square" Fill="{DynamicResource md3.secondary-container}"/>
               <c:DawIcon Data="{StaticResource icon-file-plus}" Width="26" Height="26"
                     HorizontalAlignment="Center" VerticalAlignment="Center"
                     Fill="{DynamicResource md3.on-secondary-container}"/>
-            </Border>
+            </Grid>
             <TextBlock Classes="emptyTitle" HorizontalAlignment="Center" TextWrapping="Wrap"
                        Text="{DynamicResource welcome.recent.empty}"/>
-            <TextBlock Classes="caption" FontSize="13" HorizontalAlignment="Center" TextWrapping="Wrap"
+            <TextBlock Classes="caption" FontSize="{DynamicResource Md3TypeBodyMedium}" HorizontalAlignment="Center" TextWrapping="Wrap"
                        Text="{DynamicResource welcome.empty.folder}"/>
           </StackPanel>
 
           <!-- 空态 B：有工程但搜索无匹配（必须与 A 区分，否则用户以为工程丢了） -->
           <StackPanel Grid.Row="3" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center"
                       MaxWidth="360" IsVisible="{Binding WelcomeNoMatch}">
-            <Border Classes="emptyIcon" HorizontalAlignment="Center">
+            <Grid Classes="emptyIcon" HorizontalAlignment="Center">
+              <c:MaterialShape Kind="Square" Fill="{DynamicResource md3.secondary-container}"/>
               <c:DawIcon Data="{StaticResource icon-search}" Width="26" Height="26"
                     HorizontalAlignment="Center" VerticalAlignment="Center"
                     Fill="{DynamicResource md3.on-secondary-container}"/>
-            </Border>
+            </Grid>
             <TextBlock Classes="emptyTitle" HorizontalAlignment="Center" TextWrapping="Wrap"
                        Text="{DynamicResource welcome.search.noresult}"/>
           </StackPanel>
         </Grid>
 
         <!-- ── 页 2：新建 ── -->
-        <StackPanel x:Name="PageNew" IsVisible="False" Spacing="16">
-          <StackPanel Orientation="Horizontal" Spacing="12">
-            <Button Classes="primary" Click="OnNewProject" MinHeight="36" Padding="20,0">
-              <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+        <StackPanel x:Name="PageNew" IsVisible="False" Spacing="{DynamicResource Md3Spacing4}">
+          <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}">
+            <Button Classes="primary" Click="OnNewProject" MinHeight="{DynamicResource Md3ControlHeight}" Padding="20,0">
+              <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}" VerticalAlignment="Center">
                 <c:DawIcon Data="{StaticResource icon-plus}" Width="16" Height="16"
                       VerticalAlignment="Center" Fill="{DynamicResource md3.on-primary}"/>
-                <TextBlock Text="{DynamicResource welcome.new.blank}" FontSize="13"
+                <TextBlock Text="{DynamicResource welcome.new.blank}" FontSize="{DynamicResource Md3TypeBodyMedium}"
                            VerticalAlignment="Center"/>
               </StackPanel>
             </Button>
-            <Button Classes="outline" Click="OnShowTemplates" MinHeight="36" Padding="20,0"
+            <Button Classes="tonal" Click="OnShowTemplates" MinHeight="{DynamicResource Md3ControlHeight}" Padding="20,0"
                     ToolTip.Tip="{DynamicResource welcome.template.tip}">
-              <TextBlock Text="{DynamicResource welcome.template}" FontSize="13" VerticalAlignment="Center"/>
+              <TextBlock Text="{DynamicResource welcome.template}" FontSize="{DynamicResource Md3TypeBodyMedium}" VerticalAlignment="Center"/>
             </Button>
             <TextBlock Classes="caption" Text="{DynamicResource welcome.new.shortcut}"
                        VerticalAlignment="Center" Margin="4,0,0,0"/>
           </StackPanel>
 
-          <Button Classes="outline" HorizontalAlignment="Left" Click="OnImportAudio"
-                  MinHeight="36" Padding="20,0">
-            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <Button Classes="tonal" HorizontalAlignment="Left" Click="OnImportAudio"
+                  MinHeight="{DynamicResource Md3ControlHeight}" Padding="20,0">
+            <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}" VerticalAlignment="Center">
               <c:DawIcon Data="{StaticResource icon-music}" Width="16" Height="16"
-                    VerticalAlignment="Center" Fill="{DynamicResource md3.on-surface}"/>
-              <TextBlock Text="{DynamicResource menu.file.importaudio}" FontSize="13"
+                    VerticalAlignment="Center" Fill="{Binding $parent[Button].Foreground}"/>
+              <TextBlock Text="{DynamicResource menu.file.importaudio}" FontSize="{DynamicResource Md3TypeBodyMedium}"
                          VerticalAlignment="Center"/>
             </StackPanel>
           </Button>
 
           <!-- 已安装音源（真实数据；取不到就整段隐藏，不编数） -->
-          <StackPanel x:Name="SingersSection" Margin="0,8,0,0" IsVisible="False" Spacing="8">
+          <StackPanel x:Name="SingersSection" Margin="0,8,0,0" IsVisible="False" Spacing="{DynamicResource Md3Spacing2}">
             <TextBlock Classes="groupLabel" Text="{DynamicResource welcome.singers.installed}"/>
             <ItemsControl x:Name="SingerChips">
               <ItemsControl.ItemsPanel>
@@ -443,10 +463,10 @@
               <ItemsControl.ItemTemplate>
                 <DataTemplate>
                   <Border Classes="chip" Margin="0,0,8,8">
-                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                      <Border Width="6" Height="6" CornerRadius="999"
+                    <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}" VerticalAlignment="Center">
+                      <Border Width="6" Height="6" CornerRadius="{DynamicResource Md3ShapeFull}"
                               Background="{DynamicResource md3.primary}" VerticalAlignment="Center"/>
-                      <TextBlock Text="{Binding Label}" FontSize="12" VerticalAlignment="Center"
+                      <TextBlock Text="{Binding Label}" FontSize="{DynamicResource Md3TypeLabelMedium}" VerticalAlignment="Center"
                                  Foreground="{DynamicResource md3.on-surface-variant}"/>
                     </StackPanel>
                   </Border>
@@ -459,11 +479,11 @@
         <!-- ── 页 3：打开 ── -->
         <StackPanel x:Name="PageOpen" IsVisible="False" Spacing="14">
           <Button Classes="primary" HorizontalAlignment="Left" Click="OnOpenProject"
-                  MinHeight="36" Padding="20,0">
-            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                  MinHeight="{DynamicResource Md3ControlHeight}" Padding="20,0">
+            <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}" VerticalAlignment="Center">
               <c:DawIcon Data="{StaticResource icon-folder-open}" Width="16" Height="16"
                     VerticalAlignment="Center" Fill="{DynamicResource md3.on-primary}"/>
-              <TextBlock Text="{DynamicResource welcome.open.browse}" FontSize="13" VerticalAlignment="Center"/>
+              <TextBlock Text="{DynamicResource welcome.open.browse}" FontSize="{DynamicResource Md3TypeBodyMedium}" VerticalAlignment="Center"/>
             </StackPanel>
           </Button>
           <TextBlock Classes="caption" Text="{DynamicResource welcome.open.supported}"/>
@@ -482,18 +502,18 @@
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="vm:RecentFileInfo">
                 <Button Classes="templateCard" Click="OnOpenTemplate">
-                  <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                    <Border Width="36" Height="36" CornerRadius="12"
+                  <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}" VerticalAlignment="Center">
+                    <Border Width="36" Height="36" CornerRadius="{DynamicResource Md3ShapeMedium}"
                             Background="{DynamicResource md3.secondary-container}">
                       <c:DawIcon Data="{StaticResource icon-layout}" Width="18" Height="18"
                             HorizontalAlignment="Center" VerticalAlignment="Center"
                             Fill="{DynamicResource md3.on-secondary-container}"/>
                     </Border>
                     <StackPanel VerticalAlignment="Center" Spacing="2" MaxWidth="150">
-                      <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="Medium"
+                      <TextBlock Text="{Binding Name}" FontSize="{DynamicResource Md3TypeBodyMedium}" FontWeight="Medium"
                                  TextTrimming="CharacterEllipsis"
                                  Foreground="{DynamicResource md3.on-surface}"/>
-                      <TextBlock Text="{Binding Directory}" FontSize="11.5"
+                      <TextBlock Text="{Binding Directory}" FontSize="{DynamicResource Md3TypeBodySmall}"
                                  TextTrimming="CharacterEllipsis"
                                  Foreground="{DynamicResource md3.on-surface-variant}"/>
                     </StackPanel>
@@ -506,11 +526,12 @@
 
           <StackPanel Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="360"
                       IsVisible="{Binding !TemplateFiles.Count}">
-            <Border Classes="emptyIcon" HorizontalAlignment="Center">
+            <Grid Classes="emptyIcon" HorizontalAlignment="Center">
+              <c:MaterialShape Kind="Square" Fill="{DynamicResource md3.secondary-container}"/>
               <c:DawIcon Data="{StaticResource icon-layout}" Width="26" Height="26"
                     HorizontalAlignment="Center" VerticalAlignment="Center"
                     Fill="{DynamicResource md3.on-secondary-container}"/>
-            </Border>
+            </Grid>
             <TextBlock Classes="emptyTitle" HorizontalAlignment="Center"
                        Text="{DynamicResource welcome.template.empty}"/>
           </StackPanel>
@@ -519,7 +540,7 @@
 
       <!-- 底部：拖放提示条（把主窗已有的拖放能力显性化） -->
       <Border Grid.Row="2" Classes="dropStrip" IsHitTestVisible="False">
-        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center"
+        <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}" HorizontalAlignment="Center"
                     VerticalAlignment="Center">
           <c:DawIcon Data="{StaticResource icon-download}" Width="16" Height="16"
                 VerticalAlignment="Center" Fill="{DynamicResource md3.on-surface-variant}"/>
