@@ -440,7 +440,9 @@ namespace OpenUtau.Core {
 
         // ── 独立试听通道（NAudio WaveOutEvent，不影响主 AudioOutput/工程播放）──
 
+#if WINDOWS
         private WaveOutEvent? previewOutput;
+#endif
         private string? previewPath;
         /// <summary>当前试听文件（null = 无试听）。</summary>
         public string? PreviewPath => previewPath;
@@ -448,6 +450,7 @@ namespace OpenUtau.Core {
         public event Action<string?>? PreviewChanged;
 
         public void PlayPreview(string file) {
+#if WINDOWS
             StopPreview();
             try {
                 var playSound = Wave.OpenFile(file);
@@ -469,9 +472,13 @@ namespace OpenUtau.Core {
                 Log.Error(ex, $"Failed to play preview {file}.");
                 StopPreview();
             }
+#else
+            DocManager.Inst.ExecuteCmd(new ErrorMessageNotification("Independent sample preview is currently available only on Windows."));
+#endif
         }
 
         public void StopPreview() {
+#if WINDOWS
             if (previewOutput is { } output) {
                 previewOutput = null;
                 previewPath = null;
@@ -479,6 +486,7 @@ namespace OpenUtau.Core {
                 output.Dispose();
                 PreviewChanged?.Invoke(null);
             }
+#endif
         }
 
         public void PlayOrPause(int tick = -1, int endTick = -1, int trackNo = -1) {
@@ -658,6 +666,7 @@ namespace OpenUtau.Core {
                                   IProgress<double>? progress = null, CancellationToken ct = default) {
             // 同步置位（Task.Run 调度窗口内 PlayOrPause 可能放行一次播放渲染互踩）
             if (ct.IsCancellationRequested) return Task.FromCanceled(ct);
+#if WINDOWS
             if (Interlocked.CompareExchange(ref recordingSession, 1, 0) != 0) {
                 return Task.FromException(new InvalidOperationException("An export recording is already running."));
             }
@@ -733,6 +742,9 @@ namespace OpenUtau.Core {
                 }
             }); // Always execute cleanup, even when cancellation wins before scheduling.
             return task;
+#else
+            return Task.FromException(new PlatformNotSupportedException("Real-time export is currently available only on Windows. Use offline export on Linux."));
+#endif
         }
 
         /// <summary>Device-paced VST delivery, with a finite sample count and an independent export chain.</summary>
@@ -740,6 +752,7 @@ namespace OpenUtau.Core {
             double startSeconds, double durationSeconds, IProgress<double>? progress, CancellationToken ct) {
             options.Validate();
             if (ct.IsCancellationRequested) return Task.FromCanceled(ct);
+#if WINDOWS
             if (Interlocked.CompareExchange(ref recordingSession, 1, 0) != 0)
                 return Task.FromException(new InvalidOperationException("An export recording is already running."));
             return Task.Run(() => {
@@ -785,6 +798,9 @@ namespace OpenUtau.Core {
                     Volatile.Write(ref recordingSession, 0);
                 }
             });
+#else
+            return Task.FromException(new PlatformNotSupportedException("Real-time export is currently available only on Windows. Use offline export on Linux."));
+#endif
         }
 
         // Exporting each tracks

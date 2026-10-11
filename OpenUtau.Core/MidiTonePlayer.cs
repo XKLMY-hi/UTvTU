@@ -28,6 +28,7 @@ namespace OpenUtau.Core {
         public bool IsAvailable { get; private set; }
 
         public MidiTonePlayer() {
+            if (!OperatingSystem.IsWindows()) return;
             // MMSYSERR_NODEV（无设备）等任何失败 → 不可用 → 回退正弦波
             uint err = midiOutOpen(out _handle, MIDI_MAPPER, IntPtr.Zero, IntPtr.Zero, 0);
             IsAvailable = err == 0;
@@ -39,16 +40,19 @@ namespace OpenUtau.Core {
 
         /// <summary>NoteOn（channel 0）。</summary>
         public void PlayTone(int note) {
+            if (!IsAvailable) return;
             midiOutShortMsg(_handle, 0x0090u | ((uint)note << 8) | ((uint)Velocity << 16));
         }
 
         /// <summary>NoteOff（channel 0）。</summary>
         public void EndTone(int note) {
+            if (!IsAvailable) return;
             midiOutShortMsg(_handle, 0x0080u | ((uint)note << 8));
         }
 
         /// <summary>全部 NoteOff（紧急停止所有发声）。</summary>
         public void EndAllTones() {
+            if (!IsAvailable) return;
             midiOutReset(_handle);
         }
     }

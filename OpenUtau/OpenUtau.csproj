@@ -81,7 +81,7 @@
     <ProjectReference Include="..\OpenUtau.Core\OpenUtau.Core.csproj" />
     <ProjectReference Include="..\OpenUtau.Plugin.Builtin\OpenUtau.Plugin.Builtin.csproj" />
   </ItemGroup>
-  <Target Name="CopyVstProbe" AfterTargets="Build">
+  <Target Name="CopyVstProbe" AfterTargets="Build" Condition="'$(OS)' == 'Windows_NT'">
     <MSBuild Projects="..\VstProbe\VstProbe.csproj" Targets="Build" />
     <!-- 复制 vst_probe 全部产物：apphost 运行需要同目录的 dll + runtimeconfig.json -->
     <ItemGroup>
