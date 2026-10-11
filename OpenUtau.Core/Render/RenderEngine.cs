@@ -221,6 +221,8 @@ namespace OpenUtau.Core.Render {
                 }
                 if (export?.TrackIndices != null && !export.TrackIndices.Contains(i)) continue;
                 var track = project.tracks[i];
+                ExportTrackParameters parameters = null;
+                export?.TrackParameters?.TryGetValue(i, out parameters);
                 var trackRequests = requests
                     .Where(req => req.trackNo == i)
                     .ToArray();
@@ -239,9 +241,9 @@ namespace OpenUtau.Core.Render {
                 }
 
                 var fader = new Fader(trackMix);
-                fader.Scale = export != null ? (export.TrackVolumeAndPan ? PlaybackManager.DecibelToVolume(track.Volume) : 1)
+                fader.Scale = export != null ? (export.TrackVolumeAndPan ? PlaybackManager.DecibelToVolume(parameters?.Volume ?? track.Volume) : 1)
                     : PlaybackManager.DecibelToVolume(track.Muted ? -24 : track.Volume);
-                fader.Pan = export?.TrackVolumeAndPan == false ? 0 : (float)track.Pan;
+                fader.Pan = export?.TrackVolumeAndPan == false ? 0 : parameters?.Pan ?? (float)track.Pan;
                 fader.SetScaleToTarget();
                 faders.Add(fader);
 
@@ -261,12 +263,14 @@ namespace OpenUtau.Core.Render {
                     }
                     foreach (var fx in active)
                         vstEffects.Add(fx);
+                    if (export != null && active.Count != track.VstSlots.Count(s => s.IsLoaded && !s.Bypassed))
+                        throw new InvalidOperationException($"A selected VST effect on track '{track.TrackName}' could not be loaded.");
                 }
 
                 // Bypass the fader entirely for dry stems, including its equal-power center pan law.
                 ISignalSource trackSignal = export?.TrackVolumeAndPan == false ? trackMix : fader;
                 ISignalSource trackOut = export == null ? WrapTrackFx(fader, track, mode, vstEffects.ToArray())
-                    : EffectChain.Build(export.BuiltInEffects ? MixFxSource.WrapWith(trackSignal, track.MixFx) : trackSignal, vstEffects.ToArray());
+                    : EffectChain.Build(export.BuiltInEffects ? MixFxSource.WrapWith(trackSignal, parameters != null ? parameters.Effects : track.MixFx) : trackSignal, vstEffects.ToArray());
 
                 // LevelTracker wraps the FINAL per-track output (fader + FX),
                 // so the mixer meter shows the actual audible signal.

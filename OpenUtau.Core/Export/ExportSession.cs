@@ -13,8 +13,8 @@ using OpenUtau.Core.Vst;
 
 namespace OpenUtau.Core.Export {
     /// <summary>
-    /// 统一导出会话：整曲混音 / 分轨。三入口（菜单整曲、菜单分轨、RenderWindow）
-    /// 共用同一渲染与写文件路径，进度经 IProgress&lt;ProgressInfo&gt; 转发。
+    /// Legacy menu exporter: fixed PCM16 mixdown / dry stems.
+    /// Configurable RenderWindow delivery uses ConfiguredExportSession instead.
     /// 语义（D 阶段统一后）：全部立体声 16-bit、不含主推子增益/静音、
     /// 分轨跳过静音轨、消费段计入 RenderGate（防并发 Flush）。
     /// </summary>

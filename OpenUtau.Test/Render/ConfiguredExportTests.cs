@@ -86,6 +86,7 @@ namespace OpenUtau.Test.Render {
             var options = new ExportAudioOptions { Format = ExportWaveFormat.Float32, VstEffects = false,
                 BuiltInEffects = false, TrackVolumeAndPan = true, MasterGain = .5 };
             var plan = new ExportDeliveryPlan(project, Destination, false, options, project.tracks);
+            project.tracks[0].Volume = 0; // A later live edit cannot change this job's captured gain.
             await new ConfiguredExportSession(plan).RunAsync(new Reports());
             using var reader = new WaveFileReader(Destination);
             var sample = new float[2];

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using OpenUtau.Core.Ustx;
@@ -19,6 +20,7 @@ namespace OpenUtau.Core.Export {
         public bool TrackVolumeAndPan { get; init; } = true;
         public double MasterGain { get; init; } = 1;
         public IReadOnlyCollection<int>? TrackIndices { get; init; }
+        internal IReadOnlyDictionary<int, ExportTrackParameters>? TrackParameters { get; init; }
 
         public void Validate() {
             if (!Enum.IsDefined(Format) || SampleRate is not (44100 or 48000 or 96000))
@@ -32,6 +34,7 @@ namespace OpenUtau.Core.Export {
     }
 
     public sealed record ExportTarget(UTrack Track, int Index, string Name, string Path);
+    internal sealed record ExportTrackParameters(double Volume, float Pan, UMixFx? Effects);
 
     public sealed class ExportDeliveryPlan {
         public UProject Project { get; }
@@ -40,6 +43,7 @@ namespace OpenUtau.Core.Export {
         public IReadOnlyList<ExportTarget> Targets { get; }
         public double StartSeconds { get; }
         public double DurationSeconds { get; }
+        readonly Dictionary<UTrack, string> vstIdentities;
 
         public ExportDeliveryPlan(UProject project, string outputPath, bool perTrack,
             ExportAudioOptions options, IEnumerable<UTrack> selected) {
@@ -58,7 +62,10 @@ namespace OpenUtau.Core.Export {
             DurationSeconds = (project.timeAxis.TickPosToMsPos(end) / 1000) - StartSeconds;
             if (!double.IsFinite(DurationSeconds) || DurationSeconds <= 0) throw new ArgumentException("The project or export range is empty.");
             var indices = selection.Select(t => project.tracks.IndexOf(t)).ToArray();
-            Audio = options with { EndTick = end, TrackIndices = Array.AsReadOnly(indices), MasterGain = perTrack ? 1 : options.MasterGain };
+            Audio = options with { EndTick = end, TrackIndices = Array.AsReadOnly(indices), MasterGain = perTrack ? 1 : options.MasterGain,
+                TrackParameters = new ReadOnlyDictionary<int, ExportTrackParameters>(selection.ToDictionary(t => project.tracks.IndexOf(t),
+                    t => new ExportTrackParameters(t.Volume, (float)t.Pan, t.MixFx?.Clone()))) };
+            vstIdentities = selection.ToDictionary(t => t, VstIdentity);
             string directory = System.IO.Path.GetDirectoryName(destination)!;
             string prefix = System.IO.Path.GetFileNameWithoutExtension(destination);
             Targets = Array.AsReadOnly(selection.Select(t => {
@@ -74,11 +81,14 @@ namespace OpenUtau.Core.Export {
             foreach (var target in Targets) {
                 if (target.Index >= Project.tracks.Count || !ReferenceEquals(Project.tracks[target.Index], target.Track))
                     throw new OperationCanceledException("The project tracks changed during export.");
+                if (Audio.VstEffects && vstIdentities[target.Track] != VstIdentity(target.Track))
+                    throw new OperationCanceledException("The selected VST slots changed during export.");
             }
         }
 
         public bool NeedsDevice(ExportAudioOptions options) => options.VstEffects && Targets
             .Where(t => options.TrackIndices == null || options.TrackIndices.Contains(t.Index))
             .Any(t => t.Track.VstSlots?.Any(slot => slot.IsLoaded && !slot.Bypassed) == true);
+        static string VstIdentity(UTrack track) => string.Join("\n", track.VstSlots?.Select(s => $"{s.SlotIndex}:{s.PluginUid}:{s.Bypassed}") ?? Array.Empty<string>());
     }
 }
