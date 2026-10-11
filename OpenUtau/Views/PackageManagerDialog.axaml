@@ -10,18 +10,16 @@
   <Design.DataContext>
     <vm:PackageManagerViewModel/>
   </Design.DataContext>
-<DockPanel LastChildFill="True">
-      <Border>
-  <Grid Margin="10">
-    <Grid.RowDefinitions>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="Auto"/>
-    </Grid.RowDefinitions>
-    <Grid Grid.Row="0">
-      <DataGrid ItemsSource="{Binding Available}" AutoGenerateColumns="False" CanUserSortColumns="False"
+  <Grid RowDefinitions="Auto,*,Auto">
+    <WrapPanel Orientation="Horizontal">
+      <Button Classes="toolAction resourceAction" Content="{DynamicResource packages.installfromfile}" Click="OnInstallFromFile"/>
+      <Button Classes="toolAction resourceAction" Content="{DynamicResource packages.openinstalllocation}" Click="OpenLocation"/>
+      <Button Classes="toolAction resourceAction" Content="{DynamicResource packages.refresh}" Command="{Binding RefreshCommand}"/>
+    </WrapPanel>
+<DataGrid Name="PackagesGrid" Grid.Row="1" RowHeight="56" Margin="0,16,0,12" ItemsSource="{Binding Available}" AutoGenerateColumns="False" CanUserSortColumns="False"
                 BorderThickness="1" BorderBrush="{DynamicResource SystemControlHighlightBaseMediumHighBrush}">
         <DataGrid.Columns>
-          <DataGridTextColumn Header="{DynamicResource packages.col.id}" Binding="{Binding Id}"/>
+          <DataGridTextColumn Header="{DynamicResource packages.col.name}" Binding="{Binding Name}" Width="2*"/>
           <DataGridTextColumn Header="{DynamicResource packages.col.developer}" Binding="{Binding Developer}"/>
           <DataGridTextColumn Header="{DynamicResource packages.col.version}" Binding="{Binding Version}"/>
           <DataGridTextColumn Header="{DynamicResource packages.col.installed}" Binding="{Binding InstalledDisplay}"/>
@@ -37,18 +35,6 @@
           </DataGridTemplateColumn>
         </DataGrid.Columns>
       </DataGrid>
-    </Grid>
-
-    <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10" Margin="0,8,0,0">
-      <TextBlock Text="{Binding Status}" Margin="0,4,0,0"/>
-    </StackPanel>
-
-    <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10" Margin="0,8,0,0" HorizontalAlignment="Right">
-      <Button Content="{DynamicResource packages.installfromfile}" Click="OnInstallFromFile"/>
-      <Button Content="{DynamicResource packages.openinstalllocation}" Click="OpenLocation"/>
-      <Button Content="{DynamicResource packages.refresh}" Command="{Binding RefreshCommand}"/>
-    </StackPanel>
+    <TextBlock Grid.Row="2" Classes="toolHint" TextWrapping="Wrap" Text="{Binding Status}"/>
   </Grid>
-      </Border>
-    </DockPanel>
 </controls:WorkspaceToolView>

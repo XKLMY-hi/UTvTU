@@ -30,6 +30,7 @@ public partial class ToolWorkspaceView : UserControl {
     public void SetJobStatus(string? status) => JobStatus.Text = status;
     public void SetEditingEnabled(bool enabled) {
         ResourceContent.IsEnabled = enabled;
+        PreferencesButton.IsEnabled = enabled;
     }
     public void ReleaseContents() { RenderContent.Content = SingersContent.Content = PackagesContent.Content = null; }
 }

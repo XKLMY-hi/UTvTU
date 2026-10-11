@@ -1,4 +1,4 @@
-﻿using System.Threading;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -7,9 +7,10 @@ using OpenUtau.Core;
 using OpenUtau.App.Controls;
 
 namespace OpenUtau.App.Views {
-    public partial class SingerSetupDialog : WindowEx {
+    public partial class SingerSetupDialog : WorkspaceToolView {
         public SingerSetupDialog() {
             InitializeComponent();
+            Width = 600;
         }
 
         void InstallClicked(object sender, RoutedEventArgs arg) {

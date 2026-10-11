@@ -27,16 +27,26 @@ namespace OpenUtau.App.Views {
         public SingersDialog() {
             InitializeComponent();
             Opened += (_, _) => DocManager.Inst.AddSubscriber(this);
+            SizeChanged += (_, _) => {
+                // Keep the OTO table finite inside the outer narrow-window scroller.
+                SingerLayout.Height = Math.Max(650, Bounds.Height);
+                bool showSubbanks = Bounds.Width >= 860;
+                SubbanksGrid.IsVisible = showSubbanks;
+                SingerHeader.ColumnDefinitions[4].Width = new Avalonia.Controls.GridLength(showSubbanks ? 280 : 0);
+                SingerHeader.ColumnDefinitions[3].Width = new Avalonia.Controls.GridLength(showSubbanks ? 16 : 0);
+            };
+        }
+
+        void OnInstallSinger(object? sender, RoutedEventArgs e) {
+            if (WindowHost is MainWindow main) main.InstallSinger();
         }
 
         protected override void OnClosed(EventArgs e) {
             base.OnClosed(e);
             DocManager.Inst.RemoveSubscriber(this);
-            var playBack = PlaybackManager.Inst.AudioOutput;
-            var playbackState = playBack.PlaybackState;
-            if (playbackState == PlaybackState.Playing) {
-                playBack.Stop();
-            }
+            (DataContext as SingersViewModel)?.Dispose();
+            OtoPlot.WaveFile = null;
+            wav = null;
         }
 
         void OnSingerMenuButton(object sender, RoutedEventArgs args) {
@@ -164,7 +174,7 @@ namespace OpenUtau.App.Views {
 
         void OnSelectedOtoChanged(object sender, SelectionChangedEventArgs e) {
             var viewModel = (DataContext as SingersViewModel)!;
-            if (viewModel.Singer == null || e.AddedItems.Count < 1) {
+            if (viewModel?.Singer == null || e.AddedItems.Count < 1) {
                 return;
             }
             var oto = (UOto?)e.AddedItems[0];

@@ -14,6 +14,8 @@ namespace OpenUtau.App.Controls;
 /// 交还系统：标题栏、窗口按钮、边框、投影、圆角、窗口动画。
 /// </summary>
 public class WindowEx : Window {
+    /// <summary>Detached editors route auxiliary tools here without changing native window ownership.</summary>
+    public Window? WorkspaceOwner { get; set; }
     public WindowEx() {
         ApplyNativeChrome();
         ApplyMd3Background();

@@ -7,9 +7,10 @@ using OpenUtau.App.ViewModels;
 using OpenUtau.App.Controls;
 
 namespace OpenUtau.App.Views {
-    public partial class MergeVoicebankDialog : WindowEx {
+    public partial class MergeVoicebankDialog : WorkspaceToolView {
         public MergeVoicebankDialog() {
             InitializeComponent();
+            Width = 600;
         }
 
         void OnEditedFolder(object sender, DataGridCellEditEndedEventArgs e)
@@ -52,7 +53,7 @@ namespace OpenUtau.App.Views {
             task.ContinueWith((task) => {
                 if (task.IsFaulted) {
                     Log.Error(task.Exception, "Failed to merge singer");
-                    if (Parent is Window window) {
+                    if (WindowHost is Window window && window.IsVisible) {
                         MessageBox.ShowError(window, task.Exception);
                     }
                 }

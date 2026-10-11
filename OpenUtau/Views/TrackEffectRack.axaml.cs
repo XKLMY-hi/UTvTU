@@ -19,11 +19,16 @@ namespace OpenUtau.App.Views {
     /// （`Controls/MixerTrackStrip.axaml.cs`，W1 范围，保留 = 跨线零编译风险）；
     /// ② 不切到混音台视图时也能打开某条轨的链。内容与右侧面板是**同一个控件**，无第二套实现。
     /// </summary>
-    public partial class TrackEffectRack : WindowEx {
+    public partial class TrackEffectRack : WorkspaceToolView {
+        protected override void OnClosed(EventArgs e) {
+            if (Content is FxChainPanel panel) panel.Shutdown();
+            base.OnClosed(e);
+        }
         public TrackEffectRack() : this(new UTrack()) { }
 
         public TrackEffectRack(UTrack track) {
             InitializeComponent();
+            Width = 360;
             // 内容就是 FxChainPanel（不使用 x:Name 字段：SukiWindow 派生窗口的字段填充
             // 在部分加载路径上不可靠 —— 直接取 Content，零查找依赖）
             if (Content is FxChainPanel panel) {

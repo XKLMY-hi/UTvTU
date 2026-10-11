@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -73,6 +73,8 @@ namespace OpenUtau.App.Views {
         }
 
         public void ReleaseSession() {
+            if (PageShortcuts.Content is WorkspaceToolView tool) tool.Close();
+            PageShortcuts.Content = null;
             DataContext = null;
             SingersDataContext = null;
             Host = null;
@@ -101,6 +103,7 @@ namespace OpenUtau.App.Views {
 
         /// <summary>打开时定位到音频页（稿子的默认页）。</summary>
         public void ShowDefaultPage() => ShowPage("audio", NavAudio);
+        public void ShowShortcuts() => ShowPage("shortcuts", NavShortcuts);
 
         private void OnNavClicked(object? sender, RoutedEventArgs e) {
             if (sender is Button button) {
@@ -120,6 +123,7 @@ namespace OpenUtau.App.Views {
                 "general" => "prefs.general",
                 "midi" => "prefs.nav.midi",
                 "about" => "prefs.nav.about",
+                "shortcuts" => "shortcut.caption",
                 _ => "prefs.caption",
             });
             PageAudio.IsVisible = tag == "audio";
@@ -130,7 +134,9 @@ namespace OpenUtau.App.Views {
             PageGeneral.IsVisible = tag == "general";
             PageMidi.IsVisible = tag == "midi";
             PageAbout.IsVisible = tag == "about";
-            foreach (Button nav in new[] { NavAudio, NavLibrary, NavPlayback, NavAppearance, NavEditor, NavMidi, NavGeneral, NavAbout }) {
+            PageShortcuts.IsVisible = tag == "shortcuts";
+            if (tag == "shortcuts" && PageShortcuts.Content == null) PageShortcuts.Content = new ShortcutOverviewWindow { Width = double.NaN };
+            foreach (Button nav in new[] { NavAudio, NavLibrary, NavPlayback, NavAppearance, NavEditor, NavMidi, NavGeneral, NavShortcuts, NavAbout }) {
                 nav.Classes.Set("selected", nav == selected);
             }
         }

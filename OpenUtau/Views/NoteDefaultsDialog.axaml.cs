@@ -1,14 +1,15 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
 using OpenUtau.App.ViewModels;
 using OpenUtau.Core.Util;
 using OpenUtau.App.Controls;
 
 namespace OpenUtau.App.Views {
-    public partial class NoteDefaultsDialog : WindowEx {
+    public partial class NoteDefaultsDialog : WorkspaceToolView {
         internal readonly NoteDefaultsViewModel ViewModel;
         public NoteDefaultsDialog() {
             InitializeComponent();
+            Width = 600;
             DataContext = ViewModel = new NoteDefaultsViewModel();
         }
 

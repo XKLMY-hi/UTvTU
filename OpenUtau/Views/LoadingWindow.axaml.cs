@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using OpenUtau.App.Controls;
 
 namespace OpenUtau.App.Views {
-    public partial class LoadingWindow : WindowEx {
+    public partial class LoadingWindow : WorkspaceToolView {
         private static LoadingWindow? loadingDialog;
         private static bool isCurrentlyLoading = false;
         private static CancellationTokenSource? globalLoadingCancellationTokenSource;
@@ -58,45 +58,32 @@ namespace OpenUtau.App.Views {
         /// Returns a task that shows a loading popup for a task after a time delay (Default 250ms)
         /// </summary>
         public static async Task LoadForAsyncTask(Task loadingTask, Window parentWindow, int timeBeforeLoadingPopup = 250) {
-            CancellationTokenSource cts = new CancellationTokenSource();
-            Task loadingPopupTask = ShowLoadingAfterTime(cts.Token, parentWindow, 1);
-
-            await loadingTask;
-
-            // Cancel loading box creation task early once window successfully created
-            cts.Cancel();
-            // Close loading box if opened
-            CloseLoadingWindow();
-            isCurrentlyLoading = false;
+            bool ownsLoading = !isCurrentlyLoading;
+            if (ownsLoading) BeginLoading(parentWindow, timeBeforeLoadingPopup);
+            try { await loadingTask; }
+            finally { if (ownsLoading) EndLoading(); }
         }
 
         /// <summary>
         /// Returns a task that shows a loading popup for a task after a time delay (Default 250ms)
         /// </summary>
         public static async Task<T> LoadForAsyncTask<T>(Task<T> loadingTask, Window parentWindow, int timeBeforeLoadingPopup = 250) {
-            CancellationTokenSource cts = new CancellationTokenSource();
-            Task loadingPopupTask = ShowLoadingAfterTime(cts.Token, parentWindow, 1);
-
-            await loadingTask;
-
-            // Cancel loading box creation task early once window successfully created
-            cts.Cancel();
-            // Close loading box if opened
-            CloseLoadingWindow();
-            isCurrentlyLoading = false;
-
-            return loadingTask.Result;
+            bool ownsLoading = !isCurrentlyLoading;
+            if (ownsLoading) BeginLoading(parentWindow, timeBeforeLoadingPopup);
+            try { return await loadingTask; }
+            finally { if (ownsLoading) EndLoading(); }
         }
 
         private static async Task ShowLoadingAfterTime(CancellationToken ct, Window parentWindow, int milisDelay) {
             // Must have at least 1ms of delay opening loading window to avoid strange race conditions with UI thread (?)
-            await Task.Delay(Math.Max(milisDelay, 1), ct);
+            try { await Task.Delay(Math.Max(milisDelay, 1), ct); }
+            catch (OperationCanceledException) { return; }
 
             if (ct.IsCancellationRequested) {
                 return;
             }
 
-            await uiTaskFactory.StartNew(() => ShowLoadingWindow(parentWindow));
+            await uiTaskFactory.StartNew(() => { if (!ct.IsCancellationRequested) ShowLoadingWindow(parentWindow); });
         }
 
         public static Task RunAsyncOnUIThread(Action func) {
@@ -119,7 +106,8 @@ namespace OpenUtau.App.Views {
             }
 
             globalLoadingCancellationTokenSource = new CancellationTokenSource();
-            Task.Run(() => ShowLoadingAfterTime(globalLoadingCancellationTokenSource.Token, parentWindow, milisDelay), globalLoadingCancellationTokenSource.Token);
+            var token = globalLoadingCancellationTokenSource.Token;
+            _ = ShowLoadingAfterTime(token, parentWindow, milisDelay);
         }
 
         public static void EndLoading() {
@@ -129,6 +117,8 @@ namespace OpenUtau.App.Views {
             isCurrentlyLoading = false;
 
             globalLoadingCancellationTokenSource?.Cancel();
+            globalLoadingCancellationTokenSource?.Dispose();
+            globalLoadingCancellationTokenSource = null;
             CloseLoadingWindow();
         }
     }

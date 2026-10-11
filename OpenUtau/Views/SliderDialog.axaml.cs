@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 using OpenUtau.App.Controls;
@@ -6,11 +6,12 @@ using Avalonia.Interactivity;
 using ReactiveUI;
 
 namespace OpenUtau.App.Views {
-    public partial class SliderDialog : WindowEx {
+    public partial class SliderDialog : WorkspaceToolView {
         public Action<double>? onFinish;
 
         public SliderDialog() {
             InitializeComponent();
+            Width = 340;
         }
         public SliderDialog(string title, double value, double min, double max, double tick) {
             InitializeComponent();

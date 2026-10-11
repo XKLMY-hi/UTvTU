@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml.MarkupExtensions;
+using Avalonia.Markup.Xaml.Styling;
 using OpenUtau.App.Views;
 
 namespace OpenUtau.App.Controls;
@@ -27,6 +28,9 @@ public class WorkspaceToolView : UserControl {
 
     public WorkspaceToolView() {
         this[!BackgroundProperty] = new DynamicResourceExtension("md3.surface");
+        Styles.Add(new StyleInclude(new Uri("avares://OpenUtau/")) {
+            Source = new Uri("avares://OpenUtau/Styles/ToolWorkspace.axaml"),
+        });
     }
     public void Show() => Show(null);
     public void Show(Window? owner) => _ = Present(owner, false);
@@ -38,6 +42,7 @@ public class WorkspaceToolView : UserControl {
         completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         owner = window;
         var shell = window;
+        if (shell is WindowEx { WorkspaceOwner: Window workspace }) shell = workspace;
         while (shell?.Owner is Window parent) shell = parent;
         if (shell is IWorkspaceToolHost host) {
             owner = shell;

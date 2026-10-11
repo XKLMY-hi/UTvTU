@@ -1,14 +1,12 @@
-<controls:WindowEx xmlns="https://github.com/avaloniaui"
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
         xmlns:controls="clr-namespace:OpenUtau.App.Controls"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:OpenUtau.App.ViewModels"
-        mc:Ignorable="d" Width="600" Height="400" MinWidth="600" MinHeight="400"
+        mc:Ignorable="d"
         x:Class="OpenUtau.App.Views.MergeVoicebankDialog"
-        Icon="/Assets/brand/utvtu.ico"
-        Title="{DynamicResource mergevoicebank.title}"
-        WindowStartupLocation="CenterScreen">
+        Title="{DynamicResource mergevoicebank.title}" Focusable="True">
 
 <DockPanel LastChildFill="True">
       <Border>
@@ -111,4 +109,4 @@
   </Carousel>
       </Border>
     </DockPanel>
-</controls:WindowEx>
+</controls:WorkspaceToolView>

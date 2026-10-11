@@ -26,6 +26,7 @@ public partial class MainWindow : IWorkspaceToolHost {
         ToolDialogHost.DialogsChanged = () => {
             bool enabled = !ToolDialogHost.HasDialogs;
             MainGrid.IsEnabled = WelcomeHost.IsEnabled = PreferencesHost.IsEnabled = ToolWorkspaceHost.IsEnabled = OverlayLayer.IsEnabled = enabled;
+            RefreshDetachedEditing();
         };
     }
 
@@ -71,7 +72,8 @@ public partial class MainWindow : IWorkspaceToolHost {
         }
     }
     internal void PresentTool(WorkspaceToolView tool) {
-        if (shellDisposed || tool.IsClosed) return;
+        if (tool.IsClosed) return;
+        if (shellDisposed) { tool.Close(); return; }
         tools.Add(tool);
         tool.Closed -= OnToolClosed;
         tool.Closed += OnToolClosed;
@@ -79,10 +81,11 @@ public partial class MainWindow : IWorkspaceToolHost {
             case RenderWindow: EnsureToolPages(); toolPages!.SetContent("render", tool); EnterToolWorkspace("render"); break;
             case SingersDialog: EnsureToolPages(); toolPages!.SetContent("singers", tool); EnterToolWorkspace("singers"); break;
             case PackageManagerDialog: EnsureToolPages(); toolPages!.SetContent("packages", tool); EnterToolWorkspace("packages"); break;
-            case TrackSettingsDialog or MixFxDialog or LyricsDialog or ExpressionsDialog:
+            case TrackSettingsDialog or MixFxDialog or LyricsDialog or ExpressionsDialog or TrackEffectRack:
                 HideToolWorkspace();
                 if (!ReferenceEquals(contextTool, tool)) contextTool?.Close();
                 contextTool = tool;
+                tool.Width = tool.Height = double.NaN;
                 contextTitleBinding?.Dispose();
                 contextTitleBinding = ContextToolTitle.Bind(TextBlock.TextProperty, tool.GetObservable(WorkspaceToolView.TitleProperty));
                 ContextToolHost.Content = tool;
@@ -120,8 +123,16 @@ public partial class MainWindow : IWorkspaceToolHost {
         bool editing = renderTool?.IsRendering != true;
         MainLayout.IsEnabled = ShellHeaderRow.IsEnabled = ContextToolPanel.IsEnabled = editing;
         toolPages?.SetEditingEnabled(editing);
+        RefreshDetachedEditing();
+    }
+    void RefreshDetachedEditing() {
+        bool enabled = !ToolDialogHost.HasDialogs && renderTool?.IsRendering != true;
+        if (pianoRollWindow != null) pianoRollWindow.IsEnabled = enabled;
+        if (mixerWindow != null) mixerWindow.IsEnabled = enabled;
     }
     void OnReturnToDelivery(object? sender, RoutedEventArgs e) => ShowRenderWorkspace();
+    void OnOpenResources(object? sender, RoutedEventArgs e) => ShowResourceCenter(false);
+    public void InstallSinger() => OnMenuInstallSinger(this, new RoutedEventArgs());
     void ResetProjectTools() {
         contextTool?.Close();
         renderTool?.Close();

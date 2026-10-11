@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -10,6 +10,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace OpenUtau.App.ViewModels {
     class LyricsReplaceViewModel : ViewModelBase {
+        readonly UProject capturedProject = DocManager.Inst.Project;
         [Reactive] public string OldValue { get; set; } = "";
         [Reactive] public string NewValue { get; set; } = "";
         [Reactive] public string Preview { get; set; } = "";
@@ -61,6 +62,9 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public bool Finish() {
+            if (!ReferenceEquals(capturedProject, DocManager.Inst.Project) || !capturedProject.parts.Contains(part) || notes.Any(n => !part.notes.Contains(n))) return false;
+            using var edits = new OpenUtau.App.Editing.DocumentEditGesture(capturedProject, "command.batch.lyric");
+            if (!edits.CanExecute) return false;
             try {
                 Replace();
             } catch (Exception ex) {
@@ -68,13 +72,11 @@ namespace OpenUtau.App.ViewModels {
                 return false;
             }
 
-            DocManager.Inst.StartUndoGroup("command.batch.lyric");
             for (int i = 0; i < Lyrics.Length && i < notes.Length; ++i) {
                 if (notes[i].lyric != Lyrics[i]) {
-                    DocManager.Inst.ExecuteCmd(new ChangeNoteLyricCommand(part, notes[i], Lyrics[i]));
+                    edits.Execute(new ChangeNoteLyricCommand(part, notes[i], Lyrics[i]));
                 }
             }
-            DocManager.Inst.EndUndoGroup();
             return true;
         }
     }

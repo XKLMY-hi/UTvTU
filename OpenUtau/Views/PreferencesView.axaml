@@ -263,6 +263,7 @@
               </StackPanel>
             </Button>
             <Border Height="1" Margin="0,8" Background="{DynamicResource md3.outline-variant}"/>
+            <Button Name="NavShortcuts" Classes="navItem" Content="{DynamicResource shortcut.caption}" Click="OnNavClicked" Tag="shortcuts"/>
             <Button x:Name="NavAbout" Classes="navItem" Click="OnNavClicked" Tag="about">
               <StackPanel Orientation="Horizontal" Spacing="12">
                 <c:DawIcon Data="{StaticResource icon-info}" Width="16" Height="16" VerticalAlignment="Center" Fill="{Binding $parent[Button].Foreground}"/>
@@ -874,6 +875,7 @@
 
         <!-- ══ MIDI 设备页（应用暂无 MIDI 设备设置） ══ -->
         <!-- ══ 关于页（徽标 + 版本说明 + 仓库链接 + 页尾署名） ══ -->
+        <ContentControl Name="PageShortcuts" IsVisible="False" Height="540"/>
         <Grid x:Name="PageAbout" IsVisible="False">
           <StackPanel Spacing="12" MaxWidth="560" HorizontalAlignment="Center">
             <Border Classes="card" Padding="32">

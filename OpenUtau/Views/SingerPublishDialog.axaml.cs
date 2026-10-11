@@ -9,9 +9,10 @@ using OpenUtau.App.ViewModels;
 using OpenUtau.App.Controls;
 
 namespace OpenUtau.App.Views {
-    public partial class SingerPublishDialog : WindowEx {
+    public partial class SingerPublishDialog : WorkspaceToolView {
         public SingerPublishDialog() {
             InitializeComponent();
+            Width = 500;
         }
 
         async void PublishClicked(object sender, RoutedEventArgs arg){
@@ -31,7 +32,7 @@ namespace OpenUtau.App.Views {
                 };
             }
             var outputFile = await FilePicker.SaveFile(
-                this, "singers.publish", types);
+                WindowHost, "singers.publish", types);
             if (outputFile == null) {
                 return;
             }
@@ -47,7 +48,7 @@ namespace OpenUtau.App.Views {
             viewModel.Publish(outputFile).ContinueWith((task) => {
                 if (task.IsFaulted) {
                     Log.Error(task.Exception, "Failed to publish singer");
-                    if (Parent is Window window) {
+                    if (WindowHost is Window window && window.IsVisible) {
                         MessageBox.ShowError(window, task.Exception);
                     }
                 }

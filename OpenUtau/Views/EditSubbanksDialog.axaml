@@ -1,4 +1,4 @@
-<controls:WindowEx xmlns="https://github.com/avaloniaui"
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
         xmlns:controls="clr-namespace:OpenUtau.App.Controls"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,10 +6,7 @@
         xmlns:vm="using:OpenUtau.App.ViewModels"
         mc:Ignorable="d"
         x:Class="OpenUtau.App.Views.EditSubbanksDialog"
-        Icon="/Assets/brand/utvtu.ico"
-        Title="{DynamicResource singers.subbanks.edit}"
-        WindowStartupLocation="CenterScreen"
-        MinWidth="500" MinHeight="600" Width="500" Height="600">
+        Title="{DynamicResource singers.subbanks.edit}" Focusable="True">
 <DockPanel LastChildFill="True">
       <Border>
   <Grid ColumnDefinitions="*,10,160" Margin="10">
@@ -54,4 +51,4 @@
   </Grid>
       </Border>
     </DockPanel>
-</controls:WindowEx>
+</controls:WorkspaceToolView>

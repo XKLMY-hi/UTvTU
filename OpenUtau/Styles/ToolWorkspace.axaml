@@ -20,16 +20,17 @@
   </Style>
   <Style Selector="TextBlock.toolHint"><Setter Property="FontSize" Value="13"/>
     <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/></Style>
-  <Style Selector="c|WorkspaceToolView Button">
+  <Style Selector=":is(c|WorkspaceToolView) Button">
     <Setter Property="Theme" Value="{StaticResource DawTextButtonTheme}"/>
     <Setter Property="MinHeight" Value="32"/><Setter Property="FontSize" Value="13"/>
-    <Setter Property="CornerRadius" Value="999"/>
+    <Setter Property="CornerRadius" Value="999"/><Setter Property="Margin" Value="0"/>
   </Style>
-  <Style Selector="c|WorkspaceToolView TextBox,c|WorkspaceToolView ComboBox">
+  <Style Selector=":is(c|WorkspaceToolView) TextBox,:is(c|WorkspaceToolView) ComboBox">
     <Setter Property="MinHeight" Value="36"/><Setter Property="FontSize" Value="13"/>
   </Style>
-  <Style Selector="c|WorkspaceToolView DataGrid">
+  <Style Selector=":is(c|WorkspaceToolView) DataGrid">
     <Setter Property="RowHeight" Value="36"/><Setter Property="ColumnHeaderHeight" Value="36"/>
     <Setter Property="FontSize" Value="13"/>
   </Style>
+  <Style Selector="Button.resourceAction"><Setter Property="Margin" Value="0,0,8,8"/><Setter Property="Height" Value="32"/></Style>
 </Styles>

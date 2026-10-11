@@ -253,10 +253,9 @@ namespace OpenUtau.App.Controls {
                 return;
             }
 
-            var picker = new WindowEx {
+            var picker = new WorkspaceToolView {
                 Title = ThemeManager.GetString("effects.selecteffect"),
                 Width = 520, Height = 420,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner,
             };
             var layout = new StackPanel { Margin = new Thickness(12), Spacing = 6 };
 
@@ -330,10 +329,9 @@ namespace OpenUtau.App.Controls {
                 : null;
 
         void ShowInfo(string text) {
-            var window = new WindowEx {
+            var window = new WorkspaceToolView {
                 Title = ThemeManager.GetString("effects.info"),
                 Width = 400, Height = 190,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner,
             };
             var stack = new StackPanel { Margin = new Thickness(14), Spacing = 8 };
             stack.Children.Add(new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap, FontSize = 12 });

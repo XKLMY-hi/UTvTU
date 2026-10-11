@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using Avalonia.Controls;
@@ -8,13 +8,14 @@ using OpenUtau.Core;
 using OpenUtau.App.Controls;
 
 namespace OpenUtau.App.Views {
-    public partial class EditSubbanksDialog : WindowEx {
+    public partial class EditSubbanksDialog : WorkspaceToolView {
         internal readonly EditSubbanksViewModel ViewModel;
 
         internal Action? RefreshSinger;
 
         public EditSubbanksDialog() {
             InitializeComponent();
+            Width = 500;
             DataContext = ViewModel = new EditSubbanksViewModel();
         }
 
@@ -67,7 +68,7 @@ namespace OpenUtau.App.Views {
             if (ViewModel.Singer == null || ViewModel.Rows == null) {
                 return;
             }
-            var file = await FilePicker.OpenFile(this, "singers.subbanks.import", ViewModel.Singer.Location, FilePicker.PrefixMap);
+            var file = await FilePicker.OpenFile(WindowHost, "singers.subbanks.import", ViewModel.Singer.Location, FilePicker.PrefixMap);
             if (!string.IsNullOrEmpty(file)) {
                 try {
                     using (var reader = new StreamReader(file, ViewModel.Singer.TextFileEncoding)) {
@@ -95,7 +96,7 @@ namespace OpenUtau.App.Views {
                 return;
             }
             if (ViewModel.Colors.Count > 0 && ViewModel.Colors.First(c => string.IsNullOrEmpty(c.Name)) is VoiceColor main) {
-                var file = await FilePicker.SaveFile(this, "singers.subbanks.export", ViewModel.Singer.Location, "prefix.map", FilePicker.PrefixMap);
+                var file = await FilePicker.SaveFile(WindowHost, "singers.subbanks.export", ViewModel.Singer.Location, "prefix.map", FilePicker.PrefixMap);
                 if (!string.IsNullOrEmpty(file)) {
                     try {
                         using (var writer = new StreamWriter(file, false, ViewModel.Singer.TextFileEncoding)) {

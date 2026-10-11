@@ -1,14 +1,11 @@
-<controls:WindowEx xmlns="https://github.com/avaloniaui"
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
         xmlns:controls="clr-namespace:OpenUtau.App.Controls"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="136"
         x:Class="OpenUtau.App.Views.PhoneticAssistant"
-        Icon="/Assets/brand/utvtu.ico"
-        Title="{DynamicResource phoneticassistant.caption}"
-        WindowStartupLocation="CenterScreen"
-        Width="400" Height="136" CanResize="False">
+        Title="{DynamicResource phoneticassistant.caption}" Focusable="True">
 <DockPanel LastChildFill="True">
       <Border>
   <Grid>
@@ -21,4 +18,4 @@
   </Grid>
       </Border>
     </DockPanel>
-</controls:WindowEx>
+</controls:WorkspaceToolView>

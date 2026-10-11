@@ -1,13 +1,11 @@
-﻿<controls:WindowEx xmlns="https://github.com/avaloniaui"
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
         xmlns:controls="clr-namespace:OpenUtau.App.Controls"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" MinWidth="280" MinHeight="240" Width="420" Height="380"
+        mc:Ignorable="d"
         x:Class="OpenUtau.App.Views.VoiceColorMappingDialog"
-        Icon="/Assets/brand/utvtu.ico"
-        Title="{DynamicResource dialogs.voicecolorremapping}"
-        WindowStartupLocation="CenterOwner">
+        Title="{DynamicResource dialogs.voicecolorremapping}" Focusable="True">
 <DockPanel LastChildFill="True">
       <Border>
   <Grid RowDefinitions="40,1*,30" Margin="10">
@@ -38,4 +36,4 @@
   </Grid>
       </Border>
     </DockPanel>
-</controls:WindowEx>
+</controls:WorkspaceToolView>

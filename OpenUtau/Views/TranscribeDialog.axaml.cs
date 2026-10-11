@@ -8,11 +8,12 @@ using OpenUtau.Core;
 using OpenUtau.Core.Analysis;
 
 namespace OpenUtau.App.Views {
-    public partial class TranscribeDialog : WindowEx {
+    public partial class TranscribeDialog : WorkspaceToolView {
         public bool Confirmed { get; private set; }
 
         public TranscribeDialog() {
             InitializeComponent();
+            Width = 380;
         }
 
         void OnOkClicked(object? sender, RoutedEventArgs e) {
@@ -39,7 +40,7 @@ namespace OpenUtau.App.Views {
                     RmvpeCheck.IsChecked = false;
                 }
                 var modelPath = RmvpeTranscriber.GetModelPath();
-                await MessageBox.ShowError(this, new MessageCustomizableException(
+                await MessageBox.ShowError(WindowHost, new MessageCustomizableException(
                     "RMVPE not found",
                     "<translate:errors.failed.transcribe.rmvpe>",
                     new FileNotFoundException(modelPath),

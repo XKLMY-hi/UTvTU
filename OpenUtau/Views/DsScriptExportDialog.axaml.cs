@@ -4,11 +4,12 @@ using OpenUtau.App.Controls;
 using Avalonia.Interactivity;
 
 namespace OpenUtau.App.Views {
-    public partial class DsScriptExportDialog : WindowEx {
+    public partial class DsScriptExportDialog : WorkspaceToolView {
         public bool Confirmed { get; private set; }
 
         public DsScriptExportDialog() {
             InitializeComponent();
+            Width = 380;
         }
 
         void OnOkClicked(object? sender, RoutedEventArgs e) {

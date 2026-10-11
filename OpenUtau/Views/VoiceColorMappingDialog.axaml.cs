@@ -1,16 +1,17 @@
-﻿using System;
+using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 using OpenUtau.App.Controls;
 using Avalonia.Interactivity;
 
 namespace OpenUtau.App.Views {
-    public partial class VoiceColorMappingDialog : WindowEx {
+    public partial class VoiceColorMappingDialog : WorkspaceToolView {
         public Action? onFinish;
         public bool Apply { get; private set; } = false;
 
         public VoiceColorMappingDialog() {
             InitializeComponent();
+            Width = 420;
         }
 
         private void Ok_OnClick(object sender, RoutedEventArgs e) => Finish();

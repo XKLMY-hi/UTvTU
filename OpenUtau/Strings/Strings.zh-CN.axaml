@@ -1449,4 +1449,5 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="workspace.delivery">交付</system:String>
   <system:String x:Key="workspace.resources">资源中心</system:String>
   <system:String x:Key="workspace.resources.hint">在同一工作区管理音源与依赖包。</system:String>
+  <system:String x:Key="workspace.oto.keys">1–5：定位参数 · W/S：缩放 · A/D：平移 · Q/E：选择样本</system:String>
 </ResourceDictionary>

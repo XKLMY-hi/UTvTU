@@ -1,10 +1,8 @@
-<controls:WindowEx xmlns="https://github.com/avaloniaui"
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:OpenUtau.App.Controls"
         x:Class="OpenUtau.App.Views.TrackEffectRack"
-        Icon="/Assets/brand/utvtu.ico"
-        Title="{DynamicResource effects.title}" Width="360" Height="560"
-        WindowStartupLocation="CenterOwner">
+        Title="{DynamicResource effects.title}" Focusable="True">
   <!-- ═══════════════════════════════════════════════════════════════════════
        单轨效果链的**分离窗**（原 495 行 VST 槽机架已并入 FxChainPanel）
        ───────────────────────────────────────────────────────────────────────
@@ -15,4 +13,4 @@
        内容 = FxChainPanel（同一个控件、同一套命令、同一套编辑器派发）。
        ═══════════════════════════════════════════════════════════════════════ -->
   <controls:FxChainPanel Name="Panel"/>
-</controls:WindowEx>
+</controls:WorkspaceToolView>

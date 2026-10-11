@@ -1,14 +1,15 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using Avalonia.Input;
 using OpenUtau.App.Controls;
 using Avalonia.Interactivity;
 
 namespace OpenUtau.App.Views {
-    public partial class PasteParamDialog : WindowEx {
+    public partial class PasteParamDialog : WorkspaceToolView {
         public bool Apply { get; private set; } = false;
 
         public PasteParamDialog() {
             InitializeComponent();
+            Width = 380;
         }
 
         private void OkButtonClick(object? sender, RoutedEventArgs e) {

@@ -1,15 +1,12 @@
-<controls:WindowEx xmlns="https://github.com/avaloniaui"
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
         xmlns:controls="clr-namespace:OpenUtau.App.Controls"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="380" d:DesignHeight="260"
         x:Class="OpenUtau.App.Views.DsScriptExportDialog"
-        Icon="/Assets/brand/utvtu.ico"
-        Title="{DynamicResource dialogs.exportds.caption}"
-        WindowStartupLocation="CenterOwner"
-        SizeToContent="Height" Width="380" CanResize="False">
-  <controls:WindowEx.Styles>
+        Title="{DynamicResource dialogs.exportds.caption}" Focusable="True">
+  <controls:WorkspaceToolView.Styles>
     <Style Selector="TextBlock">
       <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
@@ -17,7 +14,7 @@
     <Style Selector="CheckBox">
       <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
     </Style>
-  </controls:WindowEx.Styles>
+  </controls:WorkspaceToolView.Styles>
 <DockPanel LastChildFill="True">
       <Border>
   <Border>
@@ -53,4 +50,4 @@
   </Border>
       </Border>
     </DockPanel>
-</controls:WindowEx>
+</controls:WorkspaceToolView>

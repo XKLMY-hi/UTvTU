@@ -278,6 +278,9 @@
               <c:DawIcon Data="{StaticResource icon-sliders}" Width="16" Height="16"
                     Fill="{Binding $parent[Button].Foreground}"/>
             </Button>
+            <Button Classes="topBtn" Click="OnOpenResources" AutomationProperties.Name="{DynamicResource workspace.resources}" ToolTip.Tip="{DynamicResource workspace.resources}">
+              <c:DawIcon Data="{StaticResource icon-folder-open}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
+            </Button>
             <Button Classes="topBtn" Click="OnMenuPreferences" AutomationProperties.Name="{DynamicResource menu.tools.prefs}" ToolTip.Tip="{DynamicResource menu.tools.prefs}">
               <c:DawIcon Data="{StaticResource icon-settings}" Width="16" Height="16"
                     Fill="{Binding $parent[Button].Foreground}"/>
@@ -895,8 +898,10 @@
             <Border BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1" Padding="16,0">
               <Grid ColumnDefinitions="*,Auto">
                 <TextBlock Name="ContextToolTitle" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                <Button Grid.Column="1" Classes="toolClose" Width="32" Height="32" Content="×" Click="OnCloseContextTool"
-                        AutomationProperties.Name="{DynamicResource button.cancel}"/>
+                <Button Grid.Column="1" Classes="toolClose" Width="32" Height="32" Click="OnCloseContextTool"
+                        AutomationProperties.Name="{DynamicResource button.cancel}">
+                  <c:DawIcon Data="{StaticResource icon-x}" Width="14" Height="14" Fill="{Binding $parent[Button].Foreground}"/>
+                </Button>
               </Grid>
             </Border>
             <ContentControl Name="ContextToolHost" Grid.Row="1"/>

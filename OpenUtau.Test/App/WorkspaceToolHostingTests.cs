@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Interactivity;
+using Avalonia.Input;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using OpenUtau.App.Controls;
 using OpenUtau.App.Editing;
 using OpenUtau.App.ViewModels;
@@ -40,8 +42,23 @@ public sealed class WorkspaceToolHostingTests : IDisposable {
         }
         public void PresentTool(WorkspaceToolView tool) {
             if (tool is RenderWindow) { Pages.SetContent("render", tool); Pages.ShowPage("render"); }
+            else if (tool is SingersDialog) { Pages.SetContent("singers", tool); Pages.ShowPage("singers"); }
             else Dialogs.Push(tool);
         }
+    }
+    [AvaloniaFact]
+    public async Task ToolFromADetachedWindowRoutesToItsWorkspaceWithoutAnotherNativeWindow() {
+        var host = new HostWindow(); host.Show();
+        var detached = new WindowEx { WorkspaceOwner = host, Width = 300, Height = 200 }; detached.Show();
+        var prompt = new TypeInDialog();
+        try {
+            var completion = prompt.ShowDialog(detached);
+            Assert.Same(host, prompt.WindowHost);
+            Assert.True(host.Dialogs.HasDialogs);
+            Assert.False(completion.IsCompleted);
+            host.Dialogs.CloseTop(); await completion;
+            Assert.True(detached.IsVisible);
+        } finally { prompt.Close(); detached.Close(); host.Close(); }
     }
     [AvaloniaFact]
     public async Task NestedDialogsRestoreTheUnderlyingControlAndCompleteOnlyTheirOwnTask() {
@@ -122,6 +139,88 @@ public sealed class WorkspaceToolHostingTests : IDisposable {
         part.notes.Add(a); part.notes.Add(b); project.parts.Add(part);
         DocManager.Inst.ExecuteCmd(new LoadProjectNotification(project));
         return part;
+    }
+    [AvaloniaFact]
+    public async Task EmbeddedPromptKeyboardCancelAndConfirmKeepTheirOriginalSemantics() {
+        var host = new HostWindow(); host.Show();
+        try {
+            string value = "unchanged";
+            var cancel = new TypeInDialog { onFinish = text => value = text };
+            cancel.SetText("discarded");
+            var cancelled = cancel.ShowDialog(host);
+            cancel.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.Escape });
+            await cancelled;
+            Assert.Equal("unchanged", value);
+            var confirm = new TypeInDialog { onFinish = text => value = text };
+            confirm.SetText("accepted");
+            var confirmed = confirm.ShowDialog(host);
+            confirm.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.Enter });
+            await confirmed;
+            Assert.Equal("accepted", value);
+            Assert.False(host.Dialogs.HasDialogs);
+        } finally { host.Dialogs.Shutdown(); host.Close(); }
+    }
+    [AvaloniaFact]
+    public void ResourceTableKeepsVirtualizationAndSearchWhenPagesChangeAtNarrowWidth() {
+        var host = new HostWindow { Width = 800, Height = 650 }; host.Show();
+        var tool = new SingersDialog();
+        try {
+            tool.Show(host);
+            var table = tool.FindControl<DataGrid>("OtoGrid")!;
+            table.ItemsSource = Enumerable.Range(0, 1000).Select(i => UOto.OfDummy("alias-" + i)).ToArray();
+            var search = tool.FindControl<TextBox>("AliasSearch")!;
+            search.Text = "retained";
+            Dispatcher.UIThread.RunJobs();
+            Assert.InRange(table.Bounds.Height, 1, 650);
+            Assert.InRange(table.GetVisualDescendants().OfType<DataGridRow>().Count(), 1, 100);
+            Assert.False(tool.FindControl<DataGrid>("SubbanksGrid")!.IsVisible);
+            host.Pages.ShowPage("render");
+            Assert.False(tool.IsClosed);
+            tool.Activate(); Dispatcher.UIThread.RunJobs();
+            Assert.Equal("retained", search.Text);
+            Assert.InRange(table.Bounds.Height, 1, 650);
+        } finally { tool.Close(); host.Close(); }
+    }
+    [AvaloniaFact]
+    public void ShortcutPreferencesSearchSurvivesCategoryNavigationAndReleasesWithTheSession() {
+        var preferences = new PreferencesView();
+        var host = new WindowEx { Width = 1100, Height = 700, Content = preferences }; host.Show();
+        try {
+            preferences.ShowShortcuts(); Dispatcher.UIThread.RunJobs();
+            var page = preferences.FindControl<ContentControl>("PageShortcuts")!;
+            var tool = Assert.IsType<ShortcutOverviewWindow>(page.Content);
+            var search = tool.FindControl<TextBox>("SearchBox")!;
+            search.Text = "no-such-command-012345";
+            Dispatcher.UIThread.RunJobs();
+            Assert.True(Assert.IsType<ShortcutOverviewViewModel>(tool.DataContext).IsEmpty);
+            preferences.ShowDefaultPage();
+            Assert.False(page.IsVisible);
+            preferences.ShowShortcuts();
+            Assert.Same(tool, page.Content);
+            Assert.Equal("no-such-command-012345", search.Text);
+            Assert.True(preferences.FindControl<Button>("NavShortcuts")!.Classes.Contains("selected"));
+            preferences.ReleaseSession();
+            Assert.True(tool.IsClosed);
+            Assert.Null(page.Content);
+        } finally { preferences.ReleaseSession(); host.Close(); }
+    }
+    [AvaloniaFact]
+    public async Task LoadingFailureRemovesOnlyTheBusyLayerAndKeepsItsUnderlyingPrompt() {
+        var host = new HostWindow(); host.Show();
+        var prompt = new TypeInDialog(); var completion = prompt.ShowDialog(host);
+        try {
+            var work = new TaskCompletionSource();
+            var loading = LoadingWindow.LoadForAsyncTask(work.Task, host, 0);
+            Assert.True(LoadingWindow.IsLoading());
+            host.Dialogs.CloseTop();
+            Assert.True(LoadingWindow.IsLoading());
+            Assert.False(completion.IsCompleted);
+            work.SetException(new InvalidOperationException("expected failure"));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => loading);
+            Assert.False(LoadingWindow.IsLoading());
+            Assert.True(host.Dialogs.HasDialogs);
+            Assert.False(completion.IsCompleted);
+        } finally { LoadingWindow.EndLoading(); host.Dialogs.Shutdown(); host.Close(); }
     }
     [AvaloniaFact]
     public void LyricsPreviewDoesNotKeepTheGlobalUndoGroupOpenAndCancelRestoresOwnedLyrics() {

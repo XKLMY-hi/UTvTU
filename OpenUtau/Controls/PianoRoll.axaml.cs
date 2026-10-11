@@ -667,9 +667,6 @@ namespace OpenUtau.App.Controls {
         void EditNoteDefaults() {
             var dialog = new NoteDefaultsDialog();
             dialog.ShowDialog(RootWindow);
-            if (dialog.Position.Y < 0) {
-                dialog.Position = dialog.Position.WithY(0);
-            }
         }
 
         void AddBreathNote() {

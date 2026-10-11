@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,7 +21,8 @@ using ReactiveUI.Fody.Helpers;
 using Serilog;
 
 namespace OpenUtau.App.ViewModels {
-    public class SingersViewModel : ViewModelBase {
+    public class SingersViewModel : ViewModelBase, IDisposable {
+        readonly CompositeDisposable subscriptions = new();
         public IEnumerable<USinger> Singers => SingerManager.Inst.SingerGroups.Values.SelectMany(l => l);
         [Reactive] public USinger? Singer { get; set; }
         [Reactive] public Bitmap? Avatar { get; set; }
@@ -62,7 +64,7 @@ namespace OpenUtau.App.ViewModels {
             if (Singers.Count() > 0) {
                 Singer = Singers.FirstOrDefault();
             }
-            this.WhenAnyValue(vm => vm.Singer)
+            subscriptions.Add(this.WhenAnyValue(vm => vm.Singer)
                 .WhereNotNull()
                 .Subscribe(singer => {
                     if (LoadingWindow.IsLoading()) {
@@ -83,7 +85,9 @@ namespace OpenUtau.App.ViewModels {
                     }
                     void AttachSinger() {
                         singer.EnsureLoaded();
+                        var previousAvatar = Avatar;
                         Avatar = LoadAvatar(singer);
+                        previousAvatar?.Dispose();
                         Otos.Clear();
                         Otos.AddRange(singer.Otos);
                         DisplayedOtos.Clear();
@@ -135,11 +139,11 @@ namespace OpenUtau.App.ViewModels {
                         this.RaisePropertyChanged(nameof(SetSingerTypeMenuItems));
                         this.RaisePropertyChanged(nameof(SetDefaultPhonemizerMenuItems));
                     }
-                });
-            this.WhenAnyValue(vm => vm.SearchAlias)
+                }));
+            subscriptions.Add(this.WhenAnyValue(vm => vm.SearchAlias)
                 .Subscribe(alias => {
                     Search();
-                });
+                }));
             setEncodingCommand = ReactiveCommand.Create<Encoding>(encoding => {
                 SetEncoding(encoding);
             });
@@ -364,7 +368,9 @@ namespace OpenUtau.App.ViewModels {
             int index = SelectedIndex;
 
             Singer.Reload();
+            var previousAvatar = Avatar;
             Avatar = LoadAvatar(Singer);
+            previousAvatar?.Dispose();
             Otos.Clear();
             Otos.AddRange(Singer.Otos);
             LoadSubbanks();
@@ -542,5 +548,11 @@ namespace OpenUtau.App.ViewModels {
                 }
             });
         }
+        public void Dispose() {
+            subscriptions.Dispose();
+            Avatar?.Dispose(); Avatar = null;
+            setEncodingCommand.Dispose(); setSingerTypeCommand.Dispose(); setDefaultPhonemizerCommand.Dispose();
+        }
+
     }
 }

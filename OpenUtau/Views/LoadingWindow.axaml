@@ -1,13 +1,11 @@
-<controls:WindowEx xmlns="https://github.com/avaloniaui"
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
         xmlns:controls="clr-namespace:OpenUtau.App.Controls"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="OpenUtau.App.Views.LoadingWindow" SizeToContent="WidthAndHeight" CanResize="False"
-        Title="UTvTU" MinWidth="300" MinHeight="150"
-        Icon="/Assets/brand/utvtu.ico"
-        WindowStartupLocation="CenterScreen">
+        x:Class="OpenUtau.App.Views.LoadingWindow"
+        Title="UTvTU">
 
     <Grid>
         <!-- W40：旧位图 /Assets/OpenUtau.png → 矢量品牌标志（源几何 verbatim、描边渲染；64 网格描边=尺寸÷8） -->
@@ -19,4 +17,4 @@
         </Viewbox>
         <TextBlock Margin="0,110,0,10" Grid.Row="0"  HorizontalAlignment="Center" VerticalAlignment="Center" Name="Text" TextWrapping="Wrap" MaxWidth="560"> Loading... </TextBlock>
     </Grid>
-</controls:WindowEx>
+</controls:WorkspaceToolView>

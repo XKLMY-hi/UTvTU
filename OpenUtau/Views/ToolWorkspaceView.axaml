@@ -8,7 +8,7 @@
         <Button Name="BackButton" Classes="toolAction" Content="{DynamicResource workspace.return}" Click="OnBack"/>
         <TextBlock Grid.Column="2" FontSize="16" FontWeight="Medium" VerticalAlignment="Center"
                    Text="{DynamicResource workspace.production}"/>
-        <Button Grid.Column="3" Classes="toolAction" Content="{DynamicResource menu.tools.prefs}" Click="OnPreferences"/>
+        <Button Name="PreferencesButton" Grid.Column="3" Classes="toolAction" Content="{DynamicResource menu.tools.prefs}" Click="OnPreferences"/>
       </Grid>
     </Border>
     <Grid Grid.Row="1" ColumnDefinitions="232,*">

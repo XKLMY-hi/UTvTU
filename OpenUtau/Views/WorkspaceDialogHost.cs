@@ -22,15 +22,23 @@ public sealed class WorkspaceDialogHost : UserControl {
         HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center,
         Margin = new Thickness(24), MaxWidth = 680 };
     readonly ContentControl body = new();
+    readonly Button close = new() { Width = 32, Height = 32, Margin = new Thickness(0) };
     IDisposable? titleBinding;
     readonly TextBlock title = new() { FontSize = 16, FontWeight = FontWeight.Medium, TextWrapping = TextWrapping.Wrap };
+    void ConstrainBody() {
+        card.MaxHeight = Math.Max(100, Bounds.Height - 48);
+        if (HasDialogs) stack[^1].Tool.MaxHeight = Math.Max(100, Bounds.Height - 112);
+    }
     public WorkspaceDialogHost() {
         IsVisible = false;
         var backdrop = new Border { Background = new SolidColorBrush(Color.FromArgb(140, 0, 0, 0)) };
         card[!Border.BackgroundProperty] = new DynamicResourceExtension("md3.surface-container-low");
         card[!Border.BorderBrushProperty] = new DynamicResourceExtension("md3.outline-variant");
         card.BorderThickness = new Thickness(1);
-        var close = new Button { Content = "×", Width = 32, Height = 32, Margin = new Thickness(0) };
+        var icon = new DawIcon { Width = 14, Height = 14 };
+        icon[!DawIcon.DataProperty] = new DynamicResourceExtension("icon-x");
+        icon[!DawIcon.StrokeProperty] = new DynamicResourceExtension("md3.on-surface-variant");
+        close.Content = icon;
         close.Classes.Add("toolClose");
         close[!AutomationProperties.NameProperty] = new DynamicResourceExtension("button.cancel");
         close.Click += (_, _) => CloseTop();
@@ -45,7 +53,7 @@ public sealed class WorkspaceDialogHost : UserControl {
         AddHandler(KeyDownEvent, (_, e) => {
             if (e.Key == Key.Escape && !e.Handled) { CloseTop(); e.Handled = true; }
         }, Avalonia.Interactivity.RoutingStrategies.Bubble);
-        SizeChanged += (_, _) => card.MaxHeight = Math.Max(100, Bounds.Height - 48);
+        SizeChanged += (_, _) => ConstrainBody();
     }
     public bool HasDialogs => stack.Count > 0;
     public void Push(WorkspaceToolView tool) {
@@ -71,16 +79,18 @@ public sealed class WorkspaceDialogHost : UserControl {
         DialogsChanged?.Invoke();
         if (!HasDialogs) return;
         var tool = stack[^1].Tool;
+        close.IsVisible = tool is not LoadingWindow;
         titleBinding = title.Bind(TextBlock.TextProperty, tool.GetObservable(WorkspaceToolView.TitleProperty));
         card.Width = stack[^1].Width;
         card.MaxHeight = Math.Max(100, Bounds.Height - 48);
         tool.Width = tool.Height = double.NaN;
+        ConstrainBody();
         body.Content = new ScrollViewer { Content = tool, VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto };
         Dispatcher.UIThread.Post(() => {
             if (!tool.IsClosed && HasDialogs && stack[^1].Tool == tool)
                 (tool.GetVisualDescendants().OfType<InputElement>().FirstOrDefault(c => c.Focusable && c.IsEffectivelyEnabled && c.IsVisible) ?? tool).Focus();
         });
     }
-    public void CloseTop() { if (HasDialogs) stack[^1].Tool.Close(); }
-    public void Shutdown() { while (HasDialogs) CloseTop(); }
+    public void CloseTop() { if (HasDialogs && stack[^1].Tool is not LoadingWindow) stack[^1].Tool.Close(); }
+    public void Shutdown() { while (HasDialogs) stack[^1].Tool.Close(); }
 }

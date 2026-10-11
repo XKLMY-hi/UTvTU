@@ -1,4 +1,4 @@
-<controls:WindowEx xmlns="https://github.com/avaloniaui"
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
         xmlns:controls="clr-namespace:OpenUtau.App.Controls"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,10 +6,7 @@
         xmlns:vm="using:OpenUtau.App.ViewModels"
         mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="600"
         x:Class="OpenUtau.App.Views.SingerPublishDialog"
-        Icon="/Assets/brand/utvtu.ico"
-        WindowStartupLocation="CenterScreen"
-        MinWidth="500" MinHeight="500" Width="500" Height="500"
-        Title="{DynamicResource singers.publish}">
+        Title="{DynamicResource singers.publish}" Focusable="True">
 <DockPanel LastChildFill="True">
       <Border>
   <Grid>
@@ -28,4 +25,4 @@
   </Grid>
       </Border>
     </DockPanel>
-</controls:WindowEx>
+</controls:WorkspaceToolView>

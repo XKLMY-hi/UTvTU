@@ -1,13 +1,14 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using Avalonia.Input;
 using OpenUtau.App.Controls;
 using Avalonia.Interactivity;
 using OpenUtau.App.ViewModels;
 
 namespace OpenUtau.App.Views {
-    public partial class LyricsReplaceDialog : WindowEx {
+    public partial class LyricsReplaceDialog : WorkspaceToolView {
         public LyricsReplaceDialog() {
             InitializeComponent();
+            Width = 400;
         }
 
         void OnCancel(object? sender, RoutedEventArgs e) {

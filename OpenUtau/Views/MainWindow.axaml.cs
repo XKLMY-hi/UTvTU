@@ -748,9 +748,6 @@ namespace OpenUtau.App.Views {
                     },
                 };
                 _ = setup.ShowDialog(this);
-                if (setup.Position.Y < 0) {
-                    setup.Position = setup.Position.WithY(0);
-                }
             } catch (Exception e) {
                 Log.Error(e, $"Failed to install singer {file}");
                 _ = await MessageBox.ShowError(this, new MessageCustomizableException($"Failed to install singer {file}", $"<translate:errors.failed.installsinger>: {file}", e));
@@ -775,9 +772,6 @@ namespace OpenUtau.App.Views {
                     DataContext = new ExeSetupViewModel(file)
                 };
                 _ = setup.ShowDialog(this);
-                if (setup.Position.Y < 0) {
-                    setup.Position = setup.Position.WithY(0);
-                }
             }
         }
 
@@ -1050,7 +1044,8 @@ namespace OpenUtau.App.Views {
                 return;
             }
             DetachAndFlush(MixerContainer);
-            mixerWindow = new MixerWindow(mixerControl!);
+            mixerWindow = new MixerWindow(mixerControl!) { WorkspaceOwner = this };
+            RefreshDetachedEditing();
             // 用户关掉分离窗口 = 收回视图区（生命周期：控件不随窗口销毁，见 MixerWindow 注释）
             mixerWindow.ReturnToHost = () => AttachMixerView();
             mixerWindow.Show();
@@ -1317,15 +1312,9 @@ namespace OpenUtau.App.Views {
         }
 
         void OnMenuPhoneticAssistant(object sender, RoutedEventArgs args) {
-            var desktop = Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
-            if (desktop == null) {
-                return;
-            }
-            var window = desktop.Windows.FirstOrDefault(w => w is PhoneticAssistant);
-            if (window == null) {
-                window = new PhoneticAssistant();
-            }
-            window.Show();
+            var tool = tools.OfType<PhoneticAssistant>().FirstOrDefault(t => !t.IsClosed);
+            if (tool == null) new PhoneticAssistant().Show(this);
+            else tool.Activate();
         }
 
         void OnMenuCheckUpdate(object sender, RoutedEventArgs args) {
@@ -1541,6 +1530,7 @@ namespace OpenUtau.App.Views {
         private KeyEventArgs? handledShortcutArgs;
 
         private void HandleGlobalShortcut(KeyEventArgs args) {
+            if (ToolDialogHost.HasDialogs || ToolWorkspaceHost.IsVisible || ContextToolHost.IsKeyboardFocusWithin || renderTool?.IsRendering == true) return;
             // W47：隧道路径同样先做焦点让位判定（对 Ctrl 组合是空操作，纯为把规则收在一处）
             if (ShouldYieldShortcutToFocus(FocusManager?.GetFocusedElement(), args.Key, args.KeyModifiers)) {
                 return;
@@ -1557,7 +1547,9 @@ namespace OpenUtau.App.Views {
 
         /// <summary>快捷键总览（W28/M09）：数据源 = 命令注册表，只读。</summary>
         internal void OnMenuShortcutOverview(object? sender, RoutedEventArgs args) {
-            ShortcutOverviewWindow.Open(this);
+            if (renderTool?.IsRendering == true) return;
+            ShowPreferences();
+            PreferencesHost.ShowShortcuts();
         }
 
         /// <summary>退出应用（原 Alt+F4 分支，语义不变）。</summary>
@@ -1572,6 +1564,7 @@ namespace OpenUtau.App.Views {
                 return;
             }
             if (ContextToolHost.IsKeyboardFocusWithin) return;
+            if (renderTool?.IsRendering == true) { args.Handled = true; return; }
             // Modal overlay open — block shortcuts, Esc dismisses
             if (OverlayLayer.IsVisible) {
                 if (args.Key == Key.Escape) {
@@ -1636,6 +1629,7 @@ namespace OpenUtau.App.Views {
         }
 
         void OnPointerPressed(object? sender, PointerPressedEventArgs args) {
+            if (ToolDialogHost.HasDialogs || ToolWorkspaceHost.IsVisible || ContextToolPanel.IsPointerOver || PreferencesHost.IsVisible) return;
             // 卷帘正在显示时点它内部不该抢走焦点；其余视图点空白一律把焦点收回窗口
             bool pianoRollShown = viewModel.ViewSwitcher.ShowPianoRoll && PianoRollContainer.IsPointerOver;
             if (!pianoRollShown && !args.Handled && args.ClickCount == 1) {
@@ -1644,6 +1638,7 @@ namespace OpenUtau.App.Views {
         }
 
         async void OnDrop(object? sender, DragEventArgs args) {
+            if (ToolDialogHost.HasDialogs || ToolWorkspaceHost.IsVisible || renderTool?.IsRendering == true) { args.Handled = true; return; }
             // 阶段 E4：侧栏素材库拖拽——自定义数据格式优先（歌手 / 伴奏）
             var dragSinger = args.DataTransfer.TryGetValue(SingerDragFormat);
             if (dragSinger != null) {
@@ -1738,9 +1733,6 @@ namespace OpenUtau.App.Views {
                         },
                     };
                     _ = setup.ShowDialog(this);
-                    if (setup.Position.Y < 0) {
-                        setup.Position = setup.Position.WithY(0);
-                    }
                 } catch (Exception e) {
                     Log.Error(e, $"Failed to install singer {file}");
                     _ = await MessageBox.ShowError(this, new MessageCustomizableException($"Failed to install singer {file}", $"<translate:errors.failed.installsinger>: {file}", e));
@@ -1761,9 +1753,6 @@ namespace OpenUtau.App.Views {
                     DataContext = new ExeSetupViewModel(file)
                 };
                 _ = setup.ShowDialog(this);
-                if (setup.Position.Y < 0) {
-                    setup.Position = setup.Position.WithY(0);
-                }
             } else if (ext == PackageManager.OudepExt) {
                 var result = await MessageBox.Show(
                     this,
@@ -2087,9 +2076,10 @@ namespace OpenUtau.App.Views {
 
         /// <summary>建卷帘分离窗口：用户关窗 = 收回视图区（控件不随窗口销毁）。</summary>
         private PianoRollDetachedWindow CreatePianoRollWindow() {
-            var window = new PianoRollDetachedWindow(pianoRoll!);
+            var window = new PianoRollDetachedWindow(pianoRoll!) { WorkspaceOwner = this };
             window.ReturnToHost = () => AttachPianoRollView();
             pianoRollWindow = window;
+            RefreshDetachedEditing();
             return window;
         }
 

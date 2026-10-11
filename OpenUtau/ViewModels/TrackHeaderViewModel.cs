@@ -404,9 +404,6 @@ namespace OpenUtau.App.ViewModels {
                             },
                         };
                         _ = setup.ShowDialog(mainWindow);
-                        if (setup.Position.Y < 0) {
-                            setup.Position = setup.Position.WithY(0);
-                        }
                     } catch (Exception e) {
                         Log.Error(e, $"Failed to install singer {file}");
                         _ = await MessageBox.ShowError(mainWindow, new MessageCustomizableException($"Failed to install singer {file}", $"<translate:errors.failed.installsinger>: {file}", e));
