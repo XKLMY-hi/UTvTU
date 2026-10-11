@@ -294,6 +294,9 @@ namespace OpenUtau.Core.Util {
             public string ThemeName = "Dark";
             /// <summary>MD3 颜色池种子（决定整应用强调色阶；见决定文档 D4。默认 = M3 基线紫）。</summary>
             public uint ThemeSeed = 0xFF6750A4;
+            public string ThemeColorSource = "Custom";
+            public string ThemeScheme = "TonalSpot";
+            public int ThemeContrast = 0;
             public int DegreeStyle;
             public bool UseTrackColor = false;
             public bool ClearCacheOnQuit = false;

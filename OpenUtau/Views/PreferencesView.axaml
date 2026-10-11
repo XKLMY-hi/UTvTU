@@ -545,6 +545,35 @@
                   <ComboBox Classes="selectField" ItemsSource="{Binding ThemeItems}" SelectedItem="{Binding ThemeName}"/>
                 </StackPanel>
                 <StackPanel Spacing="8">
+                  <TextBlock Classes="fieldLabel" Text="{DynamicResource prefs.color.source}"/>
+                  <ComboBox Classes="selectField" ItemsSource="{Binding ThemeSourceItems}" SelectedIndex="{Binding ThemeSourceIndex}"/>
+                  <TextBlock Classes="helpText" Text="{DynamicResource prefs.color.source.hint}"/>
+                  <Grid ColumnDefinitions="*,8,Auto">
+                    <TextBox Classes="field" Text="{Binding CustomThemeSeed}" Watermark="#6750A4" MaxLength="7"/>
+                    <Button Grid.Column="2" Classes="tonal" Content="{DynamicResource button.apply}" Command="{Binding ApplyCustomAccentCommand}"/>
+                  </Grid>
+                  <Button Classes="text" Content="{DynamicResource prefs.color.source.refresh}" Command="{Binding RefreshSystemAccentCommand}"/>
+                </StackPanel>
+                <Grid ColumnDefinitions="*,12,*">
+                  <StackPanel Spacing="8">
+                    <TextBlock Classes="fieldLabel" Text="{DynamicResource prefs.color.scheme}"/>
+                    <ComboBox Classes="selectField" ItemsSource="{Binding ThemeSchemeItems}" SelectedIndex="{Binding ThemeSchemeIndex}"/>
+                  </StackPanel>
+                  <StackPanel Grid.Column="2" Spacing="8">
+                    <TextBlock Classes="fieldLabel" Text="{DynamicResource prefs.color.contrast}"/>
+                    <ComboBox Classes="selectField" ItemsSource="{Binding ThemeContrastItems}" SelectedIndex="{Binding ThemeContrastIndex}"/>
+                  </StackPanel>
+                </Grid>
+                <UniformGrid Columns="3">
+                  <Border Background="{DynamicResource md3.primary-container}" CornerRadius="{DynamicResource Md3ShapeMedium}" Padding="12" Margin="0,0,4,0"><TextBlock Text="{DynamicResource prefs.color.role.primary}" Foreground="{DynamicResource md3.on-primary-container}" TextAlignment="Center"/></Border>
+                  <Border Background="{DynamicResource md3.secondary-container}" CornerRadius="{DynamicResource Md3ShapeMedium}" Padding="12" Margin="4,0"><TextBlock Text="{DynamicResource prefs.color.role.secondary}" Foreground="{DynamicResource md3.on-secondary-container}" TextAlignment="Center"/></Border>
+                  <Border Background="{DynamicResource md3.tertiary-container}" CornerRadius="{DynamicResource Md3ShapeMedium}" Padding="12" Margin="4,0,0,0"><TextBlock Text="{DynamicResource prefs.color.role.tertiary}" Foreground="{DynamicResource md3.on-tertiary-container}" TextAlignment="Center"/></Border>
+                </UniformGrid>
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Classes="fieldLabel" Text="{DynamicResource prefs.motion.reduce}" VerticalAlignment="Center"/>
+                  <ToggleSwitch Grid.Column="1" IsChecked="{Binding ReduceMotion}"/>
+                </Grid>
+                <StackPanel Spacing="8">
                   <TextBlock Classes="fieldLabel" Text="{DynamicResource prefs.field.accent}"/>
                   <ItemsControl ItemsSource="{Binding AccentSwatches}">
                     <ItemsControl.ItemsPanel>

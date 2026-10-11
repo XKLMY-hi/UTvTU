@@ -111,6 +111,12 @@
        `TextBlock { Foreground = TextFillColorPrimaryBrush }`（显式样式 setter 优先于继承，
        与 T9 的 Button 是同一类问题；Button 走的是 AccessText 路线，列表内容是数据、
        不适合助记键语义，所以这里用绑定转发）。 -->
+  <Style Selector="Button TextBlock">
+    <Setter Property="Foreground" Value="{Binding $parent[Button].Foreground}"/>
+  </Style>
+  <Style Selector="ToggleButton TextBlock">
+    <Setter Property="Foreground" Value="{Binding $parent[ToggleButton].Foreground}"/>
+  </Style>
   <Style Selector="ListBoxItem TextBlock">
     <Setter Property="Foreground" Value="{Binding $parent[ListBoxItem].Foreground}"/>
   </Style>

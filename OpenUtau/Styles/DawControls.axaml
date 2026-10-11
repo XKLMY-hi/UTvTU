@@ -14,25 +14,68 @@
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
       <Setter Property="Background" Value="Transparent"/>
       <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="CornerRadius" Value="6"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3DawCornerRadius}"/>
       <Setter Property="Cursor" Value="Hand"/>
       <Setter Property="Template">
         <ControlTemplate>
           <Grid>
-            <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"
+            <Border Name="PART_Root" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"
                     BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"/>
             <Border Name="PART_StateLayer" Background="{TemplateBinding Foreground}" Opacity="0"
-                    CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False"/>
+                    CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False">
+              <Border.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="{DynamicResource Md3MotionEffectsFast}" Easing="{StaticResource Md3EffectsFastEasing}"/></Transitions></Border.Transitions>
+            </Border>
             <ContentPresenter Name="PART_ContentPresenter" Margin="{TemplateBinding Padding}"
                               Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
-                              Foreground="{TemplateBinding Foreground}"
+                              Foreground="{TemplateBinding Foreground}" RecognizesAccessKey="True" UseLayoutRounding="False"
                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-            <Border Name="PART_FocusRing" BorderBrush="{DynamicResource md3.primary}" BorderThickness="1"
+            <Border Name="PART_FocusRing" BorderBrush="{DynamicResource md3.primary}" BorderThickness="2"
                     CornerRadius="{TemplateBinding CornerRadius}" Opacity="0" IsHitTestVisible="False"/>
           </Grid>
         </ControlTemplate>
       </Setter>
+      <Style Selector="^.primary,^.filled">
+        <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+      </Style>
+      <Style Selector="^.tonal">
+        <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+        <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+      </Style>
+      <Style Selector="^.outline,^.outlined">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource md3.outline}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+      </Style>
+      <Style Selector="^.text,^.clear,^.linkButton">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+      </Style>
+      <Style Selector="^.elevated">
+        <Setter Property="Background" Value="{DynamicResource md3.surface-container-low}"/>
+        <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+      </Style>
+      <Style Selector="^.elevated /template/ Border#PART_Root">
+        <Setter Property="BoxShadow" Value="{DynamicResource Md3ElevationLevel1}"/>
+      </Style>
+      <Style Selector="^.danger">
+        <Setter Property="Foreground" Value="{DynamicResource md3.error}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource md3.error}"/>
+      </Style>
+      <Style Selector="^.danger.primary,^.danger.filled">
+        <Setter Property="Background" Value="{DynamicResource md3.error}"/>
+        <Setter Property="Foreground" Value="{DynamicResource md3.on-error}"/>
+      </Style>
+      <Style Selector="^.compact">
+        <Setter Property="MinHeight" Value="{DynamicResource Md3CompactControlHeight}"/>
+        <Setter Property="Padding" Value="{DynamicResource Md3CompactButtonPadding}"/>
+      </Style>
       <Style Selector="^:pointerover /template/ Border#PART_StateLayer">
         <Setter Property="Opacity" Value="0.08"/>
       </Style>
@@ -52,10 +95,12 @@
       <Setter Property="Template">
         <ControlTemplate>
           <Grid>
-            <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"
+            <Border Name="PART_Root" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"
                     BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"/>
             <Border Name="PART_StateLayer" Background="{TemplateBinding Foreground}" Opacity="0"
-                    CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False"/>
+                    CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False">
+              <Border.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="{DynamicResource Md3MotionEffectsFast}" Easing="{StaticResource Md3EffectsFastEasing}"/></Transitions></Border.Transitions>
+            </Border>
             <!-- Keep fractional text origins: an odd-height line in an even-height
                  compact button otherwise rounds its center half a DIP upward. -->
             <TextBlock Name="PART_Label" UseLayoutRounding="False" Margin="{TemplateBinding Padding}" Text="{TemplateBinding Content}"
@@ -64,7 +109,7 @@
                        TextAlignment="Center" TextTrimming="CharacterEllipsis"
                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-            <Border Name="PART_FocusRing" BorderBrush="{DynamicResource md3.primary}" BorderThickness="1"
+            <Border Name="PART_FocusRing" BorderBrush="{DynamicResource md3.primary}" BorderThickness="2"
                     CornerRadius="{TemplateBinding CornerRadius}" Opacity="0" IsHitTestVisible="False"/>
           </Grid>
         </ControlTemplate>

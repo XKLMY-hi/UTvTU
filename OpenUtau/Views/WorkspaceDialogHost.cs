@@ -110,7 +110,7 @@ public sealed class WorkspaceDialogHost : UserControl {
             backdrop.Classes.Set("shown", false);
             UpdatePresentation();
             if (shuttingDown || Preferences.Default.ReduceMotion) CompleteDismiss(version);
-            else DispatcherTimer.RunOnce(() => CompleteDismiss(version), TimeSpan.FromMilliseconds(200));
+            else DispatcherTimer.RunOnce(() => CompleteDismiss(version), OpenUtau.Theming.Md3Motion.EffectsDefault);
             return;
         }
         returnFocus = null;

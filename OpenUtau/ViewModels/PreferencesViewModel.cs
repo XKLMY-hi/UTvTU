@@ -38,7 +38,7 @@ namespace OpenUtau.App.ViewModels {
 
         public AccentSwatchViewModel(uint seed, bool isDark, uint currentSeed) {
             Seed = seed;
-            var colors = Core.Theming.Md3SchemeColors.Create(seed, Core.Theming.Md3SchemeVariant.TonalSpot, isDark);
+            var colors = Core.Theming.Md3SchemeColors.Create(seed, Theming.Md3Appearance.Scheme, isDark, Theming.Md3Appearance.Contrast);
             Brush = new Avalonia.Media.Immutable.ImmutableSolidColorBrush(
                 Theming.Md3ColorPool.ToColor(colors.Get(Core.Theming.Md3Role.Primary)));
             IsSelected = seed == currentSeed;
@@ -130,6 +130,16 @@ namespace OpenUtau.App.ViewModels {
         /// <summary>MD3 颜色池种子（决定整应用的强调色阶；D4）。</summary>
         public ObservableCollection<AccentSwatchViewModel> AccentSwatches { get; } = new ObservableCollection<AccentSwatchViewModel>();
         public ReactiveCommand<AccentSwatchViewModel, System.Reactive.Unit>? SelectAccentCommand { get; private set; }
+        [Reactive] public string CustomThemeSeed { get; set; } = "";
+        [Reactive] public int ThemeSourceIndex { get; set; }
+        [Reactive] public int ThemeSchemeIndex { get; set; }
+        [Reactive] public int ThemeContrastIndex { get; set; }
+        [Reactive] public bool ReduceMotion { get; set; }
+        public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit>? ApplyCustomAccentCommand { get; private set; }
+        public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit>? RefreshSystemAccentCommand { get; private set; }
+        public List<string> ThemeSourceItems => new() { ThemeManager.GetString("prefs.color.source.custom"), ThemeManager.GetString("prefs.color.source.windows") };
+        public List<string> ThemeSchemeItems => new() { ThemeManager.GetString("prefs.color.scheme.tonal"), ThemeManager.GetString("prefs.color.scheme.vibrant"), ThemeManager.GetString("prefs.color.scheme.neutral") };
+        public List<string> ThemeContrastItems => new() { ThemeManager.GetString("prefs.color.contrast.default"), ThemeManager.GetString("prefs.color.contrast.medium"), ThemeManager.GetString("prefs.color.contrast.high") };
         [Reactive] public int DegreeStyle { get; set; }
         [Reactive] public bool UseTrackColor { get; set; }
         [Reactive] public bool ShowPortrait { get; set; }
@@ -151,20 +161,21 @@ namespace OpenUtau.App.ViewModels {
         /// <summary>换种子 → 立即重建颜色池（整应用重着色），并落盘（见决定文档 D4）。</summary>
         public void ApplyThemeSeed(uint seed) {
             if (IsDisposed) return;
-            if (Preferences.Default.ThemeSeed == seed) {
-                return;
-            }
-            Preferences.Default.ThemeSeed = seed;
+            Preferences.Default.ThemeSeed = seed | 0xFF000000;
+            Preferences.Default.ThemeColorSource = "Custom";
+            ThemeSourceIndex = 0;
+            CustomThemeSeed = $"#{seed & 0xFFFFFF:X6}";
             Preferences.Save();
-            Theming.ColorPool.Initialize(seed, Core.Theming.Md3SchemeVariant.TonalSpot, ThemeManager.IsDarkMode);
+            Theming.Md3Appearance.Refresh();
             RebuildAccentSwatches();
         }
 
         private void RebuildAccentSwatches() {
             if (IsDisposed) return;
             AccentSwatches.Clear();
-            foreach (uint seed in AccentSeeds) {
-                AccentSwatches.Add(new AccentSwatchViewModel(seed, ThemeManager.IsDarkMode, Preferences.Default.ThemeSeed));
+            uint selected = Preferences.Default.ThemeColorSource == "Custom" ? Preferences.Default.ThemeSeed : 0;
+            foreach (uint seed in AccentSeeds.Prepend(Preferences.Default.ThemeSeed).Distinct()) {
+                AccentSwatches.Add(new AccentSwatchViewModel(seed, ThemeManager.IsDarkMode, selected));
             }
         }
 
@@ -249,6 +260,35 @@ namespace OpenUtau.App.ViewModels {
                 DiffSingerLangCodeHide = Preferences.Default.DiffSingerLangCodeHide;
                 SkipRenderingMutedTracks = Preferences.Default.SkipRenderingMutedTracks;
                 ThemeName = Preferences.Default.ThemeName;
+                ThemeSourceIndex = Preferences.Default.ThemeColorSource == "Windows" ? 1 : 0;
+                ThemeSchemeIndex = Preferences.Default.ThemeScheme switch { "Vibrant" => 1, "Neutral" => 2, _ => 0 };
+                ThemeContrastIndex = Math.Clamp(Preferences.Default.ThemeContrast, 0, 2);
+                ReduceMotion = Preferences.Default.ReduceMotion;
+                CustomThemeSeed = $"#{Preferences.Default.ThemeSeed & 0xFFFFFF:X6}";
+                ApplyCustomAccentCommand = ReactiveCommand.Create(() => {
+                    if (Theming.Md3Appearance.TryParseSeed(CustomThemeSeed, out uint seed)) ApplyThemeSeed(seed);
+                }, this.WhenAnyValue(vm => vm.CustomThemeSeed).Select(text => Theming.Md3Appearance.TryParseSeed(text, out _)));
+                RefreshSystemAccentCommand = ReactiveCommand.Create(() => Theming.Md3Appearance.Refresh());
+                this.WhenAnyValue(vm => vm.ThemeSourceIndex).Skip(1).Subscribe(index => {
+                    Preferences.Default.ThemeColorSource = index == 1 ? "Windows" : "Custom";
+                    Preferences.Save();
+                    Theming.Md3Appearance.Refresh();
+                }).DisposeWith(subscriptions);
+                this.WhenAnyValue(vm => vm.ThemeSchemeIndex).Skip(1).Subscribe(index => {
+                    Preferences.Default.ThemeScheme = index switch { 1 => "Vibrant", 2 => "Neutral", _ => "TonalSpot" };
+                    Preferences.Save();
+                    Theming.Md3Appearance.Refresh();
+                }).DisposeWith(subscriptions);
+                this.WhenAnyValue(vm => vm.ThemeContrastIndex).Skip(1).Subscribe(index => {
+                    Preferences.Default.ThemeContrast = Math.Clamp(index, 0, 2);
+                    Preferences.Save();
+                    Theming.Md3Appearance.Refresh();
+                }).DisposeWith(subscriptions);
+                this.WhenAnyValue(vm => vm.ReduceMotion).Skip(1).Subscribe(value => {
+                    Preferences.Default.ReduceMotion = value;
+                    Preferences.Save();
+                    Theming.Md3Motion.ApplyPreference();
+                }).DisposeWith(subscriptions);
                 ThemeEditable = ThemeName != "Light" && ThemeName != "Dark" && !Colors.CustomTheme.IsPackageTheme(ThemeName);
                 // MD3 配色：色板显示"该种子在当前深浅色下真正生成的主色"（D4 种子可选）
                 SelectAccentCommand = ReactiveCommand.Create<AccentSwatchViewModel>(swatch => ApplyThemeSeed(swatch.Seed));
@@ -711,6 +751,8 @@ namespace OpenUtau.App.ViewModels {
             IsDisposed = true;
             subscriptions.Dispose();
             SelectAccentCommand?.Dispose();
+            ApplyCustomAccentCommand?.Dispose();
+            RefreshSystemAccentCommand?.Dispose();
             if (_vstScanPaths != null) _vstScanPaths.CollectionChanged -= OnVstScanPathsChanged;
         }
 

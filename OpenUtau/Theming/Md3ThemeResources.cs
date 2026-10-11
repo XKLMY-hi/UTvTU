@@ -1,6 +1,7 @@
 using System;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Media;
 using OpenUtau.Core.Theming;
 
 namespace OpenUtau.Theming {
@@ -34,6 +35,12 @@ namespace OpenUtau.Theming {
                 dict[ColorPool.Key(role)] = pool.Brush(role);
                 dict[ColorPool.ColorKey(role)] = pool.Color(role);
             }
+            dict["Md3ElevationLevel1"] = BoxShadows.Parse("0 1 3 0 #33000000, 0 1 2 0 #26000000");
+            dict["Md3ElevationLevel2"] = BoxShadows.Parse("0 2 6 0 #33000000, 0 1 2 0 #26000000");
+            dict["Md3ElevationLevel3"] = BoxShadows.Parse("0 4 8 0 #33000000, 0 1 3 0 #26000000");
+            var scrim = pool.Color(Md3Role.Scrim);
+            dict["Md3DialogScrim"] = new Avalonia.Media.Immutable.ImmutableSolidColorBrush(Color.FromArgb(82, scrim.R, scrim.G, scrim.B));
+            dict["Md3FocusRing"] = BoxShadows.Parse("0 0 0 2 " + pool.Color(Md3Role.Primary));
             if (installed != null) {
                 app.Resources.MergedDictionaries.Remove(installed);
             }

@@ -13,102 +13,19 @@
        应用级样式里会反过来压住主题（还会在 ContentPresenter 上刷没有圆角的色块）。
        ═══════════════════════════════════════════════════════════════════════ -->
   <Styles.Resources>
-    <ControlTheme x:Key="Md3ButtonTheme" TargetType="Button">
-      <Setter Property="Background" Value="Transparent"/>
-      <!-- 基础标签色（T9-B 决策）：MD3 规范里 outlined 按钮标签应为 md3.primary，
-           但那个取值在"转发修复"之前**从未真正渲染过**（一直被应用级 TextBlock 前景压住），
-           用户这几个月确认的普通按钮观感就是 on-surface ⇒ 本轮保持 on-surface，避免
-           全 App 普通按钮标签一起变 indigo 这种未经预览的大面积视觉变更。
-           要回到 MD3 规范态：把下面这行的 md3.on-surface 改成 md3.primary 即可（一行，无其它副作用）。 -->
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+    <ControlTheme x:Key="Md3ButtonTheme" TargetType="Button" BasedOn="{StaticResource DawButtonTheme}">
+      <!-- Outlined is the desktop default; explicit filled/tonal/text variants share the same states. -->
+      <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource md3.outline}"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="CornerRadius" Value="8"/>
-      <Setter Property="Padding" Value="14,6"/>
-      <Setter Property="MinHeight" Value="32"/>
-      <Setter Property="FontSize" Value="13"/>
-      <Setter Property="HorizontalContentAlignment" Value="Center"/>
-      <Setter Property="VerticalContentAlignment" Value="Center"/>
-      <Setter Property="Cursor" Value="Hand"/>
-      <Setter Property="Transitions">
-        <Transitions>
-          <BrushTransition Property="Background" Duration="0:0:0.12"/>
-          <BrushTransition Property="BorderBrush" Duration="0:0:0.12"/>
-          <BrushTransition Property="Foreground" Duration="0:0:0.12"/>
-        </Transitions>
-      </Setter>
-      <Setter Property="Template">
-        <ControlTemplate>
-          <Border Name="PART_Root"
-                  Background="{TemplateBinding Background}"
-                  BorderBrush="{TemplateBinding BorderBrush}"
-                  BorderThickness="{TemplateBinding BorderThickness}"
-                  CornerRadius="{TemplateBinding CornerRadius}"
-                  Padding="{TemplateBinding Padding}">
-            <ContentPresenter Name="PART_ContentPresenter"
-                              Content="{TemplateBinding Content}"
-                              ContentTemplate="{TemplateBinding ContentTemplate}"
-                              Foreground="{TemplateBinding Foreground}"
-                              RecognizesAccessKey="True"
-                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-          </Border>
-        </ControlTemplate>
-      </Setter>
-      <Style Selector="^:pointerover">
-        <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource md3.outline}"/>
-      </Style>
-      <Style Selector="^:pressed">
-        <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
-      </Style>
-      <Style Selector="^:disabled">
-        <Setter Property="Opacity" Value="0.38"/>
-      </Style>
-      <Style Selector="^.primary">
-        <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
-        <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="CornerRadius" Value="999"/>
-        <Setter Property="Padding" Value="18,6"/>
-        <Setter Property="FontWeight" Value="Medium"/>
-      </Style>
-      <Style Selector="^.primary:pointerover">
-        <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
-        <Setter Property="Opacity" Value="0.92"/>
-      </Style>
-      <!-- 按下反馈（T8-A 收敛）：旧实现由应用级样式在 ContentPresenter 上刷固定色方块，
-           现收归主题 —— 深色池下 primary 是浅色容器，on-primary 才是对比色，文字不再压白。 -->
-      <Style Selector="^.primary:pressed">
-        <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
-        <Setter Property="Opacity" Value="0.85"/>
-      </Style>
-      <!-- 描边按钮：显式用 outline 角色（比基础态的 outline-variant 更实），颜色仍归主题 -->
-      <Style Selector="^.outline">
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource md3.outline}"/>
-      </Style>
-      <!-- 危险按钮（T8-A 收敛）：旧实现用固定 #e53935 / #c62828 / White，现改用 error 角色 -->
-      <Style Selector="^.danger">
-        <Setter Property="Foreground" Value="{DynamicResource md3.error}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource md3.error}"/>
-      </Style>
-      <Style Selector="^.danger:pointerover">
-        <Setter Property="Background" Value="{DynamicResource md3.error}"/>
-        <Setter Property="Foreground" Value="{DynamicResource md3.on-error}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource md3.error}"/>
-      </Style>
-      <Style Selector="^.danger:pressed">
-        <Setter Property="Background" Value="{DynamicResource md3.error}"/>
-        <Setter Property="Foreground" Value="{DynamicResource md3.on-error}"/>
-        <Setter Property="Opacity" Value="0.85"/>
-      </Style>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
+      <Setter Property="Padding" Value="{DynamicResource Md3ButtonPadding}"/>
+      <Setter Property="MinHeight" Value="{DynamicResource Md3ControlHeight}"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelLarge}"/>
+      <Setter Property="FontWeight" Value="Medium"/>
       <Style Selector="^.linkButton">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="6,2"/>
-        <Setter Property="MinHeight" Value="24"/>
+        <Setter Property="MinHeight" Value="{DynamicResource Md3DenseControlHeight}"/>
       </Style>
     </ControlTheme>
 
@@ -121,8 +38,8 @@
       <Setter Property="FontSize" Value="13"/>
       <Setter Property="Transitions">
         <Transitions>
-          <BrushTransition Property="Background" Duration="0:0:0.12"/>
-          <BrushTransition Property="Foreground" Duration="0:0:0.12"/>
+          <BrushTransition Property="Background" Duration="{DynamicResource Md3MotionEffectsFast}" Easing="{StaticResource Md3EffectsFastEasing}"/>
+          <BrushTransition Property="Foreground" Duration="{DynamicResource Md3MotionEffectsFast}" Easing="{StaticResource Md3EffectsFastEasing}"/>
         </Transitions>
       </Setter>
       <Setter Property="Template">
@@ -162,45 +79,11 @@
         过去只能靠 `/template/ ContentPresenter#PART_ContentPresenter` 补丁刷内缩方块（L9 同源问题）。
         本主题给它一个会画背景的 Border#PART_Root（与 Md3ButtonTheme 同构），
         使控件级状态色（Styles.axaml 的 .normal/.toolbar 与这里的 :checked/:pointerover）真正可见。 -->
-    <ControlTheme x:Key="Md3ToggleButtonTheme" TargetType="ToggleButton">
-      <!-- 只给"能画背景的模板 + 状态色"，**不设** MinHeight/Padding/FontSize/CornerRadius/BorderThickness：
-            本仓既有契约（ButtonMetricsLayoutTests.GeneralRule_…_ButToggleButtonIsNot）要求
-            ToggleButton 不被主题几何顶高 —— 小图标 ToggleButton（工具条/机架行）必须保持原尺寸。
-            几何仍由使用者的应用级/视图级样式给（如 ToggleButton.normal/.toolbar 的 Height=32）。 -->
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
-      <Setter Property="Cursor" Value="Hand"/>
-      <Setter Property="Template">
-        <ControlTemplate>
-          <Border Name="PART_Root"
-                  Background="{TemplateBinding Background}"
-                  BorderBrush="{TemplateBinding BorderBrush}"
-                  BorderThickness="{TemplateBinding BorderThickness}"
-                  CornerRadius="{TemplateBinding CornerRadius}"
-                  Padding="{TemplateBinding Padding}">
-            <ContentPresenter Name="PART_ContentPresenter"
-                              Content="{TemplateBinding Content}"
-                              ContentTemplate="{TemplateBinding ContentTemplate}"
-                              Foreground="{TemplateBinding Foreground}"
-                              RecognizesAccessKey="True"
-                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-          </Border>
-        </ControlTemplate>
-      </Setter>
-      <Style Selector="^:pointerover">
-        <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
-      </Style>
+    <ControlTheme x:Key="Md3ToggleButtonTheme" TargetType="ToggleButton" BasedOn="{StaticResource DawButtonTheme}">
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
       <Style Selector="^:checked">
         <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
         <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
-      </Style>
-      <Style Selector="^:checked:pointerover">
-        <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
-        <Setter Property="Opacity" Value="0.92"/>
-      </Style>
-      <Style Selector="^:disabled">
-        <Setter Property="Opacity" Value="0.38"/>
       </Style>
     </ControlTheme>
   </Styles.Resources>

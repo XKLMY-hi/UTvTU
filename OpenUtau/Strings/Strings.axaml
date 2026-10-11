@@ -1339,4 +1339,23 @@ Range {2}–{3} s · Tail {4} s
   <system:String x:Key="workspace.packages.offline">Registry unavailable. Showing locally installed packages; refresh to try again.</system:String>
   <system:String x:Key="workspace.singers.empty.title">Your voicebank workspace</system:String>
   <system:String x:Key="workspace.singers.empty.hint">Install a voicebank to manage its samples, subbanks and configuration here.</system:String>
+
+  <!-- Shared Material 3 appearance -->
+  <system:String x:Key="prefs.color.source">Theme color source</system:String>
+  <system:String x:Key="prefs.color.source.custom">Custom color</system:String>
+  <system:String x:Key="prefs.color.source.windows">Windows accent color</system:String>
+  <system:String x:Key="prefs.color.source.hint">Use a six-digit color. Windows accent is read on launch, theme change or refresh; if unavailable, the saved custom color is used.</system:String>
+  <system:String x:Key="prefs.color.source.refresh">Refresh Windows accent</system:String>
+  <system:String x:Key="prefs.color.scheme">Color expression</system:String>
+  <system:String x:Key="prefs.color.scheme.tonal">Tonal</system:String>
+  <system:String x:Key="prefs.color.scheme.vibrant">Vibrant</system:String>
+  <system:String x:Key="prefs.color.scheme.neutral">Neutral</system:String>
+  <system:String x:Key="prefs.color.contrast">Contrast</system:String>
+  <system:String x:Key="prefs.color.contrast.default">Default</system:String>
+  <system:String x:Key="prefs.color.contrast.medium">Medium</system:String>
+  <system:String x:Key="prefs.color.contrast.high">High</system:String>
+  <system:String x:Key="prefs.color.role.primary">Primary</system:String>
+  <system:String x:Key="prefs.color.role.secondary">Secondary</system:String>
+  <system:String x:Key="prefs.color.role.tertiary">Tertiary</system:String>
+  <system:String x:Key="prefs.motion.reduce">Reduce interface motion</system:String>
 </ResourceDictionary>

@@ -128,21 +128,20 @@ namespace OpenUtau.Theming {
         public static Md3ColorPool Instance => current;
 
         /// <summary>颜色变化（深浅色切换 / 重新着色）。</summary>
-        public static event EventHandler? Changed {
-            add => current.Changed += value;
-            remove => current.Changed -= value;
-        }
+        public static event EventHandler? Changed;
 
         /// <summary>重新着色：种子 / 方案 / 对比度变化时调用，并刷新 XAML 资源字典。</summary>
         public static void Initialize(uint seed, Md3SchemeVariant scheme, bool isDark, double contrastLevel = 0.0) {
             current = new Md3ColorPool(seed, scheme, isDark, contrastLevel);
             Md3ThemeResources.Install(current);
+            Changed?.Invoke(null, EventArgs.Empty);
         }
 
         /// <summary>仅深浅色变化时调用（主题切换路径）；资源字典每次重建（幂等）。</summary>
         public static void SetDark(bool isDark) {
             current.SetDark(isDark);
             Md3ThemeResources.Install(current);
+            Changed?.Invoke(null, EventArgs.Empty);
         }
 
         /// <summary>角色 → XAML 画刷资源键（如 md3.surface-container-highest）。</summary>

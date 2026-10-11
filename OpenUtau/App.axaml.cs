@@ -113,11 +113,6 @@ namespace OpenUtau.App {
             }
             // v4.0：主题状态收敛到 ThemeManager.Apply 单一入口
             ThemeManager.Apply(Core.Util.Preferences.Default.ThemeName);
-            // MD3 颜色池：按偏好里的种子重建（主题变更后刷新角色色与资源字典；种子可在偏好设置里换）
-            Theming.ColorPool.Initialize(
-                Core.Util.Preferences.Default.ThemeSeed,
-                Core.Theming.Md3SchemeVariant.TonalSpot,
-                ThemeManager.IsDarkMode);
         }
     }
 }

@@ -1467,4 +1467,23 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="workspace.packages.offline">暂时无法连接注册表，已显示本地安装的包。可刷新重试。</system:String>
   <system:String x:Key="workspace.singers.empty.title">音源工作区</system:String>
   <system:String x:Key="workspace.singers.empty.hint">安装音源后，可在这里管理采样、子音源与配置信息。</system:String>
+
+  <!-- Shared Material 3 appearance -->
+  <system:String x:Key="prefs.color.source">主题取色来源</system:String>
+  <system:String x:Key="prefs.color.source.custom">自定义颜色</system:String>
+  <system:String x:Key="prefs.color.source.windows">Windows 强调色</system:String>
+  <system:String x:Key="prefs.color.source.hint">输入六位颜色值。Windows 强调色在启动、切换主题或刷新时读取；不可用时使用已保存的自定义颜色。</system:String>
+  <system:String x:Key="prefs.color.source.refresh">刷新 Windows 强调色</system:String>
+  <system:String x:Key="prefs.color.scheme">色彩表达</system:String>
+  <system:String x:Key="prefs.color.scheme.tonal">柔和</system:String>
+  <system:String x:Key="prefs.color.scheme.vibrant">鲜明</system:String>
+  <system:String x:Key="prefs.color.scheme.neutral">中性</system:String>
+  <system:String x:Key="prefs.color.contrast">对比度</system:String>
+  <system:String x:Key="prefs.color.contrast.default">标准</system:String>
+  <system:String x:Key="prefs.color.contrast.medium">增强</system:String>
+  <system:String x:Key="prefs.color.contrast.high">高对比</system:String>
+  <system:String x:Key="prefs.color.role.primary">主色</system:String>
+  <system:String x:Key="prefs.color.role.secondary">次色</system:String>
+  <system:String x:Key="prefs.color.role.tertiary">第三色</system:String>
+  <system:String x:Key="prefs.motion.reduce">减少界面动效</system:String>
 </ResourceDictionary>
