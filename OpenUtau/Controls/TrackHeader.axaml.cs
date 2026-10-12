@@ -44,6 +44,9 @@ namespace OpenUtau.App.Controls {
             set => SetAndRaise(TrackNoProperty, ref trackNo, value);
         }
 
+        private double layoutHeight = double.NaN;
+        private double layoutWidth = double.NaN;
+        private string? volumeReadoutFormat;
         private double trackHeight;
         private Point offset;
         private int trackNo;
@@ -92,7 +95,8 @@ namespace OpenUtau.App.Controls {
             base.OnPropertyChanged(change);
             if (change.Property == OffsetProperty ||
                 change.Property == TrackNoProperty ||
-                change.Property == TrackHeightProperty) {
+                change.Property == TrackHeightProperty ||
+                change.Property == WidthProperty) {
                 SetPosition();
             }
         }
@@ -113,41 +117,56 @@ namespace OpenUtau.App.Controls {
             Canvas.SetLeft(this, 0);
             Canvas.SetTop(this, Offset.Y + (track?.TrackNo ?? 0) * trackHeight);
             if (ViewModel != null) {
-                // W33：渲染器**恒可见**（原先 `>= 5×` 的门槛会让轨道一矮就整行消失 —— 用户报的
-                // "渲染器选择框被挤掉"就是这个）。歌手/音素器的按高裁剪保留。
+                if (layoutHeight == trackHeight && layoutWidth == Width) return;
+                layoutHeight = trackHeight;
+                layoutWidth = Width;
+                // Reflow the existing controls, retaining one renderer and the native fader gestures.
+                bool compact = trackHeight < ViewConstants.TrackHeightDelta * 4;
+                bool tightWidth = Width < 200;
                 ViewModel.IsSingerVisible = trackHeight >= ViewConstants.TrackHeightDelta * 3;
-                ViewModel.IsPhonemizerVisible = trackHeight >= ViewConstants.TrackHeightDelta * 4;
+                ViewModel.IsPhonemizerVisible = !compact;
                 ViewModel.IsRendererVisible = true;
-                // 但"恒显"不能变成"溢出"：独立成行需要 name18 + singer16 + phonemizer16 + renderer16
-                // + 音量条 ≈ 90+，低于标准高(105)就放不下 ⇒ 紧凑档把渲染器**内联到名字行右侧**
-                // （同一个按钮，只改 Grid.Row —— 入口仍只有一处），并收紧行高保证卡片内零纵向溢出。
-                // 这条通用契约由 TrackHeaderLayoutTests 的溢出断言长期守住。
-                bool inlineRenderer = trackHeight < ViewConstants.TrackHeightDefault;
-                ViewModel.IsRendererInline = inlineRenderer;
-                Classes.Set("compact", inlineRenderer);
-                MainCard.CornerRadius = new CornerRadius(inlineRenderer ? 6 : 12);
-                // Compact cards use two short action rows; settings remain reachable in the card menu.
-                AvatarCard.Width = AvatarCard.Height = inlineRenderer ? 28 : 44;
-                ActionRail.Width = inlineRenderer ? 40 : 24;
-                SettingsButton.IsVisible = !inlineRenderer;
-                foreach (var action in new Control[] { MuteButton, SoloButton, FxButton, OverflowButton }) {
-                    action.Width = inlineRenderer ? 20 : action == OverflowButton ? 17 : 24;
-                    action.Height = inlineRenderer ? 16 : action == OverflowButton ? 18 : 20;
+                ViewModel.IsRendererInline = compact;
+                MainCard.CornerRadius = new CornerRadius(4);
+                if (Content is Grid root) root.Margin = new Thickness(2, compact || trackHeight < 105 ? 0 : 2);
+                HeaderContent.Margin = new Thickness(compact ? 6 : 8, compact || trackHeight < 105 ? 2 : 4);
+                ContentRows.RowDefinitions = new RowDefinitions(compact
+                    ? (ViewModel.IsSingerVisible ? "18,18,0,18" : "18,0,0,18")
+                    : trackHeight < 105 ? "20,18,20,20" : "24,18,24,22");
+                TitleRow.ColumnDefinitions = new ColumnDefinitions(compact ? "14,*,74" : "22,*,24");
+                TrackNameButton.Height = compact ? 18 : trackHeight < 105 ? 20 : 24;
+                TrackNameButton.FontSize = compact ? 11 : 13;
+                AvatarCard.IsVisible = !compact;
+                RoutingRow.IsVisible = ViewModel.IsSingerVisible;
+                ActionsRow.IsVisible = !compact;
+                SettingsButton.IsVisible = !compact;
+                if (ActionRail.Parent is Panel oldActions && oldActions != (compact ? TitleRow : ActionsRow)) {
+                    oldActions.Children.Remove(ActionRail);
+                    (compact ? TitleRow : ActionsRow).Children.Add(ActionRail);
                 }
-                // 紧凑档把卡片外层的上下 2px 边距也吃掉：卡片实际高 = 轨道高 − 4，
-                // 最小高 42 只剩 38，内容再省也差 2px（溢出契约断言抓到的）。
-                if (Content is Grid root) {
-                    root.Margin = inlineRenderer ? new Thickness(2, 0, 2, 0) : new Thickness(2, 2, 2, 2);
+                Grid.SetColumn(ActionRail, compact ? 2 : 0);
+                ActionRail.Width = compact ? 74 : 104;
+                foreach (var action in new Control[] { MuteButton, SoloButton, FxButton, OverflowButton, SettingsButton }) {
+                    action.Width = compact ? action == FxButton ? 20 : 18 : 24;
+                    action.Height = compact ? 18 : trackHeight < 105 ? 20 : 22;
+                    action.Margin = compact ? new Thickness(0) : new Thickness(0, 0, 2, 0);
                 }
-                Grid.SetRow(RendererButton, inlineRenderer ? 0 : 3);
-                RendererButton.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
-                if (inlineRenderer) {
-                    RendererButton.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right;
-                    // 给内联 chip 让位：名字按钮右侧留出 chip 宽度（名字照旧省略号收）
-                    TrackNameButton.Margin = new Thickness(2, 0, 64, 0);
-                } else {
-                    RendererButton.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
-                    TrackNameButton.Margin = new Thickness(2, 0, 0, 0);
+                if (RendererButton.Parent is Panel oldRenderer && oldRenderer != (compact ? LevelsRow : RoutingRow)) {
+                    oldRenderer.Children.Remove(RendererButton);
+                    (compact ? LevelsRow : RoutingRow).Children.Add(RendererButton);
+                }
+                Grid.SetColumn(RendererButton, compact ? 5 : 2);
+                LevelsRow.ColumnDefinitions = new ColumnDefinitions(compact ? "*,26,*,28,4,44" : tightWidth ? "*,38,4,22,26" : "*,48,6,40,28");
+                Grid.SetColumn(PanSlider, compact ? 2 : 3);
+                Grid.SetColumn(PanReadout, compact ? 3 : 4);
+                Grid.SetColumn(PanTextBox, compact ? 3 : 4);
+                // Short numeric format frees rail space at the minimum supported width.
+                string format = compact ? "{0:0.#}" : tightWidth ? "{0:0.0}" : "{0:0.0} dB";
+                if (volumeReadoutFormat != format) {
+                    volumeReadoutFormat = format;
+                    VolumeReadout.Bind(TextBlock.TextProperty, new Avalonia.Data.Binding(nameof(TrackHeaderViewModel.Volume)) {
+                        StringFormat = format
+                    });
                 }
             }
         }

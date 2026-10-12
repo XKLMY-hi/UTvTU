@@ -37,7 +37,7 @@
                      Orientation="Horizontal" Height="16" VerticalAlignment="Center">
                 <Track.DecreaseButton>
                   <RepeatButton Name="PART_DecreaseButton" Focusable="False" MinHeight="0" MinWidth="0"
-                                Padding="0" Margin="0" Background="{TemplateBinding Foreground}">
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="0" Margin="0" Background="{TemplateBinding Foreground}">
                     <RepeatButton.Template>
                       <ControlTemplate>
                         <Border Height="4" VerticalAlignment="Center" Background="{TemplateBinding Background}" CornerRadius="2"/>
@@ -47,7 +47,7 @@
                 </Track.DecreaseButton>
                 <Track.IncreaseButton>
                   <RepeatButton Name="PART_IncreaseButton" Focusable="False" MinHeight="0" MinWidth="0"
-                                Padding="0" Margin="0" Background="{TemplateBinding Background}">
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="0" Margin="0" Background="{TemplateBinding Background}">
                     <RepeatButton.Template>
                       <ControlTemplate>
                         <Border Height="4" VerticalAlignment="Center" Background="{TemplateBinding Background}" CornerRadius="2"/>
@@ -55,11 +55,11 @@
                     </RepeatButton.Template>
                   </RepeatButton>
                 </Track.IncreaseButton>
-                <Thumb Name="thumb" Width="8" Height="8" MinWidth="0" MinHeight="0" Margin="0" Padding="0"
+                <Thumb Name="thumb" Width="6" Height="12" MinWidth="0" MinHeight="0" Margin="0" Padding="0"
                        Background="{TemplateBinding Foreground}" BorderThickness="0">
                   <Thumb.Template>
                     <ControlTemplate>
-                      <Border Background="{TemplateBinding Background}" CornerRadius="{DynamicResource Md3ShapeFull}"/>
+                      <Border Background="{TemplateBinding Background}" CornerRadius="2"/>
                     </ControlTemplate>
                   </Thumb.Template>
                 </Thumb>

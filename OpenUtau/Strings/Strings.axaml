@@ -1393,4 +1393,5 @@ Range {2}–{3} s · Tail {4} s
   <system:String x:Key="workspace.packages.label">Packages</system:String>
   <system:String x:Key="workspace.singers.waveform">Sample waveform</system:String>
   <system:String x:Key="workspace.singers.waveform.hint">Select a sample to inspect its waveform and timing.</system:String>
+  <system:String x:Key="tracks.panel.title">Tracks</system:String>
 </ResourceDictionary>
