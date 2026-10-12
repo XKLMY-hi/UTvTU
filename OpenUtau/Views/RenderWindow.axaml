@@ -7,21 +7,24 @@
   <controls:WorkspaceToolView.Styles>
     <StyleInclude Source="/Styles/RenderWorkspace.axaml"/>
   </controls:WorkspaceToolView.Styles>
-  <Grid RowDefinitions="Auto,*,Auto" MaxWidth="1040" HorizontalAlignment="Stretch">
-    <StackPanel Grid.Row="0" Margin="24,20,24,16" Spacing="{DynamicResource Md3Spacing1}">
-      <TextBlock Classes="renderTitle" Text="{DynamicResource render.page.title}"/>
-      <TextBlock Classes="renderSubtitle" Text="{DynamicResource render.page.subtitle}"/>
-    </StackPanel>
+  <Grid RowDefinitions="Auto,*,Auto" HorizontalAlignment="Stretch">
+    <controls:WorkspacePageHeader Name="ExportHeader" Grid.Row="0" Margin="24,24,24,20" MaxWidth="1120"
+                                  Heading="{DynamicResource render.page.title}" Description="{DynamicResource render.page.subtitle}"
+                                  ShapeKind="Cookie7" Icon="{StaticResource icon-download}"/>
     <!-- One constrained viewport scrolls all settings; job actions stay visible. -->
-    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-      <StackPanel Name="InputPanel" Margin="24,0,24,20">
+    <ScrollViewer Name="ExportScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Name="InputPanel" Margin="24,0,24,20" Spacing="16" MaxWidth="1120">
+        <controls:AdaptiveColumns Name="ExportColumns">
+          <StackPanel Spacing="16">
+            <Border Name="DestinationCard" Classes="renderCard">
+              <StackPanel>
         <TextBlock Classes="renderSectionTitle" Text="{DynamicResource render.section.destination}" Margin="0,0,0,12"/>
         <Border Classes="renderSegment">
           <Grid ColumnDefinitions="*,*">
             <RadioButton Grid.Column="0" Name="RadioMixdown" Classes="renderSegmentItem" GroupName="OutMode"
-                         IsChecked="True" IsCheckedChanged="OnOptionsChanged" Content="{DynamicResource render.mixdown}"/>
+                         IsChecked="True" IsCheckedChanged="OnOptionsChanged" Content="{DynamicResource render.mode.mixdown.short}" ToolTip.Tip="{DynamicResource render.mixdown}"/>
             <RadioButton Grid.Column="1" Name="RadioPerTrack" Classes="renderSegmentItem" GroupName="OutMode"
-                         IsCheckedChanged="OnOptionsChanged" Content="{DynamicResource render.pertrack}"/>
+                         IsCheckedChanged="OnOptionsChanged" Content="{DynamicResource render.mode.pertrack.short}" ToolTip.Tip="{DynamicResource render.pertrack}"/>
           </Grid>
         </Border>
         <TextBlock Name="ModeContractHint" Classes="renderHint" Text="{DynamicResource render.mode.mixhint}" Margin="0,8,0,16"/>
@@ -29,12 +32,12 @@
         <Grid ColumnDefinitions="*,Auto">
           <TextBox Grid.Column="0" Name="OutputPathBox" Classes="renderInput" TextChanged="OnOptionsChanged"
                    Margin="0,0,8,0" PlaceholderText="{DynamicResource render.outputpath.placeholder}"/>
-          <Button Grid.Column="1" Name="BrowsePathBtn" Classes="renderAction" Content="{DynamicResource button.open}" Click="OnBrowsePath"/>
+          <Button Grid.Column="1" Name="BrowsePathBtn" Classes="renderAction" Content="{DynamicResource button.browse}" Click="OnBrowsePath"/>
         </Grid>
         <Grid ColumnDefinitions="*,12,*" Margin="0,12,0,0">
           <StackPanel Grid.Column="0" Spacing="6">
             <TextBlock Classes="renderFieldLabel" Text="{DynamicResource render.formatlabel}"/>
-            <ComboBox Name="FormatCombo" Classes="renderInput" SelectedIndex="0" SelectionChanged="OnOptionsChanged">
+            <ComboBox Name="FormatCombo" Classes="renderInput" HorizontalAlignment="Stretch" SelectedIndex="0" SelectionChanged="OnOptionsChanged">
               <ComboBoxItem Content="WAV 16-bit" Tag="Wav16"/>
               <ComboBoxItem Content="WAV 24-bit" Tag="Wav24"/>
               <ComboBoxItem Content="WAV 32-bit float" Tag="Wav32"/>
@@ -42,7 +45,7 @@
           </StackPanel>
           <StackPanel Grid.Column="2" Spacing="6">
             <TextBlock Classes="renderFieldLabel" Text="{DynamicResource render.samplerate}"/>
-            <ComboBox Name="SampleRateCombo" Classes="renderInput" SelectedIndex="0" SelectionChanged="OnOptionsChanged">
+            <ComboBox Name="SampleRateCombo" Classes="renderInput" HorizontalAlignment="Stretch" SelectedIndex="0" SelectionChanged="OnOptionsChanged">
               <ComboBoxItem Content="44100 Hz" Tag="44100"/>
               <ComboBoxItem Content="48000 Hz" Tag="48000"/>
               <ComboBoxItem Content="96000 Hz" Tag="96000"/>
@@ -50,7 +53,9 @@
           </StackPanel>
         </Grid>
         <TextBlock Classes="renderHint" Text="{DynamicResource render.samplerate.hint}" Margin="0,8,0,0"/>
-        <Border Classes="renderDivider"/>
+              </StackPanel>
+            </Border>
+            <Border Name="RangeCard" Classes="renderCard">
         <StackPanel Name="RangeOptions" Spacing="{DynamicResource Md3Spacing3}">
           <TextBlock Classes="renderSectionTitle" Text="{DynamicResource render.section.range}"/>
           <Border Classes="renderSegment">
@@ -78,9 +83,11 @@
             <TextBox Name="TailSecondsBox" Classes="renderInput" Text="0" TextChanged="OnOptionsChanged"/>
           </StackPanel>
         </StackPanel>
-        <Border Classes="renderDivider"/>
-        <Grid ColumnDefinitions="*,20,*">
-          <StackPanel Grid.Column="0" Spacing="{DynamicResource Md3Spacing2}">
+            </Border>
+          </StackPanel>
+          <StackPanel Spacing="16">
+            <Border Name="TracksCard" Classes="renderCard">
+          <StackPanel Spacing="{DynamicResource Md3Spacing2}">
             <TextBlock Classes="renderSectionTitle" Text="{DynamicResource render.tracks}"/>
             <WrapPanel Orientation="Horizontal">
               <Button Name="TrackSelectAllBtn" Classes="renderAction subtle" Margin="0,0,4,0"
@@ -88,18 +95,19 @@
               <Button Name="TrackSelectNoneBtn" Classes="renderAction subtle"
                       Content="{DynamicResource render.selectnone}" Click="OnSelectNoTracks"/>
             </WrapPanel>
-            <Border Background="{DynamicResource md3.surface-container-high}" BorderBrush="{DynamicResource md3.outline-variant}"
-                    BorderThickness="1" CornerRadius="{DynamicResource Md3ShapeMedium}" Padding="10,6">
+            <Border Background="{DynamicResource md3.surface-container-high}" CornerRadius="{DynamicResource Md3ShapeMedium}" Padding="12,6">
               <ScrollViewer MaxHeight="208" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Name="TrackCheckPanel"/>
               </ScrollViewer>
             </Border>
           </StackPanel>
-          <StackPanel Grid.Column="2" Spacing="{DynamicResource Md3Spacing2}">
+            </Border>
+            <Border Name="ProcessingCard" Classes="renderCard">
+          <StackPanel Spacing="{DynamicResource Md3Spacing2}">
             <TextBlock Classes="renderSectionTitle" Text="{DynamicResource render.section.processing}"/>
             <StackPanel Spacing="6">
               <TextBlock Classes="renderFieldLabel" Text="{DynamicResource render.processing.method}"/>
-              <ComboBox Name="ProcessingModeCombo" Classes="renderInput" SelectedIndex="0" SelectionChanged="OnOptionsChanged">
+              <ComboBox Name="ProcessingModeCombo" Classes="renderInput" HorizontalAlignment="Stretch" SelectedIndex="0" SelectionChanged="OnOptionsChanged">
                 <ComboBoxItem Content="{DynamicResource render.processing.offline}" Tag="Offline"/>
                 <ComboBoxItem Content="{DynamicResource render.processing.realtime}" Tag="Realtime"/>
               </ComboBox>
@@ -114,18 +122,21 @@
               </Border>
             </StackPanel>
           </StackPanel>
-        </Grid>
-        <Border Classes="renderDivider"/>
+            </Border>
+          </StackPanel>
+        </controls:AdaptiveColumns>
+        <Border Name="SummaryCard" Classes="renderCard">
         <StackPanel Spacing="10">
           <TextBlock Classes="renderSectionTitle" Text="{DynamicResource render.section.summary}"/>
-          <Border Background="{DynamicResource md3.surface-container}" CornerRadius="{DynamicResource Md3ShapeMedium}" Padding="16,12">
+          <Border Background="Transparent">
             <TextBlock Name="OutputSummaryText" Classes="renderSummary" Text="{DynamicResource render.summary.placeholder}"/>
           </Border>
         </StackPanel>
+        </Border>
       </StackPanel>
     </ScrollViewer>
     <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource md3.outline-variant}"
-            Background="{DynamicResource md3.surface-container-low}" Padding="24,12,24,16">
+            Background="{DynamicResource md3.surface}" Padding="24,12,24,16">
       <StackPanel Spacing="{DynamicResource Md3Spacing2}">
         <TextBlock Name="ValidationText" Classes="renderError" IsVisible="False"/>
         <Grid ColumnDefinitions="*,Auto">

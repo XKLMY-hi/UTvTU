@@ -2,6 +2,8 @@ using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Markup.Xaml.MarkupExtensions;
+using OpenUtau.App.Controls;
 
 namespace OpenUtau.App.Views;
 
@@ -13,14 +15,18 @@ public partial class ToolWorkspaceView : UserControl {
         SizeChanged += (_, _) => {
             var narrow = Bounds.Width <= 800;
             WorkspaceColumns.ColumnDefinitions[0].Width = new GridLength(narrow ? 152 : Bounds.Width <= 1040 ? 180 : 232);
-            WorkspaceNavigation.Padding = new Thickness(narrow ? 12 : 16, 24);
-            ResourceContent.Margin = narrow ? new Thickness(16) : new Thickness(24, 20, 24, 16);
+            WorkspaceNavigation.Padding = new Thickness(12, 24);
+            ResourceContent.Margin = narrow ? new Thickness(16) : new Thickness(24);
         };
     }
     void OnNavigate(object? sender, RoutedEventArgs e) { if (sender is Button { Tag: string page }) Navigate?.Invoke(page); }
     void OnBack(object? sender, RoutedEventArgs e) => ReturnToEditor?.Invoke();
     void OnPreferences(object? sender, RoutedEventArgs e) => Preferences?.Invoke();
     public void ShowPage(string page) {
+        ResourceHeader.ShapeKind = page == "packages" ? MaterialShapeKind.Square : MaterialShapeKind.Arch;
+        ResourceHeader[!WorkspacePageHeader.DescriptionProperty] = new DynamicResourceExtension(
+            page == "packages" ? "workspace.resources.packages.hint" : "workspace.resources.singers.hint");
+        ResourceHeader[!WorkspacePageHeader.IconProperty] = new DynamicResourceExtension(page == "packages" ? "icon-package" : "icon-mic");
         RenderContent.IsVisible = page == "render";
         ResourceContent.IsVisible = page != "render";
         SingersContent.IsVisible = page == "singers";

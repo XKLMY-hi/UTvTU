@@ -1380,4 +1380,17 @@ Range {2}–{3} s · Tail {4} s
   <system:String x:Key="prefs.option.pause.cursor">Reset cursor</system:String>
   <system:String x:Key="prefs.option.degree.solfege">Solfege</system:String>
   <system:String x:Key="prefs.option.degree.numbered">Numbered</system:String>
+
+  <!-- Resource and delivery workspace descriptions. -->
+  <system:String x:Key="workspace.resources.singers.hint">Browse voicebanks and manage samples, subbanks and configuration.</system:String>
+  <system:String x:Key="workspace.resources.packages.hint">Find, install and update the dependency packages used by your projects.</system:String>
+  <system:String x:Key="workspace.packages.catalog">Dependency packages</system:String>
+  <system:String x:Key="workspace.packages.catalog.hint">Search names, developers or versions; filter installed packages and updates.</system:String>
+  <system:String x:Key="render.mode.mixdown.short">Mixdown</system:String>
+  <system:String x:Key="render.mode.pertrack.short">Stems</system:String>
+  <system:String x:Key="workspace.singers.label">Voicebanks</system:String>
+  <system:String x:Key="workspace.singers.install">Install voicebank</system:String>
+  <system:String x:Key="workspace.packages.label">Packages</system:String>
+  <system:String x:Key="workspace.singers.waveform">Sample waveform</system:String>
+  <system:String x:Key="workspace.singers.waveform.hint">Select a sample to inspect its waveform and timing.</system:String>
 </ResourceDictionary>

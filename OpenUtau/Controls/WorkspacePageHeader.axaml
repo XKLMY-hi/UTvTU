@@ -1,0 +1,37 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:OpenUtau.App.Controls" x:Class="OpenUtau.App.Controls.WorkspacePageHeader"
+             x:Name="PageHeaderRoot">
+  <Border Background="{DynamicResource md3.surface-container-high}" Padding="20"
+          CornerRadius="{DynamicResource Md3ShapeExtraLarge}" ClipToBounds="True">
+    <Grid ColumnDefinitions="*,Auto" MinHeight="64">
+      <!-- Same source geometry and contour weight as the accepted preferences header. -->
+      <Grid Name="Contours" Grid.ColumnSpan="2" Margin="360,-20,-20,-20" Height="104"
+            VerticalAlignment="Center" ClipToBounds="True" IsHitTestVisible="False" Opacity="0.42">
+        <Path Data="{x:Static c:MaterialShape.ArchPath}" Stretch="Uniform" Width="240" Height="240"
+              Margin="0,0,340,0" HorizontalAlignment="Right" VerticalAlignment="Center"
+              Stroke="{DynamicResource md3.primary}" StrokeThickness="1.5" RenderTransformOrigin="0.5,0.5">
+          <Path.RenderTransform><RotateTransform Angle="-22"/></Path.RenderTransform>
+        </Path>
+        <Path Data="{x:Static c:MaterialShape.SquarePath}" Stretch="Uniform" Width="280" Height="280"
+              Margin="0,0,140,0" HorizontalAlignment="Right" VerticalAlignment="Center"
+              Stroke="{DynamicResource md3.primary}" StrokeThickness="1.5" RenderTransformOrigin="0.5,0.5">
+          <Path.RenderTransform><RotateTransform Angle="24"/></Path.RenderTransform>
+        </Path>
+        <Ellipse Width="240" Height="240" Margin="0,0,-80,0" HorizontalAlignment="Right" VerticalAlignment="Center"
+                 Stroke="{DynamicResource md3.primary}" StrokeThickness="1.5"/>
+      </Grid>
+      <StackPanel Spacing="{DynamicResource Md3Spacing1}" Margin="0,0,16,0" VerticalAlignment="Center">
+        <TextBlock Name="HeadingText" Text="{Binding #PageHeaderRoot.Heading}" FontSize="{DynamicResource Md3TypeDisplaySmall}"
+                   FontWeight="SemiBold" Foreground="{DynamicResource md3.on-surface}" TextWrapping="Wrap"/>
+        <TextBlock Name="DescriptionText" Text="{Binding #PageHeaderRoot.Description}" FontSize="{DynamicResource Md3TypeBodyMedium}"
+                   Foreground="{DynamicResource md3.on-surface-variant}" TextWrapping="Wrap"/>
+      </StackPanel>
+      <Grid Grid.Column="1" Width="80" Height="64" IsHitTestVisible="False">
+        <c:MaterialMorph Name="Shape" Kind="{Binding #PageHeaderRoot.ShapeKind}" Width="64" Height="64"
+                         Fill="{DynamicResource md3.primary}"/>
+        <c:DawIcon Data="{Binding #PageHeaderRoot.Icon}" Width="26" Height="26" HorizontalAlignment="Center"
+                   VerticalAlignment="Center" Fill="{DynamicResource md3.on-primary}"/>
+      </Grid>
+    </Grid>
+  </Border>
+</UserControl>

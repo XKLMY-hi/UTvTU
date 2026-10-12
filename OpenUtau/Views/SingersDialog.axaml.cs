@@ -29,12 +29,12 @@ namespace OpenUtau.App.Views {
             Opened += (_, _) => DocManager.Inst.AddSubscriber(this);
             SizeChanged += (_, _) => {
                 // Keep the OTO table finite inside the outer narrow-window scroller.
-                SingerLayout.Height = Math.Max(650, Bounds.Height);
+                SingerLayout.Height = Math.Max(Bounds.Width >= 1040 ? 620 : 720, Bounds.Height);
                 bool showBrowser = Bounds.Width >= 1040;
                 SingerBrowser.IsVisible = showBrowser;
                 SingerPicker.IsVisible = !showBrowser;
                 SingerLayout.ColumnDefinitions[0].Width = new GridLength(showBrowser ? 232 : 0);
-                SingerLayout.ColumnDefinitions[1].Width = new GridLength(showBrowser ? 24 : 0);
+                SingerLayout.ColumnDefinitions[1].Width = new GridLength(showBrowser ? 16 : 0);
             };
         }
 

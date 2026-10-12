@@ -1508,4 +1508,17 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="prefs.option.pause.cursor">仅回退标记</system:String>
   <system:String x:Key="prefs.option.degree.solfege">唱名</system:String>
   <system:String x:Key="prefs.option.degree.numbered">简谱</system:String>
+
+  <!-- Resource and delivery workspace descriptions. -->
+  <system:String x:Key="workspace.resources.singers.hint">浏览音源，管理采样、子音源与配置信息。</system:String>
+  <system:String x:Key="workspace.resources.packages.hint">查找、安装和更新工程所需的依赖包。</system:String>
+  <system:String x:Key="workspace.packages.catalog">依赖包</system:String>
+  <system:String x:Key="workspace.packages.catalog.hint">搜索包名、开发者或版本，筛选已安装与可更新的包。</system:String>
+  <system:String x:Key="render.mode.mixdown.short">混音</system:String>
+  <system:String x:Key="render.mode.pertrack.short">分轨</system:String>
+  <system:String x:Key="workspace.singers.label">音源</system:String>
+  <system:String x:Key="workspace.singers.install">安装音源</system:String>
+  <system:String x:Key="workspace.packages.label">依赖包</system:String>
+  <system:String x:Key="workspace.singers.waveform">采样波形</system:String>
+  <system:String x:Key="workspace.singers.waveform.hint">选择采样后查看波形与参数。</system:String>
 </ResourceDictionary>

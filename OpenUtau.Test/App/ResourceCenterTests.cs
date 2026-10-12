@@ -136,7 +136,7 @@ public sealed class ResourceCenterTests {
             Assert.True(page.FindControl<Grid>("SingerBrowser")!.IsVisible);
             var surface = page.FindControl<Border>("SingerBrowserSurface")!;
             Assert.True(surface.IsVisible); Assert.True(surface.ClipToBounds);
-            Assert.Equal(new CornerRadius(12), surface.CornerRadius);
+            Assert.Equal(new CornerRadius(28), surface.CornerRadius);
             var options = page.FindControl<Button>("SingerOptions")!;
             Assert.Same(options.Content, Assert.Single(options.GetVisualDescendants().OfType<DawIcon>()));
             var search = page.FindControl<TextBox>("AliasSearch")!; search.Text = "retained";

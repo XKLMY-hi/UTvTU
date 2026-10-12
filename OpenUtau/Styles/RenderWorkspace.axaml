@@ -1,5 +1,10 @@
 <Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <!-- Local to the export window; shared workspace geometry and native theme roles. -->
+  <Style Selector="Border.renderCard">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeExtraLarge}"/>
+    <Setter Property="Padding" Value="20"/>
+  </Style>
   <Style Selector="TextBlock.renderTitle">
     <Setter Property="FontSize" Value="{DynamicResource Md3TypeTitleLarge}"/>
     <Setter Property="FontWeight" Value="SemiBold"/>
@@ -59,6 +64,7 @@
     <Setter Property="ToolTip.Tip" Value="{Binding $self.Content}"/>
   </Style>
   <Style Selector="TextBox.renderInput,ComboBox.renderInput">
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
     <Setter Property="Height" Value="{DynamicResource Md3WorkspaceControlHeight}"/>
     <Setter Property="MinHeight" Value="{DynamicResource Md3WorkspaceControlHeight}"/>
     <Setter Property="MinWidth" Value="0"/>
