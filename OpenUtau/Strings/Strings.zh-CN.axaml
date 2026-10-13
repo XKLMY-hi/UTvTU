@@ -1522,7 +1522,4 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="workspace.singers.waveform">采样波形</system:String>
   <system:String x:Key="workspace.singers.waveform.hint">选择采样后查看波形与参数。</system:String>
   <system:String x:Key="tracks.panel.title">轨道</system:String>
-  <system:String x:Key="fxchain.floating.title">效果器链</system:String>
-  <system:String x:Key="fxchain.floating.close">收起效果器链</system:String>
-  <system:String x:Key="fxchain.floating.toggle">显示或收起效果器链</system:String>
 </ResourceDictionary>

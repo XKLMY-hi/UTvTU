@@ -1394,7 +1394,4 @@ Range {2}–{3} s · Tail {4} s
   <system:String x:Key="workspace.singers.waveform">Sample waveform</system:String>
   <system:String x:Key="workspace.singers.waveform.hint">Select a sample to inspect its waveform and timing.</system:String>
   <system:String x:Key="tracks.panel.title">Tracks</system:String>
-  <system:String x:Key="fxchain.floating.title">Effect chain</system:String>
-  <system:String x:Key="fxchain.floating.close">Hide effect chain</system:String>
-  <system:String x:Key="fxchain.floating.toggle">Show or hide effect chain</system:String>
 </ResourceDictionary>
