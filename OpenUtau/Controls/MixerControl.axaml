@@ -67,13 +67,15 @@
 
     <!-- Mixer Area（42：内边距 16 / 间距 8 / 横向排列） -->
     <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto,Auto" Name="MixerBody">
-      <ScrollViewer Grid.Column="0" Name="StripsScroll"
-                    HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-        <StackPanel Name="TrackStripsPanel" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}"
-                    Margin="16,16,8,16" HorizontalAlignment="Left">
-          <!-- 通道条按轨道动态生成 -->
-        </StackPanel>
-      </ScrollViewer>
+      <Border Grid.Column="0" Name="ChannelViewport" Margin="0,16,0,16">
+        <ScrollViewer Grid.Column="0" Name="StripsScroll"
+                      HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+          <StackPanel Name="TrackStripsPanel" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}"
+                      Margin="16,0,8,0" HorizontalAlignment="Left">
+            <!-- 通道条按轨道动态生成 -->
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
 
       <!-- 主输出条（691：宽 160，固定在最右的滚动区之外） -->
       <c:MasterStrip Grid.Column="1" x:Name="MasterStripControl" Margin="0,16,16,16"/>

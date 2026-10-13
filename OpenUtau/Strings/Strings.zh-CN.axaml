@@ -1138,6 +1138,8 @@ Syntax: prefix,suffix</system:String>-->
   <!-- ============================================================
        Plus 专属新增 keys — 混音台
        ============================================================ -->
+  <system:String x:Key="mixer.master.title">主输出</system:String>
+  <system:String x:Key="mixer.effects.title">效果器链</system:String>
   <system:String x:Key="mixer.tracks">轨道: {0}</system:String>
   <system:String x:Key="mixer.addtrack">+ 轨道</system:String>
   <system:String x:Key="mixer.master">主</system:String>

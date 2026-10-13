@@ -109,6 +109,7 @@ namespace OpenUtau.App.Controls {
         public MixerTrackStrip() {
             InitializeComponent();
             FaderBox.Handle = FaderHandle;
+            FaderBox.SizeChanged += (_, _) => MixerFaderVisual.Arrange(FaderBox);
             FaderBox.GestureStarted += (_, _) => _vm?.Edits.BeginGesture();
             FaderBox.GestureEnded += (_, _) => _vm?.Edits.EndGesture();
             FaderBox.ValueEdited += (_, _) => {
@@ -384,12 +385,10 @@ namespace OpenUtau.App.Controls {
             }
             bool silent = track.Mute || track.Volume <= MixerMetrics.FaderMinDb;
             meter.Push(silent ? MixerMeter.MinDb : rawPeakDb);
-            meter.Apply(MeterFill, MixerMetrics.FaderHeight);
+            meter.Apply(MeterFill, FaderBox.Bounds.Height);
         }
 
-        // ── 规格刻度（86-94：9 条，宽 8/5 交替，left 52）─────
-        // 刻度是 XAML 里的静态 FaderTick1..9（走 DynamicResource 才跟得上主题切换）；
-        // 数值由 MixerGeometryTests 与 MixerMetrics.TickWidths / TickTops 逐条比对。
+        // 刻度颜色仍走 XAML 动态资源；位置由 MixerFaderVisual 按实际推子高度与原 dB 范围排列。
 
         public void Refresh() => LoadTrackData();
     }

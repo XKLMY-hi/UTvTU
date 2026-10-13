@@ -1,26 +1,6 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:controls="clr-namespace:OpenUtau.App.Controls"
-             x:Class="OpenUtau.App.Controls.MasterStrip"
-             Width="160">
-  <!--
-    主输出条（设计规格 .opencode/design/spec/Mixer.txt:691-736）：
-    宽 160 / 内边距 8 / 圆角 12 / 列间距 6；名称 12 bold + 副标题 8；
-    Bus Info 四行（容器 padding 10 / gap 8 / 圆角 8，每行高 14：标签 8 + 值 9）；
-    推子区 144×500（**双表** 10 宽 left 24 / 38、轨 4 宽 left 74、柄 24×16 left 64、刻度 9 条 left 96）；
-    峰值读数 13px semibold。
-    设计稿里主输出**没有**插入区 / EQ 屏 / 声像 / M/S/R（spec-digest §8 第 23 条）。
-    **有意偏离（W1b / task-17）**：名称行右侧加回一个主输出静音键 —— 设计稿缺此元素，
-    但 `PlaybackManager.SetMasterMuted` 会因此失去唯一 UI 入口（功能回归），按 R19 精神保留入口：
-    视觉沿用通道条 M 键语言（高 20 / 圆角 4 / 10px bold），并入名称行不新增独立行（竖向余量仅 ≈8px）。
-    Bus Info 的四个值：能取真值就取真值，取不到的显示占位或**当前导出设置的状态文本**，
-    绝不编数（规划 R5、spec-digest §6）——每一项都带 ToolTip 说明来源。
-  -->
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="clr-namespace:OpenUtau.App.Controls" x:Class="OpenUtau.App.Controls.MasterStrip" Width="160" MinHeight="480">
+  <!-- 主输出保留独立固定列。表头、推子和读数区与轨道条对齐；双电平表仍由原数据源驱动。 -->
   <UserControl.Styles>
-    <!-- 主输出静音键（W1b）：与通道条 M 键同语言，仅底/字色走 master 条高一档的底色。
-         ⚠ 同一组"继承来的几何"陷阱：主题 MinHeight=32（Md3ControlThemes.axaml:28）会把
-         Height="20" 顶成 32（W6 实测 24×31），应用级 `Button { Margin: 0,4 }`
-         （Styles.axaml:159）再给 8px 竖向 margin ⇒ 本地两行都必须显式压掉。 -->
     <Style Selector="Button.masterMuteBtn">
       <Setter Property="Theme" Value="{StaticResource DawMixButtonTheme}"/>
       <Setter Property="MinHeight" Value="20"/>
@@ -36,118 +16,77 @@
       <Setter Property="Background" Value="{DynamicResource md3.error}"/>
       <Setter Property="Foreground" Value="{DynamicResource md3.on-error}"/>
     </Style>
+    <Style Selector="Button.masterMuteBtn">
+      <Setter Property="MinHeight" Value="28"/>
+    </Style>
   </UserControl.Styles>
-  <Border Name="MasterCard" Padding="8" CornerRadius="{DynamicResource Md3ShapeMedium}"
-          Background="{DynamicResource md3.surface-container-high}">
-    <Grid Name="RootGrid" RowSpacing="6" RowDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto">
-
-      <!-- 692 · 强调色条 -->
-      <Border Grid.Row="0" Name="MasterAccentBar" Height="3" CornerRadius="{DynamicResource Md3ShapeFull}"
-              HorizontalAlignment="Stretch" Background="{DynamicResource md3.primary}"/>
-
-      <!-- 693 · 名称 12px bold（右侧：主输出静音 —— 设计稿无此键，见文件头「有意偏离」） -->
-      <Grid Grid.Row="1" Name="MasterNameRow" ColumnDefinitions="*,Auto" ColumnSpacing="6">
-        <TextBlock Name="MasterNameLabel" FontSize="{DynamicResource Md3TypeBodySmall}" FontWeight="Bold" VerticalAlignment="Center"
-                   TextTrimming="CharacterEllipsis"
-                   Foreground="{DynamicResource md3.on-surface}"
-                   Text="{DynamicResource mixer.master}"/>
-        <Button Grid.Column="1" Name="MuteBtn" Classes="masterMuteBtn" Width="24" Height="20" MinHeight="20"
-                CornerRadius="{DynamicResource Md3ShapeExtraSmall}" FontSize="{DynamicResource Md3TypeLabelTiny}" FontWeight="Bold" VerticalAlignment="Center"
-                Content="{DynamicResource mixer.mute}" Click="OnMuteClick"/>
-      </Grid>
-
-      <!-- 695 · 副标题 8px -->
-      <TextBlock Grid.Row="2" Name="MasterSubtitleLabel" FontSize="8"
-                 TextTrimming="CharacterEllipsis"
-                 Foreground="{DynamicResource md3.on-surface-variant}"
-                 Text="{DynamicResource mixer.bus.subtitle}"/>
-
-      <!-- 697 · Bus Info：四行参数（容器满宽 / padding 10 / gap 8 / 圆角 8；底 = surface-container-lowest） -->
-      <Border Grid.Row="3" Name="BusInfo" Padding="10" CornerRadius="{DynamicResource Md3ShapeSmall}"
-              Background="{DynamicResource md3.surface-container-lowest}">
-        <Grid RowSpacing="{DynamicResource Md3Spacing2}" RowDefinitions="Auto,Auto,Auto,Auto">
-          <Grid Grid.Row="0" Name="BusRowIntegrated" Height="14" ColumnDefinitions="Auto,*">
-            <TextBlock Name="IntegratedLabel" FontSize="8" VerticalAlignment="Center"
-                       Foreground="{DynamicResource md3.on-surface-variant}"
-                       Text="{DynamicResource mixer.bus.integrated}"/>
-            <TextBlock Grid.Column="1" Name="IntegratedValue" FontSize="{DynamicResource Md3DawTypeReadout}" VerticalAlignment="Center"
-                       HorizontalAlignment="Right"
-                       Foreground="{DynamicResource md3.on-surface}" Text="—"/>
-          </Grid>
-          <Grid Grid.Row="1" Name="BusRowTruePeak" Height="14" ColumnDefinitions="Auto,*">
-            <TextBlock Name="TruePeakLabel" FontSize="8" VerticalAlignment="Center"
-                       Foreground="{DynamicResource md3.on-surface-variant}"
-                       Text="{DynamicResource mixer.bus.truepeak}"/>
-            <TextBlock Grid.Column="1" Name="TruePeakValue" FontSize="{DynamicResource Md3DawTypeReadout}" VerticalAlignment="Center"
-                       HorizontalAlignment="Right"
-                       Foreground="{DynamicResource md3.on-surface}" Text="—"/>
-          </Grid>
-          <Grid Grid.Row="2" Name="BusRowLimiter" Height="14" ColumnDefinitions="Auto,*">
-            <TextBlock Name="LimiterLabel" FontSize="8" VerticalAlignment="Center"
-                       Foreground="{DynamicResource md3.on-surface-variant}"
-                       Text="{DynamicResource mixer.bus.limiter}"/>
-            <TextBlock Grid.Column="1" Name="LimiterValue" FontSize="{DynamicResource Md3DawTypeReadout}" VerticalAlignment="Center"
-                       HorizontalAlignment="Right"
-                       Foreground="{DynamicResource md3.on-surface}" Text="—"/>
-          </Grid>
-          <Grid Grid.Row="3" Name="BusRowDither" Height="14" ColumnDefinitions="Auto,*">
-            <TextBlock Name="DitherLabel" FontSize="8" VerticalAlignment="Center"
-                       Foreground="{DynamicResource md3.on-surface-variant}"
-                       Text="{DynamicResource mixer.bus.dither}"/>
-            <TextBlock Grid.Column="1" Name="DitherValue" FontSize="{DynamicResource Md3DawTypeReadout}" VerticalAlignment="Center"
-                       HorizontalAlignment="Right"
-                       Foreground="{DynamicResource md3.on-surface}" Text="—"/>
-          </Grid>
+  <Border Name="MasterCard" Padding="10" CornerRadius="{DynamicResource Md3ShapeLarge}" Background="{DynamicResource md3.surface-container-high}" BorderThickness="1" BorderBrush="{DynamicResource md3.outline-variant}">
+    <Grid Name="RootGrid" RowSpacing="8" RowDefinitions="210,*,32">
+      <Grid Name="MasterHeader" RowDefinitions="3,28,16,Auto,*" RowSpacing="8" Grid.Row="0">
+        <Border Grid.Row="0" Name="MasterAccentBar" Height="3" CornerRadius="{DynamicResource Md3ShapeFull}" HorizontalAlignment="Stretch" Background="{DynamicResource md3.primary}"/>
+        <Grid Grid.Row="1" Name="MasterNameRow" ColumnDefinitions="*,Auto" ColumnSpacing="6">
+          <TextBlock Name="MasterNameLabel" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource md3.on-surface}" Text="{DynamicResource mixer.master.title}"/>
+          <Button Grid.Column="1" Name="MuteBtn" Classes="masterMuteBtn" Width="28" Height="28" MinHeight="28" CornerRadius="8" FontSize="{DynamicResource Md3TypeLabelTiny}" FontWeight="Bold" VerticalAlignment="Center" Content="{DynamicResource mixer.mute}" Click="OnMuteClick"/>
         </Grid>
+        <TextBlock Grid.Row="2" Name="MasterSubtitleLabel" FontSize="10" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource md3.on-surface-variant}" Text="{DynamicResource mixer.bus.subtitle}"/>
+        <Border Grid.Row="3" Name="BusInfo" Padding="8" CornerRadius="10" Background="{DynamicResource md3.surface-container-lowest}">
+          <Grid RowSpacing="{DynamicResource Md3Spacing2}" RowDefinitions="Auto,Auto,Auto,Auto">
+            <Grid Grid.Row="0" Name="BusRowIntegrated" Height="14" ColumnDefinitions="Auto,*">
+              <TextBlock Name="IntegratedLabel" FontSize="10" VerticalAlignment="Center" Foreground="{DynamicResource md3.on-surface-variant}" Text="{DynamicResource mixer.bus.integrated}"/>
+              <TextBlock Grid.Column="1" Name="IntegratedValue" FontSize="10" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="{DynamicResource md3.on-surface}" Text="—"/>
+            </Grid>
+            <Grid Grid.Row="1" Name="BusRowTruePeak" Height="14" ColumnDefinitions="Auto,*">
+              <TextBlock Name="TruePeakLabel" FontSize="10" VerticalAlignment="Center" Foreground="{DynamicResource md3.on-surface-variant}" Text="{DynamicResource mixer.bus.truepeak}"/>
+              <TextBlock Grid.Column="1" Name="TruePeakValue" FontSize="10" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="{DynamicResource md3.on-surface}" Text="—"/>
+            </Grid>
+            <Grid Grid.Row="2" Name="BusRowLimiter" Height="14" ColumnDefinitions="Auto,*">
+              <TextBlock Name="LimiterLabel" FontSize="10" VerticalAlignment="Center" Foreground="{DynamicResource md3.on-surface-variant}" Text="{DynamicResource mixer.bus.limiter}"/>
+              <TextBlock Grid.Column="1" Name="LimiterValue" FontSize="10" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="{DynamicResource md3.on-surface}" Text="—"/>
+            </Grid>
+            <Grid Grid.Row="3" Name="BusRowDither" Height="14" ColumnDefinitions="Auto,*">
+              <TextBlock Name="DitherLabel" FontSize="10" VerticalAlignment="Center" Foreground="{DynamicResource md3.on-surface-variant}" Text="{DynamicResource mixer.bus.dither}"/>
+              <TextBlock Grid.Column="1" Name="DitherValue" FontSize="10" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="{DynamicResource md3.on-surface}" Text="—"/>
+            </Grid>
+          </Grid>
+        </Border>
+        <Border Grid.Row="4" Name="ChannelSpacer"/>
+      </Grid>
+      <Border Name="FaderWell" CornerRadius="12" Padding="4,12" Background="{DynamicResource md3.surface-container-lowest}" MinHeight="140" Grid.Row="1">
+        <controls:DawFader Name="FaderBox" Width="128" FocusBrush="{DynamicResource md3.primary}" AutomationProperties.Name="{DynamicResource mixer.master}" ToolTip.Tip="{DynamicResource controls.fader.tip}" HorizontalAlignment="Center" VerticalAlignment="Stretch">
+          <Border Name="MeterBarL" Width="10" Height="{Binding #FaderBox.Bounds.Height}" Canvas.Left="12.0" Canvas.Top="0" CornerRadius="{DynamicResource Md3ShapeFull}" ClipToBounds="True" Background="{DynamicResource md3.surface-container-highest}">
+            <Border Name="MeterFillL" Width="10" Height="0" CornerRadius="{DynamicResource Md3ShapeFull}" VerticalAlignment="Bottom" Background="{DynamicResource md3.primary}"/>
+          </Border>
+          <Border Name="MeterBarR" Width="10" Height="{Binding #FaderBox.Bounds.Height}" Canvas.Left="26.0" Canvas.Top="0" CornerRadius="{DynamicResource Md3ShapeFull}" ClipToBounds="True" Background="{DynamicResource md3.surface-container-highest}">
+            <Border Name="MeterFillR" Width="10" Height="0" CornerRadius="{DynamicResource Md3ShapeFull}" VerticalAlignment="Bottom" Background="{DynamicResource md3.primary}"/>
+          </Border>
+          <Border Name="FaderTrack" Width="4" Height="{Binding #FaderBox.Bounds.Height}" Canvas.Left="62.0" Canvas.Top="0" CornerRadius="{DynamicResource Md3ShapeFull}" Background="{DynamicResource md3.surface-container-highest}"/>
+          <Border Name="FaderHandle" Width="28" Height="20" Canvas.Left="50.0" Canvas.Top="116" CornerRadius="6" Background="{DynamicResource md3.on-surface}">
+            <Grid IsHitTestVisible="False">
+              <Border Classes="faderGrip" Width="14" Height="1" Margin="0,-3,0,0" VerticalAlignment="Center" Background="{DynamicResource md3.surface-container}"/>
+              <Border Classes="faderGrip" Width="14" Height="1" Margin="0,3,0,0" VerticalAlignment="Center" Background="{DynamicResource md3.surface-container}"/>
+            </Grid>
+          </Border>
+          <Border Name="FaderTick1" Width="8" Height="1" Canvas.Left="84.0" Canvas.Top="10" Background="{DynamicResource md3.outline-variant}"/>
+          <Border Name="FaderTick2" Width="8" Height="1" Canvas.Left="84.0" Canvas.Top="90" Background="{DynamicResource md3.outline-variant}"/>
+          <Border Name="FaderTick3" Width="8" Height="1" Canvas.Left="84.0" Canvas.Top="170" Background="{DynamicResource md3.outline-variant}"/>
+          <Border Name="FaderTick4" Width="8" Height="1" Canvas.Left="84.0" Canvas.Top="250" Background="{DynamicResource md3.outline-variant}"/>
+          <Border Name="FaderTick5" Width="8" Height="1" Canvas.Left="84.0" Canvas.Top="330" Background="{DynamicResource md3.outline-variant}"/>
+          <Border Name="FaderTick6" Width="8" Height="1" Canvas.Left="84.0" Canvas.Top="410" Background="{DynamicResource md3.outline-variant}"/>
+          <Border Name="FaderTick7" Width="8" Height="1" Canvas.Left="84.0" Canvas.Top="490" Background="{DynamicResource md3.outline-variant}"/>
+          <Border Name="FaderTick8" Width="4" Height="1" Canvas.Left="84.0" Canvas.Top="130" Background="{DynamicResource md3.outline-variant}"/>
+          <Border Name="FaderTick9" Width="4" Height="1" Canvas.Left="84.0" Canvas.Top="370" Background="{DynamicResource md3.outline-variant}"/>
+          <TextBlock Text="+12" FontSize="9" FontFamily="{DynamicResource PlusFontFamilyMono}" Foreground="{DynamicResource md3.on-surface-variant}" IsHitTestVisible="False" Canvas.Left="96.0" Canvas.Top="4" Name="FaderLabel1" LineHeight="12"/>
+          <TextBlock Text="+6" FontSize="9" FontFamily="{DynamicResource PlusFontFamilyMono}" Foreground="{DynamicResource md3.on-surface-variant}" IsHitTestVisible="False" Canvas.Left="96.0" Canvas.Top="84" Name="FaderLabel2" LineHeight="12"/>
+          <TextBlock Text="0" FontSize="9" FontFamily="{DynamicResource PlusFontFamilyMono}" Foreground="{DynamicResource md3.on-surface-variant}" IsHitTestVisible="False" Canvas.Left="96.0" Canvas.Top="164" Name="FaderLabel3" LineHeight="12"/>
+          <TextBlock Text="−6" FontSize="9" FontFamily="{DynamicResource PlusFontFamilyMono}" Foreground="{DynamicResource md3.on-surface-variant}" IsHitTestVisible="False" Canvas.Left="96.0" Canvas.Top="244" Name="FaderLabel4" LineHeight="12"/>
+          <TextBlock Text="−12" FontSize="9" FontFamily="{DynamicResource PlusFontFamilyMono}" Foreground="{DynamicResource md3.on-surface-variant}" IsHitTestVisible="False" Canvas.Left="96.0" Canvas.Top="324" Name="FaderLabel5" LineHeight="12"/>
+          <TextBlock Text="−18" FontSize="9" FontFamily="{DynamicResource PlusFontFamilyMono}" Foreground="{DynamicResource md3.on-surface-variant}" IsHitTestVisible="False" Canvas.Left="96.0" Canvas.Top="404" Name="FaderLabel6" LineHeight="12"/>
+          <TextBlock Text="−24" FontSize="9" FontFamily="{DynamicResource PlusFontFamilyMono}" Foreground="{DynamicResource md3.on-surface-variant}" IsHitTestVisible="False" Canvas.Left="96.0" Canvas.Top="484" Name="FaderLabel7" LineHeight="12"/>
+        </controls:DawFader>
       </Border>
-
-      <!-- 718 · 弹性空白 -->
-      <Border Grid.Row="4" Name="ChannelSpacer"/>
-
-      <!-- 719-734 · 推子区 144×500（双表 10 宽 left 24/38、轨 4 宽 left 74、柄 24×16 left 64、刻度 9 条 left 96） -->
-      <controls:DawFader Grid.Row="5" Name="FaderBox" Width="144" Height="500"
-                         FocusBrush="{DynamicResource md3.primary}"
-                         AutomationProperties.Name="{DynamicResource mixer.master}"
-                         ToolTip.Tip="{DynamicResource controls.fader.tip}">
-        <Border Name="MeterBarL" Width="10" Height="500" Canvas.Left="24" Canvas.Top="0"
-                CornerRadius="{DynamicResource Md3ShapeFull}" ClipToBounds="True"
-                Background="{DynamicResource md3.surface-container-highest}">
-          <Border Name="MeterFillL" Width="10" Height="0" CornerRadius="{DynamicResource Md3ShapeFull}"
-                  VerticalAlignment="Bottom" Background="{DynamicResource md3.primary}"/>
-        </Border>
-        <Border Name="MeterBarR" Width="10" Height="500" Canvas.Left="38" Canvas.Top="0"
-                CornerRadius="{DynamicResource Md3ShapeFull}" ClipToBounds="True"
-                Background="{DynamicResource md3.surface-container-highest}">
-          <Border Name="MeterFillR" Width="10" Height="0" CornerRadius="{DynamicResource Md3ShapeFull}"
-                  VerticalAlignment="Bottom" Background="{DynamicResource md3.primary}"/>
-        </Border>
-        <Border Name="FaderTrack" Width="4" Height="500" Canvas.Left="74" Canvas.Top="0"
-                CornerRadius="{DynamicResource Md3ShapeFull}" Background="{DynamicResource md3.surface-container-highest}"/>
-        <Border Name="FaderHandle" Width="24" Height="16" Canvas.Left="64" Canvas.Top="116"
-                CornerRadius="{DynamicResource Md3ShapeExtraSmall}" Background="{DynamicResource md3.on-surface}"/>
-        <Border Name="FaderTick1" Width="8" Height="1" Canvas.Left="96" Canvas.Top="0"
-                Background="{DynamicResource md3.outline-variant}"/>
-        <Border Name="FaderTick2" Width="5" Height="1" Canvas.Left="96" Canvas.Top="62"
-                Background="{DynamicResource md3.outline-variant}"/>
-        <Border Name="FaderTick3" Width="8" Height="1" Canvas.Left="96" Canvas.Top="125"
-                Background="{DynamicResource md3.outline-variant}"/>
-        <Border Name="FaderTick4" Width="5" Height="1" Canvas.Left="96" Canvas.Top="187"
-                Background="{DynamicResource md3.outline-variant}"/>
-        <Border Name="FaderTick5" Width="8" Height="1" Canvas.Left="96" Canvas.Top="249"
-                Background="{DynamicResource md3.outline-variant}"/>
-        <Border Name="FaderTick6" Width="5" Height="1" Canvas.Left="96" Canvas.Top="311"
-                Background="{DynamicResource md3.outline-variant}"/>
-        <Border Name="FaderTick7" Width="8" Height="1" Canvas.Left="96" Canvas.Top="374"
-                Background="{DynamicResource md3.outline-variant}"/>
-        <Border Name="FaderTick8" Width="5" Height="1" Canvas.Left="96" Canvas.Top="436"
-                Background="{DynamicResource md3.outline-variant}"/>
-        <Border Name="FaderTick9" Width="8" Height="1" Canvas.Left="96" Canvas.Top="498"
-                Background="{DynamicResource md3.outline-variant}"/>
-      </controls:DawFader>
-
-      <!-- 735 · 峰值读数 13px semibold -->
-      <TextBlock Grid.Row="6" Name="MasterPeakLabel" FontSize="{DynamicResource Md3TypeBodyMedium}" FontWeight="SemiBold"
-                 Foreground="{DynamicResource md3.on-surface}" Text="-∞ dB"/>
+      <Border Name="ReadoutWell" CornerRadius="8" Background="{DynamicResource md3.surface-container-highest}" Grid.Row="2">
+        <TextBlock Name="MasterPeakLabel" FontSize="{DynamicResource Md3TypeBodyMedium}" FontWeight="SemiBold" Foreground="{DynamicResource md3.on-surface}" Text="-∞ dB" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="{DynamicResource PlusFontFamilyMono}"/>
+      </Border>
     </Grid>
   </Border>
 </UserControl>

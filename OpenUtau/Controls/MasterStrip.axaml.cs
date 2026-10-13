@@ -27,6 +27,7 @@ public partial class MasterStrip : UserControl {
     public MasterStrip() {
         InitializeComponent();
         FaderBox.Handle = FaderHandle;
+        FaderBox.SizeChanged += (_, _) => MixerFaderVisual.Arrange(FaderBox);
         FaderBox.ValueEdited += (_, _) => ApplyMasterVolume(FaderBox.Value);
         InitBusInfo();
         UpdateMuteBtn();
@@ -54,8 +55,8 @@ public partial class MasterStrip : UserControl {
     /// </summary>
     public void UpdateLevel(float rawPeakDb) {
         meter.Push(rawPeakDb);
-        meter.Apply(MeterFillL, MixerMetrics.FaderHeight);
-        meter.Apply(MeterFillR, MixerMetrics.FaderHeight);
+        meter.Apply(MeterFillL, FaderBox.Bounds.Height);
+        meter.Apply(MeterFillR, FaderBox.Bounds.Height);
         MasterPeakLabel.Text = FormatDb(meter.PeakDb);
         TruePeakValue.Text = $"{FormatDbNumber(meter.PeakDb)} dBFS";
     }

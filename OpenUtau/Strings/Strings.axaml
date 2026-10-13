@@ -1010,6 +1010,8 @@ General
   <!-- ============================================================
        Plus-specific keys — Mixer
        ============================================================ -->
+  <system:String x:Key="mixer.master.title">Master output</system:String>
+  <system:String x:Key="mixer.effects.title">Effects chain</system:String>
   <system:String x:Key="mixer.tracks">Tracks: {0}</system:String>
   <system:String x:Key="mixer.addtrack">+ Track</system:String>
   <system:String x:Key="mixer.master">Master</system:String>
