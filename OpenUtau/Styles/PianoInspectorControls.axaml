@@ -1,0 +1,103 @@
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:OpenUtau.App.Controls">
+  <Styles.Resources>
+    <ControlTheme x:Key="PianoPropertyGroupTheme" TargetType="Expander">
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Background="{DynamicResource md3.surface-container}" CornerRadius="12">
+            <StackPanel>
+              <ToggleButton Name="ExpanderHeader" Theme="{StaticResource DawButtonTheme}" Height="36" MinHeight="0"
+                            IsChecked="{TemplateBinding IsExpanded, Mode=TwoWay}" Padding="12,0" CornerRadius="12"
+                            HorizontalContentAlignment="Stretch" FontWeight="SemiBold" Foreground="{DynamicResource md3.on-surface}">
+                <Grid ColumnDefinitions="*,Auto">
+                  <ContentPresenter Content="{TemplateBinding Header}" VerticalAlignment="Center"/>
+                  <c:DawIcon Name="GroupChevron" Grid.Column="1" Data="{StaticResource icon-chevron-down}" Width="12" Height="12" Margin="8,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource md3.on-surface-variant}"/>
+                </Grid>
+              </ToggleButton>
+              <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}" Margin="12,0,12,12"
+                                IsVisible="{TemplateBinding IsExpanded}"/>
+            </StackPanel>
+          </Border>
+        </ControlTemplate>
+      </Setter>
+    </ControlTheme>
+    <ControlTheme x:Key="PianoPropertySliderTheme" TargetType="Slider">
+      <Setter Property="Focusable" Value="True"/>
+      <Setter Property="MinWidth" Value="0"/>
+      <Setter Property="MinHeight" Value="0"/>
+      <Setter Property="Height" Value="28"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
+      <Setter Property="Background" Value="{DynamicResource md3.outline-variant}"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <DataValidationErrors>
+            <Grid>
+              <Track Name="PART_Track" Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}"
+                     Value="{TemplateBinding Value, Mode=TwoWay}" IsDirectionReversed="{TemplateBinding IsDirectionReversed}"
+                     Orientation="Horizontal" Height="20" VerticalAlignment="Center">
+                <Track.DecreaseButton>
+                  <RepeatButton Name="PART_DecreaseButton" Focusable="False" MinWidth="0" MinHeight="0" Margin="0" Padding="0"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{TemplateBinding Foreground}">
+                    <RepeatButton.Template><ControlTemplate><Border Height="4" VerticalAlignment="Center" Background="{TemplateBinding Background}" CornerRadius="2"/></ControlTemplate></RepeatButton.Template>
+                  </RepeatButton>
+                </Track.DecreaseButton>
+                <Track.IncreaseButton>
+                  <RepeatButton Name="PART_IncreaseButton" Focusable="False" MinWidth="0" MinHeight="0" Margin="0" Padding="0"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{TemplateBinding Background}">
+                    <RepeatButton.Template><ControlTemplate><Border Height="4" VerticalAlignment="Center" Background="{TemplateBinding Background}" CornerRadius="2"/></ControlTemplate></RepeatButton.Template>
+                  </RepeatButton>
+                </Track.IncreaseButton>
+                <Thumb Name="thumb" Width="6" Height="14" MinWidth="0" MinHeight="0" Margin="0" Padding="0" Background="{TemplateBinding Foreground}">
+                  <Thumb.Template><ControlTemplate><Border Background="{TemplateBinding Background}" CornerRadius="2"/></ControlTemplate></Thumb.Template>
+                </Thumb>
+              </Track>
+              <Border Name="FocusRing" BorderBrush="{DynamicResource md3.primary}" BorderThickness="1" CornerRadius="6" Opacity="0" IsHitTestVisible="False"/>
+            </Grid>
+          </DataValidationErrors>
+        </ControlTemplate>
+      </Setter>
+      <Style Selector="^:focus-visible /template/ Border#FocusRing"><Setter Property="Opacity" Value="1"/></Style>
+      <Style Selector="^:disabled"><Setter Property="Opacity" Value="0.38"/></Style>
+    </ControlTheme>
+  </Styles.Resources>
+  <Style Selector="Button">
+    <Setter Property="Theme" Value="{StaticResource DawTextButtonTheme}"/>
+    <Setter Property="MinHeight" Value="0"/>
+    <Setter Property="Height" Value="28"/>
+    <Setter Property="Padding" Value="8,0"/>
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
+    <Setter Property="Focusable" Value="True"/>
+  </Style>
+  <Style Selector="Label">
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+  </Style>
+  <Style Selector="Label TextBlock">
+    <Setter Property="FontSize" Value="12"/>
+    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+  </Style>
+  <Style Selector="TextBox">
+    <Setter Property="MinHeight" Value="0"/>
+    <Setter Property="Height" Value="28"/>
+    <Setter Property="Padding" Value="8,0"/>
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+  </Style>
+  <Style Selector="ComboBox">
+    <Setter Property="MinHeight" Value="0"/>
+    <Setter Property="Height" Value="28"/>
+    <Setter Property="Padding" Value="8,0"/>
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+  </Style>
+  <Style Selector="Slider.inspectorFader"><Setter Property="Theme" Value="{StaticResource PianoPropertySliderTheme}"/></Style>
+  <Style Selector="ToggleButton#ExpanderHeader:checked c|DawIcon#GroupChevron"><Setter Property="RenderTransform"><RotateTransform Angle="180"/></Setter></Style>
+  <Style Selector="Expander"><Setter Property="FontWeight" Value="Normal"/><Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/></Style>
+</Styles>

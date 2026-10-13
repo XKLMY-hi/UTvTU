@@ -1,64 +1,22 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:OpenUtau.App.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600" Width="400"
-             x:Class="OpenUtau.App.Controls.NotePropertiesControl"
-             KeyDown="OnKeyDown" Focusable="True">
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:vm="using:OpenUtau.App.ViewModels" mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600" Width="400" x:Class="OpenUtau.App.Controls.NotePropertiesControl" KeyDown="OnKeyDown" Focusable="True" Classes="noteInspector">
   <UserControl.Styles>
-    <!-- W32 复核（ui-lint 第 6 条 WARN = 误报）：本样式只设 Focusable，**没有声明任何高度**；
-         规则在 12 行窗口里抓到的 Height="24" 属于下面的 TextBlock 标题（第 22 行），不是 Button。
-         类型虽是 Button 本尊，但无声明高度可被主题 MinHeight=32 顶掉 ⇒ 无需中和。 -->
-    <Style Selector="Button">
-      <Setter Property="Theme" Value="{StaticResource DawTextButtonTheme}"/>
-      <Setter Property="MinHeight" Value="32"/>
-      <Setter Property="Padding" Value="14,6"/>
-      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeSmall}"/>
-      <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
-      <Setter Property="Focusable" Value="True"/>
-    </Style>
-    <Style Selector="Label,TextBox,Slider,ComboBox,CheckBox">
-      <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
-    <Style Selector="Slider.fader">
-      <Setter Property="Focusable" Value="True"/>
-    </Style>
-    <!-- W31：Expander 头部的 3 条调参自 Styles/Styles.axaml 迁来（全仓只有本控件用 Expander，共 4 处）。
-         按 UI 标准 §0.2：模板部件的调整写在**使用它的控件自己的 UserControl.Styles** 里，
-         不再从应用级样式层越权改别人模板。 -->
-    <Style Selector="Expander:down /template/ ToggleButton#ExpanderHeader">
-      <Setter Property="Height" Value="32"/>
-      <Setter Property="MinHeight" Value="32"/>
-      <Setter Property="FontWeight" Value="Bold"/>
-    </Style>
-    <Style Selector="Expander:down /template/ ToggleButton#ExpanderHeader /template/ Border#ExpandCollapseChevronBorder">
-      <Setter Property="Height" Value="20"/>
-    </Style>
-    <Style Selector="Expander:down /template/ ToggleButton#ExpanderHeader /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Margin" Value="7,0,0,0"/>
-    </Style>
+    <StyleInclude Source="/Styles/PianoInspectorControls.axaml"/>
   </UserControl.Styles>
-
-  <Grid>
-    <TextBlock Text="{Binding Title}" Height="24" Padding="4" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-    <ScrollViewer Margin="0,48,0,0" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" AllowAutoHide="True">
-      <StackPanel Margin="0">
-        <Expander Header="{DynamicResource noteproperty.basic}" HorizontalAlignment="Stretch" Margin="0,0,4,2">
-          <StackPanel IsEnabled="{Binding IsNoteSelected}">
-            <Grid ColumnDefinitions="143,*">
+  <Grid RowDefinitions="40,*" Background="{DynamicResource md3.surface-container-low}" Name="InspectorLayout">
+    <Border Name="InspectorHeading" Padding="14,0" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource md3.outline-variant}">
+      <TextBlock Text="{Binding Title}" Height="NaN" Padding="0" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold"/>
+    </Border>
+    <ScrollViewer Margin="0" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" AllowAutoHide="True" Grid.Row="1" Name="InspectorScroll" Padding="10,10,10,12">
+      <StackPanel Margin="0" Spacing="8">
+        <Expander Header="{DynamicResource noteproperty.basic}" HorizontalAlignment="Stretch" Margin="0" Name="BasicGroup" Theme="{StaticResource PianoPropertyGroupTheme}" Padding="0" BorderThickness="0">
+          <StackPanel IsEnabled="{Binding IsNoteSelected}" Spacing="4">
+            <Grid ColumnDefinitions="92,8,*" MinHeight="28">
               <Label Content="{DynamicResource notedefaults.lyric}" Grid.Column="0"/>
-              <TextBox Text="{Binding Lyric, Mode=OneWay}" Grid.Column="1" Tag="Lyric"/>
+              <TextBox Text="{Binding Lyric, Mode=OneWay}" Grid.Column="2" Tag="Lyric" Margin="0"/>
             </Grid>
-
-            <!-- to be updated later to use the same categ phonemizer -->
-            <Grid ColumnDefinitions="143,*">
+            <Grid ColumnDefinitions="92,8,*" MinHeight="28">
               <Label Content="{DynamicResource noteproperty.phonemizer}" Grid.Column="0"/>
-              <Button Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Margin="0,0,0,2"
-                      Content="{Binding PhonemizerOverrideText}"
-                      Click="OnPhonemizerButtonClicked">
+              <Button Grid.Column="2" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Margin="0" Content="{Binding PhonemizerOverrideText}" Click="OnPhonemizerButtonClicked" Height="28" MinHeight="0" Padding="8,0" CornerRadius="6" Classes="inspectorChoice" Background="{DynamicResource md3.surface-container-highest}">
                 <Button.ContextMenu>
                   <ContextMenu Name="PhonemizerMenu" ItemsSource="{Binding PhonemizerMenuItems}" Placement="Left">
                     <ContextMenu.Styles>
@@ -73,51 +31,38 @@
                 </Button.ContextMenu>
               </Button>
             </Grid>
-
-            <Grid ColumnDefinitions="143,*">
+            <Grid ColumnDefinitions="92,8,*" MinHeight="28">
               <Label Content="{DynamicResource noteproperty.tone}" Grid.Column="0"/>
-              <TextBox Text="{Binding Tone, Mode=OneWay}" Grid.Column="1" Tag="Tone" Margin="0"/>
+              <TextBox Text="{Binding Tone, Mode=OneWay}" Grid.Column="2" Tag="Tone" Margin="0"/>
             </Grid>
-            <Grid ColumnDefinitions="130,20,50,20,*">
+            <Grid ColumnDefinitions="92,8,58,10,*" MinHeight="28">
               <Label Content="{DynamicResource noteproperty.tuning}" FontWeight="{Binding TuningFontWeight}"/>
-              <TextBox Grid.Column="2" Text="{Binding Tuning, Mode=OneWay}" Tag="Tuning" Margin="0"/>
-              <Slider Grid.Column="4" Classes="fader" Value="{Binding Tuning, Mode=OneWay}" Minimum="-100" Maximum="100"
-                      TickPlacement="BottomRight" TickFrequency="1" IsSnapToTickEnabled="true"
-                      Tag="Tuning"/>
+              <TextBox Grid.Column="2" Text="{Binding Tuning, Mode=OneWay}" Tag="Tuning" Margin="0" Classes="inspectorNumber" TextAlignment="Right" FontFamily="{DynamicResource PlusFontFamilyMono}"/>
+              <Slider Grid.Column="4" Classes="inspectorFader" Value="{Binding Tuning, Mode=OneWay}" Minimum="-100" Maximum="100" TickPlacement="BottomRight" TickFrequency="1" IsSnapToTickEnabled="true" Tag="Tuning"/>
             </Grid>
           </StackPanel>
         </Expander>
-
-        <Expander Header="{DynamicResource notedefaults.portamento}" HorizontalAlignment="Stretch" Margin="0,2,4,2">
-          <StackPanel IsEnabled="{Binding IsNoteSelected}">
-            <Grid ColumnDefinitions="123,20,*">
+        <Expander Header="{DynamicResource notedefaults.portamento}" HorizontalAlignment="Stretch" Margin="0" Name="PortamentoGroup" Theme="{StaticResource PianoPropertyGroupTheme}" Padding="0" BorderThickness="0">
+          <StackPanel IsEnabled="{Binding IsNoteSelected}" Spacing="4">
+            <Grid ColumnDefinitions="92,8,*" MinHeight="28">
               <Label Content="{DynamicResource notedefaults.preset}"/>
-              <ComboBox Grid.Column="2" ItemsSource="{Binding PortamentoPresets}" Margin="0"
-                SelectedItem="{Binding ApplyPortamentoPreset}" HorizontalAlignment="Stretch"/>
+              <ComboBox Grid.Column="2" ItemsSource="{Binding PortamentoPresets}" Margin="0" SelectedItem="{Binding ApplyPortamentoPreset}" HorizontalAlignment="Stretch"/>
             </Grid>
-            <Grid ColumnDefinitions="123,20,*,20,*">
-              <Button Classes="primary" Grid.Column="2" Content="{DynamicResource button.save}"
-                      HorizontalAlignment="Stretch" Click="OnSavePortamentoPreset"
-                      ToolTip.Tip="{DynamicResource notedefaults.preset.save.tooltip}"/>
-              <Button Grid.Column="4" Content="{DynamicResource button.remove}"
-                      HorizontalAlignment="Stretch" Command="{Binding RemoveAppliedPortamentoPreset}"
-                      ToolTip.Tip="{DynamicResource notedefaults.preset.remove.tooltip}"/>
+            <Grid ColumnDefinitions="92,8,*,8,*" Margin="0,0,0,4" MinHeight="28">
+              <Button Classes="inspectorPreset tonal" Grid.Column="2" Content="{DynamicResource button.save}" HorizontalAlignment="Stretch" Click="OnSavePortamentoPreset" ToolTip.Tip="{DynamicResource notedefaults.preset.save.tooltip}" Margin="0" Height="28" MinHeight="0" Padding="8,0" CornerRadius="6"/>
+              <Button Grid.Column="4" Content="{DynamicResource button.remove}" HorizontalAlignment="Stretch" Command="{Binding RemoveAppliedPortamentoPreset}" ToolTip.Tip="{DynamicResource notedefaults.preset.remove.tooltip}" Margin="0" Height="28" MinHeight="0" Padding="8,0" CornerRadius="6" Classes="inspectorPreset"/>
             </Grid>
-            <Grid ColumnDefinitions="130,20,50,20,*">
+            <Grid ColumnDefinitions="92,8,58,10,*" MinHeight="28">
               <Label Content="{DynamicResource notedefaults.portamento.length}"/>
-              <TextBox Grid.Column="2" Text="{Binding PortamentoLength, Mode=OneWay}" Tag="PortamentoLength_TextBox"/>
-              <Slider Grid.Column="4" Classes="fader" Value="{Binding PortamentoLength, Mode=OneWay}" Minimum="2" Maximum="320"
-                      TickPlacement="BottomRight" TickFrequency="1" IsSnapToTickEnabled="true"
-                      Tag="PortamentoLength"/>
+              <TextBox Grid.Column="2" Text="{Binding PortamentoLength, Mode=OneWay}" Tag="PortamentoLength_TextBox" Margin="0" Classes="inspectorNumber" TextAlignment="Right" FontFamily="{DynamicResource PlusFontFamilyMono}"/>
+              <Slider Grid.Column="4" Classes="inspectorFader" Value="{Binding PortamentoLength, Mode=OneWay}" Minimum="2" Maximum="320" TickPlacement="BottomRight" TickFrequency="1" IsSnapToTickEnabled="true" Tag="PortamentoLength"/>
             </Grid>
-            <Grid ColumnDefinitions="130,20,50,20,*">
+            <Grid ColumnDefinitions="92,8,58,10,*" MinHeight="28">
               <Label Content="{DynamicResource notedefaults.portamento.start}"/>
-              <TextBox Grid.Column="2" Text="{Binding PortamentoStart, Mode=OneWay}" Tag="PortamentoStart_TextBox" Margin="0"/>
-              <Slider Grid.Column="4" Classes="fader" Value="{Binding PortamentoStart, Mode=OneWay}" Minimum="-200" Maximum="200"
-                      TickPlacement="BottomRight" TickFrequency="1" IsSnapToTickEnabled="true"
-                      Tag="PortamentoStart"/>
+              <TextBox Grid.Column="2" Text="{Binding PortamentoStart, Mode=OneWay}" Tag="PortamentoStart_TextBox" Margin="0" Classes="inspectorNumber" TextAlignment="Right" FontFamily="{DynamicResource PlusFontFamilyMono}"/>
+              <Slider Grid.Column="4" Classes="inspectorFader" Value="{Binding PortamentoStart, Mode=OneWay}" Minimum="-200" Maximum="200" TickPlacement="BottomRight" TickFrequency="1" IsSnapToTickEnabled="true" Tag="PortamentoStart"/>
             </Grid>
-            <Grid ColumnDefinitions="123,20,*">
+            <Grid ColumnDefinitions="92,8,*" MinHeight="28">
               <Label Content="{DynamicResource context.pitch.shape}"/>
               <ComboBox Grid.Column="2" Margin="0" SelectedIndex="{Binding PitchCurveShape}" HorizontalAlignment="Stretch">
                 <ComboBoxItem Content="{DynamicResource context.pitch.easeinout}"/>
@@ -129,97 +74,71 @@
             </Grid>
           </StackPanel>
         </Expander>
-
-        <Expander Header="{DynamicResource notedefaults.vibrato}" HorizontalAlignment="Stretch" Margin="0,2,4,2">
-          <StackPanel IsEnabled="{Binding IsNoteSelected}">
-            <ToggleSwitch IsChecked="{Binding VibratoEnable, Mode=OneWay}" OnContent="{DynamicResource button.on}" OffContent="{DynamicResource button.off}"
-                          Click="VibratoEnableClicked"/>
-            <Grid ColumnDefinitions="123,20,*">
+        <Expander Header="{DynamicResource notedefaults.vibrato}" HorizontalAlignment="Stretch" Margin="0" Name="VibratoGroup" Theme="{StaticResource PianoPropertyGroupTheme}" Padding="0" BorderThickness="0">
+          <StackPanel IsEnabled="{Binding IsNoteSelected}" Spacing="4">
+            <ToggleSwitch IsChecked="{Binding VibratoEnable, Mode=OneWay}" OnContent="{DynamicResource button.on}" OffContent="{DynamicResource button.off}" Click="VibratoEnableClicked"/>
+            <Grid ColumnDefinitions="92,8,*" MinHeight="28">
               <Label Content="{DynamicResource notedefaults.preset}"/>
-              <ComboBox Grid.Column="2" ItemsSource="{Binding VibratoPresets}" Margin="0"
-                SelectedItem="{Binding ApplyVibratoPreset}" HorizontalAlignment="Stretch" />
+              <ComboBox Grid.Column="2" ItemsSource="{Binding VibratoPresets}" Margin="0" SelectedItem="{Binding ApplyVibratoPreset}" HorizontalAlignment="Stretch"/>
             </Grid>
-            <Grid ColumnDefinitions="123,20,*,20,*">
-              <Button Classes="primary" Grid.Column="2" Content="{DynamicResource button.save}"
-                      HorizontalAlignment="Stretch" Click="OnSaveVibratoPreset"
-                      ToolTip.Tip="{DynamicResource notedefaults.preset.save.tooltip}"/>
-              <Button Grid.Column="4" Content="{DynamicResource button.remove}"
-                HorizontalAlignment="Stretch" Command="{Binding RemoveAppliedVibratoPreset}"
-                ToolTip.Tip="{DynamicResource notedefaults.preset.remove.tooltip}"/>
+            <Grid ColumnDefinitions="92,8,*,8,*" Margin="0,0,0,4" MinHeight="28">
+              <Button Classes="inspectorPreset tonal" Grid.Column="2" Content="{DynamicResource button.save}" HorizontalAlignment="Stretch" Click="OnSaveVibratoPreset" ToolTip.Tip="{DynamicResource notedefaults.preset.save.tooltip}" Margin="0" Height="28" MinHeight="0" Padding="8,0" CornerRadius="6"/>
+              <Button Grid.Column="4" Content="{DynamicResource button.remove}" HorizontalAlignment="Stretch" Command="{Binding RemoveAppliedVibratoPreset}" ToolTip.Tip="{DynamicResource notedefaults.preset.remove.tooltip}" Margin="0" Height="28" MinHeight="0" Padding="8,0" CornerRadius="6" Classes="inspectorPreset"/>
             </Grid>
-            <Grid ColumnDefinitions="130,20,50,20,*" >
+            <Grid ColumnDefinitions="92,8,58,10,*" MinHeight="28">
               <Label Content="{DynamicResource notedefaults.vibrato.length}"/>
-              <TextBox Grid.Column="2" Text="{Binding VibratoLength, Mode=OneWay}" Tag="VibratoLength"/>
-              <Slider Grid.Column="4" Classes="fader" Value="{Binding VibratoLength, Mode=OneWay}" Minimum="0" Maximum="100"
-                      TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="true"
-                      Tag="VibratoLength" IsDirectionReversed="True" />
+              <TextBox Grid.Column="2" Text="{Binding VibratoLength, Mode=OneWay}" Tag="VibratoLength" Margin="0" Classes="inspectorNumber" TextAlignment="Right" FontFamily="{DynamicResource PlusFontFamilyMono}"/>
+              <Slider Grid.Column="4" Classes="inspectorFader" Value="{Binding VibratoLength, Mode=OneWay}" Minimum="0" Maximum="100" TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="true" Tag="VibratoLength" IsDirectionReversed="True"/>
             </Grid>
-            <Grid ColumnDefinitions="130,20,50,20,*">
+            <Grid ColumnDefinitions="92,8,58,10,*" MinHeight="28">
               <Label Content="{DynamicResource notedefaults.vibrato.period}"/>
-              <TextBox Grid.Column="2" Text="{Binding VibratoPeriod, Mode=OneWay}" Tag="VibratoPeriod"/>
-              <Slider Grid.Column="4" Classes="fader" Value="{Binding VibratoPeriod, Mode=OneWay}" Minimum="5" Maximum="500"
-                      TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="true"
-                      Tag="VibratoPeriod"/>
+              <TextBox Grid.Column="2" Text="{Binding VibratoPeriod, Mode=OneWay}" Tag="VibratoPeriod" Margin="0" Classes="inspectorNumber" TextAlignment="Right" FontFamily="{DynamicResource PlusFontFamilyMono}"/>
+              <Slider Grid.Column="4" Classes="inspectorFader" Value="{Binding VibratoPeriod, Mode=OneWay}" Minimum="5" Maximum="500" TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="true" Tag="VibratoPeriod"/>
             </Grid>
-            <Grid ColumnDefinitions="130,20,50,20,*">
+            <Grid ColumnDefinitions="92,8,58,10,*" MinHeight="28">
               <Label Content="{DynamicResource notedefaults.vibrato.depth}"/>
-              <TextBox Grid.Column="2" Text="{Binding VibratoDepth, Mode=OneWay}" Tag="VibratoDepth"/>
-              <Slider Grid.Column="4" Classes="fader" Value="{Binding VibratoDepth, Mode=OneWay}" Minimum="5" Maximum="200"
-                      TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="true"
-                      Tag="VibratoDepth"/>
+              <TextBox Grid.Column="2" Text="{Binding VibratoDepth, Mode=OneWay}" Tag="VibratoDepth" Margin="0" Classes="inspectorNumber" TextAlignment="Right" FontFamily="{DynamicResource PlusFontFamilyMono}"/>
+              <Slider Grid.Column="4" Classes="inspectorFader" Value="{Binding VibratoDepth, Mode=OneWay}" Minimum="5" Maximum="200" TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="true" Tag="VibratoDepth"/>
             </Grid>
-            <Grid ColumnDefinitions="130,20,50,20,*">
+            <Grid ColumnDefinitions="92,8,58,10,*" MinHeight="28">
               <Label Content="{DynamicResource notedefaults.vibrato.in}"/>
-              <TextBox Grid.Column="2" Text="{Binding VibratoIn, Mode=OneWay}" Tag="VibratoIn"/>
-              <Slider Grid.Column="4" Classes="fader" Value="{Binding VibratoIn, Mode=OneWay}" Minimum="0" Maximum="100"
-                      TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="true"
-                      Tag="VibratoIn"/>
+              <TextBox Grid.Column="2" Text="{Binding VibratoIn, Mode=OneWay}" Tag="VibratoIn" Margin="0" Classes="inspectorNumber" TextAlignment="Right" FontFamily="{DynamicResource PlusFontFamilyMono}"/>
+              <Slider Grid.Column="4" Classes="inspectorFader" Value="{Binding VibratoIn, Mode=OneWay}" Minimum="0" Maximum="100" TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="true" Tag="VibratoIn"/>
             </Grid>
-            <Grid ColumnDefinitions="130,20,50,20,*">
+            <Grid ColumnDefinitions="92,8,58,10,*" MinHeight="28">
               <Label Content="{DynamicResource notedefaults.vibrato.out}"/>
-              <TextBox Grid.Column="2" Text="{Binding VibratoOut, Mode=OneWay}" Tag="VibratoOut"/>
-              <Slider Grid.Column="4" Classes="fader" Value="{Binding VibratoOut, Mode=OneWay}" Minimum="0" Maximum="100"
-                      TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="true"
-                      Tag="VibratoOut"/>
+              <TextBox Grid.Column="2" Text="{Binding VibratoOut, Mode=OneWay}" Tag="VibratoOut" Margin="0" Classes="inspectorNumber" TextAlignment="Right" FontFamily="{DynamicResource PlusFontFamilyMono}"/>
+              <Slider Grid.Column="4" Classes="inspectorFader" Value="{Binding VibratoOut, Mode=OneWay}" Minimum="0" Maximum="100" TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="true" Tag="VibratoOut"/>
             </Grid>
-            <Grid ColumnDefinitions="130,20,50,20,*">
+            <Grid ColumnDefinitions="92,8,58,10,*" MinHeight="28">
               <Label Content="{DynamicResource notedefaults.vibrato.shift}"/>
-              <TextBox Grid.Column="2" Text="{Binding VibratoShift, Mode=OneWay}" Tag="VibratoShift"/>
-              <Slider Grid.Column="4" Classes="fader" Value="{Binding VibratoShift, Mode=OneWay}" Minimum="0" Maximum="100"
-                      TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="true"
-                      Tag="VibratoShift"/>
+              <TextBox Grid.Column="2" Text="{Binding VibratoShift, Mode=OneWay}" Tag="VibratoShift" Margin="0" Classes="inspectorNumber" TextAlignment="Right" FontFamily="{DynamicResource PlusFontFamilyMono}"/>
+              <Slider Grid.Column="4" Classes="inspectorFader" Value="{Binding VibratoShift, Mode=OneWay}" Minimum="0" Maximum="100" TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="true" Tag="VibratoShift"/>
             </Grid>
-            <Grid ColumnDefinitions="130,20,50,20,*">
+            <Grid ColumnDefinitions="92,8,58,10,*" MinHeight="28">
               <Label Content="{DynamicResource notedefaults.vibrato.drift}"/>
-              <TextBox Grid.Column="2" Text="{Binding VibratoDrift, Mode=OneWay}" Tag="VibratoDrift"/>
-              <Slider Grid.Column="4" Classes="fader" Value="{Binding VibratoDrift, Mode=OneWay}" Minimum="-100" Maximum="100"
-                      TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="true"
-                      Tag="VibratoDrift"/>
+              <TextBox Grid.Column="2" Text="{Binding VibratoDrift, Mode=OneWay}" Tag="VibratoDrift" Margin="0" Classes="inspectorNumber" TextAlignment="Right" FontFamily="{DynamicResource PlusFontFamilyMono}"/>
+              <Slider Grid.Column="4" Classes="inspectorFader" Value="{Binding VibratoDrift, Mode=OneWay}" Minimum="-100" Maximum="100" TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="true" Tag="VibratoDrift"/>
             </Grid>
-            <Grid ColumnDefinitions="130,20,50,20,*">
+            <Grid ColumnDefinitions="92,8,58,10,*" MinHeight="28">
               <Label Content="{DynamicResource notedefaults.vibrato.vollink}"/>
-              <TextBox Grid.Column="2" Text="{Binding VibratoVolLink, Mode=OneWay}" Tag="VibratoVolLink"/>
-              <Slider Grid.Column="4" Classes="fader" Value="{Binding VibratoVolLink, Mode=OneWay}" Minimum="-100" Maximum="100"
-                      TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="true"
-                      Tag="VibratoVolLink"/>
+              <TextBox Grid.Column="2" Text="{Binding VibratoVolLink, Mode=OneWay}" Tag="VibratoVolLink" Margin="0" Classes="inspectorNumber" TextAlignment="Right" FontFamily="{DynamicResource PlusFontFamilyMono}"/>
+              <Slider Grid.Column="4" Classes="inspectorFader" Value="{Binding VibratoVolLink, Mode=OneWay}" Minimum="-100" Maximum="100" TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="true" Tag="VibratoVolLink"/>
             </Grid>
-            <Grid ColumnDefinitions="123,20,*">
+            <Grid ColumnDefinitions="92,8,*" MinHeight="28">
               <Label Content="{DynamicResource noteproperty.setlongnote}"/>
               <CheckBox Grid.Column="2" IsChecked="{Binding AutoVibratoToggle}"/>
             </Grid>
-            <Grid ColumnDefinitions="180,20,50,20,*">
+            <Grid ColumnDefinitions="92,8,58,10,*" MinHeight="28">
               <Label Content="{DynamicResource notedefaults.vibrato.autominlength}"/>
-              <TextBox Grid.Column="2" IsEnabled="{Binding AutoVibratoToggle}" Text="{Binding AutoVibratoNoteLength}" Margin="0" />
-              <Slider Grid.Column="4" Classes="fader" IsEnabled="{Binding AutoVibratoToggle}" Value="{Binding AutoVibratoNoteLength}" Minimum="10" Maximum="1920"
-                      TickPlacement="BottomRight" TickFrequency="1" IsSnapToTickEnabled="true" />
+              <TextBox Grid.Column="2" IsEnabled="{Binding AutoVibratoToggle}" Text="{Binding AutoVibratoNoteLength}" Margin="0" Classes="inspectorNumber" TextAlignment="Right" FontFamily="{DynamicResource PlusFontFamilyMono}"/>
+              <Slider Grid.Column="4" Classes="inspectorFader" IsEnabled="{Binding AutoVibratoToggle}" Value="{Binding AutoVibratoNoteLength}" Minimum="10" Maximum="1920" TickPlacement="BottomRight" TickFrequency="1" IsSnapToTickEnabled="true"/>
             </Grid>
           </StackPanel>
         </Expander>
-
-        <Expander Header="{DynamicResource exps.caption}" HorizontalAlignment="Stretch" Margin="0,2,4,0">
-          <StackPanel Name="ExpressionsPanel" />
+        <Expander Header="{DynamicResource exps.caption}" HorizontalAlignment="Stretch" Margin="0" Name="ExpressionGroup" Theme="{StaticResource PianoPropertyGroupTheme}" Padding="0" BorderThickness="0">
+          <StackPanel Name="ExpressionsPanel" Spacing="4"/>
         </Expander>
-
       </StackPanel>
     </ScrollViewer>
   </Grid>

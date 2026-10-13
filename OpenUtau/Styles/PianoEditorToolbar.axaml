@@ -1,0 +1,18 @@
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Style Selector="Border.editorGroup">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="Padding" Value="4,2"/>
+  </Style>
+  <Style Selector="TextBlock.editorGroupLabel">
+    <Setter Property="FontSize" Value="11"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+  </Style>
+  <Style Selector="Menu#PianoMenu > MenuItem">
+    <Setter Property="FontSize" Value="12"/>
+    <Setter Property="Padding" Value="8,0"/>
+    <Setter Property="Height" Value="28"/>
+    <Setter Property="MinHeight" Value="0"/>
+    <Setter Property="CornerRadius" Value="6"/>
+  </Style>
+</Styles>

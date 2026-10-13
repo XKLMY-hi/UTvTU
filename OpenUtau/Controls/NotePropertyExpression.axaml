@@ -1,20 +1,11 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:OpenUtau.App.ViewModels"
-             x:Class="OpenUtau.App.Controls.NotePropertyExpression" Focusable="True">
-  <Grid ColumnDefinitions="143,7,50,20,*">
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:vm="using:OpenUtau.App.ViewModels" x:Class="OpenUtau.App.Controls.NotePropertyExpression" Focusable="True">
+  <UserControl.Styles>
+    <StyleInclude Source="/Styles/PianoInspectorControls.axaml"/>
+  </UserControl.Styles>
+  <Grid ColumnDefinitions="92,8,58,10,*" MinHeight="32" Margin="0,0,0,4">
     <Label Content="{Binding Name}" Grid.Column="0" VerticalAlignment="Center" FontWeight="{Binding NameFontWeight}"/>
-    <TextBox Name="ValueTextBox" Text="{Binding Value, Mode=OneWay}" Grid.Column="2" IsVisible="{Binding IsNumerical}" VerticalAlignment="Center" IsEnabled="{Binding IsNoteSelected}"
-             FontFamily="{DynamicResource PlusFontFamilyMono}" TextAlignment="Right"
-             GotFocus="OnTextBoxGotFocus" LostFocus="OnTextBoxLostFocus" KeyDown="OnTextBoxKeyDown"/>
-    <Slider Grid.Column="4" Classes="fader" Value="{Binding Value, Mode=OneWay}" Minimum="{Binding Min}" Maximum="{Binding Max}" Focusable="True"
-            TickPlacement="BottomRight" TickFrequency="1" IsSnapToTickEnabled="true" IsVisible="{Binding IsNumerical}" VerticalAlignment="Center" IsEnabled="{Binding IsNoteSelected}"
-            Name="slider"/>
-    <ComboBox Grid.Column="1" Grid.ColumnSpan="4" ItemsSource="{Binding Options}"
-              SelectedIndex="{Binding SelectedOption}" MinWidth="120" IsVisible="{Binding IsOptions}" VerticalAlignment="Center" IsEnabled="{Binding IsNoteSelected}"
-              IsDropDownOpen="{Binding DropDownOpen, Mode=OneWayToSource}"
-              Name="comboBox"/>
+    <TextBox Name="ValueTextBox" Text="{Binding Value, Mode=OneWay}" Grid.Column="2" IsVisible="{Binding IsNumerical}" VerticalAlignment="Center" IsEnabled="{Binding IsNoteSelected}" FontFamily="{DynamicResource PlusFontFamilyMono}" TextAlignment="Right" GotFocus="OnTextBoxGotFocus" LostFocus="OnTextBoxLostFocus" KeyDown="OnTextBoxKeyDown"/>
+    <Slider Grid.Column="4" Classes="inspectorFader" Value="{Binding Value, Mode=OneWay}" Minimum="{Binding Min}" Maximum="{Binding Max}" Focusable="True" TickPlacement="BottomRight" TickFrequency="1" IsSnapToTickEnabled="true" IsVisible="{Binding IsNumerical}" VerticalAlignment="Center" IsEnabled="{Binding IsNoteSelected}" Name="slider"/>
+    <ComboBox Grid.Column="1" Grid.ColumnSpan="4" ItemsSource="{Binding Options}" SelectedIndex="{Binding SelectedOption}" MinWidth="0" IsVisible="{Binding IsOptions}" VerticalAlignment="Center" IsEnabled="{Binding IsNoteSelected}" IsDropDownOpen="{Binding DropDownOpen, Mode=OneWayToSource}" Name="comboBox" HorizontalAlignment="Stretch"/>
   </Grid>
 </UserControl>
