@@ -30,18 +30,20 @@ namespace OpenUtau.App.Views {
         public void Begin(IPointer pointer, Point point) {
             capturedPointer = pointer;
             pointer.Capture(element);
-            var tone = vm.NotesViewModel.PointToTone(point);
+            var tone = element.IsKeyboard ? element.KeyboardToneAt(point) : vm.NotesViewModel.PointToTone(point);
             PlaybackManager.Inst.PlayTone(MusicMath.ToneToFreq(tone));
             activeTone = tone;
             toneStarted = true;
+            element.PressedTone = tone;
         }
         public void Update(IPointer pointer, Point point) {
             if (!toneStarted) return;
-            var tone = vm.NotesViewModel.PointToTone(point);
+            var tone = element.IsKeyboard ? element.KeyboardToneAt(point) : vm.NotesViewModel.PointToTone(point);
             if (activeTone != tone) {
                 PlaybackManager.Inst.EndTone(MusicMath.ToneToFreq(activeTone));
                 PlaybackManager.Inst.PlayTone(MusicMath.ToneToFreq(tone));
                 activeTone = tone;
+                element.PressedTone = tone;
             }
         }
         public void End(IPointer pointer, Point point) {
@@ -55,6 +57,7 @@ namespace OpenUtau.App.Views {
                 toneStarted = false;
                 PlaybackManager.Inst.EndTone(MusicMath.ToneToFreq(activeTone));
             }
+            element.PressedTone = null;
             if (pointer?.Captured == element) pointer.Capture(null);
         }
     }

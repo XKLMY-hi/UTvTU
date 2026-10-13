@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+using System;
 using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls.Primitives;
@@ -50,7 +49,7 @@ namespace OpenUtau.App.Controls {
         }
         public bool IsKeyboard {
             get => _isKeyboard;
-            set => SetAndRaise(IsPianoRollProperty, ref _isKeyboard, value);
+            set => SetAndRaise(IsKeyboardProperty, ref _isKeyboard, value);
         }
         public int Key {
             get => _key;
@@ -73,7 +72,9 @@ namespace OpenUtau.App.Controls {
             if (change.Property == TrackHeightProperty ||
                 change.Property == TrackOffsetProperty ||
                 change.Property == ForegroundProperty ||
-                change.Property == KeyProperty) {
+                change.Property == KeyProperty ||
+                change.Property == IsKeyboardProperty ||
+                change.Property == IsPianoRollProperty) {
                 InvalidateVisual();
             }
         }
@@ -86,52 +87,86 @@ namespace OpenUtau.App.Controls {
             if (TrackHeight == 0) {
                 return;
             }
+            if (IsKeyboard) {
+                RenderKeyboard(context);
+                return;
+            }
             int track = (int)TrackOffset;
             double top = TrackHeight * (track - TrackOffset);
-            string[] degreeNames;
-            switch(Preferences.Default.DegreeStyle){
-                case 1:
-                    degreeNames = MusicMath.Solfeges;
-                    break;
-                case 2:
-                    degreeNames = MusicMath.NumberedNotations;
-                    break;
-                default:
-                    degreeNames = Enumerable.Repeat("", 12).ToArray();
-                    break;
-            }
             while (top < Bounds.Height) {
-                bool isAltTrack = IsAltTrack(track) ^ (ThemeManager.IsDarkMode && !IsKeyboard);
-                bool isCenterKey = IsKeyboard && IsCenterKey(track);
-                var brush = isCenterKey ? ThemeManager.CenterKeyBrush
-                    : IsKeyboard ? (isAltTrack ? ThemeManager.BlackKeyBrush : ThemeManager.WhiteKeyBrush)
-                    : isAltTrack ? Foreground : Background;
-                context.DrawRectangle(
-                    brush,
-                    null,
+                bool isAltTrack = IsAltTrack(track) ^ ThemeManager.IsDarkMode;
+                context.DrawRectangle(isAltTrack ? Foreground : Background, null,
                     new Rect(0, (int)top, Bounds.Width, TrackHeight));
-                if (IsKeyboard && TrackHeight >= 12) {
-                    brush = isCenterKey ? ThemeManager.CenterKeyNameBrush
-                        : isAltTrack ? ThemeManager.BlackKeyNameBrush
-                            : ThemeManager.WhiteKeyNameBrush;
-                    int tone = ViewConstants.MaxTone - 1 - track;
-                    string toneName = MusicMath.GetToneName(tone);
-                    var toneTextLayout = TextLayoutCache.Get(toneName, brush, 12);
-                    var toneTextPosition = new Point(Bounds.Width - 4 - (int)toneTextLayout.Width, (int)(top + (TrackHeight - toneTextLayout.Height) / 2));
-                    using (var state = context.PushTransform(Matrix.CreateTranslation(toneTextPosition))) {
-                        toneTextLayout.Draw(context, new Point());
-                    }
-                    //scale degree display
-                    int degree = mod(tone - Key, 12);
-                    string degreeName = degreeNames[degree];
-                    var degreeTextLayout = TextLayoutCache.Get(degreeName, brush, 12);
-                    var degreeTextPosition = new Point(4, (int)(top + (TrackHeight - degreeTextLayout.Height) / 2));
-                    using (var state = context.PushTransform(Matrix.CreateTranslation(degreeTextPosition))) {
-                        degreeTextLayout.Draw(context, new Point());
-                    }
-                }
                 track++;
                 top += TrackHeight;
+            }
+        }
+
+        // Piano materials stay light/dark in both themes; accent is reserved for a held key.
+        static readonly IBrush darkWhite = new SolidColorBrush(Color.Parse("#CDC8D1"));
+        static readonly IBrush lightWhite = new SolidColorBrush(Color.Parse("#F5F1F7"));
+        static readonly IBrush darkBlack = new SolidColorBrush(Color.Parse("#27242D"));
+        static readonly IBrush lightBlack = new SolidColorBrush(Color.Parse("#343039"));
+        static readonly IBrush whiteInk = new SolidColorBrush(Color.Parse("#48414F"));
+        static readonly IBrush blackInk = new SolidColorBrush(Color.Parse("#E9E2ED"));
+        static readonly IPen darkKeyEdge = new Pen(new SolidColorBrush(Color.Parse("#948B9E")), 0.75);
+        static readonly IPen lightKeyEdge = new Pen(new SolidColorBrush(Color.Parse("#B7AEBF")), 0.75);
+        int? pressedTone;
+        internal int? PressedTone {
+            get => pressedTone;
+            set { if (pressedTone != value) { pressedTone = value; InvalidateVisual(); } }
+        }
+
+        internal Rect KeyboardKeyBounds(int tone) => PianoKeyboardGeometry.KeyBounds(tone, Bounds.Width, TrackHeight, TrackOffset);
+        internal int KeyboardToneAt(Point point) => PianoKeyboardGeometry.ToneAt(point, Bounds.Width, TrackHeight, TrackOffset);
+
+        void RenderKeyboard(DrawingContext context) {
+            if (Bounds.Width <= 0 || TrackHeight <= 0) return;
+            var white = ThemeManager.IsDarkMode ? darkWhite : lightWhite;
+            var black = ThemeManager.IsDarkMode ? darkBlack : lightBlack;
+            var edge = ThemeManager.IsDarkMode ? darkKeyEdge : lightKeyEdge;
+            int highest = Math.Clamp((int)Math.Ceiling(ViewConstants.MaxTone - TrackOffset + 2), 0, ViewConstants.MaxTone - 1);
+            int lowest = Math.Clamp((int)Math.Floor(ViewConstants.MaxTone - TrackOffset - Bounds.Height / TrackHeight - 3), 0, ViewConstants.MaxTone - 1);
+            using (context.PushClip(new Rect(Bounds.Size))) {
+                context.DrawRectangle(white, null, new Rect(Bounds.Size));
+                // White keys meet between their pitch centers; black keys overlay those boundaries.
+                for (int tone = highest; tone >= lowest; tone--) {
+                    if (MusicMath.IsBlackKey(tone)) continue;
+                    var rect = KeyboardKeyBounds(tone);
+                    context.DrawRectangle(pressedTone == tone ? ThemeManager.AccentBrush2 : white, edge, rect);
+                    DrawKeyLabel(context, tone, whiteInk);
+                }
+                for (int tone = highest; tone >= lowest; tone--) {
+                    if (!MusicMath.IsBlackKey(tone)) continue;
+                    var rect = KeyboardKeyBounds(tone);
+                    context.DrawRectangle(pressedTone == tone ? ThemeManager.AccentBrush2 : black, null, rect, 3, 3);
+                    DrawKeyLabel(context, tone, blackInk);
+                }
+                context.DrawLine(edge, new Point(Bounds.Width - .5, 0), new Point(Bounds.Width - .5, Bounds.Height));
+            }
+        }
+
+        void DrawKeyLabel(DrawingContext context, int tone, IBrush ink) {
+            if (TrackHeight < 12) return;
+            double y = (ViewConstants.MaxTone - 1 - tone - TrackOffset + .5) * TrackHeight;
+            bool black = MusicMath.IsBlackKey(tone);
+            // Octaves provide orientation without turning the keyboard into a dense note list.
+            if (!black && (MusicMath.IsCenterKey(tone) || pressedTone == tone)) {
+                var label = TextLayoutCache.Get(MusicMath.GetToneName(tone), ink, 11, true);
+                using (context.PushTransform(Matrix.CreateTranslation(Bounds.Width - 5 - label.Width, y - label.Height / 2))) {
+                    label.Draw(context, new Point());
+                }
+            }
+            string[]? degrees = Preferences.Default.DegreeStyle switch {
+                1 => MusicMath.Solfeges,
+                2 => MusicMath.NumberedNotations,
+                _ => null,
+            };
+            if (degrees != null && TrackHeight >= 18) {
+                var degree = TextLayoutCache.Get(degrees[mod(tone - Key, 12)], ink, 10);
+                using (context.PushTransform(Matrix.CreateTranslation(4, y - degree.Height / 2))) {
+                    degree.Draw(context, new Point());
+                }
             }
         }
 
@@ -146,9 +181,5 @@ namespace OpenUtau.App.Controls {
             return MusicMath.IsBlackKey(tone);
         }
 
-        private bool IsCenterKey(int track) {
-            int tone = ViewConstants.MaxTone - 1 - track;
-            return MusicMath.IsCenterKey(tone);
-        }
     }
 }

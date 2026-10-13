@@ -52,7 +52,7 @@
                  ViewportSize="{Binding ViewportTracks}"
                  LargeChange="{Binding ViewportTracks}"
                  SmallChange="{Binding SmallChangeY}" PointerWheelChanged="VScrollPointerWheelChanged"/>
-      <c:TrackBackground Grid.Column="0" Grid.Row="3" IsPianoRoll="True" IsKeyboard="True"
+      <c:TrackBackground Grid.Column="0" Grid.Row="3" IsPianoRoll="True" IsKeyboard="True" ClipToBounds="True"
                          DataContext="{Binding NotesViewModel}"
                          TrackHeight="{Binding TrackHeight}"
                          TrackOffset="{Binding TrackOffset}"
