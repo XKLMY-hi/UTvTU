@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using Avalonia;
 using Avalonia.Controls.Primitives;
@@ -9,6 +9,11 @@ using ReactiveUI;
 
 namespace OpenUtau.App.Controls {
     class TickBackground : TemplatedControl {
+        // Opt-in: the piano editor keeps its original ruler, grid and note geometry.
+        public static readonly StyledProperty<bool> IsArrangementProperty =
+            AvaloniaProperty.Register<TickBackground, bool>(nameof(IsArrangement));
+        public bool IsArrangement { get => GetValue(IsArrangementProperty); set => SetValue(IsArrangementProperty, value); }
+
         private static readonly IDashStyle DashStyle = new ImmutableDashStyle(new double[] { 2, 4 }, 0);
 
         public static readonly DirectProperty<TickBackground, int> ResolutionProperty =
@@ -117,7 +122,8 @@ namespace OpenUtau.App.Controls {
                 change.Property == TickWidthProperty ||
                 change.Property == TickOffsetProperty ||
                 change.Property == SnapDivProperty ||
-                change.Property == ShowBarProperty) {
+                change.Property == ShowBarProperty ||
+                change.Property == IsArrangementProperty) {
                 InvalidateVisual();
             }
         }
@@ -125,6 +131,12 @@ namespace OpenUtau.App.Controls {
         public override void Render(DrawingContext context) {
             if (TickWidth <= 0) {
                 return;
+            }
+            if (IsArrangement) {
+                context.DrawRectangle(ArrangementVisuals.Brush("md3.surface-container", ThemeManager.BackgroundBrush), null,
+                    new Rect(0, 0, Bounds.Width, 34));
+                var edge = new Pen(ArrangementVisuals.Brush("md3.outline-variant", Foreground), 1);
+                context.DrawLine(edge, new Point(0, 33.5), new Point(Bounds.Width, 33.5));
             }
             var project = Core.DocManager.Inst.Project;
             int snapUnit = project.resolution * 4 / SnapDiv;
@@ -146,13 +158,25 @@ namespace OpenUtau.App.Controls {
                 SnapTicks?.Add(barTick);
                 double x = Math.Round(barTick * TickWidth - pixelOffset) + 0.5;
                 double y = -0.5;
-                if (ShowBar) {
-                    var textLayout = TextLayoutCache.Get((bar + 1).ToString(), ThemeManager.BarNumberBrush, 10);
-                    using (var state = context.PushTransform(Matrix.CreateTranslation(x + 3, 10))) {
+                double rulerBarWidth = IsArrangement
+                    ? (project.timeAxis.BarBeatToTickPos(bar + 1, 0) - barTick) * TickWidth : 0;
+                int labelStride = IsArrangement ? Math.Max(1, (int)Math.Ceiling(32 / Math.Max(1, rulerBarWidth))) : 1;
+                if (ShowBar && bar % labelStride == 0) {
+                    var textLayout = TextLayoutCache.Get((bar + 1).ToString(),
+                        IsArrangement ? ArrangementVisuals.Brush("md3.on-surface", ThemeManager.BarNumberBrush) : ThemeManager.BarNumberBrush,
+                        IsArrangement ? 11 : 10, IsArrangement);
+                    using (var state = context.PushTransform(Matrix.CreateTranslation(x + (IsArrangement ? 6 : 3), IsArrangement ? 17 : 10))) {
                         textLayout.Draw(context, new Point());
                     }
                 }
-                context.DrawLine(penBar, new Point(x, y), new Point(x, Bounds.Height + 0.5f));
+                if (IsArrangement) {
+                    using (context.PushOpacity(.65)) {
+                        context.DrawLine(penBar, new Point(x, 50), new Point(x, Bounds.Height + .5));
+                    }
+                    context.DrawLine(penBar, new Point(x, 27), new Point(x, 34));
+                } else {
+                    context.DrawLine(penBar, new Point(x, y), new Point(x, Bounds.Height + 0.5f));
+                }
                 // Lines between bars.
                 var timeSig = project.timeAxis.TimeSignatureAtBar(bar);
                 int nextBarTick = project.timeAxis.BarBeatToTickPos(bar + 1, 0);
@@ -174,7 +198,17 @@ namespace OpenUtau.App.Controls {
                         var pen = snapRemainingTicks != 0 ? penDanshed : penBeatUnit;
                         x = Math.Round(tick * TickWidth - pixelOffset) + 0.5;
                         y = ShowBar ? 24 : 0;
-                        context.DrawLine(pen, new Point(x, y), new Point(x, Bounds.Height + 0.5f));
+                        if (IsArrangement) {
+                            using (context.PushOpacity(snapRemainingTicks != 0 ? .28 : .65)) {
+                                // Solid subdivisions are quiet; beat lines remain easy to follow.
+                                context.DrawLine(penBeatUnit, new Point(x, 50), new Point(x, Bounds.Height + .5));
+                            }
+                            if (snapRemainingTicks == 0) {
+                                context.DrawLine(penBeatUnit, new Point(x, 30), new Point(x, 34));
+                            }
+                        } else {
+                            context.DrawLine(pen, new Point(x, y), new Point(x, Bounds.Height + 0.5f));
+                        }
                     }
                 }
                 barTick = nextBarTick;
@@ -182,7 +216,9 @@ namespace OpenUtau.App.Controls {
             }
             SnapTicks?.Add(barTick);
 
-            if (ShowBar) {
+            if (ShowBar && IsArrangement) {
+                DrawArrangementMarkers(context, pixelOffset);
+            } else if (ShowBar) {
                 foreach (var tempo in project.tempos) {
                     double x = Math.Round(tempo.position * TickWidth - pixelOffset) + 0.5;
                     context.DrawLine(penDanshed, new Point(x, 0), new Point(x, 24));
@@ -201,6 +237,28 @@ namespace OpenUtau.App.Controls {
                         textLayout.Draw(context, new Point());
                     }
                 }
+            }
+        }
+        void DrawArrangementMarkers(DrawingContext context, double pixelOffset) {
+            var project = Core.DocManager.Inst.Project;
+            var ink = ArrangementVisuals.Brush("md3.on-surface-variant", ThemeManager.BarNumberBrush);
+            var primary = ArrangementVisuals.Brush("md3.primary", ThemeManager.AccentBrush1);
+            foreach (var tempo in project.tempos) {
+                double x = Math.Round(tempo.position * TickWidth - pixelOffset) + .5;
+                // The complete value remains available even at the left scroll boundary.
+                var label = TextLayoutCache.Get(tempo.bpm.ToString("#0.##"), primary, 10, true);
+                if (x + label.Width + 10 < 0 || x > Bounds.Width) continue;
+                context.DrawEllipse(primary, null, new Point(x + 4, 8), 1.5, 1.5);
+                label.Draw(context, new Point(x + 9, 1));
+            }
+            foreach (var signature in project.timeSignatures) {
+                int tick = project.timeAxis.BarBeatToTickPos(signature.barPosition, 0);
+                double x = Math.Round(tick * TickWidth - pixelOffset) + .5;
+                var bar = TextLayoutCache.Get((signature.barPosition + 1).ToString(), ink, 11, true);
+                var label = TextLayoutCache.Get($"{signature.beatPerBar}/{signature.beatUnit}", ink, 10);
+                // Do not paint over the next bar number at distant zoom levels.
+                double barWidth = (project.timeAxis.BarBeatToTickPos(signature.barPosition + 1, 0) - tick) * TickWidth;
+                if (barWidth > bar.Width + label.Width + 22) label.Draw(context, new Point(x + bar.Width + 15, 18));
             }
         }
     }

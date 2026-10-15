@@ -134,7 +134,6 @@ namespace OpenUtau.App.Controls {
 
         public readonly UPart part;
         private readonly PartsCanvas partsCanvas;
-        private readonly Pen notePen = new Pen(Brushes.White, 3);
         // 卷帘视口指示条（上游 9caec1a6；把手尺寸常量与命中区一起定义在下方）
         private static readonly IBrush viewportFill = new SolidColorBrush(Color.FromArgb(28, 255, 255, 255));
         private static readonly IPen viewportPen = new Pen(Brushes.White, 2);
@@ -226,35 +225,41 @@ namespace OpenUtau.App.Controls {
 
         public override void Render(DrawingContext context) {
             RenderCount++;
-            var backgroundBrush = Selected ? ThemeManager.AccentBrush2 : ThemeManager.AccentBrush1;
-            // Background
-            context.DrawRectangle(backgroundBrush, null, new Rect(1, 0, Width - 1, Height - 1), 4, 4);
+            if (Width <= 2 || Height <= 4) return;
+            var tracks = Core.DocManager.Inst.Project.tracks;
+            var track = part.trackNo >= 0 && part.trackNo < tracks.Count ? tracks[part.trackNo] : null;
+            var colors = ArrangementVisuals.For(track, Selected);
+            var clip = new Rect(1, 2, Width - 2, Height - 4);
+            double titleHeight = Height >= 60 ? 22 : 16;
+            double contentTop = clip.Top + titleHeight + 4;
+            double contentHeight = Math.Max(1, clip.Bottom - contentTop - 5);
+            var outline = new Pen(colors.Edge, Selected ? 1.5 : 1);
+            using var clipState = context.PushClip(new RoundedRect(clip, 4));
+            context.DrawRectangle(colors.Body, null, clip);
+            context.DrawRectangle(colors.Header, null, new Rect(clip.X, clip.Y, clip.Width, titleHeight));
+            context.DrawRectangle(colors.Accent, null, new Rect(clip.X, clip.Y, Math.Min(3, clip.Width), clip.Height));
 
-            // Text
-            var textLayout = TextLayoutCache.Get(Text, Application.Current?.Resources["SystemControlForegroundBaseHighBrush"] as IBrush ?? Brushes.White, 12);
-            using (var state = context.PushTransform(Matrix.CreateTranslation(3, 2))) {
-                context.DrawRectangle(backgroundBrush, null, new Rect(new Point(0, 0), new Size(textLayout.Width, textLayout.Height)));
-                textLayout.Draw(context, new Point());
-            }
-
-            if (part == null) {
-                return;
+            // Title has its own band; notes and waves can never obscure it.
+            double visibleLeft = Math.Max(7, -Canvas.GetLeft(this) + 7);
+            if (clip.Right > visibleLeft + 8) {
+                using (context.PushClip(new Rect(visibleLeft, clip.Top, Math.Max(0, clip.Right - visibleLeft - 5), titleHeight))) {
+                    DrawKindIcon(context, colors.Ink, visibleLeft, clip.Top + titleHeight / 2);
+                    var label = TextLayoutCache.Get(Text, colors.Ink, Height >= 60 ? 11 : 10, Selected);
+                    label.Draw(context, new Point(visibleLeft + 16, clip.Top + (titleHeight - label.Height) / 2));
+                }
             }
             if (part is UVoicePart voicePart) {
-                // Notes
                 if (voicePart.notes.Count > 0) {
                     int maxTone = voicePart.notes.Max(note => note.tone);
                     int minTone = voicePart.notes.Min(note => note.tone);
-                    if (maxTone - minTone < 52) {
-                        int additional = (52 - (maxTone - minTone)) / 2;
-                        minTone -= additional;
-                        maxTone += additional;
-                    }
-                    using var pushedState = context.PushTransform(Matrix.CreateScale(1, trackHeight / (maxTone - minTone)));
-                    foreach (var note in voicePart.notes) {
-                        var start = new Point((int)(note.position * tickWidth), maxTone - note.tone);
-                        var end = new Point((int)(note.End * tickWidth), maxTone - note.tone);
-                        context.DrawLine(notePen, start, end);
+                    int range = Math.Max(24, maxTone - minTone + 6);
+                    double centerTone = (maxTone + minTone) / 2.0;
+                    var notePen = new Pen(colors.Detail, Math.Clamp(contentHeight / 14, 2, 3), lineCap: PenLineCap.Round);
+                    using (context.PushClip(new Rect(clip.X + 3, contentTop, Math.Max(0, clip.Width - 6), contentHeight))) {
+                        foreach (var note in voicePart.notes) {
+                            double y = contentTop + contentHeight * (.5 + (centerTone - note.tone) / range);
+                            context.DrawLine(notePen, new Point(note.position * tickWidth, y), new Point(note.End * tickWidth, y));
+                        }
                     }
                 }
                 // Highlight：卷帘视口指示条 + 中间的可拖拽把手（上游 9caec1a6）
@@ -273,20 +278,28 @@ namespace OpenUtau.App.Controls {
                     }
                 }
             } else if (part is UWavePart wavePart) {
+                // A quiet zero line keeps silent sections legible without changing the waveform samples.
+                using (context.PushOpacity(.18)) {
+                    context.DrawLine(new Pen(colors.Detail, 1), new Point(clip.Left, contentTop + contentHeight / 2),
+                        new Point(clip.Right, contentTop + contentHeight / 2));
+                }
                 // Waveform
                 try {
-                    DrawWaveform(wavePart, GetBitmap(ViewWidth));
+                    DrawWaveform(wavePart, GetBitmap(ViewWidth), colors.Detail.Color);
                     if (bitmap != null) {
-                        var srcRect = Bounds.WithY(0);
-                        var dstRect = Bounds.WithX(1).WithY(0);
-                        context.DrawImage(bitmap, srcRect, dstRect);
+                        // Peaks are rasterized in viewport coordinates; translate only the image.
+                        var srcRect = new Rect(0, 0, bitmap.PixelSize.Width, TrackHeight);
+                        var dstRect = new Rect(-Canvas.GetLeft(this), contentTop, bitmap.PixelSize.Width, contentHeight);
+                        using (context.PushClip(new Rect(clip.X, contentTop, clip.Width, contentHeight))) {
+                            context.DrawImage(bitmap, srcRect, dstRect);
+                        }
                     }
                 } catch (Exception e) {
                     Log.Error(e, "failed to draw bitmap");
                 }
                 // Fade
-                var brush = Brushes.White;
-                var pen = Selected ? ThemeManager.AccentPen2 : ThemeManager.AccentPen1;
+                var brush = colors.Ink;
+                var pen = outline;
                 using (var state = context.PushTransform(Matrix.CreateTranslation(FadeIn, 0))) {
                     context.DrawGeometry(brush, pen, pointGeometry);
                 }
@@ -299,6 +312,23 @@ namespace OpenUtau.App.Controls {
                 if (wavePart.fadeout > 0) {
                     context.DrawLine(fadePen, new Point(Width - 1, Height - 2), new Point(FadeOut, 2));
                 }
+            }
+            context.DrawRectangle(null, outline, clip, 4, 4);
+        }
+
+        void DrawKindIcon(DrawingContext context, IBrush brush, double x, double y) {
+            var pen = new Pen(brush, 1.2, lineCap: PenLineCap.Round);
+            if (part is UWavePart) {
+                for (int i = 0; i < 5; i++) {
+                    double h = i == 2 ? 4 : i % 2 == 0 ? 1.5 : 3;
+                    context.DrawLine(pen, new Point(x + i * 2, y - h), new Point(x + i * 2, y + h));
+                }
+            } else {
+                context.DrawEllipse(brush, null, new Point(x + 2, y + 3), 2, 1.5);
+                context.DrawLine(pen, new Point(x + 4, y + 3), new Point(x + 4, y - 4));
+                context.DrawLine(pen, new Point(x + 4, y - 4), new Point(x + 9, y - 5));
+                context.DrawLine(pen, new Point(x + 9, y - 5), new Point(x + 9, y + 1));
+                context.DrawEllipse(brush, null, new Point(x + 7, y + 1), 2, 1.5);
             }
         }
 
@@ -404,7 +434,7 @@ namespace OpenUtau.App.Controls {
             return bitmap;
         }
 
-        private void DrawWaveform(UWavePart wavePart, WriteableBitmap bitmap) {
+        private void DrawWaveform(UWavePart wavePart, WriteableBitmap bitmap, Color color) {
             if (wavePart.Peaks == null ||
                 !wavePart.Peaks.IsCompletedSuccessfully ||
                 wavePart.Peaks.Result == null) {
@@ -453,7 +483,7 @@ namespace OpenUtau.App.Controls {
                             double yOffset = i == 1 ? monoChnlAmp : 0;
                             DrawPeak(bitmapData, frameBuffer.Size.Width, x,
                                 (int)(ySpan * (1 + -min) + yOffset) + 2,
-                                (int)(ySpan * (1 + -max) + yOffset) + 2);
+                                (int)(ySpan * (1 + -max) + yOffset) + 2, color);
                         }
                     }
                     x++;
@@ -465,15 +495,15 @@ namespace OpenUtau.App.Controls {
             }
         }
 
-        private void DrawPeak(int[] data, int width, int x, int y1, int y2) {
-            const int white = unchecked((int)0xFFFFFFFF);
+        private void DrawPeak(int[] data, int width, int x, int y1, int y2, Color color) {
+            int rgba = unchecked((int)(0xFF000000u | (uint)(color.B << 16) | (uint)(color.G << 8) | color.R));
             if (y1 > y2) {
                 int temp = y2;
                 y2 = y1;
                 y1 = temp;
             }
             for (var y = y1; y <= y2; ++y) {
-                data[x + width * y] = white;
+                data[x + width * y] = rgba;
             }
         }
 

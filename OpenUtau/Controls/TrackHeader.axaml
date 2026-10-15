@@ -46,7 +46,7 @@
     </ContextMenu>
   </UserControl.Resources>
   <Grid Margin="2,2,2,2">
-    <Border Name="MainCard" Margin="0" BorderThickness="1" BorderBrush="{Binding HeaderBorderBrush}" CornerRadius="4" PointerPressed="HeaderPointerPressed" Background="{DynamicResource md3.surface-container}">
+    <Border Name="MainCard" Margin="0" BorderThickness="1" BorderBrush="{Binding HeaderBorderBrush}" CornerRadius="6" PointerPressed="HeaderPointerPressed" Background="{DynamicResource md3.surface-container}">
       <Grid>
         <Grid Name="HeaderContent" ColumnDefinitions="*" RowDefinitions="*" Margin="8,4,8,4">
           <Grid Name="ContentRows" Grid.Column="0" RowDefinitions="24,18,24,22">
@@ -109,7 +109,7 @@
                 </Style>
               </Grid.Styles>
               <Slider Grid.Column="0" Name="VolumeSlider" HorizontalAlignment="Stretch" Classes="trackHeaderFader" Theme="{StaticResource TrackHeaderFaderTheme}" Foreground="{Binding TrackColor.AccentColor}" Minimum="-24" Maximum="12" Value="{Binding Volume}" PointerPressed="VolumeFaderPointerPressed" ValueChanged="VolumeOrPanSliderValueChanged" ContextRequested="VolumeFaderContextRequested" IsEnabled="{Binding !Muted}"/>
-              <TextBlock Grid.Column="1" HorizontalAlignment="Stretch" Background="Transparent" Margin="0" TextAlignment="Center" FontSize="10" Foreground="{DynamicResource md3.on-surface-variant}" FontFamily="{DynamicResource PlusFontFamilyMono}" PointerPressed="VolumePointerPressed" Name="VolumeReadout">
+              <TextBlock Grid.Column="1" HorizontalAlignment="Stretch" Background="Transparent" Margin="0" TextAlignment="Center" FontSize="11" Foreground="{DynamicResource md3.on-surface-variant}" FontFamily="{DynamicResource PlusFontFamilyMono}" PointerPressed="VolumePointerPressed" Name="VolumeReadout">
                 <TextBlock.Text>
                   <MultiBinding StringFormat="{}{0:0.0} dB">
                     <Binding Path="Volume"/>
@@ -118,7 +118,7 @@
               </TextBlock>
               <TextBox Grid.Column="1" Name="VolumeTextBox" MinWidth="0" HorizontalAlignment="Stretch" BorderThickness="0" IsVisible="False" IsEnabled="False" TextAlignment="Right" FontSize="{DynamicResource Md3DawTypeReadout}" FontFamily="{DynamicResource PlusFontFamilyMono}" KeyDown="VolumeOrPanTextBoxKeyDown" LostFocus="VolumeOrPanTextBoxLostFocus" Padding="0"/>
               <Slider Grid.Column="3" Name="PanSlider" HorizontalAlignment="Stretch" Classes="trackHeaderFader" Theme="{StaticResource TrackHeaderFaderTheme}" Foreground="{Binding TrackColor.AccentColor}" Minimum="-100" Maximum="100" Value="{Binding Pan}" PointerPressed="PanFaderPointerPressed" ValueChanged="VolumeOrPanSliderValueChanged" ContextRequested="PanFaderContextRequested" IsEnabled="{Binding !Muted}"/>
-              <TextBlock Grid.Column="4" HorizontalAlignment="Stretch" Background="Transparent" Margin="0" TextAlignment="Center" FontSize="10" Foreground="{DynamicResource md3.on-surface-variant}" FontFamily="{DynamicResource PlusFontFamilyMono}" PointerPressed="PanPointerPressed" Name="PanReadout">
+              <TextBlock Grid.Column="4" HorizontalAlignment="Stretch" Background="Transparent" Margin="0" TextAlignment="Center" FontSize="11" Foreground="{DynamicResource md3.on-surface-variant}" FontFamily="{DynamicResource PlusFontFamilyMono}" PointerPressed="PanPointerPressed" Name="PanReadout">
                 <TextBlock.Text>
                   <MultiBinding StringFormat="{}{0:00R;00L;C}">
                     <Binding Path="Pan"/>

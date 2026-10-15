@@ -9,6 +9,9 @@ using ReactiveUI;
 
 namespace OpenUtau.App.Controls {
     class TrackBackground : TemplatedControl {
+        public static readonly StyledProperty<bool> IsArrangementProperty =
+            AvaloniaProperty.Register<TrackBackground, bool>(nameof(IsArrangement));
+        public bool IsArrangement { get => GetValue(IsArrangementProperty); set => SetValue(IsArrangementProperty, value); }
         public static readonly DirectProperty<TrackBackground, double> TrackHeightProperty =
             AvaloniaProperty.RegisterDirect<TrackBackground, double>(
                 nameof(TrackHeight),
@@ -74,7 +77,8 @@ namespace OpenUtau.App.Controls {
                 change.Property == ForegroundProperty ||
                 change.Property == KeyProperty ||
                 change.Property == IsKeyboardProperty ||
-                change.Property == IsPianoRollProperty) {
+                change.Property == IsPianoRollProperty ||
+                change.Property == IsArrangementProperty) {
                 InvalidateVisual();
             }
         }
@@ -91,6 +95,10 @@ namespace OpenUtau.App.Controls {
                 RenderKeyboard(context);
                 return;
             }
+            if (IsArrangement) {
+                RenderArrangement(context);
+                return;
+            }
             int track = (int)TrackOffset;
             double top = TrackHeight * (track - TrackOffset);
             while (top < Bounds.Height) {
@@ -99,6 +107,24 @@ namespace OpenUtau.App.Controls {
                     new Rect(0, (int)top, Bounds.Width, TrackHeight));
                 track++;
                 top += TrackHeight;
+            }
+        }
+
+        void RenderArrangement(DrawingContext context) {
+            var surface = ArrangementVisuals.Brush("md3.surface", ThemeManager.BackgroundBrush);
+            var alternate = ArrangementVisuals.Brush("md3.surface-container-low", ThemeManager.BackgroundBrush);
+            var edge = new Pen(ArrangementVisuals.Brush("md3.outline-variant", ThemeManager.NeutralAccentBrush), .75);
+            int track = (int)TrackOffset;
+            double top = TrackHeight * (track - TrackOffset);
+            using (context.PushClip(new Rect(Bounds.Size))) {
+                while (top < Bounds.Height) {
+                    context.DrawRectangle(track % 2 == 0 ? surface : alternate, null, new Rect(0, top, Bounds.Width, TrackHeight));
+                    using (context.PushOpacity(.55)) {
+                        context.DrawLine(edge, new Point(0, Math.Round(top) + .5), new Point(Bounds.Width, Math.Round(top) + .5));
+                    }
+                    track++;
+                    top += TrackHeight;
+                }
             }
         }
 

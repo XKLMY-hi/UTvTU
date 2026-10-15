@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using OpenUtau.App.ViewModels;
+using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
 using ReactiveUI;
 
@@ -27,7 +28,24 @@ namespace OpenUtau.App.Controls {
         }
     }
 
-    class PartsCanvas : Canvas {
+    class PartsCanvas : Canvas, ICmdSubscriber {
+        protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
+            base.OnAttachedToVisualTree(e);
+            DocManager.Inst.AddSubscriber(this);
+        }
+
+        protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e) {
+            DocManager.Inst.RemoveSubscriber(this);
+            base.OnDetachedFromVisualTree(e);
+        }
+
+        public void OnNext(UCommand cmd, bool isUndo) {
+            if (cmd is TrackMixCommand mix && mix.Property is TrackMixProperty.Mute or TrackMixProperty.Solo) {
+                // Solo can change the audible state of other tracks as well.
+                foreach (var control in partControls.Values) control.InvalidateVisual();
+            }
+        }
+
         public static readonly DirectProperty<PartsCanvas, double> TickWidthProperty =
             AvaloniaProperty.RegisterDirect<PartsCanvas, double>(
                 nameof(TickWidth),
@@ -132,6 +150,7 @@ namespace OpenUtau.App.Controls {
                 .Subscribe(_ => {
                     foreach (var (part, control) in partControls) {
                         control.SetPosition();
+                        control.InvalidateVisual();
                     }
                 });
             MessageBus.Current.Listen<PartsSelectionEvent>()
@@ -162,7 +181,9 @@ namespace OpenUtau.App.Controls {
                     }
                 });
             MessageBus.Current.Listen<ThemeChangedEvent>()
-                .Subscribe(_ => InvalidateVisual());
+                .Subscribe(_ => {
+                    foreach (var control in partControls.Values) control.InvalidateVisual();
+                });
         }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
