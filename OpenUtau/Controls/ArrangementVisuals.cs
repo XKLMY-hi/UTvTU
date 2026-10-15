@@ -4,33 +4,61 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using OpenUtau.Core.Util;
+using OpenUtau.Core.Theming;
+using OpenUtau.Theming;
 using OpenUtau.Core.Ustx;
 
 namespace OpenUtau.App.Controls {
     // Presentation only. Stable brushes also keep TextLayoutCache keys bounded while scrolling.
     internal sealed class ArrangementVisuals {
-        static readonly Dictionary<(Color, Color, Color, bool, bool), ArrangementVisuals> clips = new();
-        internal readonly SolidColorBrush Body, Header, Edge, Ink, Detail, Accent;
-        ArrangementVisuals(Color accent, Color surface, Color ink, bool selected, bool muted) {
-            if (muted) accent = Mix(surface, ink, .28);
-            Body = new(Mix(surface, accent, selected ? .24 : .12));
-            Header = new(Mix(surface, accent, selected ? .42 : .26));
-            Edge = new(Mix(surface, accent, selected ? .95 : .52));
-            Ink = new(muted ? Mix(surface, ink, .55) : ink);
-            Detail = new(Mix(accent, ink, muted ? .20 : ThemeManager.IsDarkMode ? .12 : .30));
+        // Palette generation happens once per seed/theme/contrast, never per rendered frame.
+        static readonly Dictionary<(Color, bool, double), Md3SchemeColors> palettes = new();
+        static readonly Dictionary<(Color, Color, Color, Color, bool, bool), ArrangementVisuals> clips = new();
+        internal readonly SolidColorBrush Body, Edge, Ink, Detail, Accent;
+
+        ArrangementVisuals(Color accent, Color container, Color ink, Color detail, Color edge) {
+            Body = new(container);
+            Ink = new(ink);
+            Detail = new(detail);
+            Edge = new(edge);
             Accent = new(accent);
         }
+
         internal static ArrangementVisuals For(UTrack? track, bool selected) {
-            var surface = ColorOf("md3.surface-container", ThemeManager.BackgroundBrush);
-            var ink = ColorOf("md3.on-surface", ThemeManager.ForegroundBrush);
+            var pool = ColorPool.Current;
+            bool dark = ThemeManager.IsDarkMode;
+            bool muted = track?.Muted == true;
             var accent = Preferences.Default.UseTrackColor && track != null
                 ? ThemeManager.GetTrackColor(track.TrackColor).AccentColor.Color
-                : (ThemeManager.AccentBrush1 as ISolidColorBrush)?.Color ?? ink;
-            var key = (accent, surface, ink, selected, track?.Muted == true);
-            if (!clips.TryGetValue(key, out var result)) {
-                // Color edits / theme changes should not retain an unlimited number of brushes.
+                : pool.Color(Md3Role.Primary);
+            Color Role(Md3Role role) {
+                if (!Preferences.Default.UseTrackColor || track == null) return pool.Color(role);
+                var key = (accent, dark, pool.ContrastLevel);
+                if (!palettes.TryGetValue(key, out var palette)) {
+                    if (palettes.Count > 128) palettes.Clear();
+                    uint seed = 0xFF000000u | (uint)(accent.R << 16) | (uint)(accent.G << 8) | accent.B;
+                    palettes[key] = palette = Md3SchemeColors.Create(seed, Md3SchemeVariant.TonalSpot, dark, pool.ContrastLevel);
+                }
+                return Md3ColorPool.ToColor(palette.Get(role));
+            }
+            // Fixed tonal roles keep musical clips soft and filled on a dark editing surface.
+            // Light mode uses the corresponding container pair. Selection swaps the tone, not the hue.
+            var container = Role(dark
+                ? selected ? Md3Role.PrimaryFixed : Md3Role.PrimaryFixedDim
+                : selected ? Md3Role.PrimaryFixedDim : Md3Role.PrimaryContainer);
+            var ink = Role(dark || selected ? Md3Role.OnPrimaryFixed : Md3Role.OnPrimaryContainer);
+            var detail = Role(Md3Role.OnPrimaryFixedVariant);
+            var edge = Role(Md3Role.OnPrimaryFixedVariant);
+            if (muted) {
+                container = pool.Color(selected ? Md3Role.SurfaceContainerHighest : Md3Role.SurfaceContainerHigh);
+                ink = pool.Color(Md3Role.OnSurfaceVariant);
+                detail = Mix(container, ink, .55);
+                edge = ink;
+            }
+            var cacheKey = (accent, container, ink, detail, selected, muted);
+            if (!clips.TryGetValue(cacheKey, out var result)) {
                 if (clips.Count > 256) clips.Clear();
-                clips[key] = result = new(accent, surface, ink, selected, track?.Muted == true);
+                clips[cacheKey] = result = new(accent, container, ink, detail, edge);
             }
             return result;
         }

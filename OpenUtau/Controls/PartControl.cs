@@ -135,14 +135,11 @@ namespace OpenUtau.App.Controls {
         public readonly UPart part;
         private readonly PartsCanvas partsCanvas;
         // 卷帘视口指示条（上游 9caec1a6；把手尺寸常量与命中区一起定义在下方）
-        private static readonly IBrush viewportFill = new SolidColorBrush(Color.FromArgb(28, 255, 255, 255));
-        private static readonly IPen viewportPen = new Pen(Brushes.White, 2);
         private const double GripDot = 2;
         private const double GripGap = 3;
         private bool draggingViewport;
         private double viewportDragStartX;
         private double viewportDragStartOffset;
-        private readonly Pen fadePen = new Pen(Brushes.White);
         private List<IDisposable> unbinds = new List<IDisposable>();
         private WriteableBitmap? bitmap;
         private int[] bitmapData;
@@ -233,18 +230,17 @@ namespace OpenUtau.App.Controls {
             double titleHeight = Height >= 60 ? 22 : 16;
             double contentTop = clip.Top + titleHeight + 4;
             double contentHeight = Math.Max(1, clip.Bottom - contentTop - 5);
-            var outline = new Pen(colors.Edge, Selected ? 1.5 : 1);
-            using var clipState = context.PushClip(new RoundedRect(clip, 4));
+            var outline = new Pen(colors.Edge, 2);
+            double radius = Math.Min(8, Math.Min(clip.Width, clip.Height) / 2);
+            using var clipState = context.PushClip(new RoundedRect(clip, radius));
             context.DrawRectangle(colors.Body, null, clip);
-            context.DrawRectangle(colors.Header, null, new Rect(clip.X, clip.Y, clip.Width, titleHeight));
-            context.DrawRectangle(colors.Accent, null, new Rect(clip.X, clip.Y, Math.Min(3, clip.Width), clip.Height));
 
-            // Title has its own band; notes and waves can never obscure it.
-            double visibleLeft = Math.Max(7, -Canvas.GetLeft(this) + 7);
+            // Title and preview share one tonal surface; their reserved spaces stay separate.
+            double visibleLeft = Math.Max(9, -Canvas.GetLeft(this) + 9);
             if (clip.Right > visibleLeft + 8) {
                 using (context.PushClip(new Rect(visibleLeft, clip.Top, Math.Max(0, clip.Right - visibleLeft - 5), titleHeight))) {
                     DrawKindIcon(context, colors.Ink, visibleLeft, clip.Top + titleHeight / 2);
-                    var label = TextLayoutCache.Get(Text, colors.Ink, Height >= 60 ? 11 : 10, Selected);
+                    var label = TextLayoutCache.Get(Text, colors.Ink, Height >= 60 ? 12 : 10, Selected);
                     label.Draw(context, new Point(visibleLeft + 16, clip.Top + (titleHeight - label.Height) / 2));
                 }
             }
@@ -264,7 +260,10 @@ namespace OpenUtau.App.Controls {
                 }
                 // Highlight：卷帘视口指示条 + 中间的可拖拽把手（上游 9caec1a6）
                 if (PianoRollViewportRect() is Rect vpRect) {
-                    context.DrawRectangle(viewportFill, viewportPen, new RoundedRect(vpRect, new CornerRadius(3)));
+                    using (context.PushOpacity(.08)) {
+                        context.DrawRectangle(colors.Ink, null, new RoundedRect(vpRect, new CornerRadius(3)));
+                    }
+                    context.DrawRectangle(null, new Pen(colors.Detail, 1.5), new RoundedRect(vpRect, new CornerRadius(3)));
                     if (GripRect(vpRect) is Rect grip) {
                         // 3×3 点阵把手
                         for (int column = 0; column < 3; ++column) {
@@ -272,7 +271,7 @@ namespace OpenUtau.App.Controls {
                                 var center = new Point(
                                     grip.X + GripDot / 2 + column * (GripDot + GripGap),
                                     grip.Y + GripDot / 2 + row * (GripDot + GripGap));
-                                context.DrawEllipse(Brushes.White, null, center, GripDot / 2, GripDot / 2);
+                                context.DrawEllipse(colors.Ink, null, center, GripDot / 2, GripDot / 2);
                             }
                         }
                     }
@@ -304,16 +303,16 @@ namespace OpenUtau.App.Controls {
                     context.DrawGeometry(brush, pen, pointGeometry);
                 }
                 if (wavePart.fadein > 0) {
-                    context.DrawLine(fadePen, new Point(2, Height - 2), new Point(FadeIn + 1, 2));
+                    context.DrawLine(new Pen(colors.Detail), new Point(2, Height - 2), new Point(FadeIn + 1, 2));
                 }
                 using (var state = context.PushTransform(Matrix.CreateTranslation(FadeOut - 6, 0))) {
                     context.DrawGeometry(brush, pen, pointGeometry);
                 }
                 if (wavePart.fadeout > 0) {
-                    context.DrawLine(fadePen, new Point(Width - 1, Height - 2), new Point(FadeOut, 2));
+                    context.DrawLine(new Pen(colors.Detail), new Point(Width - 1, Height - 2), new Point(FadeOut, 2));
                 }
             }
-            context.DrawRectangle(null, outline, clip, 4, 4);
+            if (Selected && clip.Width > 2 && clip.Height > 2) context.DrawRectangle(null, outline, clip.Deflate(1), Math.Max(0, radius - 1), Math.Max(0, radius - 1));
         }
 
         void DrawKindIcon(DrawingContext context, IBrush brush, double x, double y) {
