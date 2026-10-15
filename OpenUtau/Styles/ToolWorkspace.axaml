@@ -69,4 +69,5 @@
     <Setter Property="Margin" Value="0"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/>
     <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeSmall}"/>
   </Style>
+  <StyleInclude Source="/Styles/FrontendTools.axaml"/>
 </Styles>

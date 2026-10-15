@@ -1,25 +1,13 @@
-<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
-        xmlns:controls="clr-namespace:OpenUtau.App.Controls"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
-        x:Class="OpenUtau.App.Views.TimeSignatureDialog"
-        Title="{DynamicResource dialogs.timesig.caption}" Focusable="True">
-<DockPanel LastChildFill="True">
-      <Border>
-  <StackPanel VerticalAlignment="Center">
-    <Grid ColumnDefinitions="1*,1*" Margin="4,0">
-      <ComboBox Grid.Column="0" Margin="4" HorizontalAlignment="Stretch"
-                ItemsSource="{Binding BeatPerBars}"
-                SelectedItem="{Binding BeatPerBar}"/>
-      <ComboBox Grid.Column="1" Margin="4" HorizontalAlignment="Stretch"
-                ItemsSource="{Binding BeatUnits}"
-                SelectedItem="{Binding BeatUnit}"/>
-    </Grid>
-    <Button Classes="primary" Content="{DynamicResource button.ok}" Margin="8,4" HorizontalAlignment="Stretch"
-            Click="OnOkButtonClick"/>
-  </StackPanel>
-      </Border>
-    </DockPanel>
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui" xmlns:controls="clr-namespace:OpenUtau.App.Controls" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="OpenUtau.App.Views.TimeSignatureDialog" Title="{DynamicResource dialogs.timesig.caption}" Focusable="True" Classes="refinedTool">
+  <DockPanel LastChildFill="True" Margin="16">
+    <Border>
+      <StackPanel VerticalAlignment="Center">
+        <Grid ColumnDefinitions="1*,1*" Margin="4,0">
+          <ComboBox Grid.Column="0" Margin="4" HorizontalAlignment="Stretch" ItemsSource="{Binding BeatPerBars}" SelectedItem="{Binding BeatPerBar}"/>
+          <ComboBox Grid.Column="1" Margin="4" HorizontalAlignment="Stretch" ItemsSource="{Binding BeatUnits}" SelectedItem="{Binding BeatUnit}"/>
+        </Grid>
+        <Button Classes="primary toolAction" Content="{DynamicResource button.ok}" Margin="8,4" HorizontalAlignment="Stretch" Click="OnOkButtonClick"/>
+      </StackPanel>
+    </Border>
+  </DockPanel>
 </controls:WorkspaceToolView>

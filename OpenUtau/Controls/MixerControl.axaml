@@ -78,7 +78,11 @@
       </Border>
 
       <!-- 主输出条（691：宽 160，固定在最右的滚动区之外） -->
-      <c:MasterStrip Grid.Column="1" x:Name="MasterStripControl" Margin="0,16,16,16"/>
+      <ScrollViewer Name="MasterScroll" Grid.Column="1" Margin="0,16,16,16"
+                    HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <c:MasterStrip Grid.Column="1" x:Name="MasterStripControl" Margin="0"
+                       Height="{Binding #MasterScroll.Viewport.Height}"/>
+      </ScrollViewer>
 
       <!-- W19 面板系统的分隔条（W16 配方）：
            · PanelColumn=3 ⇒ 计算固定占用时排除链面板自己那列（否则窄窗下一拖就吸附到 Min）；

@@ -1,0 +1,42 @@
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Style Selector="Border.shellTools">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    <Setter Property="CornerRadius" Value="12"/>
+    <Setter Property="Padding" Value="3"/>
+  </Style>
+  <Style Selector="Button.topBtn">
+    <Setter Property="Width" Value="32"/><Setter Property="Height" Value="32"/><Setter Property="MinHeight" Value="32"/>
+    <Setter Property="CornerRadius" Value="9"/>
+  </Style>
+  <Style Selector="Button.topBtn.shellPrimary">
+    <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+  </Style>
+  <Style Selector="Button.libTab">
+    <Setter Property="Height" Value="32"/><Setter Property="MinHeight" Value="32"/>
+    <Setter Property="CornerRadius" Value="10"/><Setter Property="FontSize" Value="11"/>
+  </Style>
+  <Style Selector="Button.libTab TextBlock"><Setter Property="FontSize" Value="11"/></Style>
+  <Style Selector="Border.sideItem">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-low}"/>
+    <Setter Property="CornerRadius" Value="10"/><Setter Property="Margin" Value="0,3"/>
+    <Setter Property="Padding" Value="10,4"/>
+  </Style>
+  <Style Selector="Border.sideItem.singer"><Setter Property="Height" Value="64"/></Style>
+  <Style Selector="Border.sideItem.small"><Setter Property="Height" Value="44"/></Style>
+  <Style Selector="Border.sideItem:pointerover"><Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/></Style>
+  <Style Selector="TextBlock.sideHeading"><Setter Property="FontSize" Value="12"/><Setter Property="Margin" Value="2,6,0,8"/></Style>
+  <Style Selector="Border.libraryEmpty">
+    <Setter Property="VerticalAlignment" Value="Top"/>
+    <Setter Property="Padding" Value="14"/><Setter Property="CornerRadius" Value="14"/>
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-low}"/>
+  </Style>
+  <Style Selector="Button.libraryAction">
+    <Setter Property="Theme" Value="{StaticResource DawTextButtonTheme}"/>
+    <Setter Property="Height" Value="32"/><Setter Property="MinHeight" Value="32"/>
+    <Setter Property="Margin" Value="0"/><Setter Property="Padding" Value="10,0"/><Setter Property="CornerRadius" Value="10"/>
+    <Setter Property="FontSize" Value="11"/><Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+  </Style>
+  <Style Selector="Button.libraryAction:focus-visible"><Setter Property="BorderThickness" Value="1"/><Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/></Style>
+</Styles>

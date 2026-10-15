@@ -1010,6 +1010,11 @@ General
   <!-- ============================================================
        Plus-specific keys — Mixer
        ============================================================ -->
+  <system:String x:Key="frontend.library.refreshsingers">Refresh singers</system:String>
+  <system:String x:Key="frontend.library.refreshsamples">Refresh audio library</system:String>
+  <system:String x:Key="frontend.library.resources">Open resource center</system:String>
+  <system:String x:Key="frontend.library.hint">Manage your resources, then drag an item into the project.</system:String>
+  <system:String x:Key="frontend.lyrics.hint">Edit lyrics in note order. Apply keeps your changes; Cancel restores the original lyrics.</system:String>
   <system:String x:Key="mixer.master.title">Master output</system:String>
   <system:String x:Key="mixer.effects.title">Effects chain</system:String>
   <system:String x:Key="mixer.tracks">Tracks: {0}</system:String>

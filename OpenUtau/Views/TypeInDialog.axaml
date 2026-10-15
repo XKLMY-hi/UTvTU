@@ -1,18 +1,11 @@
-<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
-        xmlns:controls="clr-namespace:OpenUtau.App.Controls"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
-        x:Class="OpenUtau.App.Views.TypeInDialog"
-        Title="UTvTU" Focusable="True">
-<DockPanel LastChildFill="True">
-      <Border>
-  <StackPanel VerticalAlignment="Center">
-    <TextBlock Margin="20" Name="Prompt" IsVisible="False" TextWrapping="Wrap" MaxWidth="560"/>
-    <TextBox Name="TextBox" Margin="4"/>
-    <Button Classes="primary" Name="OkButton" Content="{DynamicResource button.ok}" Margin="4" HorizontalAlignment="Stretch"/>
-  </StackPanel>
-      </Border>
-    </DockPanel>
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui" xmlns:controls="clr-namespace:OpenUtau.App.Controls" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="OpenUtau.App.Views.TypeInDialog" Title="UTvTU" Focusable="True" Classes="refinedTool">
+  <DockPanel LastChildFill="True" Margin="16">
+    <Border>
+      <StackPanel VerticalAlignment="Center">
+        <TextBlock Margin="20" Name="Prompt" IsVisible="False" TextWrapping="Wrap" MaxWidth="560"/>
+        <TextBox Name="TextBox" Margin="4"/>
+        <Button Classes="primary toolAction" Name="OkButton" Content="{DynamicResource button.ok}" Margin="4" HorizontalAlignment="Stretch"/>
+      </StackPanel>
+    </Border>
+  </DockPanel>
 </controls:WorkspaceToolView>

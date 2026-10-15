@@ -1,76 +1,68 @@
-<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
-        xmlns:controls="clr-namespace:OpenUtau.App.Controls"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
-        x:Class="OpenUtau.App.Views.LyricsDialog"
-        Title="{DynamicResource lyrics.caption}"
-        Opened="OnOpened" Focusable="True">
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui" xmlns:controls="clr-namespace:OpenUtau.App.Controls" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="OpenUtau.App.Views.LyricsDialog" Title="{DynamicResource lyrics.caption}" Opened="OnOpened" Focusable="True" Classes="refinedTool">
   <controls:WorkspaceToolView.Styles>
     <StyleInclude Source="/Controls/PianoRollStyles.axaml"/>
   </controls:WorkspaceToolView.Styles>
-<DockPanel LastChildFill="True">
-      <Border>
-  <Grid Margin="10,10,10,4" RowDefinitions="*,6,Auto,4,Auto">
-    <TextBox Name="DIALOG_Box" Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-             AcceptsReturn="True" AcceptsTab="False" TextWrapping="Wrap" Height="NaN"
-             Text="{Binding Text}" Focusable="True"/>
-    <TextBlock Grid.Row="2" Margin="0,2" HorizontalAlignment="Right">
-      <TextBlock.Text>
-        <MultiBinding StringFormat="{}{0}/{1}">
-          <Binding Path="CurrentCount"/>
-          <Binding Path="TotalCount"/>
-        </MultiBinding>
-      </TextBlock.Text>
-    </TextBlock>
-    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing1}">
-      <TextBlock Text="{StaticResource lyrics.separators}" Margin="0,2"/>
-      <Border CornerRadius="5"
-              Background="{DynamicResource MenuFlyoutItemBackgroundPointerOver}">
-        <TextBlock Text="Space" FontFamily="{DynamicResource PlusFontFamilyMono}" Margin="0" Padding="4,2"/>
-      </Border>
-      <Border CornerRadius="5"
-              Background="{DynamicResource MenuFlyoutItemBackgroundPointerOver}">
-        <TextBlock Text="," FontFamily="{DynamicResource PlusFontFamilyMono}" Margin="0" Padding="4,2"/>
-      </Border>
-      <Border CornerRadius="5"
-              Background="{DynamicResource MenuFlyoutItemBackgroundPointerOver}">
-        <TextBlock Text="&quot;" FontFamily="{DynamicResource PlusFontFamilyMono}" Margin="0" Padding="4,2"/>
-      </Border>
-      <Border CornerRadius="5"
-              Background="{DynamicResource MenuFlyoutItemBackgroundPointerOver}">
-        <TextBlock Text="Enter" FontFamily="{DynamicResource PlusFontFamilyMono}" Margin="0" Padding="4,2"/>
-      </Border>
-      <Border CornerRadius="5"
-              Background="{DynamicResource MenuFlyoutItemBackgroundPointerOver}">
-        <TextBlock Text="字" FontFamily="{DynamicResource PlusFontFamilyMono}" Margin="0" Padding="4,2"/>
-      </Border>
-    </StackPanel>
-    <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="10">
-      <TextBlock Text="{StaticResource lyrics.livepreview}" Margin="0,8"/>
-      <ToggleSwitch Margin="0" IsChecked="{Binding LivePreview}">
-        <ToggleSwitch.Styles>
-          <Style Selector="TextBlock">
-            <Setter Property="IsVisible" Value="False"/>
-          </Style>
-        </ToggleSwitch.Styles>
-      </ToggleSwitch>
-      <TextBlock Text="{StaticResource lyrics.applyselected}" Margin="0,8"/>
-      <ToggleSwitch Margin="0" IsChecked="{Binding ApplySelection}">
-        <ToggleSwitch.Styles>
-          <Style Selector="TextBlock">
-            <Setter Property="IsVisible" Value="False"/>
-          </Style>
-        </ToggleSwitch.Styles>
-      </ToggleSwitch>
-    </StackPanel>
-    <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
-      <Button Content="{DynamicResource button.reset}" Margin="0" Command="{Binding Reset}"/>
-      <Button Classes="text" Content="{DynamicResource button.cancel}" Margin="0" Click="OnCancel"/>
-      <Button Classes="primary" Content="{DynamicResource button.apply}" Margin="0" Click="OnFinish"/>
-    </StackPanel>
-  </Grid>
-      </Border>
-    </DockPanel>
+  <DockPanel LastChildFill="True">
+    <Border>
+      <Grid Margin="16" RowDefinitions="Auto,*,Auto" RowSpacing="12">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Grid.Row="0">
+          <TextBlock Text="{DynamicResource frontend.lyrics.hint}" Classes="toolHint" TextWrapping="Wrap" VerticalAlignment="Center"/>
+          <Border Classes="toolChip" Padding="10,6" Grid.Column="1">
+            <TextBlock Margin="0" HorizontalAlignment="Right" FontSize="12">
+              <TextBlock.Text>
+                <MultiBinding StringFormat="{}{0}/{1}">
+                  <Binding Path="CurrentCount"/>
+                  <Binding Path="TotalCount"/>
+                </MultiBinding>
+              </TextBlock.Text>
+            </TextBlock>
+          </Border>
+        </Grid>
+        <TextBox Name="DIALOG_Box" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" AcceptsReturn="True" AcceptsTab="False" TextWrapping="Wrap" Height="NaN" Text="{Binding Text}" Focusable="True" MinHeight="96" Padding="14" CornerRadius="12" Classes="lyricsEditor"/>
+        <StackPanel Spacing="10" Grid.Row="2">
+          <WrapPanel Orientation="Horizontal">
+            <TextBlock Text="{StaticResource lyrics.separators}" Margin="0,2"/>
+            <Border CornerRadius="5" Background="{DynamicResource MenuFlyoutItemBackgroundPointerOver}">
+              <TextBlock Text="Space" FontFamily="{DynamicResource PlusFontFamilyMono}" Margin="0" Padding="4,2"/>
+            </Border>
+            <Border CornerRadius="5" Background="{DynamicResource MenuFlyoutItemBackgroundPointerOver}">
+              <TextBlock Text="," FontFamily="{DynamicResource PlusFontFamilyMono}" Margin="0" Padding="4,2"/>
+            </Border>
+            <Border CornerRadius="5" Background="{DynamicResource MenuFlyoutItemBackgroundPointerOver}">
+              <TextBlock Text="&quot;" FontFamily="{DynamicResource PlusFontFamilyMono}" Margin="0" Padding="4,2"/>
+            </Border>
+            <Border CornerRadius="5" Background="{DynamicResource MenuFlyoutItemBackgroundPointerOver}">
+              <TextBlock Text="Enter" FontFamily="{DynamicResource PlusFontFamilyMono}" Margin="0" Padding="4,2"/>
+            </Border>
+            <Border CornerRadius="5" Background="{DynamicResource MenuFlyoutItemBackgroundPointerOver}">
+              <TextBlock Text="字" FontFamily="{DynamicResource PlusFontFamilyMono}" Margin="0" Padding="4,2"/>
+            </Border>
+          </WrapPanel>
+          <WrapPanel Orientation="Horizontal">
+            <TextBlock Text="{StaticResource lyrics.livepreview}" Margin="0,8"/>
+            <ToggleSwitch Margin="0" IsChecked="{Binding LivePreview}">
+              <ToggleSwitch.Styles>
+                <Style Selector="TextBlock">
+                  <Setter Property="IsVisible" Value="False"/>
+                </Style>
+              </ToggleSwitch.Styles>
+            </ToggleSwitch>
+            <TextBlock Text="{StaticResource lyrics.applyselected}" Margin="0,8"/>
+            <ToggleSwitch Margin="0" IsChecked="{Binding ApplySelection}">
+              <ToggleSwitch.Styles>
+                <Style Selector="TextBlock">
+                  <Setter Property="IsVisible" Value="False"/>
+                </Style>
+              </ToggleSwitch.Styles>
+            </ToggleSwitch>
+          </WrapPanel>
+          <WrapPanel HorizontalAlignment="Right">
+            <Button Content="{DynamicResource button.reset}" Margin="8,0,0,6" Command="{Binding Reset}" Classes="toolAction"/>
+            <Button Classes="text toolAction" Content="{DynamicResource button.cancel}" Margin="8,0,0,6" Click="OnCancel"/>
+            <Button Classes="primary toolAction" Content="{DynamicResource button.apply}" Margin="8,0,0,6" Click="OnFinish"/>
+          </WrapPanel>
+        </StackPanel>
+      </Grid>
+    </Border>
+  </DockPanel>
 </controls:WorkspaceToolView>

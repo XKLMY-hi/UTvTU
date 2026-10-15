@@ -1,11 +1,4 @@
-<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
-        xmlns:controls="clr-namespace:OpenUtau.App.Controls"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
-        x:Class="OpenUtau.App.Views.TrackSettingsDialog"
-        Title="{DynamicResource dialogs.tracksettings.caption}" Focusable="True">
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui" xmlns:controls="clr-namespace:OpenUtau.App.Controls" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="OpenUtau.App.Views.TrackSettingsDialog" Title="{DynamicResource dialogs.tracksettings.caption}" Focusable="True" Classes="refinedTool">
   <Grid Margin="16" RowDefinitions="*,Auto">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
       <StackPanel Spacing="{DynamicResource Md3Spacing4}" MaxWidth="1040" HorizontalAlignment="Stretch">
@@ -15,22 +8,21 @@
             <TextBlock FontSize="{DynamicResource Md3TypeBodyMedium}" FontWeight="SemiBold" Text="{DynamicResource prefs.rendering.resampler}"/>
             <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Resamplers}" SelectedItem="{Binding Resampler}"/>
             <WrapPanel Orientation="Horizontal">
-              <Button Classes="toolAction resourceAction" Content="{DynamicResource dialogs.tracksettings.location}" Command="{Binding OpenResamplerLocation}"/>
-              <Button Classes="toolAction resourceAction" Content="{DynamicResource dialogs.tracksettings.setasdefault}" Command="{Binding SetDefaultResampler}"/>
+              <Button Classes="toolAction resourceAction toolAction" Content="{DynamicResource dialogs.tracksettings.location}" Command="{Binding OpenResamplerLocation}"/>
+              <Button Classes="toolAction resourceAction toolAction" Content="{DynamicResource dialogs.tracksettings.setasdefault}" Command="{Binding SetDefaultResampler}"/>
             </WrapPanel>
           </StackPanel>
           <StackPanel Spacing="{DynamicResource Md3Spacing3}" IsVisible="{Binding NeedsWavtool}">
             <TextBlock FontSize="{DynamicResource Md3TypeBodyMedium}" FontWeight="SemiBold" Text="{DynamicResource prefs.rendering.wavtool}"/>
             <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Wavtools}" SelectedItem="{Binding Wavtool}"/>
             <WrapPanel Orientation="Horizontal">
-              <Button Classes="toolAction resourceAction" Content="{DynamicResource dialogs.tracksettings.location}" Command="{Binding OpenWavtoolLocation}"/>
-              <Button Classes="toolAction resourceAction" Content="{DynamicResource dialogs.tracksettings.setasdefault}" Command="{Binding SetDefaultWavtool}"/>
+              <Button Classes="toolAction resourceAction toolAction" Content="{DynamicResource dialogs.tracksettings.location}" Command="{Binding OpenWavtoolLocation}"/>
+              <Button Classes="toolAction resourceAction toolAction" Content="{DynamicResource dialogs.tracksettings.setasdefault}" Command="{Binding SetDefaultWavtool}"/>
             </WrapPanel>
           </StackPanel>
         </controls:AdaptiveColumns>
       </StackPanel>
     </ScrollViewer>
-    <Button Name="ApplyButton" Grid.Row="1" Classes="toolAction primary" MinWidth="80" Margin="0,12,0,0" HorizontalAlignment="Right"
-            Content="{DynamicResource button.ok}" Click="OnOkClicked"/>
+    <Button Name="ApplyButton" Grid.Row="1" Classes="toolAction primary toolAction" MinWidth="80" Margin="0,12,0,0" HorizontalAlignment="Right" Content="{DynamicResource button.ok}" Click="OnOkClicked"/>
   </Grid>
 </controls:WorkspaceToolView>

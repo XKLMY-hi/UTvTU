@@ -1,0 +1,33 @@
+<Styles xmlns="https://github.com/avaloniaui" xmlns:c="clr-namespace:OpenUtau.App.Controls">
+  <Style Selector=":is(c|WorkspaceToolView).refinedTool TextBox,:is(c|WorkspaceToolView).refinedTool ComboBox">
+    <Setter Property="CornerRadius" Value="10"/>
+    <Setter Property="MinHeight" Value="36"/><Setter Property="FontSize" Value="13"/>
+  </Style>
+  <Style Selector=":is(c|WorkspaceToolView).refinedTool TextBox">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-lowest}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+  </Style>
+  <Style Selector="Border.toolCard,Border.toolChip">
+    <Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/>
+    <Setter Property="CornerRadius" Value="12"/>
+    <Setter Property="BorderThickness" Value="1"/><Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
+  </Style>
+  <Style Selector="TextBlock.toolCaption">
+    <Setter Property="FontSize" Value="11"/><Setter Property="FontWeight" Value="SemiBold"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+  </Style>
+  <Style Selector=":is(c|WorkspaceToolView).refinedTool Button.toolAction">
+    <Setter Property="CornerRadius" Value="10"/><Setter Property="Height" Value="34"/><Setter Property="MinHeight" Value="34"/>
+    <Setter Property="FontSize" Value="12"/>
+  </Style>
+  <Style Selector=":is(c|WorkspaceToolView).refinedTool ListBox">
+    <Setter Property="Background" Value="Transparent"/><Setter Property="BorderThickness" Value="0"/>
+  </Style>
+  <Style Selector=":is(c|WorkspaceToolView).refinedTool ListBoxItem">
+    <Setter Property="MinHeight" Value="34"/><Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="Margin" Value="2"/><Setter Property="Padding" Value="10,6"/>
+  </Style>
+  <Style Selector=":is(c|WorkspaceToolView).refinedTool Button:disabled,:is(c|WorkspaceToolView).refinedTool ToggleButton:disabled">
+    <Setter Property="Opacity" Value="0.38"/>
+  </Style>
+</Styles>

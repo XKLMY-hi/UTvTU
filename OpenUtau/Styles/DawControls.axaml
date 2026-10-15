@@ -19,19 +19,16 @@
       <Setter Property="Template">
         <ControlTemplate>
           <Grid>
-            <Border Name="PART_Root" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"
-                    BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"/>
-            <Border Name="PART_StateLayer" Background="{TemplateBinding Foreground}" Opacity="0"
-                    CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False">
-              <Border.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="{DynamicResource Md3MotionEffectsFast}" Easing="{StaticResource Md3EffectsFastEasing}"/></Transitions></Border.Transitions>
+            <Border Name="PART_Root" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"/>
+            <Border Name="PART_StateLayer" Background="{TemplateBinding Foreground}" Opacity="0" CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False">
+              <Border.Transitions>
+                <Transitions>
+                  <DoubleTransition Property="Opacity" Duration="{DynamicResource Md3MotionEffectsFast}" Easing="{StaticResource Md3EffectsFastEasing}"/>
+                </Transitions>
+              </Border.Transitions>
             </Border>
-            <ContentPresenter Name="PART_ContentPresenter" Margin="{TemplateBinding Padding}"
-                              Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
-                              Foreground="{TemplateBinding Foreground}" RecognizesAccessKey="True" UseLayoutRounding="False"
-                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-            <Border Name="PART_FocusRing" BorderBrush="{DynamicResource md3.primary}" BorderThickness="2"
-                    CornerRadius="{TemplateBinding CornerRadius}" Opacity="0" IsHitTestVisible="False"/>
+            <ContentPresenter Name="PART_ContentPresenter" Margin="{TemplateBinding Padding}" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" RecognizesAccessKey="True" UseLayoutRounding="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+            <Border Name="PART_FocusRing" BorderBrush="{DynamicResource md3.primary}" BorderThickness="2" CornerRadius="{TemplateBinding CornerRadius}" Opacity="0" IsHitTestVisible="False"/>
           </Grid>
         </ControlTemplate>
       </Setter>
@@ -98,22 +95,18 @@
       <Setter Property="Template">
         <ControlTemplate>
           <Grid>
-            <Border Name="PART_Root" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"
-                    BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"/>
-            <Border Name="PART_StateLayer" Background="{TemplateBinding Foreground}" Opacity="0"
-                    CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False">
-              <Border.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="{DynamicResource Md3MotionEffectsFast}" Easing="{StaticResource Md3EffectsFastEasing}"/></Transitions></Border.Transitions>
+            <Border Name="PART_Root" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"/>
+            <Border Name="PART_StateLayer" Background="{TemplateBinding Foreground}" Opacity="0" CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False">
+              <Border.Transitions>
+                <Transitions>
+                  <DoubleTransition Property="Opacity" Duration="{DynamicResource Md3MotionEffectsFast}" Easing="{StaticResource Md3EffectsFastEasing}"/>
+                </Transitions>
+              </Border.Transitions>
             </Border>
             <!-- Keep fractional text origins: an odd-height line in an even-height
                  compact button otherwise rounds its center half a DIP upward. -->
-            <TextBlock Name="PART_Label" UseLayoutRounding="False" Margin="{TemplateBinding Padding}" Text="{TemplateBinding Content}"
-                       Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}"
-                       FontWeight="{TemplateBinding FontWeight}" FontFamily="{TemplateBinding FontFamily}"
-                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                       HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                       VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-            <Border Name="PART_FocusRing" BorderBrush="{DynamicResource md3.primary}" BorderThickness="2"
-                    CornerRadius="{TemplateBinding CornerRadius}" Opacity="0" IsHitTestVisible="False"/>
+            <TextBlock Name="PART_Label" UseLayoutRounding="False" Margin="{TemplateBinding Padding}" Text="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" FontFamily="{TemplateBinding FontFamily}" TextAlignment="Center" TextTrimming="CharacterEllipsis" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+            <Border Name="PART_FocusRing" BorderBrush="{DynamicResource md3.primary}" BorderThickness="2" CornerRadius="{TemplateBinding CornerRadius}" Opacity="0" IsHitTestVisible="False"/>
           </Grid>
         </ControlTemplate>
       </Setter>
@@ -152,6 +145,35 @@
       <Style Selector="^.solo:checked">
         <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
         <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
+      </Style>
+    </ControlTheme>
+    <ControlTheme x:Key="DawCompactSwitchTheme" TargetType="ToggleButton" BasedOn="{StaticResource DawButtonTheme}">
+      <Setter Property="MinHeight" Value="20"/>
+      <Setter Property="MinWidth" Value="0"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Margin" Value="0"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <StackPanel Orientation="Horizontal">
+            <Grid Width="34" Height="20" VerticalAlignment="Center">
+              <Border Name="PART_Track" CornerRadius="999" Background="{TemplateBinding Background}"/>
+              <Border Name="PART_StateLayer" CornerRadius="999" Background="{TemplateBinding Foreground}" Opacity="0" IsHitTestVisible="False"/>
+              <Border Name="PART_Thumb" Width="14" Height="14" Margin="3,0" HorizontalAlignment="Left" VerticalAlignment="Center" CornerRadius="999" Background="{TemplateBinding Foreground}" IsHitTestVisible="False"/>
+              <Border Name="PART_FocusRing" CornerRadius="999" BorderThickness="1" BorderBrush="{DynamicResource md3.primary}" Opacity="0" IsHitTestVisible="False"/>
+            </Grid>
+            <TextBlock Foreground="{DynamicResource md3.on-surface}" FontSize="12" VerticalAlignment="Center" IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNotNull}}" Name="PART_SwitchLabel" Text="{TemplateBinding Content}" Margin="8,0,0,0" FontFamily="{TemplateBinding FontFamily}"/>
+          </StackPanel>
+        </ControlTemplate>
+      </Setter>
+      <Style Selector="^:checked">
+        <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
+        <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
+      </Style>
+      <Style Selector="^:checked /template/ Border#PART_Thumb">
+        <Setter Property="HorizontalAlignment" Value="Right"/>
       </Style>
     </ControlTheme>
   </Styles.Resources>

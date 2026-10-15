@@ -13,15 +13,21 @@ namespace OpenUtau.App.Controls {
         public static readonly StyledProperty<double> SpacingProperty =
             AvaloniaProperty.Register<AdaptiveColumns, double>(nameof(Spacing), 16,
                 validate: value => double.IsFinite(value) && value >= 0);
+        public static readonly StyledProperty<int> MaximumColumnsProperty =
+            AvaloniaProperty.Register<AdaptiveColumns, int>(nameof(MaximumColumns), 2,
+                validate: value => value >= 1 && value <= 4);
 
         static AdaptiveColumns() {
-            AffectsMeasure<AdaptiveColumns>(MinimumColumnWidthProperty, SpacingProperty);
+            AffectsMeasure<AdaptiveColumns>(MinimumColumnWidthProperty, SpacingProperty, MaximumColumnsProperty);
         }
 
         public double MinimumColumnWidth { get => GetValue(MinimumColumnWidthProperty); set => SetValue(MinimumColumnWidthProperty, value); }
         public double Spacing { get => GetValue(SpacingProperty); set => SetValue(SpacingProperty, value); }
+        public int MaximumColumns { get => GetValue(MaximumColumnsProperty); set => SetValue(MaximumColumnsProperty, value); }
 
-        int Columns(double width, int count) => count > 1 && width >= MinimumColumnWidth * 2 + Spacing ? 2 : 1;
+        int Columns(double width, int count) => Math.Max(1, Math.Min(count,
+            double.IsFinite(width) ? Math.Min(MaximumColumns, Math.Max(1,
+                (int)Math.Floor((width + Spacing) / (MinimumColumnWidth + Spacing)))) : MaximumColumns));
 
         protected override Size MeasureOverride(Size availableSize) {
             var children = Children.Where(c => c.IsVisible).ToArray();

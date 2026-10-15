@@ -1,44 +1,30 @@
-<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
-        xmlns:controls="clr-namespace:OpenUtau.App.Controls"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
-        x:Class="OpenUtau.App.Views.LyricsReplaceDialog"
-        Title="{DynamicResource lyricsreplace.replace}" Focusable="True">
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui" xmlns:controls="clr-namespace:OpenUtau.App.Controls" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="OpenUtau.App.Views.LyricsReplaceDialog" Title="{DynamicResource lyricsreplace.replace}" Focusable="True" Classes="refinedTool">
   <controls:WorkspaceToolView.Styles>
     <StyleInclude Source="/Controls/PianoRollStyles.axaml"/>
   </controls:WorkspaceToolView.Styles>
-<DockPanel LastChildFill="True">
-      <Border>
-  <Grid Margin="10" RowDefinitions="auto,10,Auto,10,Auto,10,*,10,Auto">
-    <StackPanel Orientation="Horizontal" Grid.Row="0">
-      <TextBlock Text="{DynamicResource lyricsreplace.before}" />
-      <TextBox Text="{Binding OldValue}" MinWidth="200" Margin="10,0"
-               PlaceholderText="{DynamicResource lyricsreplace.regex}"/>
-    </StackPanel>
-
-    <StackPanel Orientation="Horizontal" Grid.Row="2">
-      <TextBlock Text="{DynamicResource lyricsreplace.after}" />
-      <TextBox Text="{Binding NewValue}" MinWidth="200" Margin="10,0" />
-    </StackPanel>
-
-    <StackPanel Grid.Row="4">
-      <TextBlock Text="{DynamicResource lyricsreplace.preview}" />
-      <TextBlock Text="{Binding Preview}" Margin="5" MinHeight="15" />
-    </StackPanel>
-
-    <StackPanel Grid.Row="6">
-      <TextBlock Text="{DynamicResource lyricsreplace.presets}" />
-      <ListBox ItemsSource="{Binding PresetList}"
-               SelectedItem="{Binding SelectedPreset}"
-               SelectionMode="Single" Margin="5" />
-    </StackPanel>
-
-    <StackPanel Grid.Row="8" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
-      <Button Classes="primary" Content="{DynamicResource button.apply}" Margin="0" MinWidth="50" Click="OnFinish"/>
-    </StackPanel>
-  </Grid>
-      </Border>
-    </DockPanel>
+  <DockPanel LastChildFill="True" Margin="16">
+    <Border>
+      <Grid Margin="10" RowDefinitions="auto,10,Auto,10,Auto,10,*,10,Auto">
+        <StackPanel Orientation="Horizontal" Grid.Row="0">
+          <TextBlock Text="{DynamicResource lyricsreplace.before}"/>
+          <TextBox Text="{Binding OldValue}" MinWidth="200" Margin="10,0" PlaceholderText="{DynamicResource lyricsreplace.regex}"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="2">
+          <TextBlock Text="{DynamicResource lyricsreplace.after}"/>
+          <TextBox Text="{Binding NewValue}" MinWidth="200" Margin="10,0"/>
+        </StackPanel>
+        <StackPanel Grid.Row="4">
+          <TextBlock Text="{DynamicResource lyricsreplace.preview}"/>
+          <TextBlock Text="{Binding Preview}" Margin="5" MinHeight="15"/>
+        </StackPanel>
+        <StackPanel Grid.Row="6">
+          <TextBlock Text="{DynamicResource lyricsreplace.presets}"/>
+          <ListBox ItemsSource="{Binding PresetList}" SelectedItem="{Binding SelectedPreset}" SelectionMode="Single" Margin="5"/>
+        </StackPanel>
+        <StackPanel Grid.Row="8" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+          <Button Classes="primary toolAction" Content="{DynamicResource button.apply}" Margin="0" MinWidth="50" Click="OnFinish"/>
+        </StackPanel>
+      </Grid>
+    </Border>
+  </DockPanel>
 </controls:WorkspaceToolView>

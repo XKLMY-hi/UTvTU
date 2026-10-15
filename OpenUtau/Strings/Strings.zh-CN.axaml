@@ -1138,6 +1138,11 @@ Syntax: prefix,suffix</system:String>-->
   <!-- ============================================================
        Plus 专属新增 keys — 混音台
        ============================================================ -->
+  <system:String x:Key="frontend.library.refreshsingers">刷新歌手</system:String>
+  <system:String x:Key="frontend.library.refreshsamples">刷新伴奏库</system:String>
+  <system:String x:Key="frontend.library.resources">打开资源中心</system:String>
+  <system:String x:Key="frontend.library.hint">管理资源后，即可将素材拖入工程。</system:String>
+  <system:String x:Key="frontend.lyrics.hint">按音符顺序编辑歌词；应用保留更改，取消恢复原来的歌词。</system:String>
   <system:String x:Key="mixer.master.title">主输出</system:String>
   <system:String x:Key="mixer.effects.title">效果器链</system:String>
   <system:String x:Key="mixer.tracks">轨道: {0}</system:String>

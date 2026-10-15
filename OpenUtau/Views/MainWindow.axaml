@@ -1,121 +1,105 @@
-<controls:WindowEx xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="using:OpenUtau.App.ViewModels"
-        xmlns:c="clr-namespace:OpenUtau.App.Controls"
-        xmlns:controls="clr-namespace:OpenUtau.App.Controls"
-        xmlns:views="using:OpenUtau.App.Views"
-        xmlns:motion="using:OpenUtau.Theming"
-        mc:Ignorable="d" d:DesignWidth="1440" d:DesignHeight="900"
-        x:Class="OpenUtau.App.Views.MainWindow"
-        Icon="/Assets/brand/utvtu.ico"
-        Title="{Binding Title}" MinWidth="800" MinHeight="200" Width="{Binding Width}" Height="{Binding Height}"
-        Focusable="True" KeyDown="OnKeyDown" PointerPressed="OnPointerPressed" Closing="WindowClosing"
-        SizeChanged="OnWindowSizeChanged"
-        DragDrop.AllowDrop="True">
-  <controls:WindowEx.Styles><StyleInclude Source="/Styles/ToolWorkspace.axaml"/></controls:WindowEx.Styles>
+<controls:WindowEx xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:vm="using:OpenUtau.App.ViewModels" xmlns:c="clr-namespace:OpenUtau.App.Controls" xmlns:controls="clr-namespace:OpenUtau.App.Controls" xmlns:views="using:OpenUtau.App.Views" xmlns:motion="using:OpenUtau.Theming" mc:Ignorable="d" d:DesignWidth="1440" d:DesignHeight="900" x:Class="OpenUtau.App.Views.MainWindow" Icon="/Assets/brand/utvtu.ico" Title="{Binding Title}" MinWidth="800" MinHeight="200" Width="{Binding Width}" Height="{Binding Height}" Focusable="True" KeyDown="OnKeyDown" PointerPressed="OnPointerPressed" Closing="WindowClosing" SizeChanged="OnWindowSizeChanged" DragDrop.AllowDrop="True">
+  <controls:WindowEx.Styles>
+    <StyleInclude Source="/Styles/ToolWorkspace.axaml"/>
+  </controls:WindowEx.Styles>
   <!-- 沿用 GitHub 原版的胶囊分组与 56 DIP 顶栏；窄窗自适应为 56 + 44。
        品牌、菜单、工程命令与当前导航生命周期保持同一入口。 -->
   <Window.Styles>
     <StyleInclude Source="/Styles/WorkspaceShell.axaml"/>
+    <StyleInclude Source="/Styles/FrontendShell.axaml"/>
   </Window.Styles>
   <!-- 窗口装饰已交还系统（原生标题栏），内容不再为自绘标题栏留白 -->
   <Border Padding="0">
-  <Grid>
-    <Grid Name="WorkspaceSurface">
-    <!-- MainGrid：主内容（overlay 时模糊目标） -->
-    <Grid x:Name="MainGrid" RowDefinitions="Auto,*,32">
-      <!-- Original UTvTU group hierarchy, with a second row only when groups cannot fit. -->
-      <Border x:Name="ShellHeaderRow" Grid.Row="0" Classes="shellRow">
-        <c:WorkspaceHeader x:Name="WorkspaceHeader">
-          <Button AutomationProperties.Name="UTvTU" ToolTip.Tip="{DynamicResource menu.file}" x:Name="AppMenuButton" Classes="brandBtn" Click="OnAppMenuClicked">
-            <Button.Flyout>
-              <MenuFlyout Placement="BottomEdgeAlignedLeft">
-
-                <MenuItem Header="{DynamicResource menu.file}">
-                  <MenuItem Header="{DynamicResource menu.file.new}" InputGesture="Ctrl+N" Click="OnMenuNew"/>
-                  <MenuItem Header="{DynamicResource menu.file.newfromtemplate}" ItemsSource="{Binding OpenTemplatesMenuItems}" Classes="MenuItemWithSubMenu"/>
-                  <MenuItem Header="{DynamicResource menu.file.savetemplate}" Click="OnMenuSaveTemplate"/>
-                  <MenuItem Header="-" Height="1"/>
-                  <MenuItem Header="{DynamicResource menu.file.open}" InputGesture="Ctrl+O" Click="OnMenuOpen"/>
-                  <MenuItem Header="{DynamicResource menu.file.openrecent}" ItemsSource="{Binding OpenRecentMenuItems}" Classes="MenuItemWithSubMenu"/>
-                  <MenuItem Header="{DynamicResource menu.file.openprojectlocation}" Click="OnMenuOpenProjectLocation"/>
-                  <MenuItem Header="-" Height="1"/>
-                  <MenuItem Header="{DynamicResource menu.file.save}" InputGesture="Ctrl+S" Click="OnMenuSave"/>
-                  <MenuItem Header="{DynamicResource menu.file.saveas}"  InputGesture="Ctrl+Shift+S" Click="OnMenuSaveAs"/>
-                  <MenuItem Header="-" Height="1"/>
-                  <MenuItem Header="{DynamicResource menu.file.importtracks}" Click="OnMenuImportTracks"/>
-                  <MenuItem Header="{DynamicResource menu.file.importaudio}" Click="OnMenuImportAudio"/>
-                  <MenuItem Header="-" Height="1"/>
-                  <MenuItem Header="{DynamicResource menu.file.exportaudio}">
-                    <MenuItem Header="{DynamicResource menu.file.render}" InputGesture="Ctrl+Shift+R" Click="OnMenuRender"/>
-                    <Separator/>
-                    <MenuItem Header="{DynamicResource menu.file.exportwav}" Click="OnMenuExportWav"/>
-                    <MenuItem Header="{DynamicResource menu.file.exportwavto}" Click="OnMenuExportWavTo"/>
-                    <MenuItem Header="{DynamicResource menu.file.exportmixdown}" Click="OnMenuExportMixdown"/>
-                  </MenuItem>
-                  <MenuItem Header="{DynamicResource menu.file.exportproject}">
-                    <MenuItem Header="{DynamicResource menu.file.exportust}" Click="OnMenuExportUst"/>
-                    <MenuItem Header="{DynamicResource menu.file.exportustto}" Click="OnMenuExportUstTo"/>
-                    <MenuItem Header="{DynamicResource menu.file.exportmidi}" Click="OnMenuExportMidi"/>
-                    <MenuItem Header="{DynamicResource menu.file.exportds}" Click="OnMenuExportDsTo"/>
-                    <!-- W27：另存为纯净 .ustx（原版可直读、不含 Plus 专有字段）——跨软件交付的唯一安全路径。
+    <Grid>
+      <Grid Name="WorkspaceSurface">
+        <!-- MainGrid：主内容（overlay 时模糊目标） -->
+        <Grid x:Name="MainGrid" RowDefinitions="Auto,*,32">
+          <!-- Original UTvTU group hierarchy, with a second row only when groups cannot fit. -->
+          <Border x:Name="ShellHeaderRow" Grid.Row="0" Classes="shellRow">
+            <c:WorkspaceHeader x:Name="WorkspaceHeader">
+              <Button AutomationProperties.Name="UTvTU" ToolTip.Tip="{DynamicResource menu.file}" x:Name="AppMenuButton" Classes="brandBtn" Click="OnAppMenuClicked">
+                <Button.Flyout>
+                  <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                    <MenuItem Header="{DynamicResource menu.file}">
+                      <MenuItem Header="{DynamicResource menu.file.new}" InputGesture="Ctrl+N" Click="OnMenuNew"/>
+                      <MenuItem Header="{DynamicResource menu.file.newfromtemplate}" ItemsSource="{Binding OpenTemplatesMenuItems}" Classes="MenuItemWithSubMenu"/>
+                      <MenuItem Header="{DynamicResource menu.file.savetemplate}" Click="OnMenuSaveTemplate"/>
+                      <MenuItem Header="-" Height="1"/>
+                      <MenuItem Header="{DynamicResource menu.file.open}" InputGesture="Ctrl+O" Click="OnMenuOpen"/>
+                      <MenuItem Header="{DynamicResource menu.file.openrecent}" ItemsSource="{Binding OpenRecentMenuItems}" Classes="MenuItemWithSubMenu"/>
+                      <MenuItem Header="{DynamicResource menu.file.openprojectlocation}" Click="OnMenuOpenProjectLocation"/>
+                      <MenuItem Header="-" Height="1"/>
+                      <MenuItem Header="{DynamicResource menu.file.save}" InputGesture="Ctrl+S" Click="OnMenuSave"/>
+                      <MenuItem Header="{DynamicResource menu.file.saveas}" InputGesture="Ctrl+Shift+S" Click="OnMenuSaveAs"/>
+                      <MenuItem Header="-" Height="1"/>
+                      <MenuItem Header="{DynamicResource menu.file.importtracks}" Click="OnMenuImportTracks"/>
+                      <MenuItem Header="{DynamicResource menu.file.importaudio}" Click="OnMenuImportAudio"/>
+                      <MenuItem Header="-" Height="1"/>
+                      <MenuItem Header="{DynamicResource menu.file.exportaudio}">
+                        <MenuItem Header="{DynamicResource menu.file.render}" InputGesture="Ctrl+Shift+R" Click="OnMenuRender"/>
+                        <Separator/>
+                        <MenuItem Header="{DynamicResource menu.file.exportwav}" Click="OnMenuExportWav"/>
+                        <MenuItem Header="{DynamicResource menu.file.exportwavto}" Click="OnMenuExportWavTo"/>
+                        <MenuItem Header="{DynamicResource menu.file.exportmixdown}" Click="OnMenuExportMixdown"/>
+                      </MenuItem>
+                      <MenuItem Header="{DynamicResource menu.file.exportproject}">
+                        <MenuItem Header="{DynamicResource menu.file.exportust}" Click="OnMenuExportUst"/>
+                        <MenuItem Header="{DynamicResource menu.file.exportustto}" Click="OnMenuExportUstTo"/>
+                        <MenuItem Header="{DynamicResource menu.file.exportmidi}" Click="OnMenuExportMidi"/>
+                        <MenuItem Header="{DynamicResource menu.file.exportds}" Click="OnMenuExportDsTo"/>
+                        <!-- W27：另存为纯净 .ustx（原版可直读、不含 Plus 专有字段）——跨软件交付的唯一安全路径。
                          注意：它不阻止"原版重存丢 Plus 字段"（那需要侧车/容器，属 A+/B 方案）。 -->
-                    <MenuItem Header="{DynamicResource menu.file.exportcleanustx}" Click="OnMenuExportCleanUstx"/>
-                  </MenuItem>
-                  <MenuItem Header="{DynamicResource menu.file.openexportlocation}" Click="OnMenuOpenProjectLocation"/>
-                </MenuItem>
-                <MenuItem Header="{DynamicResource menu.edit}">
-                  <MenuItem Header="{Binding UndoText}" InputGesture="Ctrl+Z" Command="{Binding Undo}" IsEnabled="{Binding CanUndo}"/>
-                  <MenuItem Header="{Binding RedoText}" InputGesture="Ctrl+Y" Command="{Binding Redo}" IsEnabled="{Binding CanRedo}"/>
-                </MenuItem>
-                <MenuItem Header="{DynamicResource menu.project}">
-                  <MenuItem Header="{DynamicResource menu.project.expressions}" Click="OnMenuExpressionss"/>
-                  <MenuItem Header="{DynamicResource menu.project.remaptimeaxis}" Click="OnMenuRemapTimeaxis"/>
-                </MenuItem>
-                <MenuItem Header="{DynamicResource menu.tools}">
-                  <MenuItem Header="{DynamicResource menu.tools.layout}">
-                    <MenuItem Header="{DynamicResource panel.toggle.tracks}" ToggleType="CheckBox"
-                              IsChecked="{Binding ShowTracksPanel, Mode=TwoWay}"/>
-                    <MenuItem Header="{DynamicResource panel.toggle.library}" ToggleType="CheckBox"
-                              IsChecked="{Binding ShowLibraryPanel, Mode=TwoWay}"/>
-                    <MenuItem Header="{DynamicResource panel.reset}" Click="OnMenuResetPanelLayout"/>
-                    <Separator/>
-                    <MenuItem Header="{DynamicResource menu.tools.layout.reset}" Click="OnMenuLayoutReset"/>
-                    <MenuItem Header="{DynamicResource menu.tools.layout.vsplit11}" Click="OnMenuLayoutVSplit11"/>
-                    <MenuItem Header="{DynamicResource menu.tools.layout.vsplit12}" Click="OnMenuLayoutVSplit12"/>
-                    <MenuItem Header="{DynamicResource menu.tools.layout.vsplit13}" Click="OnMenuLayoutVSplit13"/>
-                    <MenuItem Header="{DynamicResource menu.tools.layout.hsplit11}" Click="OnMenuLayoutHSplit11"/>
-                    <MenuItem Header="{DynamicResource menu.tools.layout.hsplit12}" Click="OnMenuLayoutHSplit12"/>
-                    <MenuItem Header="{DynamicResource menu.tools.layout.hsplit13}" Click="OnMenuLayoutHSplit13"/>
-                  </MenuItem>
-                  <MenuItem Header="{DynamicResource menu.tools.fullscreen}" InputGesture="F11" Click="OnMenuFullScreen"/>
-                  <!-- W28 命令层：快捷键总览（只读，数据源 = CommandRegistry） -->
-                  <MenuItem Header="{DynamicResource command.shortcutoverview}" Click="OnMenuShortcutOverview"/>
-                  <MenuItem Header="{Binding ClearCacheHeader}" Click="OnMenuClearCache"/>
-                  <MenuItem Header="{DynamicResource menu.tools.debugwindow}" Click="OnMenuDebugWindow"/>
-                  <!-- fx-rack：控件陈列室（MD3 机架控件家族审阅入口） -->
-                  <MenuItem Header="{DynamicResource menu.tools.controlgallery}" Click="OnMenuControlGallery"/>
-                  <MenuItem Header="{DynamicResource menu.tools.mixer}" InputGesture="Ctrl+M" Click="OnMenuMixer"/>
-                  <MenuItem Header="{DynamicResource phoneticassistant.caption}" Click="OnMenuPhoneticAssistant"/>
-                  <MenuItem Header="{DynamicResource menu.tools.singers}" Click="OnMenuSingers"/>
-                  <MenuItem Header="{DynamicResource menu.tools.singer.install}" Click="OnMenuInstallSinger"/>
-                  <MenuItem Header="{DynamicResource menu.tools.wavtoolresampler.install}" Click="OnMenuInstallWavtoolResampler"/>
-                  <MenuItem Header="{DynamicResource menu.tools.packages}" Click="OnMenuPackageManager"/>
-                  <MenuItem Header="{DynamicResource menu.tools.prefs}" Click="OnMenuPreferences"/>
-                </MenuItem>
-                <MenuItem Header="{DynamicResource menu.help}">
-                  <MenuItem Header="{DynamicResource menu.help.wiki}" Click="OnMenuWiki"/>
-                  <MenuItem Header="{DynamicResource menu.help.checkupdate}" Click="OnMenuCheckUpdate"/>
-                  <MenuItem Header="{DynamicResource menu.help.reportissue}" Click="OnMenuReportIssue"/>
-                  <MenuItem Header="{DynamicResource menu.help.logslocation}" Click="OnMenuLogsLocation"/>
-                </MenuItem>
-
-              </MenuFlyout>
-            </Button.Flyout>
-            <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}">
-              <!-- W40：顶栏品牌 = 「标志 + 字标，无括号」。cap 15 落在品牌阶梯的 14–23 档 ⇒ 按规则**去括号**；
+                        <MenuItem Header="{DynamicResource menu.file.exportcleanustx}" Click="OnMenuExportCleanUstx"/>
+                      </MenuItem>
+                      <MenuItem Header="{DynamicResource menu.file.openexportlocation}" Click="OnMenuOpenProjectLocation"/>
+                    </MenuItem>
+                    <MenuItem Header="{DynamicResource menu.edit}">
+                      <MenuItem Header="{Binding UndoText}" InputGesture="Ctrl+Z" Command="{Binding Undo}" IsEnabled="{Binding CanUndo}"/>
+                      <MenuItem Header="{Binding RedoText}" InputGesture="Ctrl+Y" Command="{Binding Redo}" IsEnabled="{Binding CanRedo}"/>
+                    </MenuItem>
+                    <MenuItem Header="{DynamicResource menu.project}">
+                      <MenuItem Header="{DynamicResource menu.project.expressions}" Click="OnMenuExpressionss"/>
+                      <MenuItem Header="{DynamicResource menu.project.remaptimeaxis}" Click="OnMenuRemapTimeaxis"/>
+                    </MenuItem>
+                    <MenuItem Header="{DynamicResource menu.tools}">
+                      <MenuItem Header="{DynamicResource menu.tools.layout}">
+                        <MenuItem Header="{DynamicResource panel.toggle.tracks}" ToggleType="CheckBox" IsChecked="{Binding ShowTracksPanel, Mode=TwoWay}"/>
+                        <MenuItem Header="{DynamicResource panel.toggle.library}" ToggleType="CheckBox" IsChecked="{Binding ShowLibraryPanel, Mode=TwoWay}"/>
+                        <MenuItem Header="{DynamicResource panel.reset}" Click="OnMenuResetPanelLayout"/>
+                        <Separator/>
+                        <MenuItem Header="{DynamicResource menu.tools.layout.reset}" Click="OnMenuLayoutReset"/>
+                        <MenuItem Header="{DynamicResource menu.tools.layout.vsplit11}" Click="OnMenuLayoutVSplit11"/>
+                        <MenuItem Header="{DynamicResource menu.tools.layout.vsplit12}" Click="OnMenuLayoutVSplit12"/>
+                        <MenuItem Header="{DynamicResource menu.tools.layout.vsplit13}" Click="OnMenuLayoutVSplit13"/>
+                        <MenuItem Header="{DynamicResource menu.tools.layout.hsplit11}" Click="OnMenuLayoutHSplit11"/>
+                        <MenuItem Header="{DynamicResource menu.tools.layout.hsplit12}" Click="OnMenuLayoutHSplit12"/>
+                        <MenuItem Header="{DynamicResource menu.tools.layout.hsplit13}" Click="OnMenuLayoutHSplit13"/>
+                      </MenuItem>
+                      <MenuItem Header="{DynamicResource menu.tools.fullscreen}" InputGesture="F11" Click="OnMenuFullScreen"/>
+                      <!-- W28 命令层：快捷键总览（只读，数据源 = CommandRegistry） -->
+                      <MenuItem Header="{DynamicResource command.shortcutoverview}" Click="OnMenuShortcutOverview"/>
+                      <MenuItem Header="{Binding ClearCacheHeader}" Click="OnMenuClearCache"/>
+                      <MenuItem Header="{DynamicResource menu.tools.debugwindow}" Click="OnMenuDebugWindow"/>
+                      <!-- fx-rack：控件陈列室（MD3 机架控件家族审阅入口） -->
+                      <MenuItem Header="{DynamicResource menu.tools.controlgallery}" Click="OnMenuControlGallery"/>
+                      <MenuItem Header="{DynamicResource menu.tools.mixer}" InputGesture="Ctrl+M" Click="OnMenuMixer"/>
+                      <MenuItem Header="{DynamicResource phoneticassistant.caption}" Click="OnMenuPhoneticAssistant"/>
+                      <MenuItem Header="{DynamicResource menu.tools.singers}" Click="OnMenuSingers"/>
+                      <MenuItem Header="{DynamicResource menu.tools.singer.install}" Click="OnMenuInstallSinger"/>
+                      <MenuItem Header="{DynamicResource menu.tools.wavtoolresampler.install}" Click="OnMenuInstallWavtoolResampler"/>
+                      <MenuItem Header="{DynamicResource menu.tools.packages}" Click="OnMenuPackageManager"/>
+                      <MenuItem Header="{DynamicResource menu.tools.prefs}" Click="OnMenuPreferences"/>
+                    </MenuItem>
+                    <MenuItem Header="{DynamicResource menu.help}">
+                      <MenuItem Header="{DynamicResource menu.help.wiki}" Click="OnMenuWiki"/>
+                      <MenuItem Header="{DynamicResource menu.help.checkupdate}" Click="OnMenuCheckUpdate"/>
+                      <MenuItem Header="{DynamicResource menu.help.reportissue}" Click="OnMenuReportIssue"/>
+                      <MenuItem Header="{DynamicResource menu.help.logslocation}" Click="OnMenuLogsLocation"/>
+                    </MenuItem>
+                  </MenuFlyout>
+                </Button.Flyout>
+                <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}">
+                  <!-- W40：顶栏品牌 = 「标志 + 字标，无括号」。cap 15 落在品牌阶梯的 14–23 档 ⇒ 按规则**去括号**；
                    原音符瓦片（md3.primary-container + icon-music）与文字 UTvTU 已删。
                    尺寸与 SplashWindow 同一套口径（缩放 s = cap / 277.4707 = 15/277.4707 = 0.054060）：
                      · 标志 brand-mark（源描边语义，描边 = 64 网格内 8 = 尺寸÷8）：要满足"标志墨迹高 = 字标 cap"，
@@ -124,236 +108,171 @@
                      · 切角 v 必须**单独描边**补齐（U/T 键不含 v；v 是自交单环，EvenOdd 填充会出贯穿细缝）：
                        中心线 91×142 单元 → 元素框 4.92×7.68、描边 61 × s = 3.30、左缘 463.011 × s = 25.03、顶 100.711 × s = 5.44
                      · 间距 = 0.42 × cap = 6.3；整组不撑高顶栏（原元素总高 36，此处最高 20.9） -->
-              <StackPanel Orientation="Horizontal" Spacing="6.3" VerticalAlignment="Center">
-                <Viewbox Width="20.9" Height="20.9" Stretch="Uniform">
-                  <Path Data="{StaticResource brand-mark}"
-                        Stroke="{DynamicResource md3.primary}" StrokeThickness="8"
-                        StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
-                </Viewbox>
-                <Canvas Width="55.8" Height="15" VerticalAlignment="Center">
-                  <Path Data="{StaticResource brand-wordmark}"
-                        Fill="{DynamicResource md3.on-surface}"
-                        Width="55.8" Height="15" Stretch="Uniform"/>
-                  <Path Data="{StaticResource brand-v-chevron}"
-                        Stroke="{DynamicResource md3.on-surface}" StrokeThickness="3.30"
-                        StrokeLineCap="Round" StrokeJoin="Round"
-                        Width="4.92" Height="7.68" Stretch="Uniform"
-                        Canvas.Left="25.03" Canvas.Top="5.44"/>
-                </Canvas>
+                  <StackPanel Orientation="Horizontal" Spacing="6.3" VerticalAlignment="Center">
+                    <Viewbox Width="20.9" Height="20.9" Stretch="Uniform">
+                      <Path Data="{StaticResource brand-mark}" Stroke="{DynamicResource md3.primary}" StrokeThickness="8" StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
+                    </Viewbox>
+                    <Canvas Width="55.8" Height="15" VerticalAlignment="Center">
+                      <Path Data="{StaticResource brand-wordmark}" Fill="{DynamicResource md3.on-surface}" Width="55.8" Height="15" Stretch="Uniform"/>
+                      <Path Data="{StaticResource brand-v-chevron}" Stroke="{DynamicResource md3.on-surface}" StrokeThickness="3.30" StrokeLineCap="Round" StrokeJoin="Round" Width="4.92" Height="7.68" Stretch="Uniform" Canvas.Left="25.03" Canvas.Top="5.44"/>
+                    </Canvas>
+                  </StackPanel>
+                  <TextBlock x:Name="ScreenTitle" Text="{DynamicResource view.workspace}" FontSize="{DynamicResource Md3TypeLabelSmall}" VerticalAlignment="Center" MaxWidth="100" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource md3.on-surface-variant}"/>
+                </StackPanel>
+              </Button>
+              <StackPanel x:Name="TransportGroup" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}" VerticalAlignment="Center">
+                <!-- 原设计：40 DIP 胶囊与 36 DIP 圆形按钮。 -->
+                <Border x:Name="TransportPill" Classes="transportPill">
+                  <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing1}" VerticalAlignment="Center">
+                    <Button Classes="tpBtn" AutomationProperties.Name="{DynamicResource command.playback.gohome}" ToolTip.Tip="{DynamicResource command.playback.gohome}" Command="{Binding PlaybackViewModel.SeekStart}">
+                      <c:DawIcon Data="{StaticResource icon-skip-back}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
+                    </Button>
+                    <c:PlayPauseButton x:Name="TransportPlay" Classes="tpPlay" IsPlaying="{Binding PlaybackViewModel.IsPlaying}" AutomationProperties.Name="{DynamicResource command.playback.playpause}" ToolTip.Tip="{DynamicResource command.playback.playpause}" Click="OnPlayOrPause"/>
+                    <Button Classes="tpBtn" AutomationProperties.Name="{DynamicResource command.playback.playpause}" ToolTip.Tip="{DynamicResource command.playback.playpause}" Command="{Binding PlaybackViewModel.Pause}">
+                      <c:DawIcon Data="{StaticResource icon-pause}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
+                    </Button>
+                    <Button Classes="tpBtn" AutomationProperties.Name="{DynamicResource command.playback.goend}" ToolTip.Tip="{DynamicResource command.playback.goend}" Command="{Binding PlaybackViewModel.SeekEnd}">
+                      <c:DawIcon Data="{StaticResource icon-skip-forward}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
+                    </Button>
+                    <ToggleButton Classes="tpBtn" IsChecked="{Binding PlaybackViewModel.Metronome}" AutomationProperties.Name="{DynamicResource prefs.playback.metronome}" ToolTip.Tip="{DynamicResource prefs.playback.metronome}">
+                      <c:DawIcon Data="{StaticResource icon-metronome}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
+                    </ToggleButton>
+                  </StackPanel>
+                </Border>
+                <!-- 播放位置：等宽读数。 -->
+                <Border x:Name="TimeReadout" Classes="tpReadout" Padding="10,0">
+                  <TextBlock Text="{Binding Path=PlaybackViewModel.PlayPosTime, StringFormat={}{0:mm\\:ss\\.fff}}" FontSize="{DynamicResource Md3TypeBodyLarge}" FontFamily="Consolas" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Foreground="{DynamicResource md3.on-surface}"/>
+                </Border>
+                <!-- 工程速度 / 拍号，沿用现有编辑入口。 -->
+                <Border x:Name="TempoReadout" Classes="tpChip" Padding="8,0">
+                  <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}" VerticalAlignment="Center">
+                    <TextBlock ToolTip.Tip="BPM" Background="Transparent" PointerPressed="OnEditBpm" Cursor="Hand" FontSize="{DynamicResource Md3TypeBodyLarge}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource md3.primary}">
+                      <TextBlock.Text>
+                        <MultiBinding StringFormat="{}{0:#0.00}">
+                          <Binding Path="PlaybackViewModel.Bpm"/>
+                        </MultiBinding>
+                      </TextBlock.Text>
+                    </TextBlock>
+                    <TextBlock Text="BPM" FontSize="{DynamicResource Md3TypeLabelTiny}" VerticalAlignment="Center" Foreground="{DynamicResource md3.on-surface-variant}"/>
+                    <TextBlock Background="Transparent" PointerPressed="OnEditTimeSignature" Cursor="Hand" FontSize="{DynamicResource Md3TypeBodyLarge}" VerticalAlignment="Center" Foreground="{DynamicResource md3.on-surface}">
+                      <TextBlock.Text>
+                        <MultiBinding StringFormat="{}{0} / {1}">
+                          <Binding Path="PlaybackViewModel.BeatPerBar"/>
+                          <Binding Path="PlaybackViewModel.BeatUnit"/>
+                        </MultiBinding>
+                      </TextBlock.Text>
+                    </TextBlock>
+                  </StackPanel>
+                </Border>
               </StackPanel>
-
-              <TextBlock x:Name="ScreenTitle" Text="{DynamicResource view.workspace}" FontSize="{DynamicResource Md3TypeLabelSmall}"
-                         VerticalAlignment="Center" MaxWidth="100" TextTrimming="CharacterEllipsis"
-                         Foreground="{DynamicResource md3.on-surface-variant}"/>
-            </StackPanel>
-          </Button>
-          <StackPanel x:Name="TransportGroup" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}" VerticalAlignment="Center">
-          <!-- 原设计：40 DIP 胶囊与 36 DIP 圆形按钮。 -->
-          <Border x:Name="TransportPill" Classes="transportPill">
-            <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing1}" VerticalAlignment="Center">
-              <Button Classes="tpBtn" AutomationProperties.Name="{DynamicResource command.playback.gohome}" ToolTip.Tip="{DynamicResource command.playback.gohome}" Command="{Binding PlaybackViewModel.SeekStart}">
-                <c:DawIcon Data="{StaticResource icon-skip-back}" Width="16" Height="16"
-                      Fill="{Binding $parent[Button].Foreground}"/>
-              </Button>
-              <c:PlayPauseButton x:Name="TransportPlay" Classes="tpPlay"
-                                IsPlaying="{Binding PlaybackViewModel.IsPlaying}"
-                                AutomationProperties.Name="{DynamicResource command.playback.playpause}"
-                                ToolTip.Tip="{DynamicResource command.playback.playpause}" Click="OnPlayOrPause"/>
-              <Button Classes="tpBtn" AutomationProperties.Name="{DynamicResource command.playback.playpause}" ToolTip.Tip="{DynamicResource command.playback.playpause}" Command="{Binding PlaybackViewModel.Pause}">
-                <c:DawIcon Data="{StaticResource icon-pause}" Width="16" Height="16"
-                      Fill="{Binding $parent[Button].Foreground}"/>
-              </Button>
-              <Button Classes="tpBtn" AutomationProperties.Name="{DynamicResource command.playback.goend}" ToolTip.Tip="{DynamicResource command.playback.goend}" Command="{Binding PlaybackViewModel.SeekEnd}">
-                <c:DawIcon Data="{StaticResource icon-skip-forward}" Width="16" Height="16"
-                      Fill="{Binding $parent[Button].Foreground}"/>
-              </Button>
-              <ToggleButton Classes="tpBtn" IsChecked="{Binding PlaybackViewModel.Metronome}"
-                            AutomationProperties.Name="{DynamicResource prefs.playback.metronome}" ToolTip.Tip="{DynamicResource prefs.playback.metronome}">
-                <c:DawIcon Data="{StaticResource icon-metronome}" Width="16" Height="16"
-                      Fill="{Binding $parent[Button].Foreground}"/>
-              </ToggleButton>
-            </StackPanel>
-          </Border>
-
-          <!-- 播放位置：等宽读数。 -->
-          <Border x:Name="TimeReadout" Classes="tpReadout" Padding="10,0">
-            <TextBlock Text="{Binding Path=PlaybackViewModel.PlayPosTime, StringFormat={}{0:mm\\:ss\\.fff}}"
-                       FontSize="{DynamicResource Md3TypeBodyLarge}" FontFamily="Consolas" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"
-                       Foreground="{DynamicResource md3.on-surface}"/>
-          </Border>
-
-          <!-- 工程速度 / 拍号，沿用现有编辑入口。 -->
-          <Border x:Name="TempoReadout" Classes="tpChip" Padding="8,0">
-            <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}" VerticalAlignment="Center">
-              <TextBlock ToolTip.Tip="BPM" Background="Transparent" PointerPressed="OnEditBpm" Cursor="Hand"
-                         FontSize="{DynamicResource Md3TypeBodyLarge}" FontWeight="SemiBold" VerticalAlignment="Center"
-                         Foreground="{DynamicResource md3.primary}">
-                <TextBlock.Text>
-                  <MultiBinding StringFormat="{}{0:#0.00}">
-                    <Binding Path="PlaybackViewModel.Bpm"/>
-                  </MultiBinding>
-                </TextBlock.Text>
-              </TextBlock>
-              <TextBlock Text="BPM" FontSize="{DynamicResource Md3TypeLabelTiny}" VerticalAlignment="Center"
-                         Foreground="{DynamicResource md3.on-surface-variant}"/>
-              <TextBlock Background="Transparent" PointerPressed="OnEditTimeSignature" Cursor="Hand"
-                         FontSize="{DynamicResource Md3TypeBodyLarge}" VerticalAlignment="Center"
-                         Foreground="{DynamicResource md3.on-surface}">
-                <TextBlock.Text>
-                  <MultiBinding StringFormat="{}{0} / {1}">
-                    <Binding Path="PlaybackViewModel.BeatPerBar"/>
-                    <Binding Path="PlaybackViewModel.BeatUnit"/>
-                  </MultiBinding>
-                </TextBlock.Text>
-              </TextBlock>
-            </StackPanel>
-          </Border>
-
-          </StackPanel>
-          <StackPanel x:Name="ViewSwitcherGroup" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}"
-                      HorizontalAlignment="Left" VerticalAlignment="Center">
-            <Border x:Name="ViewSwitcher" Classes="viewSwitch">
-              <StackPanel Orientation="Horizontal" Spacing="3">
-                <Button x:Name="ViewTabWorkspace" Classes="viewTab" Tag="workspace"
-                        Classes.selected="{Binding ViewSwitcher.ShowWorkspace}"
-                        Click="OnViewTabClicked" Content="{DynamicResource view.workspace}"/>
-                <Border ToolTip.Tip="{Binding PianoRollNavigation.Hint}"><Button x:Name="ViewTabPianoRoll" Classes="viewTab" Tag="pianoroll"
-                        Classes.selected="{Binding ViewSwitcher.ShowPianoRoll}"
-                        IsEnabled="{Binding PianoRollNavigation.CanOpen}" ToolTip.Tip="{Binding PianoRollNavigation.Hint}"
-                        Click="OnViewTabClicked" Content="{DynamicResource view.pianoroll}"/></Border>
-                <Button x:Name="ViewTabMixer" Classes="viewTab" Tag="mixer"
-                        Classes.selected="{Binding ViewSwitcher.ShowMixer}"
-                        Click="OnViewTabClicked" Content="{DynamicResource view.mixer}"/>
+              <StackPanel x:Name="ViewSwitcherGroup" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}" HorizontalAlignment="Left" VerticalAlignment="Center">
+                <Border x:Name="ViewSwitcher" Classes="viewSwitch">
+                  <StackPanel Orientation="Horizontal" Spacing="3">
+                    <Button x:Name="ViewTabWorkspace" Classes="viewTab" Tag="workspace" Classes.selected="{Binding ViewSwitcher.ShowWorkspace}" Click="OnViewTabClicked" Content="{DynamicResource view.workspace}"/>
+                    <Border ToolTip.Tip="{Binding PianoRollNavigation.Hint}">
+                      <Button x:Name="ViewTabPianoRoll" Classes="viewTab" Tag="pianoroll" Classes.selected="{Binding ViewSwitcher.ShowPianoRoll}" IsEnabled="{Binding PianoRollNavigation.CanOpen}" ToolTip.Tip="{Binding PianoRollNavigation.Hint}" Click="OnViewTabClicked" Content="{DynamicResource view.pianoroll}"/>
+                    </Border>
+                    <Button x:Name="ViewTabMixer" Classes="viewTab" Tag="mixer" Classes.selected="{Binding ViewSwitcher.ShowMixer}" Click="OnViewTabClicked" Content="{DynamicResource view.mixer}"/>
+                  </StackPanel>
+                </Border>
+                <Button x:Name="DetachViewButton" Classes="topBtn" Click="OnDetachViewClicked" AutomationProperties.Name="{DynamicResource view.detach}" ToolTip.Tip="{DynamicResource view.detach}">
+                  <c:DawIcon Data="{StaticResource icon-external-link}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
+                </Button>
               </StackPanel>
-            </Border>
-            <Button x:Name="DetachViewButton" Classes="topBtn" Click="OnDetachViewClicked"
-                    AutomationProperties.Name="{DynamicResource view.detach}" ToolTip.Tip="{DynamicResource view.detach}">
-              <c:DawIcon Data="{StaticResource icon-external-link}" Width="16" Height="16"
-                    Fill="{Binding $parent[Button].Foreground}"/>
-            </Button>
-          </StackPanel>
-          <StackPanel x:Name="TopRightCluster" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing1}" VerticalAlignment="Center">
-            <Button x:Name="ShellSaveButton" Classes="topBtn" Click="OnMenuSave" AutomationProperties.Name="{DynamicResource menu.file.save}" ToolTip.Tip="{DynamicResource menu.file.save}">
-              <c:DawIcon Data="{StaticResource icon-save}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
-            </Button>
-            <Button x:Name="ShellRenderButton" Classes="topBtn" Click="OnMenuRender" AutomationProperties.Name="{DynamicResource menu.file.render}" ToolTip.Tip="{DynamicResource menu.file.render}">
-              <c:DawIcon Data="{StaticResource icon-download}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
-            </Button>
-
-
-            <Button Classes="topBtn" Command="{Binding Undo}" IsEnabled="{Binding CanUndo}"
-                    AutomationProperties.Name="{DynamicResource menu.edit.undo}" ToolTip.Tip="{DynamicResource menu.edit.undo}">
-              <c:DawIcon Data="{StaticResource icon-undo}" Width="16" Height="16"
-                    Fill="{Binding $parent[Button].Foreground}"/>
-            </Button>
-            <Button Classes="topBtn" Command="{Binding Redo}" IsEnabled="{Binding CanRedo}"
-                    AutomationProperties.Name="{DynamicResource menu.edit.redo}" ToolTip.Tip="{DynamicResource menu.edit.redo}">
-              <c:DawIcon Data="{StaticResource icon-redo}" Width="16" Height="16"
-                    Fill="{Binding $parent[Button].Foreground}"/>
-            </Button>
-            <Border Width="1" Height="20" Margin="6,0" VerticalAlignment="Center"
-                    Background="{DynamicResource md3.outline-variant}"/>
-            <Button Classes="topBtn" AutomationProperties.Name="{DynamicResource menu.tools.layout}" ToolTip.Tip="{DynamicResource menu.tools.layout}">
-              <Button.Flyout>
-                <MenuFlyout Placement="BottomEdgeAlignedRight">
-                  <!-- W16 面板系统：折叠/展开开关（面板折叠后仍从这里找回；混音台视图同样可达 —— 顶栏 chrome 三个工作视图都显示） -->
-                  <MenuItem Header="{DynamicResource panel.toggle.tracks}" ToggleType="CheckBox"
-                            IsChecked="{Binding ShowTracksPanel, Mode=TwoWay}"/>
-                  <MenuItem Header="{DynamicResource panel.toggle.library}" ToggleType="CheckBox"
-                            IsChecked="{Binding ShowLibraryPanel, Mode=TwoWay}"/>
-                  <MenuItem Header="{DynamicResource panel.reset}" Click="OnMenuResetPanelLayout"/>
-                  <Separator/>
-                  <MenuItem Header="{DynamicResource menu.tools.layout.reset}" Click="OnMenuLayoutReset"/>
-                  <MenuItem Header="{DynamicResource menu.tools.layout.vsplit11}" Click="OnMenuLayoutVSplit11"/>
-                  <MenuItem Header="{DynamicResource menu.tools.layout.vsplit12}" Click="OnMenuLayoutVSplit12"/>
-                  <MenuItem Header="{DynamicResource menu.tools.layout.vsplit13}" Click="OnMenuLayoutVSplit13"/>
-                  <MenuItem Header="{DynamicResource menu.tools.layout.hsplit11}" Click="OnMenuLayoutHSplit11"/>
-                  <MenuItem Header="{DynamicResource menu.tools.layout.hsplit12}" Click="OnMenuLayoutHSplit12"/>
-                  <MenuItem Header="{DynamicResource menu.tools.layout.hsplit13}" Click="OnMenuLayoutHSplit13"/>
-                </MenuFlyout>
-              </Button.Flyout>
-              <c:DawIcon Data="{StaticResource icon-layout}" Width="16" Height="16"
-                    Fill="{Binding $parent[Button].Foreground}"/>
-            </Button>
-            <Button Classes="topBtn" Click="OnMenuMixer" AutomationProperties.Name="{DynamicResource menu.tools.mixer}" ToolTip.Tip="{DynamicResource menu.tools.mixer}">
-              <c:DawIcon Data="{StaticResource icon-sliders}" Width="16" Height="16"
-                    Fill="{Binding $parent[Button].Foreground}"/>
-            </Button>
-            <Button Classes="topBtn" Click="OnOpenResources" AutomationProperties.Name="{DynamicResource workspace.resources}" ToolTip.Tip="{DynamicResource workspace.resources}">
-              <c:DawIcon Data="{StaticResource icon-folder-open}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
-            </Button>
-            <Button Classes="topBtn" Click="OnMenuPreferences" AutomationProperties.Name="{DynamicResource menu.tools.prefs}" ToolTip.Tip="{DynamicResource menu.tools.prefs}">
-              <c:DawIcon Data="{StaticResource icon-settings}" Width="16" Height="16"
-                    Fill="{Binding $parent[Button].Foreground}"/>
-            </Button>
-            <Border Width="1" Height="20" Margin="6,0" VerticalAlignment="Center"
-                    Background="{DynamicResource md3.outline-variant}"/>
-            <Border Height="24" VerticalAlignment="Center" PointerWheelChanged="ViewScalerPointerWheelChanged">
-              <c:ViewScaler Name="VScaler" DataContext="{Binding TracksViewModel}"
-                            Value="{Binding TrackHeight}"
-                            Min="{Binding TrackHeightMin}" Max="{Binding TrackHeightMax}"/>
-            </Border>
-          </StackPanel>
-        </c:WorkspaceHeader>
-      </Border>
-
-      <!-- ══════════ 工作区（W16 面板系统）：左 轨头 · 分隔条 · 中 编排区 · 分隔条 · 右 素材库 ══════════
+              <StackPanel x:Name="TopRightCluster" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <Border Classes="shellTools">
+                  <StackPanel Orientation="Horizontal" Spacing="2">
+                    <Button x:Name="ShellSaveButton" Classes="topBtn" Click="OnMenuSave" AutomationProperties.Name="{DynamicResource menu.file.save}" ToolTip.Tip="{DynamicResource menu.file.save}">
+                      <c:DawIcon Data="{StaticResource icon-save}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
+                    </Button>
+                    <Button x:Name="ShellRenderButton" Classes="topBtn shellPrimary" Click="OnMenuRender" AutomationProperties.Name="{DynamicResource menu.file.render}" ToolTip.Tip="{DynamicResource menu.file.render}">
+                      <c:DawIcon Data="{StaticResource icon-download}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
+                    </Button>
+                  </StackPanel>
+                </Border>
+                <Border Classes="shellTools">
+                  <StackPanel Orientation="Horizontal" Spacing="2">
+                    <Button Classes="topBtn" Command="{Binding Undo}" IsEnabled="{Binding CanUndo}" AutomationProperties.Name="{DynamicResource menu.edit.undo}" ToolTip.Tip="{DynamicResource menu.edit.undo}">
+                      <c:DawIcon Data="{StaticResource icon-undo}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
+                    </Button>
+                    <Button Classes="topBtn" Command="{Binding Redo}" IsEnabled="{Binding CanRedo}" AutomationProperties.Name="{DynamicResource menu.edit.redo}" ToolTip.Tip="{DynamicResource menu.edit.redo}">
+                      <c:DawIcon Data="{StaticResource icon-redo}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
+                    </Button>
+                  </StackPanel>
+                </Border>
+                <Border Classes="shellTools">
+                  <StackPanel Orientation="Horizontal" Spacing="2">
+                    <Button Classes="topBtn" AutomationProperties.Name="{DynamicResource menu.tools.layout}" ToolTip.Tip="{DynamicResource menu.tools.layout}">
+                      <Button.Flyout>
+                        <MenuFlyout Placement="BottomEdgeAlignedRight">
+                          <!-- W16 面板系统：折叠/展开开关（面板折叠后仍从这里找回；混音台视图同样可达 —— 顶栏 chrome 三个工作视图都显示） -->
+                          <MenuItem Header="{DynamicResource panel.toggle.tracks}" ToggleType="CheckBox" IsChecked="{Binding ShowTracksPanel, Mode=TwoWay}"/>
+                          <MenuItem Header="{DynamicResource panel.toggle.library}" ToggleType="CheckBox" IsChecked="{Binding ShowLibraryPanel, Mode=TwoWay}"/>
+                          <MenuItem Header="{DynamicResource panel.reset}" Click="OnMenuResetPanelLayout"/>
+                          <Separator/>
+                          <MenuItem Header="{DynamicResource menu.tools.layout.reset}" Click="OnMenuLayoutReset"/>
+                          <MenuItem Header="{DynamicResource menu.tools.layout.vsplit11}" Click="OnMenuLayoutVSplit11"/>
+                          <MenuItem Header="{DynamicResource menu.tools.layout.vsplit12}" Click="OnMenuLayoutVSplit12"/>
+                          <MenuItem Header="{DynamicResource menu.tools.layout.vsplit13}" Click="OnMenuLayoutVSplit13"/>
+                          <MenuItem Header="{DynamicResource menu.tools.layout.hsplit11}" Click="OnMenuLayoutHSplit11"/>
+                          <MenuItem Header="{DynamicResource menu.tools.layout.hsplit12}" Click="OnMenuLayoutHSplit12"/>
+                          <MenuItem Header="{DynamicResource menu.tools.layout.hsplit13}" Click="OnMenuLayoutHSplit13"/>
+                        </MenuFlyout>
+                      </Button.Flyout>
+                      <c:DawIcon Data="{StaticResource icon-layout}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
+                    </Button>
+                    <Button Classes="topBtn" Click="OnMenuMixer" AutomationProperties.Name="{DynamicResource menu.tools.mixer}" ToolTip.Tip="{DynamicResource menu.tools.mixer}">
+                      <c:DawIcon Data="{StaticResource icon-sliders}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
+                    </Button>
+                    <Button Classes="topBtn" Click="OnOpenResources" AutomationProperties.Name="{DynamicResource workspace.resources}" ToolTip.Tip="{DynamicResource workspace.resources}">
+                      <c:DawIcon Data="{StaticResource icon-folder-open}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
+                    </Button>
+                    <Button Classes="topBtn" Click="OnMenuPreferences" AutomationProperties.Name="{DynamicResource menu.tools.prefs}" ToolTip.Tip="{DynamicResource menu.tools.prefs}">
+                      <c:DawIcon Data="{StaticResource icon-settings}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
+                    </Button>
+                    <Border Height="24" VerticalAlignment="Center" PointerWheelChanged="ViewScalerPointerWheelChanged">
+                      <c:ViewScaler Name="VScaler" DataContext="{Binding TracksViewModel}" Value="{Binding TrackHeight}" Min="{Binding TrackHeightMin}" Max="{Binding TrackHeightMax}"/>
+                    </Border>
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+            </c:WorkspaceHeader>
+          </Border>
+          <!-- ══════════ 工作区（W16 面板系统）：左 轨头 · 分隔条 · 中 编排区 · 分隔条 · 右 素材库 ══════════
            两列都是 Auto：宽度由面板自己的 Width="{Binding XxxPanel.Width}" 决定（默认值见 PanelLayoutPreferences，
            拖拽/双击复位由 PanelSplitter 负责），折叠时面板 IsVisible=false ⇒ 列宽 0，不留空白也不留窄条。
            中央列 `*`（MinWidth=320）保证拖宽面板时不会把编排区挤没。 -->
-      <Grid Grid.Row="1" Name="EditorToolsLayout">
-        <Grid.RowDefinitions><RowDefinition Height="*" MinHeight="120"/><RowDefinition Height="Auto"/><RowDefinition Height="0"/></Grid.RowDefinitions>
-      <Grid Grid.Row="0" x:Name="MainLayout" ColumnDefinitions="Auto,Auto,*,Auto,Auto">
-        <!-- ── 左：轨道头（仅工作台视图；面板本体带宽度绑定 + 折叠可见性） ── -->
-        <Border Grid.Column="0" IsVisible="{Binding ViewSwitcher.ShowWorkspace}">
-        <!-- 面板容器：宽与显隐都取自分隔条（夹紧后的有效宽 / 放不下自动折叠），不直接绑 VM 的意图值 -->
-        <Border x:Name="TracksPanelHost" Width="{Binding #TracksPanelSplitter.PanelWidth}"
-                IsVisible="{Binding #TracksPanelSplitter.PanelShown}"
-                Background="{DynamicResource md3.surface-container-low}"
-                BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,1,0">
-          <Grid RowDefinitions="34,16,*">
-            <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="12,0">
-              <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-              <TextBlock Text="{DynamicResource tracks.panel.title}" FontSize="{DynamicResource Md3TypeLabelSmall}" FontWeight="SemiBold"
-                         VerticalAlignment="Center"
-                         Foreground="{DynamicResource md3.on-surface-variant}"/>
-              <TextBlock Text="{Binding TracksViewModel.Tracks.Count}" FontSize="10" FontFamily="{DynamicResource PlusFontFamilyMono}" Foreground="{DynamicResource md3.primary}" VerticalAlignment="Center"/>
-              </StackPanel>
-              <Button Grid.Column="1" Classes="panelToggle" Width="24" Height="24" MinHeight="24" Click="OnAddTrack"
-                      AutomationProperties.Name="{DynamicResource command.track.add}" ToolTip.Tip="{DynamicResource command.track.add}">
-                <c:DawIcon Data="{StaticResource icon-plus}" Width="12" Height="12"
-                      Fill="{Binding $parent[Button].Foreground}"/>
-              </Button>
-              <Button Grid.Column="2" Classes="panelToggle" Click="OnCollapseTracksPanel"
-                      AutomationProperties.Name="{DynamicResource panel.collapse.tracks}" ToolTip.Tip="{DynamicResource panel.collapse.tracks}">
-                <c:DawIcon Data="{StaticResource icon-chevron-left}" Width="12" Height="12"
-                      Fill="{Binding $parent[Button].Foreground}"/>
-              </Button>
-            </Grid>
-            <c:TrackHeaderCanvas Grid.Row="2" ClipToBounds="True" Background="Transparent"
-                                DataContext="{Binding TracksViewModel}"
-                                TrackHeight="{Binding TrackHeight}"
-                                TrackOffset="{Binding TrackOffset}"
-                                Items="{Binding Tracks}"
-                                PointerWheelChanged="MainPagePointerWheelChanged"/>
-          </Grid>
-        </Border>
-        </Border>
-
-        <!-- ── 左分隔条（面板在其**左侧** ⇒ Invert=false：向右拖 = 轨头变宽；双击复位 248） ── -->
-        <c:PanelSplitter Grid.Column="1" x:Name="TracksPanelSplitter"
-                         IsVisible="{Binding TracksPanelVisible}"
-                         PanelColumn="0"
-                         Invert="False"
-                         Target="{Binding TracksPanel.Width, Mode=TwoWay}"
-                         Min="{Binding TracksPanel.MinWidth}"
-                         Max="{Binding TracksPanel.MaxWidth}"
-                         DefaultWidth="{Binding TracksPanel.DefaultWidth}"
-                         CenterMin="320"
-                         DragCompleted="OnPanelSplitterDragCompleted"
-                         ToolTip.Tip="{DynamicResource panel.drag.hint}"/>
-
-        <!-- ── 折叠处「快捷展开」边缘标签（W34 / 设计稿 §8）：**overlay** ——
+          <Grid Grid.Row="1" Name="EditorToolsLayout">
+            <Grid.RowDefinitions>
+              <RowDefinition Height="*" MinHeight="120"/>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="0"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" x:Name="MainLayout" ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+              <!-- ── 左：轨道头（仅工作台视图；面板本体带宽度绑定 + 折叠可见性） ── -->
+              <Border Grid.Column="0" IsVisible="{Binding ViewSwitcher.ShowWorkspace}">
+                <!-- 面板容器：宽与显隐都取自分隔条（夹紧后的有效宽 / 放不下自动折叠），不直接绑 VM 的意图值 -->
+                <Border x:Name="TracksPanelHost" Width="{Binding #TracksPanelSplitter.PanelWidth}" IsVisible="{Binding #TracksPanelSplitter.PanelShown}" Background="{DynamicResource md3.surface-container-low}" BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,1,0">
+                  <Grid RowDefinitions="34,16,*">
+                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="12,0">
+                      <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <TextBlock Text="{DynamicResource tracks.panel.title}" FontSize="{DynamicResource Md3TypeLabelSmall}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource md3.on-surface-variant}"/>
+                        <TextBlock Text="{Binding TracksViewModel.Tracks.Count}" FontSize="10" FontFamily="{DynamicResource PlusFontFamilyMono}" Foreground="{DynamicResource md3.primary}" VerticalAlignment="Center"/>
+                      </StackPanel>
+                      <Button Grid.Column="1" Classes="panelToggle" Width="24" Height="24" MinHeight="24" Click="OnAddTrack" AutomationProperties.Name="{DynamicResource command.track.add}" ToolTip.Tip="{DynamicResource command.track.add}">
+                        <c:DawIcon Data="{StaticResource icon-plus}" Width="12" Height="12" Fill="{Binding $parent[Button].Foreground}"/>
+                      </Button>
+                      <Button Grid.Column="2" Classes="panelToggle" Click="OnCollapseTracksPanel" AutomationProperties.Name="{DynamicResource panel.collapse.tracks}" ToolTip.Tip="{DynamicResource panel.collapse.tracks}">
+                        <c:DawIcon Data="{StaticResource icon-chevron-left}" Width="12" Height="12" Fill="{Binding $parent[Button].Foreground}"/>
+                      </Button>
+                    </Grid>
+                    <c:TrackHeaderCanvas Grid.Row="2" ClipToBounds="True" Background="Transparent" DataContext="{Binding TracksViewModel}" TrackHeight="{Binding TrackHeight}" TrackOffset="{Binding TrackOffset}" Items="{Binding Tracks}" PointerWheelChanged="MainPagePointerWheelChanged"/>
+                  </Grid>
+                </Border>
+              </Border>
+              <!-- ── 左分隔条（面板在其**左侧** ⇒ Invert=false：向右拖 = 轨头变宽；双击复位 248） ── -->
+              <c:PanelSplitter Grid.Column="1" x:Name="TracksPanelSplitter" IsVisible="{Binding TracksPanelVisible}" PanelColumn="0" Invert="False" Target="{Binding TracksPanel.Width, Mode=TwoWay}" Min="{Binding TracksPanel.MinWidth}" Max="{Binding TracksPanel.MaxWidth}" DefaultWidth="{Binding TracksPanel.DefaultWidth}" CenterMin="320" DragCompleted="OnPanelSplitterDragCompleted" ToolTip.Tip="{DynamicResource panel.drag.hint}"/>
+              <!-- ── 折叠处「快捷展开」边缘标签（W34 / 设计稿 §8）：**overlay** ——
              铺在中央列之上（Panel 无背景 ⇒ 自身不吃点击，只有标签可命中），
              标签 14×48 圆角 8，悬停/聚焦展开到 92×48 显示面板名；
              左列标签贴左边、向右展开；右列标签贴右边、向左展开（与面板头 chevron 镜像）。
@@ -361,638 +280,387 @@
              ⚠ **必须声明在中央区之后**（本文件靠后处）并带 `ZIndex`：z 序 = 声明顺序，而中央区是
              不透明的 `Background=md3.surface`，声明在它前面的 overlay 会被整块盖住（真机表现：
              标签既看不见、也命中不到 —— W44 验收 FAIL 的根因）。 ── -->
-        <!-- 实际声明位置在本文件靠后（MainLayout 末尾），见那里的同名注释 -->
-
-        <!-- ── 中：编排区（工作台视图：标尺 34 / 横向滚动 16 / 轨道区）── -->
-        <Grid Grid.Column="2" ColumnDefinitions="*,8" Background="{DynamicResource md3.surface}"
-              IsVisible="{Binding ViewSwitcher.ShowWorkspace}">
-          <Grid Grid.Row="0" Grid.Column="0" x:Name="ArrangementArea">
-            <!-- 标尺 34 / 横向滚动 16 / 轨道区（与外壳契约 MainWindowShellTests 同形） -->
-            <Grid.RowDefinitions>
-              <RowDefinition Height="34"/>
-              <RowDefinition Height="16"/>
-              <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <ScrollBar Name="HScrollBar" Classes="music" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                      Margin="0,2,0,2" Orientation="Horizontal" AllowAutoHide="False"
-                      DataContext="{Binding TracksViewModel}"
-                      Maximum="{Binding HScrollBarMax, Mode=OneWay}"
-                      Value="{Binding TickOffset}"
-                      ViewportSize="{Binding ViewportTicks}"
-                      LargeChange="{Binding ViewportTicks}"
-                      SmallChange="{Binding SmallChangeX}" PointerWheelChanged="HScrollPointerWheelChanged"/>
-            <Canvas Name="TimelineCanvas" Grid.Row="0" Grid.Column="0"
-                    Background="Transparent" ClipToBounds="True"
-                    PointerWheelChanged="TimelinePointerWheelChanged"
-                    PointerPressed="TimelinePointerPressed"
-                    PointerMoved="TimelinePointerMoved"
-                    PointerReleased="TimelinePointerReleased"
-                    DoubleTapped="TimelineDoubleTapped">
-              <Path Name="PlayPos"
-                    Canvas.Left="{Binding TracksViewModel.PlayPosX}"
-                    Canvas.Top="0" ZIndex="100" IsHitTestVisible="False"
-                    Fill="{DynamicResource NeutralAccentBrushSemi}"
-                    Data="M -6.5 0 L 6.5 0 L 6.5 3 L 0 9 L -6.5 3 Z"/>
-              <Canvas.ContextMenu>
-                <ContextMenu Name="TimelineContextMenu" ItemsSource="{Binding TimelineContextMenuItems}">
-                  <ContextMenu.Styles>
-                    <Style Selector="MenuItem">
-                      <Setter Property="Header" Value="{Binding Header}"/>
-                      <Setter Property="Command" Value="{Binding Command}"/>
-                      <Setter Property="CommandParameter" Value="{Binding CommandParameter}"/>
-                      <Setter Property="ItemsSource" Value="{Binding Items}"/>
-                    </Style>
-                  </ContextMenu.Styles>
-                </ContextMenu>
-              </Canvas.ContextMenu>
-            </Canvas>
-            <c:TrackBackground Grid.Row="2" Grid.Column="0" Margin="0" IsHitTestVisible="False"
-                              Foreground="{DynamicResource TrackBackgroundAltBrush}"
-                              DataContext="{Binding TracksViewModel}"
-                              Bounds="{Binding Bounds, Mode=OneWayToSource}"
-                              TrackHeight="{Binding TrackHeight}"
-                              TrackOffset="{Binding TrackOffset}"/>
-            <c:TickBackground Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" Margin="0" IsHitTestVisible="False"
-                              Foreground="{DynamicResource TickLineBrush}"
-                              Background="{DynamicResource TickLineBrushLow}"
-                              Resolution="{Binding PlaybackViewModel.Resolution}"
-                              TickWidth="{Binding TracksViewModel.TickWidth}"
-                              TickOffset="{Binding TracksViewModel.TickOffset}"
-                              SnapDiv="{Binding TracksViewModel.SnapDiv}"
-                              SnapTicks="{Binding TracksViewModel.SnapTicks}"
-                              ShowBar="True"/>
-            <c:PartsCanvas x:Name="partsCanvas" Grid.Row="2" Grid.Column="0" ClipToBounds="True" Background="Transparent"
-                          DataContext="{Binding TracksViewModel}"
-                          TickWidth="{Binding TickWidth}"
-                          TrackHeight="{Binding TrackHeight}"
-                          TickOffset="{Binding TickOffset}"
-                          TrackOffset="{Binding TrackOffset}"
-                          PianoRollOpenPart="{Binding PianoRollOpenPart}"
-                          PianoRollViewTickOffset="{Binding PianoRollViewTickOffset}"
-                          PianoRollViewViewportTicks="{Binding PianoRollViewViewportTicks}"
-                          Items="{Binding Parts}"
-                          PointerPressed="PartsCanvasPointerPressed"
-                          PointerMoved="PartsCanvasPointerMoved"
-                          PointerReleased="PartsCanvasPointerReleased"
-                          PointerCaptureLost="PartsCanvasCaptureLost"
-                          DoubleTapped="PartsCanvasDoubleTapped"
-                          PointerWheelChanged="MainPagePointerWheelChanged">
-              <Rectangle Name="PlayPosHighlight"
-                        Width="{Binding PlayPosHighlightWidth, Mode=OneWay}"
-                        Height="{Binding $parent.Bounds.Height, Mode=OneWay}"
-                        Canvas.Left="{Binding PlayPosHighlightX, Mode=OneWay}"
-                        Canvas.Top="0"
-                        Fill="{DynamicResource NeutralAccentBrushSemi2}"
-                        IsVisible="{Binding $parent[Window].DataContext.PlaybackViewModel.ShowPlayPosHighlight}"
-                        IsHitTestVisible="False"/>
-              <Rectangle Name="PlayPosLine"
-                         Canvas.Left="{Binding PlayPosX}"
-                         Canvas.Top="0" Width="1"
-                         Height="{Binding $parent.Bounds.Height, Mode=OneWay}"
-                         ZIndex="99" IsHitTestVisible="False"
-                         IsVisible="{Binding $parent[Window].DataContext.PlaybackViewModel.IsPlaying}"
-                         Fill="{DynamicResource AccentBrush2}"/>
-              <Rectangle Name="SelectionBox" StrokeThickness="2"
-                         Stroke="{DynamicResource SystemControlForegroundBaseHighBrush}"
-                         Fill="{DynamicResource TickLineBrushLow}" ZIndex="1000"
-                         IsHitTestVisible="False" IsVisible="False"/>
-              <c:PartsCanvas.ContextMenu>
-                <ContextMenu Name="PartsContextMenu"
-                            Opening="PartsContextMenuOpening"
-                            Closing="PartsContextMenuClosing">
-                  <MenuItem Header="{DynamicResource context.part.delete}"
-                            Command="{Binding PartDeleteCommand}"
-                            CommandParameter="{Binding Part}"/>
-                  <MenuItem Header="{DynamicResource context.part.gotofile}"
-                            IsVisible="{Binding IsWavePart}"
-                            Command="{Binding PartGotoFileCommand}"
-                            CommandParameter="{Binding Part}"/>
-                  <MenuItem Header="{DynamicResource context.part.replaceaudio}"
-                            IsVisible="{Binding IsWavePart}"
-                            Command="{Binding PartReplaceAudioCommand}"
-                            CommandParameter="{Binding Part}"/>
-                  <MenuItem Header="{DynamicResource context.part.transcribe}"
-                            IsVisible="{Binding IsWavePart}"
-                            Command="{Binding PartTranscribeCommand}"
-                            CommandParameter="{Binding Part}"/>
-                  <MenuItem Header="{DynamicResource context.part.rename}"
-                            IsVisible="{Binding IsVoicePart}"
-                            Command="{Binding PartRenameCommand}"
-                            CommandParameter="{Binding Part}"/>
-                  <MenuItem Header="{DynamicResource context.part.merge}"
-                            IsVisible="{Binding IsVoicePart}"
-                            Command="{Binding PartMergeCommand}"
-                            CommandParameter="{Binding Part}"/>
-                  <MenuItem Header="{DynamicResource context.part.split}"
-                            IsVisible="{Binding IsVoicePart}"
-                            Command="{Binding PartSplitCommand}"
-                            CommandParameter="{Binding Part}"/>
-                  <MenuItem Header="{DynamicResource context.part.applypitch}"
-                            IsVisible="{Binding IsVoicePart}"
-                            ItemsSource="{Binding PartApplyPitchMenuItems}"
-                            Classes="MenuItemWithSubMenu"/>
-                </ContextMenu>
-              </c:PartsCanvas.ContextMenu>
-            </c:PartsCanvas>
-            <Border Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent"
-                    ClipToBounds="True" IsHitTestVisible="False">
-              <Border HorizontalAlignment="Center" VerticalAlignment="Center" Padding="10,5"
-                      IsVisible="{Binding TracksViewModel.PlayPosWaitingRendering}" Background="{DynamicResource BackgroundBrushSemi}">
-                <TextBlock Text="{DynamicResource progress.waitingrendering}" FontSize="{DynamicResource Md3TypeTitleMedium}"/>
-              </Border>
-            </Border>
-          </Grid>
-
-          <!-- 轨道区纵向滚动条 -->
-          <ScrollBar Name="VScrollBar" Grid.Column="1" Classes="music" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                    Margin="0,50,0,0" Orientation="Vertical" AllowAutoHide="False"
-                    DataContext="{Binding TracksViewModel}"
-                    Maximum="{Binding VScrollBarMax, Mode=OneWay}"
-                    Value="{Binding TrackOffset}"
-                    ViewportSize="{Binding ViewportTracks}"
-                    LargeChange="{Binding ViewportTracks}"
-                    SmallChange="{Binding SmallChangeY}" PointerWheelChanged="VScrollPointerWheelChanged"/>
-        </Grid>
-
-        <!-- ── 右分隔条（面板在其**右侧** ⇒ Invert=true：向右拖 = 素材库变窄；双击复位 272） ── -->
-        <c:PanelSplitter Grid.Column="3" x:Name="LibraryPanelSplitter"
-                         IsVisible="{Binding LibraryPanelVisible}"
-                         PanelColumn="4"
-                         Invert="True"
-                         Target="{Binding LibraryPanel.Width, Mode=TwoWay}"
-                         Min="{Binding LibraryPanel.MinWidth}"
-                         Max="{Binding LibraryPanel.MaxWidth}"
-                         DefaultWidth="{Binding LibraryPanel.DefaultWidth}"
-                         CenterMin="320"
-                         DragCompleted="OnPanelSplitterDragCompleted"
-                         ToolTip.Tip="{DynamicResource panel.drag.hint}"/>
-
-        <!-- ── 右：素材库 272（表头 44 / 页签 40 / 内容；工作台与混音台可见 —— 混音台里要能拖插件进链面板）── -->
-        <Border Grid.Column="4" IsVisible="{Binding ViewSwitcher.ShowLibrary}">
-        <Border x:Name="LibraryPanelHost" Width="{Binding #LibraryPanelSplitter.PanelWidth}"
-                IsVisible="{Binding #LibraryPanelSplitter.PanelShown}"
-                Background="{DynamicResource md3.surface-container-low}"
-                BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="1,0,0,0">
-          <Grid RowDefinitions="40,36,*">
-            <!-- 表头 -->
-            <Border Grid.Row="0" BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1">
-              <Grid ColumnDefinitions="*,Auto,Auto" Margin="12,0">
-              <TextBlock Text="{DynamicResource sidebar.library}" FontSize="{DynamicResource Md3TypeLabelSmall}" FontWeight="SemiBold"
-                         VerticalAlignment="Center"
-                         Foreground="{DynamicResource md3.on-surface-variant}"/>
-              <Button Grid.Column="1" Classes="panelToggle" Width="24" Height="24" MinHeight="24" VerticalAlignment="Center"
-                      AutomationProperties.Name="{DynamicResource sidebar.refresh}" ToolTip.Tip="{DynamicResource sidebar.refresh}">
-                <Button.Flyout>
-                  <MenuFlyout Placement="BottomEdgeAlignedRight">
-                    <MenuItem Header="{DynamicResource sidebar.refresh}" Click="OnRefreshSingers"/>
-                    <MenuItem Header="{DynamicResource sidebar.refresh}" Click="OnRefreshSamples"/>
-                    <MenuItem Header="{DynamicResource menu.tools.singer.install}" Click="OnMenuInstallSinger"/>
-                    <MenuItem Header="{DynamicResource menu.tools.packages}" Click="OnMenuPackageManager"/>
-                  </MenuFlyout>
-                </Button.Flyout>
-                <c:DawIcon Data="{StaticResource icon-list}" Width="14" Height="14"
-                      Fill="{Binding $parent[Button].Foreground}"/>
-              </Button>
-              <Button Grid.Column="2" Classes="panelToggle" Click="OnCollapseLibraryPanel"
-                      AutomationProperties.Name="{DynamicResource panel.collapse.library}" ToolTip.Tip="{DynamicResource panel.collapse.library}">
-                <c:DawIcon Data="{StaticResource icon-chevron-right}" Width="12" Height="12"
-                      Fill="{Binding $parent[Button].Foreground}"/>
-              </Button>
-              </Grid>
-            </Border>
-
-            <!-- 页签：音源 / 音频 / MIDI / 效果器 -->
-            <Grid x:Name="LibraryTabs" Grid.Row="1" ColumnDefinitions="*,*,*,*" Margin="8,0"
-                        VerticalAlignment="Center">
-              <Button Grid.Column="0" x:Name="SingersTab" Classes="libTab selected" Click="OnShowSingers"
-                      Content="{DynamicResource sidebar.singers}"/>
-              <Button Grid.Column="1" x:Name="SamplesTab" Classes="libTab" Click="OnShowSamples"
-                      Content="{DynamicResource sidebar.samples}"/>
-              <Button Grid.Column="2" x:Name="MidiTab" Classes="libTab" Click="OnShowMidi"
-                      Content="{DynamicResource sidebar.midi}"/>
-              <Button Grid.Column="3" x:Name="EffectsTab" Classes="libTab" Click="OnShowVst"
-                      Content="{DynamicResource sidebar.effects}"/>
-            </Grid>
-
-            <!-- 内容：音源 / 音频 / MIDI / 效果器 -->
-            <Grid Grid.Row="2" Margin="12,0,12,0">
-              <!-- 音源（歌手） -->
-              <Grid x:Name="SingersPanel" RowDefinitions="Auto,*">
-                <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,2">
-                  <TextBlock Classes="sideHeading" Text="{DynamicResource sidebar.singers}"/>
-                  <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24" MinHeight="24" Click="OnRefreshSingers"
-                          AutomationProperties.Name="{DynamicResource sidebar.refresh}" ToolTip.Tip="{DynamicResource sidebar.refresh}">
-                    <c:DawIcon Data="{StaticResource icon-refresh-cw}" Width="12" Height="12"
-                          Fill="{Binding $parent[Button].Foreground}"/>
-                  </Button>
-                </Grid>
-                <ListBox Grid.Row="1" ItemsSource="{Binding Singers}" Background="Transparent"
-                         BorderThickness="0" IsVisible="{Binding HasSingers}">
-                  <ListBox.Styles>
-                    <Style Selector="ListBoxItem">
-                      <Setter Property="Padding" Value="0"/>
-                      <Setter Property="MinHeight" Value="56"/>
-                    </Style>
-                  </ListBox.Styles>
-                  <ListBox.ItemTemplate>
-                    <DataTemplate x:DataType="vm:SingerItem">
-                      <Border Classes="sideItem singer" DoubleTapped="OnSingerDoubleTap"
-                              PointerPressed="OnSidebarPointerPressed" PointerMoved="OnSidebarPointerMoved">
-                        <Grid RowDefinitions="*,Auto" Background="Transparent">
-                          <Grid Grid.Row="0" ColumnDefinitions="34,8,*" Background="Transparent">
-                            <Border Grid.Column="0" Width="34" Height="34" CornerRadius="{DynamicResource Md3ShapeSmall}"
-                                    ClipToBounds="True" Background="{DynamicResource md3.surface-container-high}"
-                                    VerticalAlignment="Center">
-                              <Panel>
-                                <Image Source="{Binding Avatar}" Width="34" Height="34" Stretch="UniformToFill"/>
-                                <TextBlock Text="{Binding AvatarFallback}" FontSize="{DynamicResource Md3TypeBodyLarge}" FontWeight="SemiBold"
-                                           Foreground="{DynamicResource md3.on-surface-variant}"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                           IsVisible="{Binding ShowAvatarFallback}"/>
-                              </Panel>
-                            </Border>
-                            <TextBlock Grid.Column="2" FontSize="{DynamicResource Md3TypeBodySmall}" VerticalAlignment="Center"
-                                       Foreground="{DynamicResource md3.on-surface}"
-                                       Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
-                          </Grid>
-                          <TextBlock Grid.Row="1" FontSize="{DynamicResource Md3TypeLabelTiny}" Margin="42,0,0,0"
-                                     Foreground="{DynamicResource md3.on-surface-variant}"
-                                     Text="{Binding SingerTypeText}"/>
-                        </Grid>
-                      </Border>
-                    </DataTemplate>
-                  </ListBox.ItemTemplate>
-                </ListBox>
-                <StackPanel Grid.Row="1" IsVisible="{Binding !HasSingers}">
-                  <Border Classes="sideCard">
-                    <StackPanel>
-                      <c:DawIcon Data="{StaticResource icon-mic}" Width="14" Height="14"
-                            Fill="{DynamicResource md3.on-surface-variant}"
-                            HorizontalAlignment="Left" Margin="0,0,0,6"/>
-                      <TextBlock FontSize="{DynamicResource Md3TypeLabelSmall}" TextWrapping="Wrap"
-                                 Foreground="{DynamicResource md3.on-surface-variant}"
-                                 Text="{DynamicResource sidebar.singers.empty}"/>
-                    </StackPanel>
+              <!-- 实际声明位置在本文件靠后（MainLayout 末尾），见那里的同名注释 -->
+              <!-- ── 中：编排区（工作台视图：标尺 34 / 横向滚动 16 / 轨道区）── -->
+              <Grid Grid.Column="2" ColumnDefinitions="*,8" Background="{DynamicResource md3.surface}" IsVisible="{Binding ViewSwitcher.ShowWorkspace}">
+                <Grid Grid.Row="0" Grid.Column="0" x:Name="ArrangementArea">
+                  <!-- 标尺 34 / 横向滚动 16 / 轨道区（与外壳契约 MainWindowShellTests 同形） -->
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="34"/>
+                    <RowDefinition Height="16"/>
+                    <RowDefinition Height="*"/>
+                  </Grid.RowDefinitions>
+                  <ScrollBar Name="HScrollBar" Classes="music" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,2,0,2" Orientation="Horizontal" AllowAutoHide="False" DataContext="{Binding TracksViewModel}" Maximum="{Binding HScrollBarMax, Mode=OneWay}" Value="{Binding TickOffset}" ViewportSize="{Binding ViewportTicks}" LargeChange="{Binding ViewportTicks}" SmallChange="{Binding SmallChangeX}" PointerWheelChanged="HScrollPointerWheelChanged"/>
+                  <Canvas Name="TimelineCanvas" Grid.Row="0" Grid.Column="0" Background="Transparent" ClipToBounds="True" PointerWheelChanged="TimelinePointerWheelChanged" PointerPressed="TimelinePointerPressed" PointerMoved="TimelinePointerMoved" PointerReleased="TimelinePointerReleased" DoubleTapped="TimelineDoubleTapped">
+                    <Path Name="PlayPos" Canvas.Left="{Binding TracksViewModel.PlayPosX}" Canvas.Top="0" ZIndex="100" IsHitTestVisible="False" Fill="{DynamicResource NeutralAccentBrushSemi}" Data="M -6.5 0 L 6.5 0 L 6.5 3 L 0 9 L -6.5 3 Z"/>
+                    <Canvas.ContextMenu>
+                      <ContextMenu Name="TimelineContextMenu" ItemsSource="{Binding TimelineContextMenuItems}">
+                        <ContextMenu.Styles>
+                          <Style Selector="MenuItem">
+                            <Setter Property="Header" Value="{Binding Header}"/>
+                            <Setter Property="Command" Value="{Binding Command}"/>
+                            <Setter Property="CommandParameter" Value="{Binding CommandParameter}"/>
+                            <Setter Property="ItemsSource" Value="{Binding Items}"/>
+                          </Style>
+                        </ContextMenu.Styles>
+                      </ContextMenu>
+                    </Canvas.ContextMenu>
+                  </Canvas>
+                  <c:TrackBackground Grid.Row="2" Grid.Column="0" Margin="0" IsHitTestVisible="False" Foreground="{DynamicResource TrackBackgroundAltBrush}" DataContext="{Binding TracksViewModel}" Bounds="{Binding Bounds, Mode=OneWayToSource}" TrackHeight="{Binding TrackHeight}" TrackOffset="{Binding TrackOffset}"/>
+                  <c:TickBackground Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" Margin="0" IsHitTestVisible="False" Foreground="{DynamicResource TickLineBrush}" Background="{DynamicResource TickLineBrushLow}" Resolution="{Binding PlaybackViewModel.Resolution}" TickWidth="{Binding TracksViewModel.TickWidth}" TickOffset="{Binding TracksViewModel.TickOffset}" SnapDiv="{Binding TracksViewModel.SnapDiv}" SnapTicks="{Binding TracksViewModel.SnapTicks}" ShowBar="True"/>
+                  <c:PartsCanvas x:Name="partsCanvas" Grid.Row="2" Grid.Column="0" ClipToBounds="True" Background="Transparent" DataContext="{Binding TracksViewModel}" TickWidth="{Binding TickWidth}" TrackHeight="{Binding TrackHeight}" TickOffset="{Binding TickOffset}" TrackOffset="{Binding TrackOffset}" PianoRollOpenPart="{Binding PianoRollOpenPart}" PianoRollViewTickOffset="{Binding PianoRollViewTickOffset}" PianoRollViewViewportTicks="{Binding PianoRollViewViewportTicks}" Items="{Binding Parts}" PointerPressed="PartsCanvasPointerPressed" PointerMoved="PartsCanvasPointerMoved" PointerReleased="PartsCanvasPointerReleased" PointerCaptureLost="PartsCanvasCaptureLost" DoubleTapped="PartsCanvasDoubleTapped" PointerWheelChanged="MainPagePointerWheelChanged">
+                    <Rectangle Name="PlayPosHighlight" Width="{Binding PlayPosHighlightWidth, Mode=OneWay}" Height="{Binding $parent.Bounds.Height, Mode=OneWay}" Canvas.Left="{Binding PlayPosHighlightX, Mode=OneWay}" Canvas.Top="0" Fill="{DynamicResource NeutralAccentBrushSemi2}" IsVisible="{Binding $parent[Window].DataContext.PlaybackViewModel.ShowPlayPosHighlight}" IsHitTestVisible="False"/>
+                    <Rectangle Name="PlayPosLine" Canvas.Left="{Binding PlayPosX}" Canvas.Top="0" Width="1" Height="{Binding $parent.Bounds.Height, Mode=OneWay}" ZIndex="99" IsHitTestVisible="False" IsVisible="{Binding $parent[Window].DataContext.PlaybackViewModel.IsPlaying}" Fill="{DynamicResource AccentBrush2}"/>
+                    <Rectangle Name="SelectionBox" StrokeThickness="2" Stroke="{DynamicResource SystemControlForegroundBaseHighBrush}" Fill="{DynamicResource TickLineBrushLow}" ZIndex="1000" IsHitTestVisible="False" IsVisible="False"/>
+                    <c:PartsCanvas.ContextMenu>
+                      <ContextMenu Name="PartsContextMenu" Opening="PartsContextMenuOpening" Closing="PartsContextMenuClosing">
+                        <MenuItem Header="{DynamicResource context.part.delete}" Command="{Binding PartDeleteCommand}" CommandParameter="{Binding Part}"/>
+                        <MenuItem Header="{DynamicResource context.part.gotofile}" IsVisible="{Binding IsWavePart}" Command="{Binding PartGotoFileCommand}" CommandParameter="{Binding Part}"/>
+                        <MenuItem Header="{DynamicResource context.part.replaceaudio}" IsVisible="{Binding IsWavePart}" Command="{Binding PartReplaceAudioCommand}" CommandParameter="{Binding Part}"/>
+                        <MenuItem Header="{DynamicResource context.part.transcribe}" IsVisible="{Binding IsWavePart}" Command="{Binding PartTranscribeCommand}" CommandParameter="{Binding Part}"/>
+                        <MenuItem Header="{DynamicResource context.part.rename}" IsVisible="{Binding IsVoicePart}" Command="{Binding PartRenameCommand}" CommandParameter="{Binding Part}"/>
+                        <MenuItem Header="{DynamicResource context.part.merge}" IsVisible="{Binding IsVoicePart}" Command="{Binding PartMergeCommand}" CommandParameter="{Binding Part}"/>
+                        <MenuItem Header="{DynamicResource context.part.split}" IsVisible="{Binding IsVoicePart}" Command="{Binding PartSplitCommand}" CommandParameter="{Binding Part}"/>
+                        <MenuItem Header="{DynamicResource context.part.applypitch}" IsVisible="{Binding IsVoicePart}" ItemsSource="{Binding PartApplyPitchMenuItems}" Classes="MenuItemWithSubMenu"/>
+                      </ContextMenu>
+                    </c:PartsCanvas.ContextMenu>
+                  </c:PartsCanvas>
+                  <Border Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent" ClipToBounds="True" IsHitTestVisible="False">
+                    <Border HorizontalAlignment="Center" VerticalAlignment="Center" Padding="10,5" IsVisible="{Binding TracksViewModel.PlayPosWaitingRendering}" Background="{DynamicResource BackgroundBrushSemi}">
+                      <TextBlock Text="{DynamicResource progress.waitingrendering}" FontSize="{DynamicResource Md3TypeTitleMedium}"/>
+                    </Border>
                   </Border>
-                </StackPanel>
-              </Grid>
-
-              <!-- 音频（伴奏库） -->
-              <Grid x:Name="SamplesPanel" IsVisible="False" RowDefinitions="Auto,*">
-                <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,2">
-                  <TextBlock Classes="sideHeading" Text="{DynamicResource sidebar.samples}"/>
-                  <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24" MinHeight="24" Click="OnRefreshSamples"
-                          AutomationProperties.Name="{DynamicResource sidebar.refresh}" ToolTip.Tip="{DynamicResource sidebar.refresh}">
-                    <c:DawIcon Data="{StaticResource icon-refresh-cw}" Width="12" Height="12"
-                          Fill="{Binding $parent[Button].Foreground}"/>
-                  </Button>
                 </Grid>
-                <ListBox Grid.Row="1" ItemsSource="{Binding Samples}" Background="Transparent"
-                         BorderThickness="0" IsVisible="{Binding HasSamples}">
-                  <ListBox.ItemTemplate>
-                    <DataTemplate x:DataType="vm:SampleItem">
-                      <Border Classes="sideItem small" DoubleTapped="OnSampleDoubleTap"
-                              PointerPressed="OnSidebarPointerPressed" PointerMoved="OnSidebarPointerMoved">
-                        <Grid ColumnDefinitions="26,8,*,Auto,4,Auto" Background="Transparent">
-                          <Border Grid.Column="0" Width="26" Height="26" CornerRadius="{DynamicResource Md3DawCornerRadius}"
-                                  Background="{DynamicResource md3.surface-container-high}" HorizontalAlignment="Left">
-                            <c:DawIcon Data="{StaticResource icon-music}" Width="13" Height="13"
-                                  Fill="{DynamicResource md3.on-surface-variant}"
-                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                          </Border>
-                          <TextBlock Grid.Column="2" FontSize="{DynamicResource Md3TypeBodySmall}" VerticalAlignment="Center"
-                                     Foreground="{DynamicResource md3.on-surface}"
-                                     Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
-                          <Border Grid.Column="3" Background="{DynamicResource md3.secondary-container}"
-                                  CornerRadius="{DynamicResource Md3ShapeExtraSmall}" Padding="4,1" VerticalAlignment="Center">
-                            <TextBlock FontSize="{DynamicResource Md3DawTypeReadout}" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource md3.on-secondary-container}"
-                                       Text="{Binding Format}"/>
-                          </Border>
-                          <Button Grid.Column="5" Classes="iconBtn" Width="26" Height="26" MinHeight="26" Margin="4,0,0,0"
-                                  Click="OnSamplePlay" AutomationProperties.Name="{DynamicResource sidebar.play}" ToolTip.Tip="{DynamicResource sidebar.play}">
-                            <Panel>
-                              <c:DawIcon Data="{StaticResource icon-play}" Width="11" Height="11"
-                                    Fill="{Binding $parent[Button].Foreground}"
-                                    IsVisible="{Binding !IsPreviewing}"/>
-                              <c:DawIcon Data="{StaticResource icon-stop}" Width="11" Height="11"
-                                    Fill="{DynamicResource md3.primary}"
-                                    IsVisible="{Binding IsPreviewing}"/>
-                            </Panel>
+                <!-- 轨道区纵向滚动条 -->
+                <ScrollBar Name="VScrollBar" Grid.Column="1" Classes="music" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,50,0,0" Orientation="Vertical" AllowAutoHide="False" DataContext="{Binding TracksViewModel}" Maximum="{Binding VScrollBarMax, Mode=OneWay}" Value="{Binding TrackOffset}" ViewportSize="{Binding ViewportTracks}" LargeChange="{Binding ViewportTracks}" SmallChange="{Binding SmallChangeY}" PointerWheelChanged="VScrollPointerWheelChanged"/>
+              </Grid>
+              <!-- ── 右分隔条（面板在其**右侧** ⇒ Invert=true：向右拖 = 素材库变窄；双击复位 272） ── -->
+              <c:PanelSplitter Grid.Column="3" x:Name="LibraryPanelSplitter" IsVisible="{Binding LibraryPanelVisible}" PanelColumn="4" Invert="True" Target="{Binding LibraryPanel.Width, Mode=TwoWay}" Min="{Binding LibraryPanel.MinWidth}" Max="{Binding LibraryPanel.MaxWidth}" DefaultWidth="{Binding LibraryPanel.DefaultWidth}" CenterMin="320" DragCompleted="OnPanelSplitterDragCompleted" ToolTip.Tip="{DynamicResource panel.drag.hint}"/>
+              <!-- ── 右：素材库 272（表头 44 / 页签 40 / 内容；工作台与混音台可见 —— 混音台里要能拖插件进链面板）── -->
+              <Border Grid.Column="4" IsVisible="{Binding ViewSwitcher.ShowLibrary}">
+                <Border x:Name="LibraryPanelHost" Width="{Binding #LibraryPanelSplitter.PanelWidth}" IsVisible="{Binding #LibraryPanelSplitter.PanelShown}" Background="Transparent" BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0">
+                  <Border Name="LibrarySurface" Margin="8,12,12,12" CornerRadius="16" BorderThickness="1" BorderBrush="{DynamicResource md3.outline-variant}" Background="{DynamicResource md3.surface-container}" ClipToBounds="True">
+                    <Grid RowDefinitions="48,44,*">
+                      <!-- 表头 -->
+                      <Border Grid.Row="0" BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1">
+                        <Grid ColumnDefinitions="*,Auto,Auto" Margin="12,0">
+                          <TextBlock Text="{DynamicResource sidebar.library}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource md3.on-surface}"/>
+                          <Button Grid.Column="1" Classes="panelToggle" Width="24" Height="24" MinHeight="24" VerticalAlignment="Center" AutomationProperties.Name="{DynamicResource sidebar.refresh}" ToolTip.Tip="{DynamicResource sidebar.refresh}">
+                            <Button.Flyout>
+                              <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                <MenuItem Header="{DynamicResource frontend.library.refreshsingers}" Click="OnRefreshSingers"/>
+                                <MenuItem Header="{DynamicResource frontend.library.refreshsamples}" Click="OnRefreshSamples"/>
+                                <MenuItem Header="{DynamicResource menu.tools.singer.install}" Click="OnMenuInstallSinger"/>
+                                <MenuItem Header="{DynamicResource menu.tools.packages}" Click="OnMenuPackageManager"/>
+                              </MenuFlyout>
+                            </Button.Flyout>
+                            <c:DawIcon Data="{StaticResource icon-list}" Width="14" Height="14" Fill="{Binding $parent[Button].Foreground}"/>
+                          </Button>
+                          <Button Grid.Column="2" Classes="panelToggle" Click="OnCollapseLibraryPanel" AutomationProperties.Name="{DynamicResource panel.collapse.library}" ToolTip.Tip="{DynamicResource panel.collapse.library}">
+                            <c:DawIcon Data="{StaticResource icon-chevron-right}" Width="12" Height="12" Fill="{Binding $parent[Button].Foreground}"/>
                           </Button>
                         </Grid>
                       </Border>
-                    </DataTemplate>
-                  </ListBox.ItemTemplate>
-                </ListBox>
-                <StackPanel Grid.Row="1" IsVisible="{Binding !HasSamples}">
-                  <Border Classes="sideCard">
-                    <StackPanel>
-                      <c:DawIcon Data="{StaticResource icon-music}" Width="14" Height="14"
-                            Fill="{DynamicResource md3.on-surface-variant}"
-                            HorizontalAlignment="Left" Margin="0,0,0,6"/>
-                      <TextBlock FontSize="{DynamicResource Md3TypeLabelSmall}" TextWrapping="Wrap"
-                                 Foreground="{DynamicResource md3.on-surface-variant}"
-                                 Text="{DynamicResource sidebar.samples.empty}"/>
-                    </StackPanel>
-                  </Border>
-                </StackPanel>
-              </Grid>
-
-              <!-- MIDI（占位：本页尚未实现） -->
-              <StackPanel x:Name="MidiPanel" IsVisible="False" Spacing="{DynamicResource Md3Spacing2}">
-                <Border Classes="sideCard">
-                  <StackPanel>
-                    <c:DawIcon Data="{StaticResource icon-music}" Width="14" Height="14"
-                          Fill="{DynamicResource md3.on-surface-variant}"
-                          HorizontalAlignment="Left" Margin="0,0,0,6"/>
-                    <TextBlock FontSize="{DynamicResource Md3TypeLabelSmall}" TextWrapping="Wrap"
-                               Foreground="{DynamicResource md3.on-surface-variant}"
-                               Text="{DynamicResource sidebar.library.empty}"/>
-                  </StackPanel>
-                </Border>
-              </StackPanel>
-
-              <!-- 效果器（W4 / 决策 B6：插件浏览器 = 扫描结果 + 搜索 + 拖入效果链面板
-                   + 插件扫描路径管理（与「偏好设置 → VST」共用同一份 Preferences 字段，即时同步）） -->
-              <Grid x:Name="VstPanel" IsVisible="False" RowDefinitions="Auto,Auto,Auto,*"
-                    DataContext="{Binding PluginBrowser}">
-                <!-- 搜索框 36 胶囊 + 重新扫描 -->
-                <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,2,0,6">
-                  <Panel Grid.Column="0" Height="36">
-                    <TextBox x:Name="PluginSearchBox" Height="36" CornerRadius="{DynamicResource Md3ShapeFull}" Padding="30,0,10,0"
-                             FontSize="{DynamicResource Md3TypeLabelSmall}" VerticalContentAlignment="Center"
-                             Text="{Binding SearchText, Mode=TwoWay}"
-                             PlaceholderText="{DynamicResource sidebar.effects.search}"/>
-                    <c:DawIcon Data="{StaticResource icon-search}" Width="13" Height="13"
-                          Fill="{DynamicResource md3.on-surface-variant}" IsHitTestVisible="False"
-                          HorizontalAlignment="Left" VerticalAlignment="Center" Margin="11,0,0,0"/>
-                  </Panel>
-                  <Button Grid.Column="1" Classes="iconBtn" Width="36" Height="36" MinHeight="36" Margin="6,0,0,0"
-                          Click="OnRescanVstFromLibrary" AutomationProperties.Name="{DynamicResource prefs.vst.rescan}" ToolTip.Tip="{DynamicResource prefs.vst.rescan}">
-                    <c:DawIcon Data="{StaticResource icon-refresh-cw}" Width="13" Height="13"
-                          Fill="{Binding $parent[Button].Foreground}"/>
-                  </Button>
-                </Grid>
-
-                <!-- 计数 / 扫描中 + 路径管理开关 -->
-                <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,4">
-                  <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing1}"
-                              IsVisible="{Binding ShowCount}">
-                    <TextBlock Classes="sideHeading" Text="{Binding PluginCount}"/>
-                    <TextBlock Classes="sideHeading" Text="{DynamicResource sidebar.effects.countlabel}"/>
-                  </StackPanel>
-                  <TextBlock Grid.Column="0" Classes="sideHeading" IsVisible="{Binding IsScanning}"
-                             Text="{DynamicResource sidebar.effects.scanning}"/>
-                  <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24" MinHeight="24"
-                          Click="OnToggleVstPathManager"
-                          AutomationProperties.Name="{DynamicResource sidebar.effects.paths.manage}" ToolTip.Tip="{DynamicResource sidebar.effects.paths.manage}">
-                    <c:DawIcon Data="{StaticResource icon-folder}" Width="12" Height="12"
-                          Fill="{Binding $parent[Button].Foreground}"/>
-                  </Button>
-                </Grid>
-
-                <!-- 插件扫描路径（折叠面板；与偏好设置同一份数据） -->
-                <Border Grid.Row="2" x:Name="VstPathManager" Classes="sideCard" IsVisible="False"
-                        Margin="0,0,0,6">
-                  <StackPanel Spacing="{DynamicResource Md3Spacing2}">
-                    <TextBlock Classes="sideHeading" Margin="0"
-                               Text="{DynamicResource sidebar.effects.paths}"/>
-                    <ListBox x:Name="VstPathsList" Height="72" Background="Transparent" BorderThickness="0"
-                             ItemsSource="{Binding ScanPaths}"/>
-                    <Grid ColumnDefinitions="*,Auto,Auto">
-                      <TextBox Grid.Column="0" x:Name="LibraryNewVstPath" Height="28" FontSize="{DynamicResource Md3TypeLabelSmall}"
-                               VerticalContentAlignment="Center"
-                               Text="{Binding NewPath, Mode=TwoWay}"
-                               PlaceholderText="{DynamicResource sidebar.effects.paths.watermark}"/>
-                      <Button Grid.Column="1" Height="28" MinHeight="28" Padding="10,0" FontSize="{DynamicResource Md3TypeLabelSmall}" Margin="6,0,0,0"
-                              Content="{DynamicResource prefs.vst.add}"
-                              Click="OnAddVstPathFromLibrary"/>
-                      <Button Grid.Column="2" Height="28" MinHeight="28" Padding="10,0" FontSize="{DynamicResource Md3TypeLabelSmall}" Margin="6,0,0,0"
-                              Content="{DynamicResource prefs.vst.remove}"
-                              Click="OnRemoveVstPathFromLibrary"/>
-                    </Grid>
-                    <TextBlock FontSize="{DynamicResource Md3TypeLabelTiny}" TextWrapping="Wrap"
-                               Foreground="{DynamicResource md3.on-surface-variant}"
-                               Text="{DynamicResource sidebar.effects.paths.hint}"/>
-                  </StackPanel>
-                </Border>
-
-                <!-- 插件列表 + 空态 / 未找到 -->
-                <Grid Grid.Row="3">
-                  <ListBox x:Name="VstPluginList" ItemsSource="{Binding Plugins}" Background="Transparent"
-                           BorderThickness="0" IsVisible="{Binding HasPlugins}">
-                    <ListBox.Styles>
-                      <Style Selector="ListBoxItem">
-                        <Setter Property="Padding" Value="0"/>
-                        <Setter Property="MinHeight" Value="46"/>
-                      </Style>
-                    </ListBox.Styles>
-                    <ListBox.ItemTemplate>
-                      <DataTemplate x:DataType="vm:VstPluginItem">
-                        <!-- 拖拽源：PointerPressed/Moved → FxChainDragData（格式 OpenUtau.FxChainItem） -->
-                        <Border Classes="sideItem" Height="46" ToolTip.Tip="{Binding Path}"
-                                PointerPressed="OnPluginPointerPressed"
-                                PointerMoved="OnPluginPointerMoved">
-                          <Grid ColumnDefinitions="*,Auto">
-                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                              <TextBlock Text="{Binding Name}" FontSize="{DynamicResource Md3TypeBodySmall}" TextTrimming="CharacterEllipsis"
-                                         Foreground="{DynamicResource md3.on-surface}"/>
-                              <TextBlock Text="{Binding Vendor}" FontSize="{DynamicResource Md3TypeLabelTiny}" Margin="0,1,0,0"
-                                         TextTrimming="CharacterEllipsis"
-                                         IsVisible="{Binding HasVendor}"
-                                         Foreground="{DynamicResource md3.on-surface-variant}"/>
-                            </StackPanel>
-                            <Border Grid.Column="1" CornerRadius="{DynamicResource Md3DawCornerRadius}" Padding="6,2" Margin="6,0,0,0"
-                                    VerticalAlignment="Center"
-                                    Background="{DynamicResource md3.surface-container-high}">
-                              <TextBlock Text="{Binding Badge}" FontSize="{DynamicResource Md3DawTypeReadout}" FontWeight="SemiBold"
-                                         Foreground="{DynamicResource md3.on-surface-variant}"/>
-                            </Border>
+                      <!-- 页签：音源 / 音频 / MIDI / 效果器 -->
+                      <Grid x:Name="LibraryTabs" Grid.Row="1" ColumnDefinitions="*,*,*,*" Margin="8,0,8,8" VerticalAlignment="Center" ColumnSpacing="2">
+                        <Button Grid.Column="0" x:Name="SingersTab" Classes="libTab selected" Click="OnShowSingers" Content="{DynamicResource sidebar.singers}"/>
+                        <Button Grid.Column="1" x:Name="SamplesTab" Classes="libTab" Click="OnShowSamples" Content="{DynamicResource sidebar.samples}"/>
+                        <Button Grid.Column="2" x:Name="MidiTab" Classes="libTab" Click="OnShowMidi" Content="{DynamicResource sidebar.midi}"/>
+                        <Button Grid.Column="3" x:Name="EffectsTab" Classes="libTab" Click="OnShowVst" Content="{DynamicResource sidebar.effects}"/>
+                      </Grid>
+                      <!-- 内容：音源 / 音频 / MIDI / 效果器 -->
+                      <Grid Grid.Row="2" Margin="12,0,12,0">
+                        <!-- 音源（歌手） -->
+                        <Grid x:Name="SingersPanel" RowDefinitions="Auto,*">
+                          <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,2">
+                            <TextBlock Classes="sideHeading" Text="{DynamicResource sidebar.singers}"/>
+                            <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24" MinHeight="24" Click="OnRefreshSingers" AutomationProperties.Name="{DynamicResource sidebar.refresh}" ToolTip.Tip="{DynamicResource sidebar.refresh}">
+                              <c:DawIcon Data="{StaticResource icon-refresh-cw}" Width="12" Height="12" Fill="{Binding $parent[Button].Foreground}"/>
+                            </Button>
                           </Grid>
-                        </Border>
-                      </DataTemplate>
-                    </ListBox.ItemTemplate>
-                  </ListBox>
-
-                  <!-- 空态：一个效果器也没扫到（W11：给「添加标准路径并扫描」出口） -->
-                  <StackPanel IsVisible="{Binding ShowNoPlugins}">
-                    <Border Classes="sideCard">
-                      <StackPanel Spacing="{DynamicResource Md3Spacing2}">
-                        <c:DawIcon Data="{StaticResource icon-sliders}" Width="14" Height="14"
-                              Fill="{DynamicResource md3.on-surface-variant}"
-                              HorizontalAlignment="Left" Margin="0,0,0,2"/>
-                        <TextBlock FontSize="{DynamicResource Md3TypeLabelSmall}" TextWrapping="Wrap"
-                                   Foreground="{DynamicResource md3.on-surface-variant}"
-                                   Text="{DynamicResource sidebar.effects.empty}"/>
-                        <Button Height="28" MinHeight="28" FontSize="{DynamicResource Md3TypeLabelSmall}" Padding="10,0"
-                                HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-                                Content="{DynamicResource sidebar.effects.addstandard}"
-                                Click="OnAddStandardVstPathsFromLibrary"/>
-                      </StackPanel>
-                    </Border>
-                  </StackPanel>
-
-                  <!-- 未找到：有插件但没匹配上搜索词 -->
-                  <StackPanel IsVisible="{Binding ShowNoMatch}">
-                    <Border Classes="sideCard">
-                      <StackPanel>
-                        <c:DawIcon Data="{StaticResource icon-search}" Width="14" Height="14"
-                              Fill="{DynamicResource md3.on-surface-variant}"
-                              HorizontalAlignment="Left" Margin="0,0,0,6"/>
-                        <TextBlock FontSize="{DynamicResource Md3TypeLabelSmall}" TextWrapping="Wrap"
-                                   Foreground="{DynamicResource md3.on-surface-variant}"
-                                   Text="{DynamicResource sidebar.effects.nomatch}"/>
-                      </StackPanel>
-                    </Border>
-                  </StackPanel>
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Border>
-        </Border>
-
-        <!-- ── 视图 2/3：钢琴卷帘（铺满工作区行；进入仍是双击片段 A5，返回走顶栏胶囊「工作台」）──
+                          <ListBox Grid.Row="1" ItemsSource="{Binding Singers}" Background="Transparent" BorderThickness="0" IsVisible="{Binding HasSingers}">
+                            <ListBox.Styles>
+                              <Style Selector="ListBoxItem">
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="MinHeight" Value="56"/>
+                              </Style>
+                            </ListBox.Styles>
+                            <ListBox.ItemTemplate>
+                              <DataTemplate x:DataType="vm:SingerItem">
+                                <Border Classes="sideItem singer" DoubleTapped="OnSingerDoubleTap" PointerPressed="OnSidebarPointerPressed" PointerMoved="OnSidebarPointerMoved">
+                                  <Grid RowDefinitions="*,Auto" Background="Transparent">
+                                    <Grid Grid.Row="0" ColumnDefinitions="34,8,*" Background="Transparent">
+                                      <Border Grid.Column="0" Width="34" Height="34" CornerRadius="{DynamicResource Md3ShapeSmall}" ClipToBounds="True" Background="{DynamicResource md3.surface-container-high}" VerticalAlignment="Center">
+                                        <Panel>
+                                          <Image Source="{Binding Avatar}" Width="34" Height="34" Stretch="UniformToFill"/>
+                                          <TextBlock Text="{Binding AvatarFallback}" FontSize="{DynamicResource Md3TypeBodyLarge}" FontWeight="SemiBold" Foreground="{DynamicResource md3.on-surface-variant}" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding ShowAvatarFallback}"/>
+                                        </Panel>
+                                      </Border>
+                                      <TextBlock Grid.Column="2" FontSize="{DynamicResource Md3TypeBodySmall}" VerticalAlignment="Center" Foreground="{DynamicResource md3.on-surface}" Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                                    </Grid>
+                                    <TextBlock Grid.Row="1" FontSize="{DynamicResource Md3TypeLabelTiny}" Margin="42,0,0,0" Foreground="{DynamicResource md3.on-surface-variant}" Text="{Binding SingerTypeText}"/>
+                                  </Grid>
+                                </Border>
+                              </DataTemplate>
+                            </ListBox.ItemTemplate>
+                          </ListBox>
+                          <Grid Grid.Row="1" IsVisible="{Binding !HasSingers}">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                              <Border Classes="sideCard libraryEmpty">
+                                <StackPanel Spacing="10">
+                                  <Grid Width="44" Height="44" HorizontalAlignment="Left">
+                                    <c:MaterialShape Kind="Arch" Width="44" Height="44" Fill="{DynamicResource md3.secondary-container}" HorizontalAlignment="Stretch" IsHitTestVisible="False"/>
+                                    <c:DawIcon Data="{StaticResource icon-mic}" Width="20" Height="20" Fill="{DynamicResource md3.on-surface-variant}" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center"/>
+                                  </Grid>
+                                  <TextBlock FontSize="13" TextWrapping="Wrap" Foreground="{DynamicResource md3.on-surface}" Text="{DynamicResource sidebar.singers.empty}" FontWeight="SemiBold"/>
+                                  <TextBlock Text="{DynamicResource frontend.library.hint}" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource md3.on-surface-variant}"/>
+                                  <Button Classes="libraryAction" Content="{DynamicResource frontend.library.resources}" Click="OnOpenResources" HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+                              </Border>
+                            </ScrollViewer>
+                          </Grid>
+                        </Grid>
+                        <!-- 音频（伴奏库） -->
+                        <Grid x:Name="SamplesPanel" IsVisible="False" RowDefinitions="Auto,*">
+                          <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,2">
+                            <TextBlock Classes="sideHeading" Text="{DynamicResource sidebar.samples}"/>
+                            <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24" MinHeight="24" Click="OnRefreshSamples" AutomationProperties.Name="{DynamicResource sidebar.refresh}" ToolTip.Tip="{DynamicResource sidebar.refresh}">
+                              <c:DawIcon Data="{StaticResource icon-refresh-cw}" Width="12" Height="12" Fill="{Binding $parent[Button].Foreground}"/>
+                            </Button>
+                          </Grid>
+                          <ListBox Grid.Row="1" ItemsSource="{Binding Samples}" Background="Transparent" BorderThickness="0" IsVisible="{Binding HasSamples}">
+                            <ListBox.ItemTemplate>
+                              <DataTemplate x:DataType="vm:SampleItem">
+                                <Border Classes="sideItem small" DoubleTapped="OnSampleDoubleTap" PointerPressed="OnSidebarPointerPressed" PointerMoved="OnSidebarPointerMoved">
+                                  <Grid ColumnDefinitions="26,8,*,Auto,4,Auto" Background="Transparent">
+                                    <Border Grid.Column="0" Width="26" Height="26" CornerRadius="{DynamicResource Md3DawCornerRadius}" Background="{DynamicResource md3.surface-container-high}" HorizontalAlignment="Left">
+                                      <c:DawIcon Data="{StaticResource icon-music}" Width="13" Height="13" Fill="{DynamicResource md3.on-surface-variant}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <TextBlock Grid.Column="2" FontSize="{DynamicResource Md3TypeBodySmall}" VerticalAlignment="Center" Foreground="{DynamicResource md3.on-surface}" Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                                    <Border Grid.Column="3" Background="{DynamicResource md3.secondary-container}" CornerRadius="{DynamicResource Md3ShapeExtraSmall}" Padding="4,1" VerticalAlignment="Center">
+                                      <TextBlock FontSize="{DynamicResource Md3DawTypeReadout}" FontWeight="SemiBold" Foreground="{DynamicResource md3.on-secondary-container}" Text="{Binding Format}"/>
+                                    </Border>
+                                    <Button Grid.Column="5" Classes="iconBtn" Width="26" Height="26" MinHeight="26" Margin="4,0,0,0" Click="OnSamplePlay" AutomationProperties.Name="{DynamicResource sidebar.play}" ToolTip.Tip="{DynamicResource sidebar.play}">
+                                      <Panel>
+                                        <c:DawIcon Data="{StaticResource icon-play}" Width="11" Height="11" Fill="{Binding $parent[Button].Foreground}" IsVisible="{Binding !IsPreviewing}"/>
+                                        <c:DawIcon Data="{StaticResource icon-stop}" Width="11" Height="11" Fill="{DynamicResource md3.primary}" IsVisible="{Binding IsPreviewing}"/>
+                                      </Panel>
+                                    </Button>
+                                  </Grid>
+                                </Border>
+                              </DataTemplate>
+                            </ListBox.ItemTemplate>
+                          </ListBox>
+                          <Grid Grid.Row="1" IsVisible="{Binding !HasSamples}">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                              <Border Classes="sideCard libraryEmpty">
+                                <StackPanel Spacing="10">
+                                  <Grid Width="44" Height="44" HorizontalAlignment="Left">
+                                    <c:MaterialShape Kind="Arch" Width="44" Height="44" Fill="{DynamicResource md3.secondary-container}" HorizontalAlignment="Stretch" IsHitTestVisible="False"/>
+                                    <c:DawIcon Data="{StaticResource icon-music}" Width="20" Height="20" Fill="{DynamicResource md3.on-surface-variant}" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center"/>
+                                  </Grid>
+                                  <TextBlock FontSize="13" TextWrapping="Wrap" Foreground="{DynamicResource md3.on-surface}" Text="{DynamicResource sidebar.samples.empty}" FontWeight="SemiBold"/>
+                                  <TextBlock Text="{DynamicResource frontend.library.hint}" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource md3.on-surface-variant}"/>
+                                  <Button Classes="libraryAction" Content="{DynamicResource menu.file.importaudio}" Click="OnMenuImportAudio" HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+                              </Border>
+                            </ScrollViewer>
+                          </Grid>
+                        </Grid>
+                        <!-- MIDI（占位：本页尚未实现） -->
+                        <Grid x:Name="MidiPanel" IsVisible="False">
+                          <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <Border Classes="sideCard libraryEmpty">
+                              <StackPanel Spacing="10">
+                                <Grid Width="44" Height="44" HorizontalAlignment="Left">
+                                  <c:MaterialShape Kind="Arch" Width="44" Height="44" Fill="{DynamicResource md3.secondary-container}" HorizontalAlignment="Stretch" IsHitTestVisible="False"/>
+                                  <c:DawIcon Data="{StaticResource icon-music}" Width="20" Height="20" Fill="{DynamicResource md3.on-surface-variant}" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center"/>
+                                </Grid>
+                                <TextBlock FontSize="13" TextWrapping="Wrap" Foreground="{DynamicResource md3.on-surface}" Text="{DynamicResource sidebar.library.empty}" FontWeight="SemiBold"/>
+                                <TextBlock Text="{DynamicResource frontend.library.hint}" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource md3.on-surface-variant}"/>
+                                <Button Classes="libraryAction" Content="{DynamicResource menu.file.importtracks}" Click="OnMenuImportTracks" HorizontalAlignment="Stretch"/>
+                              </StackPanel>
+                            </Border>
+                          </ScrollViewer>
+                        </Grid>
+                        <!-- 效果器（W4 / 决策 B6：插件浏览器 = 扫描结果 + 搜索 + 拖入效果链面板
+                   + 插件扫描路径管理（与「偏好设置 → VST」共用同一份 Preferences 字段，即时同步）） -->
+                        <Grid x:Name="VstPanel" IsVisible="False" RowDefinitions="Auto,Auto,Auto,*" DataContext="{Binding PluginBrowser}">
+                          <!-- 搜索框 36 胶囊 + 重新扫描 -->
+                          <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,2,0,6">
+                            <Panel Grid.Column="0" Height="36">
+                              <TextBox x:Name="PluginSearchBox" Height="36" CornerRadius="{DynamicResource Md3ShapeFull}" Padding="30,0,10,0" FontSize="{DynamicResource Md3TypeLabelSmall}" VerticalContentAlignment="Center" Text="{Binding SearchText, Mode=TwoWay}" PlaceholderText="{DynamicResource sidebar.effects.search}"/>
+                              <c:DawIcon Data="{StaticResource icon-search}" Width="13" Height="13" Fill="{DynamicResource md3.on-surface-variant}" IsHitTestVisible="False" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="11,0,0,0"/>
+                            </Panel>
+                            <Button Grid.Column="1" Classes="iconBtn" Width="36" Height="36" MinHeight="36" Margin="6,0,0,0" Click="OnRescanVstFromLibrary" AutomationProperties.Name="{DynamicResource prefs.vst.rescan}" ToolTip.Tip="{DynamicResource prefs.vst.rescan}">
+                              <c:DawIcon Data="{StaticResource icon-refresh-cw}" Width="13" Height="13" Fill="{Binding $parent[Button].Foreground}"/>
+                            </Button>
+                          </Grid>
+                          <!-- 计数 / 扫描中 + 路径管理开关 -->
+                          <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,4">
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing1}" IsVisible="{Binding ShowCount}">
+                              <TextBlock Classes="sideHeading" Text="{Binding PluginCount}"/>
+                              <TextBlock Classes="sideHeading" Text="{DynamicResource sidebar.effects.countlabel}"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="0" Classes="sideHeading" IsVisible="{Binding IsScanning}" Text="{DynamicResource sidebar.effects.scanning}"/>
+                            <Button Grid.Column="1" Classes="iconBtn" Width="24" Height="24" MinHeight="24" Click="OnToggleVstPathManager" AutomationProperties.Name="{DynamicResource sidebar.effects.paths.manage}" ToolTip.Tip="{DynamicResource sidebar.effects.paths.manage}">
+                              <c:DawIcon Data="{StaticResource icon-folder}" Width="12" Height="12" Fill="{Binding $parent[Button].Foreground}"/>
+                            </Button>
+                          </Grid>
+                          <!-- 插件扫描路径（折叠面板；与偏好设置同一份数据） -->
+                          <Border Grid.Row="2" x:Name="VstPathManager" Classes="sideCard libraryEmpty" IsVisible="False" Margin="0,0,0,6">
+                            <StackPanel Spacing="{DynamicResource Md3Spacing2}">
+                              <TextBlock Classes="sideHeading" Margin="0" Text="{DynamicResource sidebar.effects.paths}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource md3.on-surface}"/>
+                              <ListBox x:Name="VstPathsList" Height="72" Background="Transparent" BorderThickness="0" ItemsSource="{Binding ScanPaths}"/>
+                              <Grid ColumnDefinitions="*,Auto,Auto">
+                                <TextBox Grid.Column="0" x:Name="LibraryNewVstPath" Height="28" FontSize="{DynamicResource Md3TypeLabelSmall}" VerticalContentAlignment="Center" Text="{Binding NewPath, Mode=TwoWay}" PlaceholderText="{DynamicResource sidebar.effects.paths.watermark}"/>
+                                <Button Grid.Column="1" Height="28" MinHeight="28" Padding="10,0" FontSize="{DynamicResource Md3TypeLabelSmall}" Margin="6,0,0,0" Content="{DynamicResource prefs.vst.add}" Click="OnAddVstPathFromLibrary"/>
+                                <Button Grid.Column="2" Height="28" MinHeight="28" Padding="10,0" FontSize="{DynamicResource Md3TypeLabelSmall}" Margin="6,0,0,0" Content="{DynamicResource prefs.vst.remove}" Click="OnRemoveVstPathFromLibrary"/>
+                              </Grid>
+                              <TextBlock FontSize="13" TextWrapping="Wrap" Foreground="{DynamicResource md3.on-surface}" Text="{DynamicResource sidebar.effects.paths.hint}" FontWeight="SemiBold"/>
+                            </StackPanel>
+                          </Border>
+                          <!-- 插件列表 + 空态 / 未找到 -->
+                          <Grid Grid.Row="3">
+                            <ListBox x:Name="VstPluginList" ItemsSource="{Binding Plugins}" Background="Transparent" BorderThickness="0" IsVisible="{Binding HasPlugins}">
+                              <ListBox.Styles>
+                                <Style Selector="ListBoxItem">
+                                  <Setter Property="Padding" Value="0"/>
+                                  <Setter Property="MinHeight" Value="46"/>
+                                </Style>
+                              </ListBox.Styles>
+                              <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="vm:VstPluginItem">
+                                  <!-- 拖拽源：PointerPressed/Moved → FxChainDragData（格式 OpenUtau.FxChainItem） -->
+                                  <Border Classes="sideItem" Height="46" ToolTip.Tip="{Binding Path}" PointerPressed="OnPluginPointerPressed" PointerMoved="OnPluginPointerMoved">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                      <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" FontSize="{DynamicResource Md3TypeBodySmall}" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource md3.on-surface}"/>
+                                        <TextBlock Text="{Binding Vendor}" FontSize="{DynamicResource Md3TypeLabelTiny}" Margin="0,1,0,0" TextTrimming="CharacterEllipsis" IsVisible="{Binding HasVendor}" Foreground="{DynamicResource md3.on-surface-variant}"/>
+                                      </StackPanel>
+                                      <Border Grid.Column="1" CornerRadius="{DynamicResource Md3DawCornerRadius}" Padding="6,2" Margin="6,0,0,0" VerticalAlignment="Center" Background="{DynamicResource md3.surface-container-high}">
+                                        <TextBlock Text="{Binding Badge}" FontSize="{DynamicResource Md3DawTypeReadout}" FontWeight="SemiBold" Foreground="{DynamicResource md3.on-surface-variant}"/>
+                                      </Border>
+                                    </Grid>
+                                  </Border>
+                                </DataTemplate>
+                              </ListBox.ItemTemplate>
+                            </ListBox>
+                            <!-- 空态：一个效果器也没扫到（W11：给「添加标准路径并扫描」出口） -->
+                            <Grid IsVisible="{Binding ShowNoPlugins}">
+                              <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <Border Classes="sideCard libraryEmpty">
+                                  <StackPanel Spacing="{DynamicResource Md3Spacing2}">
+                                    <c:DawIcon Data="{StaticResource icon-sliders}" Width="14" Height="14" Fill="{DynamicResource md3.on-surface-variant}" HorizontalAlignment="Left" Margin="0,0,0,2"/>
+                                    <TextBlock FontSize="13" TextWrapping="Wrap" Foreground="{DynamicResource md3.on-surface}" Text="{DynamicResource sidebar.effects.empty}" FontWeight="SemiBold"/>
+                                    <Button Height="28" MinHeight="28" FontSize="{DynamicResource Md3TypeLabelSmall}" Padding="10,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="{DynamicResource sidebar.effects.addstandard}" Click="OnAddStandardVstPathsFromLibrary"/>
+                                  </StackPanel>
+                                </Border>
+                              </ScrollViewer>
+                            </Grid>
+                            <!-- 未找到：有插件但没匹配上搜索词 -->
+                            <Grid IsVisible="{Binding ShowNoMatch}">
+                              <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <Border Classes="sideCard libraryEmpty">
+                                  <StackPanel>
+                                    <c:DawIcon Data="{StaticResource icon-search}" Width="14" Height="14" Fill="{DynamicResource md3.on-surface-variant}" HorizontalAlignment="Left" Margin="0,0,0,6"/>
+                                    <TextBlock FontSize="13" TextWrapping="Wrap" Foreground="{DynamicResource md3.on-surface}" Text="{DynamicResource sidebar.effects.nomatch}" FontWeight="SemiBold"/>
+                                  </StackPanel>
+                                </Border>
+                              </ScrollViewer>
+                            </Grid>
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                  </Border>
+                </Border>
+              </Border>
+              <!-- ── 视图 2/3：钢琴卷帘（铺满工作区行；进入仍是双击片段 A5，返回走顶栏胶囊「工作台」）──
              宿主 Border 只负责「不透明底 + 可见性」；内层 ContentControl 走一次淡入（不参与布局）。 -->
-        <Border Grid.Column="0" Grid.ColumnSpan="5" ZIndex="10"
-                Background="{DynamicResource md3.surface}"
-                IsVisible="{Binding ViewSwitcher.ShowPianoRoll}">
-          <ContentControl x:Name="PianoRollContainer" Classes="md3-fade"/>
-        </Border>
-        <!-- ── 视图 3/3：混音台（不再停靠在编排区下方；Ctrl+M / 胶囊进入）──
+              <Border Grid.Column="0" Grid.ColumnSpan="5" ZIndex="10" Background="{DynamicResource md3.surface}" IsVisible="{Binding ViewSwitcher.ShowPianoRoll}">
+                <ContentControl x:Name="PianoRollContainer" Classes="md3-fade"/>
+              </Border>
+              <!-- ── 视图 3/3：混音台（不再停靠在编排区下方；Ctrl+M / 胶囊进入）──
              overlay 只铺前 4 列：最后 1 列留给素材库列，让「素材库 → 效果器 → 拖入链面板」可达（B3/B6）。 -->
-        <Border Grid.Column="0" Grid.ColumnSpan="4" ZIndex="10"
-                Background="{DynamicResource md3.surface}"
-                IsVisible="{Binding ViewSwitcher.ShowMixer}">
-          <ContentControl x:Name="MixerContainer" Classes="md3-fade"/>
-        </Border>
-        <!-- ── 折叠处「快捷展开」边缘标签（W34 / 设计稿 §8）：**overlay**。
+              <Border Grid.Column="0" Grid.ColumnSpan="4" ZIndex="10" Background="{DynamicResource md3.surface}" IsVisible="{Binding ViewSwitcher.ShowMixer}">
+                <ContentControl x:Name="MixerContainer" Classes="md3-fade"/>
+              </Border>
+              <!-- ── 折叠处「快捷展开」边缘标签（W34 / 设计稿 §8）：**overlay**。
              ⚠ **必须声明在 MainLayout 的最后**：z 序 = 声明顺序，而中央区/混音台覆盖层都是不透明的
              （`Background=md3.surface`）—— 之前把这段放在中央区**之前**，标签被整块盖住：真机上
              既看不见、`InputHitTest` 也命不中（W44 验收 FAIL 的根因）。这里再加 `ZIndex` 双保险。
              标签 14×48 圆角 8，悬停/聚焦展开 92×48 显名；左列标签贴左、右列贴右（与面板头 chevron 镜像）。
              无背景 Panel ⇒ 自身不吃点击，只有标签可命中；不参与面板列测量 ⇒ 零布局占用。 ── -->
-        <Panel Grid.Column="2" ZIndex="10" IsHitTestVisible="True">
-          <c:PanelRevealTab x:Name="TracksRevealTab"
-                            HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8"
-                            IsVisible="{Binding ShowTracksRevealTab}"
-                            AnchorRight="False"
-                            GlyphData="{StaticResource icon-list}"
-                            PanelLabel="{DynamicResource panel.toggle.tracks}"
-                            Hint="{DynamicResource panel.expand.tracks}"
-                            HintSuffix="{DynamicResource panel.expand.hint}"
-                            ExpandRequested="OnRevealTracksPanel"/>
-          <c:PanelRevealTab x:Name="LibraryRevealTab"
-                            HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8"
-                            IsVisible="{Binding ShowLibraryRevealTab}"
-                            AnchorRight="True"
-                            GlyphData="{StaticResource icon-folder-open}"
-                            PanelLabel="{DynamicResource panel.toggle.library}"
-                            Hint="{DynamicResource panel.expand.library}"
-                            HintSuffix="{DynamicResource panel.expand.hint}"
-                            ExpandRequested="OnRevealLibraryPanel"/>
-        </Panel>
-      </Grid>
-
-        <GridSplitter Name="ContextToolSplitter" Grid.Row="1" Height="6" HorizontalAlignment="Stretch" IsVisible="False"
-                      ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" Background="{DynamicResource md3.outline-variant}"/>
-        <Border Name="ContextToolPanel" Grid.Row="2" IsVisible="False" Background="{DynamicResource md3.surface-container-low}">
-          <Grid RowDefinitions="40,*">
-            <Border BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1" Padding="16,0">
-              <Grid ColumnDefinitions="*,Auto,Auto">
-                <TextBlock Name="ContextToolTitle" FontSize="{DynamicResource Md3TypeBodyMedium}" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                <Button Name="CollapseContextButton" Grid.Column="1" Classes="toolAction" Theme="{StaticResource DawButtonTheme}" Height="32" Margin="0,0,8,0" Padding="12,0" Click="OnToggleContextTool">
-                  <StackPanel Orientation="Horizontal" Spacing="6">
-                    <c:DawIcon Name="ContextCollapseIcon" Data="{StaticResource icon-chevron-down}" Width="14" Height="14" Fill="{Binding $parent[Button].Foreground}"/>
-                    <TextBlock Name="ContextCollapseText" Text="{DynamicResource workspace.collapse}" VerticalAlignment="Center"/>
-                  </StackPanel>
-                </Button>
-                <Button Grid.Column="2" Classes="toolClose" Width="32" Height="32" MinHeight="32" Click="OnCloseContextTool"
-                        AutomationProperties.Name="{DynamicResource button.cancel}">
-                  <c:DawIcon Data="{StaticResource icon-x}" Width="14" Height="14" Fill="{Binding $parent[Button].Foreground}"/>
-                </Button>
+              <Panel Grid.Column="2" ZIndex="10" IsHitTestVisible="True">
+                <c:PanelRevealTab x:Name="TracksRevealTab" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" IsVisible="{Binding ShowTracksRevealTab}" AnchorRight="False" GlyphData="{StaticResource icon-list}" PanelLabel="{DynamicResource panel.toggle.tracks}" Hint="{DynamicResource panel.expand.tracks}" HintSuffix="{DynamicResource panel.expand.hint}" ExpandRequested="OnRevealTracksPanel"/>
+                <c:PanelRevealTab x:Name="LibraryRevealTab" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8" IsVisible="{Binding ShowLibraryRevealTab}" AnchorRight="True" GlyphData="{StaticResource icon-folder-open}" PanelLabel="{DynamicResource panel.toggle.library}" Hint="{DynamicResource panel.expand.library}" HintSuffix="{DynamicResource panel.expand.hint}" ExpandRequested="OnRevealLibraryPanel"/>
+              </Panel>
+            </Grid>
+            <GridSplitter Name="ContextToolSplitter" Grid.Row="1" Height="6" HorizontalAlignment="Stretch" IsVisible="False" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" Background="{DynamicResource md3.outline-variant}"/>
+            <Border Name="ContextToolPanel" Grid.Row="2" IsVisible="False" Background="{DynamicResource md3.surface-container-low}">
+              <Grid RowDefinitions="40,*">
+                <Border BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1" Padding="16,0">
+                  <Grid ColumnDefinitions="*,Auto,Auto">
+                    <TextBlock Name="ContextToolTitle" FontSize="{DynamicResource Md3TypeBodyMedium}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <Button Name="CollapseContextButton" Grid.Column="1" Classes="toolAction" Theme="{StaticResource DawButtonTheme}" Height="32" Margin="0,0,8,0" Padding="12,0" Click="OnToggleContextTool">
+                      <StackPanel Orientation="Horizontal" Spacing="6">
+                        <c:DawIcon Name="ContextCollapseIcon" Data="{StaticResource icon-chevron-down}" Width="14" Height="14" Fill="{Binding $parent[Button].Foreground}"/>
+                        <TextBlock Name="ContextCollapseText" Text="{DynamicResource workspace.collapse}" VerticalAlignment="Center"/>
+                      </StackPanel>
+                    </Button>
+                    <Button Grid.Column="2" Classes="toolClose" Width="32" Height="32" MinHeight="32" Click="OnCloseContextTool" AutomationProperties.Name="{DynamicResource button.cancel}">
+                      <c:DawIcon Data="{StaticResource icon-x}" Width="14" Height="14" Fill="{Binding $parent[Button].Foreground}"/>
+                    </Button>
+                  </Grid>
+                </Border>
+                <ContentControl Name="ContextToolHost" Grid.Row="1"/>
               </Grid>
             </Border>
-            <ContentControl Name="ContextToolHost" Grid.Row="1"/>
+          </Grid>
+          <!-- ══════════ 状态条 32：左侧引擎/进度 · 右侧版本 ══════════ -->
+          <Border x:Name="ShellStatusRow" Grid.Row="2" Background="{DynamicResource md3.surface-container}" BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,1,0,0">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto" Margin="16,0">
+              <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}" VerticalAlignment="Center">
+                <Border Width="7" Height="7" CornerRadius="{DynamicResource Md3ShapeFull}" VerticalAlignment="Center" Background="{DynamicResource md3.primary}"/>
+                <TextBlock VerticalAlignment="Center" FontSize="11" Foreground="{DynamicResource md3.on-surface-variant}" MaxWidth="400" TextTrimming="CharacterEllipsis" Text="{Binding ProgressText}"/>
+              </StackPanel>
+              <ProgressBar Grid.Column="1" Height="4" VerticalAlignment="Center" Margin="16,0" Minimum="0" Maximum="100" Value="{Binding Progress}" Background="Transparent"/>
+              <Button Name="DeliveryStatusButton" Grid.Column="2" Classes="toolAction" IsVisible="False" Height="28" MinHeight="28" Margin="8,0" Click="OnReturnToDelivery">
+                <TextBlock Name="DeliveryStatusText" FontSize="{DynamicResource Md3TypeLabelSmall}" MaxWidth="220" TextTrimming="CharacterEllipsis"/>
+              </Button>
+              <TextBlock Grid.Column="3" VerticalAlignment="Center" FontSize="{DynamicResource Md3TypeLabelTiny}" Foreground="{DynamicResource md3.on-surface-variant}" Text="{Binding AppVersion}"/>
+            </Grid>
+          </Border>
+        </Grid>
+        <!-- ══════════ 欢迎视图（初始视图，内嵌于主窗口）══════════
+         打开 / 新建工程后隐藏；模态覆盖层（ZIndex 1000）仍位于其之上 -->
+        <!-- 欢迎视图：内嵌工作区行（与偏好视图同一层，靠 ZIndex 分先后） -->
+        <views:WelcomeView x:Name="WelcomeHost" Classes="md3-fade" IsVisible="False" ZIndex="900"/>
+        <!-- 偏好设置：窗口级最上层（欢迎页之上；模态对话框层 1000 仍压在其上）。自带 56px 顶栏，故覆盖共享顶栏也没问题 -->
+        <views:PreferencesView x:Name="PreferencesHost" Classes="md3-fade" IsVisible="False" ZIndex="990"/>
+        <!-- 偏好设置（全屏视图；模态覆盖层仍在其上） -->
+        <ContentControl Name="ToolWorkspaceHost" IsVisible="False" ZIndex="995" Focusable="True"/>
+      </Grid>
+      <views:WorkspaceDialogHost Name="ToolDialogHost" ZIndex="1200"/>
+      <!-- Overlay layer: in-window modal dialog host -->
+      <Grid Name="OverlayLayer" IsVisible="False" ZIndex="1000" Background="Transparent">
+        <Border Name="OverlayBackdrop" Classes="md3-fade" Background="{DynamicResource Md3DialogScrim}" PointerPressed="OnOverlayBackdropPressed"/>
+        <Border Name="OverlayCard" Classes="md3-pop" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="340" ClipToBounds="True" Background="{DynamicResource md3.surface-container-high}" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="0" CornerRadius="{DynamicResource Md3ShapeExtraLarge}" BoxShadow="{DynamicResource Md3ElevationLevel3}">
+          <Grid RowDefinitions="Auto,*">
+            <!-- Optional dialog header (e.g. Preferences) -->
+            <Border Name="OverlayHeader" Grid.Row="0" IsVisible="False" Padding="16,10" CornerRadius="11.5,11.5,0,0">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Name="OverlayHeaderTitle" Grid.Column="0" VerticalAlignment="Center" FontSize="{DynamicResource Md3TypeBodyLarge}" FontWeight="SemiBold"/>
+                <Button Name="OverlayHeaderClose" Grid.Column="1" Content="✕" Click="OnOverlayCloseClicked" Margin="8,0,0,0" Padding="6,0" MinWidth="24" MinHeight="24" FontSize="{DynamicResource Md3TypeBodySmall}" Opacity="0.7" VerticalAlignment="Center"/>
+              </Grid>
+            </Border>
+            <ContentControl Grid.Row="1" Name="OverlayContent"/>
+            <!-- Floating close for non-header overlays (Updater) -->
+            <Button Name="OverlayCloseButton" Content="✕" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,12,0" Padding="6,0" MinWidth="24" MinHeight="24" FontSize="{DynamicResource Md3TypeBodySmall}" Opacity="0.7" Click="OnOverlayCloseClicked"/>
           </Grid>
         </Border>
       </Grid>
-
-      <!-- ══════════ 状态条 32：左侧引擎/进度 · 右侧版本 ══════════ -->
-      <Border x:Name="ShellStatusRow" Grid.Row="2" Background="{DynamicResource md3.surface-container-low}"
-              BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,1,0,0">
-        <Grid ColumnDefinitions="Auto,*,Auto,Auto" Margin="16,0">
-          <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}" VerticalAlignment="Center">
-            <Border Width="7" Height="7" CornerRadius="{DynamicResource Md3ShapeFull}" VerticalAlignment="Center"
-                    Background="{DynamicResource md3.primary}"/>
-            <TextBlock VerticalAlignment="Center" FontSize="{DynamicResource Md3TypeLabelTiny}"
-                       Foreground="{DynamicResource md3.on-surface-variant}"
-                       MaxWidth="400" TextTrimming="CharacterEllipsis" Text="{Binding ProgressText}"/>
-          </StackPanel>
-          <ProgressBar Grid.Column="1" Height="4" VerticalAlignment="Center" Margin="16,0"
-                       Minimum="0" Maximum="100" Value="{Binding Progress}"
-                       Background="Transparent"/>
-          <Button Name="DeliveryStatusButton" Grid.Column="2" Classes="toolAction" IsVisible="False"
-                  Height="28" MinHeight="28" Margin="8,0" Click="OnReturnToDelivery">
-            <TextBlock Name="DeliveryStatusText" FontSize="{DynamicResource Md3TypeLabelSmall}" MaxWidth="220" TextTrimming="CharacterEllipsis"/>
-          </Button>
-          <TextBlock Grid.Column="3" VerticalAlignment="Center" FontSize="{DynamicResource Md3TypeLabelTiny}"
-                     Foreground="{DynamicResource md3.on-surface-variant}"
-                     Text="{Binding AppVersion}"/>
-        </Grid>
-      </Border>
     </Grid>
-
-    <!-- ══════════ 欢迎视图（初始视图，内嵌于主窗口）══════════
-         打开 / 新建工程后隐藏；模态覆盖层（ZIndex 1000）仍位于其之上 -->
-    <!-- 欢迎视图：内嵌工作区行（与偏好视图同一层，靠 ZIndex 分先后） -->
-    <views:WelcomeView x:Name="WelcomeHost" Classes="md3-fade" IsVisible="False" ZIndex="900"/>
-
-    <!-- 偏好设置：窗口级最上层（欢迎页之上；模态对话框层 1000 仍压在其上）。自带 56px 顶栏，故覆盖共享顶栏也没问题 -->
-    <views:PreferencesView x:Name="PreferencesHost" Classes="md3-fade" IsVisible="False" ZIndex="990"/>
-
-    <!-- 偏好设置（全屏视图；模态覆盖层仍在其上） -->
-
-
-    <ContentControl Name="ToolWorkspaceHost" IsVisible="False" ZIndex="995" Focusable="True"/>
-    </Grid>
-    <views:WorkspaceDialogHost Name="ToolDialogHost" ZIndex="1200"/>
-
-    <!-- Overlay layer: in-window modal dialog host -->
-    <Grid Name="OverlayLayer" IsVisible="False" ZIndex="1000" Background="Transparent">
-      <Border Name="OverlayBackdrop" Classes="md3-fade" Background="{DynamicResource Md3DialogScrim}" PointerPressed="OnOverlayBackdropPressed"/>
-      <Border Name="OverlayCard" Classes="md3-pop"
-              HorizontalAlignment="Center" VerticalAlignment="Center"
-              MinWidth="340"
-              ClipToBounds="True"
-              Background="{DynamicResource md3.surface-container-high}"
-              BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
-              BorderThickness="0" CornerRadius="{DynamicResource Md3ShapeExtraLarge}"
-              BoxShadow="{DynamicResource Md3ElevationLevel3}">
-        <Grid RowDefinitions="Auto,*">
-          <!-- Optional dialog header (e.g. Preferences) -->
-          <Border Name="OverlayHeader" Grid.Row="0" IsVisible="False"
-                  Padding="16,10" CornerRadius="11.5,11.5,0,0">
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Name="OverlayHeaderTitle" Grid.Column="0"
-                         VerticalAlignment="Center" FontSize="{DynamicResource Md3TypeBodyLarge}" FontWeight="SemiBold"/>
-              <Button Name="OverlayHeaderClose" Grid.Column="1" Content="✕"
-                      Click="OnOverlayCloseClicked"
-                      Margin="8,0,0,0" Padding="6,0" MinWidth="24" MinHeight="24"
-                      FontSize="{DynamicResource Md3TypeBodySmall}" Opacity="0.7" VerticalAlignment="Center"/>
-            </Grid>
-          </Border>
-          <ContentControl Grid.Row="1" Name="OverlayContent"/>
-          <!-- Floating close for non-header overlays (Updater) -->
-          <Button Name="OverlayCloseButton" Content="✕"
-                  HorizontalAlignment="Right" VerticalAlignment="Top"
-                  Margin="0,10,12,0" Padding="6,0" MinWidth="24" MinHeight="24"
-                  FontSize="{DynamicResource Md3TypeBodySmall}" Opacity="0.7"
-                  Click="OnOverlayCloseClicked"/>
-        </Grid>
-      </Border>
-    </Grid>
-  </Grid>
   </Border>
 </controls:WindowEx>

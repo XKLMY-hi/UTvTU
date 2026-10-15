@@ -1,28 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="using:OpenUtau.App.Controls" x:Class="OpenUtau.App.Controls.FxChainRow" FontFamily="{DynamicResource PlusFontFamily}">
   <!-- 效果名称独占第一行，预设与格式放在第二行；序号、把手、旁通与移除保持原交互。 -->
   <UserControl.Resources>
-    <ControlTheme x:Key="FxChainPowerTheme" TargetType="ToggleButton" BasedOn="{StaticResource DawButtonTheme}">
-      <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
-      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
-      <Setter Property="Template">
-        <ControlTemplate>
-          <Grid>
-            <Border Name="PART_Track" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" CornerRadius="{TemplateBinding CornerRadius}" Background="{TemplateBinding Background}"/>
-            <Border Name="PART_StateLayer" Background="{TemplateBinding Foreground}" Opacity="0" CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False"/>
-            <Border Name="PART_Thumb" Width="14" Height="14" CornerRadius="{DynamicResource Md3ShapeFull}" Margin="3,0" HorizontalAlignment="Left" VerticalAlignment="Center" Background="{TemplateBinding Foreground}" IsHitTestVisible="False"/>
-            <Border Name="PART_FocusRing" BorderBrush="{DynamicResource md3.primary}" BorderThickness="1" CornerRadius="{TemplateBinding CornerRadius}" Opacity="0" IsHitTestVisible="False"/>
-          </Grid>
-        </ControlTemplate>
-      </Setter>
-      <Style Selector="^:checked">
-        <Setter Property="Background" Value="{DynamicResource md3.primary}"/>
-        <Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/>
-      </Style>
-      <Style Selector="^:checked /template/ Border#PART_Thumb">
-        <Setter Property="HorizontalAlignment" Value="Right"/>
-      </Style>
-    </ControlTheme>
+    <ControlTheme x:Key="FxChainPowerTheme" TargetType="ToggleButton" BasedOn="{StaticResource DawCompactSwitchTheme}"/>
   </UserControl.Resources>
   <UserControl.Styles>
     <Style Selector="Border.rowRoot">
