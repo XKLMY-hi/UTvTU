@@ -1,0 +1,15 @@
+{
+  "uninstallWithRemoveDataFalse": {
+    "OpenUtau.exe": false,
+    "Backups/keep.ustxp": false,
+    "Singers/demo/character.txt": false,
+    "prefs.json": false,
+    "user-song.ustxp": false,
+    "OpenUtau Plus/keep.ustxp": false
+  },
+  "zipEntryEscapesTargetIntoSibling": true,
+  "upgradeFailure": "IOException",
+  "upgradeLeftMixedVersions": true,
+  "freshInstallCreatedInstalledMarkerBeforeRegistration": false,
+  "quietUninstallSwitchEnablesSilent": false
+}

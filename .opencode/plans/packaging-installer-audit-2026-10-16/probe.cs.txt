@@ -1,0 +1,52 @@
+using System.IO.Compression;
+using System.Reflection;
+using System.Text.Json;
+using UTvTU.Installer;
+
+var repo = Path.GetFullPath(args.Single());
+var sandbox = Path.GetFullPath(Path.Combine(repo, ".dsh", "installer-audit-20261016", "sandbox"));
+if (!sandbox.StartsWith(repo.TrimEnd('\\') + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+    || Directory.Exists(sandbox)) throw new Exception("Use a new sandbox strictly inside the verified workspace.");
+Directory.CreateDirectory(sandbox);
+var results = new Dictionary<string, object>();
+void Payload(params (string Name, string Text)[] entries) {
+    using var file = File.Create(InstallerCore.PayloadPath);
+    using var zip = new ZipArchive(file, ZipArchiveMode.Create);
+    foreach (var entry in entries) { using var writer = new StreamWriter(zip.CreateEntry(entry.Name).Open()); writer.Write(entry.Text); }
+}
+void Extract(string target) => typeof(InstallerCore).GetMethod("ExtractPayload", BindingFlags.Static | BindingFlags.NonPublic)!.Invoke(null, new object[] { target, (Action<int>)(_ => { }), CancellationToken.None });
+
+// Stop the actual uninstaller at its first integration boundary, before any
+// shortcut, registry or user-profile access. Only files in this sandbox are touched.
+var uninstall = Path.Combine(sandbox, "uninstall");
+var names = new[] { "OpenUtau.exe", "Backups/keep.ustxp", "Singers/demo/character.txt", "prefs.json", "user-song.ustxp", "OpenUtau Plus/keep.ustxp" };
+foreach (string name in names) { string path = Path.Combine(uninstall, name); Directory.CreateDirectory(Path.GetDirectoryName(path)!); File.WriteAllText(path, "synthetic audit data"); }
+try { InstallerCore.Uninstall(uninstall, false, new StopBefore(40)); } catch (BoundaryReached) { }
+results["uninstallWithRemoveDataFalse"] = names.ToDictionary(name => name, name => File.Exists(Path.Combine(uninstall, name)));
+
+var target = Path.Combine(sandbox, "target");
+Payload(("OpenUtau.exe", "synthetic executable"), ("../target-neighbor/leak.txt", "synthetic escaped entry"));
+Extract(target);
+results["zipEntryEscapesTargetIntoSibling"] = File.Exists(Path.Combine(sandbox, "target-neighbor", "leak.txt"));
+
+var upgrade = Path.Combine(sandbox, "upgrade"); Directory.CreateDirectory(upgrade);
+File.WriteAllText(Path.Combine(upgrade, "OpenUtau.exe"), "old app");
+File.WriteAllText(Path.Combine(upgrade, "locked.dll"), "old library");
+Payload(("OpenUtau.exe", "new app"), ("locked.dll", "new library"));
+using (var locked = File.Open(Path.Combine(upgrade, "locked.dll"), FileMode.Open, FileAccess.ReadWrite, FileShare.None)) {
+    try { Extract(upgrade); } catch (TargetInvocationException ex) when (ex.InnerException is IOException) { results["upgradeFailure"] = ex.InnerException.GetType().Name; }
+}
+results["upgradeLeftMixedVersions"] = File.ReadAllText(Path.Combine(upgrade, "OpenUtau.exe")) == "new app" && File.ReadAllText(Path.Combine(upgrade, "locked.dll")) == "old library";
+
+Payload(("OpenUtau.exe", "synthetic executable"));
+var install = Path.Combine(sandbox, "install");
+try { InstallerCore.Install(install, false, false, new StopBefore(84), CancellationToken.None); } catch (BoundaryReached) { }
+results["freshInstallCreatedInstalledMarkerBeforeRegistration"] = File.Exists(Path.Combine(install, "installed.txt"));
+InstallerCore.ParseArgs(new[] { "--quiet" });
+results["quietUninstallSwitchEnablesSilent"] = InstallerCore.Silent;
+Console.WriteLine(JsonSerializer.Serialize(results, new JsonSerializerOptions { WriteIndented = true }));
+
+sealed class BoundaryReached : Exception { }
+sealed class StopBefore(int percent) : IProgress<(int Percent, string Stage)> {
+    public void Report((int Percent, string Stage) stage) { if (stage.Percent >= percent) throw new BoundaryReached(); }
+}
