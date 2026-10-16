@@ -1,0 +1,125 @@
+version: 99.99
+isglides: true
+
+symbols:
+  - {symbol: a, type: vowel}
+  - {symbol: b, type: stop}
+  - {symbol: ch, type: affricate}
+  - {symbol: d, type: stop}
+  - {symbol: e, type: vowel}
+  - {symbol: f, type: fricative}
+  - {symbol: g, type: stop}
+  - {symbol: h, type: aspirate}
+  - {symbol: i, type: vowel}
+  - {symbol: j, type: affricate}
+  - {symbol: k, type: stop}
+  - {symbol: l, type: liquid}
+  - {symbol: m, type: nasal}
+  - {symbol: n, type: nasal}
+  - {symbol: o, type: vowel}
+  - {symbol: p, type: stop}
+  - {symbol: q, type: stop}
+  - {symbol: r, type: liquid}
+  - {symbol: s, type: fricative}
+  - {symbol: sh, type: fricative}
+  - {symbol: t, type: stop}
+  - {symbol: u, type: vowel}
+  - {symbol: v, type: fricative}
+  - {symbol: w, type: semivowel}
+  - {symbol: y, type: semivowel}
+  - {symbol: WW, type: semivowel}
+  - {symbol: YY, type: semivowel}
+  - {symbol: y1, type: stop}
+  - {symbol: w1, type: stop}
+  - {symbol: inh, type: vowel}
+
+fallbacks:
+  - {from: YY, to: y}
+  - {from: WW, to: w}
+  - {from: y1, to: i}
+  - {from: w1, to: u}
+
+replacements:
+  - {from: inh, to: br}
+  - {from: aa, to: a}
+  - {from: ae, to: e, i}
+  - {from: ah, to: a}
+  - {from: ao, to: o}
+  - {from: aw, to: a, o}
+  - {from: ax, to: a}
+  - {from: ay, to: a, i}
+  - {from: air, to: e, i, r}
+  - {from: ar, to: a, r}
+  - {from: al, to: o, l}
+  - {from: by, to: b, y1}
+  - {from: dy, to: d, y1}
+  - {from: ea, to: e}
+  - {from: eh, to: e}
+  - {from: el, to: e, l}
+  - {from: er, to: o, r}
+  - {from: ey, to: e, i}
+  - {from: ih, to: i}
+  - {from: il, to: i, l}
+  - {from: iy, to: i}
+  - {from: ix, to: i}
+  - {from: ow, to: o, u}
+  - {from: ol, to: o, l}
+  - {from: oy, to: o, i}
+  - {from: uh, to: u}
+  - {from: ul, to: u, l}
+  - {from: ur, to: o, r}
+  - {from: uw, to: u}
+  - {from: dx, to: d}
+  - {from: dr, to: j, r}
+  - {from: dh, to: v}
+  - {from: gy, to: g, y1}
+  - {from: hh, to: h}
+  - {from: hy, to: h, y1}
+  - {from: jh, to: j}
+  - {from: ky, to: k, y1}
+  - {from: my, to: m, y1}
+  - {from: ny, to: n, y1}
+  - {from: ng, to: n}
+  - {from: py, to: p, y1}
+  - {from: ry, to: r, y1}
+  - {from: th, to: f}
+  - {from: tr, to: ch, r}
+  - {from: ts, to: s}
+  - {from: zh, to: j}
+  - {from: y, to: y1}
+  - {from: w, to: w1}
+
+# Upstream #2527 fixture, retaining only words used by EnCpVTest.
+entries:
+- grapheme: go
+  phonemes:
+  - g
+  - o
+  - w
+- grapheme: words
+  phonemes:
+  - w
+  - o
+  - r
+  - d
+  - z
+- grapheme: test
+  phonemes:
+  - t
+  - e
+  - s
+  - t
+- grapheme: star
+  phonemes:
+  - s
+  - t
+  - a
+  - r
+- grapheme: streets
+  phonemes:
+  - s
+  - t
+  - r
+  - i
+  - t
+  - s
