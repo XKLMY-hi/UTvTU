@@ -7,7 +7,9 @@ using Serilog;
 namespace OpenUtau.Core.Util {
     public static class ProcessRunner {
         public static bool DebugSwitch { get; set; }
-        public static void Run(string file, string args, ILogger logger, string workDir = null, int timeoutMs = 60000) {
+        public static void Run(string file, string args, ILogger logger, string workDir = null, int timeoutMs = 60000,
+            CancellationToken cancellation = default, bool background = false) {
+            cancellation.ThrowIfCancellationRequested();
             if (!File.Exists(file)) {
                 throw new FileNotFoundException($"Executable {file} not found.");
             }
@@ -34,23 +36,32 @@ namespace OpenUtau.Core.Util {
                     }
                 };
                 proc.Start();
+                if (background) {
+                    try { proc.PriorityClass = ProcessPriorityClass.BelowNormal; }
+                    catch (Exception e) { logger.Debug(e, "Could not lower renderer process priority"); }
+                }
                 if (DebugSwitch) {
                     proc.BeginOutputReadLine();
                 }
                 proc.BeginErrorReadLine();
-                if (timeoutMs <= 0) {
-                    proc.WaitForExit();
-                } else {
-                    if (proc.WaitForExit(timeoutMs)) {
-                        return;
+                var elapsed = Stopwatch.StartNew();
+                try {
+                    while (!proc.WaitForExit(50)) {
+                        cancellation.ThrowIfCancellationRequested();
+                        if (timeoutMs > 0 && elapsed.ElapsedMilliseconds >= timeoutMs) {
+                            throw new TimeoutException($"Renderer process timed out: {Path.GetFileName(file)}");
+                        }
                     }
-                    logger.Warning($"ProcessRunner >>> [thread-{threadId}] Timeout, killing...");
+                    cancellation.ThrowIfCancellationRequested();
+                    proc.WaitForExit(); // Drain redirected output before disposing the process.
+                } catch {
                     try {
-                        proc.Kill();
-                        logger.Warning($"ProcessRunner >>> [thread-{threadId}] Killed.");
+                        if (!proc.HasExited) proc.Kill(entireProcessTree: true);
+                        proc.WaitForExit(5000);
                     } catch (Exception e) {
                         logger.Error(e, $"ProcessRunner >>> [thread-{threadId}] Failed to kill");
                     }
+                    throw;
                 }
             }
         }

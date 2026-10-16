@@ -47,6 +47,7 @@ namespace OpenUtau.Classic {
             PrepareHelper();
             string batPath = Path.Combine(PathManager.Inst.CachePath, "temp.bat");
             lock (tempBatLock) {
+                cancellation.Token.ThrowIfCancellationRequested();
                 using (var stream = File.Open(batPath, FileMode.Create)) {
                     UTF8Encoding noBomEncoding = new UTF8Encoding(false);
                     using (var writer = new StreamWriter(stream, OS.IsWindows() ? osEncoding : noBomEncoding)) {
@@ -59,13 +60,14 @@ namespace OpenUtau.Classic {
                 }
 
                 if (useWine) {
-                    ProcessRunner.Run(winePath, batPath, Log.Logger, workDir: PathManager.Inst.CachePath, timeoutMs: 5 * 60 * 1000);
+                    ProcessRunner.Run(winePath, batPath, Log.Logger, workDir: PathManager.Inst.CachePath, timeoutMs: 5 * 60 * 1000, cancellation: cancellation.Token, background: true);
                 } else {
-                    ProcessRunner.Run(batPath, "", Log.Logger, workDir: PathManager.Inst.CachePath, timeoutMs: 5 * 60 * 1000);
+                    ProcessRunner.Run(batPath, "", Log.Logger, workDir: PathManager.Inst.CachePath, timeoutMs: 5 * 60 * 1000, cancellation: cancellation.Token, background: true);
                 }
 
             }
-            if (string.IsNullOrEmpty(tempPath) || File.Exists(tempPath)) {
+            cancellation.Token.ThrowIfCancellationRequested();
+            if (!string.IsNullOrEmpty(tempPath) && File.Exists(tempPath)) {
                 using (var wavStream = Core.Format.Wave.OpenFile(tempPath)) {
                     return Core.Format.Wave.GetSamples(wavStream.ToSampleProvider().ToMono(1, 0));
                 }

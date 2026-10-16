@@ -94,6 +94,10 @@ namespace OpenUtau.Classic {
         }
 
         public string DoResamplerReturnsFile(ResamplerItem args, ILogger logger) {
+            return DoResamplerReturnsFile(args, logger, CancellationToken.None);
+        }
+
+        internal string DoResamplerReturnsFile(ResamplerItem args, ILogger logger, CancellationToken cancellation) {
             if (!_isLegalPlugin) {
                 return null;
             }
@@ -102,10 +106,16 @@ namespace OpenUtau.Classic {
             string ArgParam = FormattableString.Invariant(
                 $"\"{args.inputTemp}\" \"{tmpFile}\" {MusicMath.GetToneName(args.tone)} {args.velocity} \"{args.GetFlagsString()}\" {args.offset} {args.durRequired} {args.consonant} {args.cutoff} {args.volume} {args.modulation} !{args.tempo} {Base64.Base64EncodeInt12(args.pitches)}");
             logger.Information($" > [thread-{threadId}] {FilePath} {ArgParam}");
-            if (useWine) {
-                ProcessRunner.Run(winePath, $"{FilePath} {ArgParam}", logger);
-            } else {
-                ProcessRunner.Run(FilePath, ArgParam, logger);
+            try {
+                if (useWine) {
+                    ProcessRunner.Run(winePath, $"{FilePath} {ArgParam}", logger, cancellation: cancellation, background: true);
+                } else {
+                    ProcessRunner.Run(FilePath, ArgParam, logger, cancellation: cancellation, background: true);
+                }
+            } catch {
+                // A killed renderer can leave a valid-looking but unfinished WAV.
+                if (File.Exists(tmpFile)) File.Delete(tmpFile);
+                throw;
             }
             return tmpFile;
         }
