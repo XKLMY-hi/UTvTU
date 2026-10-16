@@ -1,5 +1,12 @@
 # HANDOVER — 新会话交接（2026-10-17 安装与卸载重构）
 
+## 2026-10-17 内嵌浮窗按钮统一（最新）
+
+- 用户要求统一截图中的退出提示及其他内嵌浮窗按钮，轨道高度控件不动。已完成产品提交`67cc8fe3`，未推送、未重打安装包。[说明与验证](.opencode/plans/dialog-actions-2026-10-17.md)。
+- 新全局`Styles/DialogActions.axaml`只作用于显式dialogAction/dialogActions/dialogClose：共享DawTextButtonTheme、40高/最小80宽/13px/Medium/胶囊/居中，primary确认、tonal替代、text取消，主操作在右；旧退出Overlay和MessageBox共用。输入/拍号/轨道颜色/音色映射/歌词/表达式/转录/导出/声库向导/更新等操作入口已接入；删掉refinedTool的34高/10圆角/12px覆盖。图标复杂内容仍用DawButtonTheme，资源页紧凑按钮不受影响。两个浮层宿主统一32×32关闭按钮与原生DawIcon，原取消/保存、模糊、动画、嵌套逻辑保留。
+- SDK9单节点、2处理器、768MB堆，复用97E6已验证Core。主程序最终0错3既有警告/86.39秒、检查0错152既有警告/17.38秒。首次新输出缺少Fody引用依赖失败，补入既有依赖后构建成功；不交付失败产物。12项轻量检查全绿（8+4，10.6秒/151MB及6.8秒/144MB，30秒/384MB护栏），深浅主题的真实控件颜色/尺寸/文字中心/点击结果和原嵌套/键盘/淡出阻塞均通过；无全套、音频压力或自截图。TRX/哈希见报告验证JSON，日志`.dsh/dialog-buttons-20261017/`。
+- 标准主程序已更新并无参数启动PID16492、2026-10-17T00:58:08.5531511+08:00，响应/窗口正常，启动ERR/FTL0；身份`.dsh/workspace-preview.json`。产品SHA256`13F24D4D6E737FD91CB97657D1377712B4F09A5FEE17EA0467419A172D7F3063`，Core仍`97E615F7D81F9A0C9810379EB1617CABCBC8C8716FB25A7AB87D48F685820EFB`。旧DLL备份`.dsh/dialog-buttons-20261017/previous-main/`。下文旧PID/产品哈希/未启动说明均是历史；后续须重新核进程身份。
+
 ## 2026-10-17 混音台底部FX入口（最新）
 
 - 用户要求在轨道条底下加FX按钮打开对应轨道效果链。原EffectsButton位于固定210高表头的第六行，子项及间距总高度超出表头；已移到RootGrid第四行，在音量读数下独占28高，使用与静音/独奏一致的DawMixButtonTheme。显示`FX · 数量`、选中轨道、共享TrackEffectRack入口与刷新逻辑保留，无音频代码变更。

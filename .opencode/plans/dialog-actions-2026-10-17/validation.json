@@ -1,0 +1,124 @@
+{
+  "Date": "2026-10-17T00:59:27.8633109+08:00",
+  "SourceCommit": "67cc8fe3b92d3dc0cd975dee846acdca585ba761",
+  "Sdk": "9.0.317",
+  "MainBuild": {
+    "Errors": 0,
+    "Warnings": 3,
+    "Log": ".dsh/dialog-buttons-20261017/build-main2.log",
+    "Seconds": 86.39
+  },
+  "TestBuild": {
+    "Errors": 0,
+    "Warnings": 152,
+    "Log": ".dsh/dialog-buttons-20261017/build-tests.log",
+    "Seconds": 17.38
+  },
+  "UniquePassed": 12,
+  "Groups": [
+    {
+      "Seconds": 10.6,
+      "Trx": "d9cdd518c83845128109440255cba045.trx",
+      "Passed": 8,
+      "Name": "presentation",
+      "PeakMB": 151
+    },
+    {
+      "Seconds": 6.8,
+      "Trx": "72b70b1c5b8346e2a7368bdf738ba9f5.trx",
+      "Passed": 4,
+      "Name": "hosting",
+      "PeakMB": 144
+    }
+  ],
+  "MaxSecondsPerGroup": 30,
+  "MaxRunnerMB": 384,
+  "SerialCollections": true,
+  "Cases": [
+    {
+      "Name": "OpenUtau.Test.App.WorkspaceDialogPresentationTests.InputAndMappingDialogsShareFooterMetricsAndCloseIcons(dark: True)",
+      "Outcome": "Passed",
+      "Duration": "00:00:00.1682086"
+    },
+    {
+      "Name": "OpenUtau.Test.App.WorkspaceDialogPresentationTests.EmbeddedInputToolSharesTheCardSurfaceInsteadOfPaintingASquare",
+      "Outcome": "Passed",
+      "Duration": "00:00:00.9148505"
+    },
+    {
+      "Name": "OpenUtau.Test.App.WorkspaceDialogPresentationTests.OpeningAnotherDialogDuringFadeOutCannotBeDismissedByTheOldTimer",
+      "Outcome": "Passed",
+      "Duration": "00:00:00.3428256"
+    },
+    {
+      "Name": "OpenUtau.Test.App.WorkspaceDialogPresentationTests.ConfirmationButtonsKeepTheirRolesAndResultsInBothThemes(dark: False)",
+      "Outcome": "Passed",
+      "Duration": "00:00:00.1027028"
+    },
+    {
+      "Name": "OpenUtau.Test.App.WorkspaceDialogPresentationTests.ConfirmationButtonsKeepTheirRolesAndResultsInBothThemes(dark: True)",
+      "Outcome": "Passed",
+      "Duration": "00:00:00.1197143"
+    },
+    {
+      "Name": "OpenUtau.Test.App.WorkspaceDialogPresentationTests.ReducedMotionClosesImmediatelyWhileAnUnderlyingOverlayKeepsItsBlur",
+      "Outcome": "Passed",
+      "Duration": "00:00:00.0564925"
+    },
+    {
+      "Name": "OpenUtau.Test.App.WorkspaceDialogPresentationTests.DismissalKeepsBlurAndInputBlockedUntilTheCardHasFinishedLeaving",
+      "Outcome": "Passed",
+      "Duration": "00:00:00.3262285"
+    },
+    {
+      "Name": "OpenUtau.Test.App.WorkspaceDialogPresentationTests.InputAndMappingDialogsShareFooterMetricsAndCloseIcons(dark: False)",
+      "Outcome": "Passed",
+      "Duration": "00:00:00.2641395"
+    },
+    {
+      "Name": "OpenUtau.Test.App.WorkspaceToolHostingTests.MessageConfirmationUsesTheEmbeddedHostAndEscapeDefaultIsPreserved",
+      "Outcome": "Passed",
+      "Duration": "00:00:00.0705911"
+    },
+    {
+      "Name": "OpenUtau.Test.App.WorkspaceToolHostingTests.EmbeddedPromptKeyboardCancelAndConfirmKeepTheirOriginalSemantics",
+      "Outcome": "Passed",
+      "Duration": "00:00:00.0623541"
+    },
+    {
+      "Name": "OpenUtau.Test.App.WorkspaceToolHostingTests.ToolFromADetachedWindowRoutesToItsWorkspaceWithoutAnotherNativeWindow",
+      "Outcome": "Passed",
+      "Duration": "00:00:00.5008911"
+    },
+    {
+      "Name": "OpenUtau.Test.App.WorkspaceToolHostingTests.NestedDialogsRestoreTheUnderlyingControlAndCompleteOnlyTheirOwnTask",
+      "Outcome": "Passed",
+      "Duration": "00:00:00.4055798"
+    }
+  ],
+  "Preview": {
+    "Pid": 16492,
+    "Exe": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\OpenUtau\\bin\\Debug\\net8.0-windows\\OpenUtau.exe",
+    "Started": "2026-10-17T00:58:08.5531511+08:00",
+    "Arguments": [],
+    "Project": null,
+    "Log": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\OpenUtau\\bin\\Debug\\net8.0-windows\\Logs\\log20261017.txt",
+    "StartOffset": 126185,
+    "Exited": false,
+    "VisiblePreview": true,
+    "SourceCommit": "67cc8fe3b92d3dc0cd975dee846acdca585ba761",
+    "RunningProductSha256": "13F24D4D6E737FD91CB97657D1377712B4F09A5FEE17EA0467419A172D7F3063",
+    "OnDiskProductSha256": "13F24D4D6E737FD91CB97657D1377712B4F09A5FEE17EA0467419A172D7F3063",
+    "CoreSha256": "97E615F7D81F9A0C9810379EB1617CABCBC8C8716FB25A7AB87D48F685820EFB",
+    "NeedsRestartForUpdate": false,
+    "StartupErrorCount": 0,
+    "Responding": true,
+    "WindowHandle": 917710,
+    "Title": "UTvTU-26.10.17-005439"
+  },
+  "FullSuite": false,
+  "RealAudioStress": false,
+  "Screenshots": false,
+  "InstallerRebuilt": false,
+  "GitHubPushed": false
+}
