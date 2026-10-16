@@ -1,0 +1,67 @@
+{
+  "UniquePassed": 141,
+  "Groups": [
+    {
+      "Group": "core",
+      "Passed": 33,
+      "Trx": "4d89b80f6e32438990d1e83ffc555a26.trx",
+      "Seconds": 7.1,
+      "PeakMB": 64.0
+    },
+    {
+      "Group": "rack-ui",
+      "Passed": 17,
+      "Trx": "f86fed5097134ed6848e1012d95f4378.trx",
+      "Seconds": 11.0,
+      "PeakMB": 176.0
+    },
+    {
+      "Group": "ownership",
+      "Passed": 20,
+      "Trx": "578e78aa58e740369ec4cb44a402b941.trx",
+      "Seconds": 9.7,
+      "PeakMB": 145.0
+    },
+    {
+      "Group": "presets",
+      "Passed": 29,
+      "Trx": "c58d121f4ed84e7b850d3163a4f640f8.trx",
+      "Seconds": 11.0,
+      "PeakMB": 151.0
+    },
+    {
+      "Group": "export",
+      "Passed": 22,
+      "Trx": "e445508358a04fd58b4374ba2d30906b.trx",
+      "Seconds": 6.2,
+      "PeakMB": 69.0
+    },
+    {
+      "Group": "vst",
+      "Passed": 20,
+      "Trx": "da330f3d1b4c406e9803d8a015e463f4.trx",
+      "Seconds": 5.7,
+      "PeakMB": 56.0
+    }
+  ],
+  "ProductHashes": {
+    "OpenUtau.dll": "3AC3807077A1D5B87F5A422FB1B426300BE4298BD1168DE0C63C0CDE171C40CE",
+    "OpenUtau.Core.dll": "A287526CE13267560FD94FE2585959193486FF4BCED56A2383E45A13D1A7D348",
+    "UTvTU.DawUI.dll": "B2E85173AA3EB886753744203D68BA5F4E60FE363E6EFE2955F2E6D9616BE275",
+    "UTvTU.Md3.dll": "0FAF4CF005B1D0D0EC94BF42F2116B7CF8EF4C3AA4B61670242FDF993D51E5D3",
+    "runtimes/win-x64/native/vst_bridge.dll": "0CAF08E9B28464937B539A9FF976D17121946CA82092748F9DAC53D745EA1BA4"
+  },
+  "SourceCommit": "96067d089e658308eba5f2d93df3da3d249ed7ce",
+  "Sdk": "9.0.317",
+  "MaxSecondsPerGroup": 30,
+  "MaxRunnerMB": 384,
+  "SerialCollections": true,
+  "FullSuite": false,
+  "RealSynthesis": false,
+  "RealPluginStress": false,
+  "Screenshots": false,
+  "MainBuild": "build16-main.log",
+  "TestBuild": "build19-tests.log",
+  "ReusedCoreBuild": "build9-tests.log",
+  "FailedResourceRebuild": "build13-tests.log"
+}
