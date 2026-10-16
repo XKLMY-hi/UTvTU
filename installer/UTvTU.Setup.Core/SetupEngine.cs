@@ -109,7 +109,7 @@ public sealed class SetupEngine {
         return new(true, "程序文件卸载完成", warnings);
     }
 
-    static void DeleteUserData(InstallReceipt receipt, SetupOptions options) {
+    public static void DeleteUserData(InstallReceipt receipt, SetupOptions options) {
         string expected = receipt.PortableData ? receipt.Directory : SetupPaths.Full(options.DataDirectory);
         if (!SetupPaths.Same(expected, receipt.DataDirectory) || !receipt.PortableData && !Path.GetFileName(expected).Equals("OpenUtau Plus", StringComparison.OrdinalIgnoreCase)) throw new IOException("数据目录与本次安装记录不一致，已保留。");
         SetupPaths.RejectLinks(expected);

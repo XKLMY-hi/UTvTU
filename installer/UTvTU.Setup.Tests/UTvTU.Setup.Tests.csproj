@@ -8,5 +8,6 @@
     <PackageReference Include="Avalonia.Headless.XUnit" Version="12.1.0" />
     <ProjectReference Include="../UTvTU.Setup.Core/UTvTU.Setup.Core.csproj" />
     <ProjectReference Include="../UTvTU.Installer/UTvTU.Installer.csproj" />
+    <ProjectReference Include="../UTvTU.Setup.Packager/UTvTU.Setup.Packager.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

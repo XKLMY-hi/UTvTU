@@ -38,6 +38,7 @@ public class SetupPresentationTests {
             Assert.InRange(position.Y, 0, window.Bounds.Height - action.Bounds.Height);
             var remove = controls.OfType<CheckBox>().Single(control => control.Name == "RemoveDataChoice");
             Assert.False(remove.IsChecked); Assert.Equal(uninstall, controls.Single(control => control.Name == "UninstallChoices").IsVisible);
+            Assert.Contains("其他 UTvTU 安装", controls.OfType<TextBlock>().Single(text => text.Name == "RemoveDataHint").Text);
             Assert.Equal(!uninstall, controls.Single(control => control.Name == "InstallChoices").IsVisible);
             Assert.DoesNotContain(controls.OfType<TextBlock>(), text => text.Text?.Contains("UTvTU.DawUI.Controls.") == true);
             Assert.False(Directory.Exists(InstallerCore.Command.Directory));

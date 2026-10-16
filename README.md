@@ -13,8 +13,9 @@
 从 [GitHub Releases](https://github.com/XKLMY-hi/UTvTU/releases) 下载发布版本。本文介绍 `plus-develop` 开发分支的当前能力，已发布安装包的功能以对应版本说明为准。
 
 - 安装包为 `UTvTU-<版本>.exe`，自带运行时，无需另装 .NET。
-- 默认按用户安装；检测到旧版 OpenUTAU Plus 时沿用原安装路径，保留用户数据、工程和声库。
-- 卸载入口为安装目录中的 `UTvTU-Uninstall.exe`，默认保留用户数据。
+- 默认按用户安装；检测到身份可确认的旧版 OpenUTAU Plus 时沿用原安装路径，保留用户数据、工程和声库。
+- 可从 Windows“已安装的应用”或安装目录中的 `UTvTU-Uninstall.exe` 卸载，默认保留用户数据；只移除清单登记的程序文件。
+- 安装、卸载与发布命令见[安装器说明](installer/README.md)。当前源码已重做安装链，下载的旧安装包仍以其发布说明为准。
 
 ## 制作流程
 

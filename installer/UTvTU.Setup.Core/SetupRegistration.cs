@@ -18,7 +18,7 @@ public sealed class SetupRegistration(IRegistrationStore store) {
         var changes = new List<(string Key, string Name, object Value)> {
             (UninstallKey, "DisplayName", "UTvTU"), (UninstallKey, "DisplayVersion", receipt.Version),
             (UninstallKey, "Publisher", "XKLMY-hi"), (UninstallKey, "InstallLocation", receipt.Directory),
-            (UninstallKey, "OwnerSid", receipt.UserSid), (UninstallKey, "DisplayIcon", exe),
+            (UninstallKey, "OwnerSid", receipt.UserSid), (UninstallKey, "SourceCommit", receipt.SourceCommit), (UninstallKey, "DisplayIcon", exe),
             (UninstallKey, "UninstallString", $"\"{uninstaller}\" --uninstall --dir \"{receipt.Directory}\""),
             (UninstallKey, "QuietUninstallString", $"\"{uninstaller}\" --uninstall --silent --dir \"{receipt.Directory}\""),
             (UninstallKey, "URLInfoAbout", "https://github.com/XKLMY-hi/UTvTU"),
@@ -46,9 +46,10 @@ public sealed class SetupRegistration(IRegistrationStore store) {
             throw;
         }
     }
-    public bool OwnsRegistration(string directory, string sid) => store.Read(UninstallKey, "InstallLocation") is string path && SetupPaths.Same(path, directory) && (store.Read(UninstallKey, "OwnerSid") is not string owner || owner == sid);
-    public void Uninstall(string directory, string sid) {
-        if (!OwnsRegistration(directory, sid)) return;
+    public bool OwnsRegistration(string directory, string sid, string? version = null, string? commit = null) => store.Read(UninstallKey, "InstallLocation") is string path && SetupPaths.Same(path, directory) && (store.Read(UninstallKey, "OwnerSid") is not string owner || owner == sid)
+        && (version == null || store.Read(UninstallKey, "DisplayVersion") as string == version) && (commit == null || store.Read(UninstallKey, "SourceCommit") as string == commit);
+    public void Uninstall(string directory, string sid, string? version = null, string? commit = null) {
+        if (!OwnsRegistration(directory, sid, version, commit)) return;
         foreach (string extension in new[] { ".ustx", ".ustxp" }) {
             store.DeleteValue(Classes + extension + @"\OpenWithProgids", ProgId);
             if (store.Read(Classes + extension, "") as string == ProgId) store.DeleteValue(Classes + extension, "");

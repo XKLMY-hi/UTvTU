@@ -2,7 +2,7 @@ name: Windows installer
 on:
   pull_request:
     branches: [plus-develop, master]
-    paths: ['installer/**', 'scripts/build-installer.ps1', 'scripts/Test-Setup.ps1', 'OpenUtau/OpenUtau.csproj', 'VstProbe/**', 'UTvTU.DawUI/**', 'UTvTU.Md3/**', '.github/workflows/windows-installer.yml']
+    paths: ['installer/**', 'scripts/build-installer.ps1', 'scripts/Test-Setup*.ps1', 'OpenUtau/OpenUtau.csproj', 'VstProbe/**', 'UTvTU.DawUI/**', 'UTvTU.Md3/**', '.github/workflows/windows-installer.yml']
   workflow_dispatch:
 jobs:
   validate:
@@ -27,6 +27,12 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         shell: pwsh
         run: ./scripts/build-installer.ps1
+      # Actual package file operations are separately bounded and never register
+      # a CI installation in HKCU or create user shortcuts.
+      - name: Published package file checks
+        if: github.event_name == 'workflow_dispatch'
+        shell: pwsh
+        run: ./scripts/Test-SetupPackage.ps1 -Installer (Get-ChildItem dist -Filter '*.exe' | Select-Object -First 1).FullName
       - uses: actions/upload-artifact@v4
         if: github.event_name == 'workflow_dispatch'
         with:

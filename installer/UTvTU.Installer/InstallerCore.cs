@@ -50,6 +50,10 @@ public static class InstallerCore {
 
     public static async Task<SetupResult> RunAsync(SetupOptions options, IProgress<SetupProgress> progress, CancellationToken token) {
         if (Command.Preview) throw new InvalidOperationException("预览模式不能执行安装或卸载。");
+        using var lease = new SetupOperationLease(options.Directory, options.UserSid);
+        return await RunOperationAsync(options, progress, token);
+    }
+    static async Task<SetupResult> RunOperationAsync(SetupOptions options, IProgress<SetupProgress> progress, CancellationToken token) {
         options = options with { CleanLegacyMachineRegistration = WindowsIntegration.HasLegacyMachineRegistration(options.Directory) };
         var originalReceipt = options.Uninstall ? SetupEngine.ReadReceipt(options.Directory) : null;
         if (options.Uninstall && originalReceipt == null) throw new IOException("缺少可验证的安装记录。旧版请先覆盖安装新版，再使用新版卸载器。");
@@ -64,6 +68,12 @@ public static class InstallerCore {
         progress.Report(new(96, options.Uninstall ? "清理当前用户的系统入口" : "注册当前用户的系统入口"));
         var warnings = result.Warnings.ToList();
         bool integrationPending = false;
+        if (options.Uninstall && options.RemoveData && originalReceipt?.PortableData == false) {
+            // Profile data is handled with the original user's rights. The elevated
+            // worker never follows a caller-provided path into another user's profile.
+            try { SetupEngine.DeleteUserData(originalReceipt, options); }
+            catch (Exception error) { warnings.Add("部分本机用户数据已保留：" + error.Message); }
+        }
         try {
             await OnSta(() => {
                 var integration = new WindowsIntegration();
@@ -77,7 +87,9 @@ public static class InstallerCore {
     public static SetupResult RunFiles(SetupOptions options, IProgress<SetupProgress>? progress, CancellationToken token) {
         var engine = new SetupEngine();
         bool legacy = options.CleanLegacyMachineRegistration && WindowsIntegration.HasLegacyMachineRegistration(options.Directory);
-        var result = options.Uninstall ? engine.Uninstall(options, progress, token) : engine.Install(OpenPayload(), options, progress, token);
+        var fileOptions = options;
+        if (options.Uninstall && options.RemoveData && SetupEngine.ReadReceipt(options.Directory)?.PortableData != true) fileOptions = options with { RemoveData = false };
+        var result = options.Uninstall ? engine.Uninstall(fileOptions, progress, token) : engine.Install(OpenPayload(), options, progress, token);
         if (legacy) {
             try { WindowsIntegration.CleanLegacyMachineRegistration(options.Directory); }
             catch (Exception error) { return result with { Warnings = result.Warnings.Append("旧版系统登记未清理：" + error.Message).ToArray() }; }
@@ -121,7 +133,8 @@ public static class InstallerCore {
         SetupPaths.RejectLinks(job);
         var request = SetupJson.Read<WorkerRequest>(Path.Combine(job, "request.json"));
         string? owner = new DirectoryInfo(job).GetAccessControl().GetOwner(typeof(SecurityIdentifier))?.Value;
-        if (owner != request.Options.UserSid) throw new IOException("授权任务与原用户不匹配。");
+        bool ownAdminJob = owner == new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null).Value && request.Options.UserSid == UserSid && IsElevated();
+        if (owner != request.Options.UserSid && !ownAdminJob) throw new IOException("授权任务与原用户不匹配。");
         using var stop = new CancellationTokenSource();
         using var poll = new Timer(_ => { try { if (File.Exists(Path.Combine(job, "cancel"))) stop.Cancel(); } catch (ObjectDisposedException) { } }, null, 0, 100);
         try {
@@ -133,8 +146,10 @@ public static class InstallerCore {
     }
     public sealed class DirectProgress(Action<SetupProgress> action) : IProgress<SetupProgress> { public void Report(SetupProgress value) => action(value); }
 
-    public static Task RetryIntegrationAsync(SetupOptions options, InstallReceipt receipt, bool legacy) => OnSta(() => {
-        var integration = new WindowsIntegration();
-        if (options.Uninstall) integration.Uninstall(options, receipt); else integration.Install(options, receipt, legacy);
-    });
+    public static async Task RetryIntegrationAsync(SetupOptions options, InstallReceipt receipt, bool legacy) {
+        using var lease = new SetupOperationLease(options.Directory, options.UserSid);
+        var current = SetupEngine.ReadReceipt(options.Directory);
+        if (options.Uninstall ? current != null : current == null || current.Version != receipt.Version || current.SourceCommit != receipt.SourceCommit) throw new IOException("此目录的安装状态已变化，请使用当前版本的管理入口。");
+        await OnSta(() => { var integration = new WindowsIntegration(); if (options.Uninstall) integration.Uninstall(options, receipt); else integration.Install(options, receipt, legacy); });
+    }
 }

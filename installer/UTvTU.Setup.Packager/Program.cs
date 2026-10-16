@@ -2,7 +2,7 @@ using System.Text.Json;
 using UTvTU.Setup;
 
 try {
-    if (args is ["bundle", string host, string payload, string destination]) { PayloadContainer.Append(host, payload, destination); Console.WriteLine("完整单文件封装与校验通过。"); return 0; }
+    if (args is ["bundle", string host, string payload, string bundleDestination]) { PayloadContainer.Append(host, payload, bundleDestination); Console.WriteLine("完整单文件封装与校验通过。"); return 0; }
     object result = args switch {
         ["create", string directory, string destination] => PackageBuilder.Create(directory, destination),
         ["verify", string path] => PackageBuilder.Verify(path),

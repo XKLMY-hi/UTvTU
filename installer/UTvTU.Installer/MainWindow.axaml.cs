@@ -57,6 +57,8 @@ public partial class MainWindow : Window {
             string target = SetupPaths.ValidateTarget((DirBox.Text ?? "").Trim());
             var receipt = SetupEngine.ReadReceipt(target);
             DataPathText.Text = "数据位置：" + (receipt?.DataDirectory ?? SetupPaths.UserDataDirectory);
+            RemoveDataChoice.Content = receipt?.PortableData == true ? "同时清理此便携版的数据" : "同时清理账户共享数据";
+            RemoveDataHint.Text = receipt?.PortableData == true ? "勾选后清理此目录内的工程、设置、缓存与声库；未知文件仍保留。" : "勾选后清理此账户共享的工程、设置、缓存与声库，会影响使用同一数据目录的其他 UTvTU 安装。";
             LocationHint.Text = receipt != null ? $"当前版本 {receipt.Version} · 将保留现有用户数据" : SetupEngine.IsUtvtu(target) ? "检测到旧版 UTvTU，将保留数据并更新程序。" : InstallerCore.NeedsElevation(target) ? "此位置需要 Windows 管理员授权。" : "仅为当前用户安装。";
         } catch (Exception error) { LocationHint.Text = error.Message; }
     }

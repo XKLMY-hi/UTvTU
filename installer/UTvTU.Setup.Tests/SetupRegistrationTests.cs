@@ -22,6 +22,11 @@ public class SetupRegistrationTests {
         registration.Uninstall(Receipt("old-install").Directory, "user");
         Assert.Equal(Receipt("new-install").Directory, store.Read(SetupRegistration.UninstallKey, "InstallLocation"));
     }
+    [Fact] public void OldOperationCannotRemoveANewerVersionsRegistrationAtTheSamePath() {
+        var store = new Store(); var registration = new SetupRegistration(store); var receipt = Receipt(); receipt.Version = "new";
+        registration.Install(receipt, true); registration.Uninstall(receipt.Directory, receipt.UserSid, "old", receipt.SourceCommit);
+        Assert.Equal("new", store.Read(SetupRegistration.UninstallKey, "DisplayVersion"));
+    }
     [Fact] public void FailedRegistrationRestoresPreviousValues() {
         var store = new Store(); var registration = new SetupRegistration(store); registration.Install(Receipt("old-install"), true);
         var original = store.Values.ToDictionary(item => item.Key, item => item.Value); store.FailAt = store.Writes + 5;

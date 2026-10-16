@@ -108,6 +108,14 @@ public sealed class SetupEngineTests : IDisposable {
         engine.Uninstall(Options with { RemoveData = true }, null, CancellationToken.None);
         Assert.False(File.Exists(Path.Combine(data, "prefs.json"))); Assert.True(File.Exists(outside));
     }
+    [Fact] public void FileWorkerLeavesProfileCleanupToOriginalUserContext() {
+        Install(); var receipt = SetupEngine.ReadReceipt(Target)!; string data = Options.DataDirectory;
+        Directory.CreateDirectory(data); File.WriteAllText(Path.Combine(data, "prefs.json"), "user");
+        UTvTU.Installer.InstallerCore.RunFiles(Options with { Uninstall = true, RemoveData = true }, null, CancellationToken.None);
+        Assert.True(File.Exists(Path.Combine(data, "prefs.json")));
+        SetupEngine.DeleteUserData(receipt, Options with { RemoveData = true });
+        Assert.False(File.Exists(Path.Combine(data, "prefs.json")));
+    }
     [Fact] public void CorruptPayloadCannotReplaceExistingInstallation() {
         Install("old"); using var payload = Package("new");
         using (var zip = new ZipArchive(payload, ZipArchiveMode.Update, true)) { zip.GetEntry("OpenUtau.exe")!.Delete(); using var writer = new StreamWriter(zip.CreateEntry("OpenUtau.exe").Open()); writer.Write("BAD"); }

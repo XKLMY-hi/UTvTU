@@ -59,8 +59,10 @@ sealed class WindowsIntegration {
     }
     public void Uninstall(SetupOptions options, InstallReceipt receipt) {
         if (receipt.UserSid != InstallerCore.UserSid) throw new IOException("不能更改其他用户的系统入口。");
+        if (SetupEngine.ReadReceipt(options.Directory) != null) throw new IOException("目录中已有新的安装，已保留其系统入口。");
+        if (!registration.OwnsRegistration(options.Directory, receipt.UserSid, receipt.Version, receipt.SourceCommit)) return;
         string exe = Path.Combine(options.Directory, InstallerCore.AppExe);
-        RemoveShortcut(StartMenu, exe); RemoveShortcut(Desktop, exe); registration.Uninstall(options.Directory, receipt.UserSid);
+        RemoveShortcut(StartMenu, exe); RemoveShortcut(Desktop, exe); registration.Uninstall(options.Directory, receipt.UserSid, receipt.Version, receipt.SourceCommit);
     }
     static object Shell() => Activator.CreateInstance(Type.GetTypeFromProgID("WScript.Shell") ?? throw new IOException("Windows 快捷方式服务不可用。"))!;
     internal static void Shortcut(string path, string exe) {

@@ -13,8 +13,9 @@ The current target is **Windows 10 / 11 x64**. Its own Material Design 3 themes 
 Download published builds from [GitHub Releases](https://github.com/XKLMY-hi/UTvTU/releases). This README describes the current `plus-develop` branch; check each release's notes for the features included in its installer.
 
 - `UTvTU-<version>.exe` includes the runtime; no separate .NET installation is needed.
-- Installation is per user by default. An existing OpenUTAU Plus installation path is reused, preserving user data, projects and voicebanks.
-- `UTvTU-Uninstall.exe` in the installation directory removes the application and preserves user data by default.
+- Installation is per user by default. A verified UTvTU / OpenUTAU Plus installation can be upgraded while preserving user data, projects and voicebanks.
+- Uninstall through Windows Installed Apps or `UTvTU-Uninstall.exe` in the installation directory. Only manifest-owned application files are removed; user data is preserved by default.
+- See the [installer documentation](installer/README.md) for packaging and command-line usage. The installer rewrite describes current sources; older downloads retain the behavior of their corresponding release.
 
 ## Production Workflow
 
