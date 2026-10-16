@@ -57,8 +57,8 @@
     </Style>
   </UserControl.Styles>
   <Border Name="StripCard" Padding="10" CornerRadius="{DynamicResource Md3ShapeLarge}" BorderThickness="1">
-    <Grid Name="RootGrid" RowSpacing="8" RowDefinitions="210,*,32">
-      <Grid Name="ChannelHeader" RowDefinitions="3,32,76,28,28,*" RowSpacing="8" Grid.Row="0">
+    <Grid Name="RootGrid" RowSpacing="8" RowDefinitions="210,*,32,28">
+      <Grid Name="ChannelHeader" RowDefinitions="3,32,76,28,28" RowSpacing="8" Grid.Row="0">
         <Border Grid.Row="0" Name="AccentBar" Height="3" CornerRadius="{DynamicResource Md3ShapeFull}" HorizontalAlignment="Stretch" Background="{DynamicResource md3.primary}"/>
         <TextBlock Grid.Row="1" Name="TrackNameLabel" FontSize="12" LineHeight="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Text="--" TextWrapping="Wrap" MaxHeight="32" ToolTip.Tip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
         <Border Grid.Row="2" Name="EqDisplay" Height="76" CornerRadius="{DynamicResource Md3ShapeSmall}" ClipToBounds="True" Background="{DynamicResource md3.surface-container-lowest}">
@@ -80,7 +80,6 @@
           <Button Grid.Column="0" Name="MuteBtn" Classes="mixerBtn" Height="28" MinHeight="28" CornerRadius="8" FontSize="{DynamicResource Md3TypeLabelTiny}" FontWeight="Bold" Click="OnMuteClick" Content="{DynamicResource mixer.mute}"/>
           <Button Grid.Column="1" Name="SoloBtn" Classes="mixerBtn" Height="28" MinHeight="28" CornerRadius="8" FontSize="{DynamicResource Md3TypeLabelTiny}" FontWeight="Bold" Click="OnSoloClick" Content="{DynamicResource mixer.solo}"/>
         </Grid>
-        <Button Grid.Row="5" Name="EffectsButton" Theme="{StaticResource DawTextButtonTheme}" Click="OnOpenEffects" MinHeight="24" Height="24" Margin="0" Padding="4,0" FontSize="10" Content="FX" ToolTip.Tip="{DynamicResource rack.open}"/>
       </Grid>
       <Border Name="FaderWell" CornerRadius="12" Padding="4,12" Background="{DynamicResource md3.surface-container-lowest}" MinHeight="140" Grid.Row="1">
         <c:DawFader Name="FaderBox" Width="88" FocusBrush="{DynamicResource md3.primary}" AutomationProperties.Name="{DynamicResource controls.volume}" ToolTip.Tip="{DynamicResource controls.fader.tip}" HorizontalAlignment="Center" VerticalAlignment="Stretch">
@@ -117,6 +116,7 @@
           <c:DawValueField Name="VolumeField" HorizontalAlignment="Stretch" AutomationProperties.Name="{DynamicResource controls.volume}" ToolTip.Tip="{DynamicResource controls.value.tip}" Width="64" Height="16"/>
         </Viewbox>
       </Border>
+      <Button Grid.Row="3" Name="EffectsButton" Classes="mixerBtn" Click="OnOpenEffects" Height="28" CornerRadius="8" FontSize="11" FontWeight="SemiBold" Content="FX" AutomationProperties.Name="{DynamicResource rack.open}" ToolTip.Tip="{DynamicResource rack.open}"/>
     </Grid>
   </Border>
 </UserControl>

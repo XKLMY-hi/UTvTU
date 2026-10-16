@@ -1,5 +1,11 @@
 # HANDOVER — 新会话交接（2026-10-17 安装与卸载重构）
 
+## 2026-10-17 混音台底部FX入口（最新）
+
+- 用户要求在轨道条底下加FX按钮打开对应轨道效果链。原EffectsButton位于固定210高表头的第六行，子项及间距总高度超出表头；已移到RootGrid第四行，在音量读数下独占28高，使用与静音/独奏一致的DawMixButtonTheme。显示`FX · 数量`、选中轨道、共享TrackEffectRack入口与刷新逻辑保留，无音频代码变更。
+- SDK9单节点、2处理器、768MB托管堆，仅增量主程序/检查项目，复用已验证Core。主程序0错3既有警告/42.73秒；检查项目0错152既有警告/19.77秒。3项现有混音台轻量检查通过，9.2秒/144MB，30秒/384MB护栏未改，TRX`1bb3827bcd254347a9663ece580789cf.trx`。日志`.dsh/mixer-footer-20261017/`；未跑全套、不自行截图。
+- 标准`OpenUtau/bin/Debug/net8.0-windows/OpenUtau.dll`已更新，SHA256`E7B571AA8859EDA459E70AAA10BFFDBD1CBE0354E7A244268EAFE42B1092DF34`；Core仍为上一轮已验证`97E615F7D81F9A0C9810379EB1617CABCBC8C8716FB25A7AB87D48F685820EFB`。注意直接增量构建会从Core默认Debug目录复制旧4F60产物，本轮已从`.dsh/effect-rack-20261016/build/`恢复正确97E6内核到主程序和检查输出，检查实际运行使用97E6。未启动或关闭主程序，未重新打安装包、未推送；下方安装包仍对应32b0019d，未包含此次按钮调整。
+
 ## 2026-10-17 打包器、安装器与卸载器全部修复（最新，优先于下文审查）
 
 - 用户要求“全修”，并将安装/卸载GUI按主程序风格重新设计。已完成产品提交`40293ab0`、`9f90bb54`、`bb874c95`、`525f2e39`、`ad54335c`、`47ae4852`、`32b0019d`。[完整交付与验收](.opencode/plans/installer-rebuild-2026-10-16.md)，[验证JSON](.opencode/plans/installer-rebuild-2026-10-16/validation.json)。本轮本地提交，**未推送、未发布Release**；远端此前为`1495dc64`，master未动。
