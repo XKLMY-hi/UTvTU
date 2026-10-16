@@ -1,12 +1,15 @@
-# HANDOVER — 新会话交接（2026-10-17 安装与卸载重构）
+# HANDOVER — 新会话交接（2026-10-17 上游集成完成）
 
-## 2026-10-17 用户批准全部有价值上游更新与新歌手选择器（进行中，继续完成）
+## 2026-10-17 适用上游更新与新歌手选择器全部接入（最新，已完成）
 
-- 用户明确“包括上面的其他上游更新，全部引入”。本轮已开始实现，**不能停在审查或仅做首批**。按本地架构引入建议的修复/功能及必要前置，保持MD3、VST机架、离线导出；不整体合并上游主题/MixPlanner/原生R1.1。后续清单及证据见[实施记录](.opencode/plans/upstream-integration-2026-10-17.md)。SDK9选择器`.dsh/packaging/sdk9/`，日志`.dsh/upstream-integration-20261017/`，实际工作区G盘、plus-develop，接手仍核盘符。
-- 已提交`210cf0c1`查找栏/泰语回退/重采样器同名/音高点右键；`896f66c8`英语C+V成组/双元音/EN2JA。查找栏2项、C+V15项轻量通过，具体TRX见实施记录。C+V最初两次触及30秒/384MiB护栏，根因为无关神经G2P初始化；未放宽，改确定性发音驱动真实插件并缩小测试字典，15项全绿，临时追踪代码已撤回。
-- ONNX批次已完成并验证：DML与每歌手统一同步、SessionOptions using、SOME/GAME单条及batch推理/释放、Worldline-R2临时会话释放、DiffSinger脚本/音高/variance生命周期，以及dur_type和word_div/word_dur输入；14项轻量通过，5.5秒/72MiB。最小真实ONNX CPU图覆盖两工厂/两输入契约；非真实GPU/声库压力。build2 0错/1791既有警告、81.2秒。新增组合Scope使用Monitor，**只能在同步代码中使用，不跨await**。
-- 尚需完成：manifest附加缓存与preutter、英语VCCV、VOICEVOX、SVP/SV2与音频导入修复、缺失包安装、新MD3虚拟歌手选择器、当前版本标签更新检查、适用的警告入口与最后轻量验收。歌手目录SearchTerms实际需补：旧USinger.cs中现有SearchTerms位于UOto类，不是歌手元数据，不能误判已具备。
-- 默认轻量每组30秒/384MiB串行、构建两处理器/单节点/768MiB堆，不自行截图、不开关用户程序。当前Debug构建已更新；没有重打安装器、推送或修改GitHub Release。每个绿灯步骤立即中文原子提交；不要回滚未提交成果。
+- 用户授权“包括上面的其他上游更新，全部引入”。已按本地架构完成全部适用项及必要前置，保留MD3、共享FX机架、VST与离线音频管线；不是整体merge。31项处置及来源、轻量证据见[实施记录](.opencode/plans/upstream-integration-2026-10-17.md)与[验证JSON](.opencode/plans/upstream-integration-2026-10-17/validation.json)。实际工作区G盘、plus-develop，origin XKLMY-hi/UTvTU、upstream openutau/OpenUtau；每轮仍先核盘符。
+- 产品提交：`210cf0c1`查找栏/泰语回退/同名resampler/音高点右键，`896f66c8`英语C+V/双元音/EN2JA，`6fd59533`ONNX/DML与分组时长，`bb4c4b51`manifest缓存/preutter/VCCV，`a9b8f2bb`SVP/SV2含音频，`16ea2548`MD3歌手选择器与后台头像缓存，`3590d164`VOICEVOX帧和音高边界，`c3a258e9`正式版更新检查，`e462dbfb`缺失包安装/重复声库/选择器收尾，`d4f092b6`英语规则补充回归。上述均本地提交，未推送，master未动。
+- 新选择器：轨道歌手按钮与溢出入口打开同一MD3纵向虚拟列表；真实头像、收藏/最近去重、名称/目录/本地化名/自定义search_terms搜索、上下/Enter/Esc、焦点返回、关闭退订；选择仍走TrackHeaderViewModel原可撤销命令。资源中心共用搜索；后台头像两路解码、72宽、96项引用租约缓存，脱离清空Image.Source并释放租约，AvatarRevision刷新旧缓存。默认不截图，观感交用户看。
+- 缺失依赖通过结构化异常覆盖WORLDLINE-R2、外置DiffSinger声码器、GAME/SOME/RMVPE；穿透Aggregate和MessageCustomizableException的扁平包装。用户确认后精确定位注册目录并安装/修复，不存在则给本地oudep入口；关闭无迟到安装，安装/卸载/刷新按钮互斥。复用现有包安装器，未改成新下载或事务内核。重复声库在资源中心展示使用/忽略位置，保留原第一位置优先。UTvTU更新器只提示本仓正式版，识别时间标签；不套上游stable/beta/alpha。
+- **累计91个不同轻量用例全部通过，无跳过**。每组30秒/384MiB、串行，未放宽护栏。最终资源/选择器/英语22项16.1秒/187MiB；有两项真实原生Worldline短音频检查。ONNX用最小真实CPU模型，转写安装用注入目录/安装服务；未跑全套、真实GPU/声库压力、实际包下载或真实VOICEVOX服务器。不得扩大验证口径。初期C+V两次护栏失败已通过固定G2P/缩小夹具修正；最后选择器一项随机测试目录干扰搜索亦已修正，最终22/22。
+- SDK9.0.317、单节点/两处理器/768MiB堆，选择器`.dsh/packaging/sdk9/`；日志`.dsh/upstream-integration-20261017/`。最终主程序0错/3项既有AXAML警告、48.74秒；测试0错/152项既有警告、31.53秒，依赖已由build9完整构建。标准Debug主程序与测试输出的Main/Core哈希一致（验证JSON）。**已编译，尚未启动本轮程序**，没有关闭用户程序/自行截图/重打安装器/更改GitHub Release。下文旧DLL/PID不能当作当前本轮实例。
+- ONNX同步锁统一DML→每歌手/转录器；Scope基于Monitor，只能用于同步片段，不能跨await。Voicevox保持本地IRenderer，用phone范围匹配本地实际合成，不照搬缺少前置的表达式图/slur UI；新vv-grid2缓存前缀不复用旧错位音频。SVP用本地Newtonsoft.Json，加载真实音频与缺失占位，清本地UProject默认空轨。
+- 不适用项有明确处置：上游旧主题/偏好/波形/视口/轨头布局不覆盖当前MD3；MixPlanner单通道与本地WaveMix/RenderGate结构不兼容；R1.1默认项缺本地后端；菲律宾语目标分支不存在。没有遗留待批准实现项；README双语已同步当前能力，现有公开Release013015仍为旧发行构建。
 
 ## 2026-10-17 上游新增31提交审查（最新，仅审查）
 

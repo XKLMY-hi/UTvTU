@@ -47,7 +47,7 @@ Screenshots captured on Windows, build `UTvTU-26.10.17-011138`. Click an image i
 - Edit notes, lyrics, pitch, portamento, vibrato and expression curves in the piano roll.
 - Use OpenUTAU's voicebank, phonemizer and synthesis workflows, including classic UTAU voicebanks, third-party resamplers and engines such as DiffSinger.
 - Arrange vocal parts and backing audio across tracks, with undo / redo.
-- Save UTvTU projects, effect chains and plugin states as `.ustxp`; retain `.ustx` compatibility and upstream import formats such as UST, MIDI and VSQx.
+- Save UTvTU projects, effect chains and plugin states as `.ustxp`; retain `.ustx` compatibility and upstream import formats such as UST, MIDI and VSQx. Synthesizer V SVP / SV2 import includes audio tracks.
 
 ### A Connected Workspace
 
@@ -81,11 +81,15 @@ Synthesis and effects use the internal project rate; delivery files can be resam
 - HCT / CAM16 role colours, custom seeds, the Windows accent, light / dark themes, palette variants and contrast settings.
 - Shared buttons, inputs, selectors, knobs, faders, menus and overlays, with compact controls where music editing needs them.
 - Consistent primary, secondary, cancel and close controls in embedded dialogs.
-- Voicebank search, real avatars, OTO / subbank information, audition controls and dependency-package management in the resource centre.
+- A track singer picker with real avatars, favorites, recent singers, metadata / folder / custom keyword search and arrow-key, Enter and Esc controls. Large catalogs use a virtual list and background thumbnail caching.
+- The resource centre provides voicebank search, OTO / subbank details, audition controls and a warning listing active and ignored locations for duplicate voicebank IDs.
+- Missing vocoders or transcription models can be installed through the resource centre after confirmation, with local `.oudep` installation available when the registry is unavailable.
 
 ### Installation and Use
 
 Get installers from [Releases](https://github.com/XKLMY-hi/UTvTU/releases); the runtime is included. The current installer checks package identity and file manifests, rolls back failed or cancelled updates, and preserves user data by default on uninstall. See [installation and packaging](installer/README.md) or [building from source](docs/BUILDING.md).
+
+In-app update checks understand UTvTU build timestamps and show official releases from this repository. Users download updates from GitHub.
 
 This page describes `plus-develop`; consult release notes for the features in a downloaded build. Fresh installations use `OpenUtau Plus` under Windows Documents for data. Existing portable installations keep their local data mode.
 

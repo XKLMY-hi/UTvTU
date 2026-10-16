@@ -1,0 +1,104 @@
+{
+  "date": "2026-10-17",
+  "sourceCommit": "d4f092b6dd73a67c8fbd3c556e8737f074c3fe85",
+  "upstream": "fd8c843e323262a57f3da2d86fbb740369216dc3",
+  "uniquePassingCases": 91,
+  "runs": [
+    {
+      "trx": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.dsh\\light-test-results\\0f892d76674b429bb94781e4a47c2c32.trx",
+      "passed": 2
+    },
+    {
+      "trx": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.dsh\\light-test-results\\a330652a36614374ad597597e4dbb842.trx",
+      "passed": 15
+    },
+    {
+      "trx": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.dsh\\light-test-results\\cc5da63ae49f46b0bbd5320fb1941f11.trx",
+      "passed": 14
+    },
+    {
+      "trx": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.dsh\\light-test-results\\2d2899a7874d4bdf96b21a98438da022.trx",
+      "passed": 5
+    },
+    {
+      "trx": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.dsh\\light-test-results\\79f21765f9e847c4b02b46ce4bf2fedb.trx",
+      "passed": 11
+    },
+    {
+      "trx": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.dsh\\light-test-results\\1f7c5e2b5b3d460ea16efee3346142ac.trx",
+      "passed": 2
+    },
+    {
+      "trx": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.dsh\\light-test-results\\02944d5e3dd444b2bc1e4f9c3a47c053.trx",
+      "passed": 5
+    },
+    {
+      "trx": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.dsh\\light-test-results\\6c83ca898e024e5fad4827722bfa2f5b.trx",
+      "passed": 9
+    },
+    {
+      "trx": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.dsh\\light-test-results\\26d1e433746948fcb2b6eb0e11523e7a.trx",
+      "passed": 11
+    },
+    {
+      "trx": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.dsh\\light-test-results\\9ba89678b836424bb1cd42f733c3e90c.trx",
+      "passed": 22
+    }
+  ],
+  "guards": {
+    "eachGroupTimeoutSeconds": 30,
+    "maxRunnerMiB": 384,
+    "serialCollections": true,
+    "buildProcessors": 2,
+    "buildManagedHeapMiB": 768
+  },
+  "finalResourcesGroup": {
+    "passed": 22,
+    "elapsedSeconds": 16.1,
+    "peakRunnerMB": 187
+  },
+  "build": {
+    "main": {
+      "log": ".dsh/upstream-integration-20261017/build11-main.log",
+      "errors": 0,
+      "warnings": 3,
+      "seconds": 48.74
+    },
+    "test": {
+      "log": ".dsh/upstream-integration-20261017/build11-test.log",
+      "errors": 0,
+      "warnings": 152,
+      "seconds": 31.53
+    },
+    "dependencyBuild": ".dsh/upstream-integration-20261017/build9.log"
+  },
+  "files": {
+    "OpenUtau/bin/Debug/net8.0-windows/OpenUtau.dll": {
+      "bytes": 37272064,
+      "sha256": "0daac4c3c482bc532712f364463f75a994da81ce7bae7efbe7dda623d0494647"
+    },
+    "OpenUtau/bin/Debug/net8.0-windows/OpenUtau.Core.dll": {
+      "bytes": 31051776,
+      "sha256": "5cc78bd5b1ab5bfb08b467f6017f40a87bb021c8c9247550113cb0e37b7e4d47"
+    },
+    "OpenUtau.Test/bin/Debug/net8.0-windows/OpenUtau.dll": {
+      "bytes": 37272064,
+      "sha256": "0daac4c3c482bc532712f364463f75a994da81ce7bae7efbe7dda623d0494647"
+    },
+    "OpenUtau.Test/bin/Debug/net8.0-windows/OpenUtau.Core.dll": {
+      "bytes": 31051776,
+      "sha256": "5cc78bd5b1ab5bfb08b467f6017f40a87bb021c8c9247550113cb0e37b7e4d47"
+    }
+  },
+  "readmeLocalLinksValidated": 38,
+  "limits": [
+    "No full suite or long synthesis stress",
+    "No actual GPU/voicebank model inference stress",
+    "No live VOICEVOX server",
+    "No actual package downloads or installation",
+    "No UI screenshot capture; visual review belongs to user"
+  ],
+  "pushed": false,
+  "installerRebuilt": false,
+  "githubReleaseChanged": false
+}
