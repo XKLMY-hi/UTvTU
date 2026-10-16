@@ -4,6 +4,7 @@ using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Styling;
 using Avalonia.Threading;
+using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using OpenUtau.Core.Theming;
 using OpenUtau.Theming;
@@ -76,6 +77,18 @@ public class SetupPresentationTests {
             window.Show(); var running = window.ExecuteAsync(); window.Close();
             await running; Dispatcher.UIThread.RunJobs();
             Assert.True(restored); Assert.False(window.IsVisible);
+        } finally { window.Close(); InstallerCore.Command = previous; }
+    }
+    [AvaloniaFact]
+    public async Task CancelButtonBecomesAnEnabledCloseActionAfterRecovery() {
+        var previous = InstallerCore.Command;
+        InstallerCore.Command = new SetupCommandLine { Directory = Path.Combine(Path.GetTempPath(), "UTvTU-GUI-Preview") };
+        var window = new MainWindow { ExecuteOperation = async (_, _, token) => { await Task.Delay(Timeout.Infinite, token); return SetupResult.Completed("unused"); } };
+        try {
+            window.Show(); var running = window.ExecuteAsync();
+            var button = window.GetVisualDescendants().OfType<DawButton>().Single(control => control.Name == "CancelButton");
+            button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); await running; Dispatcher.UIThread.RunJobs();
+            Assert.True(button.IsEnabled); Assert.Equal("关闭", button.Content); Assert.True(window.IsVisible);
         } finally { window.Close(); InstallerCore.Command = previous; }
     }
 }

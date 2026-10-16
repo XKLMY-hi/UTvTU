@@ -96,6 +96,7 @@ public partial class MainWindow : Window {
         } catch (OperationCanceledException) {
             ResetForRetry("操作已取消", "程序文件已恢复或尚未修改，可以重新开始。");
         } catch (Exception error) {
+            closeAfterCancel = false;
             Program.WriteLog("失败", error.ToString()); LogText.Text += error + Environment.NewLine; Details.IsVisible = true;
             ResetForRetry("暂时无法完成", error.Message);
         } finally {
@@ -105,9 +106,9 @@ public partial class MainWindow : Window {
     }
     void ResetForRetry(string heading, string message) {
         Heading.Text = heading; ShowNotice(message); OptionsPage.IsVisible = true; ProgressPage.IsVisible = false; ResultPage.IsVisible = false;
-        ActionButton.Content = "重试"; CancelButton.Content = "关闭"; StepProgress.Classes.Set("active", false); StepOptions.Classes.Set("active", true);
+        ActionButton.Content = "重试"; CancelButton.Content = "关闭"; CancelButton.IsEnabled = true; StepProgress.Classes.Set("active", false); StepOptions.Classes.Set("active", true);
     }
-    void CancelOperation() { operation?.Cancel(); CancelButton.IsEnabled = false; CancelButton.Content = "正在取消…"; }
+    void CancelOperation() { CancelButton.IsEnabled = false; CancelButton.Content = "正在取消…"; operation?.Cancel(); }
     void ShowNotice(string text) { NoticeText.Text = text; Notice.IsVisible = true; }
     void Finish() {
         if (!uninstall && LaunchChoice.IsChecked == true && lastOptions != null) {
