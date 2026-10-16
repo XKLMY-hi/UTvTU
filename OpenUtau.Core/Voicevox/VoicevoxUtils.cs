@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -198,6 +198,58 @@ namespace OpenUtau.Core.Voicevox {
             dic.Loaddic(singer.Location);
         }
 
+        //Converts an absolute position in ms to the nearest frame on the absolute frame grid.
+        public static int ToFrame(double ms) {
+            return (int)Math.Round((ms / 1000.0) * fps, MidpointRounding.AwayFromZero);
+        }
+
+        //Snaps an absolute position in ms to the frame grid.
+        public static double SnapMs(double ms) {
+            return ToFrame(ms) * 1000.0 / fps;
+        }
+
+        public static bool IsPhonemeNoteCountMatch(RenderPhrase phrase) {
+            return phrase.phones.Length == phrase.notes.Where(note => !IsSyllableVowelExtensionNote(note.lyric)).Count() && phrase.phones.All(p => phoneme_List.kanas.ContainsKey(p.phoneme));
+        }
+
+        //Returns the absolute range (ms) that the synthesized frames cover, excluding the head and tail pau.
+        //Synthesis and Layout both go through this, so the audio and its layout cannot diverge.
+        public static (double startMs, double endMs) GetSynthSpan(RenderPhrase phrase) {
+            return (phrase.positionMs, phrase.endMs);
+        }
+
+        //Builds the layout of a phrase whose synthesized frames start at startMs and end at endMs.
+        public static RenderResult ComputeLayout(double startMs, double endMs, double leadingMs) {
+            double frameMs = 1000.0 / fps;
+            int headFrames = (int)Math.Round(headS * fps);
+            int tailFrames = (int)Math.Round(tailS * fps);
+            const int AlignmentFrames = 1;
+
+            double correctionMs = (headFrames + AlignmentFrames) * frameMs;
+            double snappedStartMs = SnapMs(startMs);
+
+            return new RenderResult() {
+                leadingMs = leadingMs,
+                positionMs = snappedStartMs - correctionMs,
+                // Head pau + leading + synthesized frames + tail pau.
+                estimatedLengthMs = correctionMs + leadingMs + (endMs - snappedStartMs) + tailFrames * frameMs,
+            };
+        }
+
+        //Returns the end frame of a segment starting at startFrame.
+        //Segments are chained through startFrame so rounding never accumulates,
+        //and minLength keeps a segment long enough for the engine to synthesize it.
+        public static int ToEndFrame(int startFrame, double endMs, bool isPlosive, int minLength) {
+            double exactEnd = (endMs / 1000.0) * fps;
+            int endFrame = isPlosive
+                ? (int)Math.Ceiling(exactEnd)
+                : (int)Math.Round(exactEnd, MidpointRounding.AwayFromZero);
+            if (endFrame - startFrame < minLength) {
+                endFrame = startFrame + minLength;
+            }
+            return endFrame;
+        }
+
         public static VoicevoxQueryMain NoteGroupsToVQuery(VoicevoxNote[] vNotes, TimeAxis timeAxis) {
             VoicevoxQueryMain vqMain = new VoicevoxQueryMain();
             int index = 0;
@@ -208,23 +260,13 @@ namespace OpenUtau.Core.Voicevox {
                     key = null,
                     vqnindex = -1
                 });
-                int short_length_count = 0;
+                int cursor = vNotes.Length > 0 ? ToFrame(vNotes[0].positionMs) : 0;
                 while (index < vNotes.Length) {
                     string lyric = dic.Notetodic(vNotes, index);
                     //Avoid synthesis without at least two frames.
-                    double durationMs = vNotes[index].durationMs;
-                    int length = (int)Math.Round((durationMs / 1000f) * VoicevoxUtils.fps, MidpointRounding.AwayFromZero);
-                    if (length < 2) {
-                        length = 2;
-                    }
-                    if (durationMs > (length / VoicevoxUtils.fps) * 1000f) {
-                        if (short_length_count >= 2) {
-                            length += 1;
-                            short_length_count = 0;
-                        } else {
-                            short_length_count += 1;
-                        }
-                    }
+                    int endFrame = ToEndFrame(cursor, vNotes[index].positionMs + vNotes[index].durationMs, false, 2);
+                    int length = endFrame - cursor;
+                    cursor = endFrame;
                     int? tone = null;
                     if (!string.IsNullOrEmpty(lyric)) {
                         tone = vNotes[index].tone;
@@ -284,13 +326,13 @@ namespace OpenUtau.Core.Voicevox {
             const int interval = 5;
             var result = new double[length];
             try {
-                if (curve == null) {
+                if (curve == null || curve.Length == 0) {
                     Array.Fill(result, defaultValue);
                     return result;
                 }
 
                 for (int i = 0; i < length - headFrames - tailFrames; i++) {
-                    double posMs = phrase.positionMs - phrase.leadingMs + (i * frameMs) + offset;
+                    double posMs = SnapMs(GetSynthSpan(phrase).startMs) - phrase.leadingMs + (i * frameMs) + offset;
                     int ticks = phrase.timeAxis.MsPosToTickPos(posMs) - (phrase.position - phrase.leading);
                     int index = Math.Max(0, (int)((double)ticks / interval));
                     if (index < curve.Length) {

@@ -489,7 +489,9 @@ namespace OpenUtau.Core.Editing {
                 // Take the first negative tick before start and the first tick after end for each segment;
                 // Reverse traversal, so that when the score slices are too close, priority is given to covering the consonant pitch of the next segment, reducing the impact on vowels.
                 for (int i = 0; i < result.tones.Length; i++) {
-                    if (result.tones[i] < 0) {
+                    if (i >= result.ticks.Length || !float.IsFinite(result.tones[i]) || result.tones[i] < 0 ||
+                        (result.voiced != null && (i >= result.voiced.Length || !result.voiced[i]))) {
+                        lastX = lastY = null;
                         continue;
                     }
                     int x = phrase.position - part.position + (int)result.ticks[i];
@@ -497,9 +499,7 @@ namespace OpenUtau.Core.Editing {
                         if (i + 1 < result.ticks.Length && result.ticks[i + 1] > 0) { } else
                             continue;
                     }
-                    if (x >= phrase.position + phrase.duration) {
-                        i = result.tones.Length - 1;
-                    }
+                    if (x >= phrase.position - part.position + phrase.duration) break;
                     int pitchIndex = Math.Clamp((x - (phrase.position - part.position - phrase.leading)) / 5, 0, phrase.pitches.Length - 1);
                     float basePitch = phrase.pitchesBeforeDeviation[pitchIndex];
                     int y = (int)(result.tones[i] * 100 - basePitch);

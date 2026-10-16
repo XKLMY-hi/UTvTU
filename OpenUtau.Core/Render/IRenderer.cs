@@ -40,6 +40,8 @@ namespace OpenUtau.Core.Render {
         /// Semitone values in MIDI scale.
         /// </summary>
         public float[] tones;
+        /// <summary>Optional frame validity; false frames must not modify editable pitch.</summary>
+        public bool[] voiced;
     }
 
     public class RenderRealCurveResult {

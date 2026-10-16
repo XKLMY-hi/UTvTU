@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -50,11 +50,8 @@ namespace OpenUtau.Core.Voicevox {
         }
 
         public RenderResult Layout(RenderPhrase phrase) {
-            return new RenderResult() {
-                leadingMs = phrase.leadingMs,
-                positionMs = phrase.positionMs - ((VoicevoxUtils.headS * 1000)),
-                estimatedLengthMs = phrase.durationMs + phrase.leadingMs,
-            };
+            var span = VoicevoxUtils.GetSynthSpan(phrase);
+            return VoicevoxUtils.ComputeLayout(span.startMs, span.endMs, phrase.leadingMs);
         }
 
         public Task<RenderResult> Render(RenderPhrase phrase, Progress progress, int trackNo, CancellationTokenSource cancellation, bool isPreRender) {
@@ -65,7 +62,7 @@ namespace OpenUtau.Core.Voicevox {
                     }
                     string progressInfo = $"Track {trackNo + 1}: {this} \"{string.Join(" ", phrase.phones.Select(p => p.phoneme))}\"";
                     progress.Complete(0, progressInfo);
-                    var wavPath = Path.Join(PathManager.Inst.CachePath, $"vv-{phrase.hash:x16}.wav");
+                    var wavPath = Path.Join(PathManager.Inst.CachePath, $"vv-grid2-{phrase.hash:x16}.wav");
                     phrase.AddCacheFile(wavPath);
                     var result = Layout(phrase);
                     if (!File.Exists(wavPath)) {
@@ -100,10 +97,6 @@ namespace OpenUtau.Core.Voicevox {
                                 }
                                 for (int i = vsParams.volume.Count - vsParams.phonemes[vsParams.phonemes.Count - 1].frame_length; i < vsParams.volume.Count; i++) {
                                     vsParams.volume[i] = 0;
-                                }
-
-                                if (vsParams.phonemes.Count() > 0) {
-                                    result.positionMs = phrase.positionMs - phrase.timeAxis.TickPosToMsPos((vsParams.phonemes.First().frame_length / VoicevoxUtils.fps) * 1000d);
                                 }
 
                                 int speaker = 0;
@@ -267,36 +260,19 @@ namespace OpenUtau.Core.Voicevox {
                     phoneme = "pau",
                     frame_length = headFrames
                 });
-                int short_length_count = 0;
+                int cursor = VoicevoxUtils.ToFrame(VoicevoxUtils.GetSynthSpan(phrase).startMs);
                 for (int i = 0; i < phrase.phones.Length; i++) {
-                    double durationMs = phrase.phones[i].durationMs;
-                    int length = (int)Math.Round((durationMs / 1000f) * VoicevoxUtils.fps, MidpointRounding.AwayFromZero);
-                    if (length < 2) {
-                        length = 2;
-                    }
-                    int correction = 0;
-                    var flag = phrase.phones[i].flags.FirstOrDefault(f => f.Item3.Equals(DUCM));
-                    if (flag != null) {
-                        switch (flag.Item1) {
-                            case VoicevoxUtils.ON:
-                                correction = 1;
-                                break;
-                            case VoicevoxUtils.OFF:
-                                correction = 2;
-                                break;
-                        }
-                    }
-                    if (correction != 2) {
-                        if (durationMs > (length / VoicevoxUtils.fps) * 1000f) {
-                            if (short_length_count >= 2) {
-                                length += 1;
-                                short_length_count = 0;
-                            } else {
-                                short_length_count += 1;
-                            }
-                        } else if (correction == 1) {
-                            length += 1;
-                        }
+                    var phone = phrase.phones[i];
+                    var flag = phone.flags.FirstOrDefault(f => f.Item3 == DUCM);
+                    bool ceil = flag?.Item1 == VoicevoxUtils.ON;
+                    int length;
+                    if (flag?.Item1 == VoicevoxUtils.OFF) {
+                        length = Math.Max(2, VoicevoxUtils.ToFrame(phone.durationMs));
+                        cursor += length;
+                    } else {
+                        int endFrame = VoicevoxUtils.ToEndFrame(cursor, phone.endMs, ceil, 2);
+                        length = endFrame - cursor;
+                        cursor = endFrame;
                     }
                     vsParams.phonemes.Add(new Phonemes() {
                         phoneme = phrase.phones[i].phoneme,
@@ -401,6 +377,18 @@ namespace OpenUtau.Core.Voicevox {
 
         public override string ToString() => Renderers.VOICEVOX;
 
+        // Engine f0 values in head/tail pau are not editable pitch.
+        internal static bool[] PaddingVoicedMask(IReadOnlyList<int> lengths) {
+            var mask = new bool[lengths.Sum(n => Math.Max(0, n))];
+            int cursor = 0;
+            for (int i = 0; i < lengths.Count; i++) {
+                int length = Math.Max(0, lengths[i]);
+                if (i > 0 && i < lengths.Count - 1) Array.Fill(mask, true, cursor, length);
+                cursor += length;
+            }
+            return mask;
+        }
+
         RenderPitchResult IRenderer.LoadRenderedPitch(RenderPhrase phrase) {
             try {
                 var singer = phrase.singer as VoicevoxSinger;
@@ -426,13 +414,15 @@ namespace OpenUtau.Core.Voicevox {
 
                     var result = new RenderPitchResult {
                         tones = f0.Select(value => (float)MusicMath.FreqToTone(value)).ToArray(),
+                        voiced = PaddingVoicedMask(vsParams.phonemes.Select(p => p.frame_length).ToArray()),
                         ticks = new float[vvTotalFrames]
                     };
                     var layout = Layout(phrase);
                     var t = layout.positionMs - layout.leadingMs;
                     for (int i = 0; i < result.tones.Length; i++) {
-                        t += (1000d / VoicevoxUtils.fps);
+                        t += frameMs;
                         result.ticks[i] = phrase.timeAxis.MsPosToTickPos(t) - phrase.position;
+                        result.voiced[i] &= double.IsFinite(f0[i]) && f0[i] > 0;
                     }
                     return result;
                 }
