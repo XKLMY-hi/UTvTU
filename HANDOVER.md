@@ -1,4 +1,15 @@
-# HANDOVER — 新会话交接（2026-10-11 控件背景与真实声库头像）
+# HANDOVER — 新会话交接（2026-10-16 导入 DAW 控件库缓存包）
+
+## 2026-10-16 缓存包 Git 合并（最新状态）
+
+- 用户要求将 `D:/xklmy文件夹/LocalSend/utvtu-dawui-library-update-1.zip` 的 Git 合并到本地。已核实工作区仍为 `G:/xklmy文件夹/vibe coding/UTvTU`，origin 为 XKLMY-hi/UTvTU；移动盘下轮仍须核实。
+- 本地 `plus-develop` 从 `862c6a57` **快进至 `7e68f94418b95b89440df95c7e0150f10adbcf23`**，完整保留包内20次提交，无冲突，没有覆盖式拷贝或应用重叠补丁。本次只合并本地，**未推送 GitHub**；此前10/11成果及README更新已推送，下方旧段落的“未推送”是历史状态。
+- 包来源 SHA256：`9E027A9BD724E546B74BA2B66926AA53B62E2885A9C0B5D27560C803A7B294B1`。包内320项sha256清单全通过，bundle verify通过；121份最终源码逐一比对一致（仅归一化Windows换行），13个迁出旧路径均已移除。
+- 导入前备份分支：`codex/backup-before-dawui-import-20261016`；导入引用：`refs/remotes/recovery/dawui-library-20261016`。bundle和包说明保留在忽略目录`.dsh/imports/utvtu-dawui-library-update-1/`，包内说明仅作恢复资料，没有执行其中的Linux恢复脚本。
+- 累计变更包括欢迎/偏好/资源/导出/编排/钢琴窗/混音台视觉，以及两个新库：`UTvTU.Md3`承载原HCT/CAM16引擎，`UTvTU.DawUI`承载共享颜色池、主题和首批控件。旧命名空间和兼容入口保留。新库API及边界见`UTvTU.DawUI/README.md`；包内Linux运行报告不等于本机Windows运行验收。
+- 本机默认SDK现为10.0.400，但本轮按约定使用**SDK9.0.317**：只在上述忽略目录的`sdk9-host/global.json`选择SDK，没有在仓库根目录加global.json。主程序和新库restore通过；Windows主程序及项目依赖**单节点编译通过，0错误/1638警告，用时2分42.80秒**，日志`build-windows.log`。使用`RuntimeIdentifiers=`、`UsedAvaloniaProducts=`和独立OutDir；VstProbe单独restore后随主程序构建。
+- 编译产物在`.dsh/imports/utvtu-dawui-library-update-1/build/`；**标准`OpenUtau/bin`尚未更新**，下次用户要求启动应先构建/更新完整依赖及deps文件，不能只替换主DLL（现新增两个库）。本轮未启动程序、未自截图、未跑全量测试/真实合成/VST；下方10/11的PID和二进制哈希均为历史记录，不能当作当前运行状态。
+
 
 ## 2026-10-11 截图反馈修复（最新状态）
 
