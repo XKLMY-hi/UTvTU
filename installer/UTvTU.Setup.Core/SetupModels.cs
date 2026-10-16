@@ -36,6 +36,7 @@ public sealed record SetupOptions {
     public bool RemoveData { get; init; }
     public bool Uninstall { get; init; }
     public bool Silent { get; init; }
+    public bool CleanLegacyMachineRegistration { get; init; }
 }
 
 public sealed record SetupProgress(int Percent, string Stage, string? Detail = null);

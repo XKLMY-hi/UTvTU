@@ -11,10 +11,11 @@ public sealed class SetupEngine {
         if (!File.Exists(exe)) return false;
         try {
             var version = FileVersionInfo.GetVersionInfo(exe);
-            return (version.ProductVersion?.StartsWith("UTvTU-", StringComparison.OrdinalIgnoreCase) == true)
-                || new[] { version.ProductName, version.FileDescription }.Any(value => value?.Contains("UTvTU", StringComparison.OrdinalIgnoreCase) == true || value?.Contains("OpenUTAU Plus", StringComparison.OrdinalIgnoreCase) == true || value?.Contains("OpenUTAU-Plus", StringComparison.OrdinalIgnoreCase) == true);
+            return IsForkIdentity(version.ProductVersion, version.ProductName, version.FileDescription);
         } catch { return false; }
     }
+    public static bool IsForkIdentity(string? version, params string?[] names) => version?.StartsWith("UTvTU-", StringComparison.OrdinalIgnoreCase) == true || version?.Contains("-plus", StringComparison.OrdinalIgnoreCase) == true
+        || names.Any(value => value?.Contains("UTvTU", StringComparison.OrdinalIgnoreCase) == true || value?.Contains("OpenUTAU Plus", StringComparison.OrdinalIgnoreCase) == true || value?.Contains("OpenUTAU-Plus", StringComparison.OrdinalIgnoreCase) == true);
 
     public static InstallReceipt? ReadReceipt(string directory) {
         string path = Path.Combine(directory, InstallReceipt.FileName);

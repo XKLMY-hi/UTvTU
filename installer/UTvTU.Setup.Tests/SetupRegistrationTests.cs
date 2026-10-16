@@ -46,4 +46,14 @@ public class SetupRegistrationTests {
         Assert.Throws<ArgumentException>(() => SetupCommandLine.Parse(new[] { "--dir" }));
         Assert.Throws<ArgumentException>(() => SetupCommandLine.Parse(new[] { "--unknown" }));
     }
+    [Theory]
+    [InlineData("0.1.568.2-plus.0.0.3-beta", true)] [InlineData("UTvTU-26.10.7-143025", true)] [InlineData("0.1.568.2", false)]
+    public void LegacyIdentityDistinguishesPlusFromUpstream(string version, bool expected) => Assert.Equal(expected, SetupEngine.IsForkIdentity(version, "OpenUtau", "OpenUtau"));
+    [Fact] public void OldNsisLocationCanBeRecoveredWithoutInstallLocationValue() {
+        string expected = Path.Combine(Path.GetTempPath(), "中文 old installation");
+        string exe = Path.Combine(expected, "OpenUtau.exe");
+        Assert.Equal(expected, LegacyInstallLocation.Resolve(null, $"\"{exe}\",0", null, path => path == exe));
+        string uninstaller = Path.Combine(expected, "uninst.exe");
+        Assert.Equal(expected, LegacyInstallLocation.Resolve(null, null, uninstaller, path => path == uninstaller));
+    }
 }

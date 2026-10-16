@@ -24,11 +24,19 @@ public static class InstallerCore {
     public static string LogDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UTvTU", "SetupLogs");
     public static string DefaultInstallDir() {
         if (Command.Directory != null) return Path.GetFullPath(Command.Directory);
-        foreach (var root in new[] { Registry.CurrentUser, Registry.LocalMachine }) {
-            foreach (string key in new[] { SetupRegistration.UninstallKey, SetupRegistration.LegacyKey }) {
-                using var entry = root.OpenSubKey(key);
-                if (entry?.GetValue("InstallLocation") is not string path) continue;
-                try { if (SetupEngine.ReadReceipt(path) != null || SetupEngine.IsUtvtu(path)) return SetupPaths.Full(path); } catch { }
+        foreach (var hive in new[] { RegistryHive.CurrentUser, RegistryHive.LocalMachine }) {
+            foreach (var view in new[] { RegistryView.Registry64, RegistryView.Registry32 }) {
+                using var root = RegistryKey.OpenBaseKey(hive, view);
+                foreach (string key in new[] { SetupRegistration.UninstallKey, SetupRegistration.LegacyKey }) {
+                    using var entry = root.OpenSubKey(key);
+                    if (entry == null) continue;
+                    string? path = LegacyInstallLocation.Resolve(entry.GetValue("InstallLocation") as string, entry.GetValue("DisplayIcon") as string, entry.GetValue("UninstallString") as string, File.Exists);
+                    if (path == null) continue;
+                    try {
+                        var receipt = SetupEngine.ReadReceipt(path);
+                        if (receipt != null ? receipt.UserSid == UserSid : SetupEngine.IsUtvtu(path)) return SetupPaths.Full(path);
+                    } catch { }
+                }
             }
         }
         return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", AppName);
@@ -42,11 +50,12 @@ public static class InstallerCore {
 
     public static async Task<SetupResult> RunAsync(SetupOptions options, IProgress<SetupProgress> progress, CancellationToken token) {
         if (Command.Preview) throw new InvalidOperationException("预览模式不能执行安装或卸载。");
+        options = options with { CleanLegacyMachineRegistration = WindowsIntegration.HasLegacyMachineRegistration(options.Directory) };
         var originalReceipt = options.Uninstall ? SetupEngine.ReadReceipt(options.Directory) : null;
         if (options.Uninstall && originalReceipt == null) throw new IOException("缺少可验证的安装记录。旧版请先覆盖安装新版，再使用新版卸载器。");
         bool legacy = SetupEngine.IsUtvtu(options.Directory);
         SetupResult result;
-        if (NeedsElevation(options.Directory) && !IsElevated()) result = await RunElevatedFiles(options, progress, token);
+        if ((NeedsElevation(options.Directory) || options.CleanLegacyMachineRegistration) && !IsElevated()) result = await RunElevatedFiles(options, progress, token);
         else {
             try { result = await Task.Run(() => RunFiles(options, progress, token), token); }
             catch (UnauthorizedAccessException) when (!IsElevated()) { result = await RunElevatedFiles(options, progress, token); }
@@ -67,7 +76,13 @@ public static class InstallerCore {
     }
     public static SetupResult RunFiles(SetupOptions options, IProgress<SetupProgress>? progress, CancellationToken token) {
         var engine = new SetupEngine();
-        return options.Uninstall ? engine.Uninstall(options, progress, token) : engine.Install(OpenPayload(), options, progress, token);
+        bool legacy = options.CleanLegacyMachineRegistration && WindowsIntegration.HasLegacyMachineRegistration(options.Directory);
+        var result = options.Uninstall ? engine.Uninstall(options, progress, token) : engine.Install(OpenPayload(), options, progress, token);
+        if (legacy) {
+            try { WindowsIntegration.CleanLegacyMachineRegistration(options.Directory); }
+            catch (Exception error) { return result with { Warnings = result.Warnings.Append("旧版系统登记未清理：" + error.Message).ToArray() }; }
+        }
+        return result;
     }
     static Task OnSta(Action action) {
         var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);

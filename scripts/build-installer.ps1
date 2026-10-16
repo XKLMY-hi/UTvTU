@@ -59,7 +59,7 @@ try {
         Invoke-Dotnet (@('restore',$mainProject,'-r',$Runtime,'--disable-parallel',"-p:RuntimeIdentifiers=$Runtime")+$common)
         Invoke-Dotnet (@('restore',$probeProject,'-r',$Runtime,'--disable-parallel',"-p:RuntimeIdentifiers=$Runtime")+$common)
         Invoke-Dotnet (@('publish',$mainProject,'--no-restore','-c',$Configuration,'-r',$Runtime,'--self-contained','true','-o',$stage,"-p:RuntimeIdentifiers=$Runtime","-p:InformationalVersion=$stamp")+$common)
-        Invoke-Dotnet (@('publish',$installerProject,'-c',$Configuration,'-r',$Runtime,'--self-contained','true','-o',$uninstaller,"-p:RuntimeIdentifiers=$Runtime","-p:InformationalVersion=$stamp",'-p:AssemblyName=UTvTU-Uninstall','-p:IncludeInstallerPayload=false','-p:PublishSingleFile=true','-p:IncludeNativeLibrariesForSelfExtract=true','-p:EnableCompressionInSingleFile=true')+$common)
+        Invoke-Dotnet (@('publish',$installerProject,'-c',$Configuration,'-r',$Runtime,'--self-contained','true','-o',$uninstaller,"-p:RuntimeIdentifiers=$Runtime","-p:InformationalVersion=$stamp",'-p:InstallerArtifact=Uninstaller','-p:IncludeInstallerPayload=false','-p:PublishSingleFile=true','-p:IncludeNativeLibrariesForSelfExtract=true','-p:EnableCompressionInSingleFile=true')+$common)
         Copy-Item -LiteralPath (Join-Path $uninstaller 'UTvTU-Uninstall.exe') -Destination (Join-Path $stage 'UTvTU-Uninstall.exe')
         # App-local VC runtime comes from Microsoft's redistributable directory, never
         # from arbitrary System32 files. ONNX/native VST dependencies need this too.

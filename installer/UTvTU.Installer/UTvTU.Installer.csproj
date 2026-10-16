@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>12</LangVersion>
     <AssemblyName>UTvTU-Setup</AssemblyName>
+    <AssemblyName Condition="'$(InstallerArtifact)' == 'Uninstaller'">UTvTU-Uninstall</AssemblyName>
     <RootNamespace>UTvTU.Installer</RootNamespace>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>

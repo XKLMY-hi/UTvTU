@@ -15,17 +15,32 @@ sealed class WindowsIntegration {
     readonly SetupRegistration registration = new(new RegistryStore());
     static string StartMenu => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), "UTvTU.lnk");
     static string Desktop => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "UTvTU.lnk");
+    static string? RegisteredPath(RegistryKey? entry, bool requireFiles) => entry == null ? null : LegacyInstallLocation.Resolve(entry.GetValue("InstallLocation") as string, entry.GetValue("DisplayIcon") as string, entry.GetValue("UninstallString") as string, path => !requireFiles || File.Exists(path));
+    public static bool HasLegacyMachineRegistration(string directory) {
+        if (!SetupEngine.IsUtvtu(directory)) return false;
+        foreach (var view in new[] { RegistryView.Registry64, RegistryView.Registry32 }) {
+            using var root = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, view); using var entry = root.OpenSubKey(SetupRegistration.LegacyKey);
+            if (RegisteredPath(entry, true) is string path && SetupPaths.Same(path, directory)) return true;
+        }
+        return false;
+    }
+    public static void CleanLegacyMachineRegistration(string directory) {
+        if (!InstallerCore.IsElevated()) throw new UnauthorizedAccessException("清理旧版机器级登记需要管理员权限。");
+        foreach (var view in new[] { RegistryView.Registry64, RegistryView.Registry32 }) {
+            using var root = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, view); using var entry = root.OpenSubKey(SetupRegistration.LegacyKey);
+            if (RegisteredPath(entry, false) is string path && SetupPaths.Same(path, directory)) root.DeleteSubKeyTree(SetupRegistration.LegacyKey, false);
+        }
+    }
     public void Install(SetupOptions options, InstallReceipt receipt, bool verifiedLegacy) {
         if (receipt.UserSid != InstallerCore.UserSid) throw new IOException("系统入口必须由安装所属用户创建。");
         registration.Install(receipt, options.FileAssociation);
         string exe = Path.Combine(options.Directory, InstallerCore.AppExe);
         Shortcut(StartMenu, exe); if (options.DesktopShortcut) Shortcut(Desktop, exe);
         if (verifiedLegacy) {
-            foreach (var root in new[] { Registry.CurrentUser, Registry.LocalMachine }) {
+            foreach (var view in new[] { RegistryView.Registry64, RegistryView.Registry32 }) {
+                using var root = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, view);
                 using var entry = root.OpenSubKey(SetupRegistration.LegacyKey);
-                if (entry?.GetValue("InstallLocation") is string path && SetupPaths.Same(path, options.Directory)) {
-                    try { root.DeleteSubKeyTree(SetupRegistration.LegacyKey, false); } catch (UnauthorizedAccessException) { }
-                }
+                if (RegisteredPath(entry, true) is string path && SetupPaths.Same(path, options.Directory)) root.DeleteSubKeyTree(SetupRegistration.LegacyKey, false);
             }
             foreach (string folder in new[] { Path.GetDirectoryName(StartMenu)!, Path.GetDirectoryName(Desktop)! })
                 foreach (string name in new[] { "OpenUtau.lnk", "OpenUTAU Plus.lnk", "OpenUTAU-Plus.lnk" }) RemoveShortcut(Path.Combine(folder, name), exe);
@@ -37,12 +52,12 @@ sealed class WindowsIntegration {
         RemoveShortcut(StartMenu, exe); RemoveShortcut(Desktop, exe); registration.Uninstall(options.Directory, receipt.UserSid);
     }
     static object Shell() => Activator.CreateInstance(Type.GetTypeFromProgID("WScript.Shell") ?? throw new IOException("Windows 快捷方式服务不可用。"))!;
-    static void Shortcut(string path, string exe) {
+    internal static void Shortcut(string path, string exe) {
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         dynamic shell = Shell(); dynamic shortcut = shell.CreateShortcut(path);
         shortcut.TargetPath = exe; shortcut.WorkingDirectory = Path.GetDirectoryName(exe); shortcut.IconLocation = exe; shortcut.Description = "UTvTU 人声制作工作站"; shortcut.Save();
     }
-    static void RemoveShortcut(string path, string expected) {
+    internal static void RemoveShortcut(string path, string expected) {
         if (!File.Exists(path)) return;
         dynamic shell = Shell(); dynamic shortcut = shell.CreateShortcut(path);
         if (shortcut.TargetPath is string target && SetupPaths.Same(target, expected)) File.Delete(path);
