@@ -9,6 +9,7 @@ namespace OpenUtau.Classic {
     public class ResamplerManifest {
         public Dictionary<string, UExpressionDescriptor> expressions = new Dictionary<string, UExpressionDescriptor> { };
         public bool expressionFilter = false;
+        public string[] files = System.Array.Empty<string>();
 
         public ResamplerManifest() { }
 

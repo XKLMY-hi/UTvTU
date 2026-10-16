@@ -77,7 +77,7 @@ namespace OpenUtau.Classic {
                             // Recheck inside the lock: another generation may have just produced this file.
                             if (!File.Exists(item.outputFile)) {
                                 if (!(item.resampler is WorldlineResampler)) {
-                                    VoicebankFiles.Inst.CopySourceTemp(item.inputFile, item.inputTemp);
+                                    VoicebankFiles.Inst.CopySourceTemp(item.inputFile, item.inputTemp, item.resampler);
                                 }
                                 if(!item.phone.direct){
                                     if (item.resampler is ExeResampler executable) {
@@ -91,7 +91,7 @@ namespace OpenUtau.Classic {
                                     }
                                 }
                                 if (!(item.resampler is WorldlineResampler)) {
-                                    VoicebankFiles.Inst.CopyBackMetaFiles(item.inputFile, item.inputTemp);
+                                    VoicebankFiles.Inst.CopyBackMetaFiles(item.inputFile, item.inputTemp, item.resampler);
                                 }
                             }
                             progress.Complete(1, $"Track {trackNo + 1}: {item.resampler} \"{item.phone.phoneme}\"");
@@ -126,13 +126,13 @@ namespace OpenUtau.Classic {
                 var result = Layout(phrase);
                 result.samples = ClassicRenderCache.GetOrRender(wavPath, token, () => {
                     foreach (var item in resamplerItems) {
-                        VoicebankFiles.Inst.CopySourceTemp(item.inputFile, item.inputTemp);
+                        VoicebankFiles.Inst.CopySourceTemp(item.inputFile, item.inputTemp, item.resampler);
                     }
                     var wavtool = ToolsManager.Inst.GetWavtool(phrase.wavtool);
                     var samples = wavtool.Concatenate(resamplerItems, wavPath, cancellation);
                     token.ThrowIfCancellationRequested();
                     foreach (var item in resamplerItems) {
-                        VoicebankFiles.Inst.CopyBackMetaFiles(item.inputFile, item.inputTemp);
+                        VoicebankFiles.Inst.CopyBackMetaFiles(item.inputFile, item.inputTemp, item.resampler);
                     }
                     return samples;
                 });

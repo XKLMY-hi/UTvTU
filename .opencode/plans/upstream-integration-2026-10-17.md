@@ -11,8 +11,8 @@
 ## 当前与后续（随完成更新）
 
 - [x] ONNX/DirectML生命周期、SessionOptions持有、新DiffSinger分组时长输入。合并f39fc706/799ba8de/4798078a/fd8c843e的本地适配：DML→每歌手/转录器锁顺序，推理/导出脚本/释放成对保护，Worldline-R2临时会话确定性释放，CPU不枚举GPU设备。dur_type的rel/abs/未声明探测与旧模型严格输入校验保留。14项轻量通过（含4项既有variance），5.5秒/72MiB，TRXcc5da63ae49f46b0bbd5320fb1941f11；两个164/220字节最小ONNX图真实CPU推理通过，覆盖文件/内存工厂、分组输入、释放等待及DML切回CPU后锁仍保护缓存会话。不是实际GPU或真实声库压力测试。
-- [ ] Resampler manifest附加缓存与空安全；preutter文件起点扩展及边界。
-- [ ] 英语VCCV后续改进，保留本地测试钩子。
+- [x] Resampler manifest附加缓存与空安全（8945ee38+5c3c83bb），保留旧两参入口/共享锁，修正不同源/目标扩展名的旁车命名；非法路径后缀忽略。preutter按b30d3347扩展至文件起点，保留负cutoff及辅音绝对终点。5项实际文件/音素请求回归通过，6秒/57MiB，TRX2d2899a7874d4bdf96b21a98438da022。
+- [x] 英语VCCV 9fe0e923三方移植并同步模板；补本地缺失partPos上下文和绝对拍位查BPM，保留既有测试钩子。11项（含既有ConVel及新增片段偏移/变速）全绿，12.7秒/120MiB，TRX79f21765f9e847c4b02b46ce4bf2fedb。使用固定G2P词例，测试真实插件，未改变产品G2P。
 - [ ] VOICEVOX帧对齐、静音padding音高保护与加载范围。
 - [ ] SVP/SV2导入前置能力与音频实际加载/缺失保留，接入文件选择与拖入。
 - [ ] 缺失依赖包检测与现有资源中心的一键安装。

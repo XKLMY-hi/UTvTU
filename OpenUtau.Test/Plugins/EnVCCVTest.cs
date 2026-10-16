@@ -8,6 +8,7 @@ using OpenUtau.Classic;
 using OpenUtau.Core;
 using OpenUtau.Core.Format;
 using OpenUtau.Core.Ustx;
+using OpenUtau.Core.G2p;
 using OpenUtau.Plugin.Builtin;
 using Xunit;
 
@@ -15,7 +16,23 @@ namespace OpenUtau.Plugins {
     public class EnVCCVTest : PhonemizerTestBase {
         public EnVCCVTest(ITestOutputHelper output) : base(output) { }
         protected override Phonemizer CreatePhonemizer() {
-            return new EnglishVCCVPhonemizer();
+            return new FixtureVccv();
+        }
+
+        sealed class FixtureVccv : EnglishVCCVPhonemizer {
+            protected override IG2p[] GetBaseG2ps() {
+                var builder = G2pDictionary.NewBuilder();
+                foreach (var symbol in new[] { "aa", "eh", "er", "ay", "iy" }) builder.AddSymbol(symbol, true);
+                foreach (var symbol in new[] { "t", "s", "w", "d", "z", "r", "hh", "b" }) builder.AddSymbol(symbol, false);
+                builder.AddEntry("test", new[] { "t", "eh", "s", "t" });
+                builder.AddEntry("words", new[] { "w", "er", "d", "z" });
+                builder.AddEntry("hi", new[] { "hh", "ay" });
+                builder.AddEntry("read", new[] { "r", "eh", "d" });
+                builder.AddEntry("sea", new[] { "s", "iy" });
+                builder.AddEntry("bird", new[] { "b", "er", "d" });
+                builder.AddEntry("a", new[] { "aa" });
+                return new IG2p[] { builder.Build() };
+            }
         }
 
         [Theory]
@@ -73,7 +90,7 @@ namespace OpenUtau.Plugins {
 
         /// <summary>用**真实 UVoicePart** 跑音素化（这样 `unotes` 才有内容、Automatic ConVel 生效），
         /// 返回按音素顺序的 vel 表达式值；缺失记 -1 哨兵。</summary>
-        float[] RunConvelTest(string singerName, string[] lyrics, int[] durations) {
+        float[] RunConvelTest(string singerName, string[] lyrics, int[] durations, int partPosition = 0, double bpm = 120) {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
             var file = Path.Join(dir, "Files", singerName, "character.txt");
@@ -96,7 +113,8 @@ namespace OpenUtau.Plugins {
                 track.VoiceColorExp.options = voiceColors.OrderBy(c => c).ToArray();
                 track.VoiceColorExp.max = track.VoiceColorExp.options.Length - 1;
 
-                var part = new UVoicePart { trackNo = 0 };
+                var part = new UVoicePart { trackNo = 0, position = partPosition };
+                if (partPosition > 0) project.tempos.Add(new UTempo(partPosition, bpm));
                 int pos = 240;
                 foreach (var dur in durations) {
                     var note = UNote.Create();   // 必须走工厂：pitch/vibrato/pitch 点都在里面初始化
@@ -112,7 +130,7 @@ namespace OpenUtau.Plugins {
 
                 var groups = lyrics.Select((lyric, i) => new Phonemizer.Note[] {
                     new Phonemizer.Note {
-                        lyric = lyric, duration = durations[i], position = 240 + durations.Take(i).Sum(),
+                        lyric = lyric, duration = durations[i], position = partPosition + 240 + durations.Take(i).Sum(),
                         tone = MusicMath.NameToTone("C4"),
                         phonemeAttributes = new[] {
                             new Phonemizer.PhonemeAttributes { index = 0, consonantStretchRatio = 1 }
@@ -120,7 +138,7 @@ namespace OpenUtau.Plugins {
                     }
                 }).ToList();
 
-                var phonemizer = new EnglishVCCVPhonemizer {
+                var phonemizer = new FixtureVccv {
                     Testing = true,   // Plus 钩子：ConVel 走确定性分支
                 };
                 phonemizer.SetSinger(singer);
@@ -167,6 +185,13 @@ namespace OpenUtau.Plugins {
         public void ConvelNoteVelScalesWithDuration(int duration, float expectedVel) {
             var vels = RunConvelTest("en_vccv", new[] { "a" }, new[] { duration });
             Assert.All(vels, v => Assert.Equal(expectedVel, v, precision: 1));
+        }
+
+        [Fact]
+        public void ConvelUsesTheTempoAtThePartsAbsolutePosition() {
+            var velocities = RunConvelTest("en_vccv", new[] { "a" }, new[] { 480 }, 4800, 180);
+            Assert.NotEmpty(velocities);
+            Assert.All(velocities, velocity => Assert.Equal(150, velocity, 1));
         }
     }
 }
