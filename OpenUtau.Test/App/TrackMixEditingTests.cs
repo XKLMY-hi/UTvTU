@@ -257,10 +257,12 @@ namespace OpenUtau.Test.App {
         public void OldRack_CloseAfterProjectSwitch_CannotDirtyTheNewDocument() {
             var track = Load().tracks[0];
             MixFxDialog.Open(null, track);
-            var windows = (Dictionary<UTrack, MixFxDialog>)typeof(MixFxDialog)
+            var windows = (Dictionary<UTrack, OpenUtau.App.Views.TrackEffectRack>)typeof(OpenUtau.App.Views.TrackEffectRack)
                 .GetField("open", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!;
             var window = windows[track];
-            var rack = Assert.IsType<MixFxViewModel>(window.DataContext);
+            var panel = Assert.IsType<OpenUtau.App.Controls.FxChainPanel>(window.Content);
+            panel.ViewModel.AddBuiltIn(MixFxModule.Eq);
+            using var rack = new MixFxViewModel(track, panel.ViewModel.Rows[0].EffectId);
             rack.Edits!.BeginGesture();
             rack.EqLowDb = 5;
             var newProject = Load();
@@ -269,7 +271,7 @@ namespace OpenUtau.Test.App {
             Doc.StartUndoGroup("new document gesture");
             var newGroup = Doc.ActiveUndoGroup;
             Dispatcher.UIThread.RunJobs();
-            Assert.False(window.IsVisible);
+            Assert.True(window.IsClosed);
             Assert.Same(newGroup, Doc.ActiveUndoGroup);
             Assert.Same(newProject, Doc.Project);
             Assert.True(Doc.ChangesSaved);

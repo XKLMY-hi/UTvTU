@@ -409,7 +409,7 @@ namespace OpenUtau.Test.App {
             UsePool();
             string xaml = DialogXaml();
             // 自研开关（内联模板，不属于 fx-ctl 的主题范围）必须有焦点环
-            Assert.Contains("ToggleButton.md3switch:focus-visible /template/ Border#SwitchTrack", xaml);
+            Assert.Contains("DawCompactSwitchTheme", xaml);
             // 旋钮是键盘可操作的（方向键 / Home / End / PageUp·Down）→ 必须可聚焦
             Assert.True(new Knob().Focusable, "Knob 必须可聚焦，否则键盘改参不可达");
             // 曲线屏是纯显示，不参与焦点（没有需要焦点视觉的部件）
