@@ -1,0 +1,47 @@
+using OpenUtau.Core.Vst;
+using System.Reflection;
+using System.Diagnostics;
+var specs = new[]{"Persistent Q", "OTT", "TDR Nova"};
+void Note(string s) { Console.WriteLine($"{Stopwatch.GetTimestamp()} {s}"); Console.Out.Flush(); }
+var entries = (Dictionary<string,VstPluginEntry>)typeof(VstPluginRegistry).GetField("_entries",BindingFlags.Instance|BindingFlags.NonPublic)!.GetValue(VstPluginRegistry.Inst)!;
+foreach(var name in specs) {
+    var entry = new VstPluginEntry { Uid="diagnostic:"+name, Name=name, Path=Path.Combine(@"C:\Program Files\Common Files\VST3", name+".vst3"), Type=VstPluginType.VST3, IsEffect=true };
+    entries[entry.Uid]=entry;
+}
+var manager=VstPluginManager.Inst;
+const int firstTrack=12000;
+var slots=Enumerable.Range(0,24).Select(i=>new VstPluginSlot(i%3) { PluginUid="diagnostic:"+specs[i%3] }).ToArray();
+VstEffect[] effects=Array.Empty<VstEffect>();
+try {
+    Note("loading 24 mixed production instances (8 sets of 3 effects)");
+    effects=(await Task.WhenAll(Enumerable.Range(0,24).Select(i=>manager.LoadEffectAsync(firstTrack+i/3,slots[i])))).Select(fx=>fx ?? throw new Exception("Load failed")).ToArray();
+    for(int cycle=0; cycle<2; cycle++) {
+        var snapshot=effects.ToArray();
+        using var stop=new CancellationTokenSource();
+        using var ready=new ManualResetEventSlim();
+        long blocks=0;
+        var audio=Task.Run(() => {
+            var buffer=new float[512];
+            foreach(var fx in snapshot) fx.Process(buffer,0,buffer.Length);
+            ready.Set();
+            while(!stop.IsCancellationRequested) {
+                foreach(var fx in snapshot) { Array.Clear(buffer); fx.Process(buffer,0,buffer.Length); blocks++; }
+                Thread.Sleep(10);
+            }
+        });
+        try {
+            if(!ready.Wait(2000)) throw new Exception("Processing did not start");
+            Note($"cycle {cycle}: opening 4 editors while processing 24 effects");
+            var gui=Task.WhenAll(effects.Take(4).Select(fx=>fx.OpenNativeEditorAsync()));
+            var states=Task.WhenAll(effects.Select(fx=>fx.SaveStateAsync()));
+            if((await gui).Any(ok=>!ok)) throw new Exception("GUI failed");
+            if((await states).Any(state=>state==null)) throw new Exception("State capture failed");
+            foreach(var fx in effects.Take(4)) if(!await fx.OpenNativeEditorAsync()) throw new Exception("Reopen failed");
+            Note($"cycle {cycle}: all GUI/state requests completed");
+        } finally {stop.Cancel(); await audio;}
+        Note($"cycle {cycle}: processed {blocks} short silent blocks; unloading/reloading 4 slots");
+        for(int i=0;i<4;i++) effects[i]=await manager.LoadEffectAsync(firstTrack+i/3,slots[i]) ?? throw new Exception("Reload failed");
+        if(!manager.TryFlushAllPendingDispose()) throw new Exception("Retired instances were not disposed at the idle boundary");
+    }
+} finally {for(int i=0;i<8;i++) manager.RemoveTrack(firstTrack+i);}
+Note("completed");

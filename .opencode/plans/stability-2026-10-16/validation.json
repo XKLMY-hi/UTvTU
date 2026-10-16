@@ -1,0 +1,58 @@
+{
+  "UniquePassed": 86,
+  "Groups": [
+    {
+      "Group": "final-new",
+      "Passed": 16,
+      "Trx": "43813d39d07144de947bc310551eeea0.trx",
+      "Seconds": 9.4,
+      "PeakMB": 64.0
+    },
+    {
+      "Group": "final-vst",
+      "Passed": 14,
+      "Trx": "5a773c1c959f4b17a115da6d4c682060.trx",
+      "Seconds": 7.0,
+      "PeakMB": 56.0
+    },
+    {
+      "Group": "final-save-render",
+      "Passed": 28,
+      "Trx": "6ab6d690d3854db3957c2d69421805c1.trx",
+      "Seconds": 7.4,
+      "PeakMB": 68.0
+    },
+    {
+      "Group": "final-export",
+      "Passed": 10,
+      "Trx": "db47f711e9b146b88a2bded50bc10ead.trx",
+      "Seconds": 8.6,
+      "PeakMB": 62.0
+    },
+    {
+      "Group": "final-fx-ui",
+      "Passed": 18,
+      "Trx": "df550e14add4434d8d6ffa96b6042c00.trx",
+      "Seconds": 19.5,
+      "PeakMB": 166.0
+    }
+  ],
+  "Native": {
+    "Tracks": 8,
+    "SlotsPerTrack": 3,
+    "Instances": 24,
+    "SimultaneousEditors": 4,
+    "Cycles": 2,
+    "Stopped": false,
+    "ExitCode": 0,
+    "PeakMB": 377.0,
+    "Seconds": 6.6,
+    "CoreSha256": "908CBC2F4C8CF58B187BC3424EE4EBA4AA80B3413FB794C578CDF9C6291800D5",
+    "NativeSha256": "0CAF08E9B28464937B539A9FF976D17121946CA82092748F9DAC53D745EA1BA4"
+  },
+  "SourceCommit": "89c595192bbcc22aad12d090b0b08f32c954533d",
+  "Sdk": "9.0.317",
+  "FullSuite": false,
+  "RealSynthesis": false,
+  "Screenshots": false
+}

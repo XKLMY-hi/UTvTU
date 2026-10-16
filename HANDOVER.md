@@ -1,4 +1,17 @@
-# HANDOVER — 新会话交接（2026-10-16 导入 DAW 控件库缓存包）
+# HANDOVER — 新会话交接（2026-10-16 渲染与VST稳定性修复）
+
+## 2026-10-16 渲染、VST与窗口恢复（最新状态，优先于下文）
+
+- 用户报告第三方渲染器/大范围音符预渲染卡顿、Persistent Q等GUI打不开、播放或预渲染时最小化恢复随机冻结。追问“双实例够吗”后已扩展验证；完整证据与边界见[稳定性修复报告](.opencode/plans/stability-2026-10-16.md)。
+- 产品已本地提交`5e120c75`、`6f734083`、`fe2d05a2`、`89c59519`；保留缓存包已接受的UI，无产品XAML改动，**未推送GitHub**。当前plus-develop，实际G:/xklmy文件夹/vibe coding/UTvTU、origin XKLMY-hi/UTvTU已重核；下轮仍须核实移动盘。
+- 经典渲染使用跨乐句/跨周期全局并发预算（最高8且保留CPU余量）、后台准备、外部进程取消/超时清理及BelowNormal优先级；缓存同路径锁覆盖读/生成/清理，防部分WAV与重复生成。
+- VST改为跨所有实例共享STA GUI线程；真实Persistent Q分散线程双实例挂起已复现。打开/状态请求直接排队；setActive/Reset在宿主线程。桥修GUI再次打开、尺寸请求及句柄清理；错误在线程本地产生处捕获。槽位替换/状态写回同时验证实例和UID。
+- 自动保存VST状态有全工程100ms预算，忙时保留上一份状态继续保存；不强杀原生线程。Windows设备位置快照用TryEnter，UI不等待设备Stop/Dispose锁；最小化跳过画面通知，传输继续，修启动标记/热缓存及循环重启竞争。原ProcessRunner/UpdatePlayPos/SaveAllStates的CLR入口保留。
+- **86个互不重复轻量回归全绿**，5组串行，7.0–19.5秒、峰值56–166MB，保持30秒/384MB护栏；无全套、真实声库推理、长时间音频压力或自截图。[验证JSON](.opencode/plans/stability-2026-10-16/validation.json)含最终TRX、统计及哈希。
+- 最终真实探针通过产品VstPluginManager管理8轨×3槽=24个Persistent Q/OTT/TDR Nova实例、4个同时打开的GUI、并发短静音缓冲/状态调用及两轮重载；exit0、6.6秒、峰值377MB，未放宽护栏。不是实际8轨歌曲播放，不代表容量上限或所有插件兼容。源码/护栏已存报告旁，原生日志在`.dsh/stability-20261016/`。
+- SDK9.0.317单节点构建；默认SDK10未使用。选择器仍在忽略目录`.dsh/imports/utvtu-dawui-library-update-1/sdk9-host/global.json`，不在根目录钉SDK8。完整build7 0错1791警告；最终Core build14/测试build15均0错，桥Release构建通过。
+- 标准`OpenUtau/bin/Debug/net8.0-windows/`已同步最终产品；旧实例正常退出，新主程序**无参数**启动PID12060、2026-10-16T20:16:00.5937296+08:00，响应/窗口正常、启动ERR/FTL0。产品DLL SHA256 `A7AFB29F20BC8F2CDBA1E1527FD749EF5BEC5CB45E0428C1817E04EF4533F32E`；Core `908CBC2F4C8CF58B187BC3424EE4EBA4AA80B3413FB794C578CDF9C6291800D5`；桥 `0CAF08E9B28464937B539A9FF976D17121946CA82092748F9DAC53D745EA1BA4`。身份记录`.dsh/workspace-preview.json`，操作须重核exe+StartTime；不得强杀未保存实例。
+- 仍需用户原工程验证冷缓存交互和随机最小化恢复问题，不能宣称穷尽所有冻结。进程内永久挂起的第三方原生调用仍无法安全强杀，本轮未实现进程隔离。旧[VST线程记忆](.opencode/memory/vst-gui-thread-fix.md)已加更正，历史“每实例一线程”结论不再适用。下文PID/哈希与“未测试VST”等仅为历史。
 
 ## 2026-10-16 缓存包 Git 合并（最新状态）
 
