@@ -1,5 +1,12 @@
 # HANDOVER — 新会话交接（2026-10-17 安装与卸载重构）
 
+## 2026-10-17 上游新增31提交审查（最新，仅审查）
+
+- 用户询问上游哪些值得合并，已fetch并逐项审查`a06ab28b`→`fd8c843e323262a57f3da2d86fbb740369216dc3`新增31提交；263个非祖先提交包含历史已手工吸收内容，不能全部算缺失。[审查与建议](.opencode/plans/upstream-review-2026-10-17.md)，[逐项清单](.opencode/plans/upstream-review-2026-10-17/commits.json)。仅只读补丁检查，6项文本可应用，不代表编译/运行通过；未改产品源码、未合并、未替换DLL或执行构建/音频测试。
+- 优先候选：ONNX/DirectML统一生命周期与SessionOptions持有（799ba8de+4798078a，需先适配旧f39fc706）、新DiffSinger分组duration输入（fd8c843e）、SearchBar残留订阅（8fdb4e9b）、ThaiVCCV错误旧更新回退（fa2a670c，本地确有其前版）、英语C+V两条成组（8879fbed→7b6cae8b及夹具）、双元音/EN2JA（5714d927/f923284d）。另有同名resampler、manifest附加缓存、音高点右键及preutter行为，按报告分批。
+- 不整体引入主题/旧偏好UI、MixPlanner单通道补丁、缺前置的R1.1/SVP/包安装。DirectML1.23.0及共享缓存锁本地已有；5c3c83bb空引用是新manifest功能的后续修正，本地当前未引入该错误分支；菲律宾语13184085目标分支本地不存在。保持MD3与当前播放/离线导出架构。
+- 额外发现：UpdaterViewModel的UpdateCheckEnabled仍false，旧版本比较器不支持当前UTvTU时间标签；已有正式Release，应单独修复开关、解析比较和发布筛选，不能只打开开关或照搬上游更新通道。本轮只登记。审查文档本地提交，未推送；正式Release013015不变。
+
 ## 2026-10-17 正式发布 GitHub（最新）
 
 - 用户明确要求提交、编译发布版与安装器并发布GitHub，已完成 **UTvTU-26.10.17-013015**：[正式Release](https://github.com/XKLMY-hi/UTvTU/releases/tag/UTvTU-26.10.17-013015)。公开、非预发布、Latest；8份附件大小及服务端SHA256与本地全部一致。源码与标签固定`8e965414e459d9b5053eac2ff9fa70d19e01933a`，此前全部产品与README提交已推送`origin/plus-develop`，master未动；下文“未推送”均为历史状态。

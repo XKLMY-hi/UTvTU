@@ -1,0 +1,428 @@
+{
+  "date": "2026-10-17",
+  "reviewHead": "38c27d49bcffe6e9b5e4f487769a22fc8b0f3615",
+  "previousUpstream": "a06ab28b0ae011bd0b85926f3044572be46a7a63",
+  "upstreamHead": "fd8c843e323262a57f3da2d86fbb740369216dc3",
+  "newCommitCount": 31,
+  "nonAncestorCommitCount": 263,
+  "nonAncestorCountIsNotMissingFeatureCount": true,
+  "textuallyApplicablePatches": 6,
+  "textCheckOnlyNotCompileOrRuntimeValidation": true,
+  "productSourcesChanged": false,
+  "merged": false,
+  "buildOrAudioTestsRun": false,
+  "commits": [
+    {
+      "sha": "8e7883824f518170cf037e149b23d7e1827ec489",
+      "subject": "Dial back dark theme a bit",
+      "files": [
+        "OpenUtau/Colors/DarkTheme.axaml"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": false,
+      "recommendation": "skip-current-theme"
+    },
+    {
+      "sha": "11ea171712f1f2fefb76472407388a67d3ec3729",
+      "subject": "Expose stable/beta/alpha channel selection in the updater dialog",
+      "files": [
+        "OpenUtau/ViewModels/UpdaterViewModel.cs",
+        "OpenUtau/Views/UpdaterDialog.axaml"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": false,
+      "recommendation": "defer-custom-updater"
+    },
+    {
+      "sha": "2913eeb963bade267f3c1ea953321417c45742ac",
+      "subject": "Skip external resamplers named like a built-in one",
+      "files": [
+        "OpenUtau.Core/Classic/ToolsManager.cs"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": false,
+      "recommendation": "adapt-name-collision-fix"
+    },
+    {
+      "sha": "799ba8de27c19fb305b1d3c989f1823ad4a8e605",
+      "subject": "Serialize DirectML session creation, inference and disposal to stop native crashes (#2494)",
+      "files": [
+        "OpenUtau.Core/Analysis/GameOnnxBackend.cs",
+        "OpenUtau.Core/Analysis/Hnsep.cs",
+        "OpenUtau.Core/Analysis/Some.cs",
+        "OpenUtau.Core/Classic/Hifisampler/HifiSampler.cs",
+        "OpenUtau.Core/Classic/WorldlineRenderer.cs",
+        "OpenUtau.Core/DiffSinger/DiffSingerRenderer.cs",
+        "OpenUtau.Core/DiffSinger/DiffSingerScript.cs",
+        "OpenUtau.Core/DiffSinger/DiffSingerSinger.cs",
+        "OpenUtau.Core/Util/Onnx.cs"
+      ],
+      "missingLocalPaths": [
+        "OpenUtau.Core/Analysis/GameOnnxBackend.cs",
+        "OpenUtau.Core/Analysis/Hnsep.cs",
+        "OpenUtau.Core/Classic/Hifisampler/HifiSampler.cs"
+      ],
+      "patchAppliesCleanly": false,
+      "recommendation": "priority-adapt-session-lifecycle"
+    },
+    {
+      "sha": "4bd4d129d541ef3f165d023aa8e5d47076299f74",
+      "subject": "Only show piano roll viewport handle on hover (#2490)",
+      "files": [
+        "OpenUtau/Controls/PartControl.cs"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": false,
+      "recommendation": "defer-custom-ui"
+    },
+    {
+      "sha": "b30d33473b9d211ce59fb49d8f8255847639e5dc",
+      "subject": "Relax the preutter override cap to the start of the file",
+      "files": [
+        "OpenUtau.Core/Classic/ResamplerItem.cs",
+        "OpenUtau.Core/Classic/SharpWavtool.cs",
+        "OpenUtau.Core/Classic/WorldlineRenderer.cs",
+        "OpenUtau.Core/Commands/NoteCommands.cs",
+        "OpenUtau.Core/Ustx/UPhoneme.cs"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": true,
+      "recommendation": "separate-audio-behavior-change"
+    },
+    {
+      "sha": "89095ff50790ab36a392a2e7ea0697b156ea7a51",
+      "subject": "Draw wave part waveforms like the piano roll's",
+      "files": [
+        "OpenUtau.Core/Format/WavePeaks.cs",
+        "OpenUtau.Core/Ustx/UPart.cs",
+        "OpenUtau.Test/Core/Format/WavePeaksTest.cs",
+        "OpenUtau/Controls/PartControl.cs",
+        "OpenUtau/Controls/PartsCanvas.cs",
+        "OpenUtau/Controls/WaveformEnvelope.cs",
+        "OpenUtau/Controls/WaveformImage.cs"
+      ],
+      "missingLocalPaths": [
+        "OpenUtau.Core/Format/WavePeaks.cs",
+        "OpenUtau.Test/Core/Format/WavePeaksTest.cs",
+        "OpenUtau/Controls/WaveformEnvelope.cs"
+      ],
+      "patchAppliesCleanly": false,
+      "recommendation": "defer-waveform-prerequisites"
+    },
+    {
+      "sha": "7f3d7c1b35381c5cda49efafb0b5b0bd803c802f",
+      "subject": "Disable TrackHeader layout rounding (#2489)",
+      "files": [
+        "OpenUtau/Controls/TrackHeader.axaml"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": false,
+      "recommendation": "defer-custom-ui"
+    },
+    {
+      "sha": "9a5be1520c46cb341bdf7571dbcb44db05cc6717",
+      "subject": "Fix pitch loading range (#2501)",
+      "files": [
+        "OpenUtau.Core/Editing/NoteBatchEdits.cs",
+        "OpenUtau.Core/Voicevox/VoicevoxRenderer.cs",
+        "OpenUtau.Test/Core/ExpressionGraph/ExpressionGraphTest.cs",
+        "OpenUtau.Test/Core/Voicevox/VoicevoxRendererTest.cs"
+      ],
+      "missingLocalPaths": [
+        "OpenUtau.Test/Core/ExpressionGraph/ExpressionGraphTest.cs",
+        "OpenUtau.Test/Core/Voicevox/VoicevoxRendererTest.cs"
+      ],
+      "patchAppliesCleanly": false,
+      "recommendation": "defer-voicevox-adaptation"
+    },
+    {
+      "sha": "f923284d7cbfb4db6ac4b72deef5483ea90f3e82",
+      "subject": "[EN2JA] Fix ToHiragana Vowel Lookup (#2498)",
+      "files": [
+        "OpenUtau.Plugin.Builtin/ENtoJAPhonemizer.cs"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": true,
+      "recommendation": "priority-phonemizer-fix"
+    },
+    {
+      "sha": "9fe0e923aac9d14475f1473a7d86d9f042df979d",
+      "subject": "VCCV Phonemizer Changes/Updates/Fixes (#2497)",
+      "files": [
+        "OpenUtau.Plugin.Builtin/Data/envccv.template.yaml",
+        "OpenUtau.Plugin.Builtin/EnglishVCCVPhonemizer.cs"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": false,
+      "recommendation": "adapt-vccv-separately"
+    },
+    {
+      "sha": "f62465c320a667be6fbcda3666675d22dab7b83f",
+      "subject": "Use no input TextBox in PreferencesDialog (#2502)",
+      "files": [
+        "OpenUtau/Strings/Strings.axaml",
+        "OpenUtau/ViewModels/PreferencesViewModel.cs",
+        "OpenUtau/Views/PreferencesDialog.axaml"
+      ],
+      "missingLocalPaths": [
+        "OpenUtau/Views/PreferencesDialog.axaml"
+      ],
+      "patchAppliesCleanly": false,
+      "recommendation": "skip-current-preferences-ui"
+    },
+    {
+      "sha": "4798078af356ee53011d554eb605195b50305fbe",
+      "subject": "Keep SessionOptions alive while creating an InferenceSession (#2503)",
+      "files": [
+        "OpenUtau.Core/Util/Onnx.cs"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": false,
+      "recommendation": "priority-adapt-options-lifetime"
+    },
+    {
+      "sha": "8945ee38832203caafccbd85ab4375783dc630f1",
+      "subject": "Add Resampler Meta Files definable in resampler manifest (#1768)",
+      "files": [
+        "OpenUtau.Core/Classic/ClassicRenderer.cs",
+        "OpenUtau.Core/Classic/ResamplerManifest.cs",
+        "OpenUtau.Core/Classic/VoicebankFiles.cs"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": false,
+      "recommendation": "adapt-manifest-feature-with-fix"
+    },
+    {
+      "sha": "99f2f25f550c4e6d8e3d50296efa6ef5a5411525",
+      "subject": "Broaden \"install missing packages\" to DiffSinger vocoders and transcription (#2508)",
+      "files": [
+        "OpenUtau.Core/Analysis/GameBackendFactory.cs",
+        "OpenUtau.Core/Analysis/Rmvpe.cs",
+        "OpenUtau.Core/DiffSinger/DiffSingerSinger.cs",
+        "OpenUtau.Core/PackageRequirements.cs",
+        "OpenUtau.Test/Core/PackageRequirementsTest.cs",
+        "OpenUtau/Views/MainWindow.axaml.cs"
+      ],
+      "missingLocalPaths": [
+        "OpenUtau.Core/Analysis/GameBackendFactory.cs",
+        "OpenUtau.Core/PackageRequirements.cs",
+        "OpenUtau.Test/Core/PackageRequirementsTest.cs"
+      ],
+      "patchAppliesCleanly": false,
+      "recommendation": "defer-package-ui-prerequisites"
+    },
+    {
+      "sha": "0a7cde874381802ccf57c8a8fa20af7af74338ee",
+      "subject": "Align VOICEVOX waveforms with the synthesized frames (#2509)",
+      "files": [
+        "OpenUtau.Core/Voicevox/Phonemizers/VoicevoxPhonemizer.cs",
+        "OpenUtau.Core/Voicevox/VoicevoxRenderer.cs",
+        "OpenUtau.Core/Voicevox/VoicevoxUtils.cs",
+        "OpenUtau.Test/Core/Voicevox/VoicevoxLayoutTest.cs"
+      ],
+      "missingLocalPaths": [
+        "OpenUtau.Test/Core/Voicevox/VoicevoxLayoutTest.cs"
+      ],
+      "patchAppliesCleanly": false,
+      "recommendation": "defer-voicevox-adaptation"
+    },
+    {
+      "sha": "87e2b6bbd09fdb0d722d46d1eb4d3ca90209b4d8",
+      "subject": "Allow deselecting by right-clicking in the Pitch Point tool (#2491)",
+      "files": [
+        "OpenUtau/Controls/PianoRoll.axaml.cs"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": false,
+      "recommendation": "adapt-pitch-tool-behavior"
+    },
+    {
+      "sha": "e92d5e560093d1db716dae22c0ca809f9002a2d7",
+      "subject": "Add WORLDLINE-R1.1 to the default renderer preference",
+      "files": [
+        "OpenUtau.Core/Render/Renderers.cs",
+        "OpenUtau.Core/Util/Preferences.cs",
+        "OpenUtau.Test/Classic/WorldlineR11Test.cs"
+      ],
+      "missingLocalPaths": [
+        "OpenUtau.Test/Classic/WorldlineR11Test.cs"
+      ],
+      "patchAppliesCleanly": false,
+      "recommendation": "defer-missing-engine"
+    },
+    {
+      "sha": "5c3c83bbeced96718e85e4a96d127de3287cd14b",
+      "subject": "Fix NullReferenceException copying voicebank files for built-in resamplers",
+      "files": [
+        "OpenUtau.Core/Classic/VoicebankFiles.cs"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": false,
+      "recommendation": "dependency-of-manifest-feature-not-current-bug"
+    },
+    {
+      "sha": "4ef547c610d4d030dff6d48bcd384cd8e892d61c",
+      "subject": "svp: load imported audio tracks so their peaks and duration exist",
+      "files": [
+        "OpenUtau.Core/Format/SVP.cs",
+        "OpenUtau.Test/Core/Format/SvpTest.cs",
+        "OpenUtau.Test/Files/Svp/instrumental.svp",
+        "OpenUtau.Test/Files/Svp/missing-audio.svp"
+      ],
+      "missingLocalPaths": [
+        "OpenUtau.Core/Format/SVP.cs",
+        "OpenUtau.Test/Core/Format/SvpTest.cs",
+        "OpenUtau.Test/Files/Svp/instrumental.svp",
+        "OpenUtau.Test/Files/Svp/missing-audio.svp"
+      ],
+      "patchAppliesCleanly": false,
+      "recommendation": "defer-svp-import-prerequisite"
+    },
+    {
+      "sha": "fa2a670c14a4329eac413b76e28732c1c20e43d4",
+      "subject": "Revert \"Update ThaiVCCVPhonemizer.cs (#2461)\" (#2516)",
+      "files": [
+        "OpenUtau.Plugin.Builtin/ThaiVCCVPhonemizer.cs"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": true,
+      "recommendation": "priority-revert-broken-thai-update"
+    },
+    {
+      "sha": "8fdb4e9b03e8f4d8dc73822cf7be7ad9d972c603",
+      "subject": "Stop hidden find bar from reselecting notes on part load",
+      "files": [
+        "OpenUtau/Controls/SearchBar.axaml.cs"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": true,
+      "recommendation": "priority-search-lifecycle-fix"
+    },
+    {
+      "sha": "dc9270f8705563aca18ae6eacea1ca16ed6f4878",
+      "subject": "Render playback and pre-render on one lane",
+      "files": [
+        "OpenUtau.Core/PlaybackManager.cs",
+        "OpenUtau.Core/Render/RenderEngine.cs"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": false,
+      "recommendation": "do-not-apply-different-render-pipeline"
+    },
+    {
+      "sha": "4c955fb9b7fa6efa06ca5fa4e68b3cfbf4392bca",
+      "subject": "Add a warning sign next to the main menu",
+      "files": [
+        "OpenUtau.Core/Commands/Notifications.cs",
+        "OpenUtau.Core/DocManager.cs",
+        "OpenUtau.Core/SingerManager.cs",
+        "OpenUtau/Strings/Strings.axaml",
+        "OpenUtau/ViewModels/MainWindowViewModel.cs",
+        "OpenUtau/Views/MainWindow.axaml",
+        "OpenUtau/Views/MainWindow.axaml.cs",
+        "OpenUtau/Views/SplashWindow.axaml.cs"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": false,
+      "recommendation": "defer-warning-model-and-ui"
+    },
+    {
+      "sha": "c0c7bd5555733b7f1777ee1137c0d2b0a8093d5c",
+      "subject": "Lighten light theme borders and fix dim secondary text",
+      "files": [
+        "OpenUtau/Colors/Brushes.axaml",
+        "OpenUtau/Colors/LightTheme.axaml",
+        "OpenUtau/Controls/ExpressionGraphCanvas.cs",
+        "OpenUtau/Views/DsScriptExportDialog.axaml",
+        "OpenUtau/Views/MainWindow.axaml",
+        "OpenUtau/Views/TranscribeDialog.axaml"
+      ],
+      "missingLocalPaths": [
+        "OpenUtau/Controls/ExpressionGraphCanvas.cs"
+      ],
+      "patchAppliesCleanly": false,
+      "recommendation": "skip-current-theme"
+    },
+    {
+      "sha": "67dbf355255fa5bb770d3b66342f64bebd0d2642",
+      "subject": "Use theme border colours for text boxes",
+      "files": [
+        "OpenUtau/Colors/Brushes.axaml"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": false,
+      "recommendation": "skip-current-theme"
+    },
+    {
+      "sha": "8879fbedc313805c801c7810b4d4ddb5c77f1e74",
+      "subject": "[EN C+V] Fix VC alias Condition and Implement Contextual Fallbacks (#2517)",
+      "files": [
+        "OpenUtau.Plugin.Builtin/EnglishCpVPhonemizer.cs"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": true,
+      "recommendation": "priority-cpv-pair-first"
+    },
+    {
+      "sha": "7b6cae8b314c1be06efa5cf72cac8f532ff33daf",
+      "subject": "[En C+V] Fix Aggressive  Contextual Fallbacks + Test files (#2527)",
+      "files": [
+        "OpenUtau.Plugin.Builtin/EnglishCpVPhonemizer.cs",
+        "OpenUtau.Test/Files/en_CpV_5vowel/character.txt",
+        "OpenUtau.Test/Files/en_CpV_5vowel/en-cPv.yaml",
+        "OpenUtau.Test/Files/en_CpV_5vowel/oto.ini",
+        "OpenUtau.Test/Files/en_CpV_full/character.txt",
+        "OpenUtau.Test/Files/en_CpV_full/en-cPv.yaml",
+        "OpenUtau.Test/Files/en_CpV_full/oto.ini",
+        "OpenUtau.Test/Files/en_CpV_noVC/character.txt",
+        "OpenUtau.Test/Files/en_CpV_noVC/oto.ini",
+        "OpenUtau.Test/Plugins/EnCpVTest.cs"
+      ],
+      "missingLocalPaths": [
+        "OpenUtau.Test/Files/en_CpV_5vowel/character.txt",
+        "OpenUtau.Test/Files/en_CpV_5vowel/en-cPv.yaml",
+        "OpenUtau.Test/Files/en_CpV_5vowel/oto.ini",
+        "OpenUtau.Test/Files/en_CpV_full/character.txt",
+        "OpenUtau.Test/Files/en_CpV_full/en-cPv.yaml",
+        "OpenUtau.Test/Files/en_CpV_full/oto.ini",
+        "OpenUtau.Test/Files/en_CpV_noVC/character.txt",
+        "OpenUtau.Test/Files/en_CpV_noVC/oto.ini",
+        "OpenUtau.Test/Plugins/EnCpVTest.cs"
+      ],
+      "patchAppliesCleanly": false,
+      "recommendation": "priority-cpv-pair-second-with-tests"
+    },
+    {
+      "sha": "13184085f2cee51c174de9ee99163a76ee970e8c",
+      "subject": "Fix error in rule-based Filipino G2P (#2523)",
+      "files": [
+        "OpenUtau.Core/DiffSinger/Phonemizers/DiffSingerRuleBasedFilipinoPhonemizer.cs"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": false,
+      "recommendation": "not-current-rule-path"
+    },
+    {
+      "sha": "5714d927d05fb6052529716480806f78df8d3fa2",
+      "subject": "fix vv diphthongs (#2531)",
+      "files": [
+        "OpenUtau.Plugin.Builtin/ArpasingPlusPhonemizer.cs",
+        "OpenUtau.Plugin.Builtin/EnXSampaPhonemizer.cs"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": true,
+      "recommendation": "priority-phonemizer-fix"
+    },
+    {
+      "sha": "fd8c843e323262a57f3da2d86fbb740369216dc3",
+      "subject": "DiffSinger: feed word_div/word_dur to group-aware duration models (#2451)",
+      "files": [
+        "OpenUtau.Core/DiffSinger/DiffSingerBasePhonemizer.cs",
+        "OpenUtau.Core/DiffSinger/DiffSingerConfig.cs"
+      ],
+      "missingLocalPaths": [],
+      "patchAppliesCleanly": false,
+      "recommendation": "priority-adapt-diffsinger-duration"
+    }
+  ]
+}
