@@ -1,24 +1,26 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="OpenUtau.App.Controls.DawValueField" Focusable="True">
+             x:Class="UTvTU.DawUI.Controls.DawParameterField" Focusable="True">
   <UserControl.Styles>
-    <Style Selector="TextBlock#Readout">
+    <Style Selector="TextBlock#PART_Readout">
       <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
     </Style>
-    <Style Selector=".selected TextBlock#Readout">
+    <Style Selector=".selected TextBlock#PART_Readout">
       <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
     </Style>
-    <Style Selector=":focus-visible TextBlock#Readout">
+    <Style Selector=":focus-visible TextBlock#PART_Readout">
       <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
       <Setter Property="TextDecorations" Value="Underline"/>
     </Style>
   </UserControl.Styles>
+  <Border Name="PART_Surface" Background="{DynamicResource md3.surface-container-low}" BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="1" CornerRadius="8" Padding="8,0">
   <Grid MinHeight="16">
-    <TextBlock Name="Readout" FontSize="{DynamicResource Md3DawTypeReadout}" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"
+    <TextBlock Name="PART_Readout"  VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"
                FontFamily="{DynamicResource PlusFontFamilyMono}"/>
-    <TextBox Name="Editor" IsVisible="False" MinHeight="16" Height="16" MinWidth="0"
-             FontSize="{DynamicResource Md3DawTypeReadout}" FontFamily="{DynamicResource PlusFontFamilyMono}"
+    <TextBox Name="PART_Editor" IsVisible="False" MinHeight="16" Height="16" MinWidth="0"
+              FontFamily="{DynamicResource PlusFontFamilyMono}"
              Padding="2,0" Margin="0" TextAlignment="Center" CornerRadius="{DynamicResource Md3ShapeExtraSmall}" VerticalContentAlignment="Center"
              KeyDown="OnEditorKeyDown" LostFocus="OnEditorLostFocus"/>
   </Grid>
+  </Border>
 </UserControl>

@@ -1,0 +1,67 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:daw="using:UTvTU.DawUI.Controls" x:Class="OpenUtau.App.Views.DawUiGalleryView">
+  <UserControl.Styles>
+    <Style Selector="TextBlock.heading"><Setter Property="FontSize" Value="16"/><Setter Property="FontWeight" Value="Medium"/><Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/></Style>
+    <Style Selector="TextBlock.note,TextBlock.densityLabel"><Setter Property="FontSize" Value="11"/><Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/></Style>
+    <Style Selector="TextBlock.densityLabel"><Setter Property="Margin" Value="0,7,0,0"/></Style>
+  </UserControl.Styles>
+  <StackPanel Spacing="12">
+    <TextBlock Classes="heading" Text="{DynamicResource dawui.gallery.title}"/>
+    <TextBlock Classes="note" Text="{DynamicResource dawui.gallery.caption}"/>
+    <StackPanel><Grid ColumnDefinitions="94,*" Margin="0,0,0,6">
+      <TextBlock Classes="densityLabel" Text="{DynamicResource dawui.gallery.standard}"/>
+      <WrapPanel Grid.Column="1" daw:DawStyle.Density="Standard">
+        <daw:DawButton Name="StandardPrimary" Variant="Filled" Content="{DynamicResource dawui.gallery.apply}" Click="OnDemoAction" Margin="0,0,8,6"/>
+        <daw:DawButton Variant="Tonal" Content="{DynamicResource dawui.gallery.preview}" Click="OnDemoAction" Margin="0,0,8,6"/>
+        <daw:DawButton Variant="Outlined" Content="{DynamicResource dawui.gallery.reset}" Click="OnDemoAction" Margin="0,0,8,6"/>
+        <daw:DawButton Variant="Text" Content="{DynamicResource dawui.gallery.more}" Click="OnDemoAction" Margin="0,0,8,6"/>
+        <daw:DawSwitch Name="StandardSwitch" Content="{DynamicResource dawui.gallery.enabled}" IsChecked="True" Margin="0,0,12,6"/>
+        <daw:DawParameterField Name="StandardField" Width="100" Value="-3" Unit="dB" Margin="0,0,8,6"/>
+        <daw:DawIconButton IconData="M 7,1 H 9 V 7 H 15 V 9 H 9 V 15 H 7 V 9 H 1 V 7 H 7 Z" Variant="Outlined" AutomationProperties.Name="{DynamicResource command.track.add}" Margin="0,0,0,6"/>
+      </WrapPanel>
+    </Grid><Grid ColumnDefinitions="94,*" Margin="0,0,0,6">
+      <TextBlock Classes="densityLabel" Text="{DynamicResource dawui.gallery.compact}"/>
+      <WrapPanel Grid.Column="1" daw:DawStyle.Density="Compact">
+        <daw:DawButton Name="CompactPrimary" Variant="Filled" Content="{DynamicResource dawui.gallery.apply}" Click="OnDemoAction" Margin="0,0,8,6"/>
+        <daw:DawButton Variant="Tonal" Content="{DynamicResource dawui.gallery.preview}" Click="OnDemoAction" Margin="0,0,8,6"/>
+        <daw:DawButton Variant="Outlined" Content="{DynamicResource dawui.gallery.reset}" Click="OnDemoAction" Margin="0,0,8,6"/>
+        <daw:DawButton Variant="Text" Content="{DynamicResource dawui.gallery.more}" Click="OnDemoAction" Margin="0,0,8,6"/>
+        <daw:DawSwitch Name="CompactSwitch" Content="{DynamicResource dawui.gallery.enabled}" IsChecked="True" Margin="0,0,12,6"/>
+        <daw:DawParameterField Name="CompactField" Width="100" Value="-3" Unit="dB" Margin="0,0,8,6"/>
+        <daw:DawIconButton IconData="M 7,1 H 9 V 7 H 15 V 9 H 9 V 15 H 7 V 9 H 1 V 7 H 7 Z" Variant="Outlined" AutomationProperties.Name="{DynamicResource command.track.add}" Margin="0,0,0,6"/>
+      </WrapPanel>
+    </Grid><Grid ColumnDefinitions="94,*" Margin="0,0,0,6">
+      <TextBlock Classes="densityLabel" Text="{DynamicResource dawui.gallery.dense}"/>
+      <WrapPanel Grid.Column="1" daw:DawStyle.Density="Dense">
+        <daw:DawButton Name="DensePrimary" Variant="Filled" Content="{DynamicResource dawui.gallery.apply}" Click="OnDemoAction" Margin="0,0,8,6"/>
+        <daw:DawButton Variant="Tonal" Content="{DynamicResource dawui.gallery.preview}" Click="OnDemoAction" Margin="0,0,8,6"/>
+        <daw:DawButton Variant="Outlined" Content="{DynamicResource dawui.gallery.reset}" Click="OnDemoAction" Margin="0,0,8,6"/>
+        <daw:DawButton Variant="Text" Content="{DynamicResource dawui.gallery.more}" Click="OnDemoAction" Margin="0,0,8,6"/>
+        <daw:DawSwitch Name="DenseSwitch" Content="{DynamicResource dawui.gallery.enabled}" IsChecked="True" Margin="0,0,12,6"/>
+        <daw:DawParameterField Name="DenseField" Width="100" Value="-3" Unit="dB" Margin="0,0,8,6"/>
+        <daw:DawIconButton IconData="M 7,1 H 9 V 7 H 15 V 9 H 9 V 15 H 7 V 9 H 1 V 7 H 7 Z" Variant="Outlined" AutomationProperties.Name="{DynamicResource command.track.add}" Margin="0,0,0,6"/>
+      </WrapPanel>
+    </Grid></StackPanel>
+    <Border Height="1" Background="{DynamicResource md3.outline-variant}"/>
+    <TextBlock Text="{DynamicResource dawui.gallery.states}" FontWeight="Medium"/>
+    <WrapPanel>
+      <daw:DawToggleButton Name="GallerySolo" Content="{DynamicResource dawui.gallery.solo}" IsChecked="True" Margin="0,0,8,6"/>
+      <daw:DawToggleButton Name="GalleryBypass" Content="{DynamicResource dawui.gallery.bypass}" Margin="0,0,8,6"/>
+      <daw:DawButton Name="GalleryDisabled" Variant="Filled" Content="{DynamicResource dawui.gallery.disabled}" IsEnabled="False" Margin="0,0,8,6"/>
+      <daw:DawSwitch Content="{DynamicResource dawui.gallery.disabled}" IsChecked="True" IsEnabled="False" Margin="0,0,0,6"/>
+    </WrapPanel>
+    <TextBlock Text="{DynamicResource dawui.gallery.parameters}" FontWeight="Medium"/>
+    <WrapPanel>
+      <StackPanel Margin="0,0,12,6" Spacing="4"><TextBlock Classes="note" Text="{DynamicResource dawui.gallery.gain}"/><daw:DawParameterField Name="GalleryGain" Width="160" Value="-3" Minimum="-24" Maximum="12" Unit="dB" ValueCommitted="OnParameterCommitted"/></StackPanel>
+      <StackPanel Margin="0,0,12,6" Spacing="4"><TextBlock Classes="note" Text="{DynamicResource dawui.gallery.frequency}"/><daw:DawParameterField Name="GalleryFrequency" Width="160" Value="1000" Minimum="20" Maximum="20000" Format="0" Unit="Hz" ValueCommitted="OnParameterCommitted"/></StackPanel>
+      <StackPanel Margin="0,0,0,6" Spacing="4"><TextBlock Classes="note" Text="{DynamicResource dawui.gallery.tempo}"/><daw:DawParameterField Name="GalleryTempo" Width="160" Value="120" Minimum="20" Maximum="400" Unit="BPM" ValueCommitted="OnParameterCommitted"/></StackPanel>
+    </WrapPanel>
+    <TextBlock Classes="note" Text="{DynamicResource dawui.gallery.hint}" TextWrapping="Wrap"/>
+    <TextBlock Text="{DynamicResource dawui.gallery.dawcontrols}" FontWeight="Medium"/>
+    <WrapPanel>
+      <StackPanel Width="120" Spacing="6" Margin="0,0,16,0"><daw:DawKnob Name="GalleryKnob" Width="64" Height="64" Minimum="-12" Maximum="12" DefaultValue="0" Value="3" HorizontalAlignment="Left"/><TextBlock Classes="note" Text="{DynamicResource dawui.gallery.gain}"/></StackPanel>
+      <StackPanel Width="120" Spacing="6" Margin="0,0,16,0"><daw:DawVerticalFader Name="GalleryFader" Height="130" HorizontalAlignment="Left" Value="-3"/><TextBlock Classes="note" Text="{DynamicResource dawui.gallery.fader}"/></StackPanel>
+      <TextBlock Classes="note" Width="320" TextWrapping="Wrap" Text="{DynamicResource dawui.gallery.dawhint}"/>
+    </WrapPanel>
+    <TextBlock Name="DemoStatus" Text="{DynamicResource dawui.gallery.ready}" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource md3.primary}"/>
+  </StackPanel>
+</UserControl>

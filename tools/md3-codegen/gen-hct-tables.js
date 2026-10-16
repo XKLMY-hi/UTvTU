@@ -1,9 +1,9 @@
-// 生成 HCT 求解器所需的常数表：OpenUtau.Core/Theming/Md3HctTables.g.cs
+// 生成 HCT 求解器所需的常数表：UTvTU.Md3/Theming/Md3HctTables.g.cs
 // 从参考实现源码 hct/hct_solver.js 解析常数，避免手工转写出错。
 const fs = require('fs');
 const path = require('path');
 const SRC = path.join(__dirname, 'node_modules/@material/material-color-utilities/hct/hct_solver.js');
-const OUT = process.argv[2] || path.join(__dirname, '..', '..', 'OpenUtau.Core', 'Theming', 'Md3HctTables.g.cs');
+const OUT = process.argv[2] || path.join(__dirname, '..', '..', 'UTvTU.Md3', 'Theming', 'Md3HctTables.g.cs');
 
 const src = fs.readFileSync(SRC, 'utf8');
 

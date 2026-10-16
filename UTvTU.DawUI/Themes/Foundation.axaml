@@ -1,0 +1,35 @@
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:daw="using:UTvTU.DawUI.Controls">
+  <Styles.Resources>
+    <ControlTheme x:Key="DawLibraryButtonTheme" TargetType="daw:DawButton" BasedOn="{StaticResource DawButtonTheme}">
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelMedium}"/><Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="FontFamily" Value="{DynamicResource PlusFontFamily}"/>
+      <Setter Property="Padding" Value="12,0"/><Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeSmall}"/>
+
+      <Style Selector="^[Density=Standard]"><Setter Property="Height" Value="{DynamicResource Md3ControlHeight}"/><Setter Property="MinHeight" Value="{DynamicResource Md3ControlHeight}"/></Style>
+      <Style Selector="^[Density=Compact]"><Setter Property="Height" Value="{DynamicResource Md3CompactControlHeight}"/><Setter Property="MinHeight" Value="{DynamicResource Md3CompactControlHeight}"/></Style>
+      <Style Selector="^[Density=Dense]"><Setter Property="Height" Value="{DynamicResource Md3DenseControlHeight}"/><Setter Property="MinHeight" Value="{DynamicResource Md3DenseControlHeight}"/><Setter Property="FontSize" Value="11"/></Style>
+    </ControlTheme>
+    <ControlTheme x:Key="DawLibraryIconButtonTheme" TargetType="daw:DawIconButton" BasedOn="{StaticResource DawLibraryButtonTheme}">
+      <Setter Property="Padding" Value="0"/><Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
+      <Style Selector="^[Density=Standard]"><Setter Property="Width" Value="{DynamicResource Md3ControlHeight}"/></Style>
+      <Style Selector="^[Density=Compact]"><Setter Property="Width" Value="{DynamicResource Md3CompactControlHeight}"/></Style>
+      <Style Selector="^[Density=Dense]"><Setter Property="Width" Value="{DynamicResource Md3DenseControlHeight}"/></Style>
+    </ControlTheme>
+    <ControlTheme x:Key="DawLibraryToggleTheme" TargetType="daw:DawToggleButton" BasedOn="{StaticResource DawToolToggleTheme}">
+      <Setter Property="Padding" Value="12,0"/><Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeSmall}"/>
+      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelMedium}"/><Setter Property="FontFamily" Value="{DynamicResource PlusFontFamily}"/>
+
+      <Style Selector="^[Density=Standard]"><Setter Property="Height" Value="{DynamicResource Md3ControlHeight}"/><Setter Property="MinHeight" Value="{DynamicResource Md3ControlHeight}"/></Style>
+      <Style Selector="^[Density=Compact]"><Setter Property="Height" Value="{DynamicResource Md3CompactControlHeight}"/><Setter Property="MinHeight" Value="{DynamicResource Md3CompactControlHeight}"/></Style>
+      <Style Selector="^[Density=Dense]"><Setter Property="Height" Value="{DynamicResource Md3DenseControlHeight}"/><Setter Property="MinHeight" Value="{DynamicResource Md3DenseControlHeight}"/><Setter Property="FontSize" Value="11"/></Style>
+      <Style Selector="^:checked"><Setter Property="Background" Value="{DynamicResource md3.primary}"/><Setter Property="Foreground" Value="{DynamicResource md3.on-primary}"/></Style>
+    </ControlTheme>
+    <ControlTheme x:Key="DawLibrarySwitchTheme" TargetType="daw:DawSwitch" BasedOn="{StaticResource DawCompactSwitchTheme}">
+      <Setter Property="FontFamily" Value="{DynamicResource PlusFontFamily}"/>
+
+      <Style Selector="^[Density=Standard]"><Setter Property="Height" Value="{DynamicResource Md3ControlHeight}"/><Setter Property="MinHeight" Value="{DynamicResource Md3ControlHeight}"/></Style>
+      <Style Selector="^[Density=Compact]"><Setter Property="Height" Value="{DynamicResource Md3CompactControlHeight}"/><Setter Property="MinHeight" Value="{DynamicResource Md3CompactControlHeight}"/></Style>
+      <Style Selector="^[Density=Dense]"><Setter Property="Height" Value="{DynamicResource Md3DenseControlHeight}"/><Setter Property="MinHeight" Value="{DynamicResource Md3DenseControlHeight}"/><Setter Property="FontSize" Value="11"/></Style>
+    </ControlTheme>
+  </Styles.Resources>
+</Styles>

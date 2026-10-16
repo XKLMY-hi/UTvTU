@@ -12,7 +12,6 @@ namespace OpenUtau.App.Controls {
     // Presentation only. Stable brushes also keep TextLayoutCache keys bounded while scrolling.
     internal sealed class ArrangementVisuals {
         // Palette generation happens once per seed/theme/contrast, never per rendered frame.
-        static readonly Dictionary<(Color, bool, double), Md3SchemeColors> palettes = new();
         static readonly Dictionary<(Color, Color, Color, Color, bool, bool), ArrangementVisuals> clips = new();
         internal readonly SolidColorBrush Body, Edge, Ink, Detail, Accent;
 
@@ -33,13 +32,8 @@ namespace OpenUtau.App.Controls {
                 : pool.Color(Md3Role.Primary);
             Color Role(Md3Role role) {
                 if (!Preferences.Default.UseTrackColor || track == null) return pool.Color(role);
-                var key = (accent, dark, pool.ContrastLevel);
-                if (!palettes.TryGetValue(key, out var palette)) {
-                    if (palettes.Count > 128) palettes.Clear();
-                    uint seed = 0xFF000000u | (uint)(accent.R << 16) | (uint)(accent.G << 8) | accent.B;
-                    palettes[key] = palette = Md3SchemeColors.Create(seed, Md3SchemeVariant.TonalSpot, dark, pool.ContrastLevel);
-                }
-                return Md3ColorPool.ToColor(palette.Get(role));
+                uint seed = 0xFF000000u | (uint)(accent.R << 16) | (uint)(accent.G << 8) | accent.B;
+                return Md3ColorPool.ToColor(ColorPool.Derived(seed).Get(role));
             }
             // Fixed tonal roles keep musical clips soft and filled on a dark editing surface.
             // Light mode uses the corresponding container pair. Selection swaps the tone, not the hue.

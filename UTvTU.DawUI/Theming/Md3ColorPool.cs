@@ -123,6 +123,18 @@ namespace OpenUtau.Theming {
 
         /// <summary>当前颜色池。任何控件都可以从这里取色。</summary>
         public static IMd3ColorPool Current => current;
+        private static readonly Dictionary<(uint Seed, Md3SchemeVariant Scheme, bool Dark, double Contrast), Md3SchemeColors> derived = new();
+
+        /// <summary>Shared derived palette for track/data colors; preserves their seed hue independently of the app seed.</summary>
+        public static Md3SchemeColors Derived(uint seed, Md3SchemeVariant scheme = Md3SchemeVariant.TonalSpot) {
+            var key = (seed | 0xFF000000u, scheme, current.IsDark, current.ContrastLevel);
+            if (!derived.TryGetValue(key, out var colors)) {
+                if (derived.Count > 128) derived.Clear();
+                derived[key] = colors = Md3SchemeColors.Create(key.Item1, scheme, current.IsDark, current.ContrastLevel);
+            }
+            return colors;
+        }
+
 
         /// <summary>具体实现（含 Colors/Pen 等便利成员）。</summary>
         public static Md3ColorPool Instance => current;
@@ -133,6 +145,7 @@ namespace OpenUtau.Theming {
         /// <summary>重新着色：种子 / 方案 / 对比度变化时调用，并刷新 XAML 资源字典。</summary>
         public static void Initialize(uint seed, Md3SchemeVariant scheme, bool isDark, double contrastLevel = 0.0) {
             current = new Md3ColorPool(seed, scheme, isDark, contrastLevel);
+            derived.Clear();
             Md3ThemeResources.Install(current);
             Changed?.Invoke(null, EventArgs.Empty);
         }
@@ -140,6 +153,7 @@ namespace OpenUtau.Theming {
         /// <summary>仅深浅色变化时调用（主题切换路径）；资源字典每次重建（幂等）。</summary>
         public static void SetDark(bool isDark) {
             current.SetDark(isDark);
+            derived.Clear();
             Md3ThemeResources.Install(current);
             Changed?.Invoke(null, EventArgs.Empty);
         }

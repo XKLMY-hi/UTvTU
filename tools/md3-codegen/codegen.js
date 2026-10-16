@@ -1,10 +1,10 @@
 // 代码生成 v2：角色规格（含"tone 随对比度变化"的曲线）
-// 输出 OpenUtau.Core/Theming/Md3RoleTable.g.cs 与 Md3Role.g.cs
+// 输出 UTvTU.Md3/Theming/Md3RoleTable.g.cs 与 Md3Role.g.cs（保留兼容命名空间）
 const fs = require('fs');
 const path = require('path');
 const m = require('@material/material-color-utilities');
 
-const OUT = process.argv[2] || path.join(__dirname, '..', '..', 'OpenUtau.Core', 'Theming', 'Md3RoleTable.g.cs');
+const OUT = process.argv[2] || path.join(__dirname, '..', '..', 'UTvTU.Md3', 'Theming', 'Md3RoleTable.g.cs');
 
 const schemes = {
     TonalSpot: m.SchemeTonalSpot, Vibrant: m.SchemeVibrant, Expressive: m.SchemeExpressive,

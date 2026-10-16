@@ -1,0 +1,16 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Host fonts can override these keys. All fallback colors still come from the shared pool. -->
+  <FontFamily x:Key="PlusFontFamily">HarmonyOS Sans SC, Segoe UI, Microsoft YaHei UI, sans-serif</FontFamily>
+  <FontFamily x:Key="PlusFontFamilyMono">Cascadia Code, Consolas, Fira Code, Courier New</FontFamily>
+  <x:Double x:Key="PlusFontSizeBase">13</x:Double><x:Double x:Key="PlusControlHeight">32</x:Double>
+  <CornerRadius x:Key="PlusRadiusMd">8</CornerRadius>
+  <SolidColorBrush x:Key="TextFillColorPrimaryBrush" Color="{DynamicResource md3.color.on-surface}"/>
+  <SolidColorBrush x:Key="PlusBrushTextPrimary" Color="{DynamicResource md3.color.on-surface}"/>
+  <SolidColorBrush x:Key="PlusBrushTextSecondary" Color="{DynamicResource md3.color.on-surface-variant}"/>
+  <SolidColorBrush x:Key="PlusBrushTextDisabled" Color="{DynamicResource md3.color.on-surface}" Opacity="0.38"/>
+  <SolidColorBrush x:Key="PlusBrushBorderDefault" Color="{DynamicResource md3.color.outline-variant}"/>
+  <SolidColorBrush x:Key="PlusBrushBorderHover" Color="{DynamicResource md3.color.outline}"/>
+  <SolidColorBrush x:Key="PlusBrushBorderFocus" Color="{DynamicResource md3.color.primary}"/>
+  <SolidColorBrush x:Key="PlusBrushSurfaceControl" Color="{DynamicResource md3.color.surface-container-low}"/>
+  <SolidColorBrush x:Key="PlusBrushSurfaceDisabled" Color="{DynamicResource md3.color.surface-container-low}"/>
+</ResourceDictionary>

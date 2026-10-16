@@ -1,6 +1,7 @@
 <controls:WindowEx xmlns="https://github.com/avaloniaui"
                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                    xmlns:controls="clr-namespace:OpenUtau.App.Controls"
+                   xmlns:views="using:OpenUtau.App.Views"
                    x:Class="OpenUtau.App.Views.ControlGalleryWindow"
                    Icon="/Assets/brand/utvtu.ico"
                    Title="{DynamicResource controlgallery.title}"
@@ -85,6 +86,7 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
       <StackPanel Margin="20" Spacing="{DynamicResource Md3Spacing4}">
+        <Border Classes="gallerySection"><views:DawUiGalleryView Name="DawLibraryGallery"/></Border>
 
         <!-- ══ 1. 电源开关 ══ -->
         <Border Classes="gallerySection">

@@ -1,0 +1,13 @@
+<Styles xmlns="https://github.com/avaloniaui">
+  <Styles.Resources>
+    <ResourceDictionary><ResourceDictionary.MergedDictionaries>
+      <ResourceInclude Source="avares://UTvTU.DawUI/Theming/Md3Tokens.axaml"/>
+      <ResourceInclude Source="avares://UTvTU.DawUI/Themes/Defaults.axaml"/>
+    </ResourceDictionary.MergedDictionaries></ResourceDictionary>
+  </Styles.Resources>
+  <StyleInclude Source="avares://UTvTU.DawUI/Themes/Md3InputThemes.axaml"/>
+  <StyleInclude Source="avares://UTvTU.DawUI/Themes/DawControls.axaml"/>
+  <StyleInclude Source="avares://UTvTU.DawUI/Themes/Md3ControlThemes.axaml"/>
+  <StyleInclude Source="avares://UTvTU.DawUI/Themes/Md3SelectionThemes.axaml"/>
+  <StyleInclude Source="avares://UTvTU.DawUI/Themes/Foundation.axaml"/>
+</Styles>
