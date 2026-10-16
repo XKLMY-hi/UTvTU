@@ -102,6 +102,12 @@ namespace OpenUtau.Core.Ustx {
         public UMixFx MixFx { get; set; }
         /// <summary>Per-track VST plugin slots (up to 5). Only saved in .ustxp format.</summary>
         public List<VstPluginSlot> VstSlots { get; set; } = new();
+        private volatile List<UTrackEffect>? effectRack;
+        /// <summary>Null preserves the legacy EQ/COMP/REV/VST signal path. Edits publish a new list.</summary>
+        public List<UTrackEffect>? EffectRack {
+            get => effectRack;
+            set { effectRack = value; SignalChain.TrackRackSource.Refresh(this); }
+        }
         public double Volume { set; get; }
         public double Pan { set; get; }
 

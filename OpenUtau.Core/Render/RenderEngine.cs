@@ -272,8 +272,15 @@ namespace OpenUtau.Core.Render {
 
                 // Bypass the fader entirely for dry stems, including its equal-power center pan law.
                 ISignalSource trackSignal = export?.TrackVolumeAndPan == false ? trackMix : fader;
-                ISignalSource trackOut = export == null ? WrapTrackFx(fader, track, mode, vstEffects.ToArray())
-                    : EffectChain.Build(export.BuiltInEffects ? MixFxSource.WrapWith(trackSignal, parameters != null ? parameters.Effects : track.MixFx) : trackSignal, vstEffects.ToArray());
+                ISignalSource trackOut;
+                if (export != null && (parameters != null ? parameters.Rack != null : track.EffectRack != null)) {
+                    var rack = parameters?.Rack ?? TrackEffectRack.Read(track);
+                    var map = vstEffects.OfType<Vst.VstEffect>().ToDictionary(fx => fx.Slot.SlotIndex, fx => (SignalChain.Effects.IEffect)fx);
+                    trackOut = TrackRackSource.Snapshot(trackSignal, rack, map, export.BuiltInEffects, export.VstEffects);
+                } else {
+                    trackOut = export == null ? WrapTrackFx(fader, track, mode, vstEffects.ToArray())
+                        : EffectChain.Build(export.BuiltInEffects ? MixFxSource.WrapWith(trackSignal, parameters != null ? parameters.Effects : track.MixFx) : trackSignal, vstEffects.ToArray());
+                }
                 if (export?.OwnedVstEffects != null)
                     trackOut = new ExportTrackSource(trackOut, ownedEffects ?? Array.Empty<Vst.VstEffect>(), export.Cancellation);
 
@@ -300,6 +307,11 @@ namespace OpenUtau.Core.Render {
                                                   SignalChain.Effects.IEffect[] vstEffects) {
             if (mode == MixFxMode.Off) {
                 return inner;
+            }
+            if (mode == MixFxMode.Live) return new TrackRackSource(inner, track);
+            if (track.EffectRack != null) {
+                var map = vstEffects.OfType<Vst.VstEffect>().ToDictionary(fx => fx.Slot.SlotIndex, fx => (SignalChain.Effects.IEffect)fx);
+                return TrackRackSource.Snapshot(inner, TrackEffectRack.Read(track), map);
             }
             ISignalSource fx = mode == MixFxMode.Live
                 ? MixFxSource.WrapLive(inner, track)

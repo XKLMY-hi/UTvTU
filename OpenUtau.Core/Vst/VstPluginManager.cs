@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace OpenUtau.Core.Vst {
         public IVstBridge Bridge { get; set; } = RealVstBridge.Instance;
 
         private readonly object _lock = new();
-        private readonly Dictionary<int, VstTrackInstances> _tracks = new();
+        private readonly ConcurrentDictionary<int, VstTrackInstances> _tracks = new();
 
         // ── Scanning ────────────────────────────────────────────
 
@@ -103,7 +104,7 @@ namespace OpenUtau.Core.Vst {
         public void RemoveTrack(int trackNo) {
             lock (_lock) {
                 if (_tracks.TryGetValue(trackNo, out var ti)) {
-                    ti.Dispose(); _tracks.Remove(trackNo);
+                    ti.Dispose(); _tracks.TryRemove(trackNo, out _);
                 }
             }
         }

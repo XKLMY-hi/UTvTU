@@ -308,5 +308,7 @@ namespace OpenUtau.Core.SignalChain {
         public static ISignalSource WrapLive(ISignalSource inner, UTrack track) {
             return new MixFxSource(inner, () => track.MixFx);
         }
+
+        internal static ISignalSource WrapLive(ISignalSource inner, Func<UMixFx?> settings) => new MixFxSource(inner, settings);
     }
 }

@@ -38,7 +38,9 @@ namespace OpenUtau.Core.Export {
     }
 
     public sealed record ExportTarget(UTrack Track, int Index, string Name, string Path);
-    internal sealed record ExportTrackParameters(double Volume, float Pan, UMixFx? Effects);
+    internal sealed record ExportTrackParameters(double Volume, float Pan, UMixFx? Effects) {
+        public IReadOnlyList<UTrackEffect>? Rack { get; init; }
+    }
 
     public sealed class ExportDeliveryPlan {
         public UProject Project { get; }
@@ -68,7 +70,9 @@ namespace OpenUtau.Core.Export {
             var indices = selection.Select(t => project.tracks.IndexOf(t)).ToArray();
             Audio = options with { EndTick = end, TrackIndices = Array.AsReadOnly(indices), MasterGain = perTrack ? 1 : options.MasterGain,
                 TrackParameters = new ReadOnlyDictionary<int, ExportTrackParameters>(selection.ToDictionary(t => project.tracks.IndexOf(t),
-                    t => new ExportTrackParameters(t.Volume, (float)t.Pan, t.MixFx?.Clone()))) };
+                    t => new ExportTrackParameters(t.Volume, (float)t.Pan, t.MixFx?.Clone()) {
+                        Rack = t.EffectRack == null ? null : TrackEffectRack.Read(t).Select(e => e.Clone()).ToArray()
+                    })) };
             vstIdentities = selection.ToDictionary(t => t, VstIdentity);
             string directory = System.IO.Path.GetDirectoryName(destination)!;
             string prefix = System.IO.Path.GetFileNameWithoutExtension(destination);

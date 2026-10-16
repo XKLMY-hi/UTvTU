@@ -334,7 +334,7 @@ namespace OpenUtau.Core {
         /// （DocManager.ExecuteCmd 非 UI 线程自动回投）。undo 恢复旧 UID 时由 do 闭包
         /// 首次执行的旧值记录——SetVstPlugin 的 undo 需要旧值，见闭包设计。
         /// </summary>
-        static void LoadAndNotify(UTrack track, VstPluginSlot slot) {
+        internal static void LoadAndNotify(UTrack track, VstPluginSlot slot) {
             _ = Task.Run(async () => {
                 try {
                     await VstPluginManager.Inst.LoadEffectAsync(track.TrackNo, slot);

@@ -211,7 +211,7 @@ namespace OpenUtau.Core.Format {
             project.BeforeSave();
             var tree = UstxYaml.ParseTree(Yaml.DefaultSerializer.Serialize(project));
             UstxYaml.RemoveKeys(tree, "ustxp_version");
-            UstxYaml.RemoveKeysFromSequence(tree, "tracks", "vst_slots", "mix_fx");
+            UstxYaml.RemoveKeysFromSequence(tree, "tracks", "vst_slots", "mix_fx", "effect_rack");
             string text = UstxYaml.SerializeTree(tree);
             File.WriteAllText(filePath, text, Encoding.UTF8);
             project.Saved = true;
