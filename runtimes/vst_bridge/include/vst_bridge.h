@@ -92,6 +92,9 @@ VSTBRIDGE_API void vst_close_editor(VstBridgeInstance* inst);
 /// Returns 1 if an editor window was opened, 0 otherwise.
 VSTBRIDGE_API int vst_open_editor_window(VstBridgeInstance* inst);
 
+/// Modeless popup owned by the application window (above owner, hidden on minimize).
+VSTBRIDGE_API int vst_open_editor_window_owned(VstBridgeInstance* inst, void* ownerHwnd);
+
 /// ── State Persistence ────────────────────────────────────────────────
 
 /// Save plugin state to buffer.  ioSize: in = buffer capacity, out = bytes written.

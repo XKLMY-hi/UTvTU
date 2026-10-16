@@ -211,7 +211,8 @@ namespace OpenUtau.App.Controls {
             }
             bool opened = false;
             try {
-                opened = await fx.OpenNativeEditorAsync();
+                var owner = (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow ?? OwnerWindow;
+                opened = await fx.OpenNativeEditorAsync(owner?.TryGetPlatformHandle()?.Handle ?? IntPtr.Zero);
             } catch (Exception ex) {
                 Log.Error(ex, $"[FxChain] native editor failed for {fx.DisplayName}");
             }

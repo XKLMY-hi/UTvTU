@@ -1,6 +1,9 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using OpenUtau.Core.Util;
 using OpenUtau.Core.Vst;
 using ReactiveUI;
@@ -54,7 +57,8 @@ namespace OpenUtau.App.ViewModels {
             try {
                 // attached 在 VST 专用线程执行（秒级初始化不卡 UI），await 后回到 UI 线程更新状态
                 StatusText = ThemeManager.GetString("vsteditor.loading");
-                bool ok = await _fx.OpenNativeEditorAsync();
+                var owner = (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+                bool ok = await _fx.OpenNativeEditorAsync(owner?.TryGetPlatformHandle()?.Handle ?? IntPtr.Zero);
                 StatusText = ok ? ThemeManager.GetString("vsteditor.nativeopened")
                     : $"{ThemeManager.GetString("vsteditor.noeditor")}: {_fx.EditorError ?? ThemeManager.GetString("vsteditor.nogui")}";
             } catch (Exception ex) {

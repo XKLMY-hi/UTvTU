@@ -26,6 +26,7 @@ namespace OpenUtau.Core.Vst {
 
         IntPtr OpenEditor(IntPtr handle, IntPtr parentHwnd);
         bool OpenEditorWindow(IntPtr handle);
+        bool OpenEditorWindow(IntPtr handle, IntPtr ownerHwnd) => OpenEditorWindow(handle);
         void CloseEditor(IntPtr handle);
 
         byte[]? SaveState(IntPtr handle);

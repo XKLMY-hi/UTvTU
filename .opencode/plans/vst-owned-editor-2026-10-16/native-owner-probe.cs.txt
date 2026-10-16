@@ -1,0 +1,71 @@
+using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using OpenUtau.Core.Vst;
+
+// One real plugin, no audio device, synthesis, screenshots or user project.
+static class Probe {
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern IntPtr CreateWindowExW(uint ex, string cls, string title, uint style, int x, int y, int w, int h, IntPtr parent, IntPtr menu, IntPtr instance, IntPtr param);
+    [DllImport("user32.dll")] static extern bool DestroyWindow(IntPtr hwnd);
+    [DllImport("user32.dll")] static extern bool ShowWindow(IntPtr hwnd, int command);
+    [DllImport("user32.dll")] static extern bool SetForegroundWindow(IntPtr hwnd);
+    [DllImport("user32.dll")] static extern bool IsWindow(IntPtr hwnd);
+    [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr hwnd);
+    [DllImport("user32.dll")] static extern IntPtr GetWindow(IntPtr hwnd, uint command);
+    [DllImport("user32.dll")] static extern bool PostMessageW(IntPtr hwnd, uint msg, IntPtr w, IntPtr l);
+    delegate bool EnumProc(IntPtr hwnd, IntPtr param);
+    [DllImport("user32.dll")] static extern bool EnumWindows(EnumProc callback, IntPtr param);
+    [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint pid);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetClassNameW(IntPtr hwnd, System.Text.StringBuilder name, int count);
+    [StructLayout(LayoutKind.Sequential)] struct Message { public IntPtr hwnd; public uint msg; public UIntPtr w; public IntPtr l; public uint time; public int x, y; public uint reserved; }
+    [DllImport("user32.dll")] static extern bool PeekMessageW(out Message msg, IntPtr hwnd, uint min, uint max, uint remove);
+    [DllImport("user32.dll")] static extern bool TranslateMessage(ref Message msg);
+    [DllImport("user32.dll")] static extern IntPtr DispatchMessageW(ref Message msg);
+    static void Pump(int milliseconds = 100) {
+        var timer = Stopwatch.StartNew();
+        do {
+            while (PeekMessageW(out var msg, IntPtr.Zero, 0, 0, 1)) { TranslateMessage(ref msg); DispatchMessageW(ref msg); }
+            Thread.Sleep(5);
+        } while (timer.ElapsedMilliseconds < milliseconds);
+    }
+    static void Wait(Task task) { while (!task.IsCompleted) Pump(10); task.GetAwaiter().GetResult(); }
+    static bool Open(VstEffect fx, IntPtr owner) { var task = fx.OpenNativeEditorAsync(owner); Wait(task); return task.Result; }
+    static void Check(bool condition, string text) { if (!condition) throw new Exception(text); Console.WriteLine("PASS " + text); Console.Out.Flush(); }
+    static List<IntPtr> Windows() {
+        var result = new List<IntPtr>();
+        EnumWindows((hwnd, _) => { GetWindowThreadProcessId(hwnd, out uint pid); if (pid == Environment.ProcessId) result.Add(hwnd); return true; }, IntPtr.Zero);
+        return result;
+    }
+    static IntPtr Editor() => Windows().Single(hwnd => { var cls = new System.Text.StringBuilder(128); GetClassNameW(hwnd, cls, cls.Capacity); return cls.ToString() == "OUVstEditor"; });
+    static IntPtr Owner(string name) { var hwnd = CreateWindowExW(0, "STATIC", name, 0x00CF0000, 40, 40, 700, 500, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero); Check(hwnd != IntPtr.Zero, "owner created"); ShowWindow(hwnd, 5); Pump(); return hwnd; }
+    static void Main() {
+        var entry = new VstPluginEntry { Uid = "probe:owned-editor", Name = "Persistent Q", Path = @"C:\Program Files\Common Files\VST3\Persistent Q.vst3", Type = VstPluginType.VST3, IsEffect = true };
+        var entries = (Dictionary<string, VstPluginEntry>)typeof(VstPluginRegistry).GetField("_entries", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(VstPluginRegistry.Inst)!;
+        entries[entry.Uid] = entry;
+        var owner = Owner("UTvTU owner probe");
+        var replacement = IntPtr.Zero;
+        var fx = new VstEffect(new VstPluginSlot(0) { PluginUid = entry.Uid });
+        try {
+            fx.Load(); Check(fx.IsLoaded, "real plugin loaded"); fx.Setup(44100, 256);
+            Check(Open(fx, owner), "owned editor opened");
+            var editor = Editor(); Check(GetWindow(editor, 4) == owner, "native owner matches");
+            Check(Open(fx, owner) && Editor() == editor, "reopen reuses editor");
+            SetForegroundWindow(owner); Pump();
+            var ordered = Windows(); Check(ordered.IndexOf(editor) < ordered.IndexOf(owner), "editor stays above activated owner");
+            ShowWindow(owner, 6); Pump(200); Check(!IsWindowVisible(editor), "minimize hides editor");
+            ShowWindow(owner, 9); Pump(200); Check(IsWindowVisible(editor), "restore shows editor");
+            Check(!Open(fx, new IntPtr(-1)) && IsWindow(editor), "invalid owner rejected without destroying editor");
+            PostMessageW(editor, 0x0010, IntPtr.Zero, IntPtr.Zero); Pump(200); Check(!IsWindow(editor), "editor closes independently");
+            Check(Open(fx, owner), "closed editor opens again"); editor = Editor();
+            DestroyWindow(owner); owner = IntPtr.Zero; Pump(200); Check(!IsWindow(editor), "owner destruction cleans editor");
+            replacement = Owner("UTvTU replacement owner probe");
+            Check(Open(fx, replacement), "editor opens after owner destruction"); editor = Editor();
+            Wait(Task.Run(fx.Dispose)); Pump(); Check(!IsWindow(editor) && IsWindow(replacement), "plugin unload closes editor and preserves owner");
+        } finally {
+            Wait(Task.Run(fx.Dispose));
+            if (owner != IntPtr.Zero) DestroyWindow(owner);
+            if (replacement != IntPtr.Zero) DestroyWindow(replacement);
+        }
+        Console.WriteLine("completed");
+    }
+}

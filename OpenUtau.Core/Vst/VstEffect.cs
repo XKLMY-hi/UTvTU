@@ -160,7 +160,7 @@ namespace OpenUtau.Core.Vst {
 
         /// <summary>
         /// Open native editor in a Win32 popup window.
-        /// Each call creates a new window (multiple windows allowed).
+        /// Repeated calls raise the existing editor for this instance.
         /// </summary>
         public bool OpenNativeEditor() {
             if (_handle == IntPtr.Zero) return false;
@@ -168,13 +168,13 @@ namespace OpenUtau.Core.Vst {
             // attached 秒级初始化只阻塞专用线程；插件在 attached 中
             // PostMessage 等待的消息由同一线程泵出。调用线程（UI）同步等待——
             // 大插件秒级会短暂卡调用线程，重插件请用异步版。
-            return HostThread.Invoke(OpenEditorOnHost);
+            return HostThread.Invoke(() => OpenEditorOnHost(IntPtr.Zero));
         }
 
-        bool OpenEditorOnHost() {
+        bool OpenEditorOnHost(IntPtr ownerHwnd) {
             if (_handle == IntPtr.Zero) return false;
             Log.Information("[VstEffect] Opening native editor for {Plugin}", _entry.Name);
-            bool ok = _bridge.OpenEditorWindow(_handle);
+            bool ok = _bridge.OpenEditorWindow(_handle, ownerHwnd);
             // LastError is native thread-local storage; read it on the producing thread.
             EditorError = ok ? null : _bridge.LastError();
             if (ok) {
@@ -187,9 +187,12 @@ namespace OpenUtau.Core.Vst {
         }
 
         /// <summary>异步打开编辑器：attached（秒级）在专用线程执行，UI 线程不阻塞。</summary>
-        public Task<bool> OpenNativeEditorAsync() {
+        public Task<bool> OpenNativeEditorAsync() => OpenNativeEditorAsync(IntPtr.Zero);
+
+        /// <summary>Capture the UI owner's HWND before queuing work to the VST host thread.</summary>
+        public Task<bool> OpenNativeEditorAsync(IntPtr ownerHwnd) {
             if (_handle == IntPtr.Zero) return Task.FromResult(false);
-            return HostThread.InvokeAsync(OpenEditorOnHost);
+            return HostThread.InvokeAsync(() => OpenEditorOnHost(ownerHwnd));
         }
 
         // ── State Persistence ──────────────────────────────────

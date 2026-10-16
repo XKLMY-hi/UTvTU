@@ -33,6 +33,7 @@ namespace OpenUtau.Core.Vst {
         public int GetNumOutputs(IntPtr handle) => IsWin ? VstBridge.GetNumOutputs(handle) : 0;
         public IntPtr OpenEditor(IntPtr handle, IntPtr hwnd) => IsWin ? VstBridge.OpenEditor(handle, hwnd) : IntPtr.Zero;
         public bool OpenEditorWindow(IntPtr handle) => IsWin && VstBridge.OpenEditorWindow(handle);
+        public bool OpenEditorWindow(IntPtr handle, IntPtr ownerHwnd) => IsWin && VstBridge.OpenEditorWindow(handle, ownerHwnd);
         public void CloseEditor(IntPtr handle) { if (IsWin) VstBridge.CloseEditor(handle); }
         public byte[]? SaveState(IntPtr handle) => IsWin ? VstBridge.SaveState(handle) : null;
         public bool RestoreState(IntPtr handle, byte[] data) => IsWin && VstBridge.RestoreState(handle, data);

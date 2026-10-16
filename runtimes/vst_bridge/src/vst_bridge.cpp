@@ -33,6 +33,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <unordered_map>
 #include <thread>
 #include <cmath>
 #include <limits>
@@ -639,7 +640,40 @@ struct EditorWinState {
     HWND hwnd;
     IPtr<IPlugView> plugView;
     BridgePlugFrame plugFrame;
+    HWND owner = nullptr;
+    HWINEVENTHOOK ownerHook = nullptr;
+    bool attached = false;
 };
+
+// Hooks and editor windows are managed on the shared VST STA only. Cross-thread
+// owners do not reliably destroy their owned windows; enqueue close without
+// making the application's UI thread wait for plugin teardown.
+static std::unordered_map<HWINEVENTHOOK, HWND> s_ownerHooks;
+
+static void CALLBACK OwnerEvent(HWINEVENTHOOK hook, DWORD, HWND owner, LONG object, LONG child, DWORD, DWORD) {
+    if (object != OBJID_WINDOW || child != CHILDID_SELF) return;
+    const auto found = s_ownerHooks.find(hook);
+    if (found == s_ownerHooks.end()) return;
+    auto* state = reinterpret_cast<EditorWinState*>(GetWindowLongPtrW(found->second, GWLP_USERDATA));
+    if (state && state->owner == owner) PostMessageW(state->hwnd, WM_CLOSE, 0, 0);
+}
+
+static bool WatchOwner(EditorWinState* state, HWND owner) {
+    if (state->owner == owner) return !owner || state->ownerHook;
+    if (state->ownerHook) {
+        s_ownerHooks.erase(state->ownerHook);
+        UnhookWinEvent(state->ownerHook);
+        state->ownerHook = nullptr;
+    }
+    state->owner = owner;
+    if (owner) {
+        const DWORD ownerThread = GetWindowThreadProcessId(owner, nullptr);
+        state->ownerHook = SetWinEventHook(EVENT_OBJECT_DESTROY, EVENT_OBJECT_DESTROY,
+            nullptr, OwnerEvent, GetCurrentProcessId(), ownerThread, WINEVENT_OUTOFCONTEXT);
+        if (state->ownerHook) s_ownerHooks.emplace(state->ownerHook, state->hwnd);
+    }
+    return !owner || state->ownerHook;
+}
 
 static LRESULT CALLBACK EditorWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     auto* s = reinterpret_cast<EditorWinState*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
@@ -651,11 +685,18 @@ static LRESULT CALLBACK EditorWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
     case WM_ERASEBKGND: return TRUE;
     case WM_PAINT: { PAINTSTRUCT ps; BeginPaint(hwnd, &ps); EndPaint(hwnd, &ps); return 0; }
     case WM_CLOSE:
-        if (s && s->plugView) { s->plugView->setFrame(nullptr); s->plugView->removed(); s->plugView = nullptr; }
         DestroyWindow(hwnd);
         return 0;
-    case WM_DESTROY: return 0;  // 线程生命周期由宿主(VstThread)管理——窗口销毁不杀线程
+    case WM_DESTROY:
+        // Owner destruction can bypass WM_CLOSE; detach on every destruction path.
+        if (s && s->plugView) {
+            s->plugView->setFrame(nullptr);
+            if (s->attached) s->plugView->removed();
+            s->plugView = nullptr;
+        }
+        return 0;  // The shared host thread outlives individual editor windows.
     case WM_NCDESTROY:
+        if (s) WatchOwner(s, nullptr);
         if (s && s->inst) {
             s->inst->editorWindowOpen = false;
             s->inst->editorWindowHwnd = nullptr;
@@ -666,20 +707,35 @@ static LRESULT CALLBACK EditorWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 }
 
 extern "C" int vst_open_editor_window(VstBridgeInstance* inst) {
+    return vst_open_editor_window_owned(inst, nullptr);
+}
+
+extern "C" int vst_open_editor_window_owned(VstBridgeInstance* inst, void* ownerHwnd) {
     g_lastError[0] = '\0';
     if (!inst || !inst->controller) { setError("no controller"); return 0; }
+    HWND owner = static_cast<HWND>(ownerHwnd);
+    if (owner) {
+        DWORD processId = 0;
+        GetWindowThreadProcessId(owner, &processId);
+        if (!IsWindow(owner) || processId != GetCurrentProcessId() || GetAncestor(owner, GA_ROOT) != owner) {
+            setError("invalid editor owner"); return 0;
+        }
+    }
     if (inst->editorWindowOpen && IsWindow(inst->editorWindowHwnd)) {
+        if (owner) {
+            SetWindowLongPtrW(inst->editorWindowHwnd, GWLP_HWNDPARENT, reinterpret_cast<LONG_PTR>(owner));
+            auto* state = reinterpret_cast<EditorWinState*>(GetWindowLongPtrW(inst->editorWindowHwnd, GWLP_USERDATA));
+            if (state && !WatchOwner(state, owner)) {
+                setError("cannot watch editor owner"); DestroyWindow(inst->editorWindowHwnd); return 0;
+            }
+        }
         ShowWindow(inst->editorWindowHwnd, IsIconic(inst->editorWindowHwnd) ? SW_RESTORE : SW_SHOW);
         SetForegroundWindow(inst->editorWindowHwnd);
         return 1;
     }
 
-    // 窗口在调用线程（UI）创建：插件 controller 在 vst_load 的 UI 线程创建，
-    // createView/attached 期望同线程——窗口线程化会让线程敏感插件
-    //（Persistent Q 等）打不开 / TDR Nova 卡死。UI 线程创建兼容所有插件；
-    // 重插件（EQ 类）attached 初始化时 UI 短暂卡是插件固有成本。
-    // 窗口消息由 Avalonia 的 UI 消息泵驱动（detach 线程仅兜底，收不到
-    // 跨线程窗口消息——窗口消息实际由创建线程的消息队列处理）。
+    // Keep createView/attached and window messages on the shared VST STA.
+    // The Avalonia window is only the native owner; plugin calls stay off its UI thread.
     if (!inst->isActivated && vst_activate(inst, 1) != 0) { setError("activate fail"); return 0; }
     syncComponentToController(inst);
 
@@ -707,9 +763,12 @@ extern "C" int vst_open_editor_window(VstBridgeInstance* inst) {
     RECT rect = {0,0,w,h}; AdjustWindowRect(&rect, style, FALSE);
     HWND hwnd = CreateWindowExW(0, L"OUVstEditor", L"VST Editor", style,
         CW_USEDEFAULT, CW_USEDEFAULT, rect.right-rect.left, rect.bottom-rect.top,
-        nullptr, nullptr, GetModuleHandleW(nullptr), st);
+        owner, nullptr, GetModuleHandleW(nullptr), st);
     if (!hwnd) { delete st; setError("CreateWindow %lu", GetLastError()); return 0; }
     st->hwnd = hwnd;
+    if (!WatchOwner(st, owner)) {
+        setError("cannot watch editor owner"); DestroyWindow(hwnd); return 0;
+    }
     st->plugFrame.parent = hwnd;
     inst->editorWindowHwnd = hwnd;   // vst_close_editor 用它关闭窗口
 
@@ -718,6 +777,7 @@ extern "C" int vst_open_editor_window(VstBridgeInstance* inst) {
         setError("attach fail"); pv->setFrame(nullptr); DestroyWindow(hwnd);
         inst->editorWindowHwnd = nullptr; return 0;
     }
+    st->attached = true;
 
     ViewRect vr2 {};
     if (pv->getSize(&vr2) == kResultTrue && (vr2.getWidth() != w || vr2.getHeight() != h))
@@ -731,6 +791,7 @@ extern "C" int vst_open_editor_window(VstBridgeInstance* inst) {
 }
 #else
 extern "C" int vst_open_editor_window(VstBridgeInstance*) { setError("non-Windows"); return 0; }
+extern "C" int vst_open_editor_window_owned(VstBridgeInstance*, void*) { setError("non-Windows"); return 0; }
 #endif
 
 // ═════════════════════════════════════════════════════════════════════

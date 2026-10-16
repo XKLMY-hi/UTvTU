@@ -19,6 +19,29 @@ namespace OpenUtau.Core.Vst {
             }));
             Assert.NotNull(typeof(PlaybackManager).GetMethod("UpdatePlayPos", Type.EmptyTypes));
             Assert.NotNull(typeof(VstPluginManager).GetMethod("SaveAllStates", new[] { typeof(int) }));
+            Assert.NotNull(typeof(VstEffect).GetMethod("OpenNativeEditorAsync", Type.EmptyTypes));
+            Assert.NotNull(typeof(VstBridge).GetMethod("OpenEditorWindow", new[] { typeof(IntPtr) }));
+        }
+
+        [Fact]
+        public async Task EditorOwnerIsForwardedOnTheSharedHostThreadForOpenAndReopen() {
+            VstTestSetup.Register(VstTestSetup.MakeEntry(Uid));
+            var requestedOwners = new List<IntPtr>();
+            var threads = new HashSet<int>();
+            var bridge = new FakeVstBridge {
+                LoadCallback = () => threads.Add(Environment.CurrentManagedThreadId),
+                EditorOwnerCallback = owner => { requestedOwners.Add(owner); threads.Add(Environment.CurrentManagedThreadId); },
+                EditorCallback = () => true,
+            };
+            using var fx = new VstEffect(VstTestSetup.CreateSlot(Uid), bridge);
+            Assert.False(await fx.OpenNativeEditorAsync(new IntPtr(123)));
+            Assert.Empty(requestedOwners);
+            fx.Load();
+            Assert.True(await fx.OpenNativeEditorAsync(new IntPtr(123)));
+            Assert.True(await fx.OpenNativeEditorAsync(new IntPtr(456)));
+            Assert.True(await fx.OpenNativeEditorAsync());
+            Assert.Equal(new[] { new IntPtr(123), new IntPtr(456), IntPtr.Zero }, requestedOwners);
+            Assert.Single(threads); Assert.DoesNotContain(Environment.CurrentManagedThreadId, threads);
         }
 
         [Fact]

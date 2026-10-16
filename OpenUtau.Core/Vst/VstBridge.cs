@@ -182,6 +182,9 @@ namespace OpenUtau.Core.Vst {
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int vst_open_editor_window(IntPtr handle);
 
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int vst_open_editor_window_owned(IntPtr handle, IntPtr ownerHwnd);
+
         /// <summary>Open the native editor. parentHwnd is a Windows HWND.</summary>
         public static IntPtr OpenEditor(IntPtr handle, IntPtr parentHwnd) {
             if (handle == IntPtr.Zero) return IntPtr.Zero;
@@ -198,6 +201,14 @@ namespace OpenUtau.Core.Vst {
             if (handle == IntPtr.Zero) return false;
             try { return vst_open_editor_window(handle) == 1; }
             catch (Exception ex) { Log.Error(ex, "[VST] Exception opening editor window"); return false; }
+        }
+
+        /// <summary>Open a modeless editor above its owner; owner minimization hides it.</summary>
+        public static bool OpenEditorWindow(IntPtr handle, IntPtr ownerHwnd) {
+            if (handle == IntPtr.Zero) return false;
+            if (ownerHwnd == IntPtr.Zero) return OpenEditorWindow(handle);
+            try { return vst_open_editor_window_owned(handle, ownerHwnd) == 1; }
+            catch (Exception ex) { Log.Error(ex, "[VST] Exception opening owned editor window"); return false; }
         }
 
         /// <summary>Close the native editor.</summary>
