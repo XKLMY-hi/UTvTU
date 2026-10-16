@@ -1,4 +1,19 @@
-# HANDOVER — 新会话交接（2026-10-16 统一底部效果器机架）
+# HANDOVER — 新会话交接（2026-10-17 安装与卸载重构）
+
+## 2026-10-17 打包器、安装器与卸载器全部修复（最新，优先于下文审查）
+
+- 用户要求“全修”，并将安装/卸载GUI按主程序风格重新设计。已完成产品提交`40293ab0`、`9f90bb54`、`bb874c95`、`525f2e39`、`ad54335c`、`47ae4852`、`32b0019d`。[完整交付与验收](.opencode/plans/installer-rebuild-2026-10-16.md)，[验证JSON](.opencode/plans/installer-rebuild-2026-10-16/validation.json)。本轮本地提交，**未推送、未发布Release**；远端此前为`1495dc64`，master未动。
+- 新`UTvTU.Setup.Core`独立清单/事务内核；同盘暂存、哈希校验、占用预检、备份/取消/失败回滚。卸载只移除收据登记且未修改的程序文件；默认保留工程/声库/备份/设置/未知文件。路径、ZIP越界、ADS、失效联接、重复条目均拒绝，不跟随外部数据路径。
+- 新装写`installed.txt`，遵循主程序Documents/OpenUtau Plus数据契约；旧便携版保持原模式。历史Plus/NSIS从HKCU/HKLM两个registry view检测，必须验证分支身份，不能误覆盖上游；无收据旧版先更新建立清单再卸载。外部档案清理由原用户执行，不让提权worker清理其他账户档案。
+- GUI/CLI共用选项和执行服务，UAC保留选择；HKCU/快捷方式/启动留原用户。`.ustx/.ustxp`均注册OpenWith，不改UserChoice。全流程跨进程信号量及版本/提交归属检查，避免旧卸载移除新版本登记；失败明确返回并提供重试。
+- 安装与卸载共用940×680（最小820×600）新向导，直接使用UTvTU.DawUI/MD3控件、固定蓝色种子、系统深浅主题、品牌原生路径；选项/数据说明、进度、保留项/错误/日志统一。取消/关闭等待恢复，失败诊断保留；`--preview`禁用执行。按约定未自行截图，观感交用户查看。
+- 打包自动SDK9、单节点/2处理器/768MB托管堆，不关闭应用；独立stage和统一版本/commit。VstProbe实际RID输出加入发布清单；关键UI/原生库/VC CRT/运行时/x64/桥导出校验。小型单文件宿主以PE尾部流式附加ZIP（不用巨大EmbeddedResource），附范围与哈希。旧危险NSIS入口禁用，Windows Actions提供PR轻量检查及手动构建/实包文件流程，不自动发布Release；非Windows配置保留。
+- 独立卸载器约44MiB，不携带全载荷；Windows登记指向安装目录外的LocalAppData/UTvTU/Installers管理缓存，交互目录入口先临时迁移再退出，避免自锁。目录内exe同步`--silent`明确拒绝，自动化用QuietUninstallString或独立安装包。缓存保留作恢复用途。退出码0成功/1失败/2保留或部分完成/3取消，详见`installer/README.md`。
+- **最终55项轻量检查全绿**，无跳过，9.9秒/120MB，30秒/384MB护栏；检查项目最终构建0错0警告/23.30秒。TRX`2bee2a1bdb0643c2b50d3a2ed48e5d12.trx`，本轮日志`.dsh/installer-rebuild-20261016/`。覆盖真实文件事务、临时快捷方式、失效联接、注册回滚/归属、完整操作互斥、PE载荷、深浅主题/尺寸及取消恢复按钮。未跑主程序全套、不同管理员凭据UAC或真实用户安装。
+- **最终包**`dist/UTvTU-26.10.17-001312.exe`，275.9MiB，来源`32b0019d1fb993b240b83bc9231ed9c87fdf017e`，SHA256`E7CC89251E365075716CAAD9B0B02A94DF885BD83F73005F8BE11967FCC50EF2`，同名sha256/json在旁。stage`.dsh/packaging/c41061114c9d4d7f8ba5fed2906603f7/application/`，359文件已验收。package-build5退出0；早期失败产物不交付。主程序publish有既有警告，不能说整个发布0警告。
+- **最终实际exe文件流程通过**：安装9.9秒/79MB、卸载6.3秒/73MB，默认护栏不变、均exit0；合成工程/声库/备份/设置/未知文件保留，程序移除。只在新Temp合成目录执行内部文件任务，不写HKCU或真实快捷方式、不使用用户工程；结果见验证JSON和test-package-final.log。
+- 最终两个向导已打开：安装器PID10236/2026-10-17T00:17:31.6203496+08:00，无参数；独立卸载器PID12100/00:17:34.0173887+08:00，为只读`--preview --uninstall`。路径/启动时间/响应/窗口已核对，未实际点击安装/卸载。身份`.dsh/installer-rebuild-20261016/gui-final-verified.json`。旧向导只正常关闭，无强杀。后续须重新核身份，不能直接沿用PID。
+- 实际工作区仍G:/xklmy文件夹/vibe coding/UTvTU，origin XKLMY-hi/UTvTU、plus-develop已核实。下轮仍先核移动盘；下文旧“仅审查、未修复”等是历史。下一步交用户查看安装/卸载GUI；若要求推送，推plus-develop，不合并master。
 
 ## 2026-10-16 打包器/安装器审查（最新）
 

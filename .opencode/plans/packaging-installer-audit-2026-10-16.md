@@ -1,5 +1,7 @@
 # Windows 打包器与安装器审查（2026-10-16）
 
+> 后续状态：用户已授权全部修复，安装/卸载核心、共享GUI及Windows发布链已重构。实现与最终验收见[修复交付](installer-rebuild-2026-10-16.md)。下文保留审查时的问题及复现证据，不代表当前源码仍有这些缺陷。
+
 审查基线：`1495dc6403a0bdee13412af1eb087aa21334f8ae`，`plus-develop`。本轮检查当前自研安装链 `scripts/build-installer.ps1` → `installer/UTvTU.Installer`，同时对照主程序数据目录、VstProbe及旧发布入口。没有修改产品代码，没有运行打包脚本、完整安装/卸载、提权或强制关闭主程序。
 
 ## 已确认的问题（按处理优先级）

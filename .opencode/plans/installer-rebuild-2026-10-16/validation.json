@@ -1,0 +1,441 @@
+{
+  "Date": "2026-10-17T00:18:07.6232346+08:00",
+  "Workspace": "G:\\xklmy文件夹\\vibe coding\\UTvTU",
+  "Branch": "plus-develop",
+  "SourceCommit": "32b0019d1fb993b240b83bc9231ed9c87fdf017e",
+  "Sdk": "9.0.317",
+  "Runtime": "win-x64",
+  "Version": "UTvTU-26.10.17-001312",
+  "Package": {
+    "Path": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\dist\\UTvTU-26.10.17-001312.exe",
+    "Bytes": 289336842,
+    "Sha256": "E7CC89251E365075716CAAD9B0B02A94DF885BD83F73005F8BE11967FCC50EF2",
+    "Metadata": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\dist\\UTvTU-26.10.17-001312.json",
+    "Stage": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.dsh\\packaging\\c41061114c9d4d7f8ba5fed2906603f7\\application",
+    "ManifestFiles": 359,
+    "ManifestBytes": 519474375.0,
+    "Binaries": [
+      {
+        "Path": "OpenUtau.Core.dll",
+        "Length": 32972800,
+        "Sha256": "1B4D4196CA7D0DA2C049844A93A13B72368966D5F6BDED25312523658D4FABE0"
+      },
+      {
+        "Path": "OpenUtau.dll",
+        "Length": 41918464,
+        "Sha256": "0A6C7A900882AE10509368101B39AC311D28F5547DA1B8A0E8D4AF0E9F9C8120"
+      },
+      {
+        "Path": "OpenUtau.exe",
+        "Length": 184832,
+        "Sha256": "F09DAF01048CE9411D95A212088F6946AD3A3B4BF85738D592256F22A420167F"
+      },
+      {
+        "Path": "UTvTU-Uninstall.exe",
+        "Length": 46320682,
+        "Sha256": "A71FF3C6432101E5C7A3E4C8BC75D13D03CF5F93060F192EF3427BC573F7BAC3"
+      },
+      {
+        "Path": "UTvTU.DawUI.dll",
+        "Length": 405504,
+        "Sha256": "8192B5E36EED6C6BAA084659288E4CC0730FCE49DE30C9DE1FBD2757D3F7DECE"
+      },
+      {
+        "Path": "UTvTU.Md3.dll",
+        "Length": 135168,
+        "Sha256": "9F8EB3F4C2372939F9C84F19D619AEC17D60FBBA8D0B8DF1B6594A398BC6055C"
+      },
+      {
+        "Path": "vst_bridge.dll",
+        "Length": 576512,
+        "Sha256": "9483EB15A8D1E985DF764CF8323D9AAB9B6A8B211B0BCF80F8D28CE088B60BEC"
+      },
+      {
+        "Path": "vst_probe.deps.json",
+        "Length": 27075,
+        "Sha256": "5197826A067B449E1B3CD7349E1027641162A18F9DA78EBFC9BD2B42D3C56465"
+      },
+      {
+        "Path": "vst_probe.dll",
+        "Length": 9216,
+        "Sha256": "75CC18F42C02ADA300C0735680D6CFDC25ED165A5F40518FE1CA0EFCFA823E26"
+      },
+      {
+        "Path": "vst_probe.exe",
+        "Length": 151552,
+        "Sha256": "0C77A0CEE5E7AED184BF8D9451A38F33EA0E5003D754269AC6D45E867309FB2C"
+      },
+      {
+        "Path": "vst_probe.runtimeconfig.json",
+        "Length": 372,
+        "Sha256": "2AFD10F6BA1551C115362013C6CE4568A6C132B6C6D8D4937993FD016EFAAB9D"
+      },
+      {
+        "Path": "worldline.dll",
+        "Length": 404992,
+        "Sha256": "5E3D2E714CAC24ABB6BA1843F5992132757F3F7F20C9E8505A740FD2E86E763C"
+      }
+    ],
+    "BuildLog": ".dsh/installer-rebuild-20261016/package-build5.log",
+    "ExitCode": 0
+  },
+  "Checks": {
+    "Passed": 55,
+    "Failed": 0,
+    "Skipped": 0,
+    "Seconds": 9.9,
+    "PeakMB": 120,
+    "TimeLimitSeconds": 30,
+    "MemoryLimitMB": 384,
+    "Trx": ".dsh/setup-test-results/2bee2a1bdb0643c2b50d3a2ed48e5d12.trx",
+    "BuildLog": ".dsh/installer-rebuild-20261016/build-cancel-final.log",
+    "BuildErrors": 0,
+    "BuildWarnings": 0,
+    "BuildSeconds": 23.3,
+    "Cases": [
+      {
+        "Name": "SetupEngineTests.AnotherUsersReceiptCannotBeUninstalled",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0596747"
+      },
+      {
+        "Name": "SetupEngineTests.BrokenDirectoryJunctionCannotRedirectInstallation",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0049025"
+      },
+      {
+        "Name": "SetupEngineTests.CancellationDuringCommitRestoresOriginalVersion",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0783235"
+      },
+      {
+        "Name": "SetupEngineTests.CorruptPayloadCannotReplaceExistingInstallation",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0482395"
+      },
+      {
+        "Name": "SetupEngineTests.DataRemovalIsExplicitAndLimitedToRecordedDataRoot",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0767567"
+      },
+      {
+        "Name": "SetupEngineTests.FailureDuringCommitRestoresOriginalFilesAndReceipt",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0595703"
+      },
+      {
+        "Name": "SetupEngineTests.FileWorkerLeavesProfileCleanupToOriginalUserContext",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0822176"
+      },
+      {
+        "Name": "SetupEngineTests.ForgedReceiptCannotTurnUserProjectIntoAnOwnedFile",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0510562"
+      },
+      {
+        "Name": "SetupEngineTests.FreshInstallHasMarkerVerifiedReceiptAndCorrectDataDirectory",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0379797"
+      },
+      {
+        "Name": "SetupEngineTests.LockedLibraryPreventsAnyReplacement",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0662002"
+      },
+      {
+        "Name": "SetupEngineTests.MalformedPathsAreRejectedBeforeTargetChanges(path: \"../Application-other/leak.txt\")",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0025423"
+      },
+      {
+        "Name": "SetupEngineTests.MalformedPathsAreRejectedBeforeTargetChanges(path: \"/outside\")",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0029981"
+      },
+      {
+        "Name": "SetupEngineTests.MalformedPathsAreRejectedBeforeTargetChanges(path: \"a/../../leak\")",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0032405"
+      },
+      {
+        "Name": "SetupEngineTests.MalformedPathsAreRejectedBeforeTargetChanges(path: \"a/../b\")",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0031022"
+      },
+      {
+        "Name": "SetupEngineTests.MalformedPathsAreRejectedBeforeTargetChanges(path: \"a/file:stream\")",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0027123"
+      },
+      {
+        "Name": "SetupEngineTests.MalformedPathsAreRejectedBeforeTargetChanges(path: \"a\\\\..\\\\outside\")",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0059417"
+      },
+      {
+        "Name": "SetupEngineTests.MalformedPathsAreRejectedBeforeTargetChanges(path: \"C:/outside\")",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0028568"
+      },
+      {
+        "Name": "SetupEngineTests.MalformedPathsAreRejectedBeforeTargetChanges(path: \"NUL.txt\")",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0023914"
+      },
+      {
+        "Name": "SetupEngineTests.ModifiedOwnedFilesArePreservedAndReported",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0624629"
+      },
+      {
+        "Name": "SetupEngineTests.ObsoleteOwnedFilesAreRemovedButUnknownFilesSurviveUpgrade",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0782844"
+      },
+      {
+        "Name": "SetupEngineTests.PortableUpgradeKeepsExistingDataMode",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0318849"
+      },
+      {
+        "Name": "SetupEngineTests.PrefixSimilarDirectoriesDoNotPassContainmentCheck",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0019967"
+      },
+      {
+        "Name": "SetupEngineTests.UninstallCancellationRestoresManagedFilesAndReceipt",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0565201"
+      },
+      {
+        "Name": "SetupEngineTests.UninstallPreservesUnknownProjectsBackupsSingersAndPreferences",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0750372"
+      },
+      {
+        "Name": "SetupEngineTests.UninstallWithoutReceiptRefusesAnyDirectory",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0103861"
+      },
+      {
+        "Name": "SetupEngineTests.UpstreamAndUnknownFoldersAreNotAutomaticallyOverwritten",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0114635"
+      },
+      {
+        "Name": "SetupEngineTests.UserDataCannotBeShippedAsProgramFiles(path: \"Backups/song.ustxp\")",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0027865"
+      },
+      {
+        "Name": "SetupEngineTests.UserDataCannotBeShippedAsProgramFiles(path: \"prefs.json\")",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0024957"
+      },
+      {
+        "Name": "SetupEngineTests.UserDataCannotBeShippedAsProgramFiles(path: \"Singers/test/character.txt\")",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0025600"
+      },
+      {
+        "Name": "SetupOperationLeaseTests.OperationGateCanBeReleasedByAnAsyncContinuation",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0050641"
+      },
+      {
+        "Name": "SetupOperationLeaseTests.WholeOperationGateRejectsAnotherTaskForTheSameInstall",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0308409"
+      },
+      {
+        "Name": "SetupPayloadTests.CorruptedPayloadIsRejectedBeforeExtraction",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0072242"
+      },
+      {
+        "Name": "SetupPayloadTests.SingleFilePayloadRemainsReadableWithoutAnyExternalZip",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0065771"
+      },
+      {
+        "Name": "SetupPayloadTests.ZipViewCannotSeekIntoHostOrFooter",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0795201"
+      },
+      {
+        "Name": "SetupPresentationTests.BothWizardsUseSharedControlsWithSafeDefaults(uninstall: False, dark: False, width: 820, height: 600)",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.1155745"
+      },
+      {
+        "Name": "SetupPresentationTests.BothWizardsUseSharedControlsWithSafeDefaults(uninstall: False, dark: True, width: 940, height: 680)",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.1021147"
+      },
+      {
+        "Name": "SetupPresentationTests.BothWizardsUseSharedControlsWithSafeDefaults(uninstall: True, dark: False, width: 820, height: 600)",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.1443701"
+      },
+      {
+        "Name": "SetupPresentationTests.BothWizardsUseSharedControlsWithSafeDefaults(uninstall: True, dark: True, width: 940, height: 680)",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.9688336"
+      },
+      {
+        "Name": "SetupPresentationTests.CancelButtonBecomesAnEnabledCloseActionAfterRecovery",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.1500573"
+      },
+      {
+        "Name": "SetupPresentationTests.ClosingDuringOperationRequestsCancellationAndWaitsForRecovery",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0998074"
+      },
+      {
+        "Name": "SetupPresentationTests.FailedOperationReturnsToOptionsWithRetryInsteadOfLaunch",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.1802718"
+      },
+      {
+        "Name": "SetupPresentationTests.PreviewCannotExecuteAnyFileOperation",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0047598"
+      },
+      {
+        "Name": "SetupRegistrationTests.CommandLineOptionsSurviveRoundTripWithChineseSpacesAndQuietAlias",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0033413"
+      },
+      {
+        "Name": "SetupRegistrationTests.FailedRegistrationRestoresPreviousValues",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0054253"
+      },
+      {
+        "Name": "SetupRegistrationTests.LegacyIdentityDistinguishesPlusFromUpstream(version: \"0.1.568.2-plus.0.0.3-beta\", expected: True)",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0009071"
+      },
+      {
+        "Name": "SetupRegistrationTests.LegacyIdentityDistinguishesPlusFromUpstream(version: \"0.1.568.2\", expected: False)",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0004984"
+      },
+      {
+        "Name": "SetupRegistrationTests.LegacyIdentityDistinguishesPlusFromUpstream(version: \"UTvTU-26.10.7-143025\", expected: True)",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0002136"
+      },
+      {
+        "Name": "SetupRegistrationTests.OldNsisLocationCanBeRecoveredWithoutInstallLocationValue",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0009639"
+      },
+      {
+        "Name": "SetupRegistrationTests.OldOperationCannotRemoveANewerVersionsRegistrationAtTheSamePath",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0005362"
+      },
+      {
+        "Name": "SetupRegistrationTests.OldUninstallerCannotRemoveNewInstallationsRegistration",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0005460"
+      },
+      {
+        "Name": "SetupRegistrationTests.QuietUninstallCommandUsesSupportedFlagAndQuotedPaths",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0004898"
+      },
+      {
+        "Name": "SetupRegistrationTests.RegisteredUninstallerCanRunOutsideTheLockedInstallDirectory",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0005063"
+      },
+      {
+        "Name": "SetupRegistrationTests.RegistersBothExtensionsAndPreservesOtherDefaultApplications",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0024634"
+      },
+      {
+        "Name": "SetupRegistrationTests.UninstallPreservesExtensionMetadataAndAnotherUsersEntry",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0052819"
+      },
+      {
+        "Name": "SetupShellTests.ShortcutRemovalUsesExactExecutableInsteadOfDirectoryPrefix",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.1853550"
+      }
+    ]
+  },
+  "PackageSmoke": {
+    "Success": true,
+    "Installer": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\dist\\UTvTU-26.10.17-001312.exe",
+    "InstallerSha256": "E7CC89251E365075716CAAD9B0B02A94DF885BD83F73005F8BE11967FCC50EF2",
+    "Version": "UTvTU-26.10.17-001312",
+    "SourceCommit": "32b0019d1fb993b240b83bc9231ed9c87fdf017e",
+    "Scratch": "C:\\Users\\XKLMY\\AppData\\Local\\Temp\\UTvTU-Package-Smoke-671b7275f8a64edbaae53d985de70b5f",
+    "Runs": [
+      {
+        "Mode": "file-install",
+        "Seconds": 9.9,
+        "PeakMB": 79.0,
+        "ExitCode": 0,
+        "Stopped": false,
+        "Job": "C:\\Users\\XKLMY\\AppData\\Local\\Temp\\UTvTU-Setup-Jobs\\69e5a44c25c84c1bb7e5da3b22ea4861"
+      },
+      {
+        "Mode": "file-uninstall",
+        "Seconds": 6.3,
+        "PeakMB": 73.0,
+        "ExitCode": 0,
+        "Stopped": false,
+        "Job": "C:\\Users\\XKLMY\\AppData\\Local\\Temp\\UTvTU-Setup-Jobs\\8db21b4789134d299c72e60f9b4aede7"
+      }
+    ],
+    "RegistryTouched": false,
+    "ShortcutsTouched": false,
+    "RealProjects": false
+  },
+  "Gui": [
+    {
+      "Kind": "installer",
+      "Pid": 10236,
+      "Exe": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\dist\\UTvTU-26.10.17-001312.exe",
+      "Started": "2026-10-17T00:17:31.6203496+08:00",
+      "Responding": true,
+      "WindowHandle": 985214,
+      "Title": "安装 UTvTU",
+      "Arguments": [],
+      "Sha256": "E7CC89251E365075716CAAD9B0B02A94DF885BD83F73005F8BE11967FCC50EF2"
+    },
+    {
+      "Kind": "uninstaller-preview",
+      "Pid": 12100,
+      "Exe": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.dsh\\packaging\\c41061114c9d4d7f8ba5fed2906603f7\\application\\UTvTU-Uninstall.exe",
+      "Started": "2026-10-17T00:17:34.0173887+08:00",
+      "Responding": true,
+      "WindowHandle": 1836630,
+      "Title": "卸载 UTvTU",
+      "Arguments": [
+        "--preview",
+        "--uninstall",
+        "--dir",
+        "C:\\Users\\XKLMY\\AppData\\Local\\Programs\\UTvTU"
+      ],
+      "Sha256": "A71FF3C6432101E5C7A3E4C8BC75D13D03CF5F93060F192EF3427BC573F7BAC3"
+    }
+  ],
+  "Boundaries": {
+    "Screenshots": false,
+    "RealInstallationChanged": false,
+    "RealProjectsUsed": false,
+    "ProfileRegistryWritten": false,
+    "DifferentAdministratorUacTested": false,
+    "FullMainTestSuiteRun": false,
+    "GitHubPushed": false,
+    "ReleasePublished": false
+  }
+}
