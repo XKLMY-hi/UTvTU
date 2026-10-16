@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -9,7 +9,7 @@ using OpenUtau.Core.Util;
 namespace OpenUtau.App {
     internal class FilePicker {
         public static FilePickerFileType ProjectFiles { get; } = new("Project Files") {
-            Patterns = new[] { "*.ustxp", "*.ustx", "*.vsqx", "*.ust", "*.mid", "*.midi", "*.ufdata", "*.musicxml" },
+            Patterns = new[] { "*.ustxp", "*.ustx", "*.vsqx", "*.ust", "*.mid", "*.midi", "*.ufdata", "*.musicxml", "*.svp", "*.sv2" },
         };
         public static FilePickerFileType USTX { get; } = new("USTX") {
             Patterns = new[] { "*.ustx" },
@@ -29,6 +29,7 @@ namespace OpenUtau.App {
         public static FilePickerFileType UFDATA { get; } = new("UFDATA") {
             Patterns = new[] { "*.ufdata" },
         };
+        public static FilePickerFileType SVP { get; } = new("Synthesizer V") { Patterns = new[] { "*.svp", "*.sv2" } };
         public static FilePickerFileType MUSICXML { get; } = new("MUSICXML") {
             Patterns = new[] { "*.musicxml" },
         };

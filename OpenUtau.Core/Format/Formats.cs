@@ -5,7 +5,7 @@ using OpenUtau.Classic;
 using OpenUtau.Core.Ustx;
 
 namespace OpenUtau.Core.Format {
-    public enum ProjectFormats { Unknown, Vsq3, Vsq4, Ust, Ustx, Midi, Ufdata, Musicxml };
+    public enum ProjectFormats { Unknown, Vsq3, Vsq4, Ust, Ustx, Midi, Ufdata, Musicxml, Svp };
 
     public static class Formats {
         const string ustMatch = "[#SETTING]";
@@ -18,6 +18,9 @@ namespace OpenUtau.Core.Format {
         const string musicxmlMatch = "score-partwise";
 
         public static ProjectFormats DetectProjectFormat(string file) {
+            string extension = Path.GetExtension(file);
+            if (extension.Equals(".svp", System.StringComparison.OrdinalIgnoreCase) ||
+                extension.Equals(".sv2", System.StringComparison.OrdinalIgnoreCase)) return ProjectFormats.Svp;
             var lines = new List<string>();
             using (var reader = new StreamReader(file)) {
                 for (int i = 0; i < 10 && !reader.EndOfStream; ++i) {
@@ -80,6 +83,9 @@ namespace OpenUtau.Core.Format {
                     break;
                 case ProjectFormats.Musicxml:
                     project = MusicXML.LoadProject(files[0]);
+                    break;
+                case ProjectFormats.Svp:
+                    project = SVP.Load(files[0]);
                     break;
                 default:
                     throw new FileFormatException("Unknown file format");
