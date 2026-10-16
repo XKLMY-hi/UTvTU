@@ -1,10 +1,12 @@
 using System;
 using System.IO;
+using System.Threading;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using OpenUtau.Core.Ustx;
 using Serilog;
 
@@ -18,7 +20,9 @@ public sealed class SingerAvatar : UserControl {
         AvaloniaProperty.Register<SingerAvatar, int>(nameof(Revision));
     readonly Image image = new() { Stretch = Stretch.UniformToFill };
     readonly DawIcon fallback = new() { Width = 20, Height = 20 };
-    Bitmap? bitmap;
+    SingerThumbnailCache.Lease? lease;
+    CancellationTokenSource? loading;
+    int generation;
     bool attached;
 
     public USinger? Singer { get => GetValue(SingerProperty); set => SetValue(SingerProperty, value); }
@@ -45,32 +49,35 @@ public sealed class SingerAvatar : UserControl {
         base.OnPropertyChanged(change);
         if (attached && (change.Property == SingerProperty || change.Property == RevisionProperty)) ReloadAvatar();
     }
-    void ReloadAvatar() {
-        Bitmap? next = null;
+    async void ReloadAvatar() {
+        ReleaseAvatar();
+        int request = generation;
+        var cancellation = new CancellationTokenSource();
+        loading = cancellation;
         try {
             // Metadata is sufficient: never EnsureLoaded() a voicebank just to draw a row.
-            if (Singer?.AvatarData is { Length: > 0 } data) {
-                using var stream = new MemoryStream(data, writable: false);
-                next = Bitmap.DecodeToWidth(stream, 72);
-            } else if (Singer?.Avatar is { Length: > 0 } path && File.Exists(path)) {
-                using var stream = File.OpenRead(path);
-                next = Bitmap.DecodeToWidth(stream, 72);
-            }
+            var next = await SingerThumbnailCache.AcquireAsync(Singer?.AvatarData, Singer?.Avatar, Revision, cancellation.Token).ConfigureAwait(false);
+            Dispatcher.UIThread.Post(() => {
+                if (!attached || request != generation) { next?.Dispose(); return; }
+                lease = next;
+                image.Source = next?.Bitmap;
+                image.IsVisible = next != null;
+                fallback.IsVisible = next == null;
+            });
+        } catch (OperationCanceledException) {
         } catch (Exception e) {
             Log.Warning(e, "Failed to load voicebank thumbnail {SingerId}", Singer?.Id);
         }
-        var previous = bitmap;
-        bitmap = next;
-        image.Source = next;
-        image.IsVisible = next != null;
-        fallback.IsVisible = next == null;
-        previous?.Dispose();
     }
     void ReleaseAvatar() {
+        generation++;
+        loading?.Cancel();
+        loading?.Dispose();
+        loading = null;
         image.Source = null;
         image.IsVisible = false;
         fallback.IsVisible = true;
-        bitmap?.Dispose();
-        bitmap = null;
+        lease?.Dispose();
+        lease = null;
     }
 }

@@ -44,6 +44,14 @@ public sealed class ResourceCenterTests {
         public override void EnsureLoaded() => LoadCalls++;
     }
 
+    static void WaitImage(Image image) {
+        var deadline = DateTime.UtcNow.AddSeconds(2);
+        while (image.Source == null && DateTime.UtcNow < deadline) {
+            Dispatcher.UIThread.RunJobs(); System.Threading.Thread.Sleep(5);
+        }
+        Dispatcher.UIThread.RunJobs(); Assert.NotNull(image.Source);
+    }
+
     [AvaloniaFact]
     public void VoicebankRowsShowRealSmallAvatarsWithoutLoadingUnselectedBanksAndRefreshAfterReload() {
         // A real PNG fixture: headless drawing's Save is a no-op and its decoder is a stub.
@@ -65,6 +73,7 @@ public sealed class ResourceCenterTests {
             var m = avatars.Single(c => c.Singer == missing);
             var ai = a.GetVisualDescendants().OfType<Image>().Single();
             var bi = b.GetVisualDescendants().OfType<Image>().Single();
+            WaitImage(ai); WaitImage(bi);
             Assert.InRange(Assert.IsType<Bitmap>(ai.Source).PixelSize.Width, 1, 72);
             Assert.InRange(Assert.IsType<Bitmap>(bi.Source).PixelSize.Width, 1, 72);
             Assert.Equal(0, beta.LoadCalls);
@@ -75,19 +84,19 @@ public sealed class ResourceCenterTests {
             Assert.Null(ai.Source);
             Assert.True(a.GetVisualDescendants().OfType<DawIcon>().Single().IsVisible);
             alpha.ImageData = bytes; vm.RefreshSinger(); Dispatcher.UIThread.RunJobs();
-            Assert.IsType<Bitmap>(ai.Source);
+            WaitImage(ai); Assert.IsType<Bitmap>(ai.Source);
             beta.FailImageRead = true; vm.AvatarRevision++; Dispatcher.UIThread.RunJobs();
             Assert.Null(bi.Source);
             Assert.True(b.GetVisualDescendants().OfType<DawIcon>().Single().IsVisible);
             beta.FailImageRead = false; vm.AvatarRevision++; Dispatcher.UIThread.RunJobs();
-            Assert.IsType<Bitmap>(bi.Source);
+            WaitImage(bi); Assert.IsType<Bitmap>(bi.Source);
             var previous = bi.Source;
             window.Content = null; Dispatcher.UIThread.RunJobs();
             Assert.Null(ai.Source); Assert.Null(bi.Source);
             window.Content = page; Dispatcher.UIThread.RunJobs(); window.UpdateLayout();
             var remounted = page.GetVisualDescendants().OfType<SingerAvatar>().Single(c => c.Singer == beta)
                 .GetVisualDescendants().OfType<Image>().Single();
-            Assert.IsType<Bitmap>(remounted.Source); Assert.NotSame(previous, remounted.Source);
+            WaitImage(remounted); Assert.IsType<Bitmap>(remounted.Source); Assert.Same(previous, remounted.Source);
             Assert.Equal(0, beta.LoadCalls);
         } finally { window.Close(); File.Delete(file); }
     }

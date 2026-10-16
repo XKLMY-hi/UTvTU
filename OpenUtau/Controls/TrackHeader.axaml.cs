@@ -60,6 +60,7 @@ namespace OpenUtau.App.Controls {
         private UTrack? track;
         private TrackHeaderCanvas? canvas;
         readonly Dictionary<Slider, Thumb> captureThumbs = new();
+        Flyout? singerFlyout;
 
         public TrackHeader() {
             InitializeComponent();
@@ -87,6 +88,7 @@ namespace OpenUtau.App.Controls {
         void FaderCaptureLost(object? sender, PointerCaptureLostEventArgs args) => ViewModel?.EndMixGesture();
 
         protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e) {
+            singerFlyout?.Hide();
             ViewModel?.EndMixGesture();
             base.OnDetachedFromVisualTree(e);
         }
@@ -193,8 +195,34 @@ namespace OpenUtau.App.Controls {
 
         void SingerButtonClicked(object sender, RoutedEventArgs args) {
             try {
-                ViewModel?.RefreshSingers();
-                SingersMenu.Open((Control)sender);
+                singerFlyout?.Hide();
+                if (ViewModel == null) return;
+                var owner = FindWindow(this);
+                var anchor = ReferenceEquals(sender, SingerButton) ? SingerButton : OverflowButton;
+                OverflowButton.Flyout?.Hide();
+                var model = new SingerPickerViewModel(ViewModel.Singer);
+                var picker = new SingerPicker { DataContext = model,
+                    Width = Math.Max(240, Math.Min(400, (owner?.Bounds.Width ?? 440) - 32)),
+                    Height = Math.Max(160, Math.Min(480, (owner?.Bounds.Height ?? 560) - 64)),
+                };
+                var flyout = new Flyout { Content = picker, Placement = PlacementMode.BottomEdgeAlignedLeft };
+                singerFlyout = flyout;
+                picker.Chosen += singer => {
+                    try { ViewModel?.SelectSingerCommand.Execute(singer).Subscribe(); }
+                    finally { flyout.Hide(); }
+                };
+                picker.CloseRequested += flyout.Hide;
+                picker.ManageRequested += () => {
+                    flyout.Hide();
+                    if (owner is Views.MainWindow main) _ = main.OpenSingersWindowAsync();
+                };
+                flyout.Opened += (_, _) => { model.Open(); picker.FocusSearch(); };
+                flyout.Closed += (_, _) => {
+                    model.Dispose();
+                    if (ReferenceEquals(singerFlyout, flyout)) singerFlyout = null;
+                    if (this.IsAttachedToVisualTree()) anchor.Focus();
+                };
+                flyout.ShowAt(anchor);
             } catch (Exception e) {
                 DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e));
             }
@@ -343,6 +371,7 @@ namespace OpenUtau.App.Controls {
         }
 
         public void Dispose() {
+            singerFlyout?.Hide();
             foreach (var thumb in captureThumbs.Values) thumb.PointerCaptureLost -= FaderCaptureLost;
             captureThumbs.Clear();
             unbinds.ForEach(u => u.Dispose());

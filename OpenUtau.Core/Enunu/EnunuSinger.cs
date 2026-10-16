@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,6 +14,7 @@ namespace OpenUtau.Core.Enunu {
         public override string Id => voicebank.Id;
         public override string Name => voicebank.Name;
         public override Dictionary<string, string> LocalizedNames => voicebank.LocalizedNames;
+        public override IList<string> SearchTerms => voicebank.SearchTerms;
         public override USingerType SingerType => voicebank.SingerType;
         public override string BasePath => voicebank.BasePath;
         public override string Author => voicebank.Author;

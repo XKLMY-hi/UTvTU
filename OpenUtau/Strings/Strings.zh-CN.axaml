@@ -1566,4 +1566,11 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="rack.missing">插件不可用 · 已保留存档状态</system:String>
   <system:String x:Key="rack.ready">已就绪</system:String>
   <system:String x:Key="rack.retry">尚未加载 · 打开以重试</system:String>
+  <system:String x:Key="singerpicker.search">搜索名称、文件夹或关键词</system:String>
+  <system:String x:Key="singerpicker.empty">没有匹配的歌手</system:String>
+  <system:String x:Key="singerpicker.favorite">收藏</system:String>
+  <system:String x:Key="singerpicker.recent">最近使用</system:String>
+  <system:String x:Key="singerpicker.all">全部歌手</system:String>
+  <system:String x:Key="singerpicker.missing">声库缺失</system:String>
+  <system:String x:Key="singerpicker.manage">管理 / 安装声库…</system:String>
 </ResourceDictionary>

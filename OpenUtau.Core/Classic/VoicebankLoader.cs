@@ -166,6 +166,10 @@ namespace OpenUtau.Classic {
         }
 
         public static void ApplyConfig(Voicebank bank, VoicebankConfig bankConfig) {
+            if (bankConfig.SearchTerms != null) {
+                bank.SearchTerms.Clear();
+                bank.SearchTerms.AddRange(bankConfig.SearchTerms.Where(term => !string.IsNullOrWhiteSpace(term)).Distinct());
+            }
             if (!string.IsNullOrWhiteSpace(bankConfig.Name)) {
                 bank.Name = bankConfig.Name;
             }

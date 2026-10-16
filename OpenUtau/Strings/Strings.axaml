@@ -1438,4 +1438,11 @@ Range {2}–{3} s · Tail {4} s
   <system:String x:Key="rack.missing">Plugin unavailable · saved state retained</system:String>
   <system:String x:Key="rack.ready">Ready</system:String>
   <system:String x:Key="rack.retry">Not loaded · open to retry</system:String>
+  <system:String x:Key="singerpicker.search">Search name, folder or keyword</system:String>
+  <system:String x:Key="singerpicker.empty">No matching singers</system:String>
+  <system:String x:Key="singerpicker.favorite">Favorite</system:String>
+  <system:String x:Key="singerpicker.recent">Recent</system:String>
+  <system:String x:Key="singerpicker.all">All singers</system:String>
+  <system:String x:Key="singerpicker.missing">Missing voicebank</system:String>
+  <system:String x:Key="singerpicker.manage">Manage / install voicebanks…</system:String>
 </ResourceDictionary>

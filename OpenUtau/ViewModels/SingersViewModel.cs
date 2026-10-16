@@ -26,10 +26,7 @@ namespace OpenUtau.App.ViewModels {
         readonly IEnumerable<USinger>? singerSource;
         public IEnumerable<USinger> Singers => singerSource ?? SingerManager.Inst.SingerGroups.Values.SelectMany(l => l);
         [Reactive] public string SearchSinger { get; set; } = "";
-        public IEnumerable<USinger> FilteredSingers => Singers.Where(s =>
-            string.IsNullOrWhiteSpace(SearchSinger) ||
-            s.LocalizedName.Contains(SearchSinger.Trim(), StringComparison.OrdinalIgnoreCase) ||
-            s.Id?.Contains(SearchSinger.Trim(), StringComparison.OrdinalIgnoreCase) == true);
+        public IEnumerable<USinger> FilteredSingers => Singers.Where(s => SingerSearch.Matches(s, SearchSinger));
         public int SingerCount => FilteredSingers.Count();
         public bool NoSingerMatches => SingerCount == 0;
         public bool HasSinger => Singer != null;

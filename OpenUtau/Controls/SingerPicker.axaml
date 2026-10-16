@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:OpenUtau.App.Controls" xmlns:vm="using:OpenUtau.App.ViewModels"
+             x:Class="OpenUtau.App.Controls.SingerPicker" x:DataType="vm:SingerPickerViewModel"
+             MinWidth="240" MaxWidth="400" ClipToBounds="True">
+  <Border Background="{DynamicResource md3.surface-container-high}" CornerRadius="20" Padding="12">
+    <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="8">
+      <StackPanel Spacing="4">
+        <TextBlock Text="{DynamicResource tracks.selectsinger}" FontWeight="SemiBold" FontSize="16"/>
+        <TextBlock Text="{Binding CurrentName}" IsVisible="{Binding HasCurrent}" TextTrimming="CharacterEllipsis" FontSize="12"/>
+      </StackPanel>
+      <TextBox Name="SearchBox" Grid.Row="1" Text="{Binding Search, Mode=TwoWay}" PlaceholderText="{DynamicResource singerpicker.search}"/>
+      <Grid Grid.Row="2" MinHeight="64">
+        <ListBox Name="SingerList" ItemsSource="{Binding Rows}" SelectedItem="{Binding Selected, Mode=TwoWay}"
+                 Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" AutoScrollToSelectedItem="True">
+          <ListBox.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel/></ItemsPanelTemplate></ListBox.ItemsPanel>
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:SingerPickerRow">
+              <Grid ColumnDefinitions="40,*,20,36" ColumnSpacing="8" Height="52" Tapped="RowTapped">
+                <Border Width="40" Height="40" CornerRadius="12" ClipToBounds="True" Background="{DynamicResource md3.surface-container-highest}">
+                  <c:SingerAvatar Singer="{Binding Singer}" Revision="{Binding AvatarRevision}"/>
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                  <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                  <TextBlock Text="{Binding Detail}" FontSize="11" Foreground="{DynamicResource md3.on-surface-variant}" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+                <TextBlock Grid.Column="2" Text="✓" IsVisible="{Binding IsCurrent}" VerticalAlignment="Center"/>
+                <Button Grid.Column="3" Width="36" Height="36" Padding="0" Theme="{StaticResource DawTextButtonTheme}"
+                        Content="{Binding FavoriteGlyph}" Click="FavoriteClicked" ToolTip.Tip="{DynamicResource singerpicker.favorite}"/>
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+        <TextBlock IsVisible="{Binding IsEmpty}" Text="{DynamicResource singerpicker.empty}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+      </Grid>
+      <Button Grid.Row="3" Theme="{StaticResource DawTextButtonTheme}" HorizontalAlignment="Stretch"
+              Content="{DynamicResource singerpicker.manage}" Click="ManageClicked"/>
+    </Grid>
+  </Border>
+</UserControl>
