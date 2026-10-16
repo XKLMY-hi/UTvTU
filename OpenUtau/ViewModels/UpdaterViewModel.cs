@@ -1,6 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Globalization;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Avalonia.Media;
@@ -12,7 +15,7 @@ using Serilog;
 
 namespace OpenUtau.App.ViewModels {
     public class UpdaterViewModel : ViewModelBase {
-        class GithubRelease {
+        internal class GithubRelease {
 #pragma warning disable 0649
             public string html_url = string.Empty;
             public long id = long.MaxValue;
@@ -24,7 +27,7 @@ namespace OpenUtau.App.ViewModels {
         }
 
         // 版本号规则：v{上游主线版本} p{Plus版本}
-        public string AppVersion => $"v{System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version} p{OpenUtau.Core.PlusInfo.PlusVersion}";
+        public string AppVersion => PlusInfo.VersionString;
         public bool IsDarkMode => ThemeManager.IsDarkMode;
         [Reactive] public string UpdaterStatus { get; set; }
         [Reactive] public bool UpdateAvailable { get; set; }
@@ -43,83 +46,55 @@ namespace OpenUtau.App.ViewModels {
             UpdateButtonFontWeight = FontWeight.Normal;
         }
 
-        /// <summary>
-        /// 迁移期闸门（2026-09-18 迁移至 XKLMY-hi/UTvTU）：新仓库尚无任何 release，
-        /// 此时检查更新毫无意义；旧仓库的 Plus release 已按迁移决策撤下。
-        /// 等 UTvTU 发布首个版本后把返回值改为 true 即可恢复。
-        /// （写成方法而非 const——const 会让编译器把后续代码判为不可达，
-        /// 而本项目 TreatWarningsAsErrors 会把 CS0162 升级成构建失败。）
-        /// </summary>
-        private static bool UpdateCheckEnabled() => false;
+        static readonly SemaphoreSlim checkGate = new(1);
+        static bool checkFailed;
 
-        /// <summary>
-        /// Check if a newer version exists on the repository.
-        /// Called at startup (non-blocking) and possibly again when the dialog opens.
-        /// Returns true if an update is available.
-        /// </summary>
-        public static async Task<bool> CheckForUpdateAsync() {
-            if (!UpdateCheckEnabled()) {
-                Log.Information("[Updater] Update check disabled during UTvTU migration.");
-                return false;
-            }
+        internal static bool TryParseBuildTag(string tag, out DateTime stamp) {
+            stamp = default;
+            var match = Regex.Match(tag ?? "", @"\AUTvTU-(\d{2})\.(\d{1,2})\.(\d{1,2})-(\d{2})(\d{2})(\d{2})(?:\+[^\s]+)?\z", RegexOptions.CultureInvariant);
+            if (!match.Success) return false;
             try {
-                using var client = new HttpClient();
+                int N(int index) => int.Parse(match.Groups[index].Value, CultureInfo.InvariantCulture);
+                stamp = new DateTime(2000 + N(1), N(2), N(3), N(4), N(5), N(6));
+                return true;
+            } catch (ArgumentOutOfRangeException) { return false; }
+        }
+
+        internal static GithubRelease? FindNewerRelease(IEnumerable<GithubRelease> releases, string currentTag, Version? legacyVersion = null) {
+            var eligible = releases.Where(r => !r.draft && !r.prerelease &&
+                Uri.TryCreate(r.html_url, UriKind.Absolute, out var uri) && uri.Scheme == "https" &&
+                uri.Host.Equals("github.com", StringComparison.OrdinalIgnoreCase) &&
+                uri.AbsolutePath.StartsWith("/XKLMY-hi/UTvTU/releases/tag/", StringComparison.OrdinalIgnoreCase));
+            if (TryParseBuildTag(currentTag, out var current)) {
+                return eligible.Select(r => (release: r, valid: TryParseBuildTag(r.tag_name, out var time), time))
+                    .Where(r => r.valid && r.time > current).OrderByDescending(r => r.time).Select(r => r.release).FirstOrDefault();
+            }
+            // Unstamped developer builds cannot be ordered against dated release builds.
+            if (legacyVersion == null) return null;
+            return eligible.Where(r => TryParsePlusVersion(r.tag_name.TrimStart('v'), out var version) && version > legacyVersion)
+                .OrderByDescending(r => { TryParsePlusVersion(r.tag_name.TrimStart('v'), out var version); return version; }).FirstOrDefault();
+        }
+
+        public static async Task<bool> CheckForUpdateAsync() {
+            await checkGate.WaitAsync();
+            try {
+                s_latestVersion = null; s_releaseUrl = null; checkFailed = false;
+                using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
                 client.DefaultRequestHeaders.Add("User-Agent", "UTvTU");
-                client.Timeout = TimeSpan.FromSeconds(15);
-
-                var url = "https://api.github.com/repos/XKLMY-hi/UTvTU/releases";
-                Log.Information($"[Updater] Checking releases at {url}");
-                using var response = await client.GetAsync(url);
+                using var response = await client.GetAsync("https://api.github.com/repos/XKLMY-hi/UTvTU/releases?per_page=100");
                 response.EnsureSuccessStatusCode();
-
-                string body = await response.Content.ReadAsStringAsync();
-                var releases = JsonConvert.DeserializeObject<List<GithubRelease>>(body);
-                if (releases == null || releases.Count == 0) {
-                    Log.Information("[Updater] No releases found.");
-                    return false;
-                }
-
-                // Find the latest non-draft release (always include pre-releases for Plus)
-                var latest = releases
-                    .Where(r => !r.draft)
-                    .OrderByDescending(r => r.id)
-                    .FirstOrDefault();
-
-                if (latest == null) {
-                    Log.Information("[Updater] No eligible release found.");
-                    return false;
-                }
-
-                Log.Information($"[Updater] Latest release: {latest.tag_name} ({latest.name})");
-
-                // Compare versions. Our tags look like:
-                //   "v0.1.568-plus.0.0.1-beta"  →  assembly 0.1.568.1
-                //   "0.1.568"                    →  assembly 0.1.568.0
-                // Strip leading 'v', extract the base numeric triple, then
-                // grab the last numeric segment of the -plus part as revision.
-                string latestTag = latest.tag_name.TrimStart('v');
-                Version? current = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version;
-                if (current == null) return false;
-
-                if (!TryParsePlusVersion(latestTag, out var remoteVer)) {
-                    Log.Warning($"[Updater] Cannot parse version tag: {latest.tag_name}");
-                    return false;
-                }
-
-                bool isNewer = remoteVer > current;
-                Log.Information($"[Updater] Current: {current}, Latest: {remoteVer}, Newer: {isNewer}");
-
-                if (isNewer) {
-                    s_latestVersion = latest.tag_name;
-                    s_releaseUrl = latest.html_url;
-                }
-
-                return isNewer;
+                var releases = JsonConvert.DeserializeObject<List<GithubRelease>>(await response.Content.ReadAsStringAsync());
+                var latest = FindNewerRelease(releases ?? new(), PlusInfo.VersionString,
+                    System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version);
+                if (latest == null) return false;
+                s_latestVersion = latest.tag_name; s_releaseUrl = latest.html_url;
+                return true;
             } catch (Exception e) {
-                Log.Error(e, "[Updater] Failed to check for update.");
+                checkFailed = true;
+                Log.Warning(e, "[Updater] Failed to check for update.");
                 return false;
-            }
+            } finally { checkGate.Release(); }
         }
 
         /// <summary>
@@ -127,6 +102,8 @@ namespace OpenUtau.App.ViewModels {
         /// found an update, use that; otherwise run a fresh check.
         /// </summary>
         public async void Init() {
+            UpdateAvailable = false;
+            UpdateButtonFontWeight = FontWeight.Normal;
             UpdaterStatus = ThemeManager.GetString("updater.status.checking");
 
             // If startup check already cached a result, use it
@@ -148,7 +125,7 @@ namespace OpenUtau.App.ViewModels {
                 UpdateAvailable = true;
                 UpdateButtonFontWeight = FontWeight.Bold;
             } else if (!hasUpdate) {
-                UpdaterStatus = ThemeManager.GetString("updater.status.notavailable");
+                UpdaterStatus = ThemeManager.GetString(checkFailed ? "updater.status.unknown" : "updater.status.notavailable");
             } else {
                 UpdaterStatus = ThemeManager.GetString("updater.status.unknown");
             }
