@@ -3,15 +3,7 @@
              xmlns:c="clr-namespace:OpenUtau.App.Controls"
              x:Class="OpenUtau.App.Controls.MixerControl"
              x:Name="MixerRoot">
-  <!--
-    混音台（设计规格 Mixer.txt:42 起的 Mixer Area + 691-736 主输出条）。
-    · Mixer Area：内边距 16、通道条间距 8；12×96 + 160 + 12×8 = 1408 ⇒ 横向必然滚动；
-    · 主输出条固定在滚动区之外（沿用上一轮的 E5 决定：主推子不随轨道滚走）；
-    · 效果器链保留原来的固定列、调宽、折叠与持久化；宿主内增加留白、圆角、细描边与阴影。
-      通道区、主输出和效果器链仍按原顺序排列，卡片不覆盖其它区域。
-    · 工具行（＋轨道 / 轨道数 / 链面板折叠键）设计稿里没有，属既有功能入口（spec-digest §7.3 C-6），
-      压成一行 28 高；颜色全部走 md3.* 角色键。
-  -->
+  <!-- 通道区与主输出占用全部宽度；效果器通过工具栏或通道 FX 进入共享底栏。 -->
   <UserControl.Styles>
     <!-- 链面板折叠键（宿主侧 chevron，W19）：范式抄 W16 的 Button.panelToggle，但那份样式在
          MainWindow.axaml 里（分离窗下不生效），所以这里自带一份；MinHeight/Margin 显式压掉，
@@ -50,23 +42,13 @@
                 BorderThickness="0"/>
         <TextBlock Grid.Column="2" Name="StatusText" FontSize="{DynamicResource Md3TypeLabelTiny}" VerticalAlignment="Center"
                    Foreground="{DynamicResource md3.on-surface-variant}"/>
-        <Button Grid.Column="3" Name="ChainToggleBtn" Theme="{StaticResource DawButtonTheme}" Classes="chainToggle" Margin="8,0,0,0"
-                Click="OnToggleChainPanel" ToolTip.Tip="{DynamicResource panel.collapse.fxchain}"
-                DataContext="{Binding #MixerRoot.ChainPanel}">
-          <Panel>
-            <c:DawIcon Data="{StaticResource icon-chevron-right}" Width="12" Height="12"
-                  IsVisible="{Binding !IsCollapsed}"
-                  Fill="{DynamicResource md3.on-surface-variant}"/>
-            <c:DawIcon Data="{StaticResource icon-chevron-left}" Width="12" Height="12"
-                  IsVisible="{Binding IsCollapsed}"
-                  Fill="{DynamicResource md3.on-surface-variant}"/>
-          </Panel>
-        </Button>
+        <Button Grid.Column="3" Name="ChainToggleBtn" Theme="{StaticResource DawTextButtonTheme}" Margin="12,0,0,0" Height="28" MinHeight="28" Click="OnToggleChainPanel" Content="{DynamicResource rack.open}"/>
+
       </Grid>
     </Border>
 
     <!-- Mixer Area（42：内边距 16 / 间距 8 / 横向排列） -->
-    <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto,Auto" Name="MixerBody">
+    <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Name="MixerBody">
       <Border Grid.Column="0" Name="ChannelViewport" Margin="0,16,0,16">
         <ScrollViewer Grid.Column="0" Name="StripsScroll"
                       HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
@@ -84,53 +66,6 @@
                        Height="{Binding #MasterScroll.Viewport.Height}"/>
       </ScrollViewer>
 
-      <!-- W19 面板系统的分隔条（W16 配方）：
-           · PanelColumn=3 ⇒ 计算固定占用时排除链面板自己那列（否则窄窗下一拖就吸附到 Min）；
-           · Invert=True ⇒ 面板在分隔条右侧（向右拖 = 变窄）；
-           · Target=意图值（两向绑定，供持久化）；容器绑 PanelWidth/PanelShown（夹紧后的有效值）；
-           · IsVisible 绑"未折叠"：用户折叠 ⇒ 本控件隐藏 ⇒ PanelShown=false、列宽 0（不留夹缝）。
-           双击 = 复位默认宽；拖动中只改内存，拖完由 DragCompleted 落盘。 -->
-      <c:PanelSplitter Grid.Column="2" x:Name="FxChainSplitter"
-                       DataContext="{Binding #MixerRoot.ChainPanel}"
-                       IsVisible="{Binding !IsCollapsed}"
-                       PanelColumn="3" Invert="True"
-                       Min="264" Max="480" DefaultWidth="280" CenterMin="320"
-                       Target="{Binding Width, Mode=TwoWay}"
-                       DragCompleted="OnChainPanelDragCompleted"
-                       ToolTip.Tip="{DynamicResource panel.drag.hint}"/>
-
-      <!-- 列宽仍取原分隔条的有效宽；卡片留白在槽内，不改变整体布局。 -->
-      <Border Grid.Column="3" Name="FxCardSlot"
-              Width="{Binding #FxChainSplitter.PanelWidth}"
-              IsVisible="{Binding #FxChainSplitter.PanelShown}">
-        <Border Name="FxCard" Margin="8,16,16,16"
-                CornerRadius="{DynamicResource Md3ShapeLarge}" BorderThickness="1"
-                BorderBrush="{DynamicResource md3.outline-variant}"
-                Background="{DynamicResource md3.surface-container}"
-                BoxShadow="{DynamicResource Md3ElevationLevel2}">
-          <Border CornerRadius="15" ClipToBounds="True">
-            <!-- 复用原效果链控件和全部交互。 -->
-            <ContentControl Name="FxChainHost" IsVisible="{Binding #FxChainSplitter.PanelShown}"/>
-          </Border>
-        </Border>
-      </Border>
-
-      <!-- ── 折叠处「快捷展开」边缘标签（W44 ② / 设计稿 §8）：链面板在分隔条**右侧** ⇒
-           标签贴这条边界、`AnchorRight=True`（贴右缘、向左展开进混音区），14×48 → 悬停/聚焦 92×48。
-           ⚠ **必须声明在混音区之后**（本块就是最后一个子元素）：z 序 = 声明顺序，通道条滚动区不透明
-           ⇒ 声明在它前面会被整块盖住：既看不见也命中不到（W44 主树那次的 FAIL 根因）。
-           无背景 Panel ⇒ 自身不吃点击；不参与列测量 ⇒ 零布局占用，`PanelSplitter` 五值一行未改。 ── -->
-      <Panel Grid.Column="0" ZIndex="10" IsHitTestVisible="True">
-        <c:PanelRevealTab x:Name="ChainRevealTab"
-                          HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8"
-                          IsVisible="{Binding #MixerRoot.ChainPanel.IsCollapsed}"
-                          AnchorRight="True"
-                          GlyphData="{StaticResource icon-equalizer}"
-                          PanelLabel="{DynamicResource panel.collapse.fxchain}"
-                          Hint="{DynamicResource panel.collapse.fxchain}"
-                          HintSuffix="{DynamicResource panel.expand.hint}"
-                          ExpandRequested="OnRevealChainPanel"/>
-      </Panel>
     </Grid>
   </Grid>
 </UserControl>

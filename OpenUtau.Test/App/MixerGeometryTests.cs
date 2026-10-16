@@ -508,38 +508,15 @@ namespace OpenUtau.Test.App {
         // ── 混音台外壳 + 冻结接口（§1.1）─────────────────────
 
         [AvaloniaFact]
-        public void MixerControl_ExposesFrozenChainHost() {
-            // W24：全局派发字段走**作用域版**（Dispose 恢复；旧式 RunOnCurrentThread 已弃用）。
-            // `nullChannel: true` = 不安装投递通道（本类命令都在测试线程内联执行，不需要通道；
-            //   装了通道会在与并行 collection 的作用域重叠时把别人的投递吞掉）；
-            // `installScheduler: false` = 不动 mainScheduler（它是产品路径 RenderEngine/PhonemizerRunner
-            //   读的 TaskScheduler，改了会把并行 Audio 用例的后台装配推到线程池）。
+        public void MixerControl_ExposesRackEntryAndKeepsMasterOutsideScrolling() {
             using var dispatcher = DocManagerTestSetup.EnterScopedDispatcher(nullChannel: true, installScheduler: false);
             var mixer = new MixerControl();
             try {
-                // §1.1-1（W19 起）：链宿主仍是 ContentControl「FxChainHost」，
-                // 宽度改由面板系统的 `PanelWidth` 驱动（意图值默认 280，与冻结接口一致）；
-                // 原来的固定 1px 分隔线由 `FxChainSplitter` 顶替（视觉仍 1px outline-variant + 7px 命中区）。
-                Assert.NotNull(mixer.FxChainHost);
-                // §1.1-1（W19 起）：冻结接口的 280 现在是面板系统的**默认宽**（可拖宽/折叠并持久化），
-                // 有效宽取决于持久化意图 ⇒ 这里锁"设计三值"，避免依赖用户配置状态。
-                Assert.Equal(280, mixer.ChainPanel.DefaultWidth);
-                Assert.Equal(264, mixer.ChainPanel.MinWidth);
-                Assert.Equal(480, mixer.ChainPanel.MaxWidth);
-                Assert.NotNull(mixer.FxChainSplitter);
-                Assert.Equal(3, mixer.FxChainSplitter.PanelColumn);
-                // 链宿主与分隔条都在**横向滚动区之外**（设计稿 13 条恰好填满 1440，链面板只能占滚动区外）
-                Assert.Empty(mixer.StripsScroll.GetLogicalDescendants()
-                    .Where(d => ReferenceEquals(d, mixer.FxChainHost)));
-                Assert.Empty(mixer.StripsScroll.GetLogicalDescendants()
-                    .Where(d => ReferenceEquals(d, mixer.FxChainSplitter)));
-                // 主输出条固定在滚动区之外（E5）
-                Assert.Empty(mixer.StripsScroll.GetLogicalDescendants()
-                    .Where(d => ReferenceEquals(d, mixer.MasterStripControl)));
+                Assert.Empty(mixer.GetVisualDescendants().OfType<FxChainPanel>());
+                Assert.Empty(mixer.StripsScroll.GetLogicalDescendants().Where(d => ReferenceEquals(d, mixer.MasterStripControl)));
                 Assert.Equal(MasterWidth, mixer.MasterStripControl.Width);
-            } finally {
-                mixer.Shutdown();
-            }
+                Assert.NotNull(mixer.ChainToggleBtn);
+            } finally { mixer.Shutdown(); }
         }
 
         [AvaloniaFact]
@@ -593,27 +570,16 @@ namespace OpenUtau.Test.App {
         /// </summary>
         [AvaloniaFact]
         public void MixerControl_LayoutSizesMatchSpec() {
-            // W24：全局派发字段走**作用域版**（Dispose 恢复；旧式 RunOnCurrentThread 已弃用）。
-            // `nullChannel: true` = 不安装投递通道（本类命令都在测试线程内联执行，不需要通道；
-            //   装了通道会在与并行 collection 的作用域重叠时把别人的投递吞掉）；
-            // `installScheduler: false` = 不动 mainScheduler（它是产品路径 RenderEngine/PhonemizerRunner
-            //   读的 TaskScheduler，改了会把并行 Audio 用例的后台装配推到线程池）。
             using var dispatcher = DocManagerTestSetup.EnterScopedDispatcher(nullChannel: true, installScheduler: false);
             var mixer = new MixerControl();
             try {
                 InWindow(mixer, 1400, 800, () => {
-                    Assert.Equal(28, mixer.AddTrackBtn.MinHeight);
-                    Assert.Equal(new Thickness(0), mixer.AddTrackBtn.Margin);
                     Assert.Equal(28, mixer.AddTrackBtn.Bounds.Height);
-                    // W19：链宿主宽由面板系统的有效宽驱动（默认 280）；分隔条命中区 7px、视觉轨 1px
-                    Assert.Equal(MixerMetrics.FxChainHostWidth, mixer.FxChainHost.Bounds.Width);
-                    Assert.Equal(7, mixer.FxChainSplitter.Bounds.Width);
-                    Assert.Equal(1, mixer.FxChainSplitter.GetLogicalDescendants().OfType<Border>()
-                        .Single(b => b.Classes.Contains("panelSplitterTrack")).Bounds.Width);
+                    Assert.Equal(28, mixer.ChainToggleBtn.Bounds.Height);
+                    var body = mixer.GetVisualDescendants().OfType<Grid>().Single(g => g.Name == "MixerBody");
+                    Assert.Equal(2, body.ColumnDefinitions.Count);
                 });
-            } finally {
-                mixer.Shutdown();
-            }
+            } finally { mixer.Shutdown(); }
         }
 
         // ── 选中轨道（冻结接口 §1.1-2）───────────────────────
@@ -852,247 +818,15 @@ namespace OpenUtau.Test.App {
     /// C 组（拖宽/折叠/重启三张真机截图）不在此文件内。
     /// </summary>
     [Collection("Theme")]
-    public class MixerChainPanelTests : IDisposable {
-        const double Default = 280;   // 面板设计默认宽（与冻结接口一致）
-        const double Min = 264;
-        const double Max = 480;
-        const double CenterMin = 320;
-        const double SplitterHit = 7; // PanelSplitter 命中区
-
-        // W24：全局派发字段作用域化（构造保存、Dispose 恢复；参数理由见 MixerControl_* 用例里的注释）
-        readonly DocManagerTestSetup.ScopedDispatcher dispatcher;
-
-        public MixerChainPanelTests() {
-            dispatcher = DocManagerTestSetup.EnterScopedDispatcher(nullChannel: true, installScheduler: false);
-        }
-
-        public void Dispose() => dispatcher.Dispose();
-
-        /// <summary>起一个真窗口 + 真布局的混音台，跑完 body 后关窗 + Shutdown（body 里改完状态记得 Settle）。</summary>
-        static void WithMixer(double width, double height, Action<MixerControl, Window> body) {
+    public class MixerChainPanelTests {
+        [AvaloniaFact]
+        public void MixerUsesTheSharedRackEntryWithoutASecondChainPanel() {
+            using var dispatcher = DocManagerTestSetup.EnterScopedDispatcher(nullChannel: true, installScheduler: false);
             var mixer = new MixerControl();
             try {
-                MixerGeometryTests.InWindow(mixer, width, height, window => body(mixer, window));
-            } finally {
-                mixer.Shutdown();
-            }
-        }
-
-        /// <summary>临时改持久化字段（不动磁盘），跑完原样恢复。</summary>
-        static void WithPrefs(double width, bool collapsed, Action body) {
-            var prefs = Preferences.Default.PanelLayout;
-            double oldWidth = prefs.MixerChainWidth;
-            bool oldCollapsed = prefs.MixerChainCollapsed;
-            prefs.MixerChainWidth = width;
-            prefs.MixerChainCollapsed = collapsed;
-            try {
-                body();
-            } finally {
-                prefs.MixerChainWidth = oldWidth;
-                prefs.MixerChainCollapsed = oldCollapsed;
-            }
-        }
-
-        // ── A 组：属性/契约层 ────────────────────────────────
-
-        /// <summary>A1：分隔条六值 + 意图值默认宽（与被替换掉的冻结接口 280 一致）。
-        /// 依赖持久化默认值 ⇒ 用 WithPrefs 隔离用户配置。</summary>
-        [AvaloniaFact]
-        public void A1_SplitterParameters_MatchDesign() {
-            WithPrefs(Default, false, () => WithMixer(1400, 800, (mixer, window) => {
-                var s = mixer.FxChainSplitter;
-                Assert.Equal(Min, s.Min);
-                Assert.Equal(Max, s.Max);
-                Assert.Equal(Default, s.DefaultWidth);
-                Assert.Equal(CenterMin, s.CenterMin);
-                Assert.True(s.Invert, "面板在分隔条右侧 ⇒ Invert=true");
-                Assert.Equal(3, s.PanelColumn);          // 必填：排除自身列（吸附缺陷的修复口径）
-                Assert.Equal(Default, mixer.ChainPanel.Width);
-                Assert.Equal(Default, mixer.ChainPanel.DefaultWidth);
-            }));
-        }
-
-        /// <summary>A2：R17 —— 链宿主与分隔条都在横向滚动区之外（既有断言沿用，见 MixerControl_ExposesFrozenChainHost）。
-        /// 这里补一条"结构性"断言：分隔条的父 Grid 就是 Mixer Area，而不是滚动容器内部。</summary>
-        [AvaloniaFact]
-        public void A2_Splitter_LivesOutsideTheScrollArea() {
-            WithMixer(1400, 800, (mixer, window) => {
-                Assert.Same(mixer.FxChainHost.Parent, mixer.FxChainSplitter.Parent);
-                Assert.NotSame(mixer.StripsScroll, mixer.FxChainSplitter.Parent);
-                Assert.Empty(mixer.StripsScroll.GetLogicalDescendants()
-                    .Where(d => ReferenceEquals(d, mixer.FxChainSplitter)));
-            });
-        }
-
-        /// <summary>A3：折叠/展开不改写宿主内容实例 ⇒ 拖放、排序、撤销语义零改动。</summary>
-        [AvaloniaFact]
-        public void A3_ChainContentInstance_SurvivesCollapse() {
-            WithMixer(1400, 800, (mixer, window) => {
-                var content = mixer.FxChainHost.Content;
-                Assert.NotNull(content);
-                mixer.ChainPanel.ToggleCollapse();
-                MixerGeometryTests.Settle(window);
-                Assert.Same(content, mixer.FxChainHost.Content);
-                mixer.ChainPanel.ToggleCollapse();
-                MixerGeometryTests.Settle(window);
-                Assert.Same(content, mixer.FxChainHost.Content);
-            });
-        }
-
-        // ── B 组：布局层 Bounds ──────────────────────────────
-
-        /// <summary>B1：默认宽 —— 宿主布局到 280、分隔条命中区 7px、视觉轨 1px。
-        /// （原来那 1px 固定分隔线的视觉被 PanelSplitter 的 track 顶替，配色仍是 outline-variant。）</summary>
-        [AvaloniaFact]
-        public void B1_DefaultWidth_LaysOutTo280() {
-            WithPrefs(Default, false, () => WithMixer(1400, 800, (mixer, window) => {
-                Assert.Equal(Default, mixer.FxChainHost.Bounds.Width, 1);
-                Assert.True(mixer.FxChainSplitter.PanelShown);
-                Assert.Equal(Default, mixer.FxChainSplitter.PanelWidth, 1);
-                Assert.Equal(SplitterHit, mixer.FxChainSplitter.Bounds.Width, 1);
-                var track = mixer.FxChainSplitter.GetLogicalDescendants().OfType<Border>()
-                    .Single(b => b.Classes.Contains("panelSplitterTrack"));
-                Assert.Equal(1, track.Bounds.Width, 1);
-            }));
-        }
-
-        /// <summary>B2：拖拽被 min/max 夹紧（Invert ⇒ 右拖变窄、左拖变宽）。
-        /// 拖动改的是**意图值**（同步写回 PanelSlot），有效宽/宿主 Bounds 由随后的布局收敛。</summary>
-        [AvaloniaFact]
-        public void B2_Drag_ClampsToMinAndMax() {
-            WithMixer(1400, 800, (mixer, window) => {
-                var s = mixer.FxChainSplitter;
-                s.ApplyDragDelta(+10000);
-                MixerGeometryTests.Settle(window);
-                Assert.Equal(Min, mixer.ChainPanel.Width, 1);
-                Assert.Equal(Min, s.Target, 1);
-                Assert.Equal(Min, mixer.FxChainHost.Bounds.Width, 1);
-
-                s.ApplyDragDelta(-10000);
-                MixerGeometryTests.Settle(window);
-                Assert.Equal(Max, mixer.ChainPanel.Width, 1);
-                Assert.Equal(Max, s.Target, 1);
-                Assert.Equal(Max, mixer.FxChainHost.Bounds.Width, 1);
-            });
-        }
-
-        /// <summary>B3：双击分隔条（ResetToDefault）= 回默认宽并落盘。</summary>
-        [AvaloniaFact]
-        public void B3_ResetToDefault_Persists280() {
-            WithPrefs(Default, false, () => WithMixer(1400, 800, (mixer, window) => {
-                var s = mixer.FxChainSplitter;
-                s.ApplyDragDelta(-10000);
-                MixerGeometryTests.Settle(window);
-                Assert.Equal(Max, mixer.ChainPanel.Width, 1);
-
-                s.ResetToDefault();
-                MixerGeometryTests.Settle(window);
-                Assert.Equal(Default, mixer.ChainPanel.Width, 1);
-                Assert.Equal(Default, mixer.FxChainHost.Bounds.Width, 1);
-                Assert.Equal(Default, Preferences.Default.PanelLayout.MixerChainWidth, 1);
-            }));
-        }
-
-        /// <summary>B4：折叠 = 面板与分隔条都不占位、不留夹缝，中央滚动区吃掉释放的宽度
-        /// （释放量按**布局后实际 Bounds** 推导，不用常数）。</summary>
-        [AvaloniaFact]
-        public void B4_Collapse_LeavesNoGap_AndStripsExpand() {
-            WithPrefs(Default, false, () => WithMixer(1400, 800, (mixer, window) => {
-                double stripsBefore = mixer.StripsScroll.Bounds.Width;
-                double reclaimed = mixer.FxChainSplitter.Bounds.Width + mixer.FxChainHost.Bounds.Width;
-
-                mixer.ChainPanel.ToggleCollapse();
-                MixerGeometryTests.Settle(window);
-
-                Assert.False(mixer.FxChainHost.IsVisible);
-                Assert.False(mixer.FxChainSplitter.IsVisible, "折叠后分隔条也必须隐藏（否则留一条 1px 线）");
-                Assert.False(mixer.FxChainSplitter.PanelShown);
-                Assert.Equal(0, mixer.FxChainSplitter.PanelWidth, 1);
-                double stripsAfter = mixer.StripsScroll.Bounds.Width;
-                Assert.True(stripsAfter > stripsBefore, $"折叠应把宽度让给中央区（{stripsBefore} → {stripsAfter}）");
-                Assert.Equal(reclaimed, stripsAfter - stripsBefore, 2);
-
-                mixer.ChainPanel.ToggleCollapse();
-                MixerGeometryTests.Settle(window);
-                Assert.True(mixer.FxChainHost.IsVisible);
-                Assert.Equal(Default, mixer.FxChainHost.Bounds.Width, 1);
-            }));
-        }
-
-        /// <summary>B5：分离窗 720×480 —— 持久化意图 480 被**静默夹紧**（有效宽 ≤ Min），
-        /// 中央滚动区仍 ≥ 250；意图值不丢（回宽窗恢复 480，见 B5b）。</summary>
-        [AvaloniaFact]
-        public void B5_DetachedWindow720_ClampsSilently_AndKeepsStripsUsable() {
-            WithPrefs(Max, false, () => WithMixer(720, 480, (mixer, window) => {
-                var s = mixer.FxChainSplitter;
-                Assert.Equal(Max, mixer.ChainPanel.Width, 1);              // 意图值保持 480
-                Assert.True(s.PanelWidth <= Min + 0.5, $"有效宽应被夹到 ≤Min，实际 {s.PanelWidth}");
-                Assert.True(s.PanelShown, "夹紧后仍 ≥120 ⇒ 保持显示（不折叠）");
-                Assert.True(mixer.StripsScroll.Bounds.Width >= 250,
-                    $"分离窗最窄档中央滚动区应 ≥250，实际 {mixer.StripsScroll.Bounds.Width}");
-            }));
-        }
-
-        /// <summary>B5b：窗口变宽 ⇒ 有效宽回到用户意图（480），不覆盖持久化值。</summary>
-        [AvaloniaFact]
-        public void B5b_WideWindow_RestoresPersistedIntent() {
-            WithPrefs(Max, false, () => WithMixer(1400, 800, (mixer, window) => {
-                Assert.Equal(Max, mixer.ChainPanel.Width, 1);
-                Assert.Equal(Max, mixer.FxChainHost.Bounds.Width, 1);
-                Assert.Equal(Max, Preferences.Default.PanelLayout.MixerChainWidth, 1);
-            }));
-        }
-
-        /// <summary>B6：300 / 400 / 720 三档 —— 不重叠，且"中央区 ≥250 或面板已自动折叠"。</summary>
-        [AvaloniaTheory]
-        [InlineData(300.0, 600.0)]
-        [InlineData(400.0, 360.0)]
-        [InlineData(720.0, 480.0)]
-        public void B6_NarrowWindows_DoNotOverlap_AndKeepCenterOrCollapse(double width, double height) {
-            WithPrefs(Default, false, () => WithMixer(width, height, (mixer, window) => {
-                var s = mixer.FxChainSplitter;
-                Assert.True(mixer.MasterStripControl.Bounds.Right <= s.Bounds.Left + 0.5,
-                    $"{width}×{height}: 主输出条与分隔条重叠");
-                if (s.PanelShown) {
-                    Assert.True(mixer.FxChainHost.Bounds.Left >= s.Bounds.Right - 0.5,
-                        $"{width}×{height}: 链宿主与分隔条重叠");
-                }
-                bool centerOk = mixer.StripsScroll.Bounds.Width >= 250;
-                Assert.True(centerOk || !s.PanelShown,
-                    $"{width}×{height}: 中央区仅 {mixer.StripsScroll.Bounds.Width}px 且面板未折叠");
-            }));
-        }
-
-        /// <summary>B7：持久化往返 —— 折叠键 + 复位落盘后，新实例恢复宽度与折叠态。
-        /// （落盘走真实 Preferences；测试结束把字段恢复原值并再存一次，避免污染用户配置。）</summary>
-        [AvaloniaFact]
-        public void B7_PersistRoundTrip_WriteThenReadFromFreshControl() {
-            var prefs = Preferences.Default.PanelLayout;
-            double oldWidth = prefs.MixerChainWidth;
-            bool oldCollapsed = prefs.MixerChainCollapsed;
-            try {
-                WithMixer(1400, 800, (mixer, window) => {
-                    mixer.FxChainSplitter.ApplyDragDelta(-10000);
-                    MixerGeometryTests.Settle(window);
-                    mixer.FxChainSplitter.ResetToDefault();                       // 复位 + 落盘
-                    MixerGeometryTests.Settle(window);
-                    mixer.ChainToggleBtn.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // 折叠 + 落盘
-                    MixerGeometryTests.Settle(window);
-                });
-                Assert.Equal(Default, prefs.MixerChainWidth, 1);
-                Assert.True(prefs.MixerChainCollapsed);
-
-                WithMixer(1400, 800, (mixer, window) => {
-                    Assert.Equal(Default, mixer.ChainPanel.Width, 1);
-                    Assert.True(mixer.ChainPanel.IsCollapsed);
-                    Assert.False(mixer.FxChainHost.IsVisible);
-                    Assert.Equal(0, mixer.FxChainSplitter.PanelWidth, 1);
-                });
-            } finally {
-                prefs.MixerChainWidth = oldWidth;
-                prefs.MixerChainCollapsed = oldCollapsed;
-                Preferences.Save();
-            }
+                Assert.Empty(mixer.GetLogicalDescendants().OfType<FxChainPanel>());
+                Assert.NotNull(mixer.ChainToggleBtn);
+            } finally { mixer.Shutdown(); }
         }
     }
 }

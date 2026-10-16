@@ -1426,4 +1426,16 @@ Range {2}–{3} s · Tail {4} s
   <system:String x:Key="dawui.gallery.dawcontrols">Knob and fader</system:String>
   <system:String x:Key="dawui.gallery.fader">Fader</system:String>
   <system:String x:Key="dawui.gallery.dawhint">Knob: drag, wheel, Shift fine adjustment and double-click reset. Fader: drag and keyboard; the host owns edit history.</system:String>
+  <system:String x:Key="rack.add">Add effect</system:String>
+  <system:String x:Key="rack.replace">Replace plugin…</system:String>
+  <system:String x:Key="rack.open">Open effects</system:String>
+  <system:String x:Key="rack.signal">SIGNAL FLOW →</system:String>
+  <system:String x:Key="rack.empty">Build this track’s effect chain</system:String>
+  <system:String x:Key="rack.vst.hint">Double-click to open the plugin interface.</system:String>
+  <system:String x:Key="rack.drag">Drag to reorder effects</system:String>
+  <system:String x:Key="rack.left">Move earlier</system:String>
+  <system:String x:Key="rack.right">Move later</system:String>
+  <system:String x:Key="rack.missing">Plugin unavailable · saved state retained</system:String>
+  <system:String x:Key="rack.ready">Ready</system:String>
+  <system:String x:Key="rack.retry">Not loaded · open to retry</system:String>
 </ResourceDictionary>

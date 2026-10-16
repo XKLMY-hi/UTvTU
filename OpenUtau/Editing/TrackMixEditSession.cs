@@ -9,6 +9,7 @@ namespace OpenUtau.App.Editing {
         readonly DocManager doc;
         readonly UProject? project;
         readonly UTrack track;
+        readonly string? effectId;
         bool gesture;
         bool disposed;
         DocumentEditGesture? documentGesture;
@@ -19,7 +20,11 @@ namespace OpenUtau.App.Editing {
             project = doc.Project.tracks.Contains(track) ? doc.Project : null;
         }
 
-        public bool IsCurrent => !disposed && (project == null ||
+        public TrackMixEditSession(UTrack track, string effectId) : this(track) { this.effectId = effectId; }
+
+        public UMixFx? Effects => effectId == null ? track.MixFx : TrackEffectRack.Find(track, effectId)?.Settings;
+
+        public bool IsCurrent => !disposed && (effectId == null || TrackEffectRack.Find(track, effectId) != null) && (project == null ||
             (ReferenceEquals(project, doc.Project) && project.tracks.Contains(track)));
 
         public void BeginGesture() {
@@ -51,7 +56,9 @@ namespace OpenUtau.App.Editing {
         public bool SetSolo(bool solo, bool additionally = false) =>
             track.Solo != solo && Execute(() => TrackMixCommands.Solo(track, solo, additionally));
         public bool SetEffects(UMixFx? effects) =>
-            !ReferenceEquals(track.MixFx, effects) && Execute(() => TrackMixCommands.SetMixFx(track, effects));
+            !ReferenceEquals(Effects, effects) && Execute(() => effectId == null
+                ? TrackMixCommands.SetMixFx(track, effects)
+                : TrackRackCommands.Settings(track, effectId, effects ?? new UMixFx()));
 
         public bool SetMutes(Func<UTrack, bool> value) {
             var tracks = project?.tracks.ToArray() ?? new[] { track };

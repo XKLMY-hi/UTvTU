@@ -1,176 +1,83 @@
 using System;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Xml.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Layout;
-using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using OpenUtau.App.Controls;
 using OpenUtau.App.ViewModels;
+using OpenUtau.Core;
+using OpenUtau.Core.Ustx;
+using OpenUtau.Core.Vst;
 using Xunit;
 
-namespace OpenUtau.Test.App {
-    // One small row: no chain attachment, document commands, VST registry or plugins.
-    [Collection("Theme")]
-    public class FxChainRowPresentationTests {
-        static FxChainRowViewModel Model(FxChainViewModel owner) => new(owner, null, 0) {
-            Order = 1, Name = "Demo FX", BadgeText = "VST3", Detail = "ACME",
-            CanReorder = true, IsPowered = true,
-        };
+namespace OpenUtau.Test.App;
 
-        static Window Mount(Control control) {
-            var window = new Window { Width = 340, Height = 100, Content = control };
-            window.Show();
-            Settle(window);
-            return window;
-        }
-
-        static void Settle(Window window) {
-            Dispatcher.UIThread.RunJobs();
-            window.UpdateLayout();
-        }
-
-        static T Part<T>(Visual root, string name) where T : Visual =>
-            root.GetVisualDescendants().OfType<T>().Single(v => ((INamed)v).Name == name);
-
-        static void Center(Control child, Control parent, Point center) {
-            var actual = child.TranslatePoint(center, parent)!.Value;
-            Assert.Equal(parent.Bounds.Width / 2, actual.X, 3);
-            Assert.Equal(parent.Bounds.Height / 2, actual.Y, 3);
-        }
-
-        static IDisposable RealGeometry() => (IDisposable)typeof(DawPresentationTests)
-            .GetMethod("RealGeometry", BindingFlags.Static | BindingFlags.NonPublic)!.Invoke(null, null)!;
-
-        static Geometry Asset(string key) {
-            XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
-            var document = XDocument.Load(Path.Combine(AppContext.BaseDirectory, "Assets", "Icons.axaml"));
-            return Geometry.Parse(document.Descendants().Single(e => (string?)e.Attribute(x + "Key") == key).Value);
-        }
-
-        [AvaloniaFact]
-        public void NativeIconInk_IsCenteredWithinTheOriginalCompactHitTargets() {
-            // Reuse the scoped geometry-only provider; font/bitmap layout stays headless.
-            using var geometry = RealGeometry();
-            using var owner = new FxChainViewModel();
-            owner.Unsubscribe();
-            var row = new FxChainRow { DataContext = Model(owner) };
-            // App resources may already hold empty headless geometry instances. Parse the
-            // same authoritative paths freshly under the real geometry provider for this probe.
-            row.Grip.Data = Asset("icon-list");
-            row.RemoveIcon.Data = Asset("icon-x");
-            var window = Mount(row);
-            try {
-                Assert.Equal(new Size(20, 20), row.GripBox.Bounds.Size);
-                Assert.Equal(new Size(22, 22), row.RemoveButton.Bounds.Size);
-                foreach (var (icon, target) in new[] { (row.Grip, (Control)row.GripBox), (row.RemoveIcon, (Control)row.RemoveButton) }) {
-                    var ink = icon.RenderedInkBounds;
-                    Assert.True(ink.Width > 0 && ink.Height > 0);
-                    Assert.True(ink.Left >= -0.01 && ink.Top >= -0.01 &&
-                        ink.Right <= icon.Bounds.Width + 0.01 && ink.Bottom <= icon.Bounds.Height + 0.01);
-                    Center(icon, target, ink.Center);
-                    Assert.False(icon.IsHitTestVisible);
-                }
-                Assert.Equal(row.RemoveButton.Foreground, row.RemoveIcon.Fill);
-                Assert.Equal(new CornerRadius(12), row.RowRoot.CornerRadius);
-            } finally { window.Close(); }
-        }
-
-        [AvaloniaFact]
-        public void LabelsKeepTheirTypography_AndLongTitlesStayInsideTheirColumn() {
-            using var owner = new FxChainViewModel();
-            owner.Unsubscribe();
-            var vm = Model(owner);
-            vm.Name = "A long effect name that must fit beside its format badge";
-            var row = new FxChainRow { DataContext = vm };
-            var window = Mount(row);
-            try {
-                Assert.Equal(12, row.NameText.FontSize);
-                Assert.Equal(FontWeight.SemiBold, row.NameText.FontWeight);
-                Assert.Equal(TextTrimming.CharacterEllipsis, row.NameText.TextTrimming);
-                Assert.Equal(9, row.BadgeLabel.FontSize);
-                foreach (var text in new[] { row.NameText, row.BadgeLabel, row.DetailText, row.StateChipText }) {
-                    Assert.Equal(row.FontFamily, text.FontFamily);
-                    Assert.NotNull(text.Foreground);
-                    Assert.False(text.UseLayoutRounding);
-                }
-                var titleGrid = (Grid)row.NameText.Parent!;
-                Assert.True(row.NameText.Bounds.Right <= row.BadgeChip.Bounds.Left + 0.01);
-                Assert.True(row.BadgeChip.Bounds.Right <= titleGrid.Bounds.Width + 0.01);
-                Center(row.BadgeLabel, row.BadgeChip, new Point(row.BadgeLabel.Bounds.Width / 2, row.BadgeLabel.Bounds.Height / 2));
-                vm.IsMuted = true;
-                Settle(window);
-                Assert.True(row.StateChip.IsVisible);
-                Center(row.StateChipText, row.StateChip, new Point(row.StateChipText.Bounds.Width / 2, row.StateChipText.Bounds.Height / 2));
-            } finally { window.Close(); }
-        }
-
-        [AvaloniaFact]
-        public void SwitchKeepsItsPillAndThumbGeometry_WithSharedKeyboardFocusAndDisabledFeedback() {
-            using var owner = new FxChainViewModel();
-            owner.Unsubscribe();
-            var row = new FxChainRow { DataContext = Model(owner) };
-            var window = Mount(row);
-            try {
-                var power = row.PowerToggle;
-                Assert.Equal(new Size(34, 20), power.Bounds.Size);
-                var thumb = Part<Border>(power, "PART_Thumb");
-                Assert.Equal(new Size(14, 14), thumb.Bounds.Size);
-                Assert.Equal(HorizontalAlignment.Right, thumb.HorizontalAlignment);
-                Assert.Equal(power.Foreground, thumb.Background);
-                power.IsChecked = false;
-                Settle(window);
-                Assert.Equal(HorizontalAlignment.Left, thumb.HorizontalAlignment);
-                Assert.Equal(power.Foreground, thumb.Background);
-                power.Focus(NavigationMethod.Tab);
-                Settle(window);
-                Assert.Equal(1, Part<Border>(power, "PART_FocusRing").Opacity);
-                Assert.Equal(new Size(34, 20), power.Bounds.Size);
-                Assert.Equal(0, Part<Border>(power, "PART_StateLayer").Opacity);
-                power.IsEnabled = false;
-                Settle(window);
-                Assert.Equal(0.38, power.Opacity, 3);
-                row.RemoveButton.Focus(NavigationMethod.Tab);
-                Settle(window);
-                Assert.Equal(1, Part<Border>(row.RemoveButton, "PART_FocusRing").Opacity);
-            } finally { window.Close(); }
-        }
-
-        [AvaloniaFact]
-        public void RemountRestoresLiveState_WithoutActivatingAPluginOrWritingTheDocument() {
-            using var owner = new FxChainViewModel();
-            owner.Unsubscribe();
-            var vm = Model(owner);
-            var row = new FxChainRow { DataContext = vm };
-            var host = new Panel { Children = { row } };
-            var window = Mount(host);
-            try {
-                host.Children.Remove(row);
-                vm.Name = "Updated FX";
-                vm.IsPowered = false;
-                Assert.Equal("Demo FX", row.NameText.Text);
-                host.Children.Add(row);
-                Assert.Equal("Updated FX", row.NameText.Text);
-                Assert.False(row.PowerToggle.IsChecked);
-                vm.Name = "Live FX";
-                Assert.Equal("Live FX", row.NameText.Text);
-                int activates = 0;
-                vm.Activated += (_, _) => activates++;
-                row.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.Enter });
-                Assert.Equal(1, activates);
-                row.PowerToggle.IsChecked = true;
-                row.PowerToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                Assert.False(row.PowerToggle.IsChecked); // No owner track: rejected request rolls back.
-                Assert.Equal(1, activates);
-            } finally { window.Close(); }
-        }
+// The old vertical chain row is no longer used by the mixer or workspace.
+[Collection("Theme")]
+public class FxChainRowPresentationTests {
+    static Window Mount(Control content, double width = 650) {
+        var window = new Window { Width = width, Height = 330, Content = content };
+        window.Show(); Dispatcher.UIThread.RunJobs(); window.UpdateLayout(); return window;
+    }
+    static T Part<T>(Visual root, string name) where T : Control => root.GetVisualDescendants().OfType<T>().Single(v => v.Name == name);
+    static UTrack EqTrack() {
+        var track = new UTrack(); TrackRackCommands.Add(track, TrackEffectKind.Eq).Execute(); return track;
+    }
+    [AvaloniaFact]
+    public void NativeSwitchUsesSharedThemeAndItsPowerActionReachesTheModel() {
+        var track = EqTrack(); using var model = new FxChainViewModel(); model.Attach(track);
+        var card = new EffectRackCard { DataContext = model.Rows[0] }; var window = Mount(card);
+        try {
+            var power = Part<ToggleButton>(card, "PowerToggle");
+            var shape = Part<Border>(power, "PART_Track");
+            Assert.Equal(new Size(34, 20), shape.Bounds.Size);
+            Assert.True(power.Focusable); Assert.True(power.IsChecked);
+            power.IsChecked = false; power.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Assert.False(TrackEffectRack.IsPowered(track, TrackEffectRack.Read(track)[0]));
+        } finally { window.Close(); }
+    }
+    [AvaloniaFact]
+    public void LongVstTitlesStayInsideTheCardAndRemainAvailableInTheTooltip() {
+        var track = new UTrack { VstSlots = new() { new VstPluginSlot(0) { PluginUid = new string('Q', 160) } } };
+        using var model = new FxChainViewModel(); model.Attach(track);
+        var card = new EffectRackCard { DataContext = model.Rows[0] }; var window = Mount(card);
+        try {
+            var label = Part<TextBlock>(card, "NameText");
+            Assert.True(label.Bounds.Width < card.Bounds.Width);
+            Assert.Equal(Avalonia.Media.TextTrimming.CharacterEllipsis, label.TextTrimming);
+            Assert.Equal(track.VstSlots[0].PluginUid, ToolTip.GetTip(label));
+            Assert.Empty(card.GetVisualDescendants().OfType<Knob>());
+        } finally { window.Close(); }
+    }
+    [AvaloniaFact]
+    public void KeyboardReorderKeepsTheSelectedInstanceIdentity() {
+        var track = EqTrack(); TrackRackCommands.Add(track, TrackEffectKind.Compressor).Execute();
+        using var panel = new FxChainPanel { Track = track }; var window = Mount(panel);
+        try {
+            var card = panel.GetVisualDescendants().OfType<EffectRackCard>().First(); string id = panel.ViewModel.Rows[0].EffectId;
+            card.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.Right, KeyModifiers = KeyModifiers.Alt });
+            Assert.Equal(id, track.EffectRack![1].Id);
+        } finally { window.Close(); }
+    }
+    [AvaloniaFact]
+    public void RemountDisposesTheOldEditorAndCreatesAViewOfTheCurrentState() {
+        var track = EqTrack(); using var model = new FxChainViewModel(); model.Attach(track);
+        var card = new EffectRackCard { DataContext = model.Rows[0] }; var parent = new StackPanel(); parent.Children.Add(card);
+        var window = Mount(parent);
+        try {
+            var old = card.GetVisualDescendants().OfType<BuiltInEffectView>().Single().ViewModel;
+            parent.Children.Remove(card);
+            var next = track.EffectRack![0].Settings!.Clone(); next.EqHighDb = 8;
+            TrackRackCommands.Settings(track, track.EffectRack[0].Id, next).Execute();
+            old.EqHighDb = 11; Assert.Equal(8, track.EffectRack[0].Settings!.EqHighDb);
+            parent.Children.Add(card); Dispatcher.UIThread.RunJobs(); window.UpdateLayout();
+            var current = card.GetVisualDescendants().OfType<BuiltInEffectView>().Single().ViewModel;
+            Assert.NotSame(old, current); Assert.Equal(8, current.EqHighDb);
+        } finally { window.Close(); }
     }
 }

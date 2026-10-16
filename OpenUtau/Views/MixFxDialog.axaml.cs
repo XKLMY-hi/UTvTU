@@ -74,17 +74,7 @@ namespace OpenUtau.App.Views {
 
         /// <summary>打开 <paramref name="track"/> 的机架；已开着就把它抬到最前。</summary>
         public static void Open(Window? owner, UTrack track) {
-            if (open.TryGetValue(track, out var existing)) {
-                existing.Activate();
-                return;
-            }
-            var dialog = new MixFxDialog(track);
-            open[track] = dialog;
-            if (owner != null) {
-                dialog.Show(owner);
-            } else {
-                dialog.Show();
-            }
+            TrackEffectRack.Open(owner, track);
         }
 
         protected void OnDialogClosed(object? sender, EventArgs e) {

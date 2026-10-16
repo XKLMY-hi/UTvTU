@@ -167,4 +167,29 @@ public class UnifiedEffectRackTests {
             } finally { manager.RemoveTrack(track.TrackNo); manager.Bridge = previous; }
         });
     }
+
+    [Fact]
+    public void ReplacingVstDoesNotRestoreAnotherPluginsBytesAndUndoKeepsEachState() {
+        VstTestSetup.RunExclusive(() => {
+            const string first = "test:rack-state-a", second = "test:rack-state-b";
+            VstTestSetup.Register(VstTestSetup.MakeEntry(first)); VstTestSetup.Register(VstTestSetup.MakeEntry(second));
+            var manager = VstPluginManager.Inst; var previous = manager.Bridge;
+            var restored = new System.Collections.Concurrent.ConcurrentQueue<byte[]>();
+            var bridge = new FakeVstBridge { StateCallback = () => new byte[] { 42 }, RestoreCallback = data => restored.Enqueue(data.ToArray()) };
+            manager.Bridge = bridge;
+            var track = new UTrack { TrackNo = VstTestSetup.NextTrackNo(), VstSlots = new() { new(0) { PluginUid = first, StateData = new byte[] { 3 } } } };
+            void Wait(string uid) => Assert.True(System.Threading.SpinWait.SpinUntil(() => manager.GetEffect(track.TrackNo, 0)?.Entry?.Uid == uid, 3000));
+            try {
+                Assert.NotNull(manager.LoadEffect(track.TrackNo, track.VstSlots[0]));
+                var replace = TrackRackCommands.AssignVst(track, 0, second); replace.Execute(); Wait(second);
+                Assert.Single(restored); Assert.Equal(new byte[] { 3 }, restored.Last());
+                Assert.Null(track.VstSlots[0].StateData);
+                bridge.StateCallback = () => new byte[] { 91 };
+                replace.Unexecute(); Wait(first);
+                Assert.Equal(new byte[] { 42 }, restored.Last());
+                replace.Execute(); Wait(second);
+                Assert.Equal(new byte[] { 91 }, restored.Last());
+            } finally { manager.RemoveTrack(track.TrackNo); manager.Bridge = previous; }
+        });
+    }
 }

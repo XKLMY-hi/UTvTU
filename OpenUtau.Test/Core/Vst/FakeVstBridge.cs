@@ -13,6 +13,7 @@ namespace OpenUtau.Core.Vst {
         public Action? LoadCallback { get; set; }
         public Func<bool>? EditorCallback { get; set; }
         public Func<byte[]?>? StateCallback { get; set; }
+        public Action<byte[]>? RestoreCallback { get; set; }
         public Func<string?>? ErrorCallback { get; set; }
         public Action? ActivateCallback { get; set; }
 
@@ -40,7 +41,7 @@ namespace OpenUtau.Core.Vst {
         public bool OpenEditorWindow(IntPtr handle) => EditorCallback?.Invoke() ?? false;
         public void CloseEditor(IntPtr handle) { }
         public byte[]? SaveState(IntPtr handle) => StateCallback == null ? new byte[] { 1, 2, 3 } : StateCallback();
-        public bool RestoreState(IntPtr handle, byte[] data) => true;
+        public bool RestoreState(IntPtr handle, byte[] data) { RestoreCallback?.Invoke(data); return true; }
         public string? Probe(string path) => null;
 
         private int _nextHandle;

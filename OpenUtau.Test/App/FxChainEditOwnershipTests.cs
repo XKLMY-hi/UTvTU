@@ -45,13 +45,13 @@ namespace OpenUtau.Test.App {
         [AvaloniaFact]
         public void BuiltInPower_IsOneUndoAndRedoWithoutAnOpenGroup() {
             model.Rows[0].RequestPower(false);
-            Assert.False(A.MixFx!.EqEnabled);
+            Assert.False(TrackEffectRack.IsPowered(A, TrackEffectRack.Read(A)[0]));
             Assert.Null(DocManager.Inst.ActiveUndoGroup);
             DocManager.Inst.Undo();
             Assert.True(A.MixFx.EqEnabled);
             Assert.False(DocManager.Inst.GetUndoState(out _));
             DocManager.Inst.Redo();
-            Assert.False(A.MixFx.EqEnabled);
+            Assert.False(TrackEffectRack.IsPowered(A, TrackEffectRack.Read(A)[0]));
             Assert.False(model.Rows[0].IsPowered);
         }
 
@@ -123,7 +123,7 @@ namespace OpenUtau.Test.App {
             var target = model.CaptureTarget()!;
             model.Attach(B);
             Assert.True(model.AddBuiltIn(target, MixFxModule.Compressor));
-            Assert.True(A.MixFx!.CompEnabled);
+            Assert.Contains(TrackEffectRack.Read(A), e => e.Kind == TrackEffectKind.Compressor && TrackEffectRack.IsPowered(A, e));
             Assert.False(B.MixFx!.CompEnabled);
             DocManager.Inst.Undo();
             Assert.False(A.MixFx.CompEnabled);
@@ -175,7 +175,7 @@ namespace OpenUtau.Test.App {
             Assert.Equal(3, model.Rows.Count);
             Assert.False(model.Rows[0].IsPowered);
             model.Rows[0].RequestPower(true);
-            Assert.True(A.MixFx.EqEnabled);
+            Assert.True(TrackEffectRack.IsPowered(A, TrackEffectRack.Read(A)[0]));
             Assert.Null(DocManager.Inst.ActiveUndoGroup);
         }
 
@@ -227,7 +227,7 @@ namespace OpenUtau.Test.App {
             DocManager.Inst.StartUndoGroup();
             var foreign = DocManager.Inst.ActiveUndoGroup;
             model.Rows[0].RequestPower(false);
-            Assert.False(preview.MixFx.EqEnabled);
+            Assert.False(TrackEffectRack.IsPowered(preview, TrackEffectRack.Read(preview)[0]));
             Assert.Same(foreign, DocManager.Inst.ActiveUndoGroup);
             Assert.Empty(foreign!.Commands);
             Assert.True(A.MixFx!.EqEnabled);

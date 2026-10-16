@@ -15,7 +15,7 @@ using ReactiveUI;
 namespace OpenUtau.App.Controls;
 
 /// <summary>
-/// 混音台主体：通道条行（横向滚动）+ 固定主输出条 + 右侧效果链宿主槽。
+/// 混音台主体：通道条行（横向滚动）与固定主输出条；效果编辑经入口进入共享底栏。
 ///
 /// 生命周期（本轮修）：电平定时器**随挂载与可见性启停**——旧实现构造即启动、只有
 /// <see cref="Shutdown"/> 才停，而 Shutdown 仅由分离窗关闭触发 ⇒ 视图隐藏后仍 30fps 轮询。
@@ -35,10 +35,10 @@ public partial class MixerControl : UserControl
     private IDisposable? _selectionSubscription;
     private IDisposable? _visibilitySubscription;
     /// <summary>右侧效果链面板（宿主装配见构造器；生命周期随本控件，无需窗口侧管理）。</summary>
-    private readonly FxChainPanel chainPanel;
+
 
     /// <summary>
-    /// W19：右侧效果链面板的宽/折叠状态（W16 面板系统 <see cref="PanelSlot"/>）。
+    /// 旧扩展兼容属性：原右侧效果链面板的宽/折叠状态（现界面不再使用）（W16 面板系统 <see cref="PanelSlot"/>）。
     /// XAML 里 `#MixerRoot.ChainPanel` 把它喂给 `FxChainSplitter`（Target 两向绑定 = 用户意图）
     /// 与折叠键的图标；面板容器的 `Width`/`IsVisible` 取分隔条的 `PanelWidth`/`PanelShown`（夹紧后的有效值）。
     /// 状态落 <c>Preferences.Default.PanelLayout.MixerChainWidth/MixerChainCollapsed</c>（不新增平行存储）。
@@ -58,12 +58,6 @@ public partial class MixerControl : UserControl
         // 选中轨道 → 通道条选中态（右侧链面板消费 ViewModel.SelectedTrack，见冻结接口 §1.1-2）
         _selectionSubscription = ViewModel.WhenAnyValue(x => x.SelectedTrack)
             .Subscribe(_ => SyncStripSelection());
-
-        // 右侧效果链面板接线（冻结接口 §1.1；控件由 W3 提供，此处只做宿主装配）：
-        // 面板消费 MixerViewModel.SelectedTrack，不反向写；未选轨时显示空态。
-        chainPanel = new FxChainPanel();
-        chainPanel.BindSelection(ViewModel.WhenAnyValue(x => x.SelectedTrack));
-        FxChainHost.Content = chainPanel;
 
         // Forward space to main window
         KeyDown += (_, e) =>
@@ -119,8 +113,8 @@ public partial class MixerControl : UserControl
 
     /// <summary>折叠键（工具行 chevron；折叠后仍常驻 ⇒ 一定能展开回来）。</summary>
     private void OnToggleChainPanel(object? sender, Avalonia.Interactivity.RoutedEventArgs e) {
-        ChainPanel.ToggleCollapse();
-        PersistChainPanelLayout();
+        var track = ViewModel.SelectedTrack;
+        if (track != null) ViewModel.OpenMixFxCommand.Execute(track).Subscribe();
     }
 
     /// <summary>把槽状态写回 Preferences 并落盘（与 W16 同一份存储，不新增字段之外的东西）。</summary>
@@ -259,8 +253,7 @@ public partial class MixerControl : UserControl
             }
         }
         TrackStripsPanel.Children.Clear();
-        chainPanel.Shutdown();
-        FxChainHost.Content = null;
+
         ViewModel.Dispose();
     }
 

@@ -184,7 +184,6 @@ namespace OpenUtau.Test.App {
                 Dispatcher.UIThread.RunJobs();
                 mixer.RebuildStrips(); mixer.ViewModel.AddTrack();
                 Assert.Empty(mixer.TrackStripsPanel.Children);
-                Assert.Null(mixer.FxChainHost.Content);
                 Assert.False(mixer.LevelTimerRunning);
                 Assert.Equal(2, project.tracks.Count);
             } finally { mixer.Shutdown(); }
@@ -192,7 +191,10 @@ namespace OpenUtau.Test.App {
 
         [AvaloniaFact]
         public void WorkspaceDocumentCommandsWorkWithoutAWindowAndRejectInvalidSelections() {
+            // This light fixture does not initialize PlaybackManager/audio devices.
+            using var seekConsumer = new SeekConsumer();
             var project = Load();
+            ((UVoicePart)project.parts[0]).notes.Add(project.CreateNote(60, 0, 1920));
             using var vm = new MainWindowViewModel();
             // Like the production shell, the hosted VM receives a load notification after creation.
             Doc.ExecuteCmd(new LoadProjectNotification(project));
@@ -239,6 +241,15 @@ namespace OpenUtau.Test.App {
             Assert.Null(Doc.ActiveUndoGroup);
             Assert.True(Doc.ChangesSaved);
             Assert.Equal(2, next.tracks.Count);
+        }
+
+        sealed class SeekConsumer : ICmdSubscriber, IDisposable {
+            public SeekConsumer() => DocManager.Inst.AddSubscriber(this);
+            public void OnNext(UCommand command, bool undo) {
+                if (command is SeekPlayPosTickNotification seek)
+                    DocManager.Inst.ExecuteCmd(new SetPlayPosTickNotification(seek.playPosTick));
+            }
+            public void Dispose() => DocManager.Inst.RemoveSubscriber(this);
         }
 
         sealed class PublicationAction : ICmdSubscriber, IDisposable {

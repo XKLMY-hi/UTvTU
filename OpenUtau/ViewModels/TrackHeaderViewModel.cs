@@ -1,4 +1,5 @@
 using System;
+using TrackEffectRack = OpenUtau.Core.Ustx.TrackEffectRack;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -153,7 +154,7 @@ namespace OpenUtau.App.ViewModels {
             Mute = track.Mute;
             Muted = track.Muted;
             Solo = track.Solo;
-            MixFxEnabled = track.MixFx?.Enabled ?? false;
+            MixFxEnabled = track.EffectRack == null ? track.MixFx?.Enabled ?? false : TrackEffectRack.Read(track).Any(e => TrackEffectRack.IsPowered(track, e));
             this.WhenAnyValue(x => x.Volume)
                 .Skip(1)
                 .Subscribe(volume => {
@@ -211,7 +212,7 @@ namespace OpenUtau.App.ViewModels {
                 .Subscribe(_ => this.RaisePropertyChanged(nameof(ShowOverflow))).DisposeWith(subscriptions);
             this.WhenAnyValue(x => x.MixFxEnabled)
                 .Subscribe(enabled => {
-                    if (_syncing || (track.MixFx?.Enabled ?? false) == enabled) return;
+                    if (_syncing || track.EffectRack != null || (track.MixFx?.Enabled ?? false) == enabled) return;
                     var fx = track.MixFx?.Clone() ?? new UMixFx();
                     fx.Enabled = enabled;
                     if (mixEdits.SetEffects(fx)) MessageBus.Current.SendMessage(new MixFxChangedNotification(track.TrackNo));
@@ -555,7 +556,7 @@ namespace OpenUtau.App.ViewModels {
             this.RaisePropertyChanged(nameof(Mute));
             this.RaisePropertyChanged(nameof(Muted));
             this.RaisePropertyChanged(nameof(Solo));
-            MixFxEnabled = track.MixFx?.Enabled ?? false;
+            MixFxEnabled = track.EffectRack == null ? track.MixFx?.Enabled ?? false : TrackEffectRack.Read(track).Any(e => TrackEffectRack.IsPowered(track, e));
             this.RaisePropertyChanged(nameof(MixFxEnabled));
             this.RaisePropertyChanged(nameof(Volume));
             this.RaisePropertyChanged(nameof(Pan));
@@ -578,7 +579,7 @@ namespace OpenUtau.App.ViewModels {
                 Mute = track.Mute;
                 Muted = track.Muted;
                 Solo = track.Solo;
-                MixFxEnabled = track.MixFx?.Enabled ?? false;
+                MixFxEnabled = track.EffectRack == null ? track.MixFx?.Enabled ?? false : TrackEffectRack.Read(track).Any(e => TrackEffectRack.IsPowered(track, e));
             } finally {
                 _syncing = false;
             }

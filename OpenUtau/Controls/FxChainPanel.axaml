@@ -1,86 +1,23 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:OpenUtau.App.Controls" x:Class="OpenUtau.App.Controls.FxChainPanel" DragDrop.AllowDrop="True">
-  <!-- 效果器链保留原选择绑定及添加、拖入逻辑，仅调整标题、轨道名和效果行的视觉层级。 -->
-  <UserControl.Styles>
-    <Style Selector="TextBlock.chainHeader">
-      <Setter Property="FontSize" Value="{DynamicResource Md3TypeBodyMedium}"/>
-      <Setter Property="FontWeight" Value="Medium"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
-      <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface}"/>
-    </Style>
-    <Style Selector="Button.addButton">
-      <Setter Property="MinHeight" Value="36"/>
-      <Setter Property="Margin" Value="0"/>
-      <Setter Property="Width" Value="36"/>
-      <Setter Property="Height" Value="36"/>
-      <Setter Property="Padding" Value="0"/>
-      <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
-      <Setter Property="FontSize" Value="{DynamicResource Md3TypeTitleMedium}"/>
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource md3.outline-variant}"/>
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
-      <Setter Property="HorizontalContentAlignment" Value="Center"/>
-      <Setter Property="VerticalContentAlignment" Value="Center"/>
-    </Style>
-    <Style Selector="Button.addButton:pointerover">
-      <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
-      <Setter Property="Foreground" Value="{DynamicResource md3.primary}"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
-    </Style>
-    <Style Selector="TextBlock.chainHint">
-      <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelSmall}"/>
-      <Setter Property="LineHeight" Value="16"/>
-      <Setter Property="TextWrapping" Value="Wrap"/>
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
-    </Style>
-    <Style Selector="Border.chainRoot.dragover">
-      <Setter Property="BorderBrush" Value="{DynamicResource md3.primary}"/>
-    </Style>
-    <Style Selector="TextBlock.chainHeader">
-      <Setter Property="FontSize" Value="13"/>
-    </Style>
-    <Style Selector="Button.addButton">
-      <Setter Property="Width" Value="28"/>
-      <Setter Property="Height" Value="28"/>
-      <Setter Property="MinHeight" Value="28"/>
-      <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
-      <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
-      <Setter Property="BorderThickness" Value="0"/>
-    </Style>
-  </UserControl.Styles>
-  <Border Name="ChainRoot" Classes="chainRoot" BorderThickness="1" BorderBrush="Transparent" Background="Transparent">
-    <Grid RowDefinitions="Auto,*">
-      <Grid RowDefinitions="Auto,Auto" RowSpacing="12" Margin="14,16,14,14" Grid.Row="0">
-        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-          <c:DawIcon Width="16" Height="16" Data="{StaticResource icon-equalizer}" Fill="{DynamicResource md3.primary}" VerticalAlignment="Center"/>
-          <TextBlock Text="{DynamicResource mixer.effects.title}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource md3.on-surface}" Grid.Column="1"/>
-        </Grid>
-        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0">
-          <TextBlock Name="HeaderName" Classes="chainHeader" Text="{Binding HeaderText}"/>
-          <Button Name="AddButton" Grid.Column="1" Classes="addButton" Theme="{StaticResource DawButtonTheme}" Click="OnAddClick" ToolTip.Tip="{DynamicResource fxchain.add.tip}">
-            <c:DawIcon Data="{StaticResource icon-plus}" Width="16" Height="16" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
-          </Button>
-        </Grid>
+  <Border Name="ChainRoot" Background="{DynamicResource md3.surface-container-lowest}" Padding="12,8,12,10" ClipToBounds="True">
+    <Grid RowDefinitions="Auto,*" RowSpacing="8">
+      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+        <TextBlock Text="{DynamicResource rack.signal}" VerticalAlignment="Center" FontSize="{DynamicResource Md3TypeLabelSmall}" Foreground="{DynamicResource md3.on-surface-variant}"/>
+        <TextBlock Name="HeaderName" Grid.Column="1" Text="{Binding HeaderText}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource md3.on-surface}"/>
+        <Button Name="AddButton" Grid.Column="2" Theme="{StaticResource DawButtonTheme}" Content="{DynamicResource rack.add}" Click="OnAddClick" IsEnabled="{Binding HasTrack}" Height="30" MinHeight="30" Margin="0" Padding="12,0"/>
       </Grid>
-      <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Margin="12,0,12,14" Spacing="6">
+      <Grid Grid.Row="1">
+        <ScrollViewer Name="RackScroll" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
           <ItemsControl Name="RowList" ItemsSource="{Binding Rows}">
-            <ItemsControl.ItemsPanel>
-              <ItemsPanelTemplate>
-                <StackPanel Spacing="8"/>
-              </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <c:FxChainRow/>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
+            <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="12"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate><DataTemplate><c:EffectRackCard Height="{Binding #RackScroll.Viewport.Height}"/></DataTemplate></ItemsControl.ItemTemplate>
           </ItemsControl>
-          <TextBlock Name="EmptyHint" Classes="chainHint" Margin="2,16" Text="{DynamicResource fxchain.empty}" IsVisible="{Binding ShowEmptyHint}" FontSize="12"/>
-          <TextBlock Name="NoTrackHint" Classes="chainHint" Margin="2,6" Text="{DynamicResource fxchain.notrack}" IsVisible="{Binding !HasTrack}"/>
+        </ScrollViewer>
+        <StackPanel IsVisible="{Binding ShowEmptyHint}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8" IsHitTestVisible="False">
+          <TextBlock Text="{DynamicResource rack.empty}" FontSize="{DynamicResource Md3TypeTitleMedium}" Foreground="{DynamicResource md3.on-surface}" HorizontalAlignment="Center"/>
+          <TextBlock Text="{DynamicResource fxchain.empty}" Foreground="{DynamicResource md3.on-surface-variant}" HorizontalAlignment="Center"/>
         </StackPanel>
-      </ScrollViewer>
+      </Grid>
     </Grid>
   </Border>
 </UserControl>

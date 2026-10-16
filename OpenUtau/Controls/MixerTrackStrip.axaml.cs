@@ -212,6 +212,7 @@ namespace OpenUtau.App.Controls {
                 return;
             }
             _vm.Refresh();
+            EffectsButton.Content = $"FX · {TrackEffectRack.Read(track).Count}";
             TrackNameLabel.Text = _vm.TrackName;
             var accent = _vm.TrackColor;
             AccentBar.Background = accent;
@@ -226,6 +227,13 @@ namespace OpenUtau.App.Controls {
 
         /// <summary>EQ 曲线屏跟随轨道 MixFx（内置效果编辑器是实时写模型的，故由电平定时器定期刷新）。</summary>
         public void RefreshEq() => UpdateFxCurve();
+
+        void OnOpenEffects(object? sender, RoutedEventArgs e) {
+            if (track == null) return;
+            Selected?.Invoke(this, EventArgs.Empty);
+            var owner = TopLevel.GetTopLevel(this) as Window;
+            Views.TrackEffectRack.Open(owner, track);
+        }
 
         private void UpdateFxCurve() {
             if (track == null || _vm == null) {

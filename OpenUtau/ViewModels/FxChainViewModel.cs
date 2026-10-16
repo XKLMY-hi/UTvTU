@@ -16,9 +16,9 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace OpenUtau.App.ViewModels {
-    /// <summary>链行的来源类别（内置伪插件 / VST 槽）。</summary>
+    /// <summary>链行的来源类别（内置效果器 / VST 槽）。</summary>
     public enum FxChainItemKind {
-        /// <summary>内置伪插件（EQ / 压缩 / 混响）。</summary>
+        /// <summary>内置效果器（EQ / 压缩 / 混响）。</summary>
         BuiltIn,
         /// <summary>VST / VST3 槽位。</summary>
         Vst,
@@ -31,7 +31,7 @@ namespace OpenUtau.App.ViewModels {
     /// 模块枚举用 Core 的 <see cref="MixFxModule"/>（命令层同一类型，避免第二套枚举）。
     /// </summary>
     public sealed class FxBuiltInDescriptor {
-        /// <summary>模块（顺序即 DSP 链顺序：EQ → 压缩 → 混响）。</summary>
+        /// <summary>模块类型（此表顺序仅用于添加菜单和旧工程迁移）。</summary>
         public MixFxModule Module { get; init; }
         /// <summary>稳定 id（拖拽负载用）：eq / comp / rev。</summary>
         public string Id { get; init; } = string.Empty;
@@ -49,7 +49,7 @@ namespace OpenUtau.App.ViewModels {
 
     /// <summary>链的**静态描述表**：内置三件套 + VST 格式徽标映射（W1/W4 共用）。</summary>
     public static class FxChainCatalog {
-        /// <summary>内置三件套（固定序，与 DSP 链一致）。</summary>
+        /// <summary>可添加的内置类型；实际实例顺序来自轨道 EffectRack。</summary>
         public static readonly IReadOnlyList<FxBuiltInDescriptor> BuiltIns = new[] {
             new FxBuiltInDescriptor {
                 Module = MixFxModule.Eq, Id = "eq", NameKey = "mixfx.eq",
@@ -178,7 +178,7 @@ namespace OpenUtau.App.ViewModels {
     }
 
     /// <summary>
-    /// 链上的一行（内置伪插件与 VST 槽**同一等级**的投影，B2/B4）。
+    /// 链上的一行（内置效果器与 VST 槽**同一等级**的投影，B2/B4）。
     /// 行只读模型 + 发命令；不持有窗口，也不直接改 <c>MixerViewModel</c>。
     /// </summary>
     public sealed class FxChainRowViewModel : ViewModelBase {
@@ -221,11 +221,15 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public bool IsPowered { get; set; }
         /// <summary>不过声（旁通 / 模块关 / 链路总电源关）⇒ 名称转 on-surface-variant + 状态角标。</summary>
         [Reactive] public bool IsMuted { get; set; }
-        /// <summary>可重排（仅 VST 段内；内置段是固定 DSP 顺序 ⇒ 把手为禁用态）。</summary>
+        /// <summary>所有类型按统一效果链顺序重排。</summary>
         [Reactive] public bool CanReorder { get; set; }
 
-        /// <summary>可移除（VST 槽；内置模块恒在链上，无删除语义 —— 见报告）。</summary>
-        public bool CanRemove => Kind == FxChainItemKind.Vst;
+        /// <summary>每个独立实例均可移除。</summary>
+        public bool CanRemove => true;
+        public string EffectId { get; internal set; } = string.Empty;
+        public UTrack? OwnerTrack => Target?.Track;
+        public bool IsBuiltIn => Kind == FxChainItemKind.BuiltIn;
+        [Reactive] public string Status { get; set; } = string.Empty;
         /// <summary>行强调色角色（画布只取色池）。</summary>
         public Md3Role Accent => BuiltIn?.Accent ?? Md3Role.Primary;
 
@@ -250,6 +254,7 @@ namespace OpenUtau.App.ViewModels {
 
         /// <summary>双击 / Enter 的落点。</summary>
         public void Activate() => Activated?.Invoke(this, this);
+        public void RequestReplacement() => owner.BrowseReplacement(this);
 
         /// <summary>调试/测试用的一行摘要。</summary>
         public override string ToString() =>
@@ -452,54 +457,43 @@ namespace OpenUtau.App.ViewModels {
                 track = null;
                 project = null;
             }
-            foreach (var row in Rows) {
-                row.Activated -= OnRowActivated;
-            }
-            Rows.Clear();
-
             HasTrack = track != null;
             HeaderText = track?.TrackName ?? string.Empty;
-
-            var fx = track?.MixFx;
-            IsBuiltInMuted = fx != null && !fx.Enabled;
-
+            IsBuiltInMuted = false;
+            var entries = track == null ? Array.Empty<UTrackEffect>() : TrackEffectRack.Read(track);
+            var desired = new List<FxChainRowViewModel>();
             int order = 0;
-            if (fx != null) {
-                foreach (var descriptor in FxChainCatalog.BuiltIns) {
-                    var builtIn = descriptor;
-                    var row = new FxChainRowViewModel(this, builtIn, -1) {
-                        Order = ++order,
-                        NameKey = builtIn.NameKey,
-                        Detail = builtIn.GetPreset(fx) ?? string.Empty,
-                        BadgeIsBuiltIn = true,
-                        IsPowered = builtIn.GetEnabled(fx),
-                    };
-                    row.IsMuted = IsBuiltInMuted || !row.IsPowered;
-                    Rows.Add(Wire(row));
+            foreach (var entry in entries) {
+                var builtIn = entry.Kind == TrackEffectKind.Vst ? null : FxChainCatalog.Descriptor((MixFxModule)entry.Kind);
+                var row = Rows.FirstOrDefault(r => r.EffectId == entry.Id && r.Target?.IsCurrent == true && ReferenceEquals(r.OwnerTrack, track))
+                    ?? Wire(new FxChainRowViewModel(this, builtIn, entry.VstSlot) { EffectId = entry.Id });
+                row.Order = ++order;
+                row.NameKey = builtIn?.NameKey ?? string.Empty;
+                row.BadgeIsBuiltIn = builtIn != null;
+                row.IsPowered = TrackEffectRack.IsPowered(track!, entry);
+                row.IsMuted = !row.IsPowered;
+                row.CanReorder = entries.Count > 1;
+                if (builtIn != null) {
+                    row.Detail = builtIn.GetPreset(entry.Settings ?? new UMixFx());
+                } else {
+                    var slot = track!.VstSlots[entry.VstSlot];
+                    row.Name = slot.DisplayName;
+                    row.Detail = slot.PluginVendor;
+                    row.BadgeText = FxChainCatalog.VstBadge(slot);
+                    row.Status = slot.Entry == null ? ThemeManager.GetString("rack.missing")
+                        : VstPluginManager.Inst.GetEffect(track.TrackNo, entry.VstSlot)?.IsLoaded == true
+                            ? ThemeManager.GetString("rack.ready") : ThemeManager.GetString("rack.retry");
                 }
+                desired.Add(row);
             }
-
-            var slots = track?.VstSlots;
-            if (slots != null) {
-                foreach (var slot in slots.Where(s => s.IsLoaded).OrderBy(s => s.SlotIndex)) {
-                    var row = new FxChainRowViewModel(this, null, slot.SlotIndex) {
-                        Order = ++order,
-                        Name = slot.DisplayName,
-                        Detail = slot.PluginVendor,
-                        BadgeText = FxChainCatalog.VstBadge(slot),
-                        BadgeIsBuiltIn = false,
-                        IsPowered = !slot.Bypassed,
-                    };
-                    row.IsMuted = slot.Bypassed;
-                    Rows.Add(Wire(row));
-                }
+            foreach (var obsolete in Rows.Except(desired).ToArray()) {
+                obsolete.Activated -= OnRowActivated;
+                Rows.Remove(obsolete);
             }
-
-            int vstRows = Rows.Count(r => r.Kind == FxChainItemKind.Vst);
-            foreach (var row in Rows) {
-                row.CanReorder = row.Kind == FxChainItemKind.Vst && vstRows > 1;
+            for (int i = 0; i < desired.Count; i++) {
+                int at = Rows.IndexOf(desired[i]);
+                if (at < 0) Rows.Insert(i, desired[i]); else if (at != i) Rows.Move(at, i);
             }
-
             IsEmpty = Rows.Count == 0;
             ShowEmptyHint = HasTrack && IsEmpty;
         }
@@ -533,32 +527,19 @@ namespace OpenUtau.App.ViewModels {
             }
             var target = row.Target!;
             var track = target.Track;
-            UCommand? cmd = null;
-            if (row.Kind == FxChainItemKind.BuiltIn && row.Module.HasValue) {
-                if (track.MixFx == null) {
-                    return;   // 内置段不存在（Rebuild 不会产出这种行）
-                }
-                if (TrackMixCommands.IsModuleEnabled(track.MixFx, row.Module.Value) == powered) return;
-                cmd = TrackMixCommands.SetMixFxModule(track, row.Module.Value, powered);
-            } else if (row.Kind == FxChainItemKind.Vst) {
-                if (track.VstSlots[row.SlotIndex].Bypassed == !powered) return;
-                // 既有命令：槽位旁通（数据级，下次渲染快照生效；不必重载实例）
-                cmd = TrackMixCommands.ToggleVstBypass(track, row.SlotIndex);
-            }
-            if (cmd == null) {
-                return;
-            }
-            target.Execute(cmd);
+            var entry = TrackEffectRack.Read(track).FirstOrDefault(e => e.Id == row.EffectId);
+            if (entry == null || TrackEffectRack.IsPowered(track, entry) == powered) return;
+            target.Execute(TrackRackCommands.Power(track, row.EffectId, powered));
             Rebuild();
         }
 
-        /// <summary>移除一行（仅 VST 槽；内置模块无删除语义 —— 见报告）。</summary>
+        /// <summary>移除一个效果器实例，保留可撤销的参数状态。</summary>
         public void RemoveRow(FxChainRowViewModel row) {
-            if (!CanUseRow(row) || !row.Target!.CanExecute || row.Kind != FxChainItemKind.Vst) {
+            if (!CanUseRow(row) || !row.Target!.CanExecute) {
                 return;
             }
             var target = row.Target!;
-            target.Execute(TrackMixCommands.RemoveVstSlot(target.Track, row.SlotIndex));
+            target.Execute(TrackRackCommands.Remove(target.Track, row.EffectId));
             Rebuild();
         }
 
@@ -568,42 +549,13 @@ namespace OpenUtau.App.ViewModels {
         /// 多步移动包在一个 UndoGroup 里 ⇒ Ctrl+Z 一次回到原位。
         /// </summary>
         public void MoveRow(FxChainRowViewModel row, int delta) {
-            if (!CanUseRow(row) || !row.Target!.CanExecute || delta == 0 || row.Kind != FxChainItemKind.Vst) {
-                return;
-            }
-            var target = CaptureTarget()!;
-            var track = target.Track;
-            if (track.VstSlots == null) {
-                return;
-            }
-            var order = Rows.Where(r => r.Kind == FxChainItemKind.Vst)
-                .Select(r => r.SlotIndex).OrderBy(i => i).ToList();
-            int at = order.IndexOf(row.SlotIndex);
-            if (at < 0) {
-                return;
-            }
-            int step = Math.Sign(delta);
-            int remaining = delta;
-            int index = at;
-            using (var gesture = target.CreateGesture()) {
-                while (remaining != 0) {
-                    int next = index + step;
-                    if (next < 0 || next >= order.Count) {
-                        break;   // 到 VST 段边界即停
-                    }
-                    if (!target.Execute(TrackMixCommands.ReorderVstSlot(track, order[index], order[next]), gesture)) break;
-                    // 被移动的插件载荷现在落在 next 位置
-                    index = next;
-                    remaining -= step;
-                }
-            }
+            if (!CanUseRow(row) || !row.Target!.CanExecute || delta == 0) return;
+            int at = Rows.IndexOf(row);
+            if (Math.Clamp(at + delta, 0, Rows.Count - 1) == at) return;
+            row.Target.Execute(TrackRackCommands.Move(row.Target.Track, row.EffectId, delta));
             Rebuild();
         }
 
-        /// <summary>
-        /// 「＋」：把内置模块加入链（B2 —— 内置与 VST 同一等级，可被"加入"）。
-        /// <c>MixFx == null</c> 时创建之（撤销回到 null）；已存在则打开该模块电源。
-        /// </summary>
         public void AddBuiltIn(MixFxModule module) {
             var target = CaptureTarget();
             if (target != null) AddBuiltIn(target, module);
@@ -611,32 +563,20 @@ namespace OpenUtau.App.ViewModels {
 
         internal bool AddBuiltIn(EditTarget target, MixFxModule module) {
             if (!target.CanExecute) return false;
-            var track = target.Track;
-            var before = track.MixFx;
-            if (before == null) {
-                // 先按描述表把三路开关摆好（只有被点的那个开），再把整条链挂上去；
-                // 撤销 = 摘回 null（不留空 UMixFx）
-                var created = new UMixFx { Enabled = true };
-                foreach (var d in FxChainCatalog.BuiltIns) {
-                    TrackMixCommands.SetModuleEnabled(created, d.Module, d.Module == module);
-                }
-                bool changed = target.Execute(TrackMixCommands.SetMixFx(track, created));
-                Rebuild();
-                return changed;
-            }
-            if (FxChainCatalog.Descriptor(module).GetEnabled(before)) {
-                return true;   // 已在链上
-            }
-            bool applied = target.Execute(TrackMixCommands.SetMixFxModule(track, module, true));
+            bool changed = target.Execute(TrackRackCommands.Add(target.Track, (TrackEffectKind)module));
             Rebuild();
-            return applied;
+            return changed;
         }
-
 
         /// <summary>「＋」：浏览插件并加载到第一个空槽（无空槽则追加）。</summary>
         public void BrowseVst() {
             var target = CaptureTarget();
             if (target != null) BrowseVst(target);
+        }
+
+        internal void BrowseReplacement(FxChainRowViewModel row) {
+            if (!CanUseRow(row) || !row.Target!.CanExecute || row.Kind != FxChainItemKind.Vst) return;
+            Launcher?.BrowsePlugin(row.Target.Track, row.SlotIndex);
         }
 
         internal void BrowseVst(EditTarget target) {
@@ -658,7 +598,7 @@ namespace OpenUtau.App.ViewModels {
             var slots = target.Track.VstSlots;
             if (slotIndex > (slots?.Count ?? 0)) return false;
             if (slots != null && slotIndex < slots.Count && slots[slotIndex].PluginUid == pluginUid.Trim()) return true;
-            bool applied = target.Execute(TrackMixCommands.SetVstPlugin(target.Track, slotIndex, pluginUid.Trim()));
+            bool applied = target.Execute(TrackRackCommands.AssignVst(target.Track, slotIndex, pluginUid.Trim()));
             Rebuild();
             return applied;
         }
@@ -712,6 +652,7 @@ namespace OpenUtau.App.ViewModels {
             }
             // 2) 效果链相关命令被撤销 / 重做（含全局 Ctrl+Z）→ 重建，
             //    否则界面停留在旧状态（开关 / 名称 / 行序与实际不符）
+            if (cmd is TrackMixChangedNotification mix && track != null && mix.Tracks.Contains(track)) { Rebuild(); return; }
             string desc = cmd.ToString() ?? string.Empty;
             if (desc.Contains("VST", StringComparison.Ordinal) || desc.Contains("MixFx", StringComparison.Ordinal)) {
                 Rebuild();

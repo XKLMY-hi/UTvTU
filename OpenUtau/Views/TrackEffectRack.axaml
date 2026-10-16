@@ -1,16 +1,3 @@
-<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:controls="clr-namespace:OpenUtau.App.Controls"
-        x:Class="OpenUtau.App.Views.TrackEffectRack"
-        Title="{DynamicResource effects.title}" Focusable="True">
-  <!-- ═══════════════════════════════════════════════════════════════════════
-       单轨效果链的**分离窗**（原 495 行 VST 槽机架已并入 FxChainPanel）
-       ───────────────────────────────────────────────────────────────────────
-       保留理由（并入而非删除）：
-        1) 混音台通道条的 FX 入口 `Controls/MixerTrackStrip.axaml.cs` 直接 new 本窗口
-           （W1 s 范围的文件）——保留类型与构造函数 = 跨线零编译风险；
-        2) 不切到混音台视图也能看/改某条轨的链（分离窗与面板同一个控件，不存在第二套实现）。
-       内容 = FxChainPanel（同一个控件、同一套命令、同一套编辑器派发）。
-       ═══════════════════════════════════════════════════════════════════════ -->
+<controls:WorkspaceToolView xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="using:OpenUtau.App.Controls" x:Class="OpenUtau.App.Views.TrackEffectRack" Title="{DynamicResource effects.title}" Focusable="True">
   <controls:FxChainPanel Name="Panel"/>
 </controls:WorkspaceToolView>

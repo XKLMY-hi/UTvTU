@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Windows.Input;
 using OpenUtau.App.Editing;
 using Avalonia.Media;
@@ -81,12 +82,13 @@ namespace OpenUtau.App.ViewModels {
         }
 
         // EQ 曲线屏取值：没有 MixFx 时按平坦响应（0dB）画，绝不显示虚构的曲线。
-        public double EqLowDb => _track.MixFx?.EqLowDb ?? 0;
-        public double EqMidFreq => _track.MixFx?.EqMidFreq ?? 1000;
-        public double EqMidDb => _track.MixFx?.EqMidDb ?? 0;
-        public double EqHighDb => _track.MixFx?.EqHighDb ?? 0;
+        UMixFx? FirstEq => _track.EffectRack == null ? _track.MixFx : _track.EffectRack.FirstOrDefault(e => e.Kind == TrackEffectKind.Eq)?.Settings;
+        public double EqLowDb => FirstEq?.EqLowDb ?? 0;
+        public double EqMidFreq => FirstEq?.EqMidFreq ?? 1000;
+        public double EqMidDb => FirstEq?.EqMidDb ?? 0;
+        public double EqHighDb => FirstEq?.EqHighDb ?? 0;
 
         /// <summary>EQ 是否真的在链上生效（整机架开 + EQ 模块开）——决定曲线屏是否降透明度。</summary>
-        public bool EqActive => _track.MixFx?.Enabled == true && _track.MixFx.EqEnabled;
+        public bool EqActive => FirstEq?.Enabled == true && FirstEq.EqEnabled;
     }
 }

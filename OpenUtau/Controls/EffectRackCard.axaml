@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:OpenUtau.App.Controls" x:Class="OpenUtau.App.Controls.EffectRackCard" Focusable="True">
+  <UserControl.Styles>
+    <Style Selector="Button.rackAction">
+      <Setter Property="Theme" Value="{StaticResource DawTextButtonTheme}"/>
+      <Setter Property="MinWidth" Value="28"/><Setter Property="Height" Value="28"/><Setter Property="MinHeight" Value="28"/>
+      <Setter Property="Margin" Value="0"/><Setter Property="Padding" Value="6,0"/>
+    </Style>
+  </UserControl.Styles>
+  <Border Name="CardRoot" CornerRadius="{DynamicResource Md3ShapeMedium}" BorderThickness="1" BorderBrush="{DynamicResource md3.outline-variant}" Background="{DynamicResource md3.surface-container}" ClipToBounds="True">
+    <Grid RowDefinitions="Auto,*,Auto">
+      <Border Name="Grip" Padding="12,10" Background="{DynamicResource md3.surface-container-high}" Cursor="SizeAll" PointerPressed="OnGripPressed" PointerMoved="OnGripMoved" PointerReleased="OnGripReleased" PointerCaptureLost="OnGripLost" ToolTip.Tip="{DynamicResource rack.drag}">
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+          <ToggleButton Name="PowerToggle" Theme="{StaticResource DawCompactSwitchTheme}" IsChecked="{Binding IsPowered, Mode=OneWay}" Click="OnPower" VerticalAlignment="Center" ToolTip.Tip="{DynamicResource mixfx.rack.module.tip}"/>
+          <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+            <TextBlock Name="NameText" FontSize="{DynamicResource Md3TypeTitleSmall}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource md3.on-surface}"/>
+            <TextBlock Name="KindText" FontSize="{DynamicResource Md3TypeLabelTiny}" Foreground="{DynamicResource md3.on-surface-variant}"/>
+          </StackPanel>
+          <TextBlock Grid.Column="2" Text="{Binding Order}" VerticalAlignment="Center" FontFamily="{DynamicResource PlusFontFamilyMono}" Foreground="{DynamicResource md3.on-surface-variant}" FontSize="11"/>
+        </Grid>
+      </Border>
+      <ContentControl Name="EditorHost" Grid.Row="1" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" ClipToBounds="True"/>
+      <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,*,Auto" Margin="8,6" ColumnSpacing="4">
+        <Button Classes="rackAction" Command="{Binding MoveUpCommand}" IsEnabled="{Binding CanReorder}" AutomationProperties.Name="{DynamicResource rack.left}" ToolTip.Tip="{DynamicResource rack.left}"><c:DawIcon Data="{StaticResource icon-chevron-left}" Width="14" Height="14" Fill="{DynamicResource md3.on-surface-variant}"/></Button>
+        <Button Grid.Column="1" Classes="rackAction" Command="{Binding MoveDownCommand}" IsEnabled="{Binding CanReorder}" AutomationProperties.Name="{DynamicResource rack.right}" ToolTip.Tip="{DynamicResource rack.right}"><c:DawIcon Data="{StaticResource icon-chevron-right}" Width="14" Height="14" Fill="{DynamicResource md3.on-surface-variant}"/></Button>
+        <Button Grid.Column="3" Classes="rackAction" Command="{Binding RemoveCommand}" ToolTip.Tip="{DynamicResource fxchain.remove.tip}" Content="{DynamicResource fxchain.remove.tip}"/>
+      </Grid>
+    </Grid>
+  </Border>
+</UserControl>

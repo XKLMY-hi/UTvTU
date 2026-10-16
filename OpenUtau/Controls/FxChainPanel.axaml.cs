@@ -18,7 +18,7 @@ using Serilog;
 
 namespace OpenUtau.App.Controls {
     /// <summary>
-    /// 效果链面板（B2/B3/B4/B5/B7）——混音台右侧的链管理面板，**可独立实例化并 headless 测试**：
+    /// 统一横向效果器机架——主编辑器与混音台共用的底部编辑界面，**可独立实例化并 headless 测试**：
     /// 不依赖真实窗口、不依赖音频设备（编辑器派发走可注入的 <see cref="IFxChainEditorLauncher"/>）。
     ///
     /// 数据流（冻结契约 §1.1）：

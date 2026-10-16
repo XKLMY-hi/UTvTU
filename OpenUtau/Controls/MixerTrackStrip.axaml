@@ -80,7 +80,7 @@
           <Button Grid.Column="0" Name="MuteBtn" Classes="mixerBtn" Height="28" MinHeight="28" CornerRadius="8" FontSize="{DynamicResource Md3TypeLabelTiny}" FontWeight="Bold" Click="OnMuteClick" Content="{DynamicResource mixer.mute}"/>
           <Button Grid.Column="1" Name="SoloBtn" Classes="mixerBtn" Height="28" MinHeight="28" CornerRadius="8" FontSize="{DynamicResource Md3TypeLabelTiny}" FontWeight="Bold" Click="OnSoloClick" Content="{DynamicResource mixer.solo}"/>
         </Grid>
-        <Border Grid.Row="5" Name="ChannelSpacer"/>
+        <Button Grid.Row="5" Name="EffectsButton" Theme="{StaticResource DawTextButtonTheme}" Click="OnOpenEffects" MinHeight="24" Height="24" Margin="0" Padding="4,0" FontSize="10" Content="FX" ToolTip.Tip="{DynamicResource rack.open}"/>
       </Grid>
       <Border Name="FaderWell" CornerRadius="12" Padding="4,12" Background="{DynamicResource md3.surface-container-lowest}" MinHeight="140" Grid.Row="1">
         <c:DawFader Name="FaderBox" Width="88" FocusBrush="{DynamicResource md3.primary}" AutomationProperties.Name="{DynamicResource controls.volume}" ToolTip.Tip="{DynamicResource controls.fader.tip}" HorizontalAlignment="Center" VerticalAlignment="Stretch">

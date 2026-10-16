@@ -103,9 +103,11 @@ namespace OpenUtau.App.ViewModels {
 
         public MixFxViewModel() : this(null) { }
 
-        public MixFxViewModel(UTrack? track) {
+        public MixFxViewModel(UTrack? track) : this(track, null) { }
+
+        public MixFxViewModel(UTrack? track, string? effectId) {
             this.track = track!;
-            Edits = track == null ? null : new TrackMixEditSession(track);
+            Edits = track == null ? null : effectId == null ? new TrackMixEditSession(track) : new TrackMixEditSession(track, effectId);
             TrackName = track?.TrackName ?? "Preview";
 
             EqPresets = FxPresets.EqPresetNames
@@ -128,11 +130,11 @@ namespace OpenUtau.App.ViewModels {
             }
 
             // Seed dialog state from track's existing FX, or sensible defaults.
-            original = track?.MixFx;
-            var fx = track?.MixFx ?? new UMixFx();
+            original = Edits?.Effects;
+            var fx = Edits?.Effects ?? new UMixFx();
             suspendBindings = true;
             try {
-                Enabled = track?.MixFx?.Enabled ?? false;
+                Enabled = fx.Enabled;
                 EqEnabled = fx.EqEnabled;
                 CompEnabled = fx.CompEnabled;
                 ReverbEnabled = fx.ReverbEnabled;
@@ -374,7 +376,7 @@ namespace OpenUtau.App.ViewModels {
 
         void RefreshFromTrack() {
             if (disposed || track == null) return;
-            var fx = track.MixFx ?? new UMixFx();
+            var fx = Edits?.Effects ?? new UMixFx();
             suspendBindings = true;
             try {
                 Enabled = fx.Enabled;

@@ -1554,4 +1554,16 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="dawui.gallery.dawcontrols">旋钮与推子</system:String>
   <system:String x:Key="dawui.gallery.fader">推子</system:String>
   <system:String x:Key="dawui.gallery.dawhint">旋钮支持拖动、滚轮、Shift 微调与双击复位；推子支持拖动与键盘。编辑历史由宿主维护。</system:String>
+  <system:String x:Key="rack.add">添加效果器</system:String>
+  <system:String x:Key="rack.replace">替换插件…</system:String>
+  <system:String x:Key="rack.open">打开效果器</system:String>
+  <system:String x:Key="rack.signal">信号流向 →</system:String>
+  <system:String x:Key="rack.empty">为这条轨道添加效果器</system:String>
+  <system:String x:Key="rack.vst.hint">双击卡片，打开插件原生界面</system:String>
+  <system:String x:Key="rack.drag">拖动调整处理顺序</system:String>
+  <system:String x:Key="rack.left">向前移动</system:String>
+  <system:String x:Key="rack.right">向后移动</system:String>
+  <system:String x:Key="rack.missing">插件不可用 · 已保留存档状态</system:String>
+  <system:String x:Key="rack.ready">已就绪</system:String>
+  <system:String x:Key="rack.retry">尚未加载 · 打开以重试</system:String>
 </ResourceDictionary>
