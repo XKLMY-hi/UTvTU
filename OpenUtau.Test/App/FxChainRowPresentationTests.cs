@@ -54,6 +54,34 @@ public class FxChainRowPresentationTests {
             Assert.Empty(card.GetVisualDescendants().OfType<Knob>());
         } finally { window.Close(); }
     }
+    [AvaloniaTheory]
+    [InlineData(false, 220)]
+    [InlineData(false, 330)]
+    [InlineData(true, 220)]
+    [InlineData(true, 330)]
+    public void FooterKeepsVectorMoveIconsAndRemovalInsideBothCardWidths(bool vst, int height) {
+        var track = vst ? new UTrack { VstSlots = new() { new VstPluginSlot(0) { PluginUid = "rack:footer:missing" } } } : EqTrack();
+        using var model = new FxChainViewModel(); model.Attach(track);
+        var card = new EffectRackCard { DataContext = model.Rows[0], Height = height };
+        var window = Mount(card);
+        try {
+            foreach (string name in new[] { "MoveLeftButton", "MoveRightButton" }) {
+                var button = Part<Button>(card, name);
+                var icon = Assert.Single(button.GetVisualDescendants().OfType<DawIcon>());
+                Assert.NotNull(icon.Data); Assert.NotNull(icon.Fill);
+                Assert.Equal(new Size(14, 14), icon.Bounds.Size);
+                Assert.Equal(28, button.Bounds.Width);
+                Assert.DoesNotContain(button.GetVisualDescendants().OfType<TextBlock>(),
+                    text => text.Text?.Contains(nameof(DawIcon)) == true);
+            }
+            var remove = Part<Button>(card, "RemoveButton");
+            var position = remove.TranslatePoint(default, card)!.Value;
+            Assert.True(remove.IsEffectivelyVisible); Assert.True(remove.IsEffectivelyEnabled);
+            Assert.True(remove.Bounds.Width > 28);
+            Assert.InRange(position.X, 0, card.Bounds.Width - remove.Bounds.Width);
+            Assert.InRange(position.Y, 0, card.Bounds.Height - remove.Bounds.Height);
+        } finally { window.Close(); }
+    }
     [AvaloniaFact]
     public void KeyboardReorderKeepsTheSelectedInstanceIdentity() {
         var track = EqTrack(); TrackRackCommands.Add(track, TrackEffectKind.Compressor).Execute();

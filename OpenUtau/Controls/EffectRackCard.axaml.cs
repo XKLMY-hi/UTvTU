@@ -35,21 +35,25 @@ public partial class EffectRackCard : UserControl {
         if (row != null) row.PropertyChanged -= OnRowChanged;
         editor?.Dispose(); editor = null;
         row = DataContext as FxChainRowViewModel;
-        if (row == null) { EditorHost.Content = null; return; }
         ContextFlyout = null;
+        if (row == null) { EditorHost.Content = null; return; }
         row.PropertyChanged += OnRowChanged;
         Width = row.IsBuiltIn ? 306 : 224;
+        var original = row;
+        var menu = new MenuFlyout();
+        if (!row.IsBuiltIn) {
+            var replace = new MenuItem { Header = ThemeManager.GetString("rack.replace") };
+            replace.Click += (_, _) => original.RequestReplacement();
+            menu.Items.Add(replace);
+        }
+        var remove = new MenuItem { Header = ThemeManager.GetString("fxchain.remove.tip") };
+        remove.Click += (_, _) => original.RemoveCommand.Execute(null);
+        menu.Items.Add(remove);
+        ContextFlyout = menu;
         if (row.IsBuiltIn && row.OwnerTrack != null) {
             editor = new BuiltInEffectView(row.OwnerTrack, row.EffectId, (TrackEffectKind)row.Module!.Value);
             EditorHost.Content = editor;
         } else {
-            var original = row;
-            var menu = new MenuFlyout();
-            var replace = new MenuItem { Header = ThemeManager.GetString("rack.replace") };
-            replace.Click += (_, _) => original.RequestReplacement();
-            var remove = new MenuItem { Header = ThemeManager.GetString("fxchain.remove.tip") };
-            remove.Click += (_, _) => original.RemoveCommand.Execute(null);
-            menu.Items.Add(replace); menu.Items.Add(remove); ContextFlyout = menu;
             var body = new StackPanel { Spacing = 10, Margin = new Thickness(16), VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center };
             var vendor = new TextBlock { Text = row.Detail, TextWrapping = TextWrapping.Wrap };
             Md3RackKit.Paint(vendor, TextBlock.ForegroundProperty, "md3.on-surface-variant");

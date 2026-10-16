@@ -8,6 +8,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
+using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -82,6 +83,34 @@ namespace OpenUtau.Test.App {
             DocManager.Inst.Undo(); Pump(); Assert.True(panel.ViewModel.Rows[0].IsPowered);
             panel.ViewModel.Rows[0].RemoveCommand.Execute(null); Pump(); Assert.Empty(panel.ViewModel.Rows);
             DocManager.Inst.Undo(); Pump(); Assert.Single(panel.ViewModel.Rows); Assert.Null(DocManager.Inst.ActiveUndoGroup);
+        }
+        [AvaloniaTheory]
+        [InlineData(MixFxModule.Eq, false)]
+        [InlineData(MixFxModule.Compressor, false)]
+        [InlineData(MixFxModule.Reverb, false)]
+        [InlineData(MixFxModule.Eq, true)]
+        [InlineData(MixFxModule.Compressor, true)]
+        [InlineData(MixFxModule.Reverb, true)]
+        public void BuiltInRemovalThroughVisibleControlsIsUndoable(MixFxModule module, bool contextMenu) {
+            using var panel = Panel(); panel.ViewModel.AddBuiltIn(module); Pump();
+            string id = panel.ViewModel.Rows[0].EffectId;
+            var window = Host(panel, 680, 320);
+            try {
+                var card = Assert.Single(Cards(panel));
+                if (contextMenu) {
+                    var menu = Assert.IsType<MenuFlyout>(card.ContextFlyout);
+                    Assert.Single(menu.Items.OfType<MenuItem>()).RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+                } else {
+                    var remove = card.GetVisualDescendants().OfType<Button>().Single(b => b.Name == "RemoveButton");
+                    var point = remove.TranslatePoint(new Point(remove.Bounds.Width / 2, remove.Bounds.Height / 2), window)!.Value;
+                    window.MouseDown(point, MouseButton.Left);
+                    window.MouseUp(point, MouseButton.Left);
+                }
+                Pump(); Assert.Empty(panel.ViewModel.Rows); Assert.Empty(Track.EffectRack!);
+                DocManager.Inst.Undo(); Pump();
+                Assert.Equal(id, Assert.Single(panel.ViewModel.Rows).EffectId);
+                Assert.Equal(id, Assert.Single(Track.EffectRack!).Id);
+            } finally { window.Close(); }
         }
         [AvaloniaFact]
         public void UnknownVstKeepsItsNameStateAndDoubleClickDispatchesTheOriginalSlot() {
