@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net8.0</TargetFramework><Nullable>enable</Nullable><IsPackable>false</IsPackable><AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault><DebugType>embedded</DebugType></PropertyGroup>
+  <ItemGroup><PackageReference Include="Avalonia" Version="12.1.0" /><ProjectReference Include="../UTvTU.Md3/UTvTU.Md3.csproj" /></ItemGroup>
+  <ItemGroup><InternalsVisibleTo Include="OpenUtau.Test" /></ItemGroup>
+</Project>

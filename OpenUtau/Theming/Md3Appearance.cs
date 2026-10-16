@@ -39,6 +39,7 @@ public static class Md3Appearance {
     }
 
     public static void Apply(bool isDark) {
+        Md3Motion.PreferenceSource = static () => Preferences.Default.ReduceMotion;
         uint seed = Preferences.Default.ThemeSeed | 0xFF000000;
         if (Preferences.Default.ThemeColorSource == "Windows" && TryWindowsAccent(out uint accent)) seed = accent;
         ColorPool.Initialize(seed, Scheme, isDark, Contrast);

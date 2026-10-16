@@ -4,7 +4,6 @@ using Avalonia;
 using Avalonia.Animation.Easings;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
-using OpenUtau.Core.Util;
 
 namespace OpenUtau.Theming;
 
@@ -47,6 +46,8 @@ public sealed class Md3StandardSpringEasing : Easing {
 
 /// <summary>One live motion preference for transitions, popup mounts and busy indicators.</summary>
 public sealed class Md3Motion : AvaloniaObject {
+    /// <summary>Host-owned preference input; the UI library does not read application settings.</summary>
+    public static Func<bool> PreferenceSource { get; set; } = static () => false;
     public static readonly AttachedProperty<bool> ReducedProperty =
         AvaloniaProperty.RegisterAttached<Md3Motion, Control, bool>("Reduced", inherits: true);
     static readonly List<WeakReference<Window>> windows = new();
@@ -64,18 +65,18 @@ public sealed class Md3Motion : AvaloniaObject {
     public static TimeSpan SpatialFast => Duration(1400, 0.9);
     public static TimeSpan SpatialDefault => Duration(700, 0.9);
     public static TimeSpan SpatialSlow => Duration(300, 0.9);
-    static TimeSpan Duration(double stiffness, double damping) => Preferences.Default.ReduceMotion
+    static TimeSpan Duration(double stiffness, double damping) => PreferenceSource()
         ? TimeSpan.Zero : Md3StandardSpringEasing.SettlingDuration(stiffness, damping);
 
     public static void Register(Window window) {
         windows.Add(new WeakReference<Window>(window));
-        window.Classes.Set("no-motion", Preferences.Default.ReduceMotion);
-        SetReduced(window, Preferences.Default.ReduceMotion);
+        window.Classes.Set("no-motion", PreferenceSource());
+        SetReduced(window, PreferenceSource());
     }
 
     public static void ApplyPreference() {
         if (Application.Current is { } app) {
-            app.Resources["Md3ReducedMotion"] = Preferences.Default.ReduceMotion;
+            app.Resources["Md3ReducedMotion"] = PreferenceSource();
             app.Resources["Md3MotionEffectsFast"] = EffectsFast;
             app.Resources["Md3MotionEffectsDefault"] = EffectsDefault;
             app.Resources["Md3MotionEffectsSlow"] = EffectsSlow;
@@ -85,8 +86,8 @@ public sealed class Md3Motion : AvaloniaObject {
         }
         for (int i = windows.Count - 1; i >= 0; i--) {
             if (!windows[i].TryGetTarget(out var window)) { windows.RemoveAt(i); continue; }
-            window.Classes.Set("no-motion", Preferences.Default.ReduceMotion);
-            SetReduced(window, Preferences.Default.ReduceMotion);
+            window.Classes.Set("no-motion", PreferenceSource());
+            SetReduced(window, PreferenceSource());
         }
     }
 }

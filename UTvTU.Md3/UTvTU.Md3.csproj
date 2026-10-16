@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net8.0</TargetFramework><Nullable>enable</Nullable><IsPackable>false</IsPackable><DebugType>embedded</DebugType></PropertyGroup>
+  <ItemGroup><InternalsVisibleTo Include="OpenUtau.Test" /></ItemGroup>
+</Project>

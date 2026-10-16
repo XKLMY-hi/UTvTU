@@ -150,4 +150,5 @@
     <InformationalVersion>UTvTU-$([System.DateTime]::Now.ToString("yy.M.d-HHmmss"))</InformationalVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
+  <ItemGroup><ProjectReference Include="../UTvTU.DawUI/UTvTU.DawUI.csproj" /></ItemGroup>
 </Project>
