@@ -68,17 +68,16 @@ namespace OpenUtau.Core.Vst {
         }
 
         [Fact]
-        public void Setup_DoesNotActivateImmediately() {
+        public void SetupActivatesOnOwnerBeforeAnyAudioProcessing() {
             var bridge = new FakeVstBridge();
             var slot = VstTestSetup.CreateSlot(TestUid);
             var fx = new VstEffect(slot, bridge);
             try {
                 fx.Load();
                 fx.Setup(44100, 4096);
-                // Per current code: Setup calls Activate immediately.
-                // After phase-1 fix: first Process activates. For now,
-                // assert that Setup completes without error.
-                Assert.True(bridge.ActivateCalls >= 0); // smoke
+                Assert.Equal(1, bridge.ActivateCalls);
+                fx.Process(new float[512], 0, 512);
+                Assert.Equal(1, bridge.ActivateCalls);
             } finally { fx.Dispose(); }
         }
     }

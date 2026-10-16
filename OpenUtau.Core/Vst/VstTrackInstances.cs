@@ -137,8 +137,12 @@ namespace OpenUtau.Core.Vst {
             var fx = _effects[index];
             if (fx != null) {
                 // Save state before disposal so user params persist across reloads
-                var state = fx.TrySaveState(TimeSpan.FromMilliseconds(100));
-                if (state != null && fx.Slot != null) fx.Slot.StateData = state;
+                // Slot objects are reused by replace/reorder commands. An old instance
+                // must never overwrite the incoming plugin's serialized state.
+                if (fx.Slot.PluginUid == fx.Entry.Uid) {
+                    var state = fx.TrySaveState(TimeSpan.FromMilliseconds(100));
+                    if (state != null && fx.Slot.PluginUid == fx.Entry.Uid) fx.Slot.StateData = state;
+                }
 
                 // Defer Dispose — audio thread may still be processing this effect.
                 _effects[index] = null;

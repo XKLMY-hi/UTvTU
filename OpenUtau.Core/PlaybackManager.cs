@@ -525,9 +525,10 @@ namespace OpenUtau.Core {
                 return;
             }
             AudioOutput.Stop();
-            Render(project, tick, endTick, trackNo);
             StartingToPlay = true;
             PlayingMaster = true;
+            // Publish the starting state before a warm-cache render can finish on its worker.
+            Render(project, tick, endTick, trackNo);
         }
 
         public void StopPlayback() {
@@ -537,6 +538,7 @@ namespace OpenUtau.Core {
             // 频谱总线清零（drain 后安全——无在飞 AddSamples）
             SignalChain.SpectrumBus.Inst.Reset();
             PlayingMaster = false;
+            StartingToPlay = false;
             metronomeEngine.Stop();
             loopEndTick = -1;
             TrackLevels.Clear();
@@ -607,10 +609,13 @@ namespace OpenUtau.Core {
         }
 
         public void UpdatePlayPos(bool publish = true) {
-            if (AudioOutput != null && AudioOutput.PlaybackState == PlaybackState.Playing && PlayingMaster) {
+            if (!PlayingMaster || StartingToPlay || AudioOutput == null ||
+                !AudioOutput.TryGetPlaybackPosition(out var state, out var position)) return;
+            var master = masterMix;
+            if (state == PlaybackState.Playing && master != null) {
                 // 硬件位置（字节）→ float 采样数 → 扣除等待静音（帧数）→ ms（格式显式化）
-                double ms = (AudioOutput.GetPosition() / sizeof(float) - masterMix.Waited / masterMix.WaveFormat.Channels)
-                    * 1000.0 / masterMix.WaveFormat.SampleRate;
+                double ms = (position / sizeof(float) - master.Waited / master.WaveFormat.Channels)
+                    * 1000.0 / master.WaveFormat.SampleRate;
                 int tick = DocManager.Inst.Project.timeAxis.MsPosToTickPos(startMs + ms);
                 if (loopEndTick > 0 && tick >= loopEndTick) {
                     // Loop back to range start
@@ -619,8 +624,9 @@ namespace OpenUtau.Core {
                 }
                 // Keep loop/transport timing alive while minimized, without scheduling hidden
                 // editor redraws. The first visible tick publishes the current device position.
-                if (publish) DocManager.Inst.ExecuteCmd(new SetPlayPosTickNotification(tick, masterMix.IsWaiting));
-            } else if (AudioOutput != null && AudioOutput.PlaybackState == PlaybackState.Stopped && PlayingMaster) {
+                if (publish && ReferenceEquals(master, masterMix))
+                    DocManager.Inst.ExecuteCmd(new SetPlayPosTickNotification(tick, master.IsWaiting));
+            } else if (state == PlaybackState.Stopped) {
                 // Playback stopped (e.g. silence at end). Check if we should loop.
                 if (loopEndTick > 0) {
                     Play(DocManager.Inst.Project, tick: loopStartTick, endTick: loopEndTick);

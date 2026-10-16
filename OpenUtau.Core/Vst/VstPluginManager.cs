@@ -91,8 +91,10 @@ namespace OpenUtau.Core.Vst {
             var all = ti.GetAllEffects();
             var elapsed = Stopwatch.StartNew();
             foreach (var fx in all) {
+                if (!ReferenceEquals(ti[fx.Slot.SlotIndex], fx) || fx.Slot.PluginUid != fx.Entry.Uid) continue;
                 var state = budget.HasValue ? fx.TrySaveState(budget.Value - elapsed.Elapsed) : fx.SaveState();
-                if (state != null) fx.Slot.StateData = state;
+                if (state != null && ReferenceEquals(ti[fx.Slot.SlotIndex], fx) && fx.Slot.PluginUid == fx.Entry.Uid)
+                    fx.Slot.StateData = state;
             }
         }
 

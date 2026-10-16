@@ -238,20 +238,20 @@ namespace OpenUtau.Test.App {
             try {
                 var row = Rows(panel)[0];
                 var root = Part<Border>(row, "RowRoot");
-                // 行容器（B4 自定；设计稿无此元素）
-                Assert.Equal(new CornerRadius(12), root.CornerRadius);
+                // 2026-10-16 已接受的双行效果卡；不再沿用旧 B4 单行尺寸。
+                Assert.Equal(new CornerRadius(10), root.CornerRadius);
                 Assert.Equal(new Thickness(1), root.BorderThickness);
-                Assert.Equal(new Thickness(10, 6), root.Padding);
-                Assert.Equal(44, root.MinHeight);
+                Assert.Equal(new Thickness(10), root.Padding);
+                Assert.Equal(58, root.MinHeight);
                 // 把手 + 序号 + 名称 + 徽标 + 状态角标 + 旁通开关 + 移除（部件齐全）
                 Assert.NotNull(Part<Border>(row, "GripBox"));
                 Assert.NotNull(Part<TextBlock>(row, "OrderText"));
                 Assert.NotNull(Part<TextBlock>(row, "NameText"));
-                Assert.Equal(12, Part<TextBlock>(row, "NameText").FontSize);
+                Assert.Equal(13, Part<TextBlock>(row, "NameText").FontSize);
                 Assert.Equal(FontWeight.SemiBold, Part<TextBlock>(row, "NameText").FontWeight);
                 var badge = Part<Border>(row, "BadgeChip");
                 Assert.Equal(new CornerRadius(999), badge.CornerRadius);
-                Assert.Equal(new Thickness(6, 1), badge.Padding);
+                Assert.Equal(new Thickness(4, 1), badge.Padding);
                 var chip = Part<Border>(row, "StateChip");
                 Assert.Equal(22, chip.Height);
                 Assert.Equal(new CornerRadius(999), chip.CornerRadius);
@@ -261,8 +261,8 @@ namespace OpenUtau.Test.App {
                 Assert.Equal(34, power.Width);
                 Assert.Equal(20, power.Height);
                 var trackBg = Part<Border>(power, "PART_Track");
-                Assert.Equal(34, trackBg.Width);
-                Assert.Equal(20, trackBg.Height);
+                Assert.Equal(34, trackBg.Bounds.Width);
+                Assert.Equal(20, trackBg.Bounds.Height);
                 Assert.Equal(new CornerRadius(999), trackBg.CornerRadius);
                 var thumb = Part<Border>(power, "PART_Thumb");
                 Assert.Equal(14, thumb.Width);
@@ -650,8 +650,8 @@ namespace OpenUtau.Test.App {
             win.Show();
             Layout(win, 320, 780);
             try {
-                // 校准：裸按钮被主题 MinHeight=32 顶高（证明断言口径有效）
-                Assert.Equal(32, calibration.Bounds.Height);
+                // 页面按钮基准已为40；DAW局部控件仍必须保留自己的紧凑尺寸。
+                Assert.Equal(40, calibration.Bounds.Height);
 
                 var rows = Rows(panel);
                 // ✕ 移除：声明 22×22 ⇒ Bounds 必须也是 22（本地 MinHeight=22 + Margin=0 中和）
@@ -660,21 +660,21 @@ namespace OpenUtau.Test.App {
                 Assert.Equal(22, remove.Bounds.Width);
                 Assert.Equal(0, remove.Margin.Top);
                 Assert.Equal(0, remove.Margin.Bottom);
-                // ＋：声明 36×36 ⇒ Bounds 36，且应用级 8px 竖向 margin 已清零
+                // 当前效果链页头采用28×28紧凑添加按钮，不继承页面按钮的40高。
                 var add = Part<Button>(panel, "AddButton");
-                Assert.Equal(36, add.Bounds.Height);
-                Assert.Equal(36, add.Bounds.Width);
+                Assert.Equal(28, add.Bounds.Height);
+                Assert.Equal(28, add.Bounds.Width);
                 Assert.Equal(0, add.Margin.Top);
                 Assert.Equal(0, add.Margin.Bottom);
                 // 旁通开关（ToggleButton 派生自 Button，同吃 Button 主题/应用级样式）：
-                // 自带模板固定 34×20 ⇒ Bounds 必须是 20，不被顶到 32
+                // 自带模板固定 34×20 ⇒ Bounds 必须是 20，不被页面基准顶高
                 var power = Part<ToggleButton>(rows[0], "PowerToggle");
                 Assert.Equal(20, power.Bounds.Height);
                 Assert.Equal(34, power.Bounds.Width);
                 Assert.Equal(0, power.Margin.Top);
                 Assert.Equal(0, power.Margin.Bottom);
-                // 行容器：最小高 44
-                Assert.True(Part<Border>(rows[0], "RowRoot").Bounds.Height >= 44,
+                // 已接受的双行容器：最小高58。
+                Assert.True(Part<Border>(rows[0], "RowRoot").Bounds.Height >= 58,
                     $"链行低于声明的最小高：实际 {Part<Border>(rows[0], "RowRoot").Bounds.Height}");
             } finally {
                 win.Close();

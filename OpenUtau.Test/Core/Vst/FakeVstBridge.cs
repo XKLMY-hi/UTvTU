@@ -14,6 +14,7 @@ namespace OpenUtau.Core.Vst {
         public Func<bool>? EditorCallback { get; set; }
         public Func<byte[]?>? StateCallback { get; set; }
         public Func<string?>? ErrorCallback { get; set; }
+        public Action? ActivateCallback { get; set; }
 
         public IntPtr Load(string bundlePath) {
             LoadCallback?.Invoke();
@@ -25,7 +26,7 @@ namespace OpenUtau.Core.Vst {
         public bool Setup(IntPtr handle, double sr, int block) => true;
         private int _activateCalls;
         public int ActivateCalls => _activateCalls;
-        public bool Activate(IntPtr handle, bool enable) { _activateCalls++; return true; }
+        public bool Activate(IntPtr handle, bool enable) { ActivateCallback?.Invoke(); _activateCalls++; return true; }
         public Action<float[], int>? ProcessCallback { get; set; }
         public void Process(IntPtr handle, float[] buf, int frames) { ProcessCallback?.Invoke(buf, frames); }
         public void Reset(IntPtr handle) { }

@@ -72,6 +72,24 @@ namespace OpenUtau.App {
             }
         }
 
+        public bool TryGetPlaybackPosition(out PlaybackState state, out long position) {
+            state = PlaybackState.Stopped;
+            position = 0;
+            // Stop/Dispose may wait for a device callback. Never make the UI timer
+            // wait for that lock, especially while Windows is restoring the window.
+            if (!System.Threading.Monitor.TryEnter(lockObj)) return false;
+            try {
+                if (Preferences.Default.UseSystemDefaultAudioDevice) {
+                    state = wasapiOut?.PlaybackState ?? PlaybackState.Stopped;
+                    if (state == PlaybackState.Playing) position = wasapiOut!.GetPosition() / Channels;
+                } else {
+                    state = waveOutEvent?.PlaybackState ?? PlaybackState.Stopped;
+                    if (state == PlaybackState.Playing) position = waveOutEvent!.GetPosition() / Channels;
+                }
+                return true;
+            } finally { System.Threading.Monitor.Exit(lockObj); }
+        }
+
         public void Init(ISampleProvider sampleProvider) {
             lock (lockObj) {
                 if (Preferences.Default.UseSystemDefaultAudioDevice) {

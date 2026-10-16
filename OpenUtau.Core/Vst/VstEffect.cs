@@ -67,15 +67,20 @@ namespace OpenUtau.Core.Vst {
             if (_handle == IntPtr.Zero || _isSetup) return;
             if (maxBlockSize <= 0 || maxBlockSize > int.MaxValue / 2)
                 throw new ArgumentOutOfRangeException(nameof(maxBlockSize));
-            if (!HostThread.Invoke(() => _bridge.Setup(_handle, sampleRate, maxBlockSize))) {
-                Log.Warning($"[VstEffect] Setup failed: {_bridge.LastError()}");
+            var setup = HostThread.Invoke(() => {
+                bool ok = _bridge.Setup(_handle, sampleRate, maxBlockSize) && _bridge.Activate(_handle, true);
+                return (Ok: ok, Error: ok ? null : _bridge.LastError());
+            });
+            if (!setup.Ok) {
+                Log.Warning($"[VstEffect] Setup/activation failed: {setup.Error}");
                 return;
             }
             _maxBlockSize = maxBlockSize;
             _processScratch = new float[maxBlockSize * 2];
             _isSetup = true;
-            // Activate is deferred to first Process() call —
-            // avoids keeping plugins hot while idle.
+            // IComponent.setActive belongs to the host GUI thread, never the audio callback.
+            // Native setProcessing remains deferred to the first processing block.
+            _isActivated = true;
         }
 
         // ── IEffect ────────────────────────────────────────────
@@ -123,8 +128,7 @@ namespace OpenUtau.Core.Vst {
 
         public bool IsBypassed => _slot.Bypassed;
         public void Process(float[] buffer, int offset, int count) {
-            if (_slot.Bypassed || _handle == IntPtr.Zero) return;
-            EnsureActivated();
+            if (_slot.Bypassed || _handle == IntPtr.Zero || !_isSetup || !_isActivated) return;
             int frames = count / 2;
             if (frames <= 0) return;
 
@@ -148,13 +152,8 @@ namespace OpenUtau.Core.Vst {
             }
         }
 
-        private void EnsureActivated() {
-            if (_isActivated || !_isSetup) return;
-            _bridge.Activate(_handle, true);
-            _isActivated = true;
-        }
         public void Reset() {
-            if (_handle != IntPtr.Zero) _bridge.Reset(_handle);
+            if (_handle != IntPtr.Zero) HostThread.Invoke(() => _bridge.Reset(_handle));
         }
 
         // ── Native GUI ─────────────────────────────────────────
@@ -169,13 +168,15 @@ namespace OpenUtau.Core.Vst {
             // attached 秒级初始化只阻塞专用线程；插件在 attached 中
             // PostMessage 等待的消息由同一线程泵出。调用线程（UI）同步等待——
             // 大插件秒级会短暂卡调用线程，重插件请用异步版。
+            return HostThread.Invoke(OpenEditorOnHost);
+        }
+
+        bool OpenEditorOnHost() {
+            if (_handle == IntPtr.Zero) return false;
             Log.Information("[VstEffect] Opening native editor for {Plugin}", _entry.Name);
-            bool ok = HostThread.Invoke(() => {
-                bool opened = _bridge.OpenEditorWindow(_handle);
-                // LastError is native thread-local storage; read it on the producing thread.
-                EditorError = opened ? null : _bridge.LastError();
-                return opened;
-            });
+            bool ok = _bridge.OpenEditorWindow(_handle);
+            // LastError is native thread-local storage; read it on the producing thread.
+            EditorError = ok ? null : _bridge.LastError();
             if (ok) {
                 _editorOpen = true;
                 Log.Information($"[VstEffect] Native editor opened for '{_entry.Name}'");
@@ -188,7 +189,7 @@ namespace OpenUtau.Core.Vst {
         /// <summary>异步打开编辑器：attached（秒级）在专用线程执行，UI 线程不阻塞。</summary>
         public Task<bool> OpenNativeEditorAsync() {
             if (_handle == IntPtr.Zero) return Task.FromResult(false);
-            return Task.Run(() => OpenNativeEditor());
+            return HostThread.InvokeAsync(OpenEditorOnHost);
         }
 
         // ── State Persistence ──────────────────────────────────
@@ -198,6 +199,9 @@ namespace OpenUtau.Core.Vst {
             if (_handle == IntPtr.Zero) return null;
             return HostThread.Invoke(() => _bridge.SaveState(_handle));
         }
+
+        public Task<byte[]?> SaveStateAsync() => HostThread.InvokeAsync(() =>
+            _handle == IntPtr.Zero ? null : _bridge.SaveState(_handle));
 
         internal byte[]? TrySaveState(TimeSpan budget) {
             if (_handle == IntPtr.Zero || budget <= TimeSpan.Zero) return null;

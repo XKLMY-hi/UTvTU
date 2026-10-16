@@ -14,6 +14,21 @@ namespace OpenUtau.Core.Vst {
         }
 
         [Fact]
+        public async Task ReplacingPluginDoesNotOverwriteTheIncomingStateWithTheRetiredInstance() {
+            const string nextUid = "test:replacement-state-owner";
+            VstTestSetup.Register(VstTestSetup.MakeEntry(nextUid));
+            using var track = new VstTrackInstances(VstTestSetup.NextTrackNo()) { Bridge = new FakeVstBridge() };
+            var slot = VstTestSetup.CreateSlot(TestUid);
+            Assert.NotNull(await track.LoadAtAsync(0, slot));
+            slot.PluginUid = nextUid;
+            slot.StateData = new byte[] { 77, 88 };
+            var replacement = await track.LoadAtAsync(0, slot);
+            Assert.NotNull(replacement);
+            Assert.Equal(nextUid, replacement.Entry.Uid);
+            Assert.Equal(new byte[] { 77, 88 }, slot.StateData);
+        }
+
+        [Fact]
         public async Task LoadAtAsync_LoadsAndPublishes() {
             var bridge = new FakeVstBridge();
             var ti = new VstTrackInstances(0) { Bridge = bridge };

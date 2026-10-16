@@ -6,13 +6,29 @@ using OpenUtau.Classic;
 using Xunit;
 
 namespace OpenUtau.Test.Classic {
+    [Collection("VstShared")]
     public class ClassicRenderSchedulerTests {
         [Fact]
         public async Task OverlappingGenerationsUseOneGlobalBudget() {
+            ThreadPool.GetMinThreads(out int workers, out int io);
+            ThreadPool.SetMinThreads(Math.Max(workers, 4), io);
+            try {
             var scheduler = new ClassicRenderScheduler(() => 2);
             int active = 0, peak = 0;
             using var release = new ManualResetEventSlim();
             using var started = new CountdownEvent(2);
+            // The observer must not occupy a pool worker while the simulated native
+            // jobs occupy theirs (the guarded runner can have only two processors).
+            var observed = Task.Factory.StartNew(() => {
+                try {
+                    bool ready = started.Wait(2000);
+                    // Spare pool capacity makes a missing budget observable; this is
+                    // not merely asserting the runner's two-processor pool size.
+                    Thread.Sleep(100);
+                    return (Ready: ready, Active: Volatile.Read(ref active));
+                }
+                finally { release.Set(); }
+            }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             var tasks = Enumerable.Range(0, 20).Select(_ => scheduler.RunAsync(() => {
                 int count = Interlocked.Increment(ref active);
                 InterlockedExtensions.Max(ref peak, count);
@@ -21,10 +37,12 @@ namespace OpenUtau.Test.Classic {
                 Interlocked.Decrement(ref active);
                 return true;
             }, CancellationToken.None)).ToArray();
-            try { Assert.True(started.Wait(2000)); Assert.Equal(2, Volatile.Read(ref active)); }
-            finally { release.Set(); }
+            var result = await observed.WaitAsync(TimeSpan.FromSeconds(3));
             await Task.WhenAll(tasks).WaitAsync(TimeSpan.FromSeconds(3));
+            Assert.True(result.Ready);
+            Assert.Equal(2, result.Active);
             Assert.Equal(2, peak);
+            } finally { ThreadPool.SetMinThreads(workers, io); }
         }
 
         [Fact]
