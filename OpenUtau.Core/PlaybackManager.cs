@@ -608,6 +608,8 @@ namespace OpenUtau.Core {
             });
         }
 
+        public void UpdatePlayPos() => UpdatePlayPos(true);
+
         public void UpdatePlayPos(bool publish = true) {
             if (!PlayingMaster || StartingToPlay || AudioOutput == null ||
                 !AudioOutput.TryGetPlaybackPosition(out var state, out var position)) return;

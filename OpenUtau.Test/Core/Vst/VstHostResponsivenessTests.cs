@@ -13,6 +13,15 @@ namespace OpenUtau.Core.Vst {
         const string Uid = "test:shared-gui-host";
 
         [Fact]
+        public void LegacyClrMethodSignaturesRemainAvailableForPrecompiledExtensions() {
+            Assert.NotNull(typeof(Util.ProcessRunner).GetMethod("Run", new[] {
+                typeof(string), typeof(string), typeof(Serilog.ILogger), typeof(string), typeof(int),
+            }));
+            Assert.NotNull(typeof(PlaybackManager).GetMethod("UpdatePlayPos", Type.EmptyTypes));
+            Assert.NotNull(typeof(VstPluginManager).GetMethod("SaveAllStates", new[] { typeof(int) }));
+        }
+
+        [Fact]
         public async Task ManyInstancesAndParallelGuiStateRequestsUseOneOwnerWithoutPoolWaiters() {
             var owners = new HashSet<int>();
             var bridge = new FakeVstBridge {

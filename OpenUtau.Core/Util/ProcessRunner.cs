@@ -7,6 +7,10 @@ using Serilog;
 namespace OpenUtau.Core.Util {
     public static class ProcessRunner {
         public static bool DebugSwitch { get; set; }
+        // Keep the original CLR signature for already-compiled phonemizer/tool plugins.
+        public static void Run(string file, string args, ILogger logger, string workDir, int timeoutMs) =>
+            Run(file, args, logger, workDir, timeoutMs, CancellationToken.None, false);
+
         public static void Run(string file, string args, ILogger logger, string workDir = null, int timeoutMs = 60000,
             CancellationToken cancellation = default, bool background = false) {
             cancellation.ThrowIfCancellationRequested();
