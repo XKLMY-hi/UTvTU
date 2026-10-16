@@ -15,6 +15,9 @@ namespace OpenUtau.Core.DiffSinger
 {
     public abstract class DiffSingerBasePhonemizer : MachineLearningPhonemizer
     {
+        internal static bool DurationUsesWordInputs(string durationType, IEnumerable<string> inputNames) =>
+            durationType == "rel" || (string.IsNullOrEmpty(durationType) && inputNames.Contains("word_div"));
+
         USinger singer;
         DsConfig dsConfig;
         Dictionary<string, int>languageIds = new Dictionary<string, int>();
@@ -402,12 +405,10 @@ namespace OpenUtau.Core.DiffSinger
             linguisticInputs.Add(NamedOnnxValue.CreateFromTensor("tokens",
                 new DenseTensor<Int64>(tokens, new int[] { tokens.Length }, false)
                 .Reshape(new int[] { 1, tokens.Length })));
-            linguisticInputs.Add(NamedOnnxValue.CreateFromTensor("word_div",
-                new DenseTensor<Int64>(word_div, new int[] { word_div.Length }, false)
-                .Reshape(new int[] { 1, word_div.Length })));
-            linguisticInputs.Add(NamedOnnxValue.CreateFromTensor("word_dur",
-                new DenseTensor<Int64>(word_dur, new int[] { word_dur.Length }, false)
-                .Reshape(new int[] { 1, word_dur.Length })));
+            var wordDivTensor = new DenseTensor<Int64>(word_div, new int[] { 1, word_div.Length });
+            var wordDurTensor = new DenseTensor<Int64>(word_dur, new int[] { 1, word_dur.Length });
+            linguisticInputs.Add(NamedOnnxValue.CreateFromTensor("word_div", wordDivTensor));
+            linguisticInputs.Add(NamedOnnxValue.CreateFromTensor("word_dur", wordDurTensor));
             //Language id
             if(dsConfig.use_lang_id){
                 var langIdByPhone = phrasePhonemes
@@ -446,6 +447,11 @@ namespace OpenUtau.Core.DiffSinger
             durationInputs.Add(NamedOnnxValue.CreateFromTensor("ph_midi",
                 new DenseTensor<Int64>(ph_midi, new int[] { ph_midi.Length }, false)
                 .Reshape(new int[] { 1, ph_midi.Length })));
+            // Upstream fd8c843e: group-aware models share the encoder's exact tensors.
+            if (DurationUsesWordInputs(dsConfig.dur_type, durationModel.InputNames)) {
+                durationInputs.Add(NamedOnnxValue.CreateFromTensor("word_div", wordDivTensor));
+                durationInputs.Add(NamedOnnxValue.CreateFromTensor("word_dur", wordDurTensor));
+            }
             //Speaker
             if(dsConfig.speakers != null){
                 var speakerEmbedManager = getSpeakerEmbedManager();

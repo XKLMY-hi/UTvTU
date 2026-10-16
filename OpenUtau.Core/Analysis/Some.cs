@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,6 +22,7 @@ public class Some : MidiExtractor<SomeOptions> {
     RunOptions? runOptions;
     SomeConfig config;
     bool disposed = false;
+    readonly object sessionLock = new();
 
     protected override int ExpectedSampleRate => config.sample_rate;
 
@@ -51,6 +52,8 @@ public class Some : MidiExtractor<SomeOptions> {
     }
 
     protected override List<TranscribedNote> TranscribeWaveform(float[] samples, SomeOptions options) {
+        using var modelScope = Onnx.EnterSessionScope(sessionLock);
+        ObjectDisposedException.ThrowIf(disposed, this);
         var inputs = new List<NamedOnnxValue>();
         inputs.Add(NamedOnnxValue.CreateFromTensor("waveform",
             new DenseTensor<float>(samples, new int[] { samples.Length }, false)
@@ -84,6 +87,7 @@ public class Some : MidiExtractor<SomeOptions> {
             }
             throw;
         }
+
     }
 
     public override void Interrupt() {
@@ -93,9 +97,11 @@ public class Some : MidiExtractor<SomeOptions> {
     }
 
     protected override void DisposeManaged() {
+        using var modelScope = Onnx.EnterSessionScope(sessionLock);
         if (disposed) return;
         disposed = true;
         runOptions?.Dispose();
         session.Dispose();
+
     }
 }

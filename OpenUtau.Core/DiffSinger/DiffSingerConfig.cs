@@ -48,6 +48,8 @@ namespace OpenUtau.Core.DiffSinger {
         [YamlMember(Alias = "max_depth")] public double _maxDepth;
         [YamlIgnore] public double maxDepth => useContinuousAcceleration ? _maxDepth : _maxDepth / 1000.0;
         public string dur;
+        // Upstream fd8c843e: null preserves graph-based detection for older exports.
+        public string dur_type;
         public string linguistic;
         public string pitch;
         public string variance;

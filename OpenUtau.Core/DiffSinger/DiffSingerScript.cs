@@ -33,6 +33,7 @@ namespace OpenUtau.Core.DiffSinger {
         public double[]? tension = null;
 
         public DiffSingerScript(RenderPhrase phrase, DsScriptExportOptions options) {
+            using var modelScope = Onnx.EnterSessionScope((phrase.singer as DiffSingerSinger)?.SessionLock ?? phrase);
             float headMs = DiffSingerUtils.GetHeadMs(phrase);
             float tailMs = DiffSingerUtils.GetTailMs(phrase);
 
@@ -171,6 +172,7 @@ namespace OpenUtau.Core.DiffSinger {
             }
 
             offsetMs = phrase.phones[0].positionMs - headMs;
+
         }
 
         private static double[] ComputeVarianceCurve(

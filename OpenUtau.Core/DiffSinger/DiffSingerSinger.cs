@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -48,6 +48,7 @@ namespace OpenUtau.Core.DiffSinger {
         public DsConfig dsConfig;
         public ulong acousticHash;
         public InferenceSession acousticSession = null;
+        public object SessionLock { get; } = new object();
         public DsVocoder vocoder = null;
         public DsPitch pitchPredictor = null;
         public DiffSingerSpeakerEmbedManager speakerEmbedManager = null;
@@ -173,6 +174,7 @@ namespace OpenUtau.Core.DiffSinger {
         }
 
         public InferenceSession getAcousticSession() {
+            using var modelScope = Onnx.EnterSessionScope(SessionLock);
             if (acousticSession is null) {
                 var acousticPath = Path.Combine(Location, dsConfig.acoustic);
                 var acousticBytes = File.ReadAllBytes(acousticPath);
@@ -180,9 +182,11 @@ namespace OpenUtau.Core.DiffSinger {
                 acousticSession = Onnx.getInferenceSession(acousticBytes, OnnxRunnerChoice.Default);
             }
             return acousticSession;
+
         }
 
         public DsVocoder getVocoder() {
+            using var modelScope = Onnx.EnterSessionScope(SessionLock);
             if(vocoder is null) {
                 if(File.Exists(Path.Join(Location, "dsvocoder", "vocoder.yaml"))) {
                     vocoder = new DsVocoder(Path.Join(Location, "dsvocoder"));
@@ -191,31 +195,38 @@ namespace OpenUtau.Core.DiffSinger {
                 vocoder = new DsVocoder(Path.Combine(PathManager.Inst.DependencyPath, dsConfig.vocoder));
             }
             return vocoder;
+
         }
 
         public DsPitch? getPitchPredictor(){
+            using var modelScope = Onnx.EnterSessionScope(SessionLock);
             if(pitchPredictor is null) {
                 if(HasPitchPredictor){
                     pitchPredictor = new DsPitch(Path.Join(Location, "dspitch"));
                 }
             }
             return pitchPredictor;
+
         }
-       
+
         public DiffSingerSpeakerEmbedManager getSpeakerEmbedManager(){
+            using var modelScope = Onnx.EnterSessionScope(SessionLock);
             if(speakerEmbedManager is null) {
                 speakerEmbedManager = new DiffSingerSpeakerEmbedManager(dsConfig, Location);
             }
             return speakerEmbedManager;
+
         }
 
         public DsVariance? getVariancePredictor(){
+            using var modelScope = Onnx.EnterSessionScope(SessionLock);
             if(variancePredictor is null) {
                 if(HasVariancePredictor){
                     variancePredictor = new DsVariance(Path.Join(Location, "dsvariance"));
                 }
             }
             return variancePredictor;
+
         }
 
         public int PhonemeTokenize(string phoneme){
@@ -232,6 +243,7 @@ namespace OpenUtau.Core.DiffSinger {
         }
 
         public override void FreeMemory(){
+            using var modelScope = Onnx.EnterSessionScope(SessionLock);
             Log.Information($"Freeing memory for singer {Id}");
             if(acousticSession != null) {
                 lock(acousticSession) {
@@ -257,6 +269,7 @@ namespace OpenUtau.Core.DiffSinger {
                 }
                 variancePredictor = null;
             }
+
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -52,6 +52,7 @@ public class Game : MidiExtractor<GameOptions> {
     RunOptions? runOptions;
     bool sessionsLoaded = false;
     bool disposed = false;
+    readonly object sessionLock = new();
     volatile bool stopping = false;
     GameConfig config;
     string Location;
@@ -122,13 +123,19 @@ public class Game : MidiExtractor<GameOptions> {
     protected override bool SupportsBatch => true;
 
     protected override List<List<TranscribedNote>> TranscribeWaveformBatch(List<float[]> batch, GameOptions options) {
+        using var modelScope = Onnx.EnterSessionScope(sessionLock);
+        ObjectDisposedException.ThrowIf(disposed, this);
         EnsureSessionsLoaded();
         return RunPipeline(batch, options);
+
     }
 
     protected override List<TranscribedNote> TranscribeWaveform(float[] samples, GameOptions options) {
+        using var modelScope = Onnx.EnterSessionScope(sessionLock);
+        ObjectDisposedException.ThrowIf(disposed, this);
         EnsureSessionsLoaded();
         return RunPipeline(new List<float[]> { samples }, options)[0];
+
     }
 
     private List<List<TranscribedNote>> RunPipeline(List<float[]> batch, GameOptions options) {
@@ -213,6 +220,7 @@ public class Game : MidiExtractor<GameOptions> {
     }
 
     protected override void DisposeManaged() {
+        using var modelScope = Onnx.EnterSessionScope(sessionLock);
         if (disposed) return;
         disposed = true;
         runOptions?.Dispose();
@@ -221,6 +229,7 @@ public class Game : MidiExtractor<GameOptions> {
         estimatorSession?.Dispose();
         bd2durSession?.Dispose();
         sessionsLoaded = false;
+
     }
 
     // -------------------------------------------------------------------------

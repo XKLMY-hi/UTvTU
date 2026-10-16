@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -62,8 +62,8 @@ namespace OpenUtau.Core.DiffSinger {
                 (descriptor.abbr.StartsWith(VoiceColorHeader) && int.TryParse(descriptor.abbr.Substring(2), out int _));
         }
 
-        //Calculate the Timing layout of the RenderPhrase, 
-        //including the position of the phrase, 
+        //Calculate the Timing layout of the RenderPhrase,
+        //including the position of the phrase,
         //the length of the head consonant, and the estimated total length
         public RenderResult Layout(RenderPhrase phrase) {
             var singer = phrase.singer as DiffSingerSinger;
@@ -130,12 +130,13 @@ namespace OpenUtau.Core.DiffSinger {
             });
             return task;
         }
-        /*result format: 
+        /*result format:
         result.samples: Rendered audio, float[]
         leadingMs、positionMs、estimatedLengthMs: timeaxis layout in Ms, double
          */
 
         float[] InvokeDiffsinger(RenderPhrase phrase, double depth, int steps, CancellationTokenSource cancellation) {
+            using var modelScope = Onnx.EnterSessionScope(((DiffSingerSinger)phrase.singer).SessionLock);
             var singer = phrase.singer as DiffSingerSinger;
             //Check if dsconfig.yaml is correct
             if(String.IsNullOrEmpty(singer.dsConfig.vocoder) ||
@@ -240,7 +241,7 @@ namespace OpenUtau.Core.DiffSinger {
             var durations = DiffSingerUtils.PaddedPhoneDurations(phrase, frameMs, headFrames, tailFrames)
                 .ToList();
             int totalFrames = durations.Sum();
-            float[] f0 = DiffSingerUtils.SampleCurve(phrase, phrase.pitches, 0, frameMs, totalFrames, headFrames, tailFrames, 
+            float[] f0 = DiffSingerUtils.SampleCurve(phrase, phrase.pitches, 0, frameMs, totalFrames, headFrames, tailFrames,
                 x => MusicMath.ToneToFreq(x * 0.01))
                 .Select(f => (float)f).ToArray();
             float[] shiftedF0 = f0.Zip(DiffSingerUtils.SampleCurve(phrase, phrase.toneShift, 0, frameMs, totalFrames,
@@ -513,9 +514,11 @@ namespace OpenUtau.Core.DiffSinger {
                 samples = signal.Samples;
             }
             return samples;
+
         }
 
         public RenderPitchResult LoadRenderedPitch(RenderPhrase phrase) {
+            using var modelScope = Onnx.EnterSessionScope(((DiffSingerSinger)phrase.singer).SessionLock);
             DiffSingerSinger singer = (DiffSingerSinger) phrase.singer;
             if (!singer.HasPitchPredictor) {
                 throw new Exception("This singer has no pitch predictor.");
@@ -524,9 +527,11 @@ namespace OpenUtau.Core.DiffSinger {
             lock (pitchPredictor) {
                 return pitchPredictor.Process(phrase);
             }
+
         }
 
         public List<RenderRealCurveResult> LoadRenderedRealCurves(RenderPhrase phrase) {
+            using var modelScope = Onnx.EnterSessionScope(((DiffSingerSinger)phrase.singer).SessionLock);
             if (!Preferences.Default.DiffSingerTensorCache) {
                 throw new Exception("Please enable DiffSinger tensor cache and re-render the phrase to display correct base curves.");
             }
@@ -588,6 +593,7 @@ namespace OpenUtau.Core.DiffSinger {
                 }).ToList();
                 return realCurves;
             }
+
         }
 
         public UExpressionDescriptor[] GetSuggestedExpressions(USinger singer, URenderSettings renderSettings) {

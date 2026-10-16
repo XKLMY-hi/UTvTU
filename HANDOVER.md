@@ -1,5 +1,13 @@
 # HANDOVER — 新会话交接（2026-10-17 安装与卸载重构）
 
+## 2026-10-17 用户批准全部有价值上游更新与新歌手选择器（进行中，继续完成）
+
+- 用户明确“包括上面的其他上游更新，全部引入”。本轮已开始实现，**不能停在审查或仅做首批**。按本地架构引入建议的修复/功能及必要前置，保持MD3、VST机架、离线导出；不整体合并上游主题/MixPlanner/原生R1.1。后续清单及证据见[实施记录](.opencode/plans/upstream-integration-2026-10-17.md)。SDK9选择器`.dsh/packaging/sdk9/`，日志`.dsh/upstream-integration-20261017/`，实际工作区G盘、plus-develop，接手仍核盘符。
+- 已提交`210cf0c1`查找栏/泰语回退/重采样器同名/音高点右键；`896f66c8`英语C+V成组/双元音/EN2JA。查找栏2项、C+V15项轻量通过，具体TRX见实施记录。C+V最初两次触及30秒/384MiB护栏，根因为无关神经G2P初始化；未放宽，改确定性发音驱动真实插件并缩小测试字典，15项全绿，临时追踪代码已撤回。
+- ONNX批次已完成并验证：DML与每歌手统一同步、SessionOptions using、SOME/GAME单条及batch推理/释放、Worldline-R2临时会话释放、DiffSinger脚本/音高/variance生命周期，以及dur_type和word_div/word_dur输入；14项轻量通过，5.5秒/72MiB。最小真实ONNX CPU图覆盖两工厂/两输入契约；非真实GPU/声库压力。build2 0错/1791既有警告、81.2秒。新增组合Scope使用Monitor，**只能在同步代码中使用，不跨await**。
+- 尚需完成：manifest附加缓存与preutter、英语VCCV、VOICEVOX、SVP/SV2与音频导入修复、缺失包安装、新MD3虚拟歌手选择器、当前版本标签更新检查、适用的警告入口与最后轻量验收。歌手目录SearchTerms实际需补：旧USinger.cs中现有SearchTerms位于UOto类，不是歌手元数据，不能误判已具备。
+- 默认轻量每组30秒/384MiB串行、构建两处理器/单节点/768MiB堆，不自行截图、不开关用户程序。当前Debug构建已更新；没有重打安装器、推送或修改GitHub Release。每个绿灯步骤立即中文原子提交；不要回滚未提交成果。
+
 ## 2026-10-17 上游新增31提交审查（最新，仅审查）
 
 - 用户询问上游哪些值得合并，已fetch并逐项审查`a06ab28b`→`fd8c843e323262a57f3da2d86fbb740369216dc3`新增31提交；263个非祖先提交包含历史已手工吸收内容，不能全部算缺失。[审查与建议](.opencode/plans/upstream-review-2026-10-17.md)，[逐项清单](.opencode/plans/upstream-review-2026-10-17/commits.json)。仅只读补丁检查，6项文本可应用，不代表编译/运行通过；未改产品源码、未合并、未替换DLL或执行构建/音频测试。

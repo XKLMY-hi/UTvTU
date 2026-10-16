@@ -22,7 +22,47 @@ namespace OpenUtau.Core {
     }
 
     public class Onnx {
-        private static readonly Dictionary<int, OrtEpDevice> devices = initializeDevices();
+        // Upstream 799ba8de: cached DirectML sessions retain their provider even
+        // after the preference changes. Lock order: DmlLock -> singer.SessionLock.
+        internal static readonly object DmlLock = new();
+        private static volatile bool dmlInUse;
+
+        public readonly struct DmlScope : IDisposable {
+            readonly bool entered;
+            internal DmlScope(bool entered) { this.entered = entered; }
+            public void Dispose() {
+                if (entered) System.Threading.Monitor.Exit(DmlLock);
+            }
+        }
+
+        public static DmlScope EnterDmlScope() {
+            System.Threading.Monitor.Enter(DmlLock);
+            if (!dmlInUse && Preferences.Default.OnnxRunner != "DirectML") {
+                System.Threading.Monitor.Exit(DmlLock);
+                return default;
+            }
+            dmlInUse = true;
+            return new DmlScope(true);
+        }
+
+        public readonly struct SessionScope : IDisposable {
+            readonly DmlScope dml;
+            readonly object gate;
+            internal SessionScope(object gate) {
+                dml = EnterDmlScope();
+                this.gate = gate;
+                try { System.Threading.Monitor.Enter(gate); }
+                catch { dml.Dispose(); throw; }
+            }
+            public void Dispose() {
+                System.Threading.Monitor.Exit(gate);
+                dml.Dispose();
+            }
+        }
+
+        public static SessionScope EnterSessionScope(object gate) => new(gate);
+        private static readonly Lazy<Dictionary<int, OrtEpDevice>> deviceCache = new(initializeDevices);
+        private static Dictionary<int, OrtEpDevice> devices => deviceCache.Value;
 
         private static Dictionary<int, OrtEpDevice> initializeDevices() {
             var env = OrtEnv.Instance();
@@ -104,6 +144,8 @@ namespace OpenUtau.Core {
             }
             switch (runner) {
                 case "DirectML":
+                    options.EnableMemoryPattern = false;
+                    options.ExecutionMode = ExecutionMode.ORT_SEQUENTIAL;
                     var d = devices[Preferences.Default.OnnxGpu];
                     options.AppendExecutionProvider(
                         OrtEnv.Instance(),
@@ -134,15 +176,17 @@ namespace OpenUtau.Core {
                 (runnerChoice == OnnxRunnerChoice.CPUForCoreML && Preferences.Default.OnnxRunner == "CoreML")) {
                 return new InferenceSession(model);
             } else {
+                using var dmlScope = EnterDmlScope();
                 // Try with CoreML subgraphs enabled first, fallback to default if it fails
                 if (OS.IsMacOS() && Preferences.Default.OnnxRunner == "CoreML") {
                     try {
-                        return new InferenceSession(model, getOnnxSessionOptions(coremlEnableOnSubgraphs: true));
+                        using var options = getOnnxSessionOptions(coremlEnableOnSubgraphs: true);
+                        return new InferenceSession(model, options);
                     } catch (Exception e) {
                         Log.Warning(e, "Failed to create session with CoreML subgraphs enabled, falling back to default settings");
                     }
                 }
-                return new InferenceSession(model, getOnnxSessionOptions());
+                return CreateSession(options => new InferenceSession(model, options), () => new InferenceSession(model));
             }
         }
 
@@ -151,15 +195,29 @@ namespace OpenUtau.Core {
                 (runnerChoice == OnnxRunnerChoice.CPUForCoreML && Preferences.Default.OnnxRunner == "CoreML")) {
                 return new InferenceSession(modelPath);
             } else {
+                using var dmlScope = EnterDmlScope();
                 // Try with CoreML subgraphs enabled first, fallback to default if it fails
                 if (OS.IsMacOS() && Preferences.Default.OnnxRunner == "CoreML") {
                     try {
-                        return new InferenceSession(modelPath, getOnnxSessionOptions(coremlEnableOnSubgraphs: true));
+                        using var options = getOnnxSessionOptions(coremlEnableOnSubgraphs: true);
+                        return new InferenceSession(modelPath, options);
                     } catch (Exception e) {
                         Log.Warning(e, "Failed to create session with CoreML subgraphs enabled, falling back to default settings");
                     }
                 }
-                return new InferenceSession(modelPath, getOnnxSessionOptions());
+                return CreateSession(options => new InferenceSession(modelPath, options), () => new InferenceSession(modelPath));
+            }
+        }
+
+        private static InferenceSession CreateSession(Func<SessionOptions, InferenceSession> create, Func<InferenceSession> cpu) {
+            try {
+                // Upstream 4798078a: keep the SafeHandle alive for the complete
+                // native constructor, then release the temporary options deterministically.
+                using var options = getOnnxSessionOptions();
+                return create(options);
+            } catch (Exception e) when (Preferences.Default.OnnxRunner == "DirectML") {
+                Log.Warning(e, "Failed to create a DirectML inference session, falling back to CPU.");
+                return cpu();
             }
         }
 
