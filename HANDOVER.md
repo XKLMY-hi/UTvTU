@@ -8,7 +8,7 @@
 - 导入前备份分支：`codex/backup-before-dawui-import-20261016`；导入引用：`refs/remotes/recovery/dawui-library-20261016`。bundle和包说明保留在忽略目录`.dsh/imports/utvtu-dawui-library-update-1/`，包内说明仅作恢复资料，没有执行其中的Linux恢复脚本。
 - 累计变更包括欢迎/偏好/资源/导出/编排/钢琴窗/混音台视觉，以及两个新库：`UTvTU.Md3`承载原HCT/CAM16引擎，`UTvTU.DawUI`承载共享颜色池、主题和首批控件。旧命名空间和兼容入口保留。新库API及边界见`UTvTU.DawUI/README.md`；包内Linux运行报告不等于本机Windows运行验收。
 - 本机默认SDK现为10.0.400，但本轮按约定使用**SDK9.0.317**：只在上述忽略目录的`sdk9-host/global.json`选择SDK，没有在仓库根目录加global.json。主程序和新库restore通过；Windows主程序及项目依赖**单节点编译通过，0错误/1638警告，用时2分42.80秒**，日志`build-windows.log`。使用`RuntimeIdentifiers=`、`UsedAvaloniaProducts=`和独立OutDir；VstProbe单独restore后随主程序构建。
-- 编译产物在`.dsh/imports/utvtu-dawui-library-update-1/build/`；**标准`OpenUtau/bin`尚未更新**，下次用户要求启动应先构建/更新完整依赖及deps文件，不能只替换主DLL（现新增两个库）。本轮未启动程序、未自截图、未跑全量测试/真实合成/VST；下方10/11的PID和二进制哈希均为历史记录，不能当作当前运行状态。
+- 编译产物在`.dsh/imports/utvtu-dawui-library-update-1/build/`。用户随后要求启动，已将完整产物（含新增两库及deps文件）同步到标准`OpenUtau/bin/Debug/net8.0-windows/`，主程序/两库/Core/Plugin/运行配置与源产物SHA256逐一一致；从标准目录**无参数启动PID18636**，响应正常、窗口句柄有效、启动日志0 ERR/FTL。产品SHA256为`375661D4BA67D0AAEAD9D191BF0F72CCD9336F8EDEC4DB53B2CD90C8129A744B`，身份记录在`.dsh/workspace-preview.json`，下次须重核exe+StartTime。未自截图、未跑全量测试/真实合成/VST；下方10/11的PID和哈希均为历史记录。
 
 
 ## 2026-10-11 截图反馈修复（最新状态）
