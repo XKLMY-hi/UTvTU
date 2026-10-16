@@ -76,6 +76,7 @@ public class Game : MidiExtractor<GameOptions> {
     public static GameConfig LoadConfig(string? modelPath = null) {
         string location = modelPath ?? Path.Combine(PathManager.Inst.DependencyPath, PackageId);
         string configPath = Path.Combine(location, "config.json");
+        if (!File.Exists(configPath)) throw new MissingPackageException(PackageId);
         var jsonText = File.ReadAllText(configPath, System.Text.Encoding.UTF8);
         return JsonSerializer.Deserialize<GameConfig>(jsonText)
                ?? throw new InvalidOperationException("Failed to parse GAME config.json");
@@ -91,7 +92,7 @@ public class Game : MidiExtractor<GameOptions> {
     /// </summary>
     /// <param name="location">Path to model directory, or null for default (Dependencies/game)</param>
     public Game(string? location) {
-        Location = location ?? PackageManager.Inst.GetInstalledPath(PackageId)!;
+        Location = location ?? PackageManager.Inst.GetInstalledPath(PackageId) ?? Path.Combine(PathManager.Inst.DependencyPath, PackageId);
         Log.Information("GAME: Model location = {Location}", Location);
         config = LoadConfig(location);
     }

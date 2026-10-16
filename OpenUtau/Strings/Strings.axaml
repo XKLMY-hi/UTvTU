@@ -1445,4 +1445,11 @@ Range {2}–{3} s · Tail {4} s
   <system:String x:Key="singerpicker.all">All singers</system:String>
   <system:String x:Key="singerpicker.missing">Missing voicebank</system:String>
   <system:String x:Key="singerpicker.manage">Manage / install voicebanks…</system:String>
+  <system:String x:Key="packages.required.prompt">Required package(s): {0}. Install now in the Resource Center?</system:String>
+  <system:String x:Key="packages.required.unavailable">Package {0} is unavailable in the registry. Refresh or install a local .oudep file.</system:String>
+  <system:String x:Key="packages.required.game">Install GAME</system:String>
+  <system:String x:Key="packages.required.some">Install SOME</system:String>
+  <system:String x:Key="singerpicker.duplicates">{0} duplicate voicebank ID(s) — expand to review active and ignored locations</system:String>
+  <system:String x:Key="singerpicker.active">Active</system:String>
+  <system:String x:Key="singerpicker.ignored">Ignored</system:String>
 </ResourceDictionary>

@@ -21,6 +21,28 @@ public partial class MainWindow : IWorkspaceToolHost {
     WorkspaceToolView? contextTool;
     IDisposable? contextTitleBinding;
     bool contextCollapsed;
+    bool requiredPackagesPromptOpen;
+
+    public async System.Threading.Tasks.Task OfferRequiredPackages(IReadOnlyList<string> packageIds) {
+        if (shellDisposed || requiredPackagesPromptOpen) return;
+        requiredPackagesPromptOpen = true;
+        try {
+            var ids = packageIds.Where(MissingPackageException.IsRegistryId).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+            if (ids.Length == 0) return;
+            var answer = await MessageBox.Show(this,
+                string.Format(ThemeManager.GetString("packages.required.prompt"), string.Join(", ", ids)),
+                ThemeManager.GetString("packages.install"), MessageBox.MessageBoxButtons.YesNo);
+            if (answer != MessageBox.MessageBoxResult.Yes || shellDisposed) return;
+            ShowResourceCenter(true);
+            if (packagesTool?.DataContext is PackageManagerViewModel model) {
+                foreach (var id in ids) {
+                    if (shellDisposed || packagesTool.IsClosed || !await model.InstallRequiredAsync(id)) break;
+                }
+            }
+        } catch (Exception e) {
+            if (!shellDisposed) await MessageBox.ShowError(this, e);
+        } finally { requiredPackagesPromptOpen = false; }
+    }
     double contextExpandedHeight;
 
     void IWorkspaceToolHost.PresentTool(WorkspaceToolView tool) => PresentTool(tool);

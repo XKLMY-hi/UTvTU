@@ -206,6 +206,7 @@ namespace OpenUtau.App.Controls {
                     Height = Math.Max(160, Math.Min(480, (owner?.Bounds.Height ?? 560) - 64)),
                 };
                 var flyout = new Flyout { Content = picker, Placement = PlacementMode.BottomEdgeAlignedLeft };
+                flyout.FlyoutPresenterClasses.Add("singerPickerHost");
                 singerFlyout = flyout;
                 picker.Chosen += singer => {
                     try { ViewModel?.SelectSingerCommand.Execute(singer).Subscribe(); }

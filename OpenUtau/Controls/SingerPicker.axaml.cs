@@ -23,7 +23,11 @@ public partial class SingerPicker : UserControl {
     void HandleKey(object? sender, KeyEventArgs e) {
         if (Model == null) return;
         if (e.Key is Key.Down or Key.Up) { Model.Move(e.Key == Key.Down ? 1 : -1); e.Handled = true; }
-        else if (e.Key == Key.Enter) { if (Model.Selected != null) Chosen?.Invoke(Model.Selected.Singer); e.Handled = true; }
+        else if (e.Key == Key.Enter) {
+            if (e.Source is Visual source && source.GetSelfAndVisualAncestors().OfType<Button>().Any()) return;
+            if (Model.Selected != null) Chosen?.Invoke(Model.Selected.Singer);
+            e.Handled = true;
+        }
         else if (e.Key == Key.Escape) {
             if (Model.Search.Length > 0) Model.Search = "";
             else CloseRequested?.Invoke();

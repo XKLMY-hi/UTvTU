@@ -1573,4 +1573,11 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="singerpicker.all">全部歌手</system:String>
   <system:String x:Key="singerpicker.missing">声库缺失</system:String>
   <system:String x:Key="singerpicker.manage">管理 / 安装声库…</system:String>
+  <system:String x:Key="packages.required.prompt">缺少依赖包：{0}。现在前往资源中心安装吗？</system:String>
+  <system:String x:Key="packages.required.unavailable">当前目录中没有可安装的 {0}。请刷新，或从本地 .oudep 文件安装。</system:String>
+  <system:String x:Key="packages.required.game">安装 GAME</system:String>
+  <system:String x:Key="packages.required.some">安装 SOME</system:String>
+  <system:String x:Key="singerpicker.duplicates">发现 {0} 组重复声库标识 — 展开查看使用中及忽略的位置</system:String>
+  <system:String x:Key="singerpicker.active">使用中</system:String>
+  <system:String x:Key="singerpicker.ignored">已忽略</system:String>
 </ResourceDictionary>

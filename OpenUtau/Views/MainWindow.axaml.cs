@@ -2335,11 +2335,7 @@ namespace OpenUtau.App.Views {
                 // Show algorithm selection dialog first
                 var transcribeVm = new TranscribeViewModel();
                 if (transcribeVm.NoneAvailable) {
-                    await MessageBox.Show(this,
-                        String.Format(ThemeManager.GetString("dialogs.transcribe.allnotfound"),
-                            Game.DownloadUrl),
-                        ThemeManager.GetString("dialogs.transcribe.caption"),
-                        MessageBox.MessageBoxButtons.Ok);
+                    await OfferRequiredPackages(new[] { "game" });
                     return;
                 }
                 var transcribeDialog = new TranscribeDialog { DataContext = transcribeVm };
@@ -2915,6 +2911,11 @@ namespace OpenUtau.App.Views {
                 ResetProjectTools();
                 FinishPartEdit();
             } else if (cmd is ErrorMessageNotification notif) {
+                var missingPackages = MissingPackageException.Find(notif.e);
+                if (missingPackages.Count > 0) {
+                    _ = OfferRequiredPackages(missingPackages);
+                    return;
+                }
                 switch (notif.e) {
                     case Core.Render.NoResamplerException:
                     case Core.Render.NoWavtoolException:

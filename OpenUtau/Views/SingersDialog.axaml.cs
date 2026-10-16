@@ -532,6 +532,9 @@ namespace OpenUtau.App.Views {
         #region ICmdSubscriber
 
         public void OnNext(UCommand cmd, bool isUndo) {
+            if (cmd is SingersChangedNotification or SingersRefreshedNotification) {
+                (DataContext as SingersViewModel)?.RefreshCatalogue();
+            }
             if (cmd is LoadingNotification loadingNotif && loadingNotif.window == typeof(SingersDialog)) {
                 if (loadingNotif.startLoading) {
                     LoadingWindow.BeginLoading(WindowHost);

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using OpenUtau.Core;
 using ReactiveUI.Fody.Helpers;
 using System.Reactive;
+using System.Reactive.Linq;
 using ReactiveUI;
 using Serilog;
 
@@ -71,6 +72,10 @@ namespace OpenUtau.App.ViewModels {
         readonly HashSet<PackageRowViewModel> observedRows = new();
         readonly Func<Task<List<RegistrySoftware>>> fetchRegistry;
         readonly Func<Task<List<OudepMetadata>>> listInstalled;
+        readonly Func<RegistrySoftware, IProgress<int>, Task> install;
+        Task? refreshing;
+        int operation;
+        [Reactive] public bool IsInstalling { get; private set; }
         bool disposed;
         public ObservableCollection<PackageRowViewModel> Available { get; } = new ObservableCollection<PackageRowViewModel>();
         [Reactive] public string SearchText { get; set; } = string.Empty;
@@ -94,12 +99,15 @@ namespace OpenUtau.App.ViewModels {
 
         public PackageManagerViewModel(bool refreshOnStart,
             Func<Task<List<RegistrySoftware>>>? fetchRegistry = null,
-            Func<Task<List<OudepMetadata>>>? listInstalled = null) {
+            Func<Task<List<OudepMetadata>>>? listInstalled = null,
+            Func<RegistrySoftware, IProgress<int>, Task>? install = null) {
             this.fetchRegistry = fetchRegistry ?? PackageManager.Inst.FetchRegistryAsync;
             this.listInstalled = listInstalled ?? PackageManager.Inst.GetInstalledAsync;
-            RefreshCommand = ReactiveCommand.CreateFromTask(RefreshAsync);
-            InstallCommand = ReactiveCommand.CreateFromTask<PackageRowViewModel>(InstallAsync);
-            UninstallCommand = ReactiveCommand.CreateFromTask<PackageRowViewModel>(UninstallAsync);
+            this.install = install ?? ((software, progress) => PackageManager.Inst.InstallAsync(software, progress));
+            var idle = this.WhenAnyValue(vm => vm.IsInstalling).Select(busy => !busy);
+            RefreshCommand = ReactiveCommand.CreateFromTask(RefreshAsync, idle);
+            InstallCommand = ReactiveCommand.CreateFromTask<PackageRowViewModel>(InstallAsync, idle);
+            UninstallCommand = ReactiveCommand.CreateFromTask<PackageRowViewModel>(UninstallAsync, idle);
             Available.CollectionChanged += OnAvailableChanged;
             subscriptions.Add(this.WhenAnyValue(x => x.SearchText, x => x.FilterIndex).Subscribe(_ => RefreshFilter()));
             if (refreshOnStart) _ = RefreshAsync();
@@ -137,7 +145,10 @@ namespace OpenUtau.App.ViewModels {
             RefreshCommand.Dispose(); InstallCommand.Dispose(); UninstallCommand.Dispose();
         }
 
-        public async Task RefreshAsync() {
+        public Task RefreshAsync() => disposed ? Task.CompletedTask :
+            refreshing is { IsCompleted: false } ? refreshing : refreshing = RefreshCoreAsync();
+
+        async Task RefreshCoreAsync() {
             if (disposed) return;
             try {
                 Status = ThemeManager.GetString("packages.status.fetching");
@@ -186,29 +197,56 @@ namespace OpenUtau.App.ViewModels {
             }
         }
 
-        public async Task InstallAsync(PackageRowViewModel row) {
+        public async Task<bool> InstallRequiredAsync(string id) {
+            if (disposed || !MissingPackageException.IsRegistryId(id)) return false;
+            SearchText = id; FilterIndex = 0;
+            await RefreshAsync();
+            if (disposed) return false;
+            var row = Available.FirstOrDefault(row => string.Equals(row.Id, id, StringComparison.OrdinalIgnoreCase));
+            if (row?.Software == null) {
+                Status = string.Format(ThemeManager.GetString("packages.required.unavailable"), id);
+                return false;
+            }
+            // This request follows a missing-file error; even an installed receipt may need repair.
+            return await InstallCoreAsync(row, repair: true);
+        }
+
+        public async Task InstallAsync(PackageRowViewModel row) => await InstallCoreAsync(row, repair: false);
+
+        async Task<bool> InstallCoreAsync(PackageRowViewModel row, bool repair) {
+            if (disposed || IsInstalling) return false;
+            IsInstalling = true;
+            int request = ++operation;
             try {
                 if (row.Software == null) {
                     DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(new InvalidOperationException("No registry entry to install.")));
-                    return;
+                    return false;
                 }
-                if (row.IsUpToDate) return;
+                if (row.IsUpToDate && !repair) return true;
                 var installingTemplate = ThemeManager.GetString("packages.status.installing");
                 var baseStatus = string.Format(installingTemplate, row.Id);
                 Status = baseStatus;
                 var progress = new Progress<int>(p => {
-                    Status = $"{baseStatus} ({p}%)";
+                    if (!disposed && IsInstalling && request == operation) Status = $"{baseStatus} ({p}%)";
                 });
-                await PackageManager.Inst.InstallAsync(row.Software, progress);
+                await install(row.Software, progress);
+                if (disposed) return false;
                 await RefreshAsync();
+                if (disposed) return false;
                 Status = ThemeManager.GetString("packages.status.installfinished");
+                return true;
             } catch (Exception e) {
+                if (disposed) return false;
                 Status = ThemeManager.GetString("packages.status.installfailed");
                 DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e));
-            }
+                return false;
+            } finally { IsInstalling = false; }
         }
 
         public async Task UninstallAsync(PackageRowViewModel row) {
+            if (disposed || IsInstalling) return;
+            IsInstalling = true;
+            operation++;
             try {
                 if (!row.IsInstalled) {
                     DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(new InvalidOperationException("Package is not installed.")));
@@ -216,12 +254,15 @@ namespace OpenUtau.App.ViewModels {
                 }
                 Status = string.Format(ThemeManager.GetString("packages.status.uninstalling"), row.Id);
                 await PackageManager.Inst.UninstallAsync(row.Id);
+                if (disposed) return;
                 await RefreshAsync();
+                if (disposed) return;
                 Status = ThemeManager.GetString("packages.status.uninstallfinished");
             } catch (Exception e) {
+                if (disposed) return;
                 Status = ThemeManager.GetString("packages.status.uninstallfailed");
                 DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e));
-            }
+            } finally { IsInstalling = false; }
         }
     }
 }

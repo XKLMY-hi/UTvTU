@@ -37,12 +37,10 @@ public class Some : MidiExtractor<SomeOptions> {
     public Some() : this(null) { }
 
     public Some(string? location) {
-        location ??= PackageManager.Inst.GetInstalledPath(PackageId)!;
+        location ??= PackageManager.Inst.GetInstalledPath(PackageId) ?? Path.Combine(PathManager.Inst.DependencyPath, PackageId);
         string yamlpath = Path.Combine(location, "some.yaml");
         if (!File.Exists(yamlpath)) {
-            throw new MessageCustomizableException("SOME not found", "<translate:errors.failed.transcribe.some>",
-                new FileNotFoundException(), false,
-                new string[] { "https://github.com/xunmengshe/OpenUtau/releases/0.0.0.0" });
+            throw new MissingPackageException(PackageId);
         }
 
         config = Yaml.DefaultDeserializer.Deserialize<SomeConfig>(

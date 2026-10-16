@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using OpenUtau.App.Controls;
@@ -18,13 +20,30 @@ namespace OpenUtau.Test.App;
 public class SingerPickerTests {
     sealed class Singer : USinger {
         readonly string id;
-        public Singer(string id, bool exists = true) { this.id = id; found = exists; }
+        static int nextLocation;
+        public Singer(string id, bool exists = true) {
+            this.id = id; found = exists;
+            Location = "voice/" + id + "/" + System.Threading.Interlocked.Increment(ref nextLocation);
+        }
         public override string Id => id;
         public override string Name => "テト " + id;
+        public override string Location { get; }
         public override Dictionary<string, string> LocalizedNames => new() { ["en"] = "Teto " + id };
         public override IList<string> SearchTerms => new[] { "Kasane", "重音" };
         public int Loads;
         public override void EnsureLoaded() => Loads++;
+    }
+
+    [Fact]
+    public void CatalogRetainsTheExistingWinnerAndReportsEachDuplicateLocationWithoutLoadingBanks() {
+        var a = new Singer("same"); var b = new Singer("same"); var c = new Singer("other");
+        var catalog = SingerManager.BuildCatalog(new[] { a, a, b, c });
+        Assert.Equal(2, catalog.singers.Count);
+        Assert.Same(a, catalog.singers["same"]);
+        var duplicate = Assert.Single(catalog.duplicates);
+        Assert.Equal(a.Location, duplicate.ActivePath);
+        Assert.Equal(b.Location, Assert.Single(duplicate.IgnoredPaths));
+        Assert.All(new[] { a, b, c }, s => Assert.Equal(0, s.Loads));
     }
 
     [AvaloniaFact]
@@ -45,6 +64,27 @@ public class SingerPickerTests {
         Assert.Equal(1, saves); Assert.Contains("a", favorites);
         vm.Move(1); Assert.NotNull(vm.Selected);
         Assert.All(new[] { a, b, c, missing }, s => Assert.Equal(0, s.Loads));
+    }
+
+    [AvaloniaFact]
+    public void TrackHeaderOpensThePickerAndEveryCloseOrDetachRemovesItsSubscription() {
+        var header = new TrackHeader();
+        var vm = new TrackHeaderViewModel { IsSingerVisible = true };
+        header.ViewModel = vm; header.DataContext = vm;
+        var window = new WindowEx { Content = header, Width = 800, Height = 600 };
+        var subscriptions = (List<ICmdSubscriber>)typeof(DocManager).GetField("subscribers", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(DocManager.Inst);
+        try {
+            window.Show(); Dispatcher.UIThread.RunJobs(); int baseline = subscriptions.Count;
+            for (int i = 0; i < 3; i++) {
+                header.FindControl<Button>("SingerButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                Dispatcher.UIThread.RunJobs();
+                var flyout = Assert.IsType<Flyout>(typeof(TrackHeader).GetField("singerFlyout", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(header));
+                Assert.IsType<SingerPicker>(flyout.Content);
+                Assert.Equal(baseline + 1, subscriptions.Count);
+                if (i < 2) flyout.Hide(); else window.Content = null;
+                Dispatcher.UIThread.RunJobs(); Assert.Equal(baseline, subscriptions.Count);
+            }
+        } finally { window.Content = null; header.Dispose(); window.Close(); }
     }
 
     [AvaloniaFact]

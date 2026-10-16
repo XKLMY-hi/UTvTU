@@ -25,6 +25,13 @@ namespace OpenUtau.App.Views {
             Close();
         }
 
+        async void OnInstallModel(object? sender, RoutedEventArgs e) {
+            if (sender is Avalonia.Controls.Button { Tag: string id } && WindowHost is MainWindow main) {
+                Close();
+                await main.OfferRequiredPackages(new[] { id });
+            }
+        }
+
         void OnRmvpeRowPressed(object? sender, PointerPressedEventArgs e) {
             e.Handled = true;
             _ = HandleRmvpeRowClick();
@@ -39,13 +46,10 @@ namespace OpenUtau.App.Views {
                 if (RmvpeCheck != null) {
                     RmvpeCheck.IsChecked = false;
                 }
-                var modelPath = RmvpeTranscriber.GetModelPath();
-                await MessageBox.ShowError(WindowHost, new MessageCustomizableException(
-                    "RMVPE not found",
-                    "<translate:errors.failed.transcribe.rmvpe>",
-                    new FileNotFoundException(modelPath),
-                    false,
-                    new[] { modelPath }));
+                if (WindowHost is MainWindow main) {
+                    Close();
+                    await main.OfferRequiredPackages(new[] { "rmvpe" });
+                }
                 return;
             }
             var current = vm.PredictPitd;

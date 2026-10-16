@@ -17,7 +17,13 @@
   <controls:WorkspaceToolView.Styles>
     <StyleInclude Source="/Styles/ResourceWorkspace.axaml"/>
   </controls:WorkspaceToolView.Styles>
-  <ScrollViewer Name="SingerScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+  <Grid RowDefinitions="Auto,*">
+    <Border IsVisible="{Binding HasDuplicateWarnings}" Background="{DynamicResource md3.tertiary-container}" CornerRadius="16" Padding="12" Margin="0,0,0,12">
+      <Expander Header="{Binding DuplicateSummary}" Foreground="{DynamicResource md3.on-tertiary-container}" HorizontalAlignment="Stretch">
+        <ScrollViewer MaxHeight="120"><TextBlock Text="{Binding DuplicateDetails}" TextWrapping="Wrap" Foreground="{DynamicResource md3.on-tertiary-container}"/></ScrollViewer>
+      </Expander>
+    </Border>
+  <ScrollViewer Grid.Row="1" Name="SingerScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
     <Grid Name="SingerLayout" MinWidth="440" Height="620" ColumnDefinitions="232,16,*">
       <Border Name="SingerBrowserSurface" CornerRadius="{DynamicResource Md3ShapeExtraLarge}" ClipToBounds="True"
               Background="{DynamicResource md3.surface-container}" IsVisible="{Binding #SingerBrowser.IsVisible}">
@@ -202,4 +208,5 @@
       </Grid>
     </Grid>
   </ScrollViewer>
+  </Grid>
 </controls:WorkspaceToolView>

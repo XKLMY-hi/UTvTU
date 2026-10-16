@@ -15,6 +15,15 @@ namespace OpenUtau.Core {
     public class SingerManager : SingletonBase<SingerManager> {
         public Dictionary<string, USinger> Singers { get; private set; } = new Dictionary<string, USinger>();
         public Dictionary<USingerType, List<USinger>> SingerGroups { get; private set; } = new Dictionary<USingerType, List<USinger>>();
+        public sealed record DuplicateSinger(string Id, string ActivePath, IReadOnlyList<string> IgnoredPaths);
+        public IReadOnlyList<DuplicateSinger> DuplicateSingers { get; private set; } = Array.Empty<DuplicateSinger>();
+
+        internal static (Dictionary<string, USinger> singers, IReadOnlyList<DuplicateSinger> duplicates) BuildCatalog(IEnumerable<USinger> source) {
+            // USinger.Equals compares Id only, so Distinct() would discard the evidence of collisions.
+            var groups = source.DistinctBy(s => (s.Id, s.Location?.Replace('\\', '/').TrimEnd('/').ToUpperInvariant())).ToLookup(s => s.Id);
+            return (groups.ToDictionary(g => g.Key, g => g.First()), groups.Where(g => g.Count() > 1)
+                .Select(g => new DuplicateSinger(g.Key, g.First().Location, g.Skip(1).Select(s => s.Location).ToArray())).ToArray());
+        }
 
         private readonly ConcurrentQueue<USinger> reloadQueue = new ConcurrentQueue<USinger>();
         private CancellationTokenSource reloadCancellation;
@@ -31,11 +40,13 @@ namespace OpenUtau.Core {
             var stopWatch = Stopwatch.StartNew();
             var singers = ClassicSingerLoader.FindAllSingers()
                 .Concat(Vogen.VogenSingerLoader.FindAllSingers())
-                .Distinct();
-            Singers = singers
-                .ToLookup(s => s.Id)
-                .ToDictionary(g => g.Key, g => g.First());
-            SingerGroups = singers
+                .ToArray();
+            var catalogue = BuildCatalog(singers);
+            Singers = catalogue.singers;
+            DuplicateSingers = catalogue.duplicates;
+            foreach (var duplicate in DuplicateSingers)
+                Log.Warning("Duplicate voicebank {Id}; using {Active}; ignored {Ignored}", duplicate.Id, duplicate.ActivePath, string.Join(", ", duplicate.IgnoredPaths));
+            SingerGroups = Singers.Values
                 .GroupBy(s => s.SingerType)
                 .ToDictionary(s => s.Key, s => s.LocalizedOrderBy(singer => singer.LocalizedName).ToList());
             stopWatch.Stop();

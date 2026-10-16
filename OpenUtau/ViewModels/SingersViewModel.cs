@@ -30,6 +30,18 @@ namespace OpenUtau.App.ViewModels {
         public int SingerCount => FilteredSingers.Count();
         public bool NoSingerMatches => SingerCount == 0;
         public bool HasSinger => Singer != null;
+        public bool HasDuplicateWarnings => SingerManager.Inst.DuplicateSingers.Count > 0;
+        public string DuplicateSummary => string.Format(ThemeManager.GetString("singerpicker.duplicates"), SingerManager.Inst.DuplicateSingers.Count);
+        public string DuplicateDetails => string.Join("\n\n", SingerManager.Inst.DuplicateSingers.Select(d =>
+            $"{d.Id}\n{ThemeManager.GetString("singerpicker.active")}: {d.ActivePath}\n{ThemeManager.GetString("singerpicker.ignored")}:\n{string.Join("\n", d.IgnoredPaths)}"));
+
+        public void RefreshCatalogue() {
+            RefreshSingerFilter();
+            this.RaisePropertyChanged(nameof(Singers));
+            this.RaisePropertyChanged(nameof(HasDuplicateWarnings));
+            this.RaisePropertyChanged(nameof(DuplicateSummary));
+            this.RaisePropertyChanged(nameof(DuplicateDetails));
+        }
         [Reactive] public USinger? Singer { get; set; }
         [Reactive] public Bitmap? Avatar { get; set; }
         [Reactive] public int AvatarRevision { get; set; }

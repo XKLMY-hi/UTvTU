@@ -193,7 +193,11 @@ namespace OpenUtau.Core.DiffSinger {
                     vocoder = new DsVocoder(Path.Join(Location, "dsvocoder"));
                     return vocoder;
                 }
-                vocoder = new DsVocoder(Path.Combine(PathManager.Inst.DependencyPath, dsConfig.vocoder));
+                string id = dsConfig.vocoder;
+                if (MissingPackageException.IsRegistryId(id) &&
+                    !File.Exists(Path.Combine(PathManager.Inst.DependencyPath, id, "vocoder.yaml")))
+                    throw new MissingPackageException(id);
+                vocoder = new DsVocoder(Path.Combine(PathManager.Inst.DependencyPath, id));
             }
             return vocoder;
 

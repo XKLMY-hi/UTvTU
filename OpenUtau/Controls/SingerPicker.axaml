@@ -25,7 +25,8 @@
                 </StackPanel>
                 <TextBlock Grid.Column="2" Text="✓" IsVisible="{Binding IsCurrent}" VerticalAlignment="Center"/>
                 <Button Grid.Column="3" Width="36" Height="36" Padding="0" Theme="{StaticResource DawTextButtonTheme}"
-                        Content="{Binding FavoriteGlyph}" Click="FavoriteClicked" ToolTip.Tip="{DynamicResource singerpicker.favorite}"/>
+                        Content="{Binding FavoriteGlyph}" Click="FavoriteClicked" ToolTip.Tip="{DynamicResource singerpicker.favorite}"
+                        AutomationProperties.Name="{DynamicResource singerpicker.favorite}"/>
               </Grid>
             </DataTemplate>
           </ListBox.ItemTemplate>
