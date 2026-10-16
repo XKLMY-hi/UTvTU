@@ -1,0 +1,61 @@
+{
+  "SourceCommit": "d70f0b018c3cdf83278df23f1db0bee107420e14",
+  "Sdk": "9.0.317",
+  "MainBuild": {
+    "Errors": 0,
+    "Seconds": 39.58,
+    "Warnings": 3,
+    "Log": ".dsh/effect-rack-actions-20261016/build-main.log"
+  },
+  "TestBuild": {
+    "Errors": 0,
+    "Seconds": 17,
+    "Warnings": 151,
+    "Log": ".dsh/effect-rack-actions-20261016/build-tests.log"
+  },
+  "UniquePassed": 36,
+  "Groups": [
+    {
+      "Passed": 24,
+      "Trx": "b140ccf49555491ab9ffe1ea26fbef40.trx",
+      "PeakMB": 193,
+      "Seconds": 16.3,
+      "Name": "rack-controls"
+    },
+    {
+      "Passed": 12,
+      "Trx": "00fcf2fd2390428990b87c77f642398e.trx",
+      "PeakMB": 137,
+      "Seconds": 6.8,
+      "Name": "ownership"
+    }
+  ],
+  "MaxSecondsPerGroup": 30,
+  "MaxRunnerMB": 384,
+  "SerialCollections": true,
+  "FullSuite": false,
+  "RealSynthesis": false,
+  "RealPluginStress": false,
+  "Screenshots": false,
+  "ProductSha256": "06E3395BB91FC1F3D94E9A4673828E5CCBCCAAE01BD031CFF3D6052120BC6B3B",
+  "CoreSha256": "A287526CE13267560FD94FE2585959193486FF4BCED56A2383E45A13D1A7D348",
+  "NativeSha256": "0CAF08E9B28464937B539A9FF976D17121946CA82092748F9DAC53D745EA1BA4",
+  "Preview": {
+    "Pid": 12932,
+    "Exe": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\OpenUtau\\bin\\Debug\\net8.0-windows\\OpenUtau.exe",
+    "Started": "2026-10-16T22:21:19.4813345+08:00",
+    "Arguments": [],
+    "Project": null,
+    "Log": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\OpenUtau\\bin\\Debug\\net8.0-windows\\Logs\\log20261016.txt",
+    "StartLine": 3536,
+    "Exited": false,
+    "VisiblePreview": true,
+    "SourceCommit": "d70f0b018c3cdf83278df23f1db0bee107420e14",
+    "RunningProductSha256": "06E3395BB91FC1F3D94E9A4673828E5CCBCCAAE01BD031CFF3D6052120BC6B3B",
+    "OnDiskProductSha256": "06E3395BB91FC1F3D94E9A4673828E5CCBCCAAE01BD031CFF3D6052120BC6B3B",
+    "CoreSha256": "A287526CE13267560FD94FE2585959193486FF4BCED56A2383E45A13D1A7D348",
+    "NativeSha256": "0CAF08E9B28464937B539A9FF976D17121946CA82092748F9DAC53D745EA1BA4",
+    "NeedsRestartForUpdate": false,
+    "StartupErrorCount": 0
+  }
+}
