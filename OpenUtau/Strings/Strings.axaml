@@ -944,7 +944,7 @@ General
   <system:String x:Key="prefs.about.version">Version</system:String>
   <system:String x:Key="prefs.about.repo">Repository</system:String>
   <system:String x:Key="prefs.about.basedon">Based on OpenUTAU</system:String>
-  <system:String x:Key="prefs.about.credit">By XKLMY | Built with vibe coding (DeepSeek v4.1 Flash)</system:String>
+  <system:String x:Key="prefs.about.credit">By XKLMY | Built with vibe coding</system:String>
 
   <!-- Mix Effects (post-processing) -->
   <system:String x:Key="mixfx.caption">Track Polish</system:String>
@@ -1033,7 +1033,7 @@ General
   <system:String x:Key="prefs.vst.discovered">Discovered Plugins</system:String>
   <system:String x:Key="prefs.vst.rescan">Rescan</system:String>
   <system:String x:Key="prefs.plus.footer1">UTvTU {0} · Fork author: XKLMY</system:String>
-  <system:String x:Key="prefs.plus.footer2">This project is built with vibe coding (deepseek-v4)</system:String>
+  <system:String x:Key="prefs.plus.footer2">This project is built with vibe coding</system:String>
 
   <!-- ============================================================
        Plus-specific keys — Debug Window log levels

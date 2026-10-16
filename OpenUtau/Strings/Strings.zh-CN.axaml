@@ -733,7 +733,7 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="prefs.about.version">版本</system:String>
   <system:String x:Key="prefs.about.repo">仓库</system:String>
   <system:String x:Key="prefs.about.basedon">基于 OpenUTAU</system:String>
-  <system:String x:Key="prefs.about.credit">By XKLMY ︱ 使用 vibe coding（DeepSeek v4.1 Flash）</system:String>
+  <system:String x:Key="prefs.about.credit">By XKLMY ︱ 使用 vibe coding</system:String>
 
   <!-- Mix Effects -->
   <system:String x:Key="mixfx.caption">试听效果</system:String>
@@ -1161,7 +1161,7 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="prefs.vst.discovered">已发现的插件</system:String>
   <system:String x:Key="prefs.vst.rescan">重新扫描</system:String>
   <system:String x:Key="prefs.plus.footer1">UTvTU {0} · 分支作者：XKLMY</system:String>
-  <system:String x:Key="prefs.plus.footer2">本项目使用 vibe coding（deepseek-v4）</system:String>
+  <system:String x:Key="prefs.plus.footer2">本项目使用 vibe coding</system:String>
 
   <!-- ============================================================
        Plus 专属新增 keys — 调试窗口
