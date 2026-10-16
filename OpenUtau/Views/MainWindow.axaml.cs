@@ -2860,21 +2860,19 @@ namespace OpenUtau.App.Views {
                 MaxWidth = 400,
             };
             var buttons = new StackPanel {
-                Orientation = Orientation.Horizontal,
-                HorizontalAlignment = HorizontalAlignment.Right,
-                Spacing = 8,
+                Classes = { "dialogActions" },
                 Margin = new Thickness(0, 12, 0, 0),
             };
 
-            void AddButton(string caption, MessageBox.MessageBoxResult result) {
-                var btn = new Button { Content = caption };
+            void AddButton(string caption, MessageBox.MessageBoxResult result, string role) {
+                var btn = new Button { Content = caption, Classes = { "dialogAction", role } };
                 btn.Click += (_, _) => CompleteOverlay(result);
                 buttons.Children.Add(btn);
             }
 
-            AddButton(ThemeManager.GetString("button.yes"), MessageBox.MessageBoxResult.Yes);
-            AddButton(ThemeManager.GetString("button.no"), MessageBox.MessageBoxResult.No);
-            AddButton(ThemeManager.GetString("button.cancel"), MessageBox.MessageBoxResult.Cancel);
+            AddButton(ThemeManager.GetString("button.cancel"), MessageBox.MessageBoxResult.Cancel, "text");
+            AddButton(ThemeManager.GetString("button.no"), MessageBox.MessageBoxResult.No, "tonal");
+            AddButton(ThemeManager.GetString("button.yes"), MessageBox.MessageBoxResult.Yes, "primary");
 
             // 内容自适应卡片（不写死 20% 窗口比例——窗口缩放时自动重排）
             var panel = new StackPanel {

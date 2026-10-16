@@ -19,7 +19,7 @@
       </ListBox.Styles>
     </ListBox>
 
-    <Button Classes="primary" Content="{DynamicResource button.ok}" Click="OkButtonClick" Grid.Row="1" Width="100" HorizontalAlignment="Center"/>
+    <Button Classes="primary dialogAction" Content="{DynamicResource button.ok}" Click="OkButtonClick" Grid.Row="1" HorizontalAlignment="Right" Margin="16,0"/>
   </Grid>
       </Border>
     </DockPanel>

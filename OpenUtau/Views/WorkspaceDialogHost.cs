@@ -63,7 +63,7 @@ public sealed class WorkspaceDialogHost : UserControl {
         icon[!DawIcon.DataProperty] = new DynamicResourceExtension("icon-x");
         icon[!DawIcon.FillProperty] = new DynamicResourceExtension("md3.on-surface-variant");
         close.Content = icon;
-        close.Classes.Add("toolClose");
+        close.Classes.Add("dialogClose");
         close[!AutomationProperties.NameProperty] = new DynamicResourceExtension("button.cancel");
         close.Click += (_, _) => CloseTop();
         var header = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto"), Margin = new Thickness(0, 0, 0, 12) };

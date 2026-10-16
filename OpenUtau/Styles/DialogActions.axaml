@@ -1,0 +1,32 @@
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Dialog footers use the same label template and state layers as the workspace.
+       Roles are primary (confirm), tonal (alternative) and text (cancel). -->
+  <Style Selector="Button.dialogAction">
+    <Setter Property="Theme" Value="{StaticResource DawTextButtonTheme}"/>
+    <Setter Property="Height" Value="{DynamicResource Md3ControlHeight}"/>
+    <Setter Property="MinHeight" Value="{DynamicResource Md3ControlHeight}"/>
+    <Setter Property="MinWidth" Value="80"/>
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="Padding" Value="{DynamicResource Md3ButtonPadding}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
+    <Setter Property="FontSize" Value="{DynamicResource Md3TypeLabelLarge}"/>
+    <Setter Property="FontWeight" Value="Medium"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+  </Style>
+  <Style Selector="StackPanel.dialogActions">
+    <Setter Property="Orientation" Value="Horizontal"/>
+    <Setter Property="Spacing" Value="8"/>
+    <Setter Property="HorizontalAlignment" Value="Right"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+  </Style>
+  <Style Selector="Button.dialogClose">
+    <Setter Property="Theme" Value="{StaticResource DawButtonTheme}"/>
+    <Setter Property="Width" Value="32"/><Setter Property="Height" Value="32"/>
+    <Setter Property="MinWidth" Value="32"/><Setter Property="MinHeight" Value="32"/>
+    <Setter Property="Padding" Value="0"/><Setter Property="Margin" Value="0"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource Md3ShapeFull}"/>
+    <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+  </Style>
+</Styles>

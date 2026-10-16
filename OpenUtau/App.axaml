@@ -61,6 +61,7 @@
     <!-- 选择类控件自有 ControlTheme（同文件挂载）：CheckBox / RadioButton / ToggleSwitch / Slider / ProgressBar -->
     <StyleInclude Source="/Styles/Md3SelectionThemes.axaml"/>
     <StyleInclude Source="avares://UTvTU.DawUI/Themes/Foundation.axaml"/>
+    <StyleInclude Source="/Styles/DialogActions.axaml"/>
     <StyleInclude Source="/Styles/WorkspacePages.axaml"/>
   </Application.Styles>
   <NativeMenu.Menu>

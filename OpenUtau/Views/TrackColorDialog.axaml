@@ -31,9 +31,9 @@
         </Style>
       </ListBox.Styles>
     </ListBox>
-    <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Top">
-      <Button Classes="text" Content="{DynamicResource button.cancel}" MinWidth="50" Click="OnCancel"/>
-      <Button Classes="primary" Content="{DynamicResource button.apply}" MinWidth="50" Click="OnFinish"/>
+    <StackPanel Grid.Row="1" Classes="dialogActions" Margin="16,0">
+      <Button Classes="text dialogAction" Content="{DynamicResource button.cancel}" Click="OnCancel"/>
+      <Button Classes="primary dialogAction" Content="{DynamicResource button.apply}" Click="OnFinish"/>
     </StackPanel>
   </Grid>
       </Border>

@@ -39,10 +39,9 @@
                Text="{DynamicResource updater.description}"/>
     <TextBlock Grid.Row="4" Margin="40,10,40,0" TextAlignment="Center"
                Text="{Binding UpdaterStatus}" FontWeight="Bold"/>
-    <StackPanel Grid.Row="5" Orientation="Horizontal" Margin="0,18,0,22"
-                HorizontalAlignment="Center" Spacing="20">
-      <Button Width="120" Content="{DynamicResource updater.github}" Command="{Binding OnGithub}"/>
-      <Button Width="120" Content="{DynamicResource updater.update}" Command="{Binding OnUpdate}"
+    <StackPanel Grid.Row="5" Classes="dialogActions" Margin="24,18,24,22">
+      <Button Classes="tonal dialogAction" Content="{DynamicResource updater.github}" Command="{Binding OnGithub}"/>
+      <Button Classes="primary dialogAction" Content="{DynamicResource updater.update}" Command="{Binding OnUpdate}"
               IsEnabled="{Binding UpdateAvailable}"
               FontWeight="{Binding UpdateButtonFontWeight}"/>
     </StackPanel>

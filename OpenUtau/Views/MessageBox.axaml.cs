@@ -288,17 +288,17 @@ namespace OpenUtau.App.Views {
             root.Children.Add(content);
 
             var buttonRow = new StackPanel {
-                Orientation = Orientation.Horizontal,
-                Spacing = 12,
-                HorizontalAlignment = HorizontalAlignment.Right,
+                Classes = { "dialogActions" },
             };
             foreach (var descriptor in buttons) {
                 var button = new Button {
                     Content = descriptor.Label,
-                    MinWidth = 88,
+                    Classes = { "dialogAction" },
                 };
                 if (descriptor.Primary) {
                     button.Classes.Add("primary");
+                } else if (descriptor.Result == MessageBoxResult.No) {
+                    button.Classes.Add("tonal");
                 } else {
                     button.Classes.Add("text");
                 }

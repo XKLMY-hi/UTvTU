@@ -104,7 +104,7 @@
           </Grid>
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,12,6">
             <Button Margin="4,0" HorizontalAlignment="Right" IsEnabled="{Binding !IsTrackOverride}" Content="{DynamicResource exps.getsuggestions}" Command="{Binding GetSuggestions}" Classes="toolAction"/>
-            <Button Classes="primary toolAction" Margin="4,0" Width="80" HorizontalAlignment="Right" Content="{DynamicResource button.apply}" Click="ApplyButtonClicked"/>
+            <Button Classes="primary dialogAction" Margin="4,0" HorizontalAlignment="Right" Content="{DynamicResource button.apply}" Click="ApplyButtonClicked"/>
           </StackPanel>
         </WrapPanel>
       </Grid>

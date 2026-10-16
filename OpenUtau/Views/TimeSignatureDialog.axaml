@@ -6,7 +6,7 @@
           <ComboBox Grid.Column="0" Margin="4" HorizontalAlignment="Stretch" ItemsSource="{Binding BeatPerBars}" SelectedItem="{Binding BeatPerBar}"/>
           <ComboBox Grid.Column="1" Margin="4" HorizontalAlignment="Stretch" ItemsSource="{Binding BeatUnits}" SelectedItem="{Binding BeatUnit}"/>
         </Grid>
-        <Button Classes="primary toolAction" Content="{DynamicResource button.ok}" Margin="8,4" HorizontalAlignment="Stretch" Click="OnOkButtonClick"/>
+        <Button Classes="primary dialogAction" Content="{DynamicResource button.ok}" Margin="8,4" HorizontalAlignment="Stretch" Click="OnOkButtonClick"/>
       </StackPanel>
     </Border>
   </DockPanel>

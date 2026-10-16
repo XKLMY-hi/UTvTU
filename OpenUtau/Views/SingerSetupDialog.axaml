@@ -37,7 +37,7 @@
       <Grid Grid.Row="2" Margin="10" HorizontalAlignment="Stretch">
         <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
           <TextBlock Margin="0,1,0,0" Text="{DynamicResource singersetup.archivefileencoding.prompt}"></TextBlock>
-          <Button Classes="primary" Margin="0" Command="{Binding Next}"
+          <Button Classes="primary dialogAction" Margin="0" Command="{Binding Next}"
                   Content="{DynamicResource singersetup.next}"/>
         </StackPanel>
       </Grid>
@@ -61,13 +61,13 @@
       </StackPanel>
       <ListBox Grid.Row="1" Margin="10,0" Focusable="False" ItemsSource="{Binding TextItems}"/>
       <Grid Grid.Row="2" Margin="10" HorizontalAlignment="Stretch">
-        <Button Margin="0" Command="{Binding Back}" HorizontalAlignment="Left"
+        <Button Classes="text dialogAction" Margin="0" Command="{Binding Back}" HorizontalAlignment="Left"
                  Content="{DynamicResource singersetup.back}"/>
         <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
           <TextBlock Margin="0,1,0,0" Text="{DynamicResource singersetup.textfileencoding.prompt}"/>
-          <Button Classes="primary" Margin="0" Command="{Binding Next}" IsVisible="{Binding MissingInfo}"
+          <Button Classes="primary dialogAction" Margin="0" Command="{Binding Next}" IsVisible="{Binding MissingInfo}"
                   Content="{DynamicResource singersetup.next}"/>
-          <Button Classes="primary" Margin="0" Click="InstallClicked" IsVisible="{Binding !MissingInfo}"
+          <Button Classes="primary dialogAction" Margin="0" Click="InstallClicked" IsVisible="{Binding !MissingInfo}"
                   Content="{DynamicResource singersetup.install}"/>
         </StackPanel>
       </Grid>
@@ -91,10 +91,10 @@
         <ComboBox Grid.Row="0" Grid.Column="1" Width="240" Margin="0" ItemsSource="{Binding SingerTypes}" SelectedItem="{Binding SingerType}"/>
       </Grid>
       <Grid Grid.Row="2" Margin="10" HorizontalAlignment="Stretch">
-        <Button Margin="0" Command="{Binding Back}" HorizontalAlignment="Left"
+        <Button Classes="text dialogAction" Margin="0" Command="{Binding Back}" HorizontalAlignment="Left"
                 Content="{DynamicResource singersetup.back}"/>
         <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
-          <Button Classes="primary" Margin="0" HorizontalAlignment="Right" Click="InstallClicked"
+          <Button Classes="primary dialogAction" Margin="0" HorizontalAlignment="Right" Click="InstallClicked"
                   Content="{DynamicResource singersetup.install}"/>
         </StackPanel>
       </Grid>

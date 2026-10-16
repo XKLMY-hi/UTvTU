@@ -1,7 +1,7 @@
 <controls:WorkspaceToolView xmlns="https://github.com/avaloniaui" xmlns:controls="clr-namespace:OpenUtau.App.Controls" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="OpenUtau.App.Views.VoiceColorMappingDialog" Title="{DynamicResource dialogs.voicecolorremapping}" Focusable="True" Classes="refinedTool">
   <DockPanel LastChildFill="True" Margin="16">
     <Border>
-      <Grid RowDefinitions="40,1*,30" Margin="10">
+      <Grid RowDefinitions="40,1*,Auto" Margin="10">
         <StackPanel Grid.Row="0">
           <TextBlock Text="{DynamicResource dialogs.voicecolorremapping.caption}"/>
           <TextBlock Text="{Binding TrackName}"/>
@@ -18,9 +18,9 @@
             </ItemsControl.ItemTemplate>
           </ItemsControl>
         </ScrollViewer>
-        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Center" Spacing="10">
-          <Button Classes="primary toolAction" Content="{DynamicResource button.ok}" Click="Ok_OnClick" Width="100"/>
-          <Button Classes="text toolAction" Content="{DynamicResource button.cancel}" Click="Cancel_OnClick" Width="100"/>
+        <StackPanel Classes="dialogActions" Grid.Row="2" Margin="0,12,0,0">
+          <Button Classes="text dialogAction" Content="{DynamicResource button.cancel}" Click="Cancel_OnClick"/>
+          <Button Classes="primary dialogAction" Content="{DynamicResource button.ok}" Click="Ok_OnClick"/>
         </StackPanel>
       </Grid>
     </Border>

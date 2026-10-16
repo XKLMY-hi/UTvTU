@@ -57,9 +57,9 @@
             </ToggleSwitch>
           </WrapPanel>
           <WrapPanel HorizontalAlignment="Right">
-            <Button Content="{DynamicResource button.reset}" Margin="8,0,0,6" Command="{Binding Reset}" Classes="toolAction"/>
-            <Button Classes="text toolAction" Content="{DynamicResource button.cancel}" Margin="8,0,0,6" Click="OnCancel"/>
-            <Button Classes="primary toolAction" Content="{DynamicResource button.apply}" Margin="8,0,0,6" Click="OnFinish"/>
+            <Button Content="{DynamicResource button.reset}" Margin="8,0,0,6" Command="{Binding Reset}" Classes="tonal dialogAction"/>
+            <Button Classes="text dialogAction" Content="{DynamicResource button.cancel}" Margin="8,0,0,6" Click="OnCancel"/>
+            <Button Classes="primary dialogAction" Content="{DynamicResource button.apply}" Margin="8,0,0,6" Click="OnFinish"/>
           </WrapPanel>
         </StackPanel>
       </Grid>

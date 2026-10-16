@@ -654,12 +654,16 @@
             <Border Name="OverlayHeader" Grid.Row="0" IsVisible="False" Padding="16,10" CornerRadius="11.5,11.5,0,0">
               <Grid ColumnDefinitions="*,Auto">
                 <TextBlock Name="OverlayHeaderTitle" Grid.Column="0" VerticalAlignment="Center" FontSize="{DynamicResource Md3TypeBodyLarge}" FontWeight="SemiBold"/>
-                <Button Name="OverlayHeaderClose" Grid.Column="1" Content="✕" Click="OnOverlayCloseClicked" Margin="8,0,0,0" Padding="6,0" MinWidth="24" MinHeight="24" FontSize="{DynamicResource Md3TypeBodySmall}" Opacity="0.7" VerticalAlignment="Center"/>
+                <Button Name="OverlayHeaderClose" Grid.Column="1" Classes="dialogClose" Click="OnOverlayCloseClicked" Margin="8,0,0,0" VerticalAlignment="Center" AutomationProperties.Name="{DynamicResource button.cancel}">
+                  <c:DawIcon Data="{StaticResource icon-x}" Width="14" Height="14" Fill="{Binding $parent[Button].Foreground}"/>
+                </Button>
               </Grid>
             </Border>
             <ContentControl Grid.Row="1" Name="OverlayContent"/>
             <!-- Floating close for non-header overlays (Updater) -->
-            <Button Name="OverlayCloseButton" Content="✕" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,12,0" Padding="6,0" MinWidth="24" MinHeight="24" FontSize="{DynamicResource Md3TypeBodySmall}" Opacity="0.7" Click="OnOverlayCloseClicked"/>
+            <Button Name="OverlayCloseButton" Classes="dialogClose" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,12,0" Click="OnOverlayCloseClicked" AutomationProperties.Name="{DynamicResource button.cancel}">
+              <c:DawIcon Data="{StaticResource icon-x}" Width="14" Height="14" Fill="{Binding $parent[Button].Foreground}"/>
+            </Button>
           </Grid>
         </Border>
       </Grid>

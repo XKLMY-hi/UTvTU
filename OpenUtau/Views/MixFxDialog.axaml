@@ -248,8 +248,8 @@
         </ComboBox>
         <Button Theme="{StaticResource DawTextButtonTheme}" Margin="0,0,8,6" Content="{DynamicResource mixfx.library.save}" Command="{Binding SaveUserPresetCommand}" Classes="toolAction"/>
         <Button Theme="{StaticResource DawTextButtonTheme}" Margin="0,0,8,6" Content="{DynamicResource mixfx.library.delete}" Command="{Binding DeleteUserPresetCommand}" IsEnabled="{Binding CanDeleteSelectedPreset}" Classes="toolAction"/>
-        <Button Classes="text toolAction" Theme="{StaticResource DawTextButtonTheme}" Content="{DynamicResource button.cancel}" MinWidth="90" Margin="0,0,8,6" Click="OnCancelClicked"/>
-        <Button Theme="{StaticResource DawTextButtonTheme}" Classes="primary toolAction" Content="{DynamicResource button.ok}" MinWidth="90" Click="OnOkClicked" Margin="0,0,8,6"/>
+        <Button Classes="text dialogAction" Content="{DynamicResource button.cancel}" Margin="0,0,8,6" Click="OnCancelClicked"/>
+        <Button Classes="primary dialogAction" Content="{DynamicResource button.ok}" Click="OnOkClicked" Margin="0,0,8,6"/>
       </WrapPanel>
     </StackPanel>
   </Grid>

@@ -2,8 +2,8 @@ using System;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Presenters;
 using Avalonia.Headless.XUnit;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -11,6 +11,8 @@ using System.Linq;
 using OpenUtau.App.Controls;
 using OpenUtau.App.Views;
 using OpenUtau.Core.Util;
+using OpenUtau.Core.Theming;
+using OpenUtau.Theming;
 using Xunit;
 
 namespace OpenUtau.Test.App;
@@ -18,6 +20,7 @@ namespace OpenUtau.Test.App;
 [Collection("WorkspaceSession")]
 public sealed class WorkspaceDialogPresentationTests : IDisposable {
     readonly bool previousMotion = Preferences.Default.ReduceMotion;
+    readonly bool previousDark = ColorPool.Current.IsDark;
     sealed class Host : WindowEx, IWorkspaceToolHost {
         public readonly TextBox Input = new() { Text = "editor" };
         public readonly Grid Surface = new();
@@ -95,12 +98,83 @@ public sealed class WorkspaceDialogPresentationTests : IDisposable {
             Assert.True(position.X + tool.Bounds.Width <= card.Bounds.Width - card.Padding.Right + .01);
             Assert.True(position.Y + tool.Bounds.Height <= card.Bounds.Height - card.Padding.Bottom + .01);
             var button = tool.FindControl<Button>("OkButton")!;
-            var presenter = button.GetVisualDescendants().OfType<ContentPresenter>().Single(p => p.Name == "PART_ContentPresenter");
-            Assert.True(presenter.Background == null || presenter.Background is ISolidColorBrush { Color.A: 0 });
+            AssertButtonLabelIsCentered(button);
             var root = button.GetVisualDescendants().OfType<Border>().Single(b => b.Name == "PART_Root");
             Assert.Equal(button.Bounds.Size, root.Bounds.Size);
             Assert.Equal(button.CornerRadius, root.CornerRadius);
         } finally { host.Dialogs.Shutdown(); host.Close(); }
     }
-    public void Dispose() => Preferences.Default.ReduceMotion = previousMotion;
+    static Color ResourceColor(Control control, string key) {
+        Assert.True(control.TryFindResource(key, out var resource));
+        return Assert.IsAssignableFrom<ISolidColorBrush>(resource).Color;
+    }
+    static void AssertButtonLabelIsCentered(Button button) {
+        Assert.Equal(40, button.Bounds.Height);
+        Assert.True(button.Bounds.Width >= 80);
+        Assert.Equal(new CornerRadius(999), button.CornerRadius);
+        var label = button.GetVisualDescendants().OfType<TextBlock>().Single(t => t.Name == "PART_Label");
+        Assert.Equal(button.FontSize, label.FontSize);
+        Assert.Equal(button.Foreground, label.Foreground);
+        var center = label.TranslatePoint(new Point(label.Bounds.Width / 2, label.Bounds.Height / 2), button)!.Value;
+        Assert.InRange(Math.Abs(center.X - button.Bounds.Width / 2), 0, .6);
+        Assert.InRange(Math.Abs(center.Y - button.Bounds.Height / 2), 0, .6);
+    }
+    [AvaloniaTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ConfirmationButtonsKeepTheirRolesAndResultsInBothThemes(bool dark) {
+        Preferences.Default.ReduceMotion = true;
+        ColorPool.Initialize(ColorPool.DefaultSeed, Md3SchemeVariant.TonalSpot, dark);
+        var host = new Host(); host.Show();
+        try {
+            foreach (var (role, expected) in new[] {
+                ("primary", MessageBox.MessageBoxResult.Yes),
+                ("tonal", MessageBox.MessageBoxResult.No),
+                ("text", MessageBox.MessageBoxResult.Cancel),
+            }) {
+                var completion = MessageBox.Show(host, "Save changes?", "Confirm", MessageBox.MessageBoxButtons.YesNoCancel);
+                Dispatcher.UIThread.RunJobs(); host.UpdateLayout();
+                var buttons = host.Dialogs.GetVisualDescendants().OfType<Button>().Where(b => b.Classes.Contains("dialogAction")).ToArray();
+                Assert.Equal(3, buttons.Length);
+                Assert.All(buttons, AssertButtonLabelIsCentered);
+                var primary = buttons.Single(b => b.Classes.Contains("primary"));
+                var secondary = buttons.Single(b => b.Classes.Contains("tonal"));
+                var cancel = buttons.Single(b => b.Classes.Contains("text"));
+                Assert.Equal(ResourceColor(primary, "md3.primary"), Assert.IsAssignableFrom<ISolidColorBrush>(primary.Background).Color);
+                Assert.Equal(ResourceColor(primary, "md3.on-primary"), Assert.IsAssignableFrom<ISolidColorBrush>(primary.Foreground).Color);
+                Assert.Equal(ResourceColor(secondary, "md3.secondary-container"), Assert.IsAssignableFrom<ISolidColorBrush>(secondary.Background).Color);
+                Assert.Equal(0, Assert.IsAssignableFrom<ISolidColorBrush>(cancel.Background).Color.A);
+                Assert.All(buttons, b => Assert.Equal(new Thickness(0), b.BorderThickness));
+                buttons.Single(b => b.Classes.Contains(role)).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                Assert.Equal(expected, await completion);
+                Assert.False(host.Dialogs.HasDialogs);
+            }
+        } finally { host.Dialogs.Shutdown(); host.Close(); }
+    }
+    [AvaloniaTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void InputAndMappingDialogsShareFooterMetricsAndCloseIcons(bool dark) {
+        Preferences.Default.ReduceMotion = true;
+        ColorPool.Initialize(ColorPool.DefaultSeed, Md3SchemeVariant.TonalSpot, dark);
+        var host = new Host(); host.Show();
+        try {
+            foreach (var tool in new WorkspaceToolView[] { new TypeInDialog(), new TimeSignatureDialog(), new TrackColorDialog(), new VoiceColorMappingDialog() }) {
+                tool.Show(host); Dispatcher.UIThread.RunJobs(); host.UpdateLayout();
+                var buttons = tool.GetVisualDescendants().OfType<Button>().Where(b => b.Classes.Contains("dialogAction")).ToArray();
+                Assert.NotEmpty(buttons);
+                Assert.All(buttons, AssertButtonLabelIsCentered);
+                var primary = buttons.Single(b => b.Classes.Contains("primary"));
+                Assert.Equal(ResourceColor(primary, "md3.primary"), Assert.IsAssignableFrom<ISolidColorBrush>(primary.Background).Color);
+                var close = host.Dialogs.GetVisualDescendants().OfType<Button>().Single(b => b.Classes.Contains("dialogClose"));
+                Assert.Equal(new Size(32, 32), close.Bounds.Size);
+                Assert.IsType<DawIcon>(close.Content);
+                tool.Close();
+            }
+        } finally { host.Dialogs.Shutdown(); host.Close(); }
+    }
+    public void Dispose() {
+        Preferences.Default.ReduceMotion = previousMotion;
+        ColorPool.SetDark(previousDark);
+    }
 }

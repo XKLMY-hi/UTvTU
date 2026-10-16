@@ -17,18 +17,9 @@
     <TextBlock Margin="20" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" Name="Text" TextWrapping="Wrap" MaxWidth="560" Text="{Binding message}"/>
     <TextBox Margin="30,0,30,20" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{OnPlatform False, macOS=True}" TextWrapping="Wrap" Height="36"
              Text="% brew tap gcenx/wine&#x0a;% brew install --cask --no-quarantine wine-crossover" />
-    <StackPanel Grid.Row="2" HorizontalAlignment="Center" Orientation="Horizontal" Name="Buttons">
-      <StackPanel.Styles>
-        <Style Selector="Button">
-          <Setter Property="Margin" Value="15,0,15,0"/>
-          <Setter Property="MinWidth" Value="80"/>
-        </Style>
-        <Style Selector="Button TextBlock">
-          <Setter Property="TextAlignment" Value="Center"/>
-        </Style>
-      </StackPanel.Styles>
-      <Button Click="InstallAsResampler" Content="{DynamicResource exesetup.resampler}"/>
-      <Button Click="InstallAsWavtool" Content="{DynamicResource exesetup.wavtool}"/>
+    <StackPanel Grid.Row="2" Classes="dialogActions" Margin="20,0" Name="Buttons">
+      <Button Classes="tonal dialogAction" Click="InstallAsResampler" Content="{DynamicResource exesetup.resampler}"/>
+      <Button Classes="tonal dialogAction" Click="InstallAsWavtool" Content="{DynamicResource exesetup.wavtool}"/>
     </StackPanel>
   </Grid>
       </Border>
