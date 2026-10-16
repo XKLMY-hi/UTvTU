@@ -1,0 +1,91 @@
+{
+  "SourceCommit": "e5bff785c28bbc7780d80990e0223806da1dec44",
+  "Sdk": "9.0.317",
+  "BuildProjectReferences": false,
+  "SharedCompilation": false,
+  "Builds": {
+    "Main": {
+      "Errors": 0,
+      "Warnings": 3,
+      "Seconds": 34.7
+    },
+    "Native": {
+      "Log": ".dsh/vst-owned-20261016/build-native2.log",
+      "Errors": 0
+    },
+    "Core": {
+      "Errors": 0,
+      "Warnings": 1066,
+      "Seconds": 16.87
+    },
+    "Tests": {
+      "Errors": 0,
+      "Warnings": 152,
+      "Seconds": 15.91
+    }
+  },
+  "UniquePassed": 25,
+  "Groups": [
+    {
+      "Seconds": 4.9,
+      "PeakMB": 53,
+      "Passed": 7,
+      "Trx": "17d7d0703cf647c28313d5294e71e8fa.trx",
+      "Name": "host-responsiveness"
+    },
+    {
+      "Seconds": 7.8,
+      "PeakMB": 130,
+      "Passed": 18,
+      "Trx": "3ec3ba094af74c15a662b07bcd3ba8e8.trx",
+      "Name": "lifecycle-ownership"
+    }
+  ],
+  "NativeOwnerProbe": {
+    "Instances": 1,
+    "Plugin": "Persistent Q",
+    "Seconds": 3.2,
+    "PeakMB": 121.0,
+    "Stopped": false,
+    "ExitCode": 0,
+    "CoreSha256": "97E615F7D81F9A0C9810379EB1617CABCBC8C8716FB25A7AB87D48F685820EFB",
+    "NativeSha256": "9483EB15A8D1E985DF764CF8323D9AAB9B6A8B211B0BCF80F8D28CE088B60BEC"
+  },
+  "OwnerProbeChecks": [
+    "owner matches",
+    "reopen reuses HWND",
+    "above activated owner",
+    "minimize hides",
+    "restore shows",
+    "invalid owner rejected",
+    "editor close/reopen",
+    "owner destruction closes editor",
+    "new owner after destruction",
+    "unload closes editor and keeps owner"
+  ],
+  "MaxSecondsPerGroup": 30,
+  "MaxRunnerMB": 384,
+  "SerialCollections": true,
+  "FullSuite": false,
+  "RealSynthesis": false,
+  "RealPluginStress": false,
+  "Screenshots": false,
+  "Preview": {
+    "Pid": 16664,
+    "Exe": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\OpenUtau\\bin\\Debug\\net8.0-windows\\OpenUtau.exe",
+    "Started": "2026-10-16T22:35:41.3587796+08:00",
+    "Arguments": [],
+    "Project": null,
+    "Log": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\OpenUtau\\bin\\Debug\\net8.0-windows\\Logs\\log20261016.txt",
+    "StartLine": 4761,
+    "Exited": false,
+    "VisiblePreview": true,
+    "SourceCommit": "e5bff785c28bbc7780d80990e0223806da1dec44",
+    "RunningProductSha256": "C3E81B555C4EDC1E1203EA377040CD72FAA86AD4AB5BA31C94D094B4A243677A",
+    "OnDiskProductSha256": "C3E81B555C4EDC1E1203EA377040CD72FAA86AD4AB5BA31C94D094B4A243677A",
+    "CoreSha256": "97E615F7D81F9A0C9810379EB1617CABCBC8C8716FB25A7AB87D48F685820EFB",
+    "NativeSha256": "9483EB15A8D1E985DF764CF8323D9AAB9B6A8B211B0BCF80F8D28CE088B60BEC",
+    "NeedsRestartForUpdate": false,
+    "StartupErrorCount": 0
+  }
+}

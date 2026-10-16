@@ -1,5 +1,12 @@
 # HANDOVER — 新会话交接（2026-10-16 统一底部效果器机架）
 
+## 2026-10-16 VST GUI 默认置于主窗口上方（最新）
+
+- 用户确定不内嵌，采用主窗口owner关系：插件浮窗默认在UTvTU之上，随主窗口最小化隐藏/恢复显示；不是全局Topmost。机架/诊断两个入口传主窗口HWND，GUI仍在共享VST STA上处理。产品提交`e5bff785`，未推送。[实现与验收](.opencode/plans/vst-owned-editor-2026-10-16.md)。
+- 旧无参CLR入口/旧原生导出保持；新增owner原生导出，校验本进程顶层句柄。实测跨线程owner销毁不会可靠清理插件窗口，补owner销毁事件钩子、异步WM_CLOSE、WM_DESTROY统一detach及销毁时解除钩子。真实Persistent Q检查层级/最小化恢复/关闭重开/owner销毁/卸载均通过（3.2秒、121MB）；不是歌曲播放压力测试。
+- 25项不同轻量回归通过，两组串行4.9/7.8秒、53/130MB，30秒/384MB护栏；SDK9增量Core/Main/Test与Release桥构建0错，无全套/真实合成/自截图。[验证JSON](.opencode/plans/vst-owned-editor-2026-10-16/validation.json)含TRX与哈希；探针复现模板/护栏同目录。
+- 标准主程序已更新并无参数启动PID16664、2026-10-16T22:35:41.3587796+08:00，响应/窗口正常、启动ERR/FTL0。身份`.dsh/workspace-preview.json`；备份`.dsh/vst-owned-20261016/previous-main/`。产品`C3E81B555C4EDC1E1203EA377040CD72FAA86AD4AB5BA31C94D094B4A243677A`，Core`97E615F7D81F9A0C9810379EB1617CABCBC8C8716FB25A7AB87D48F685820EFB`，桥`9483EB15A8D1E985DF764CF8323D9AAB9B6A8B211B0BCF80F8D28CE088B60BEC`；下文PID/哈希为历史。
+
 ## 2026-10-16 机架按钮反馈修复（最新）
 
 - 用户截图中左右移动显示`OpenUtau.App.Controls.DawIcon`，同时内置效果无法找到移除。根因是图标按钮误用仅文字的DawTextButtonTheme，类型名挤出移除入口；已改用支持ContentPresenter的DawButtonTheme，移动按钮固定28宽，文字移除保留文字模板；内置效果新增右键移除。
