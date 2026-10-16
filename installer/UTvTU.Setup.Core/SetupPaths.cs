@@ -39,8 +39,9 @@ public static class SetupPaths {
 
     public static void RejectLinks(string path) {
         for (string? p = Path.GetFullPath(path); p != null; p = Path.GetDirectoryName(p)) {
-            if ((File.Exists(p) || Directory.Exists(p)) && (File.GetAttributes(p) & FileAttributes.ReparsePoint) != 0)
-                throw new IOException($"安装路径不能经过符号链接或目录联接：{p}");
+            try {
+                if ((File.GetAttributes(p) & FileAttributes.ReparsePoint) != 0) throw new IOException($"安装路径不能经过符号链接或目录联接：{p}");
+            } catch (FileNotFoundException) { } catch (DirectoryNotFoundException) { }
         }
     }
     public static IEnumerable<string> EnumerateFiles(string root) {

@@ -33,6 +33,11 @@ public class SetupRegistrationTests {
         string command = (string)store.Read(SetupRegistration.UninstallKey, "QuietUninstallString")!;
         Assert.Contains("--silent", command); Assert.DoesNotContain("--quiet", command); Assert.StartsWith("\"", command);
     }
+    [Fact] public void RegisteredUninstallerCanRunOutsideTheLockedInstallDirectory() {
+        var store = new Store(); string cached = Path.Combine(Path.GetTempPath(), "installer cache", "UTvTU-Uninstall.exe");
+        new SetupRegistration(store).Install(Receipt(), true, cached);
+        Assert.StartsWith("\"" + cached + "\" --uninstall --silent", (string)store.Read(SetupRegistration.UninstallKey, "QuietUninstallString")!);
+    }
     [Fact] public void UninstallPreservesExtensionMetadataAndAnotherUsersEntry() {
         var store = new Store(); var registration = new SetupRegistration(store); registration.Install(Receipt(), true);
         store.Write(@"Software\Classes\.ustxp", "CustomMetadata", "keep"); registration.Uninstall(Receipt().Directory, "other-user");

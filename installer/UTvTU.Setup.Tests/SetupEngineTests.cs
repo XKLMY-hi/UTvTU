@@ -1,6 +1,8 @@
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
+using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
 using UTvTU.Setup;
 using Xunit;
 
@@ -16,7 +18,7 @@ public sealed class SetupEngineTests : IDisposable {
         if (!SetupPaths.Within(Path.Combine(Path.GetTempPath(), "UTvTU-Setup-Tests"), sandbox)) throw new Exception("Invalid fixture cleanup.");
         Directory.Delete(sandbox, true);
     }
-    static MemoryStream Package(string version = "UTvTU-26.10.16-000000", params (string Path, string Content)[] extra) {
+    internal static MemoryStream Package(string version = "UTvTU-26.10.16-000000", params (string Path, string Content)[] extra) {
         var files = new[] { ("OpenUtau.exe", version), ("UTvTU-Uninstall.exe", "uninstaller") }.Concat(extra).ToArray();
         var manifest = new PackageManifest { Version = version, SourceCommit = new string('a', 40) };
         var stream = new MemoryStream();
@@ -129,5 +131,25 @@ public sealed class SetupEngineTests : IDisposable {
         Assert.False(SetupPaths.Within(Target, Target + "-other/file"));
         Assert.True(SetupPaths.Within(Target, Path.Combine(Target, "library.dll")));
     }
+    [Fact] public void BrokenDirectoryJunctionCannotRedirectInstallation() {
+        string outside = Path.Combine(sandbox, "missing-destination");
+        Directory.CreateDirectory(Target);
+        try {
+            byte[] substitute = Encoding.Unicode.GetBytes(@"\??\" + outside), display = Encoding.Unicode.GetBytes(outside);
+            byte[] data = new byte[16 + substitute.Length + 2 + display.Length + 2];
+            BitConverter.GetBytes(0xA0000003u).CopyTo(data, 0); BitConverter.GetBytes((ushort)(data.Length - 8)).CopyTo(data, 4);
+            BitConverter.GetBytes((ushort)substitute.Length).CopyTo(data, 10); BitConverter.GetBytes((ushort)(substitute.Length + 2)).CopyTo(data, 12); BitConverter.GetBytes((ushort)display.Length).CopyTo(data, 14);
+            substitute.CopyTo(data, 16); display.CopyTo(data, 16 + substitute.Length + 2);
+            using (var handle = CreateFileW(Target, 0x40000000, 7, IntPtr.Zero, 3, 0x02200000, IntPtr.Zero)) {
+                if (handle.IsInvalid || !DeviceIoControl(handle, 0x900A4, data, data.Length, IntPtr.Zero, 0, out _, IntPtr.Zero)) throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+            }
+            Assert.True((File.GetAttributes(Target) & FileAttributes.ReparsePoint) != 0);
+            Assert.False(Directory.Exists(outside));
+            Assert.Throws<IOException>(() => engine.Install(Package(), Options, null, CancellationToken.None));
+            Assert.False(Directory.Exists(outside));
+        } finally { Directory.Delete(Target); }
+    }
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)] static extern SafeFileHandle CreateFileW(string path, uint access, uint share, IntPtr security, uint mode, uint flags, IntPtr template);
+    [DllImport("kernel32.dll", SetLastError = true)] static extern bool DeviceIoControl(SafeFileHandle file, uint code, byte[] input, int inputSize, IntPtr output, int outputSize, out int returned, IntPtr overlapped);
     sealed class Callback(Action<SetupProgress> action) : IProgress<SetupProgress> { public void Report(SetupProgress value) => action(value); }
 }

@@ -19,8 +19,8 @@ public static class InstallerCore {
     public static string SelfPath => Environment.ProcessPath ?? throw new IOException("无法定位安装程序。");
     public static string Version => typeof(InstallerCore).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "开发预览";
     public static string UserSid => WindowsIdentity.GetCurrent().User?.Value ?? throw new IOException("无法确认当前用户。");
-    public static bool HasPayload { get { using var stream = typeof(InstallerCore).Assembly.GetManifestResourceStream("payload.zip"); return stream != null; } }
-    public static Stream OpenPayload() => typeof(InstallerCore).Assembly.GetManifestResourceStream("payload.zip") ?? throw new InvalidDataException("此文件不包含安装载荷。请下载完整安装包。");
+    public static bool HasPayload { get { try { return PayloadContainer.Contains(SelfPath); } catch (IOException) { return false; } } }
+    public static Stream OpenPayload() => PayloadContainer.Open(SelfPath);
     public static string LogDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UTvTU", "SetupLogs");
     public static string DefaultInstallDir() {
         if (Command.Directory != null) return Path.GetFullPath(Command.Directory);

@@ -49,6 +49,8 @@ try {
         $source=if ([IO.Path]::IsPathFullyQualified($PublishDirectory)) { $PublishDirectory } else { Join-Path $repo $PublishDirectory }
         Invoke-Dotnet @($packager,'validate',$source)
         $identity=Get-Content -LiteralPath (Join-Path $source 'utvtu-build.json') -Raw | ConvertFrom-Json
+        & git -C $repo diff --quiet $identity.SourceCommit HEAD -- OpenUtau OpenUtau.Core OpenUtau.Plugin.Builtin UTvTU.DawUI UTvTU.Md3 VstProbe installer runtimes scripts/build-installer.ps1
+        if ($LASTEXITCODE -ne 0) { throw '产物来源之后的程序或安装器源码已变化，必须执行完整发布。' }
         $stamp=$identity.Version; $commit=$identity.SourceCommit
         foreach ($item in Get-ChildItem -LiteralPath $source -Force) { Copy-Item -LiteralPath $item.FullName -Destination (Join-Path $stage $item.Name) -Recurse -Force }
     } else {
@@ -82,7 +84,7 @@ try {
     New-Item -ItemType Directory -Path $output -Force | Out-Null
     $final=Join-Path $output ($stamp+'.exe')
     if (Test-Path -LiteralPath $final) { throw '同版本安装包已存在，请使用另一个输出目录。' }
-    Copy-Item -LiteralPath (Join-Path $setup 'UTvTU-Setup.exe') -Destination $final
+    Invoke-Dotnet @($packager,'bundle',(Join-Path $setup 'UTvTU-Setup.exe'),$payload,$final)
     $hash=(Get-FileHash -LiteralPath $final -Algorithm SHA256).Hash
     "$hash  $stamp.exe" | Set-Content -LiteralPath (Join-Path $output ($stamp+'.sha256')) -Encoding utf8
     @{Version=$stamp;SourceCommit=$commit;Runtime=$Runtime;Sdk=$sdkVersion;InstallerSha256=$hash;Manifest=(Get-Content -LiteralPath (Join-Path $work 'package-manifest.json') -Raw | ConvertFrom-Json)} | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $output ($stamp+'.json')) -Encoding utf8

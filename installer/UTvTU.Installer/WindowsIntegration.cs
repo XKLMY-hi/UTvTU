@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.Win32;
 using UTvTU.Setup;
 
@@ -15,6 +17,7 @@ sealed class WindowsIntegration {
     readonly SetupRegistration registration = new(new RegistryStore());
     static string StartMenu => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), "UTvTU.lnk");
     static string Desktop => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "UTvTU.lnk");
+    static string CacheDirectory(string directory) => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UTvTU", "Installers", Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(SetupPaths.Full(directory).ToUpperInvariant())))[..24]);
     static string? RegisteredPath(RegistryKey? entry, bool requireFiles) => entry == null ? null : LegacyInstallLocation.Resolve(entry.GetValue("InstallLocation") as string, entry.GetValue("DisplayIcon") as string, entry.GetValue("UninstallString") as string, path => !requireFiles || File.Exists(path));
     public static bool HasLegacyMachineRegistration(string directory) {
         if (!SetupEngine.IsUtvtu(directory)) return false;
@@ -33,7 +36,15 @@ sealed class WindowsIntegration {
     }
     public void Install(SetupOptions options, InstallReceipt receipt, bool verifiedLegacy) {
         if (receipt.UserSid != InstallerCore.UserSid) throw new IOException("系统入口必须由安装所属用户创建。");
-        registration.Install(receipt, options.FileAssociation);
+        string cache = CacheDirectory(options.Directory); Directory.CreateDirectory(cache); SetupPaths.RejectLinks(cache);
+        string source = Path.Combine(options.Directory, InstallerCore.UninstExe), uninstaller = Path.Combine(cache, InstallerCore.UninstExe);
+        string temporary = Path.Combine(cache, Guid.NewGuid().ToString("N") + ".tmp");
+        File.Copy(source, temporary);
+        try { File.Move(temporary, uninstaller, true); } finally { if (File.Exists(temporary)) File.Delete(temporary); }
+        SetupJson.Write(Path.Combine(cache, "target.json"), options);
+        // Settings/silent uninstall runs outside the target, so waiting for its exit
+        // cannot keep the installed uninstaller executable locked.
+        registration.Install(receipt, options.FileAssociation, uninstaller);
         string exe = Path.Combine(options.Directory, InstallerCore.AppExe);
         Shortcut(StartMenu, exe); if (options.DesktopShortcut) Shortcut(Desktop, exe);
         if (verifiedLegacy) {

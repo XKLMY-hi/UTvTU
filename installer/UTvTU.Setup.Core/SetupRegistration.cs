@@ -13,8 +13,8 @@ public sealed class SetupRegistration(IRegistrationStore store) {
     public const string LegacyKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\OpenUtau";
     public const string ProgId = "UTvTU.UstxFile";
     const string Classes = @"Software\Classes\";
-    public void Install(InstallReceipt receipt, bool associations) {
-        string exe = Path.Combine(receipt.Directory, "OpenUtau.exe"), uninstaller = Path.Combine(receipt.Directory, "UTvTU-Uninstall.exe");
+    public void Install(InstallReceipt receipt, bool associations, string? uninstallerPath = null) {
+        string exe = Path.Combine(receipt.Directory, "OpenUtau.exe"), uninstaller = uninstallerPath ?? Path.Combine(receipt.Directory, "UTvTU-Uninstall.exe");
         var changes = new List<(string Key, string Name, object Value)> {
             (UninstallKey, "DisplayName", "UTvTU"), (UninstallKey, "DisplayVersion", receipt.Version),
             (UninstallKey, "Publisher", "XKLMY-hi"), (UninstallKey, "InstallLocation", receipt.Directory),
