@@ -6,6 +6,7 @@
 - 优先候选：ONNX/DirectML统一生命周期与SessionOptions持有（799ba8de+4798078a，需先适配旧f39fc706）、新DiffSinger分组duration输入（fd8c843e）、SearchBar残留订阅（8fdb4e9b）、ThaiVCCV错误旧更新回退（fa2a670c，本地确有其前版）、英语C+V两条成组（8879fbed→7b6cae8b及夹具）、双元音/EN2JA（5714d927/f923284d）。另有同名resampler、manifest附加缓存、音高点右键及preutter行为，按报告分批。
 - 不整体引入主题/旧偏好UI、MixPlanner单通道补丁、缺前置的R1.1/SVP/包安装。DirectML1.23.0及共享缓存锁本地已有；5c3c83bb空引用是新manifest功能的后续修正，本地当前未引入该错误分支；菲律宾语13184085目标分支本地不存在。保持MD3与当前播放/离线导出架构。
 - 额外发现：UpdaterViewModel的UpdateCheckEnabled仍false，旧版本比较器不支持当前UTvTU时间标签；已有正式Release，应单独修复开关、解析比较和发布筛选，不能只打开开关或照搬上游更新通道。本轮只登记。审查文档本地提交，未推送；正式Release013015不变。
+- 用户补问新歌手选择器：已核对历史`ce996bac`/#2444与`ec6c4b2e`/#2450及本地轨头/头像控件，建议作为前端优先项。吸收头像、搜索、收藏/最近和排序，改为本地MD3纵向虚拟列表，补键盘；保留现有歌手变更命令、资源中心宿主、AvatarRevision/释放语义及Fody，不整体复制上游横向非虚拟网格、独立窗口或SourceGenerators。详细建议已补入同一审查报告，仍仅审查，未实现或性能实测。
 
 ## 2026-10-17 正式发布 GitHub（最新）
 
