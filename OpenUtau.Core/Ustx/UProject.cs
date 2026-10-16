@@ -152,7 +152,9 @@ namespace OpenUtau.Core.Ustx {
             return note;
         }
 
-        public void BeforeSave() {
+        public void BeforeSave() => BeforeSave(null);
+
+        internal void BeforeSave(TimeSpan? vstStateBudget) {
             foreach (var track in tracks) {
                 track.BeforeSave();
             }
@@ -172,8 +174,10 @@ namespace OpenUtau.Core.Ustx {
                 .ThenBy(part => part.position)
                 .ToList();
             // Flush live VST plugin state into slot data before serialisation
+            var elapsed = System.Diagnostics.Stopwatch.StartNew();
             foreach (var track in tracks) {
-                try { Vst.VstPluginManager.Inst.SaveAllStates(track.TrackNo); }
+                try { Vst.VstPluginManager.Inst.SaveAllStates(track.TrackNo,
+                    vstStateBudget.HasValue ? vstStateBudget.Value - elapsed.Elapsed : null); }
                 catch (Exception ex) { Serilog.Log.Warning(ex, $"Failed to save VST state for track {track.TrackNo}"); }
             }
         }

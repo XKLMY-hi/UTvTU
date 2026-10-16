@@ -134,9 +134,11 @@ namespace OpenUtau.App.Views {
 
             timer = new DispatcherTimer(
                 TimeSpan.FromMilliseconds(15),
-                DispatcherPriority.Normal,
+                DispatcherPriority.Background,
                 (sender, args) => {
-                    PlaybackManager.Inst.UpdatePlayPos();
+                    bool visible = WindowState != WindowState.Minimized;
+                    PlaybackManager.Inst.UpdatePlayPos(publish: visible);
+                    if (!visible) return;
                     var pvm = viewModel.PlaybackViewModel;
                     pvm.RaisePropertyChanged(nameof(pvm.IsPlaying));
                     pvm.RaisePropertyChanged(nameof(pvm.ShowPlayPosHighlight));

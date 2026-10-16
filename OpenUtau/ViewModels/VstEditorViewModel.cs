@@ -56,7 +56,7 @@ namespace OpenUtau.App.ViewModels {
                 StatusText = ThemeManager.GetString("vsteditor.loading");
                 bool ok = await _fx.OpenNativeEditorAsync();
                 StatusText = ok ? ThemeManager.GetString("vsteditor.nativeopened")
-                    : $"{ThemeManager.GetString("vsteditor.noeditor")}: {VstBridge.LastError() ?? ThemeManager.GetString("vsteditor.nogui")}";
+                    : $"{ThemeManager.GetString("vsteditor.noeditor")}: {_fx.EditorError ?? ThemeManager.GetString("vsteditor.nogui")}";
             } catch (Exception ex) {
                 StatusText = $"{ThemeManager.GetString("vsteditor.error")}: {ex.Message}";
                 Log.Error(ex, $"[VstEditor] Failed for {_fx.DisplayName}");

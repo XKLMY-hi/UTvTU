@@ -92,7 +92,9 @@ namespace OpenUtau.Core.Format {
                 }
                 project.ustxVersion = Ustx.kUstxVersion;
                 project.ustxpVersion = kUstxpVersion;
-                project.BeforeSave();
+                // Autosave must still persist note edits if a plugin GUI is busy or hung.
+                // A timed-out capture keeps the last stored plugin state, never an empty state.
+                project.BeforeSave(TimeSpan.FromMilliseconds(100));
                 AtomicFile.WriteAllText(filePath, SerializeForSave(project));
                 Preferences.Default.RecoveryPath = filePath;
                 if (!Preferences.TrySave()) {

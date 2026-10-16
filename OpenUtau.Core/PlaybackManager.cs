@@ -606,7 +606,7 @@ namespace OpenUtau.Core {
             });
         }
 
-        public void UpdatePlayPos() {
+        public void UpdatePlayPos(bool publish = true) {
             if (AudioOutput != null && AudioOutput.PlaybackState == PlaybackState.Playing && PlayingMaster) {
                 // 硬件位置（字节）→ float 采样数 → 扣除等待静音（帧数）→ ms（格式显式化）
                 double ms = (AudioOutput.GetPosition() / sizeof(float) - masterMix.Waited / masterMix.WaveFormat.Channels)
@@ -617,7 +617,9 @@ namespace OpenUtau.Core {
                     Play(DocManager.Inst.Project, tick: loopStartTick, endTick: loopEndTick);
                     return;
                 }
-                DocManager.Inst.ExecuteCmd(new SetPlayPosTickNotification(tick, masterMix.IsWaiting));
+                // Keep loop/transport timing alive while minimized, without scheduling hidden
+                // editor redraws. The first visible tick publishes the current device position.
+                if (publish) DocManager.Inst.ExecuteCmd(new SetPlayPosTickNotification(tick, masterMix.IsWaiting));
             } else if (AudioOutput != null && AudioOutput.PlaybackState == PlaybackState.Stopped && PlayingMaster) {
                 // Playback stopped (e.g. silence at end). Check if we should loop.
                 if (loopEndTick > 0) {

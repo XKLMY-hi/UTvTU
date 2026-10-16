@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Serilog;
 
 namespace OpenUtau.Core.Vst {
@@ -22,6 +23,10 @@ namespace OpenUtau.Core.Vst {
     /// 线程 = 消息泵线程，三者合一，线程敏感检查通过且插件消息由自身线程泵出。
     /// </summary>
     public sealed class VstThread : IDisposable {
+        // VSTGUI and other module-level GUI systems retain their first UI thread.
+        // Every instance, including reloads and export instances, must use that same thread.
+        static readonly Lazy<VstThread> shared = new(() => new VstThread("VST host"));
+        internal static VstThread Shared => shared.Value;
         const uint WM_QUIT = 0x0012;
         const uint WM_DESTROY = 0x0002;
         const uint WM_APP_COMMAND = 0x8000;
@@ -56,7 +61,7 @@ namespace OpenUtau.Core.Vst {
         delegate IntPtr WndProcDelegate(IntPtr hwnd, uint msg, IntPtr wp, IntPtr lp);
 
         [DllImport("user32.dll")]
-        static extern bool GetMessageW(out MSG msg, IntPtr hwnd, uint min, uint max);
+        static extern int GetMessageW(out MSG msg, IntPtr hwnd, uint min, uint max);
 
         [DllImport("user32.dll")]
         static extern bool TranslateMessage(ref MSG msg);
@@ -132,6 +137,7 @@ namespace OpenUtau.Core.Vst {
             }, done));
             if (!PostMessageW(_sentinel, WM_APP_COMMAND, IntPtr.Zero, IntPtr.Zero)) {
                 // 哨兵窗口已销毁（线程退出中）——无法投递，通知等待者避免永久挂起
+                error = new InvalidOperationException("VST host command could not be posted.");
                 done.Set();
             }
             done.Wait();
@@ -142,6 +148,27 @@ namespace OpenUtau.Core.Vst {
         }
 
         public void Invoke(Action action) => Invoke(() => { action(); return true; });
+
+        /// <summary>Cancellation skips queued work; it never interrupts an active native call.</summary>
+        public Task<T> InvokeAsync<T>(Func<T> action, CancellationToken cancellation = default) {
+            var completion = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+            if (_disposed) return Task.FromException<T>(new ObjectDisposedException(nameof(VstThread)));
+            if (Thread.CurrentThread == _thread) {
+                try { cancellation.ThrowIfCancellationRequested(); completion.SetResult(action()); }
+                catch (Exception e) { completion.SetException(e); }
+                return completion.Task;
+            }
+            var done = new ManualResetEventSlim();
+            _queue.Enqueue((() => {
+                try {
+                    if (cancellation.IsCancellationRequested) completion.TrySetCanceled(cancellation);
+                    else completion.TrySetResult(action());
+                } catch (Exception e) { completion.TrySetException(e); }
+            }, done));
+            if (!PostMessageW(_sentinel, WM_APP_COMMAND, IntPtr.Zero, IntPtr.Zero))
+                completion.TrySetException(new InvalidOperationException("VST host command could not be posted."));
+            return completion.Task;
+        }
 
         // 哨兵窗口过程：WM_APP_COMMAND → 执行宿主命令队列
         IntPtr SentinelWndProc(IntPtr hwnd, uint msg, IntPtr wp, IntPtr lp) {
@@ -171,7 +198,8 @@ namespace OpenUtau.Core.Vst {
                 // GetMessage 阻塞式循环——泵编辑器窗口 + 哨兵窗口的消息；
                 // 对跨线程 SendMessage（OTT 等插件通知渲染）天然可靠
                 while (true) {
-                    if (!GetMessageW(out MSG msg, IntPtr.Zero, 0, 0)) {
+                    int status = GetMessageW(out MSG msg, IntPtr.Zero, 0, 0);
+                    if (status <= 0) {
                         break; // WM_QUIT
                     }
                     TranslateMessage(ref msg);

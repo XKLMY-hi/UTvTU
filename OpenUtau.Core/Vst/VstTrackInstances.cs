@@ -137,7 +137,7 @@ namespace OpenUtau.Core.Vst {
             var fx = _effects[index];
             if (fx != null) {
                 // Save state before disposal so user params persist across reloads
-                var state = fx.SaveState();
+                var state = fx.TrySaveState(TimeSpan.FromMilliseconds(100));
                 if (state != null && fx.Slot != null) fx.Slot.StateData = state;
 
                 // Defer Dispose — audio thread may still be processing this effect.

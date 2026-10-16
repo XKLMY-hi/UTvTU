@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -84,11 +86,12 @@ namespace OpenUtau.Core.Vst {
         }
 
         /// <summary>Save state for all loaded effects on a track（含旁通槽——旁通时 GUI 调参也必须持久化）。</summary>
-        public void SaveAllStates(int trackNo) {
+        public void SaveAllStates(int trackNo, TimeSpan? budget = null) {
             if (!_tracks.TryGetValue(trackNo, out var ti)) return;
             var all = ti.GetAllEffects();
+            var elapsed = Stopwatch.StartNew();
             foreach (var fx in all) {
-                var state = fx.SaveState();
+                var state = budget.HasValue ? fx.TrySaveState(budget.Value - elapsed.Elapsed) : fx.SaveState();
                 if (state != null) fx.Slot.StateData = state;
             }
         }

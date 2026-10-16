@@ -182,8 +182,20 @@ static Vst::HostApplication g_hostApp;
 
 class BridgePlugFrame : public IPlugFrame {
 public:
+    HWND parent = nullptr;
     tresult PLUGIN_API resizeView(IPlugView* v, ViewRect* r) override {
-        if (v && r) { v->onSize(r); return kResultOk; }
+        if (v && r) {
+#ifdef _WIN32
+            if (parent && IsWindow(parent) && r->getWidth() > 0 && r->getHeight() > 0) {
+                RECT rect {0, 0, r->getWidth(), r->getHeight()};
+                AdjustWindowRectEx(&rect, (DWORD)GetWindowLongPtrW(parent, GWL_STYLE), FALSE,
+                                   (DWORD)GetWindowLongPtrW(parent, GWL_EXSTYLE));
+                SetWindowPos(parent, nullptr, 0, 0, rect.right - rect.left, rect.bottom - rect.top,
+                             SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+            }
+#endif
+            v->onSize(r); return kResultOk;
+        }
         return kInvalidArgument;
     }
     tresult PLUGIN_API queryInterface(const TUID iid, void** obj) override {
@@ -644,7 +656,10 @@ static LRESULT CALLBACK EditorWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
         return 0;
     case WM_DESTROY: return 0;  // 线程生命周期由宿主(VstThread)管理——窗口销毁不杀线程
     case WM_NCDESTROY:
-        if (s && s->inst) s->inst->editorWindowOpen = false;
+        if (s && s->inst) {
+            s->inst->editorWindowOpen = false;
+            s->inst->editorWindowHwnd = nullptr;
+        }
         delete s; return 0;
     }
     return DefWindowProcW(hwnd, msg, wp, lp);
@@ -653,7 +668,11 @@ static LRESULT CALLBACK EditorWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 extern "C" int vst_open_editor_window(VstBridgeInstance* inst) {
     g_lastError[0] = '\0';
     if (!inst || !inst->controller) { setError("no controller"); return 0; }
-    if (inst->editorWindowOpen) { setError("window already open"); return 0; }
+    if (inst->editorWindowOpen && IsWindow(inst->editorWindowHwnd)) {
+        ShowWindow(inst->editorWindowHwnd, IsIconic(inst->editorWindowHwnd) ? SW_RESTORE : SW_SHOW);
+        SetForegroundWindow(inst->editorWindowHwnd);
+        return 1;
+    }
 
     // 窗口在调用线程（UI）创建：插件 controller 在 vst_load 的 UI 线程创建，
     // createView/attached 期望同线程——窗口线程化会让线程敏感插件
@@ -691,6 +710,7 @@ extern "C" int vst_open_editor_window(VstBridgeInstance* inst) {
         nullptr, nullptr, GetModuleHandleW(nullptr), st);
     if (!hwnd) { delete st; setError("CreateWindow %lu", GetLastError()); return 0; }
     st->hwnd = hwnd;
+    st->plugFrame.parent = hwnd;
     inst->editorWindowHwnd = hwnd;   // vst_close_editor 用它关闭窗口
 
     pv->setFrame(&st->plugFrame);
@@ -701,7 +721,7 @@ extern "C" int vst_open_editor_window(VstBridgeInstance* inst) {
 
     ViewRect vr2 {};
     if (pv->getSize(&vr2) == kResultTrue && (vr2.getWidth() != w || vr2.getHeight() != h))
-        pv->onSize(&vr2);
+        st->plugFrame.resizeView(pv, &vr2);
     inst->editorWindowOpen = true;
     ShowWindow(hwnd, SW_SHOW); UpdateWindow(hwnd);
     // 窗口消息由宿主的 VST 专用线程消息泵处理（本函数调用线程 = controller

@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using System.Threading;
 using OpenUtau.Core.SignalChain.Effects;
 using Serilog;
 
@@ -25,9 +26,9 @@ namespace OpenUtau.Core.Vst {
         public int LatencySamples => _exportLatency;
         // 原生编辑器窗口是否打开——Dispose 时必须先关闭（否则窗口悬空引用已卸载 handle）
         private bool _editorOpen;
-        // 专用 VST 线程：controller 创建/attached/编辑器消息循环同线程（插件线程敏感 + 消息泵）
-        private VstThread? _vstThread;
-        private VstThread VstThread => _vstThread ??= new VstThread($"VST:{_entry.Name}");
+        // Shared for all instances: plugin modules also keep process-wide GUI thread state.
+        private VstThread HostThread => VstThread.Shared;
+        public string? EditorError { get; private set; }
         public VstPluginSlot Slot => _slot;
         public VstPluginEntry Entry => _entry;
         public string DisplayName => _entry.Name;
@@ -53,7 +54,7 @@ namespace OpenUtau.Core.Vst {
             // 同线程（Persistent Q 等线程敏感插件，桥接层实测 mismatched 线程
             // 挂起），attached 期间插件等待的消息也由该线程泵出（无死锁）。
             // UI 线程经 Invoke marshal，不阻塞。
-            _handle = VstThread.Invoke(() => _bridge.Load(_entry.Path));
+            _handle = HostThread.Invoke(() => _bridge.Load(_entry.Path));
             if (_handle == IntPtr.Zero) {
                 string? err = _bridge.LastError();
                 throw new InvalidOperationException(
@@ -66,7 +67,7 @@ namespace OpenUtau.Core.Vst {
             if (_handle == IntPtr.Zero || _isSetup) return;
             if (maxBlockSize <= 0 || maxBlockSize > int.MaxValue / 2)
                 throw new ArgumentOutOfRangeException(nameof(maxBlockSize));
-            if (!VstThread.Invoke(() => _bridge.Setup(_handle, sampleRate, maxBlockSize))) {
+            if (!HostThread.Invoke(() => _bridge.Setup(_handle, sampleRate, maxBlockSize))) {
                 Log.Warning($"[VstEffect] Setup failed: {_bridge.LastError()}");
                 return;
             }
@@ -79,7 +80,7 @@ namespace OpenUtau.Core.Vst {
 
         // ── IEffect ────────────────────────────────────────────
 
-        internal (byte[] State, VstExportParameter[] Parameters) CaptureExportState() => VstThread.Invoke(() => {
+        internal (byte[] State, VstExportParameter[] Parameters) CaptureExportState() => HostThread.Invoke(() => {
             if (_bridge is not IVstExportBridge export)
                 throw new NotSupportedException("The VST bridge does not support independent export.");
             var state = _bridge.SaveState(_handle) ?? throw new InvalidOperationException($"Could not capture '{DisplayName}' for export.");
@@ -91,7 +92,7 @@ namespace OpenUtau.Core.Vst {
             if (_bridge is not IVstExportBridge export)
                 throw new NotSupportedException("The VST bridge does not support independent export.");
             _processScratch = new float[checked(blockSize * 2)];
-            VstThread.Invoke(() => {
+            HostThread.Invoke(() => {
                 if (!export.SetupExport(_handle, sampleRate, blockSize, offline))
                     throw new InvalidOperationException($"'{DisplayName}' rejected {(offline ? "offline" : "realtime")} processing.");
                 if (!export.RestoreExportParameters(_handle, parameters))
@@ -168,12 +169,18 @@ namespace OpenUtau.Core.Vst {
             // attached 秒级初始化只阻塞专用线程；插件在 attached 中
             // PostMessage 等待的消息由同一线程泵出。调用线程（UI）同步等待——
             // 大插件秒级会短暂卡调用线程，重插件请用异步版。
-            bool ok = VstThread.Invoke(() => _bridge.OpenEditorWindow(_handle));
+            Log.Information("[VstEffect] Opening native editor for {Plugin}", _entry.Name);
+            bool ok = HostThread.Invoke(() => {
+                bool opened = _bridge.OpenEditorWindow(_handle);
+                // LastError is native thread-local storage; read it on the producing thread.
+                EditorError = opened ? null : _bridge.LastError();
+                return opened;
+            });
             if (ok) {
                 _editorOpen = true;
                 Log.Information($"[VstEffect] Native editor opened for '{_entry.Name}'");
             } else {
-                Log.Warning($"[VstEffect] Editor failed for '{_entry.Name}': {_bridge.LastError()}");
+                Log.Warning($"[VstEffect] Editor failed for '{_entry.Name}': {EditorError}");
             }
             return ok;
         }
@@ -189,13 +196,25 @@ namespace OpenUtau.Core.Vst {
         /// <summary>Save processor state (for .ustxp). Returns null on failure.</summary>
         public byte[]? SaveState() {
             if (_handle == IntPtr.Zero) return null;
-            return VstThread.Invoke(() => _bridge.SaveState(_handle));
+            return HostThread.Invoke(() => _bridge.SaveState(_handle));
+        }
+
+        internal byte[]? TrySaveState(TimeSpan budget) {
+            if (_handle == IntPtr.Zero || budget <= TimeSpan.Zero) return null;
+            using var cancellation = new CancellationTokenSource(budget);
+            try {
+                return HostThread.InvokeAsync(() => _bridge.SaveState(_handle), cancellation.Token)
+                    .WaitAsync(cancellation.Token).GetAwaiter().GetResult();
+            } catch (OperationCanceledException) {
+                Log.Warning("[VstEffect] State capture deferred for {Plugin}; preserving previous state", DisplayName);
+                return null;
+            }
         }
 
         /// <summary>Restore processor state (from .ustxp). Returns true on success.</summary>
         public bool RestoreState(byte[]? data) {
             if (_handle == IntPtr.Zero || data == null || data.Length == 0) return false;
-            return VstThread.Invoke(() => _bridge.RestoreState(_handle, data));
+            return HostThread.Invoke(() => _bridge.RestoreState(_handle, data));
         }
 
         // ── IDisposable ────────────────────────────────────────
@@ -207,20 +226,18 @@ namespace OpenUtau.Core.Vst {
                 // 先关闭原生编辑器窗口——GUI 打开时直接 vst_unload 会让窗口
                 // 悬空引用已卸载的 handle → 原生崩溃（LoadProject ClearAll 场景）
                 if (_editorOpen) {
-                    VstThread.Invoke(() => _bridge.CloseEditor(_handle));
+                    HostThread.Invoke(() => _bridge.CloseEditor(_handle));
                     _editorOpen = false;
                 }
                 if (_isActivated) {
-                    VstThread.Invoke(() => _bridge.Activate(_handle, false));
+                    HostThread.Invoke(() => _bridge.Activate(_handle, false));
                     _isActivated = false;
                 }
-                VstThread.Invoke(() => _bridge.Unload(_handle));
+                HostThread.Invoke(() => _bridge.Unload(_handle));
                 Log.Information($"[VstEffect] Disposed '{_entry.Name}' (0x{_handle:X})");
                 _handle = IntPtr.Zero;
             }
-            // Failed Load still created a dedicated thread, even though the handle is zero.
-            _vstThread?.Dispose();
-            _vstThread = null;
+            // The shared GUI thread survives instance removal/reload until process exit.
         }
     }
 }

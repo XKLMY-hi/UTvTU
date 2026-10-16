@@ -10,13 +10,18 @@ namespace OpenUtau.Core.Vst {
     internal class FakeVstBridge : IVstBridge {
         /// <summary>Optional artificial Load delay — used to test load serialization.</summary>
         public TimeSpan LoadDelay { get; set; }
+        public Action? LoadCallback { get; set; }
+        public Func<bool>? EditorCallback { get; set; }
+        public Func<byte[]?>? StateCallback { get; set; }
+        public Func<string?>? ErrorCallback { get; set; }
 
         public IntPtr Load(string bundlePath) {
+            LoadCallback?.Invoke();
             if (LoadDelay > TimeSpan.Zero) Thread.Sleep(LoadDelay);
             return new(++_nextHandle);
         }
         public void Unload(IntPtr handle) { _unloaded.Add(handle); }
-        public string? LastError() => null;
+        public string? LastError() => ErrorCallback?.Invoke();
         public bool Setup(IntPtr handle, double sr, int block) => true;
         private int _activateCalls;
         public int ActivateCalls => _activateCalls;
@@ -31,9 +36,9 @@ namespace OpenUtau.Core.Vst {
         public int GetNumInputs(IntPtr handle) => 2;
         public int GetNumOutputs(IntPtr handle) => 2;
         public IntPtr OpenEditor(IntPtr handle, IntPtr hwnd) => IntPtr.Zero;
-        public bool OpenEditorWindow(IntPtr handle) => false;
+        public bool OpenEditorWindow(IntPtr handle) => EditorCallback?.Invoke() ?? false;
         public void CloseEditor(IntPtr handle) { }
-        public byte[]? SaveState(IntPtr handle) => new byte[] { 1, 2, 3 };
+        public byte[]? SaveState(IntPtr handle) => StateCallback == null ? new byte[] { 1, 2, 3 } : StateCallback();
         public bool RestoreState(IntPtr handle, byte[] data) => true;
         public string? Probe(string path) => null;
 
