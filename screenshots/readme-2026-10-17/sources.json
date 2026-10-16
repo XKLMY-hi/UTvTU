@@ -1,0 +1,90 @@
+[
+  {
+    "OriginalName": "欢迎页.png",
+    "Path": "screenshots/readme-2026-10-17/welcome.png",
+    "Sha256": "7AEE70DD973461A95C6FB7EE595F0D65EC8CFCB6CADA041275B88E5FA055A528",
+    "Bytes": 109704,
+    "Width": 1433,
+    "Height": 835,
+    "Source": "User-provided Windows screenshot",
+    "Build": "UTvTU-26.10.17-011138",
+    "Edited": false
+  },
+  {
+    "OriginalName": "渲染.png",
+    "Path": "screenshots/readme-2026-10-17/render.png",
+    "Sha256": "F725F3C8DB0054EEC21C91C7480032B6CD47C279F4A01ACD0027445C9B12CFCC",
+    "Bytes": 143575,
+    "Width": 1433,
+    "Height": 835,
+    "Source": "User-provided Windows screenshot",
+    "Build": "UTvTU-26.10.17-011138",
+    "Edited": false
+  },
+  {
+    "OriginalName": "编辑器.png",
+    "Path": "screenshots/readme-2026-10-17/workspace.png",
+    "Sha256": "9C3ED25832494B7AD531ADE0A1BEE2292065849A88488BA4D9E4767D6060EF5F",
+    "Bytes": 79986,
+    "Width": 1433,
+    "Height": 835,
+    "Source": "User-provided Windows screenshot",
+    "Build": "UTvTU-26.10.17-011138",
+    "Edited": false
+  },
+  {
+    "OriginalName": "钢琴卷帘.png",
+    "Path": "screenshots/readme-2026-10-17/piano-roll.png",
+    "Sha256": "751DBC0133536AF17C57D1A2975E2E5CE89EB90C4CC6364537DEF141DF258690",
+    "Bytes": 112539,
+    "Width": 1433,
+    "Height": 835,
+    "Source": "User-provided Windows screenshot",
+    "Build": "UTvTU-26.10.17-011138",
+    "Edited": false
+  },
+  {
+    "OriginalName": "混音台.png",
+    "Path": "screenshots/readme-2026-10-17/mixer.png",
+    "Sha256": "A733512222085BD6A177AF8B3D706FA0752E100A2F7C69AF68782021D285611B",
+    "Bytes": 88235,
+    "Width": 1433,
+    "Height": 835,
+    "Source": "User-provided Windows screenshot",
+    "Build": "UTvTU-26.10.17-011138",
+    "Edited": false
+  },
+  {
+    "OriginalName": "混音台+效果器.png",
+    "Path": "screenshots/readme-2026-10-17/mixer-effects.png",
+    "Sha256": "09D920596724F3559971EF6D1134F2E546B35C11BC641D67F3582DED4207154E",
+    "Bytes": 115207,
+    "Width": 1433,
+    "Height": 835,
+    "Source": "User-provided Windows screenshot",
+    "Build": "UTvTU-26.10.17-011138",
+    "Edited": false
+  },
+  {
+    "OriginalName": "偏好设置.png",
+    "Path": "screenshots/readme-2026-10-17/preferences.png",
+    "Sha256": "75548796F6F67FF46AEA526701E5C59AB36267BB866F3ED5B1EB1C34B608B60C",
+    "Bytes": 154714,
+    "Width": 1433,
+    "Height": 835,
+    "Source": "User-provided Windows screenshot",
+    "Build": "UTvTU-26.10.17-011138",
+    "Edited": false
+  },
+  {
+    "OriginalName": "包管理器.png",
+    "Path": "screenshots/readme-2026-10-17/packages.png",
+    "Sha256": "29A08D371FE29FAAE2449BF89E1F6BCF3973FD85755DDAFAD01B3F705BEA9930",
+    "Bytes": 119446,
+    "Width": 1433,
+    "Height": 835,
+    "Source": "User-provided Windows screenshot",
+    "Build": "UTvTU-26.10.17-011138",
+    "Edited": false
+  }
+]

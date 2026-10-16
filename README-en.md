@@ -1,229 +1,161 @@
-# UTvTU
+# UTvTU · Vocal Production Workstation
 
-[简体中文](README.md)
+**Edit, synthesize, mix and deliver vocals in one workspace.**
 
-**UTvTU is a vocal production workstation based on [OpenUTAU](https://github.com/openutau/OpenUtau)**, bringing vocal editing, synthesis, mixing and audio delivery into one workflow. Development continues on the existing UTvTU codebase, with upstream OpenUTAU as a technical reference.
+Built on [OpenUTAU](https://github.com/openutau/OpenUtau), currently targeting **Windows 10 / 11 x64**. Maintained by [XKLMY](https://github.com/XKLMY-hi), formerly OpenUTAU Plus.
 
-The current target is **Windows 10 / 11 x64**. Its own Material Design 3 themes and controls combine dynamic colours and consistent interactions with the density needed for DAW editing.
+[Download](https://github.com/XKLMY-hi/UTvTU/releases) · [Report an issue](https://github.com/XKLMY-hi/UTvTU/issues) · [简体中文](README.md)
 
-> Formerly **OpenUTAU Plus**, renamed in 2026-10. The [previous repository](https://github.com/XKLMY-hi/OpenUTAU-Plus) remains an archive. The user data directory is still `OpenUtau Plus`; the rename requires no data migration.
+## Product Screenshots
 
-## Download and Install
+![UTvTU welcome page](screenshots/readme-2026-10-17/welcome.png)
 
-Download published builds from [GitHub Releases](https://github.com/XKLMY-hi/UTvTU/releases). This README describes the current `plus-develop` branch; check each release's notes for the features included in its installer.
+<table>
+  <tr>
+    <td width="50%" align="center"><strong>Arrangement workspace</strong><br><a href="screenshots/readme-2026-10-17/workspace.png"><img src="screenshots/readme-2026-10-17/workspace.png" alt="UTvTU tracks and library" width="640"></a></td>
+    <td width="50%" align="center"><strong>Piano roll</strong><br><a href="screenshots/readme-2026-10-17/piano-roll.png"><img src="screenshots/readme-2026-10-17/piano-roll.png" alt="UTvTU note, pitch and expression editing" width="640"></a></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><strong>Mixer and effects rack</strong><br><a href="screenshots/readme-2026-10-17/mixer-effects.png"><img src="screenshots/readme-2026-10-17/mixer-effects.png" alt="UTvTU mixer with built-in effects and a VST3 card" width="640"></a></td>
+    <td width="50%" align="center"><strong>Rendering and delivery</strong><br><a href="screenshots/readme-2026-10-17/render.png"><img src="screenshots/readme-2026-10-17/render.png" alt="UTvTU offline mixdown and stem export" width="640"></a></td>
+  </tr>
+</table>
 
-- `UTvTU-<version>.exe` includes the runtime; no separate .NET installation is needed.
-- Installation is per user by default. A verified UTvTU / OpenUTAU Plus installation can be upgraded while preserving user data, projects and voicebanks.
-- Uninstall through Windows Installed Apps or `UTvTU-Uninstall.exe` in the installation directory. Only manifest-owned application files are removed; user data is preserved by default.
-- See the [installer documentation](installer/README.md) for packaging and command-line usage. The installer rewrite describes current sources; older downloads retain the behavior of their corresponding release.
+<details>
+<summary>More views: mixer, preferences and package manager</summary>
 
-## Production Workflow
+**Mixer**
 
-1. Create or open a project from the welcome page, then install and select a voicebank.
-2. Arrange tracks and backing audio; edit notes, lyrics, pitch and expressions in the piano roll.
-3. Adjust faders, pan, mute and solo in the mixer, and process vocals with built-in or VST3 effects.
-4. Select tracks, a time range and file settings on the render page; export a mixdown or individual stems.
+![UTvTU mixer with per-track FX buttons](screenshots/readme-2026-10-17/mixer.png)
+
+**Preferences**
+
+![UTvTU appearance and dynamic-colour settings](screenshots/readme-2026-10-17/preferences.png)
+
+**Package manager**
+
+![UTvTU dependency-package resource centre](screenshots/readme-2026-10-17/packages.png)
+
+</details>
+
+Screenshots captured on Windows, build `UTvTU-26.10.17-011138`. Click an image in the main gallery to view its full size.
 
 ## Features
 
-### Editing and Projects
+### Vocal Editing and Synthesis
 
-- OpenUTAU vocal editing, phonemizers and synthesis, including classic UTAU voicebanks and engines such as DiffSinger.
-- Arrangement, piano roll and mixer views share the main window. Piano roll and mixer views can also be detached.
-- `.ustxp` projects persist UTvTU settings and VST state, with `.ustx` compatibility and upstream project import capabilities.
-- Undo / redo for track and effect-chain edits.
+- Edit notes, lyrics, pitch, portamento, vibrato and expression curves in the piano roll.
+- Use OpenUTAU's voicebank, phonemizer and synthesis workflows, including classic UTAU voicebanks, third-party resamplers and engines such as DiffSinger.
+- Arrange vocal parts and backing audio across tracks, with undo / redo.
+- Save UTvTU projects, effect chains and plugin states as `.ustxp`; retain `.ustx` compatibility and upstream import formats such as UST, MIDI and VSQx.
 
-### Mixing and Effects
+### A Connected Workspace
 
-- Track faders, pan, mute / solo, live meters and master output controls.
-- Built-in EQ, compressor and reverb with live adjustment, bypass and a collapsible effects panel.
-- VST3 audio-effect scanning, loading, native editors and state persistence; chain insertion, removal, bypass and reordering.
-- A library for voicebanks, backing audio and effects, with search and applicable audition / drag-and-drop operations.
+Switch between arrangement, piano roll and mixer in the main window, or detach the piano roll and mixer. The welcome page provides new, open, recent-project and template entries. Resources, rendering and preferences share the main-window workspace. Smaller tools and confirmations use embedded overlays with keyboard focus, cancellation and reduced-motion support.
 
-### Rendering and Delivery
+### Shared Effects Rack and Mixer
 
-- **Offline export by default**, with separate plugin instances for the export job. Audio delivery does not require silent playback through an output device.
-- Stereo mixdown or stems, whole-project / loop / custom ranges, track selection and configurable effect tails.
-- WAV 16-bit, 24-bit and 32-bit float; 44.1 / 48 / 96 kHz output sample rates.
-- Options for VST, built-in effects, track gain / pan and master settings, plus progress, cancellation and output-folder access.
-- A manually selected real-time compatibility mode for plugins that cannot process offline. Failures are reported without automatically changing the processing mode.
+- Track faders, pan, mute, solo, live meters and master output controls.
+- **EQ, compressor and reverb are independent built-in effects**. Add multiple instances, remove, bypass, reorder and use presets.
+- The editor and mixer share a horizontal bottom rack. Open it from a track's FX entry, including **FX · count** at the bottom of each mixer strip.
+- **VST3 audio effects appear as named cards**. Add, replace, bypass, remove or reorder them; double-click a card to open the plugin's native GUI.
+- Plugin windows stay above their UTvTU owner and follow its minimize / restore state, without being globally always-on-top.
+- Undo / redo effect-chain edits and save built-in parameters and VST state with the project.
 
-Output sample rate is a delivery setting; synthesis and effects use the internal project rate. Offline export aligns selected tracks for plugin latency. Full playback delay compensation remains future work.
+### Offline Rendering and Delivery
 
-### Material Design 3 Interface
+Offline export is the default, with separate plugin instances for the export job. Choose a stereo mixdown or individual stems, the whole song, a loop or a custom range, and the required effect tail.
 
-- HCT / CAM16 role colours from a custom seed or the Windows accent, with light / dark themes, palette variants and contrast settings.
-- Shared container, shape, outline and control-state roles, with compact DAW editor controls.
-- Consistent buttons, inputs, selectors, sliders, menus and overlays, including keyboard focus and reduced motion.
-- Welcome and preferences pages share the page system; rendering, voicebank resources and package management use the main-window tool workspace.
-- Context tools use the bottom panel or main-window overlays. Native VST editors and system file pickers remain separate windows.
-- Voicebank lists display real voicebank avatars, with a fallback icon when no avatar is available.
-
-## Current Scope
-
-Development prioritizes the **Windows vocal production workflow**, stability, project compatibility and control interactions. macOS / Linux are outside the current development and validation focus.
-
-| Boundary | Status |
+| Setting | Options |
 |---|---|
-| VST instruments | Synths and samplers cannot be used as project sound sources; the host currently supports audio effects |
-| Routing | Aux / send buses, sidechains and track groups remain future work |
-| Latency compensation | Offline track alignment exists; complete playback PDC remains future work |
-| Plugin compatibility | Offline support depends on the plugin; not all third-party plugins have been validated |
-| Metering | Unimplemented loudness metrics are shown as unavailable; full mastering metering is not yet provided |
+| Format | WAV 16-bit, 24-bit, 32-bit float |
+| File sample rate | 44.1 / 48 / 96 kHz |
+| Processing | VST, built-in effects, track gain / pan and master settings |
+| Task controls | Progress, cancellation and output-folder access |
+| Plugin compatibility | Manually selected real-time compatibility mode |
 
-Future directions include sends and sidechains, full plugin delay compensation, track groups and MIDI control mapping. Availability follows implementation and validation.
+Synthesis and effects use the internal project rate; delivery files can be resampled independently. Offline export aligns selected tracks for plugin latency. Third-party compatibility depends on each plugin's implementation.
 
-## Build and Run
+### Material Design 3 and DAW Controls
 
-Use **.NET SDK 9** to build. The application targets .NET 8; Avalonia 12 analyzers require a newer Roslyn compiler, so installing only the .NET 8 Runtime or pinning SDK 8.x is insufficient.
+- HCT / CAM16 role colours, custom seeds, the Windows accent, light / dark themes, palette variants and contrast settings.
+- Shared buttons, inputs, selectors, knobs, faders, menus and overlays, with compact controls where music editing needs them.
+- Consistent primary, secondary, cancel and close controls in embedded dialogs.
+- Voicebank search, real avatars, OTO / subbank information, audition controls and dependency-package management in the resource centre.
 
-```powershell
-git clone --branch plus-develop https://github.com/XKLMY-hi/UTvTU.git
-cd UTvTU
-dotnet restore OpenUtau.sln -m:1
-dotnet build OpenUtau.sln --no-restore -m:1
-dotnet run --project OpenUtau --no-build
-```
+### Installation and Use
 
-Install voicebanks and engine dependencies as needed after launching. Windows native libraries are included; normal C# / UI development does not require rebuilding the C++ bridge.
+Get installers from [Releases](https://github.com/XKLMY-hi/UTvTU/releases); the runtime is included. The current installer checks package identity and file manifests, rolls back failed or cancelled updates, and preserves user data by default on uninstall. See [installation and packaging](installer/README.md) or [building from source](docs/BUILDING.md).
 
-## Development and Validation
+This page describes `plus-develop`; consult release notes for the features in a downloaded build. Fresh installations use `OpenUtau Plus` under Windows Documents for data. Existing portable installations keep their local data mode.
 
-Build the test project, then run a relevant small group with the guarded runner:
-
-```powershell
-dotnet build OpenUtau.Test/OpenUtau.Test.csproj --no-restore -m:1
-pwsh -File scripts/Test-Light.ps1 -Filter 'FullyQualifiedName~ResourceCenterTests'
-```
-
-The default limits are 30 seconds and 384 MB per test process, with test collections run serially. Documentation changes only need Markdown and link checks.
-
-For VST bridge C++ changes, install Visual Studio 2022 with the Desktop development with C++ workload, then run:
-
-```powershell
-cd runtimes/vst_bridge
-./build.bat
-```
-
-- [AGENTS.md](AGENTS.md): workspace rules and build / validation requirements.
-- [HANDOVER.md](HANDOVER.md): current development context.
-- [Offline export notes](.opencode/plans/offline-export-2026-10-11.md): processing modes, plugin lifetime and validation boundaries.
-- [Workspace integration notes](.opencode/plans/workspace-integration-2026-10-11.md): tool hosting and sessions.
-- [MD3 implementation notes](.opencode/plans/md3-rebuild-2026-10-11.md): design sources, coverage and validation.
-
-## Project Structure
-
-```text
-OpenUtau.sln
-├── OpenUtau/                 # Avalonia views, view models, controls and themes
-├── OpenUtau.Core/            # Project models, synthesis, audio, export and VST hosting
-├── OpenUtau.Plugin.Builtin/  # Built-in phonemizers
-├── OpenUtau.Test/            # Unit and UI contract tests
-├── VstProbe/                 # Out-of-process plugin discovery
-├── runtimes/                 # Native libraries and VST3 bridge source
-└── scripts/                  # Development and guarded test scripts
-```
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Runtime / build | .NET 8 / C#, built with .NET SDK 9 |
-| Interface | Avalonia 12.1.0, ReactiveUI.Avalonia 14.7.1, own MD3 themes and controls |
-| Audio | NAudio / MiniAudio, NWaves, own signal chain |
-| Plugin hosting | C++ / Steinberg VST3 SDK, out-of-process discovery |
-| Synthesis inference | ONNX Runtime |
-| Data and logging | YamlDotNet, Newtonsoft.Json, Serilog |
-| Tests | xUnit v3 |
-
-## Open Source Libraries
-
-This project is built with the following open source libraries. We are grateful to all maintainers.
-
-### Core
-
-| Library | Version | License | Purpose |
-|----|------|------|------|
-| [Avalonia UI](https://avaloniaui.net/) | 12.1.0 | MIT | Cross-platform UI framework |
-| [ReactiveUI.Avalonia](https://github.com/reactiveui/ReactiveUI) | 14.7.1 | MIT | Reactive MVVM integration |
-| [NAudio](https://github.com/naudio/NAudio) | 2.2.1 | MIT | Windows audio playback & processing |
-| [NWaves](https://github.com/ar1st0crat/NWaves) | 0.9.6 | MIT | Audio signal processing / DSP |
-| [ONNX Runtime](https://onnxruntime.ai/) | 1.23 | MIT | Machine learning inference engine |
-| [YamlDotNet](https://github.com/aaubry/YamlDotNet) | 15.1 | MIT | USTX project file serialization |
-| [Newtonsoft.Json](https://www.newtonsoft.com/json) | 13.0 | MIT | JSON serialization |
-| [Serilog](https://serilog.net/) | 4.1 | Apache-2.0 | Structured logging |
-
-### Audio Formats
-
-| Library | Version | License | Purpose |
-|----|------|------|------|
-| [NAudio.Vorbis](https://github.com/naudio/Vorbis) | 1.5.0 | MIT | Ogg Vorbis decoding |
-| [BunLabs.NAudio.Flac](https://github.com/BunLabs/NAudio.Flac) | 2.0.1 | MIT | FLAC decoding |
-| [NLayer](https://github.com/naudio/NLayer) | 1.4.0 | MIT | MP3 decoding |
-| [Concentus.OggFile](https://github.com/lostromb/concentus) | 1.0.6 | Apache-2.0 | Opus encoding |
-
-### UI / Design
-
-| Library | Version | License | Purpose |
-|----|------|------|------|
-| [Phosphor](https://phosphoricons.com) | — | MIT | User interface icons |
-| [Dotnet.Bundle](https://github.com/egramtel/dotnet-bundle) | 0.9.13 | MIT | macOS app bundling |
-
-### File Formats / MIDI
-
-| Library | Version | License | Purpose |
-|----|------|------|------|
-| [DryWetMidi](https://github.com/melanchall/drywetmidi) | 7.2.0 | MIT | MIDI file read/write |
-| [SharpCompress](https://github.com/adamhathcock/sharpcompress) | 0.48.1 | MIT | Archive extraction |
-
-### Language / Phoneme Processing
-
-| Library | Version | License | Purpose |
-|----|------|------|------|
-| [csharp-pinyin](https://github.com/poychang/csharp-pinyin) | 1.0.0 | MIT | Hanzi to Pinyin conversion |
-| [csharp-kana](https://github.com/poychang/csharp-kana) | 1.0.2 | MIT | Kana conversion |
-| [WanaKana-net](https://github.com/MartinZikmund/WanaKana-net) | 1.0.0 | MIT | Japanese kana processing |
-| [UTF.Unknown](https://github.com/CharsetDetector/UTF-unknown) | 2.5.1 | MIT | Text encoding detection |
-
-### Utilities
-
-| Library | Version | License | Purpose |
-|----|------|------|------|
-| [TextCopy](https://github.com/CopyText/TextCopy) | 6.2.1 | MIT | Cross-platform clipboard |
-| [K4os.Hash.xxHash](https://github.com/k4os/K4os.Hash.xxHash) | 1.0.8 | MIT | Fast hashing |
-| [Ignore](https://github.com/nicoco007/Ignore) | 0.1.50 | MIT | .gitignore rule parsing |
-| [NumSharp](https://github.com/SciSharp/NumSharp) | 0.30.0 | Apache-2.0 | Numerical computing |
-| [NeoLua](https://github.com/neolithos/NeoLua) | 1.3.19 | Apache-2.0 | Lua scripting engine |
-| [NetMQ](https://github.com/zeromq/netmq) | 4.0.1 | LGPL-3.0 | Inter-process communication |
-
-### C++ Native (VST3 Bridge)
-
-| Library | Version | License | Purpose |
-|----|------|------|------|
-| [VST3 SDK](https://github.com/steinbergmedia/vst3sdk) | 3.8.0 | MIT / GPL-3 | VST3 host bridging |
-| [Worldline](https://github.com/stakira/OpenUtau) | — | MIT | Native audio rendering engine |
-
-### Design Assets
-
-| Resource | License | Source |
-|------|------|------|
-| Phosphor | MIT | https://phosphoricons.com |
-
----
-
-## License
-
-Based on [OpenUTAU](https://github.com/openutau/OpenUtau), MIT License.
-
-The VST3 bridge uses [Steinberg VST3 SDK v3.8.0](https://github.com/steinbergmedia/vst3sdk), dual-licensed MIT / GPL-3 (this project uses the MIT-licensed portions).
-
-Phosphor icons are MIT licensed.
-
----
+Windows vocal production is the current focus. VST instruments, aux / send buses, sidechains, track groups and complete playback delay compensation remain future work; offline track alignment is available.
 
 ## Acknowledgments
 
-- [OpenUTAU](https://github.com/openutau/OpenUtau) original project and all contributors
-- Steinberg for the VST3 SDK
-- The vocal synthesis community
-- This project was developed through **Vibe Coding** — using AI assistance for architecture design, code, and debugging
+UTvTU builds on upstream code, open standards, design resources and community knowledge. The following credits cover direct dependencies and major technical sources. Versions, licenses and additional notices are recorded in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+### Projects and Contributors
+
+| Project / contributors | Contribution |
+|---|---|
+| [OpenUTAU](https://github.com/openutau/OpenUtau), [StAkira](https://github.com/stakira) and [all upstream contributors](https://github.com/openutau/OpenUtau/graphs/contributors) | Vocal editing, project models, synthesis, phonemizers and long-term maintenance |
+| [UTAU](https://utau2008.xrea.jp/), Ameya / Ayame and the UTAU community | Voicebanks, resamplers, creative tools and shared experience |
+| [UTvTU contributors](https://github.com/XKLMY-hi/UTvTU/graphs/contributors) and earlier OpenUTAU Plus contributors | Branch features, UI, audio workflows, fixes and documentation |
+| [DiffSinger](https://github.com/MoonInTheRiver/DiffSinger), [OpenVPI](https://github.com/openvpi) and related maintainers | Neural singing synthesis and its model ecosystem |
+| [CREPE](https://github.com/marl/crepe), Jong Wook Kim and contributors | Pitch-analysis implementations and resources |
+| Phonemizer, dictionary, language-resource and translation contributors | Pronunciation, compatibility and localization |
+| Users sharing reports, test projects and reproduction steps | Real production feedback and compatibility testing |
+
+### Application, UI and Audio Components
+
+| Project | Use |
+|---|---|
+| [Avalonia](https://github.com/AvaloniaUI/Avalonia), including Desktop, Fluent, DataGrid, ColorPicker and HarfBuzz integration | Desktop UI and controls |
+| [ReactiveUI](https://github.com/reactiveui/ReactiveUI), [ReactiveUI.Avalonia](https://www.nuget.org/packages/ReactiveUI.Avalonia/14.7.1), [Fody](https://github.com/Fody/Fody) / ReactiveUI.Fody, [Splat](https://github.com/reactiveui/splat), [DynamicData](https://github.com/reactivemarbles/DynamicData), [Reactive Extensions](https://github.com/dotnet/reactive) | Reactive MVVM, collections and property notifications |
+| [SkiaSharp](https://github.com/mono/SkiaSharp), [HarfBuzz](https://github.com/harfbuzz/harfbuzz) | Rendering and text shaping |
+| [.NET](https://github.com/dotnet/runtime) / System.* | Runtime, base libraries, JSON, encodings and packaging |
+| [NAudio](https://github.com/naudio/NAudio), [NAudio.Vorbis](https://github.com/naudio/Vorbis), [NAudio.Flac](https://github.com/BunLabs/NAudio.Flac), [NLayer](https://github.com/naudio/NLayer), [Concentus.OggFile](https://github.com/lostromb/concentus.oggfile) | Audio devices, processing and file formats |
+| [NWaves](https://github.com/ar1st0crat/NWaves) | Signal processing and analysis |
+| [ONNX Runtime](https://github.com/microsoft/onnxruntime) / DirectML | Model inference |
+| [DryWetMidi](https://github.com/melanchall/drywetmidi) | MIDI files |
+| [YamlDotNet](https://github.com/aaubry/YamlDotNet), [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json) | Projects and configuration |
+| [Serilog](https://github.com/serilog/serilog), with Console / Debug / File sinks | Structured logging |
+| [SharpCompress](https://github.com/adamhathcock/sharpcompress), [Ignore](https://github.com/goelhardik/ignore) | Archives and ignore rules |
+| [csharp-kana](https://github.com/wolfgitpr/csharp-kana), [csharp-pinyin](https://github.com/wolfgitpr/csharp-pinyin), [WanaKana-net](https://github.com/MartinZikmund/WanaKana-net), [UTF.Unknown](https://github.com/CharsetDetector/UTF-unknown) | Language conversion and encoding detection |
+| [K4os.Hash.xxHash](https://github.com/MiloszKrajewski/K4os.Hash.xxHash), [NumSharp](https://github.com/SciSharp/NumSharp), [NeoLua](https://github.com/neolithos/neolua), [NetMQ](https://github.com/zeromq/netmq), [TextCopy](https://github.com/CopyText/TextCopy) | Hashing, numerics, scripting, messaging and clipboard |
+
+### Native Audio and Design Sources
+
+| Project / resource | Use |
+|---|---|
+| [Steinberg VST3 SDK](https://github.com/steinbergmedia/vst3sdk) | VST3 effect hosting and native-editor bridge |
+| [Worldline](cpp/worldline), [WORLD](https://github.com/mmorise/World), [libgvps](https://github.com/Sleepwalking/libgvps), [libpyin](https://github.com/Sleepwalking/libpyin) | Native synthesis and audio analysis |
+| [miniaudio](https://github.com/mackron/miniaudio), [libnpy](https://github.com/llohse/libnpy), [spline](https://github.com/ttk592/spline), [Abseil](https://github.com/abseil/abseil-cpp), [xxHash](https://github.com/Cyan4973/xxHash) | Native audio, data and algorithms |
+| [Google Material Design](https://m3.material.io/), [Material Color Utilities](https://github.com/material-foundation/material-color-utilities) | MD3 design and HCT / CAM16 colour algorithms |
+| [AndroidX](https://github.com/androidx/androidx) MaterialShapes, graphics-shapes and state tokens | Shape geometry, morph parameters and interaction references |
+| [Phosphor Icons](https://github.com/phosphor-icons/core) | Interface icons |
+| Huawei [HarmonyOS Sans](https://developer.huawei.com/consumer/cn/design/resource/) | Application font, under the [HarmonyOS Sans Fonts License Agreement](OpenUtau/Assets/Fonts/LICENSE.txt) |
+| Voicebank, plugin and character-art creators | Their voices, tools and artwork, under their respective ownership and usage terms |
+
+Thanks also to [xUnit](https://github.com/xunit/xunit), [Avalonia.Headless](https://github.com/AvaloniaUI/Avalonia), [Microsoft Test Platform](https://github.com/microsoft/vstest), [coverlet](https://github.com/coverlet-coverage/coverlet), [GoogleTest](https://github.com/google/googletest), [Bazel](https://github.com/bazelbuild/bazel), [CMake](https://github.com/Kitware/CMake) and [GitHub Actions](https://github.com/features/actions) for development and validation tools, and to projects used in earlier development stages, including [SukiUI](https://github.com/kikipoulet/SukiUI) and [Dotnet.Bundle](https://github.com/egramtel/dotnet-bundle).
+
+The main project uses the [MIT License](LICENSE.txt) and retains upstream copyright notices. Third-party code, fonts, voicebanks, models and plugins retain their own licenses.
+
+## Vibe Coding Statement
+
+UTvTU uses **vibe coding / AI-assisted development**. The maintainer supplies product goals, interaction requirements and practical feedback; AI tools assist with design discussions, implementation, refactoring, debugging and documentation.
+
+This describes UTvTU's development process. Existing OpenUTAU code, third-party components and community resources retain their authorship and credits; UTvTU extends and refactors those foundations. The maintainer is responsible for project direction, change selection and release decisions. Feature descriptions follow implementation and validation results.
+
+Reproductions, code reviews and improvements are welcome through [Issues](https://github.com/XKLMY-hi/UTvTU/issues) and pull requests.
+
+**By XKLMY · Built with vibe coding**
+
+## Thanks to OpenUTAU and the UTAU Community
+
+Thank you to StAkira and every OpenUTAU contributor. UTvTU's editing, phonemizers, project formats and synthesis are built on your accumulated work. This project will continue to preserve upstream credits and respect those contributions.
+
+Thank you to the UTAU community's voicebank authors, recording contributors, OTO creators, resampler developers, phonemizer and dictionary maintainers, translators, tutorial writers, vocal editors and musicians. Your shared voices, tools, knowledge and music make singing synthesis a creative practice that people can take part in together.
+
+We hope UTvTU can make editing, mixing and delivery more connected, and help more voices be heard.

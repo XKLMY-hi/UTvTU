@@ -1,240 +1,161 @@
-# UTvTU
+# UTvTU · 人声制作工作站
 
-[English](README-en.md)
+**从歌声编辑、合成到混音与音频交付，在一个工作区里完成。**
 
-**UTvTU 是基于 [OpenUTAU](https://github.com/openutau/OpenUtau) 的人声制作工作站**，将歌声编辑、合成、混音与音频交付放进同一套工作流程。项目在现有 UTvTU 上持续重构，并以上游 OpenUTAU 为技术参考。
+基于 [OpenUTAU](https://github.com/openutau/OpenUtau) 持续开发，当前面向 **Windows 10 / 11 x64**。由 [XKLMY](https://github.com/XKLMY-hi) 维护，原名 OpenUTAU Plus。
 
-当前面向 **Windows 10 / 11 x64**。界面采用自有 Material Design 3 主题与控件，兼顾动态配色、统一交互和 DAW 编辑所需的信息密度。
+[下载发布版](https://github.com/XKLMY-hi/UTvTU/releases) · [反馈问题](https://github.com/XKLMY-hi/UTvTU/issues) · [English](README-en.md)
 
-> 项目前身为 **OpenUTAU Plus**，2026-10 更名为 UTvTU。旧仓库 [OpenUTAU-Plus](https://github.com/XKLMY-hi/OpenUTAU-Plus) 保留为历史存档；用户数据目录仍为 `OpenUtau Plus`，更名无需迁移数据。
+## 产品截图
 
-## 下载与安装
+![UTvTU 欢迎页](screenshots/readme-2026-10-17/welcome.png)
 
-从 [GitHub Releases](https://github.com/XKLMY-hi/UTvTU/releases) 下载发布版本。本文介绍 `plus-develop` 开发分支的当前能力，已发布安装包的功能以对应版本说明为准。
+<table>
+  <tr>
+    <td width="50%" align="center"><strong>多轨工作台</strong><br><a href="screenshots/readme-2026-10-17/workspace.png"><img src="screenshots/readme-2026-10-17/workspace.png" alt="UTvTU 多轨编排与素材库" width="640"></a></td>
+    <td width="50%" align="center"><strong>钢琴卷帘</strong><br><a href="screenshots/readme-2026-10-17/piano-roll.png"><img src="screenshots/readme-2026-10-17/piano-roll.png" alt="UTvTU 音符、音高与表情编辑" width="640"></a></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><strong>混音台与效果器链</strong><br><a href="screenshots/readme-2026-10-17/mixer-effects.png"><img src="screenshots/readme-2026-10-17/mixer-effects.png" alt="UTvTU 混音台及内置效果器与 VST3 卡片" width="640"></a></td>
+    <td width="50%" align="center"><strong>渲染与交付</strong><br><a href="screenshots/readme-2026-10-17/render.png"><img src="screenshots/readme-2026-10-17/render.png" alt="UTvTU 离线混音与分轨导出设置" width="640"></a></td>
+  </tr>
+</table>
 
-- 安装包为 `UTvTU-<版本>.exe`，自带运行时，无需另装 .NET。
-- 默认按用户安装；检测到身份可确认的旧版 OpenUTAU Plus 时沿用原安装路径，保留用户数据、工程和声库。
-- 可从 Windows“已安装的应用”或安装目录中的 `UTvTU-Uninstall.exe` 卸载，默认保留用户数据；只移除清单登记的程序文件。
-- 安装、卸载与发布命令见[安装器说明](installer/README.md)。当前源码已重做安装链，下载的旧安装包仍以其发布说明为准。
+<details>
+<summary>更多界面：混音台、偏好设置与包管理器</summary>
 
-## 制作流程
+**混音台**
 
-1. 从欢迎页创建工程或打开最近工程，安装并选择所需声库。
-2. 在编排区组织轨道与伴奏，在钢琴卷帘编辑音符、歌词、音高和表情。
-3. 在混音台调整音量、声像、静音与独奏，使用内置效果器或 VST3 效果器处理人声。
-4. 打开渲染交付页，选择轨道、时间范围和文件规格，导出混音或独立分轨。
+![UTvTU 混音台与轨道底部 FX 入口](screenshots/readme-2026-10-17/mixer.png)
 
-## 主要功能
+**偏好设置**
 
-### 歌声编辑与工程
+![UTvTU 外观与动态配色设置](screenshots/readme-2026-10-17/preferences.png)
 
-- 保留 OpenUTAU 的歌声编辑、音素化与合成工作流，支持经典 UTAU 声库与 DiffSinger 等引擎。
-- 编排、钢琴卷帘和混音台在主窗口内切换；钢琴卷帘与混音台可分离为独立窗口。
-- 使用 `.ustxp` 保存 UTvTU 工程及 VST 插件状态，兼容 `.ustx`；保留上游提供的工程导入能力。
-- 轨道与效果链编辑接入撤销 / 重做。
+**包管理器**
 
-### 混音与效果
+![UTvTU 依赖包资源中心](screenshots/readme-2026-10-17/packages.png)
 
-- 轨道推子、声像、静音 / 独奏、实时电平表和主输出控制。
-- 内置 EQ、压缩器、混响，支持实时调节、旁通及效果面板收起。
-- VST3 音频效果器扫描、加载、原生编辑器与参数状态保存；效果链支持增删、旁通和重排。
-- 素材库提供声库、伴奏与效果器浏览、搜索及相应试听 / 拖入操作。
+</details>
 
-### 渲染与音频交付
+以上为 Windows 实机截图，版本 `UTvTU-26.10.17-011138`。点击主要展示区的图片可查看原图。
 
-- **默认离线导出**，使用独立导出插件实例处理音频；无需通过播放设备静音录制完成交付。
-- 支持立体声混音与分轨导出，选择整曲、循环区间或自定义范围，配置轨道和效果尾音。
-- 支持 WAV 16-bit、24-bit、32-bit float，以及 44.1 / 48 / 96 kHz 文件采样率。
-- 可选择包含 VST、内置效果、轨道音量 / 声像和主输出设置；提供进度、取消及输出文件夹入口。
-- 对不支持离线处理的插件，可手动选择实时兼容模式；失败时明确报错，不自动切换处理方式。
+## 功能介绍
 
-文件采样率属于交付规格，合成与效果链仍按工程内部采样率处理。离线导出包含所选轨道的插件延迟对齐；播放中的全局延迟补偿仍待完善。
+### 歌声编辑与合成
 
-### Material Design 3 界面
+- 在钢琴卷帘中编辑音符、歌词、音高、滑音、颤音和表情曲线。
+- 延续 OpenUTAU 的声库、音素化器及合成工作流，支持经典 UTAU 声库、第三方重采样器和 DiffSinger 等引擎。
+- 在多轨编排中组织人声片段与伴奏，使用撤销 / 重做调整工程。
+- 使用 `.ustxp` 保存 UTvTU 工程、效果器链和插件状态；兼容 `.ustx`，保留上游提供的 UST、MIDI、VSQx 等导入能力。
 
-- HCT / CAM16 动态角色色，支持自定义种子色或读取 Windows 强调色，并提供深浅主题、配色方案和对比度设置。
-- 按角色组织容器层级、圆角、描边与控件状态；编辑器保留紧凑的 DAW 控件规格。
-- 统一按钮、输入、选择、滑条、菜单与浮层的视觉和焦点行为，支持减少动态效果。
-- 欢迎页与偏好设置采用统一页面布局；渲染、资源和依赖包管理整合进主窗口工具工作区。
-- 上下文编辑工具使用底部工具区或主窗口浮层；原生 VST 编辑器与系统文件选择器使用独立窗口。
-- 资源中心的声库列表显示真实声库头像，缺失头像时使用默认图标。
+### 连贯的制作工作区
 
-## 当前范围与后续方向
+工作台、钢琴卷帘与混音台可在主窗口切换，钢琴卷帘和混音台也可分离使用。欢迎页提供新建、打开、最近工程和模板入口；资源中心、渲染页与偏好设置整合在主窗口中。小型编辑和确认操作使用内嵌浮层，支持键盘焦点、取消和减少动效。
 
-当前优先完善 **Windows 人声制作流程**、稳定性、工程兼容和控件交互。macOS / Linux 暂不作为新增开发和验证的目标平台。
+### 统一效果器链与混音台
 
-| 当前边界 | 说明 |
+- 每轨提供音量推子、声像、静音、独奏与实时电平，另有主输出控制。
+- **EQ、压缩器、混响是可独立添加的内置效果器**，支持重复实例、删除、旁通、排序和预设。
+- 主编辑器与混音台共用底部横向效果器机架；从轨道的 FX 入口打开，在混音台中也可点击轨道条底部的 **FX · 数量**。
+- **VST3 音频效果器使用名称卡片**，支持添加、替换、旁通、移除和重排；双击卡片打开插件原生 GUI。
+- 原生插件窗口保持在 UTvTU 主窗口上方，并随主窗口最小化与恢复；不做全局置顶。
+- 效果器链修改可撤销 / 重做；内置效果参数与 VST 状态随工程保存。
+
+### 离线渲染与音频交付
+
+默认使用离线导出，采用独立的导出插件实例处理音频。可选择立体声混音或独立分轨，设置整曲、循环区间或自定义范围，并保留所需的效果尾音。
+
+| 交付设置 | 支持内容 |
 |---|---|
-| VST 音源 | 尚不支持将 VST 合成器或采样器作为工程音源；当前宿主面向音频效果器 |
-| 路由 | Aux / 发送轨、侧链与轨道编组尚待实现 |
-| 延迟补偿 | 离线交付已有轨道对齐；完整播放 PDC 尚待实现 |
-| 插件兼容 | 离线支持取决于插件；并非所有第三方插件都已验证 |
-| 测量 | 主输出未实现的响度指标显示为空，不代表已有完整母带测量功能 |
+| 文件格式 | WAV 16-bit、24-bit、32-bit float |
+| 文件采样率 | 44.1 / 48 / 96 kHz |
+| 处理选择 | VST、内置效果、轨道音量 / 声像、主输出设置 |
+| 任务控制 | 进度、取消、完成后打开输出文件夹 |
+| 插件兼容 | 可手动选择实时兼容模式 |
 
-后续方向包括发送与侧链路由、完整插件延迟补偿、轨道编组和 MIDI 控制映射。具体实施以实际开发与验证结果为准。
+合成与效果链按工程内部采样率处理，输出文件可独立重采样；离线交付对所选轨道进行插件延迟对齐。第三方插件的实际兼容性取决于插件实现。
 
-## 从源码运行
+### Material Design 3 与 DAW 控件
 
-需要 **.NET SDK 9** 构建，应用目标运行时为 .NET 8。Avalonia 12 分析器需要新版 Roslyn，不能仅安装 .NET 8 Runtime 或将 SDK 固定到 8.x。
+- 基于 HCT / CAM16 的动态角色色，支持自定义种子色、Windows 强调色、深浅主题、配色方案和对比度设置。
+- 共享按钮、输入、选择、旋钮、推子、菜单及浮层的视觉与状态反馈，保留音乐编辑需要的紧凑密度。
+- 内嵌浮窗使用统一的主操作、次要操作、取消和关闭控件。
+- 资源中心提供声库搜索、真实头像、OTO / 子音源信息及试听入口，并整合依赖包管理。
 
-```powershell
-git clone --branch plus-develop https://github.com/XKLMY-hi/UTvTU.git
-cd UTvTU
-dotnet restore OpenUtau.sln -m:1
-dotnet build OpenUtau.sln --no-restore -m:1
-dotnet run --project OpenUtau --no-build
-```
+### 安装与使用
 
-首次启动后按所用合成引擎安装声库与依赖。仓库包含 Windows 原生运行库，普通 C# / UI 开发无需重新构建 C++ 桥接。
+从 [Releases](https://github.com/XKLMY-hi/UTvTU/releases) 获取安装包，自带运行时，无需另装 .NET。当前安装链提供版本与文件清单校验、覆盖失败 / 取消回滚，以及默认保留用户数据的卸载方式。具体操作见[安装器说明](installer/README.md)，源码运行见[构建与开发](docs/BUILDING.md)。
 
-## 开发与验证
+本文介绍 `plus-develop` 的当前能力；下载包包含的功能以对应发布说明为准。新安装的数据目录仍使用 Windows“文档”下的 `OpenUtau Plus`，既有便携版保持原地数据模式。
 
-轻量验证按相关测试小组串行执行。先构建测试项目，再使用带时间和内存上限的脚本：
+当前重点是 Windows 人声制作流程。VST 乐器音源、Aux / 发送、侧链、轨道编组和完整播放延迟补偿尚未实现；离线导出的轨道延迟对齐已可用。
 
-```powershell
-dotnet build OpenUtau.Test/OpenUtau.Test.csproj --no-restore -m:1
-pwsh -File scripts/Test-Light.ps1 -Filter 'FullyQualifiedName~ResourceCenterTests'
-```
+## 完整鸣谢
 
-脚本默认每组最多 30 秒、测试进程 384 MB，并关闭测试集合并行。仅修改文档时检查链接与 Markdown，无需启动应用或运行音频测试。
+UTvTU 的工作建立在上游代码、开放标准、设计资源和社区经验之上。以下列出项目直接依赖与主要技术来源；具体版本、许可及补充声明见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。
 
-修改 VST 桥接 C++ 时，需要 Visual Studio 2022 的“使用 C++ 的桌面开发”工作负载，再运行：
+### 项目与贡献者
 
-```powershell
-cd runtimes/vst_bridge
-./build.bat
-```
-
-- [AGENTS.md](AGENTS.md)：工作区约定、构建注意事项与验证要求。
-- [HANDOVER.md](HANDOVER.md)：接手记录与当前开发状态。
-- [离线导出说明](.opencode/plans/offline-export-2026-10-11.md)：处理模式、插件生命周期及验证边界。
-- [工具整合说明](.opencode/plans/workspace-integration-2026-10-11.md)：主窗口工具与会话管理。
-- [MD3 重构记录](.opencode/plans/md3-rebuild-2026-10-11.md)：设计来源、覆盖范围与轻量验证。
-
-## 项目结构
-
-```text
-OpenUtau.sln
-├── OpenUtau/                 # Avalonia UI、视图与控件
-│   ├── Views/                # 主窗口、编辑器、工具与偏好页面
-│   ├── ViewModels/           # MVVM
-│   ├── Controls/             # DAW 与通用控件
-│   ├── Styles/               # 控件主题、尺寸、形状与动效
-│   └── Theming/              # MD3 角色色与主题配置
-├── OpenUtau.Core/            # 工程模型、合成、音频链、导出与 VST 宿主
-├── OpenUtau.Plugin.Builtin/  # 内置音素化器
-├── OpenUtau.Test/            # 单元与界面契约测试
-├── VstProbe/                 # 进程外插件探测
-├── runtimes/                 # 原生库与 VST3 桥接源码
-└── scripts/                  # 开发与轻量验证脚本
-```
-
-## 技术栈
-
-| 层 | 技术 |
+| 项目 / 贡献者 | 对本项目的贡献 |
 |---|---|
-| 运行时 / 构建 | .NET 8 / C#，.NET SDK 9 构建 |
-| 界面 | Avalonia 12.1.0、ReactiveUI.Avalonia 14.7.1、自有 MD3 主题与控件 |
-| 音频 | NAudio / MiniAudio、NWaves、自有信号链 |
-| 插件宿主 | C++ / Steinberg VST3 SDK，进程外扫描探针 |
-| 合成推理 | ONNX Runtime |
-| 数据与日志 | YamlDotNet、Newtonsoft.Json、Serilog |
-| 测试 | xUnit v3 |
+| [OpenUTAU](https://github.com/openutau/OpenUtau)、[StAkira](https://github.com/stakira) 与[全部上游贡献者](https://github.com/openutau/OpenUtau/graphs/contributors) | 歌声编辑器、工程模型、合成与音素化框架，以及长期的维护与改进 |
+| [UTAU](https://utau2008.xrea.jp/)、飴屋／菖蒲与 UTAU 社区 | 声库与重采样器生态、创作工具及使用经验 |
+| [UTvTU 贡献者](https://github.com/XKLMY-hi/UTvTU/graphs/contributors)与历史 OpenUTAU Plus 贡献者 | 分支功能、界面、音频工作流、修复与文档 |
+| [DiffSinger](https://github.com/MoonInTheRiver/DiffSinger) / [OpenVPI](https://github.com/openvpi) 与相关维护者 | 神经网络歌声合成及模型生态 |
+| [CREPE](https://github.com/marl/crepe)、Jong Wook Kim 与贡献者 | 音高分析相关实现与资源 |
+| 音素化器、词典、语言资源与翻译贡献者 | 多语言发音、工程兼容和本地化支持 |
+| 提交反馈、测试工程和复现步骤的使用者 | 实际制作流程验证、兼容性反馈与交互改进 |
 
-## 使用的开源库
+### 界面、音频与应用组件
 
-本项目的构建离不开以下开源项目，在此致谢。
+| 项目 | 用途 |
+|---|---|
+| [Avalonia](https://github.com/AvaloniaUI/Avalonia)，含 Desktop、Fluent、DataGrid、ColorPicker 与 HarfBuzz 集成 | 桌面界面与基础控件 |
+| [ReactiveUI](https://github.com/reactiveui/ReactiveUI)、[ReactiveUI.Avalonia](https://www.nuget.org/packages/ReactiveUI.Avalonia/14.7.1)、[Fody](https://github.com/Fody/Fody) / ReactiveUI.Fody、[Splat](https://github.com/reactiveui/splat)、[DynamicData](https://github.com/reactivemarbles/DynamicData)、[Reactive Extensions](https://github.com/dotnet/reactive) | 响应式 MVVM、集合与属性通知 |
+| [SkiaSharp](https://github.com/mono/SkiaSharp)、[HarfBuzz](https://github.com/harfbuzz/harfbuzz) | 界面绘制与文字整形 |
+| [.NET](https://github.com/dotnet/runtime) / System.* | 应用运行时、基础类库、JSON、编码和文件封装 |
+| [NAudio](https://github.com/naudio/NAudio)、[NAudio.Vorbis](https://github.com/naudio/Vorbis)、[NAudio.Flac](https://github.com/BunLabs/NAudio.Flac)、[NLayer](https://github.com/naudio/NLayer)、[Concentus.OggFile](https://github.com/lostromb/concentus.oggfile) | 音频设备、处理与格式支持 |
+| [NWaves](https://github.com/ar1st0crat/NWaves) | 音频信号处理与分析 |
+| [ONNX Runtime](https://github.com/microsoft/onnxruntime) / DirectML | 合成模型推理 |
+| [DryWetMidi](https://github.com/melanchall/drywetmidi) | MIDI 文件处理 |
+| [YamlDotNet](https://github.com/aaubry/YamlDotNet)、[Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json) | 工程与配置序列化 |
+| [Serilog](https://github.com/serilog/serilog) 及 Console / Debug / File sinks | 结构化日志 |
+| [SharpCompress](https://github.com/adamhathcock/sharpcompress)、[Ignore](https://github.com/goelhardik/ignore) | 压缩包与忽略规则处理 |
+| [csharp-kana](https://github.com/wolfgitpr/csharp-kana)、[csharp-pinyin](https://github.com/wolfgitpr/csharp-pinyin)、[WanaKana-net](https://github.com/MartinZikmund/WanaKana-net)、[UTF.Unknown](https://github.com/CharsetDetector/UTF-unknown) | 语言转换与编码检测 |
+| [K4os.Hash.xxHash](https://github.com/MiloszKrajewski/K4os.Hash.xxHash)、[NumSharp](https://github.com/SciSharp/NumSharp)、[NeoLua](https://github.com/neolithos/neolua)、[NetMQ](https://github.com/zeromq/netmq)、[TextCopy](https://github.com/CopyText/TextCopy) | 哈希、数值、脚本、通信与剪贴板 |
 
-### 核心
+### 原生音频与设计来源
 
-| 库 | 版本 | 许可 | 用途 |
-|----|------|------|------|
-| [Avalonia UI](https://avaloniaui.net/) | 12.1.0 | MIT | 跨平台 UI 框架 |
-| [ReactiveUI.Avalonia](https://github.com/reactiveui/ReactiveUI) | 14.7.1 | MIT | MVVM 响应式框架（Avalonia 12 兼容线） |
-| [NAudio](https://github.com/naudio/NAudio) | 2.2.1 | MIT | Windows 音频播放与处理 |
-| [NWaves](https://github.com/ar1st0crat/NWaves) | 0.9.6 | MIT | 音频信号处理 / DSP |
-| [ONNX Runtime](https://onnxruntime.ai/) | 1.23 | MIT | 机器学习推理引擎 |
-| [YamlDotNet](https://github.com/aaubry/YamlDotNet) | 15.1 | MIT | USTX 项目文件序列化 |
-| [Newtonsoft.Json](https://www.newtonsoft.com/json) | 13.0 | MIT | JSON 序列化 |
-| [Serilog](https://serilog.net/) | 4.1 | Apache-2.0 | 结构化日志 |
+| 项目 / 资源 | 用途 |
+|---|---|
+| [Steinberg VST3 SDK](https://github.com/steinbergmedia/vst3sdk) | VST3 音频效果器宿主与原生 GUI 桥接 |
+| [Worldline](cpp/worldline)、[WORLD](https://github.com/mmorise/World)、[libgvps](https://github.com/Sleepwalking/libgvps)、[libpyin](https://github.com/Sleepwalking/libpyin) | 原生歌声合成与音频分析 |
+| [miniaudio](https://github.com/mackron/miniaudio)、[libnpy](https://github.com/llohse/libnpy)、[spline](https://github.com/ttk592/spline)、[Abseil](https://github.com/abseil/abseil-cpp)、[xxHash](https://github.com/Cyan4973/xxHash) | 原生音频、数据读写与基础算法 |
+| [Google Material Design](https://m3.material.io/)、[Material Color Utilities](https://github.com/material-foundation/material-color-utilities) | MD3 设计、HCT / CAM16 与动态颜色算法参考 |
+| [AndroidX](https://github.com/androidx/androidx) 的 MaterialShapes、graphics-shapes 与状态令牌 | 几何图形、形变参数及交互状态参考 |
+| [Phosphor Icons](https://github.com/phosphor-icons/core) | 界面图标 |
+| 华为 [HarmonyOS Sans](https://developer.huawei.com/consumer/cn/design/resource/) | 应用字体；使用 [HarmonyOS Sans Fonts License Agreement](OpenUtau/Assets/Fonts/LICENSE.txt) |
+| 声库、插件和截图中角色形象的创作者 | 各自的声音、工具与视觉作品；相关权利和使用条件归各权利人 |
 
-### 音频格式
+感谢 [xUnit](https://github.com/xunit/xunit)、[Avalonia.Headless](https://github.com/AvaloniaUI/Avalonia)、[Microsoft Test Platform](https://github.com/microsoft/vstest)、[coverlet](https://github.com/coverlet-coverage/coverlet)、[GoogleTest](https://github.com/google/googletest)、[Bazel](https://github.com/bazelbuild/bazel)、[CMake](https://github.com/Kitware/CMake) 与 [GitHub Actions](https://github.com/features/actions) 提供的开发和验证工具。也感谢历史开发阶段使用过的 [SukiUI](https://github.com/kikipoulet/SukiUI) 与 [Dotnet.Bundle](https://github.com/egramtel/dotnet-bundle) 等项目。
 
-| 库 | 版本 | 许可 | 用途 |
-|----|------|------|------|
-| [NAudio.Vorbis](https://github.com/naudio/Vorbis) | 1.5.0 | MIT | Ogg Vorbis 解码 |
-| [BunLabs.NAudio.Flac](https://github.com/BunLabs/NAudio.Flac) | 2.0.1 | MIT | FLAC 解码 |
-| [NLayer](https://github.com/naudio/NLayer) | 1.4.0 | MIT | MP3 解码 |
-| [Concentus.OggFile](https://github.com/lostromb/concentus) | 1.0.6 | Apache-2.0 | Opus 编码 |
+主项目使用 [MIT 许可证](LICENSE.txt)，并保留上游版权声明。第三方代码、字体、声库、模型及插件分别遵循各自许可。
 
-### UI / 设计
+## Vibe coding 声明
 
-| 库 | 版本 | 许可 | 用途 |
-|----|------|------|------|
-| [HarmonyOS Sans SC](https://developer.harmonyos.com/) | — | OFL | 全局 UI 字体 |
-| [Phosphor](https://phosphoricons.com) | — | MIT | 界面图标 |
-| [Dotnet.Bundle](https://github.com/egramtel/dotnet-bundle) | 0.9.13 | MIT | macOS 应用打包 |
+UTvTU 使用 **vibe coding / AI 辅助开发**：由维护者提出产品目标、交互要求和使用反馈，借助 AI 工具参与方案讨论、代码编写、重构、调试与文档整理。
 
-### 文件格式 / MIDI
+这一声明描述 UTvTU 的开发方式。OpenUTAU 的既有代码、第三方组件和社区资源继续保留原作者的署名与贡献，本项目在这些基础上扩展与重构。维护者负责项目方向、变更取舍和发布决策，功能描述以实际实现与验证结果为准。
 
-| 库 | 版本 | 许可 | 用途 |
-|----|------|------|------|
-| [DryWetMidi](https://github.com/melanchall/drywetmidi) | 7.2.0 | MIT | MIDI 文件读写 |
-| [SharpCompress](https://github.com/adamhathcock/sharpcompress) | 0.48.1 | MIT | 压缩包解压 |
+欢迎通过 [Issues](https://github.com/XKLMY-hi/UTvTU/issues) 和 Pull Requests 提供复现、代码审阅与改进建议。
 
-### 语言 / 音素处理
+**By XKLMY · Built with vibe coding**
 
-| 库 | 版本 | 许可 | 用途 |
-|----|------|------|------|
-| [csharp-pinyin](https://github.com/poychang/csharp-pinyin) | 1.0.0 | MIT | 汉字转拼音 |
-| [csharp-kana](https://github.com/poychang/csharp-kana) | 1.0.2 | MIT | 假名转换 |
-| [WanaKana-net](https://github.com/MartinZikmund/WanaKana-net) | 1.0.0 | MIT | 日文假名处理 |
-| [UTF.Unknown](https://github.com/CharsetDetector/UTF-unknown) | 2.5.1 | MIT | 文本编码检测 |
+## 感谢 OpenUTAU 与 UTAU 社区
 
-### 工具
+感谢 StAkira 与 OpenUTAU 的每一位贡献者。UTvTU 的歌声编辑、音素化、工程格式和合成能力都以你们长期积累的工作为基础；本项目会继续保留上游署名，并尊重原有设计与贡献。
 
-| 库 | 版本 | 许可 | 用途 |
-|----|------|------|------|
-| [TextCopy](https://github.com/CopyText/TextCopy) | 6.2.1 | MIT | 跨平台剪贴板 |
-| [K4os.Hash.xxHash](https://github.com/k4os/K4os.Hash.xxHash) | 1.0.8 | MIT | 高速哈希 |
-| [Ignore](https://github.com/nicoco007/Ignore) | 0.1.50 | MIT | .gitignore 规则解析 |
-| [NumSharp](https://github.com/SciSharp/NumSharp) | 0.30.0 | Apache-2.0 | 数值计算 |
-| [NeoLua](https://github.com/neolithos/NeoLua) | 1.3.19 | Apache-2.0 | Lua 脚本引擎 |
-| [NetMQ](https://github.com/zeromq/netmq) | 4.0.1 | LGPL-3.0 | 进程间通信 |
+感谢 UTAU 社区的声库作者、录音者、OTO 制作者、重采样器开发者、音素化器与词典维护者，以及翻译者、教程作者、调声师和音乐创作者。你们分享的声音、工具、知识和作品，让歌声合成成为可以共同参与、不断探索的创作方式。
 
-### C++ 原生 (VST3 桥接)
-
-| 库 | 版本 | 许可 | 用途 |
-|----|------|------|------|
-| [VST3 SDK](https://github.com/steinbergmedia/vst3sdk) | 3.8.0 | MIT / GPL-3 | VST3 宿主桥接 |
-| [Worldline](https://github.com/stakira/OpenUtau) | — | MIT | 原生音频渲染引擎 |
-
-### 设计资源
-
-| 资源 | 许可 | 来源 |
-|------|------|------|
-| Phosphor | MIT | https://phosphoricons.com |
-| HarmonyOS Sans SC | OFL | https://developer.harmonyos.com/ |
-
----
-
-## 许可证
-
-基于 [OpenUTAU](https://github.com/openutau/OpenUtau)，MIT License。
-
-VST3 桥接基于 [Steinberg VST3 SDK v3.8.0](https://github.com/steinbergmedia/vst3sdk)，MIT / GPL-3 双许可（本项目使用 MIT 许可部分）。
-
-Phosphor 图标使用 MIT License。
-
----
-
-## 致谢
-
-- [OpenUTAU](https://github.com/openutau/OpenUtau) 原版项目及全体贡献者
-- Steinberg 提供 VST3 SDK
-- 歌声合成社区
-- 本项目以 **Vibe Coding** 方式开发 —— 借助 AI 辅助架构设计、代码编写与调试
-
----
-
-**By XKLMY · Vibe Coding**
+希望 UTvTU 能在这些积累之上，让编辑、混音和交付更连贯，也让更多声音被听见。
