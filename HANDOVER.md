@@ -1,5 +1,12 @@
 # HANDOVER — 新会话交接（2026-10-17 安装与卸载重构）
 
+## 2026-10-17 正式发布 GitHub（最新）
+
+- 用户明确要求提交、编译发布版与安装器并发布GitHub，已完成 **UTvTU-26.10.17-013015**：[正式Release](https://github.com/XKLMY-hi/UTvTU/releases/tag/UTvTU-26.10.17-013015)。公开、非预发布、Latest；8份附件大小及服务端SHA256与本地全部一致。源码与标签固定`8e965414e459d9b5053eac2ff9fa70d19e01933a`，此前全部产品与README提交已推送`origin/plus-develop`，master未动；下文“未推送”均为历史状态。
+- [交付与验证](.opencode/plans/release-2026-10-17.md)，[验证JSON](.opencode/plans/release-2026-10-17/validation.json)。SDK9.0.317、Windows x64、Release、自包含、单节点/两处理器/768MiB托管堆，正式打包脚本退出0，存在既有编译警告。安装器`dist/UTvTU-26.10.17-013015.exe`约275.9MiB，SHA256`ED77E97DD018783030FC540B5D1F59640A129AA49AFF5D7CE32DE00641F774EB`；便携ZIP约231.8MiB，与已验证载荷一致。两者与校验、来源及许可文件均已上传。
+- 本轮55项安装器轻量检查通过（13.1秒/109MiB），最终实包隔离安装11.1秒/76MiB、卸载6.5秒/72MiB，均exit0，合成用户数据保留，不动真实工程、注册表或快捷方式；护栏30秒/384MiB不变。未跑全套音频压力。日志`.dsh/release-20261017/`；359文件发布目录`.dsh/packaging/d7ab9f9ccaa54d6eb34db16d305018a4/application/`。
+- 未启动或关闭用户主程序、未自行截图，现有Debug预览不作为本轮Release。此前旧安装包001312不再是最新交付；今后定位产物以本节013015为准。移动盘工作区仍须重新核实。
+
 ## 2026-10-17 README 重写与新版实机截图（最新）
 
 - 用户指定首页结构为“大标题、产品截图、功能介绍、完整鸣谢、vibe coding 声明、感谢 OpenUTAU 与 UTAU 社区”。中英文 README 已同步重写，介绍当前工作区、独立内置效果与共享机架、VST3 名称卡片、离线交付、MD3 动态配色及资源中心；明确当前能力与发行包的版本区别。开发命令迁至 `docs/BUILDING.md`（该目录被忽略，新文件已显式纳入 Git）。

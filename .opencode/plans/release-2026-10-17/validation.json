@@ -1,0 +1,83 @@
+{
+  "Version": "UTvTU-26.10.17-013015",
+  "SourceCommit": "8e965414e459d9b5053eac2ff9fa70d19e01933a",
+  "Runtime": "win-x64",
+  "Sdk": "9.0.317",
+  "ManifestFiles": 359,
+  "PortableEntries": 360,
+  "PortableMatchesVerifiedPayload": true,
+  "BuildExitCode": 0,
+  "BuildHasExistingWarnings": true,
+  "SetupChecks": {
+    "Passed": 55,
+    "Failed": 0,
+    "Skipped": 0,
+    "Seconds": 13.1,
+    "PeakMiB": 109,
+    "Trx": "4d3c56d2f8e34b3f94db7cd173a420e3.trx"
+  },
+  "PackageSmoke": {
+    "Success": true,
+    "InstallSeconds": 11.1,
+    "InstallPeakMiB": 76,
+    "UninstallSeconds": 6.5,
+    "UninstallPeakMiB": 72,
+    "SyntheticFilesPreserved": true,
+    "RegistryTouched": false,
+    "ShortcutsTouched": false,
+    "RealProjectsTouched": false
+  },
+  "Limits": {
+    "Seconds": 30,
+    "MemoryMiB": 384
+  },
+  "FullAudioStressTest": false,
+  "Assets": [
+    {
+      "Name": "UTvTU-26.10.17-013015.exe",
+      "Bytes": 289342233,
+      "Sha256": "ED77E97DD018783030FC540B5D1F59640A129AA49AFF5D7CE32DE00641F774EB"
+    },
+    {
+      "Name": "UTvTU-26.10.17-013015-win-x64.zip",
+      "Bytes": 243021477,
+      "Sha256": "80D387F9A173287350AF615B32854DD5DF86E28223D7C494E47B47A410254019"
+    },
+    {
+      "Name": "UTvTU-26.10.17-013015.json",
+      "Bytes": 64289,
+      "Sha256": "2DBDE728FE4030A38E5ED02A150F7F385FD73B1BAEFE96BDCCA40439B0583F0A"
+    },
+    {
+      "Name": "UTvTU-26.10.17-013015.sha256",
+      "Bytes": 93,
+      "Sha256": "0298497DF48C24A06108E9D57547B72A0CEACCE7C216DADCEE317AE1B71BCB91"
+    },
+    {
+      "Name": "THIRD-PARTY-NOTICES.md",
+      "Bytes": 9484,
+      "Sha256": "3F171FA264431F358C2BA7FF0FFAA7A9FDE19756D73FF50620F2D52D9B0A843C"
+    },
+    {
+      "Name": "LICENSE.txt",
+      "Bytes": 1182,
+      "Sha256": "C578CF22FB6265BB6FC89FEEFD5AED1AEC75D99CF3A41AD8D2C54FEB4A604361"
+    },
+    {
+      "Name": "HarmonyOS-Sans-LICENSE.txt",
+      "Bytes": 32768,
+      "Sha256": "B2FFEC0E6269EE41C3B5FC0345AB37600B46D66EBEA6C9C58FF37F517BDFA164"
+    }
+  ],
+  "GitHub": {
+    "Url": "https://github.com/XKLMY-hi/UTvTU/releases/tag/UTvTU-26.10.17-013015",
+    "ReleaseId": 415217155,
+    "Tag": "UTvTU-26.10.17-013015",
+    "PublishedAt": "2026-10-16T17:41:12Z",
+    "Draft": false,
+    "Prerelease": false,
+    "AssetCount": 8,
+    "AllRemoteSha256Match": true,
+    "TagCommit": "8e965414e459d9b5053eac2ff9fa70d19e01933a"
+  }
+}
