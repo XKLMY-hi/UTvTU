@@ -72,6 +72,8 @@ namespace OpenUtau.Classic {
             resamplers.Clear();
             resamplersMap.Clear();
             resamplers.Add(new WorldlineResampler());
+            // Upstream 2913eeb9: external files must not replace built-in identities.
+            var builtInNames = resamplers.Select(r => r.ToString()).ToHashSet(StringComparer.OrdinalIgnoreCase);
             string basePath = PathManager.Inst.ResamplersPath;
             try {
                 Directory.CreateDirectory(basePath);
@@ -79,7 +81,9 @@ namespace OpenUtau.Classic {
                     RecurseSubdirectories = true
                 })) {
                     var driver = LoadResampler(file, basePath);
-                    if (driver != null) {
+                    if (driver != null && builtInNames.Contains(driver.ToString())) {
+                        Log.Warning("Skipped resampler {File}: name conflicts with a built-in resampler", file);
+                    } else if (driver != null) {
                         resamplers.Add(driver);
                     }
                 }
