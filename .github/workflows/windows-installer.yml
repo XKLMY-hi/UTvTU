@@ -1,0 +1,35 @@
+name: Windows installer
+on:
+  pull_request:
+    branches: [plus-develop, master]
+    paths: ['installer/**', 'scripts/build-installer.ps1', 'scripts/Test-Setup.ps1', 'OpenUtau/OpenUtau.csproj', 'VstProbe/**', 'UTvTU.DawUI/**', 'UTvTU.Md3/**', '.github/workflows/windows-installer.yml']
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: windows-latest
+    env:
+      DOTNET_PROCESSOR_COUNT: 2
+      DOTNET_CLI_DO_NOT_USE_MSBUILD_SERVER: 1
+      MSBUILDDISABLENODEREUSE: 1
+      DOTNET_GCHeapHardLimit: '0x30000000'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - name: Build installer checks
+        shell: pwsh
+        run: dotnet build installer/UTvTU.Setup.Tests -m:1 -nodeReuse:false -p:UseSharedCompilation=false -p:RuntimeIdentifiers= -p:UsedAvaloniaProducts=
+      - name: Bounded installer checks
+        shell: pwsh
+        run: ./scripts/Test-Setup.ps1
+      - name: Build complete package
+        if: github.event_name == 'workflow_dispatch'
+        shell: pwsh
+        run: ./scripts/build-installer.ps1
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          name: UTvTU-windows-installer
+          path: dist/*
+          if-no-files-found: error

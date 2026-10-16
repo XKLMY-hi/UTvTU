@@ -72,6 +72,7 @@ public sealed class SetupEngine {
 
     public SetupResult Uninstall(SetupOptions options, IProgress<SetupProgress>? progress, CancellationToken token) {
         string target = SetupPaths.ValidateTarget(options.Directory);
+        using var transaction = new FileTransaction(target);
         var receipt = ReadReceipt(target) ?? throw new IOException("此目录没有可验证的 UTvTU 安装记录。旧版请先覆盖安装新版，再使用新版卸载器。");
         if (receipt.UserSid != options.UserSid) throw new IOException("不能卸载其他用户的安装。");
         EnsureNotRunning(target);
@@ -83,7 +84,6 @@ public sealed class SetupEngine {
             if (SetupPackage.Matches(path, file)) owned.Add(file.Path);
             else warnings.Add($"保留已修改文件：{file.Path}");
         }
-        using var transaction = new FileTransaction(target);
         owned.Add(InstallReceipt.FileName);
         transaction.Preflight(owned);
         token.ThrowIfCancellationRequested(); EnsureNotRunning(target);
@@ -117,7 +117,7 @@ public sealed class SetupEngine {
         foreach (string name in SetupPaths.DataFolders) {
             string path = SetupPaths.Resolve(expected, name);
             if (!Directory.Exists(path)) continue;
-            foreach (string item in Directory.EnumerateFileSystemEntries(path, "*", SearchOption.AllDirectories)) SetupPaths.RejectLinks(item);
+            foreach (string item in SetupPaths.EnumerateFiles(path)) SetupPaths.RejectLinks(item);
             Directory.Delete(path, true);
         }
         foreach (string path in Directory.EnumerateFiles(expected)) {

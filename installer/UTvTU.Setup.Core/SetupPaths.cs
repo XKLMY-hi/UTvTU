@@ -43,6 +43,16 @@ public static class SetupPaths {
                 throw new IOException($"安装路径不能经过符号链接或目录联接：{p}");
         }
     }
+    public static IEnumerable<string> EnumerateFiles(string root) {
+        RejectLinks(root);
+        var pending = new Stack<string>(); pending.Push(root);
+        while (pending.TryPop(out string? directory)) {
+            foreach (string path in Directory.EnumerateFileSystemEntries(directory)) {
+                RejectLinks(path);
+                if (Directory.Exists(path)) pending.Push(path); else yield return path;
+            }
+        }
+    }
 
     public static string ValidateTarget(string path) {
         if (!Path.IsPathFullyQualified(path)) throw new IOException("请选择完整的安装路径。");
@@ -61,7 +71,7 @@ public static class SetupPaths {
         if (!Within(parent, path) || !Path.GetFileName(path).StartsWith(prefix, StringComparison.Ordinal)) throw new IOException("事务清理范围无效。");
         RejectLinks(path);
         if (!Directory.Exists(path)) return;
-        foreach (string entry in Directory.EnumerateFileSystemEntries(path, "*", SearchOption.AllDirectories)) RejectLinks(entry);
+        foreach (string entry in EnumerateFiles(path)) RejectLinks(entry);
         Directory.Delete(path, true);
     }
 }

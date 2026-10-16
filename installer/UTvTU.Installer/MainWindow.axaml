@@ -1,10 +1,16 @@
 <Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:daw="using:UTvTU.DawUI.Controls"
-        x:Class="UTvTU.Installer.MainWindow" Title="UTvTU 安装程序" Width="940" Height="680" MinWidth="820" MinHeight="600" WindowStartupLocation="CenterScreen">
+        x:Class="UTvTU.Installer.MainWindow" Title="UTvTU 安装程序" Width="940" Height="680" MinWidth="820" MinHeight="600" WindowStartupLocation="CenterScreen" daw:DawStyle.Density="Standard">
   <Grid RowDefinitions="72,*,76">
     <Grid Margin="28,0" ColumnDefinitions="Auto,*,Auto">
       <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
         <Viewbox Width="32" Height="32"><Canvas Width="64" Height="64"><Path Data="{StaticResource brand-mark}" Stroke="{DynamicResource md3.primary}" StrokeThickness="8" StrokeLineCap="Round" StrokeJoin="Round"/></Canvas></Viewbox>
-        <StackPanel Spacing="1"><TextBlock Text="UTvTU" FontWeight="SemiBold" FontSize="20"/><TextBlock Text="人声制作工作站" Classes="label"/></StackPanel>
+        <StackPanel Spacing="4">
+          <Viewbox Width="84" Height="23" HorizontalAlignment="Left"><Canvas Width="55.8" Height="15">
+            <Path Data="{StaticResource brand-wordmark}" Fill="{DynamicResource md3.on-surface}" Width="55.8" Height="15" Stretch="Uniform"/>
+            <Path Data="{StaticResource brand-v-chevron}" Stroke="{DynamicResource md3.on-surface}" StrokeThickness="3.30" StrokeLineCap="Round" StrokeJoin="Round" Width="4.92" Height="7.68" Stretch="Uniform" Canvas.Left="25.03" Canvas.Top="5.44"/>
+          </Canvas></Viewbox>
+          <TextBlock Text="人声制作工作站" Classes="label"/>
+        </StackPanel>
       </StackPanel>
       <Border Grid.Column="2" Background="{DynamicResource md3.surface-container}" CornerRadius="20" Padding="12,6" VerticalAlignment="Center"><TextBlock Name="ModeBadge" Text="安装" Classes="label"/></Border>
     </Grid>

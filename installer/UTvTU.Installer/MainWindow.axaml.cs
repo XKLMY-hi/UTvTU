@@ -19,6 +19,7 @@ public partial class MainWindow : Window {
     string[] retainedWarnings = Array.Empty<string>();
     readonly bool uninstall;
     readonly bool preview;
+    internal Func<SetupOptions, IProgress<SetupProgress>, CancellationToken, Task<SetupResult>> ExecuteOperation { get; set; } = InstallerCore.RunAsync;
     public MainWindow() {
         InitializeComponent();
         uninstall = InstallerCore.Command.Uninstall; preview = InstallerCore.Command.Preview;
@@ -59,7 +60,8 @@ public partial class MainWindow : Window {
             LocationHint.Text = receipt != null ? $"当前版本 {receipt.Version} · 将保留现有用户数据" : SetupEngine.IsUtvtu(target) ? "检测到旧版 UTvTU，将保留数据并更新程序。" : InstallerCore.NeedsElevation(target) ? "此位置需要 Windows 管理员授权。" : "仅为当前用户安装。";
         } catch (Exception error) { LocationHint.Text = error.Message; }
     }
-    async Task ExecuteAsync() {
+    internal async Task ExecuteAsync() {
+        if (busy || preview) return;
         try {
             lastOptions = InstallerCore.Options((DirBox.Text ?? "").Trim(), DesktopChoice.IsChecked == true, AssociationChoice.IsChecked == true, RemoveDataChoice.IsChecked == true);
             lastReceipt = uninstall ? SetupEngine.ReadReceipt(lastOptions.Directory) : null; legacy = SetupEngine.IsUtvtu(lastOptions.Directory);
@@ -75,7 +77,7 @@ public partial class MainWindow : Window {
                 if (p.Detail != null) { LogText.Text += p.Stage + " · " + p.Detail + Environment.NewLine; Details.IsVisible = true; }
                 Program.WriteLog(p.Stage, p.Detail ?? "");
             });
-            var result = await InstallerCore.RunAsync(lastOptions, progress, operation.Token);
+            var result = await ExecuteOperation(lastOptions, progress, operation.Token);
             if (!uninstall) lastReceipt = SetupEngine.ReadReceipt(lastOptions.Directory);
             completed = true; ProgressPage.IsVisible = false; ResultPage.IsVisible = true;
             StepProgress.Classes.Set("active", false); StepDone.Classes.Set("active", true);

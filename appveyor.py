@@ -31,31 +31,9 @@ def write_appcast(appcast_os, appcast_rid, appcast_file):
 
 
 if sys.platform == 'win32':
-    if appcast_ver is not None:
-        os.system("git tag build/%s 2>&1" % (appcast_ver))
-        os.system("git push origin build/%s 2>&1" % (appcast_ver))
-
-    os.system("del *.xml 2>&1")
-
-    import urllib.request
-    urllib.request.urlretrieve("https://www.nuget.org/api/v2/package/Microsoft.AI.DirectML/1.12.0", "Microsoft.AI.DirectML.nupkg")
-    os.system("mkdir Microsoft.AI.DirectML")
-    os.system("tar -xf Microsoft.AI.DirectML.nupkg -C Microsoft.AI.DirectML")
-
-    os.system("dotnet restore OpenUtau -r win-x86")
-    os.system(
-        "dotnet publish OpenUtau -c Release -r win-x86 --self-contained true -o bin/win-x86")
-    os.system("copy /y OpenUtau.Plugin.Builtin\\bin\\Release\\netstandard2.1\\OpenUtau.Plugin.Builtin.dll bin\\win-x86")
-    write_appcast("windows", "win-x86", "OpenUtau-win-x86.zip")
-
-    os.system("dotnet restore OpenUtau -r win-x64")
-    os.system(
-        "dotnet publish OpenUtau -c Release -r win-x64 --self-contained true -o bin/win-x64")
-    os.system("copy /y OpenUtau.Plugin.Builtin\\bin\\Release\\netstandard2.1\\OpenUtau.Plugin.Builtin.dll bin\\win-x64")
-    write_appcast("windows", "win-x64", "OpenUtau-win-x64.zip")
-
-    os.system("makensis -DPRODUCT_VERSION=%s OpenUtau.nsi" % (appcast_ver))
-    write_appcast("windows", "win-x64-installer", "OpenUtau-win-x64.exe")
+    # The old NSIS path used the upstream identity and unsafe uninstall behavior.
+    # Windows releases now run the verified packaging script in windows-installer.yml.
+    raise SystemExit("Windows packaging moved to .github/workflows/windows-installer.yml; run scripts/build-installer.ps1 locally.")
 
 elif sys.platform == 'darwin':
     os.system("rm *.dmg")

@@ -82,12 +82,19 @@
     <ProjectReference Include="..\OpenUtau.Plugin.Builtin\OpenUtau.Plugin.Builtin.csproj" />
   </ItemGroup>
   <Target Name="CopyVstProbe" AfterTargets="Build" Condition="'$(OS)' == 'Windows_NT'">
-    <MSBuild Projects="..\VstProbe\VstProbe.csproj" Targets="Build" />
-    <!-- 复制 vst_probe 全部产物：apphost 运行需要同目录的 dll + runtimeconfig.json -->
+    <MSBuild Projects="..\VstProbe\VstProbe.csproj" Targets="GetVstProbeFiles" RemoveProperties="OutDir;PublishDir;PublishSingleFile">
+      <Output TaskParameter="TargetOutputs" ItemName="VstProbeFiles" />
+    </MSBuild>
+    <RemoveDuplicates Inputs="@(VstProbeFiles)"><Output TaskParameter="Filtered" ItemName="UniqueVstProbeFiles" /></RemoveDuplicates>
+    <Copy SourceFiles="@(UniqueVstProbeFiles)" DestinationFolder="$(OutDir)" />
+  </Target>
+  <Target Name="PublishVstProbe" AfterTargets="ComputeFilesToPublish" DependsOnTargets="CopyVstProbe" Condition="'$(OS)' == 'Windows_NT'">
     <ItemGroup>
-      <VstProbeFiles Include="..\VstProbe\bin\$(Configuration)\net8.0\vst_probe.*" />
+      <ResolvedFileToPublish Include="@(UniqueVstProbeFiles)">
+        <RelativePath>%(Filename)%(Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
     </ItemGroup>
-    <Copy SourceFiles="@(VstProbeFiles)" DestinationFolder="$(OutDir)" />
   </Target>
   <ItemGroup Condition="'$(Configuration)'=='DEBUG'">
     <None Include="..\runtimes\**" CopyToOutputDirectory="PreserveNewest" LinkBase="runtimes\" />

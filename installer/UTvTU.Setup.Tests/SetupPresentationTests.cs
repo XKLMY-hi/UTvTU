@@ -51,4 +51,30 @@ public class SetupPresentationTests {
             Assert.ThrowsAsync<InvalidOperationException>(() => InstallerCore.RunAsync(new SetupOptions(), new InstallerCore.DirectProgress(_ => { }), CancellationToken.None)).GetAwaiter().GetResult();
         } finally { InstallerCore.Command = previous; }
     }
+    [AvaloniaFact]
+    public async Task FailedOperationReturnsToOptionsWithRetryInsteadOfLaunch() {
+        var previous = InstallerCore.Command;
+        InstallerCore.Command = new SetupCommandLine { Directory = Path.Combine(Path.GetTempPath(), "UTvTU-GUI-Preview") };
+        var window = new MainWindow { ExecuteOperation = (_, _, _) => Task.FromException<SetupResult>(new IOException("locked library")) };
+        try {
+            window.Show(); await window.ExecuteAsync(); Dispatcher.UIThread.RunJobs();
+            var controls = window.GetVisualDescendants().OfType<Control>().ToArray();
+            Assert.True(controls.Single(control => control.Name == "OptionsPage").IsVisible);
+            Assert.False(controls.Single(control => control.Name == "ResultPage").IsVisible);
+            Assert.Equal("重试", controls.OfType<DawButton>().Single(button => button.Name == "ActionButton").Content);
+            Assert.Contains("locked library", controls.OfType<TextBlock>().Single(text => text.Name == "NoticeText").Text);
+        } finally { window.Close(); InstallerCore.Command = previous; }
+    }
+    [AvaloniaFact]
+    public async Task ClosingDuringOperationRequestsCancellationAndWaitsForRecovery() {
+        var previous = InstallerCore.Command;
+        InstallerCore.Command = new SetupCommandLine { Directory = Path.Combine(Path.GetTempPath(), "UTvTU-GUI-Preview") };
+        bool restored = false;
+        var window = new MainWindow { ExecuteOperation = async (_, _, token) => { try { await Task.Delay(Timeout.Infinite, token); } finally { restored = true; } return SetupResult.Completed("unused"); } };
+        try {
+            window.Show(); var running = window.ExecuteAsync(); window.Close();
+            await running; Dispatcher.UIThread.RunJobs();
+            Assert.True(restored); Assert.False(window.IsVisible);
+        } finally { window.Close(); InstallerCore.Command = previous; }
+    }
 }

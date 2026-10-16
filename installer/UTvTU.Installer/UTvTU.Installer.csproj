@@ -24,6 +24,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="UTvTU.Setup.Tests" />
     <ProjectReference Include="../UTvTU.Setup.Core/UTvTU.Setup.Core.csproj" />
     <ProjectReference Include="../../UTvTU.DawUI/UTvTU.DawUI.csproj" />
     <AvaloniaResource Include="Assets\**" />

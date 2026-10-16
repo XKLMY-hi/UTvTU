@@ -113,5 +113,21 @@ public sealed class SetupEngineTests : IDisposable {
         Assert.Throws<InvalidDataException>(() => engine.Install(payload, Options, null, CancellationToken.None));
         Assert.Equal("old", File.ReadAllText(Path.Combine(Target, "OpenUtau.exe")));
     }
+    [Fact] public void UninstallCancellationRestoresManagedFilesAndReceipt() {
+        Install(); using var stop = new CancellationTokenSource();
+        Assert.Throws<OperationCanceledException>(() => engine.Uninstall(Options, new Callback(p => stop.Cancel()), stop.Token));
+        Assert.NotNull(SetupEngine.ReadReceipt(Target)); Assert.True(File.Exists(Path.Combine(Target, "OpenUtau.exe")));
+    }
+    [Fact] public void ForgedReceiptCannotTurnUserProjectIntoAnOwnedFile() {
+        Install(); string project = Path.Combine(Target, "song.ustxp"); File.WriteAllText(project, "user");
+        var receipt = SetupEngine.ReadReceipt(Target)!; receipt.Files.Add(SetupPackage.Describe(Target, project));
+        SetupJson.Write(Path.Combine(Target, InstallReceipt.FileName), receipt);
+        Assert.Throws<InvalidDataException>(() => engine.Uninstall(Options, null, CancellationToken.None));
+        Assert.Equal("user", File.ReadAllText(project)); Assert.True(File.Exists(Path.Combine(Target, "OpenUtau.exe")));
+    }
+    [Fact] public void PrefixSimilarDirectoriesDoNotPassContainmentCheck() {
+        Assert.False(SetupPaths.Within(Target, Target + "-other/file"));
+        Assert.True(SetupPaths.Within(Target, Path.Combine(Target, "library.dll")));
+    }
     sealed class Callback(Action<SetupProgress> action) : IProgress<SetupProgress> { public void Report(SetupProgress value) => action(value); }
 }

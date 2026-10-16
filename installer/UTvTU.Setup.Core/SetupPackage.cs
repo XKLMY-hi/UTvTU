@@ -66,6 +66,12 @@ public sealed class SetupPackage : IDisposable {
         using var stream = File.OpenRead(path);
         return new(Path.GetRelativePath(root, path).Replace('\\', '/'), stream.Length, Convert.ToHexString(SHA256.HashData(stream)));
     }
+    public void Verify() {
+        foreach (var file in Manifest.Files) {
+            using var stream = entries[file.Path].Open();
+            if (!Convert.ToHexString(SHA256.HashData(stream)).Equals(file.Sha256, StringComparison.OrdinalIgnoreCase)) throw new InvalidDataException($"文件完整性检查失败：{file.Path}");
+        }
+    }
     public static bool Matches(string path, PackageFile file) {
         if (!File.Exists(path)) return false;
         using var stream = File.OpenRead(path);
