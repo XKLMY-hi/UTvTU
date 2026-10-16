@@ -3,193 +3,113 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
-using Avalonia.Threading;
+using Avalonia.Platform.Storage;
+using UTvTU.Setup;
 
-namespace UTvTU.Installer {
-    /// <summary>
-    /// 安装向导（5 个互斥页面）。状态机很浅：0 欢迎 → 1 位置 → 2 安装中 → 3 完成；
-    /// 卸载模式（--uninstall）只有 1 页。
-    /// </summary>
-    public partial class MainWindow : Window {
-        private readonly bool uninstallMode;
-        private int step;
+namespace UTvTU.Installer;
 
-        public MainWindow() : this(false) { }
-
-        public MainWindow(bool uninstallMode) {
-            this.uninstallMode = uninstallMode || InstallerCore.UninstallMode;
-            InitializeComponent();   // ⚠ 必须走生成的 InitializeComponent：x:Name 字段由 name generator 在此赋值
-            Wire();
-            BuildInitialState();
-        }
-
-        private void Wire() {
-            BtnNext.Click += OnNext;
-            BtnBack.Click += (_, _) => GoTo(Math.Max(0, step - 1));
-            BtnCancel.Click += (_, _) => Close();
-        }
-
-        private void BuildInitialState() {
-            string dir = InstallerCore.DefaultInstallDir();
-            DirBox.Text = dir;
-            WelcomeTarget.Text = dir;
-
-            (string Path, string DisplayName)? legacy = InstallerCore.DetectLegacy();
-            bool sameAsLegacy = legacy != null &&
-                string.Equals(legacy.Value.Path, dir, StringComparison.OrdinalIgnoreCase);
-            if (legacy != null) {
-                string msg = sameAsLegacy
-                    ? $"检测到既有安装：{legacy.Value.DisplayName}（{legacy.Value.Path}）—— 将就地覆盖"
-                    : $"检测到另一个安装：{legacy.Value.DisplayName}（{legacy.Value.Path}）—— 不会动它";
-                WelcomeLegacy.Text = msg;
-                WelcomeLegacy.IsVisible = true;
-                LegacyCard.IsVisible = true;
-                LegacyInfo.Text = msg;
-            }
-            ElevationNote.IsVisible = InstallerCore.NeedsElevation(dir) && !InstallerCore.IsElevated();
-
-            string? own = null;
-            try {
-                using Microsoft.Win32.RegistryKey? k = Microsoft.Win32.Registry.CurrentUser
-                    .OpenSubKey(InstallerCore.UninstKey);
-                own = k?.GetValue("DisplayVersion") as string;
-            } catch {
-                // 忽略
-            }
-            StatusText.Text = own != null
-                ? $"已安装版本 {own} ⇒ 将升级到 {InstallerCore.Version}"
-                : $"{InstallerCore.Version} · 载荷 {(InstallerCore.HasPayload ? "就绪" : "缺失")}";
-
-            if (uninstallMode) {
-                PageTitle.Text = "卸载";
-                UninstallTarget.Text = $"将卸载：{dir}";
-                BtnNext.Content = "卸载";
-                GoTo(-1);   // 只显示卸载页
-            } else {
-                // 截图/验证用：UTVTU_INSTALLER_PAGE=<0..3> 直接停在指定页（不影响用户正常流程）
-                int start = 0;
-                if (int.TryParse(Environment.GetEnvironmentVariable("UTVTU_INSTALLER_PAGE"), out int pg)
-                    && pg is >= 0 and <= 3) {
-                    start = pg;
-                }
-                GoTo(start);
-            }
-        }
-
-        private void GoTo(int s) {
-            step = s;
-            PageWelcome.IsVisible = s == 0;
-            PageLocation.IsVisible = s == 1;
-            PageInstall.IsVisible = s == 2;
-            PageDone.IsVisible = s == 3;
-            PageUninstall.IsVisible = uninstallMode;
-            BtnBack.IsVisible = !uninstallMode && s == 1;
-            if (uninstallMode) {
-                PageTitle.Text = "卸载 UTvTU";
-            } else {
-                PageTitle.Text = s switch { 0 => "安装", 1 => "安装位置", 2 => "正在安装", _ => "完成" };
-            }
-            BtnNext.Content = uninstallMode ? "卸载" : s switch { 0 => "下一步", 1 => "安装", 2 => "安装中…", _ => "完成" };
-            BtnNext.IsEnabled = !(s == 2 && !uninstallMode);
-            BtnCancel.IsVisible = !(s == 3);
-        }
-
-        private async void OnNext(object? sender, RoutedEventArgs e) {
-            try {
-                if (uninstallMode) {
-                    await RunUninstall();
-                    return;
-                }
-                switch (step) {
-                    case 0:
-                        GoTo(1);
-                        break;
-                    case 1:
-                        await RunInstall();
-                        break;
-                    default:
-                        if (ChkLaunch.IsChecked == true) {
-                            string exe = Path.Combine(DirBox.Text ?? "", InstallerCore.AppExe);
-                            if (File.Exists(exe)) {
-                                Process.Start(new ProcessStartInfo(exe) { UseShellExecute = true });
-                            }
-                        }
-                        Close();
-                        break;
-                }
-            } catch (Exception ex) {
-                Log(ex.ToString());   // 完整堆栈：跨线程/COM 这类问题只看 Message 定位不了
-                StatusText.Text = "失败：" + ex.Message;
-                BtnNext.IsEnabled = true;
-            }
-        }
-
-        private async Task RunInstall() {
-            string dir = (DirBox.Text ?? "").Trim();
-            if (dir.Length == 0) {
-                StatusText.Text = "请填写安装位置";
-                return;
-            }
-            if (!InstallerCore.HasPayload) {
-                StatusText.Text = $"缺少载荷文件 {InstallerCore.PayloadName}（应与本程序同目录）";
-                return;
-            }
-            if (InstallerCore.NeedsElevation(dir) && !InstallerCore.IsElevated()) {
-                StatusText.Text = "正在请求管理员权限…";
-                if (!InstallerCore.RelaunchElevated(dir)) {
-                    StatusText.Text = "已取消提权 —— 请改选一个用户目录，或以管理员身份运行";
-                    return;
-                }
-                Close();
-                return;
-            }
-
-            GoTo(2);
-            var progress = new Progress<(int Percent, string Stage)>(p => {
-                Bar.Value = p.Percent;
-                StageText.Text = p.Stage;
+public partial class MainWindow : Window {
+    bool busy, completed, closeAfterCancel;
+    CancellationTokenSource? operation;
+    SetupOptions? lastOptions;
+    InstallReceipt? lastReceipt;
+    bool legacy;
+    string[] retainedWarnings = Array.Empty<string>();
+    readonly bool uninstall;
+    readonly bool preview;
+    public MainWindow() {
+        InitializeComponent();
+        uninstall = InstallerCore.Command.Uninstall; preview = InstallerCore.Command.Preview;
+        string directory = InstallerCore.DefaultInstallDir(); DirBox.Text = directory;
+        VersionText.Text = InstallerCore.Version;
+        DesktopChoice.IsChecked = InstallerCore.Command.DesktopShortcut; AssociationChoice.IsChecked = InstallerCore.Command.FileAssociation; RemoveDataChoice.IsChecked = InstallerCore.Command.RemoveData;
+        Title = uninstall ? "卸载 UTvTU" : "安装 UTvTU"; ModeBadge.Text = uninstall ? "卸载" : "安装";
+        InstallChoices.IsVisible = !uninstall; UninstallChoices.IsVisible = uninstall;
+        DirBox.IsReadOnly = uninstall; BrowseButton.IsVisible = !uninstall;
+        StepOptionsText.Text = uninstall ? "卸载选项" : "安装选项"; StepProgressText.Text = uninstall ? "卸载进度" : "安装进度";
+        Heading.Text = uninstall ? "管理这一次安装" : "让创作准备就绪";
+        Subtitle.Text = uninstall ? "移除 UTvTU 程序，保留属于你的创作。" : "选择安装位置，即可开始歌声编辑、合成与混音。";
+        ActionButton.Content = uninstall ? "卸载 UTvTU" : "安装 UTvTU";
+        DirBox.TextChanged += (_, _) => UpdateLocation(); UpdateLocation();
+        ActionButton.Click += async (_, _) => { if (completed) Finish(); else if (!busy) await ExecuteAsync(); };
+        CancelButton.Click += (_, _) => { if (busy) CancelOperation(); else Close(); };
+        LogButton.Click += (_, _) => { Directory.CreateDirectory(InstallerCore.LogDirectory); Process.Start(new ProcessStartInfo(InstallerCore.LogDirectory) { UseShellExecute = true }); };
+        BrowseButton.Click += async (_, _) => {
+            var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions { Title = "选择 UTvTU 安装文件夹", AllowMultiple = false });
+            if (folders.Count > 0) DirBox.Text = folders[0].TryGetLocalPath();
+        };
+        RetryIntegrationButton.Click += async (_, _) => {
+            if (lastOptions == null || lastReceipt == null || busy) return;
+            busy = true; RetryIntegrationButton.IsEnabled = false; ActionButton.IsEnabled = false;
+            try { await InstallerCore.RetryIntegrationAsync(lastOptions, lastReceipt, legacy); Notice.IsVisible = retainedWarnings.Length > 0; NoticeText.Text = string.Join(Environment.NewLine, retainedWarnings); RetryIntegrationButton.IsVisible = false; ResultDetail.Text = "系统入口设置已完成。"; }
+            catch (Exception error) { ShowNotice(error.Message); }
+            finally { busy = false; RetryIntegrationButton.IsEnabled = true; ActionButton.IsEnabled = true; if (closeAfterCancel) Close(); }
+        };
+        Closing += (_, e) => { if (busy) { e.Cancel = true; closeAfterCancel = true; CancelOperation(); } };
+        if (preview) { ActionButton.IsEnabled = false; ShowNotice("界面预览 · 此窗口不会安装、卸载或修改用户数据。"); }
+        else if (!uninstall && !InstallerCore.HasPayload) { ActionButton.IsEnabled = false; ShowNotice("此程序未包含安装文件，请下载完整的 UTvTU 安装包。"); }
+    }
+    void UpdateLocation() {
+        try {
+            string target = SetupPaths.ValidateTarget((DirBox.Text ?? "").Trim());
+            var receipt = SetupEngine.ReadReceipt(target);
+            DataPathText.Text = "数据位置：" + (receipt?.DataDirectory ?? SetupPaths.UserDataDirectory);
+            LocationHint.Text = receipt != null ? $"当前版本 {receipt.Version} · 将保留现有用户数据" : SetupEngine.IsUtvtu(target) ? "检测到旧版 UTvTU，将保留数据并更新程序。" : InstallerCore.NeedsElevation(target) ? "此位置需要 Windows 管理员授权。" : "仅为当前用户安装。";
+        } catch (Exception error) { LocationHint.Text = error.Message; }
+    }
+    async Task ExecuteAsync() {
+        try {
+            lastOptions = InstallerCore.Options((DirBox.Text ?? "").Trim(), DesktopChoice.IsChecked == true, AssociationChoice.IsChecked == true, RemoveDataChoice.IsChecked == true);
+            lastReceipt = uninstall ? SetupEngine.ReadReceipt(lastOptions.Directory) : null; legacy = SetupEngine.IsUtvtu(lastOptions.Directory);
+            busy = true; completed = false; closeAfterCancel = false; operation = new CancellationTokenSource();
+            CancelButton.IsEnabled = true;
+            OptionsPage.IsVisible = false; ProgressPage.IsVisible = true; ResultPage.IsVisible = false; Notice.IsVisible = false;
+            ActionButton.IsEnabled = false; CancelButton.Content = "取消操作"; StepOptions.Classes.Set("active", false); StepProgress.Classes.Set("active", true);
+            Heading.Text = uninstall ? "正在卸载" : "正在准备你的工作站";
+            Subtitle.Text = uninstall ? "只移除已登记的程序文件。" : "正在校验安装文件并更新程序。";
+            var progress = new Progress<SetupProgress>(p => {
+                if (!busy) return;
+                Progress.Value = p.Percent; PercentText.Text = p.Percent + "%"; StageText.Text = p.Stage; ProgressDetail.Text = p.Detail;
+                if (p.Detail != null) { LogText.Text += p.Stage + " · " + p.Detail + Environment.NewLine; Details.IsVisible = true; }
+                Program.WriteLog(p.Stage, p.Detail ?? "");
             });
-            // ⚠ 勾选值必须在**切后台线程之前**读好：UI 控件属性只能在 UI 线程访问
-            //   （实测踩过：后台线程读 ToggleButton.IsChecked ⇒ "The calling thread cannot access this object"）
-            bool desktopShortcut = ChkDesktop.IsChecked == true;
-            bool fileAssoc = ChkAssoc.IsChecked == true;
-            string log = "";
-            void OnLog(string line) {
-                log += line + Environment.NewLine;
+            var result = await InstallerCore.RunAsync(lastOptions, progress, operation.Token);
+            if (!uninstall) lastReceipt = SetupEngine.ReadReceipt(lastOptions.Directory);
+            completed = true; ProgressPage.IsVisible = false; ResultPage.IsVisible = true;
+            StepProgress.Classes.Set("active", false); StepDone.Classes.Set("active", true);
+            Heading.Text = uninstall ? "UTvTU 已卸载" : "准备就绪"; ResultTitle.Text = result.Message;
+            ResultDetail.Text = uninstall ? lastOptions.RemoveData ? "程序与所选本机用户数据已移除。" : "工程、声库、备份和个人设置已保留。" : "下一段创作，从这里开始。";
+            LaunchChoice.IsVisible = !uninstall; ActionButton.Content = "完成";
+            CancelButton.IsVisible = false;
+            if (result.Warnings.Count > 0) {
+                Heading.Text = "操作已完成，请检查保留项"; ResultDetail.Text = "请查看下方未完成或保留的项目。";
+                ShowNotice(string.Join(Environment.NewLine, result.Warnings));
+                retainedWarnings = result.Warnings.Where(warning => !warning.StartsWith("程序文件操作已完成，但系统入口未全部更新：", StringComparison.Ordinal)).ToArray();
+                RetryIntegrationButton.IsVisible = result.IntegrationPending && lastReceipt != null;
             }
-
-            await Task.Run(() => {
-                OnLog($"目标目录：{dir}");
-                if (InstallerCore.DetectLegacy() is { } lg) {
-                    OnLog($"检测到既有安装：{lg.DisplayName} @ {lg.Path}");
-                }
-                InstallerCore.Install(dir, desktopShortcut, fileAssoc, progress, CancellationToken.None);
-                OnLog("安装完成");
-            });
-            await Dispatcher.UIThread.InvokeAsync(() => LogText.Text = log);
-            GoTo(3);
+        } catch (OperationCanceledException) {
+            ResetForRetry("操作已取消", "程序文件已恢复或尚未修改，可以重新开始。");
+        } catch (Exception error) {
+            Program.WriteLog("失败", error.ToString()); LogText.Text += error + Environment.NewLine; Details.IsVisible = true;
+            ResetForRetry("暂时无法完成", error.Message);
+        } finally {
+            busy = false; operation?.Dispose(); operation = null; ActionButton.IsEnabled = !preview;
+            if (closeAfterCancel) Close();
         }
-
-        private async Task RunUninstall() {
-            string dir = (DirBox.Text ?? "").Trim();
-            GoTo(2);
-            PageInstall.IsVisible = true;
-            var progress = new Progress<(int Percent, string Stage)>(p => {
-                Bar.Value = p.Percent;
-                StageText.Text = p.Stage;
-            });
-            bool removeData = ChkRemoveData.IsChecked == true;   // ⚠ 同上：先取好再切线程
-            await Task.Run(() => InstallerCore.Uninstall(dir, removeData, progress));
-            StatusText.Text = "卸载完成";
-            await Task.Delay(700);
-            Close();
+    }
+    void ResetForRetry(string heading, string message) {
+        Heading.Text = heading; ShowNotice(message); OptionsPage.IsVisible = true; ProgressPage.IsVisible = false; ResultPage.IsVisible = false;
+        ActionButton.Content = "重试"; CancelButton.Content = "关闭"; StepProgress.Classes.Set("active", false); StepOptions.Classes.Set("active", true);
+    }
+    void CancelOperation() { operation?.Cancel(); CancelButton.IsEnabled = false; CancelButton.Content = "正在取消…"; }
+    void ShowNotice(string text) { NoticeText.Text = text; Notice.IsVisible = true; }
+    void Finish() {
+        if (!uninstall && LaunchChoice.IsChecked == true && lastOptions != null) {
+            try { Process.Start(new ProcessStartInfo(Path.Combine(lastOptions.Directory, InstallerCore.AppExe)) { UseShellExecute = true, WorkingDirectory = lastOptions.Directory }); }
+            catch (Exception error) { ShowNotice("程序已安装，启动失败：" + error.Message); return; }
         }
-
-        private void Log(string line) {
-            LogText.Text = (LogText.Text ?? "") + line + Environment.NewLine;
-        }
+        Close();
     }
 }

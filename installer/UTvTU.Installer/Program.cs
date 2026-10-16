@@ -1,77 +1,63 @@
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Avalonia;
+using UTvTU.Setup;
 
-namespace UTvTU.Installer {
-    internal static class Program {
-        /// <summary>
-        /// 入口。两种模式：
-        ///   · 无参 / 图形安装：正常开安装向导；
-        ///   · `--uninstall [--dir &lt;安装目录&gt;]`：卸载流程（安装时把自身复制为 UTvTU-Uninstall.exe）；
-        ///   · `--elevated &lt;原始参数&gt;`：提权后的子进程（内部用，避免二次 UAC 递归）。
-        /// 启动期异常写 `installer-crash.log`（WinExe 没有控制台，崩溃日志是唯一线索）。
-        /// </summary>
-        [STAThread]
-        public static void Main(string[] args) {
-            try {
-                InstallerCore.ParseArgs(args);
-                if (InstallerCore.Silent) {
-                    RunSilent();
-                    return;
-                }
-                BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
-            } catch (Exception ex) {
-                try {
-                    File.WriteAllText(Path.Combine(AppContext.BaseDirectory, "installer-crash.log"),
-                        $"{DateTime.Now:O}{Environment.NewLine}{ex}");
-                } catch {
-                    // 连日志都写不了就放弃
-                }
-                throw;
+namespace UTvTU.Installer;
+
+internal static class Program {
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int MessageBoxW(IntPtr owner, string message, string title, uint flags);
+    [STAThread]
+    public static int Main(string[] args) {
+        try {
+            InstallerCore.Command = SetupCommandLine.Parse(args);
+            if (Path.GetFileName(InstallerCore.SelfPath).Equals(InstallerCore.UninstExe, StringComparison.OrdinalIgnoreCase)) {
+                InstallerCore.Command = InstallerCore.Command with { Uninstall = true, Directory = InstallerCore.Command.Directory ?? AppContext.BaseDirectory };
             }
+            if (InstallerCore.Command.WorkerJob is string job) return InstallerCore.RunWorker(job);
+            if (RelocateUninstaller()) return Environment.ExitCode;
+            if (InstallerCore.Command.Silent) return RunSilent();
+            return BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        } catch (Exception error) {
+            WriteLog("启动失败", error.ToString());
+            if (!InstallerCore.Command.Silent) MessageBoxW(IntPtr.Zero, error.Message + "\n\n日志：" + InstallerCore.LogDirectory, "UTvTU 安装程序", 0x10);
+            return 1;
         }
-
-        /// <summary>
-        /// 无界面模式（可回归/可脚本化）：`--silent [--uninstall] [--dir &lt;目录&gt;] [--no-desktop]`
-        /// 日志写 `installer-silent.log`（WinExe 没有可用 stdout），退出码 0=成功 / 1=失败。
-        /// </summary>
-        private static void RunSilent() {
-            string log = Path.Combine(AppContext.BaseDirectory, "installer-silent.log");
-            var sb = new System.Text.StringBuilder();
-            void W(string s) {
-                // Progress 回调来自后台线程 ⇒ 必须加锁（否则 StringBuilder 并发写会抛 ArgumentOutOfRange）
-                lock (sb) {
-                    sb.AppendLine($"{DateTime.Now:HH:mm:ss.fff} {s}");
-                    File.WriteAllText(log, sb.ToString());
-                }
-            }
-            try {
-                string dir = InstallerCore.DefaultInstallDir();
-                W($"mode={(InstallerCore.UninstallMode ? "uninstall" : "install")} dir={dir} elevated={InstallerCore.IsElevated()}");
-                if (InstallerCore.UninstallMode) {
-                    InstallerCore.Uninstall(dir, removeData: false,
-                        new Progress<(int, string)>(p => W($"{p.Item1}% {p.Item2}")));
-                    W("OK uninstalled");
-                } else {
-                    if (!InstallerCore.HasPayload) {
-                        W($"FAIL missing payload: {InstallerCore.PayloadPath}");
-                        Environment.Exit(1);
-                    }
-                    InstallerCore.Install(dir, !InstallerCore.NoDesktopShortcut, fileAssociation: true,
-                        new Progress<(int, string)>(p => W($"{p.Item1}% {p.Item2}")), CancellationToken.None);
-                    W("OK installed");
-                }
-                Environment.Exit(0);
-            } catch (Exception ex) {
-                W("FAIL " + ex);
-                Environment.Exit(1);
-            }
-        }
-
-        public static AppBuilder BuildAvaloniaApp() =>
-            AppBuilder.Configure<App>()
-                .UsePlatformDetect()
-                .LogToTrace();
     }
+    static bool RelocateUninstaller() {
+        var command = InstallerCore.Command;
+        if (!command.Uninstall || command.Relocated || command.Preview) return false;
+        string target = InstallerCore.DefaultInstallDir();
+        if (!SetupPaths.Within(target, InstallerCore.SelfPath)) return false;
+        // Only published single-file executables can be copied without dependencies.
+        if (!string.IsNullOrEmpty(typeof(Program).Assembly.Location)) throw new IOException("请使用正式的单文件卸载程序。");
+        string temporary = Path.Combine(Path.GetTempPath(), "UTvTU-Uninstall", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(temporary); SetupPaths.RejectLinks(temporary);
+        string exe = Path.Combine(temporary, InstallerCore.UninstExe); File.Copy(InstallerCore.SelfPath, exe);
+        var start = new ProcessStartInfo(exe) { UseShellExecute = false, WorkingDirectory = temporary };
+        foreach (string arg in (command with { Relocated = true, Directory = target }).Arguments()) start.ArgumentList.Add(arg);
+        using var process = Process.Start(start) ?? throw new IOException("无法启动卸载程序。");
+        if (command.Silent) { process.WaitForExit(); Environment.ExitCode = process.ExitCode; }
+        return true;
+    }
+    static int RunSilent() {
+        try {
+            var command = InstallerCore.Command;
+            var options = InstallerCore.Options(InstallerCore.DefaultInstallDir(), command.DesktopShortcut, command.FileAssociation, command.RemoveData);
+            var progress = new InstallerCore.DirectProgress(p => WriteLog("进度", $"{p.Percent}% {p.Stage} {p.Detail}"));
+            var result = InstallerCore.RunAsync(options, progress, CancellationToken.None).GetAwaiter().GetResult();
+            WriteLog(result.Message, string.Join(Environment.NewLine, result.Warnings));
+            return result.Success ? result.Warnings.Count == 0 ? 0 : 2 : 1;
+        } catch (OperationCanceledException) { WriteLog("已取消", "文件已恢复或未修改。"); return 3; }
+        catch (Exception error) { WriteLog("失败", error.ToString()); return 1; }
+    }
+    internal static void WriteLog(string stage, string detail) {
+        try { lock (LogGate) { Directory.CreateDirectory(InstallerCore.LogDirectory); File.AppendAllText(Path.Combine(InstallerCore.LogDirectory, "setup-" + DateTime.Now.ToString("yyyyMMdd") + ".log"), $"{DateTime.Now:O} [{Environment.ProcessId}] {stage} {detail}{Environment.NewLine}"); } } catch { }
+    }
+    static readonly object LogGate = new();
+    public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>().UsePlatformDetect().LogToTrace();
 }

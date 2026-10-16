@@ -1,103 +1,54 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        x:Class="UTvTU.Installer.MainWindow"
-        Title="UTvTU 安装程序"
-        Width="780" Height="540" CanResize="False"
-        WindowStartupLocation="CenterScreen">
-  <Grid RowDefinitions="64,*,76">
-
-    <!-- ══ 顶栏：品牌锁定（几何与主程序顶栏逐字一致）+ 页名 ══ -->
-    <Border Grid.Row="0" Background="{DynamicResource inst.surface-container}"
-            BorderBrush="{DynamicResource inst.outline-variant}" BorderThickness="0,0,0,1">
-      <Grid ColumnDefinitions="Auto,*,Auto" Margin="24,0">
-        <StackPanel Orientation="Horizontal" Spacing="6.3" VerticalAlignment="Center">
-          <Viewbox Width="20.9" Height="20.9" Stretch="Uniform">
-            <Path Data="{StaticResource brand-mark}" Stroke="{DynamicResource inst.primary}"
-                  StrokeThickness="8" StrokeLineCap="Round" StrokeJoin="Round" Width="64" Height="64"/>
-          </Viewbox>
-          <Canvas Width="55.8" Height="15" VerticalAlignment="Center">
-            <Path Data="{StaticResource brand-wordmark}" Fill="{DynamicResource inst.on-surface}"
-                  Width="55.8" Height="15" Stretch="Uniform"/>
-            <Path Data="{StaticResource brand-v-chevron}" Stroke="{DynamicResource inst.on-surface}"
-                  StrokeThickness="3.30" StrokeLineCap="Round" StrokeJoin="Round"
-                  Width="4.92" Height="7.68" Stretch="Uniform" Canvas.Left="25.03" Canvas.Top="5.44"/>
-          </Canvas>
-        </StackPanel>
-        <TextBlock Grid.Column="2" x:Name="PageTitle" Classes="caption"
-                   VerticalAlignment="Center" Text="安装"/>
-      </Grid>
-    </Border>
-
-    <!-- ══ 内容区（5 个页面互斥显示） ══ -->
-    <Grid Grid.Row="1" Margin="24,20,24,8">
-
-      <!-- ① 欢迎 -->
-      <StackPanel x:Name="PageWelcome" Spacing="14">
-        <TextBlock Classes="h1" Text="安装 UTvTU"/>
-        <Border Classes="card">
-          <StackPanel Spacing="6">
-            <TextBlock Classes="caption" Text="安装位置"/>
-            <TextBlock x:Name="WelcomeTarget" TextWrapping="Wrap"/>
-          </StackPanel>
-        </Border>
-        <TextBlock x:Name="WelcomeLegacy" Classes="muted" TextWrapping="Wrap" IsVisible="False"/>
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:daw="using:UTvTU.DawUI.Controls"
+        x:Class="UTvTU.Installer.MainWindow" Title="UTvTU 安装程序" Width="940" Height="680" MinWidth="820" MinHeight="600" WindowStartupLocation="CenterScreen">
+  <Grid RowDefinitions="72,*,76">
+    <Grid Margin="28,0" ColumnDefinitions="Auto,*,Auto">
+      <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+        <Viewbox Width="32" Height="32"><Canvas Width="64" Height="64"><Path Data="{StaticResource brand-mark}" Stroke="{DynamicResource md3.primary}" StrokeThickness="8" StrokeLineCap="Round" StrokeJoin="Round"/></Canvas></Viewbox>
+        <StackPanel Spacing="1"><TextBlock Text="UTvTU" FontWeight="SemiBold" FontSize="20"/><TextBlock Text="人声制作工作站" Classes="label"/></StackPanel>
       </StackPanel>
-
-      <!-- ② 安装位置 -->
-      <StackPanel x:Name="PageLocation" Spacing="14" IsVisible="False">
-        <TextBlock Classes="h1" Text="选择安装位置"/>
-        <TextBox x:Name="DirBox"/>
-        <Border Classes="card" x:Name="LegacyCard" IsVisible="False">
-          <StackPanel Spacing="4">
-            <TextBlock Classes="caption" Text="检测到既有安装"/>
-            <TextBlock x:Name="LegacyInfo" Classes="muted" TextWrapping="Wrap"/>
-          </StackPanel>
-        </Border>
-        <StackPanel Spacing="6">
-          <CheckBox x:Name="ChkDesktop" Content="创建桌面快捷方式" IsChecked="True"/>
-          <CheckBox x:Name="ChkAssoc" Content="关联 .ustx / .ustxp 工程" IsChecked="True"/>
-        </StackPanel>
-        <TextBlock x:Name="ElevationNote" Classes="caption" IsVisible="False"
-                   Text="需要管理员权限，安装时会请求一次 UAC。"/>
-      </StackPanel>
-
-      <!-- ③ 安装中 -->
-      <StackPanel x:Name="PageInstall" Spacing="14" IsVisible="False">
-        <TextBlock Classes="h1" Text="正在安装"/>
-        <ProgressBar x:Name="Bar" Minimum="0" Maximum="100" Value="0"/>
-        <TextBlock x:Name="StageText" Classes="muted"/>
-        <Border Classes="card" Padding="10">
-          <ScrollViewer Height="180">
-            <TextBlock x:Name="LogText" Classes="caption" TextWrapping="Wrap"/>
-          </ScrollViewer>
-        </Border>
-      </StackPanel>
-
-      <!-- ④ 完成 -->
-      <StackPanel x:Name="PageDone" Spacing="14" IsVisible="False">
-        <TextBlock Classes="h1" Text="安装完成"/>
-        <CheckBox x:Name="ChkLaunch" Content="立即启动 UTvTU" IsChecked="True"/>
-      </StackPanel>
-
-      <!-- ⑤ 卸载（卸载模式：命令行带 uninstall 参数时进入） -->
-      <StackPanel x:Name="PageUninstall" Spacing="14" IsVisible="False">
-        <TextBlock Classes="h1" Text="卸载 UTvTU"/>
-        <TextBlock x:Name="UninstallTarget" Classes="muted" TextWrapping="Wrap"/>
-        <CheckBox x:Name="ChkRemoveData" Content="同时删除用户数据"/>
-      </StackPanel>
+      <Border Grid.Column="2" Background="{DynamicResource md3.surface-container}" CornerRadius="20" Padding="12,6" VerticalAlignment="Center"><TextBlock Name="ModeBadge" Text="安装" Classes="label"/></Border>
     </Grid>
-
-    <!-- ══ 底栏 ══ -->
-    <Border Grid.Row="2" Background="{DynamicResource inst.surface-container-low}"
-            BorderBrush="{DynamicResource inst.outline-variant}" BorderThickness="0,1,0,0">
-      <Grid ColumnDefinitions="*,Auto" Margin="24,0">
-        <TextBlock x:Name="StatusText" Classes="caption" VerticalAlignment="Center"/>
-        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-          <Button x:Name="BtnCancel" Classes="text" Content="取消"/>
-          <Button x:Name="BtnBack" Classes="tonal" Content="上一步" IsVisible="False"/>
-          <Button x:Name="BtnNext" Classes="primary" Content="下一步"/>
+    <Grid Grid.Row="1" ColumnDefinitions="220,*" ColumnSpacing="24" Margin="20,0,28,0">
+      <Border CornerRadius="24" Background="{DynamicResource md3.surface-container-low}" Padding="16,24">
+        <Grid RowDefinitions="Auto,*,Auto">
+          <StackPanel Spacing="4">
+            <TextBlock Text="开始下一段创作" FontSize="18" FontWeight="SemiBold" Margin="12,0,0,20"/>
+            <Border Name="StepOptions" Classes="step active"><Grid ColumnDefinitions="28,*"><TextBlock Text="01" Classes="label"/><TextBlock Name="StepOptionsText" Grid.Column="1" Text="安装选项"/></Grid></Border>
+            <Border Name="StepProgress" Classes="step"><Grid ColumnDefinitions="28,*"><TextBlock Text="02" Classes="label"/><TextBlock Name="StepProgressText" Grid.Column="1" Text="安装进度"/></Grid></Border>
+            <Border Name="StepDone" Classes="step"><Grid ColumnDefinitions="28,*"><TextBlock Text="03" Classes="label"/><TextBlock Grid.Column="1" Text="准备就绪"/></Grid></Border>
+          </StackPanel>
+          <Viewbox Grid.Row="1" Height="112" Margin="12,24" Stretch="Uniform" IsHitTestVisible="False">
+            <Canvas Width="160" Height="100" Opacity="0.55">
+              <Ellipse Width="80" Height="80" Stroke="{DynamicResource md3.outline-variant}" StrokeThickness="1" Canvas.Left="40" Canvas.Top="10"/>
+              <Path Data="M8 50 Q28 10 48 50 T88 50 T128 50 T168 50" Stroke="{DynamicResource md3.primary}" StrokeThickness="2" StrokeLineCap="Round"/>
+              <Path Data="M8 64 Q28 24 48 64 T88 64 T128 64 T168 64" Stroke="{DynamicResource md3.secondary}" StrokeThickness="1" StrokeLineCap="Round"/>
+            </Canvas>
+          </Viewbox>
+          <StackPanel Grid.Row="2" Spacing="6" Margin="12,0"><TextBlock Name="VersionText" Classes="label"/><TextBlock Text="WINDOWS · X64" Classes="label"/></StackPanel>
+        </Grid>
+      </Border>
+      <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="20" Margin="0,14,0,24">
+          <StackPanel Spacing="8"><TextBlock Name="Heading" Text="让创作准备就绪" Classes="title"/><TextBlock Name="Subtitle" Classes="muted" Text="选择安装位置，即可开始歌声编辑、合成与混音。"/></StackPanel>
+          <StackPanel Name="OptionsPage" Spacing="16">
+            <Border Classes="card"><StackPanel Spacing="10">
+              <TextBlock Text="安装位置" Classes="section"/>
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"><TextBox Name="DirBox" PlaceholderText="选择 UTvTU 专用文件夹"/><daw:DawButton Name="BrowseButton" Grid.Column="1" Variant="Tonal" Content="浏览"/></Grid>
+              <TextBlock Name="LocationHint" Classes="muted"/>
+            </StackPanel></Border>
+            <Border Name="InstallChoices" Classes="card"><StackPanel Spacing="6"><TextBlock Text="系统入口" Classes="section" Margin="0,0,0,4"/><CheckBox Name="DesktopChoice" Content="创建桌面快捷方式" IsChecked="True"/><CheckBox Name="AssociationChoice" Content="注册 .ustx / .ustxp 工程类型" IsChecked="True"/><TextBlock Text="保留其他应用的默认打开方式。" Classes="label"/></StackPanel></Border>
+            <Border Name="UninstallChoices" Classes="card" IsVisible="False"><StackPanel Spacing="10"><TextBlock Text="保留你的创作" Classes="section"/><TextBlock Text="默认保留工程、声库、备份和个人设置。其他目录中的素材不会被删除。" Classes="muted"/><CheckBox Name="RemoveDataChoice" Content="同时删除此安装的本机用户数据" IsChecked="False"/><TextBlock Name="DataPathText" Classes="label"/></StackPanel></Border>
+          </StackPanel>
+          <Border Name="ProgressPage" Classes="card" IsVisible="False"><StackPanel Spacing="14"><Grid ColumnDefinitions="*,Auto"><TextBlock Name="StageText" Text="准备中" Classes="section"/><TextBlock Name="PercentText" Grid.Column="1" Text="0%" Classes="label"/></Grid><ProgressBar Name="Progress" Minimum="0" Maximum="100" Height="8"/><TextBlock Name="ProgressDetail" Classes="muted"/><TextBlock Text="操作完成后会自动显示结果。" Classes="label"/></StackPanel></Border>
+          <Border Name="ResultPage" Classes="card" IsVisible="False"><StackPanel Spacing="12"><TextBlock Name="ResultTitle" Classes="section"/><TextBlock Name="ResultDetail" Classes="muted"/><CheckBox Name="LaunchChoice" Content="完成后启动 UTvTU" IsChecked="True"/><daw:DawButton Name="RetryIntegrationButton" Content="重试系统入口设置" Variant="Outlined" IsVisible="False" HorizontalAlignment="Left"/></StackPanel></Border>
+          <Border Name="Notice" Background="{DynamicResource md3.secondary-container}" CornerRadius="12" Padding="14" IsVisible="False"><TextBlock Name="NoticeText" Foreground="{DynamicResource md3.on-secondary-container}"/></Border>
+          <Expander Name="Details" Header="查看操作记录" IsVisible="False"><TextBlock Name="LogText" FontFamily="{DynamicResource PlusFontFamilyMono}" FontSize="11" Classes="muted" Margin="0,8"/></Expander>
         </StackPanel>
-      </Grid>
-    </Border>
+      </ScrollViewer>
+    </Grid>
+    <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="28,0">
+      <daw:DawButton Name="LogButton" Content="打开日志目录" Variant="Text" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center"><daw:DawButton Name="CancelButton" Content="取消" Variant="Text"/><daw:DawButton Name="ActionButton" Content="安装" Variant="Filled" MinWidth="112"/></StackPanel>
+    </Grid>
   </Grid>
 </Window>

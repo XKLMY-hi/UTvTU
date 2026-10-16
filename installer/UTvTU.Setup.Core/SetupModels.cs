@@ -39,7 +39,7 @@ public sealed record SetupOptions {
 }
 
 public sealed record SetupProgress(int Percent, string Stage, string? Detail = null);
-public sealed record SetupResult(bool Success, string Message, IReadOnlyList<string> Warnings) {
+public sealed record SetupResult(bool Success, string Message, IReadOnlyList<string> Warnings, bool IntegrationPending = false) {
     public static SetupResult Completed(string message, params string[] warnings) => new(true, message, warnings);
 }
 
