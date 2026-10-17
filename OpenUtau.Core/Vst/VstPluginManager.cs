@@ -27,6 +27,7 @@ namespace OpenUtau.Core.Vst {
         // ── Scanning ────────────────────────────────────────────
 
         public List<VstPluginInfo> ScanPlugins() {
+            if (!OperatingSystem.IsWindows()) return new List<VstPluginInfo>();
             VstPluginRegistry.Inst.Rescan();
             return KnownPlugins.Values.ToList();
         }
@@ -53,6 +54,7 @@ namespace OpenUtau.Core.Vst {
 
         /// <summary>Load/reload a VST effect. Called from UI thread.</summary>
         public VstEffect? LoadEffect(int trackNo, VstPluginSlot slot) {
+            if (!OperatingSystem.IsWindows() && ReferenceEquals(Bridge, RealVstBridge.Instance)) return null;
             var ti = GetOrCreate(trackNo);
             return ti.LoadAt(slot.SlotIndex, slot);
         }
@@ -62,6 +64,8 @@ namespace OpenUtau.Core.Vst {
         /// 同 track 并发加载由 _loadGate 串行化。返回加载后的实例（失败返回 null）。
         /// </summary>
         public Task<VstEffect?> LoadEffectAsync(int trackNo, VstPluginSlot slot, CancellationToken ct = default) {
+            if (!OperatingSystem.IsWindows() && ReferenceEquals(Bridge, RealVstBridge.Instance))
+                return Task.FromResult<VstEffect?>(null);
             var ti = GetOrCreate(trackNo);
             return ti.LoadAtAsync(slot.SlotIndex, slot, ct);
         }

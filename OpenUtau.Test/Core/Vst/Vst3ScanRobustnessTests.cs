@@ -152,6 +152,10 @@ namespace OpenUtau.Test.Core.Vst {
         /// </summary>
         [Fact]
         public void TestHost_HasVstProbeExecutable_AndRegistrySeesIt() {
+            if (!OperatingSystem.IsWindows()) {
+                Assert.False(VstPluginRegistry.ProbeAvailable);
+                return;
+            }
             string expected = Path.Combine(AppContext.BaseDirectory, "vst_probe.exe");
             Assert.True(File.Exists(expected),
                 $"测试输出目录缺少 vst_probe.exe（应在 {expected}）——单文件 VST3 扫描会静默空转");

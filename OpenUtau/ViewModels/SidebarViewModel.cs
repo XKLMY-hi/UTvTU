@@ -91,6 +91,7 @@ namespace OpenUtau.App.ViewModels {
     public class SampleItem : ReactiveObject {
         public string Name { get; }
         public string Path { get; }
+        public bool CanPreview => OperatingSystem.IsWindows();
         public string Format => System.IO.Path.GetExtension(Path).TrimStart('.').ToUpperInvariant();
         [Reactive] public bool IsPreviewing { get; set; }
 

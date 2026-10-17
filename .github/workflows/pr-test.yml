@@ -35,3 +35,8 @@ jobs:
     - name: test
       run: dotnet test OpenUtau.Test
       timeout-minutes: 30
+
+    - name: publish Linux x64
+      if: matrix.os.arch == 'linux-x64'
+      run: bash scripts/build-linux.sh
+      timeout-minutes: 30

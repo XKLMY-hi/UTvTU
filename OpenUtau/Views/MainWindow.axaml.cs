@@ -124,7 +124,11 @@ namespace OpenUtau.App.Views {
 
             // W11：首次运行把平台标准 VST3 目录播种进扫描路径（幂等 + 只此一次；
             // 用户之后删掉不会被复活）。素材库「效果器」页签与偏好设置 VST 页共用这份数据。
-            Preferences.SeedStandardVstScanPathsOnce();
+            if (OS.IsWindows()) {
+                Preferences.SeedStandardVstScanPathsOnce();
+            } else {
+                EffectsTab.IsVisible = false;
+            }
 
             viewModel.NewProject();
             viewModel.AddTempoChangeCmd = ReactiveCommand.Create<int>(tick => AddTempoChange(tick));
@@ -1215,6 +1219,7 @@ namespace OpenUtau.App.Views {
 
         /// <summary>素材库页签：效果器（W4 浏览器；W11 首次展开会播种标准路径 + 空表自动首扫）。</summary>
         private void OnShowVst(object? sender, RoutedEventArgs e) {
+            if (!OS.IsWindows()) return;
             viewModel.PluginBrowser.RefreshPlugins();
             viewModel.PluginBrowser.EnsureFirstScan();   // 幂等：只在首次展开时播种/首扫（返回的任务由后台自己跑完）
             ShowLibraryPage(VstPanel, EffectsTab);

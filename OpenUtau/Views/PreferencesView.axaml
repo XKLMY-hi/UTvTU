@@ -986,7 +986,7 @@
             </Border>
           </StackPanel>
           <StackPanel Grid.Column="1" Spacing="{DynamicResource Md3Spacing3}">
-            <Border Classes="card">
+            <Border x:Name="VstSettingsCard" Classes="card">
               <StackPanel Spacing="{DynamicResource Md3Spacing3}">
                 <StackPanel Spacing="{DynamicResource Md3Spacing1}">
                   <TextBlock Classes="cardTitle" Text="{DynamicResource prefs.vst.title}"/>

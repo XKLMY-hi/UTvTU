@@ -38,6 +38,7 @@ namespace OpenUtau.App.Views {
 
         public PreferencesView() {
             InitializeComponent();
+            VstSettingsCard.IsVisible = OperatingSystem.IsWindows();
         }
 
         /// <summary>挂载即开始监听插件库变更（另一侧改了扫描路径时同步过来）。</summary>

@@ -39,6 +39,12 @@ namespace OpenUtau.App.Views {
             CustomStartSecondsBox.Text = "0";
             CustomEndSecondsBox.Text = (project.timeAxis.TickPosToMsPos(project.EndTick) / 1000).ToString("0.###", CultureInfo.CurrentCulture);
             TailSecondsBox.Text = "0";
+            if (!OS.IsWindows()) {
+                ChkVst.IsChecked = false;
+                ChkVst.IsEnabled = false;
+                ProcessingModeCombo.SelectedIndex = 0;
+                ProcessingModeCombo.IsEnabled = false;
+            }
             SyncTracks();
             DocManager.Inst.AddSubscriber(this);
             ready = true;
@@ -77,7 +83,8 @@ namespace OpenUtau.App.Views {
                 bool mixdown = RadioMixdown.IsChecked == true;
                 if (showingMixdown != mixdown) {
                     showingMixdown = mixdown;
-                    ChkVst.IsChecked = ChkBuiltinFx.IsChecked = ChkVolume.IsChecked = ChkMaster.IsChecked = mixdown;
+                    ChkBuiltinFx.IsChecked = ChkVolume.IsChecked = ChkMaster.IsChecked = mixdown;
+                    ChkVst.IsChecked = OS.IsWindows() && mixdown;
                 }
                 ChkMaster.IsEnabled = mixdown;
                 MasterOptionsHost.Opacity = mixdown ? 1 : .45;
@@ -122,10 +129,10 @@ namespace OpenUtau.App.Views {
                 string rate = (SampleRateCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "44100";
                 string processing = (ProcessingModeCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Offline";
                 var audio = new ExportAudioOptions {
-                    ProcessingMode = processing == "Realtime" ? ExportProcessingMode.Realtime : ExportProcessingMode.Offline,
+                    ProcessingMode = OS.IsWindows() && processing == "Realtime" ? ExportProcessingMode.Realtime : ExportProcessingMode.Offline,
                     Format = tag switch { "Wav16" => ExportWaveFormat.Pcm16, "Wav32" => ExportWaveFormat.Float32, _ => ExportWaveFormat.Pcm24 },
                     SampleRate = int.Parse(rate, CultureInfo.InvariantCulture), StartTick = start, EndTick = end, TailSeconds = tail,
-                    VstEffects = ChkVst.IsChecked == true, BuiltInEffects = ChkBuiltinFx.IsChecked == true,
+                    VstEffects = OS.IsWindows() && ChkVst.IsChecked == true, BuiltInEffects = ChkBuiltinFx.IsChecked == true,
                     TrackVolumeAndPan = ChkVolume.IsChecked == true,
                     MasterGain = RadioMixdown.IsChecked == true && ChkMaster.IsChecked == true ? PlaybackManager.Inst.ExportMasterGain : 1,
                 };

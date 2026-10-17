@@ -60,6 +60,12 @@ namespace OpenUtau.Core.Vst {
         public int EffectCount => Effects.Count;
 
         public void ScanAll() {
+            if (!OperatingSystem.IsWindows()) {
+                _entries.Clear();
+                _scanned = true;
+                LastScanSummary = "VST hosting is unavailable on this platform.";
+                return;
+            }
             if (_scanned) return;
             _scanned = true;
             _entries.Clear();

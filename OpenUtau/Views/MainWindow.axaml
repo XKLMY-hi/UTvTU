@@ -442,7 +442,7 @@
                                     <Border Grid.Column="3" Background="{DynamicResource md3.secondary-container}" CornerRadius="{DynamicResource Md3ShapeExtraSmall}" Padding="4,1" VerticalAlignment="Center">
                                       <TextBlock FontSize="{DynamicResource Md3DawTypeReadout}" FontWeight="SemiBold" Foreground="{DynamicResource md3.on-secondary-container}" Text="{Binding Format}"/>
                                     </Border>
-                                    <Button Grid.Column="5" Classes="iconBtn" Width="26" Height="26" MinHeight="26" Margin="4,0,0,0" Click="OnSamplePlay" AutomationProperties.Name="{DynamicResource sidebar.play}" ToolTip.Tip="{DynamicResource sidebar.play}">
+                                    <Button Grid.Column="5" Classes="iconBtn" Width="26" Height="26" MinHeight="26" Margin="4,0,0,0" IsVisible="{Binding CanPreview}" Click="OnSamplePlay" AutomationProperties.Name="{DynamicResource sidebar.play}" ToolTip.Tip="{DynamicResource sidebar.play}">
                                       <Panel>
                                         <c:DawIcon Data="{StaticResource icon-play}" Width="11" Height="11" Fill="{Binding $parent[Button].Foreground}" IsVisible="{Binding !IsPreviewing}"/>
                                         <c:DawIcon Data="{StaticResource icon-stop}" Width="11" Height="11" Fill="{DynamicResource md3.primary}" IsVisible="{Binding IsPreviewing}"/>

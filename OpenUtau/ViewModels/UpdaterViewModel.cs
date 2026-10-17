@@ -76,6 +76,8 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public static async Task<bool> CheckForUpdateAsync() {
+            // Current UTvTU releases contain a Windows installer only.
+            if (!OperatingSystem.IsWindows()) return false;
             await checkGate.WaitAsync();
             try {
                 s_latestVersion = null; s_releaseUrl = null; checkFailed = false;

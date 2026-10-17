@@ -134,11 +134,13 @@ namespace OpenUtau.App.Controls {
                 };
                 flyout.Items.Add(item);
             }
-            var browse = new MenuItem { Header = ThemeManager.GetString("fxchain.addvst") };
-            browse.Click += (_, _) => {
-                if (IsSelectionCurrent(version)) ViewModel.BrowseVst(target);
-            };
-            flyout.Items.Add(browse);
+            if (OperatingSystem.IsWindows()) {
+                var browse = new MenuItem { Header = ThemeManager.GetString("fxchain.addvst") };
+                browse.Click += (_, _) => {
+                    if (IsSelectionCurrent(version)) ViewModel.BrowseVst(target);
+                };
+                flyout.Items.Add(browse);
+            }
             flyout.ShowAt(AddButton);
         }
 
@@ -187,7 +189,9 @@ namespace OpenUtau.App.Controls {
         }
 
         /// <summary>B5：VST → 插件原生窗口。</summary>
-        public void OpenVstEditor(UTrack track, int slotIndex) => _ = OpenVstEditorAsync(track, slotIndex);
+        public void OpenVstEditor(UTrack track, int slotIndex) {
+            if (OperatingSystem.IsWindows()) _ = OpenVstEditorAsync(track, slotIndex);
+        }
 
         async System.Threading.Tasks.Task OpenVstEditorAsync(UTrack track, int slotIndex) {
             var target = panel.ViewModel.CaptureTarget(track, slotIndex);
