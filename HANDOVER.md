@@ -1,5 +1,14 @@
 # HANDOVER — 新会话交接（2026-10-17 上游集成完成）
 
+## 2026-10-18 钢琴窗音高工具修复（最新）
+
+- 用户报告S型、正弦波和平滑不可用，已真实鼠标事件复现并修复，产品提交`e702736d`，本地未推送。[修复与验收](.opencode/plans/pitch-tools-2026-10-18.md)、[验证JSON](.opencode/plans/pitch-tools-2026-10-18/validation.json)。实际工作区G盘、plus-develop已核。
+- S/正弦首轮鼠标松开时Avalonia自动释放捕获，原InputCaptureLost无条件Cancel把调整阶段预览清掉；现在允许调整阶段自然失去捕获，窗口失活/控件移除/切换工具/工程仍清理。拖动后移动调整，单击或Enter确认，右键或Esc取消；确认点击不再马上开第二个手势，并抑制音高工具快速点击误开歌词框。提示沿用现有浮层，新增中英文确认说明。
+- 平滑不再要求预先存在PITD：对原始音高+可选偏移做7样本滑动平均，创建必要偏移。无效采样不作零音高参与平均，只写变化点；保留范围外编辑与撤销/重做。
+- **9项轻量全绿**，15.9秒/245MB，默认30秒/384MiB串行护栏不变。真实headless控件鼠标按下/移动/松开/二次确认、Enter/Esc/切换工具、连续操作、原始/已有/无来源平滑、撤销重做及原3项手势归属均覆盖；不是自截图或音频压力。初始3项均红、定点复现两条S曲线松开即state=null；修复后6/7揭示连续操作歌词双击，再修后最终9/9。
+- SDK9.0.317增量主程序0错/3项既有AXAML警告、40.72秒；测试0错/152项既有警告、24.20秒。复用已验证Core，Main/Test的Main与Core哈希一致，见JSON。标准Debug DLL已更新，当前未启动本轮程序，也未关闭用户进程、截图、打包或发布。
+- 本轮初始obj仍指不存在的F:/home/.nuget/packages，按实际C:/Users/XKLMY/.nuget/packages重新restore主测试项目及VstProbe（两者顺序：测试依赖→Probe），恢复正确targeting pack。初始NETSDK1064/1127及一次漏Reactive.Linq、一次测试Pointer命名冲突均已修正，不把失败构建当交付。日志`.dsh/pitch-tools-20261018/`。每次接手仍核移动盘，不沿用旧PID；旧workspace-preview不代表本轮已运行。
+
 ## 2026-10-17 适用上游更新与新歌手选择器全部接入（最新，已完成）
 
 - 用户授权“包括上面的其他上游更新，全部引入”。已按本地架构完成全部适用项及必要前置，保留MD3、共享FX机架、VST与离线音频管线；不是整体merge。31项处置及来源、轻量证据见[实施记录](.opencode/plans/upstream-integration-2026-10-17.md)与[验证JSON](.opencode/plans/upstream-integration-2026-10-17/validation.json)。实际工作区G盘、plus-develop，origin XKLMY-hi/UTvTU、upstream openutau/OpenUtau；每轮仍先核盘符。

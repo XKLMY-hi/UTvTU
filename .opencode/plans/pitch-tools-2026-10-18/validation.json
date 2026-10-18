@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-18",
+  "sourceCommit": "e702736dfd497e388210d62f19184e99ea3f1378",
+  "test": {
+    "trx": "G:\\xklmy文件夹\\vibe coding\\UTvTU\\.dsh\\light-test-results\\d9b6f87d9a174e9d9bbe2ed1c4348181.trx",
+    "passed": 9,
+    "failed": 0,
+    "elapsedSeconds": 15.9,
+    "peakRunnerMB": 245,
+    "guards": {
+      "seconds": 30,
+      "memoryMiB": 384,
+      "collections": "serial"
+    }
+  },
+  "build": {
+    "main": {
+      "log": ".dsh/pitch-tools-20261018/build-main3.log",
+      "errors": 0,
+      "warnings": 3,
+      "seconds": 40.72
+    },
+    "test": {
+      "log": ".dsh/pitch-tools-20261018/build-test4.log",
+      "errors": 0,
+      "warnings": 152,
+      "seconds": 24.2
+    },
+    "sdk": "9.0.317",
+    "buildProjectReferences": false
+  },
+  "sha256": {
+    "OpenUtau/OpenUtau.dll": "2125e3912c314ba1b92f876c808412fee6ce718532c8eb67f1f232c9375d66b2",
+    "OpenUtau/OpenUtau.Core.dll": "de88349c2bcea4b636c75593019f1ad9868af04962d7fd2f367b26a7ea9ed59d",
+    "OpenUtau.Test/OpenUtau.dll": "2125e3912c314ba1b92f876c808412fee6ce718532c8eb67f1f232c9375d66b2",
+    "OpenUtau.Test/OpenUtau.Core.dll": "de88349c2bcea4b636c75593019f1ad9868af04962d7fd2f367b26a7ea9ed59d"
+  },
+  "mainAndTestBinariesMatch": true,
+  "validationScope": "Headless Avalonia real control/mouse and command undo/redo; no audio stress or screenshots",
+  "pushed": false,
+  "appLaunched": false,
+  "installerRebuilt": false
+}
