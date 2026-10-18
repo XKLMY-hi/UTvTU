@@ -1452,4 +1452,5 @@ Range {2}–{3} s · Tail {4} s
   <system:String x:Key="singerpicker.duplicates">{0} duplicate voicebank ID(s) — expand to review active and ignored locations</system:String>
   <system:String x:Key="singerpicker.active">Active</system:String>
   <system:String x:Key="singerpicker.ignored">Ignored</system:String>
+  <system:String x:Key="pianoroll.pitch.confirmhint">Move to adjust · Click / Enter to apply · Right-click / Esc to cancel</system:String>
 </ResourceDictionary>

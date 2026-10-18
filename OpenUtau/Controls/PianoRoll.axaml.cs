@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
@@ -38,6 +39,7 @@ namespace OpenUtau.App.Controls {
             OS.IsMacOS() ? KeyModifiers.Meta : KeyModifiers.Control;
         private KeyboardPlayState? keyboardPlayState;
         private NoteEditState? editState;
+        private Window? inputWindow;
         private Point valueTipPointerPosition;
         private bool shouldOpenNotesContextMenu;
 
@@ -89,13 +91,17 @@ namespace OpenUtau.App.Controls {
                 }));
             SetupExpPanel();
             ValueTip.IsVisible = false;
+            messageSubs.Add(model.WhenAnyValue(vm => vm.ToolIndex).Skip(1).Subscribe(_ => FinishNoteEdit()));
             SetPenToolIcon();
             penTool.AddHandler(PointerPressedEvent, OnToolButtonPointerPressed, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, true);
             this.LayoutUpdated += PianoRollLayoutUpdated;
         }
 
         public void InputCaptureLost(object? sender, PointerCaptureLostEventArgs args) {
-            if (ReferenceEquals(args.Source, editState?.control)) FinishNoteEdit();
+            // Avalonia releases mouse capture on button-up; a two-phase preview remains editable.
+            // Capture stolen by another control, window deactivation and detach still cancel it.
+            if (ReferenceEquals(args.Source, editState?.control) &&
+                !(editState is PitchCurveState { IsInAdjustingPhase: true } && args.Pointer.Captured == null)) FinishNoteEdit();
             if (ReferenceEquals(args.Source, keyboardPlayState?.Control)) FinishKeyboardPlay();
             if (ReferenceEquals(args.Source, timelineControl)) {
                 timelinePointer = null;
@@ -135,7 +141,20 @@ namespace OpenUtau.App.Controls {
             if (control != null && pointer?.Captured == control) pointer.Capture(null);
         }
 
+        protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
+            base.OnAttachedToVisualTree(e);
+            inputWindow = TopLevel.GetTopLevel(this) as Window;
+            if (inputWindow != null) inputWindow.Deactivated += InputWindowDeactivated;
+        }
+
+        void InputWindowDeactivated(object? sender, EventArgs e) => CancelActiveInput();
+        void DetachInputWindow() {
+            if (inputWindow != null) inputWindow.Deactivated -= InputWindowDeactivated;
+            inputWindow = null;
+        }
+
         protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e) {
+            DetachInputWindow();
             CancelActiveInput();
             base.OnDetachedFromVisualTree(e);
         }
@@ -237,6 +256,7 @@ namespace OpenUtau.App.Controls {
                 return;
             }
             disposed = true;
+            DetachInputWindow();
             CancelActiveInput();
             DocManager.Inst.RemoveSubscriber(this);
             foreach (var sub in messageSubs) {
@@ -894,6 +914,7 @@ namespace OpenUtau.App.Controls {
             if (editState != null) {
                 // Finalize pitch curve in adjusting phase before starting a new edit
                 if (editState is PitchCurveState pcs2 && pcs2.IsInAdjustingPhase) {
+                    shouldOpenNotesContextMenu = false;
                     editState = null;
                     if (point.Properties.IsLeftButtonPressed) {
                         pcs2.Apply();
@@ -902,6 +923,8 @@ namespace OpenUtau.App.Controls {
                         // Right-click during adjusting: cancel the edit
                         pcs2.Cancel(args.Pointer);
                     }
+                    args.Handled = true;
+                    return; // Confirmation must not immediately start another curve gesture.
                 } else {
                     return;
                 }
@@ -1264,7 +1287,7 @@ namespace OpenUtau.App.Controls {
                     pcs.Apply();
                     EndNoteEdit(args.Pointer, point.Position);
                 } else {
-                    // S-curve / Sine: transition to adjusting phase, keep pointer captured
+                    // Mouse-up releases native capture. Keep the pending preview until confirmed/cancelled.
                     if (!pcs.TransitionToAdjusting(point.Position)) {
                         // TransitionToAdjusting returned false (click without drag) — already cancelled
                         editState = null;
@@ -1280,6 +1303,8 @@ namespace OpenUtau.App.Controls {
         }
 
         public void NotesCanvasDoubleTapped(object sender, TappedEventArgs args) {
+            // Consecutive pitch strokes/confirmation clicks must not become a lyric double-click.
+            if (ViewModel.EditTool.IsPitchTool) { args.Handled = true; return; }
             if (!(sender is Control control)) {
                 return;
             }
@@ -1693,6 +1718,19 @@ namespace OpenUtau.App.Controls {
             }
             if (LyricBox.IsVisible) {
                 args.Handled = false;
+                return;
+            }
+
+            if (editState != null && args.Key == Key.Escape && args.KeyModifiers == KeyModifiers.None) {
+                FinishNoteEdit();
+                args.Handled = true;
+                return;
+            }
+            if (editState is PitchCurveState { IsInAdjustingPhase: true } pending &&
+                args.Key == Key.Enter && args.KeyModifiers == KeyModifiers.None) {
+                editState = null;
+                try { pending.Apply(); } finally { pending.Cancel(); }
+                args.Handled = true;
                 return;
             }
 

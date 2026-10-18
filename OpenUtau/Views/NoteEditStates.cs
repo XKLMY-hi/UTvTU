@@ -1838,6 +1838,8 @@ namespace OpenUtau.App.Views {
             }
             endPoint = point;
             phase = Phase.Adjusting;
+            prevPoint = point;
+            UpdateDrawingParams(point);
             UpdatePreview(firstPoint, endPoint);
             return true;
         }
@@ -1884,10 +1886,10 @@ namespace OpenUtau.App.Views {
             var notesVm = vm.NotesViewModel;
             switch (mode) {
                 case CurveMode.Sine:
-                    valueTip.UpdateValueTip($"\u03BB:{spacingTicks:0} ticks, amp:{amplitudeCents / 100:0.00}tone");
+                    valueTip.UpdateValueTip($"\u03BB:{spacingTicks:0} ticks, amp:{amplitudeCents / 100:0.00}tone{ConfirmationHint}");
                     break;
                 case CurveMode.SCurve:
-                    valueTip.UpdateValueTip($"S:{scurveStrength:0.00}");
+                    valueTip.UpdateValueTip($"S:{scurveStrength:0.00}{ConfirmationHint}");
                     break;
                 case CurveMode.Line:
                 default:
@@ -1909,17 +1911,19 @@ namespace OpenUtau.App.Views {
                         // Horizontal: adjust wavelength, Vertical: adjust amplitude
                         spacingTicks = Math.Clamp(spacingTicks + dx, step, maxSpacing);
                         amplitudeCents = Math.Clamp(amplitudeCents - dy * 2, 0, 1200);
-                        valueTip.UpdateValueTip($"\u03BB:{spacingTicks:0} ticks, amp:{amplitudeCents / 100:0.00}tone");
+                        valueTip.UpdateValueTip($"\u03BB:{spacingTicks:0} ticks, amp:{amplitudeCents / 100:0.00}tone{ConfirmationHint}");
                         break;
                     }
                 case CurveMode.SCurve: {
                         // Both directions adjust S-curve strength
                         scurveStrength = Math.Clamp(scurveStrength - dy * 0.05, 1.0, 8.0);
-                        valueTip.UpdateValueTip($"S:{scurveStrength:0.00}");
+                        valueTip.UpdateValueTip($"S:{scurveStrength:0.00}{ConfirmationHint}");
                         break;
                     }
             }
         }
+
+        private string ConfirmationHint => IsInAdjustingPhase ? "\n" + ThemeManager.GetString("pianoroll.pitch.confirmhint") : "";
 
         private void UpdatePreview(Point start, Point end) {
             var notesVm = vm.NotesViewModel;
@@ -2167,7 +2171,6 @@ namespace OpenUtau.App.Views {
         private readonly bool overwrite;
         int brushRadius = 10;
         int kernelRadius = 3;
-        double kernelWeight = 1.0 / (2 * 3 + 1);
 
         public SmoothenPitchState(
             Control control,
@@ -2180,31 +2183,37 @@ namespace OpenUtau.App.Views {
             base.Begin(pointer, point);
             if (!CanEditGesture) { Cancel(); return; }
         }
-        private double GetPitch(int tick, UCurve? curve = null) {
+        private double? GetPitch(int tick, UCurve? curve = null) {
             var point = vm.NotesViewModel.TickToneToPoint(tick, 0);
             var pitch = overwrite
                 ? vm.NotesViewModel.HitTest.SampleOverwritePitch(point)
                 : vm.NotesViewModel.HitTest.SamplePitch(point);
-            if (pitch == null) return 0;
-            if (curve == null) return pitch.Value;
-            return pitch.Value + curve.Sample(tick);
+            return pitch + (curve?.Sample(tick) ?? 0);
         }
         public override void Update(IPointer pointer, Point point) {
             if (!CanEditGesture) { Cancel(); return; }
             if (vm.NotesViewModel.Part == null) return;
             var curve = vm.NotesViewModel.Part.curves.FirstOrDefault(c => c.abbr == Core.Format.Ustx.PITD);
-            if (curve == null) return;
             double total = 0;
+            int valid = 0;
+            var window = new Queue<double?>();
             List<(int tick, int pitch)> newPoints = new List<(int tick, int pitch)>();
             int baseTick = ((int)Math.Round(vm.NotesViewModel.PointToTick(point) / 5.0) - brushRadius) * 5;
-            for (int i = -kernelRadius; i <= kernelRadius; i++) total += GetPitch(baseTick + i * 5, curve);
-            newPoints.Add((baseTick, (int)Math.Round(total * kernelWeight - GetPitch(baseTick))));
-            total -= GetPitch(baseTick - kernelRadius * 5, curve);
-            for (int i = -brushRadius + 1; i <= brushRadius; i++) {
-                baseTick += 5;
-                total += GetPitch(baseTick + kernelRadius * 5, curve);
-                newPoints.Add((baseTick, (int)Math.Round(total * kernelWeight - GetPitch(baseTick))));
-                total -= GetPitch(baseTick - kernelRadius * 5, curve);
+            void AddSample(int tick) {
+                var pitch = GetPitch(tick, curve);
+                window.Enqueue(pitch);
+                if (pitch.HasValue) { total += pitch.Value; valid++; }
+            }
+            for (int i = -kernelRadius; i <= kernelRadius; i++) AddSample(baseTick + i * 5);
+            for (int i = -brushRadius; i <= brushRadius; i++, baseTick += 5) {
+                var original = GetPitch(baseTick);
+                if (valid > 0 && original.HasValue) {
+                    int deviation = (int)Math.Round(total / valid - original.Value);
+                    if (deviation != (curve?.Sample(baseTick) ?? 0)) newPoints.Add((baseTick, deviation));
+                }
+                var removed = window.Dequeue();
+                if (removed.HasValue) { total -= removed.Value; valid--; }
+                AddSample(baseTick + (kernelRadius + 1) * 5);
             }
             foreach (var (tick, pitch) in newPoints)
                 ExecuteCmd(new SetCurveCommand(
