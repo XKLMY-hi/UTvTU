@@ -1,0 +1,91 @@
+name: UI preview (cloud build + headless screenshots)
+
+# 只用于给移动端/低配设备开发 Avalonia 前端时出图与编译校验。
+# 工具链来源：.ci/build-tools（钉死 .NET 9.0.316 linux-x64 + Avalonia.Headless 12.1.0）
+# 产物：preferences-preview/*.png + validation.json（Avalonia/Skia 真实光栅渲染）
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ci/ui-preview]
+    paths:
+      - '.ci/**'
+      - '.github/workflows/ui-preview.yml'
+
+concurrency:
+  group: ui-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  capture:
+    name: Linux headless capture
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: UTvTU
+
+      # 工具链必须与仓库同级（脚本默认 root.parent/'UTvTU'）
+      - name: Lay out tooling next to the checkout
+        run: |
+          cp -r UTvTU/.ci/build-tools build-tools
+          chmod +x build-tools/csc-wrapper
+
+      - name: Bootstrap managed toolchain
+        run: python3 build-tools/bootstrap-recovery.py
+
+      - name: Restore
+        run: >
+          python3 build-tools/run-build.py UTvTU/OpenUtau/OpenUtau.csproj /t:Restore
+          /p:RuntimeIdentifier=linux-x64 /p:SelfContained=false /p:PublishReadyToRun=false
+          /p:TreatWarningsAsErrors=false /p:UsedAvaloniaProducts= /p:UseSharedCompilation=false
+          /m:1 /nr:false /v:minimal
+
+      - name: Repair ONNX NuGet cache if needed
+        run: python3 build-tools/repair-onnx-cache.py
+
+      - name: Build
+        run: >
+          python3 build-tools/run-build.py UTvTU/OpenUtau/OpenUtau.csproj /t:Build
+          /p:RuntimeIdentifier=linux-x64 /p:SelfContained=false /p:PublishReadyToRun=false
+          /p:TreatWarningsAsErrors=false /p:UsedAvaloniaProducts= /p:UseSharedCompilation=false
+          /m:1 /nr:false /v:minimal
+
+      - name: Capture screenshots and run UI checks
+        run: python3 build-tools/run-preferences-preview.py preferences-preview
+
+      - name: Collect build logs
+        if: always()
+        run: |
+          mkdir -p preferences-preview/__logs || true
+          cp -f build-tools/*.log preferences-preview/__logs/ 2>/dev/null || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ui-preview-${{ github.run_number }}
+          path: preferences-preview/**
+          retention-days: 14
+          if-no-files-found: warn
+
+  windows-compile:
+    name: Windows target compile check
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore (win-x64)
+        run: dotnet restore OpenUtau/OpenUtau.csproj -r win-x64
+
+      # 这一步专门挡 net8.0-windows 专有代码/条件编译编不过的问题
+      - name: Build Windows target
+        run: >
+          dotnet build OpenUtau/OpenUtau.csproj -c Release --no-restore
+          -m:1 -p:UsedAvaloniaProducts= -p:UseSharedCompilation=false
+          -p:TreatWarningsAsErrors=false

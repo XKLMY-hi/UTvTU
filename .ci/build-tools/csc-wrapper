@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+build_tools_root="$(cd -- "$(dirname -- "$0")" && pwd)"
+exec "$build_tools_root/dotnet-thread-host" "$build_tools_root/dotnet/sdk/9.0.316/Roslyn/bincore/csc.dll" "$@"
