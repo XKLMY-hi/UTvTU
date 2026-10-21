@@ -69,6 +69,68 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
 
+  unit-tests:
+    name: Unit tests (${{ matrix.os }}, ${{ matrix.arch }})
+    runs-on: ${{ matrix.os }}
+    # 与 pr-test.yml 同一套矩阵思路，但只在手动/本分支触发时跑，避免和 PR 流水线抢额度
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            arch: linux-x64
+          - os: windows-latest
+            arch: win-x64
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            6.0.x
+            8.0.x
+            9.0.x
+
+      - name: Restore
+        run: dotnet restore OpenUtau -r ${{ matrix.arch }}
+
+      - name: Test
+        run: >
+          dotnet test OpenUtau.Test
+          --logger "trx;LogFileName=test-${{ matrix.arch }}.trx"
+          --results-directory TestResults
+          --logger "console;verbosity=normal"
+        timeout-minutes: 40
+
+      - name: Test summary from trx
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import glob, os, xml.etree.ElementTree as ET
+          rows = []
+          for path in glob.glob('TestResults/*.trx'):
+              root = ET.parse(path).getroot()
+              ns = {'t': 'http://microsoft.com/schemas/VisualStudio/TeamTest/2010'}
+              counts = root.find('.//t:ResultSummary/t:Counters', ns)
+              if counts is not None:
+                  rows.append((os.path.basename(path), dict(counts.attrib)))
+          for name, c in rows:
+              print(f"{name}: total={c.get('total')} passed={c.get('passed')} "
+                    f"failed={c.get('failed')} skipped={c.get('notExecuted')}")
+          if not rows:
+              print('no trx produced')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.arch }}
+          path: TestResults/**
+          retention-days: 14
+          if-no-files-found: warn
+
   windows-compile:
     name: Windows target compile check
     runs-on: windows-latest
