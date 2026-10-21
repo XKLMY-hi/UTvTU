@@ -92,12 +92,19 @@ jobs:
             8.0.x
             9.0.x
 
-      - name: Restore
-        run: dotnet restore OpenUtau -r ${{ matrix.arch }}
+      - name: Pin SDK 9.x
+        shell: bash
+        run: |
+          VERSION=$(dotnet --list-sdks | awk '/^9\./ {print $1}' | sort -V | tail -1)
+          echo "{\"sdk\":{\"version\":\"$VERSION\",\"rollForward\":\"latestMinor\"}}" > global.json
+          dotnet --version
+
+      - name: Restore (whole solution incl. VstProbe)
+        run: dotnet restore OpenUtau.sln -r ${{ matrix.arch }}
 
       - name: Test
         run: >
-          dotnet test OpenUtau.Test
+          dotnet test OpenUtau.Test --no-restore
           --logger "trx;LogFileName=test-${{ matrix.arch }}.trx"
           --results-directory TestResults
           --logger "console;verbosity=normal"
@@ -142,8 +149,15 @@ jobs:
         with:
           dotnet-version: 9.0.x
 
-      - name: Restore (win-x64)
-        run: dotnet restore OpenUtau/OpenUtau.csproj -r win-x64
+      - name: Pin SDK 9.x
+        shell: bash
+        run: |
+          VERSION=$(dotnet --list-sdks | awk '/^9\./ {print $1}' | sort -V | tail -1)
+          echo "{\"sdk\":{\"version\":\"$VERSION\",\"rollForward\":\"latestMinor\"}}" > global.json
+          dotnet --version
+
+      - name: Restore (whole solution incl. VstProbe)
+        run: dotnet restore OpenUtau.sln -r win-x64
 
       # 这一步专门挡 net8.0-windows 专有代码/条件编译编不过的问题
       - name: Build Windows target
