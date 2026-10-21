@@ -102,13 +102,19 @@ jobs:
       - name: Restore (whole solution incl. VstProbe)
         run: dotnet restore OpenUtau.sln -r ${{ matrix.arch }}
 
+      - name: Build tests
+        run: dotnet build OpenUtau.Test/OpenUtau.Test.csproj --no-restore -m:1
+
       - name: Test
+        env:
+          VSTEST_CONNECTION_TIMEOUT: '300'
         run: >
-          dotnet test OpenUtau.Test --no-restore
+          dotnet test OpenUtau.Test/OpenUtau.Test.csproj --no-build
+          --blame-hang --blame-hang-timeout 6m --blame-hang-dump-type none
           --logger "trx;LogFileName=test-${{ matrix.arch }}.trx"
           --results-directory TestResults
           --logger "console;verbosity=normal"
-        timeout-minutes: 40
+        timeout-minutes: 45
 
       - name: Test summary from trx
         if: always()
