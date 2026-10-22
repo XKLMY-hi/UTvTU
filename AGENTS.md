@@ -205,3 +205,85 @@ opencode 无内置记忆系统，Claude Code 记忆已迁移到本仓库，涉�
 - **记忆索引**：`.opencode/memory/MEMORY.md` — 17 份记忆：SukiUI 替换（A-E 全部收官、UI 改造已结束）、Avalonia 12 升级踩坑、VST 专用线程修复、音频管线重构、用户偏好（中文/明确推荐/阶段预览闸门/每步跑 verify）、git SSL 等
 - **计划文档**：`.opencode/plans/` — 8 份：Plus 实施计划、UI 完全重铸、SukiUI 替换表、混音台内嵌化、PlusTheme 体系等
 - 旧 Claude 会话原文：`~/.claude/projects/D--xklmy----XK-XKLMY----vibe-coding-OpenUTAU-plus/`（jsonl 按需查阅）
+
+---
+
+## 非桌面环境运行约束（Codex CLI / 云端 Agent）
+
+> 适用范围：在**没有显示器**的环境里运行的 Agent 会话，包括本机 proot Ubuntu、GitHub Actions runner、其他 headless 容器。
+> 本节优先级高于上文「UI 改动交给用户实机查看」的约定；桌面实机开发仍按原文执行。
+> 生效原因：这类环境跑不起 GUI，`dotnet build` 主工程会在 Avalonia XAML 编译阶段被 OOM 杀掉（实测 RSS 峰值约 5.2 GB，可用仅 2.4 GB）。
+
+### 1. 环境事实（不要浪费时间验证）
+
+| 项 | 事实 |
+|---|---|
+| 架构 / 系统 | aarch64，Ubuntu 24.04 in proot，root |
+| 显示 | **没有** X / Wayland / 显示器，无 DPI 缩放，无输入设备 |
+| 音频 | **没有**真实音频设备，只能 `DummyAudioOutput` |
+| 沙箱 | `bubblewrap` 不可用（proot 无法建立 mount 隔离），必须 `sandbox_mode = "danger-full-access"` |
+| GPU | 无。渲染走 Skia 光栅（CPU） |
+| 内存 | 约 7.8 GB 总量，可用常在 3 GB 上下 |
+
+### 2. UI 结论必须由工具产出的图像支撑
+
+- 任何关于界面外观、间距、颜色、对齐、层级的判断，**必须**附上工具生成的图像路径；不得用 OCR 文本、源码推断、或"根据设计规范应该是"来代替。
+- 图像只有两个合法来源：
+  1. `GitHub Actions` → `.github/workflows/ui-preview.yml` 的 `capture` job（Avalonia.Headless + 真实 Skia 绘制）；
+  2. 本机 `.ci/build-tools`（arm64 需自行改 RID），但**仅限**改动不触及主工程 XAML 编译的场景。
+- 交付图像时**必须同时给出**：artifact 名或文件路径、逻辑尺寸（1440×900 / 800 宽窄窗）、主题（dark/light）、断点。命名沿用 `preferences-<page>-<mode>.png`。
+- **禁止**声称"我看到了界面"却不给图像路径。OCR 只能用于取图里的文案与数字。
+
+### 3. 禁止事项（做了会浪费时间或损坏环境）
+
+- ❌ 在本机运行 GUI：`dotnet run` 主程序、`xvfb-run`、Wine、box64。
+- ❌ 对 `OpenUtau.csproj` 跑全量 `dotnet build`（XAML 编译必然 OOM 被杀，白等十几分钟）。
+- ❌ 在本机跑 `dotnet test`（`net8.0-windows` + 内存；且该套件在 CI 上本身会 hang）。
+- ❌ 把 `bin/`、`obj/`、下载的 SDK、NuGet 缓存提交进仓库。
+- ❌ 破坏性命令：`git reset --hard`、`git clean -fdx`、`git push --force`。
+- ❌ 直接向 `plus-develop` / `master` 推送。
+
+### 4. 编译与出图的正确姿势
+
+- 语法级校验（快）：`dotnet build OpenUtau.sln -m:1 -p:EnableWindowsTargeting=true -p:RuntimeIdentifiers=`
+- 完整出图（唯一可信路径）：推分支 → 触发 `ui-preview.yml` → 下载 artifact。
+- 需要大内存编译时，用 `.ci/build-tools`（32 MiB 线程栈宿主 + `DOTNET_GCHeapHardLimit`），不要裸跑 MSBuild。
+
+### 5. 测试与环境稳定性
+
+- 测试只在 CI 跑：`unit-tests` job（ubuntu + windows 矩阵）。
+- 已知识别问题：ubuntu 上部分用例会挂死（已加 `--blame-hang` 定位）、windows 上 `vstest` 连接 testhost 偶发 90 秒超时（已加 `VSTEST_CONNECTION_TIMEOUT=300`）。
+- 修改测试相关代码前先读 AGENTS.md 的基线说明（284 个测试全绿）。
+
+### 6. Git 与凭据
+
+- 只在新分支或 `ci/ui-preview` 上提交；推送前先 `git push --dry-run`。
+- `~/.git-credentials` 存在 GitHub OAuth token：**只读使用**，禁止打印全文、禁止写进仓库或提交信息、回复中一律掩码（`gho_kvjr…4ab8w5`）。
+- 提交信息用中文，说明"改了什么 / 为什么"，一次提交一件事。
+
+### 7. 设计令牌纪律
+
+- 颜色、字号、间距、圆角只能来自令牌表（`tokens/Utvtu.Roles.axaml`、`tokens.json` 或仓库现有 `PlusBrush*`）。
+- 禁止在 `.axaml` 里新写 `#RRGGBB` 字面量；需要新角色时先改令牌表并说明影响面。
+- 尺寸类改动（面板宽度、控件高度）必须回填到令牌，不要在页面里硬编码。
+
+### 8. 交互与输出规范
+
+- 中文回答；代码、标识符、命令保持原文。
+- 结论附**文件路径 + 行号**；命令必须可直接复制执行。
+- 结论与证据分开写：先说做了什么、证据是什么（run id / 文件路径 / 测量值），再说判断。
+- 长命令显式加 timeout；单次下载 > 200 MB 要提前说明。
+- 不要同时跑编译和浏览器等重活，内存不够。
+
+### 9. 需要"看"的时候怎么办
+
+```bash
+# 1) 触发云端出图（约 8-12 分钟）
+python3 /root/workspace/build-tools/gh.py runs
+# 2) 下载 artifact 到手机
+python3 /root/workspace/build-tools/gh.py artifacts <run_id> /sdcard/Download/utvtu-preview
+# 3) 量化核对（尺寸 / 配色 / 边界 / 对比度），比肉眼更准
+python3 /root/workspace/build-tools/inspect_png.py <png 路径>
+```
+
+如果确实需要"人眼"判断而当前会话没有视觉通道，正确做法是：把 PNG 交给用户，并**明确说明自己要他回答什么**（例如"请确认卡片间距是否过窄"），而不是自己编造观感。
