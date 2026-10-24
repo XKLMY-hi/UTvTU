@@ -75,6 +75,10 @@ namespace OpenUtau.Core.Ustx {
                         // 某些类型无法用无参构造（例如抽象部件）⇒ 视作"全未知"，
                         // 调用方会退化为不排除任何键（更保守：宁可多留，不可丢）。
                     }
+                    // Nullable modeled fields must not be resurrected by unknown-key passthrough
+                    // after a user removes the last graph or resets a track override.
+                    if (type == typeof(UProject)) set.UnionWith(new[] { "expression_graphs", "default_expression_graphs" });
+                    if (type == typeof(UTrack)) set.Add("expression_graph");
                     KnownKeys[type] = set;
                 }
                 return set.Contains(key);

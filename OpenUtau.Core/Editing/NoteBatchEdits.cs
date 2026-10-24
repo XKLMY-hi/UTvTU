@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -476,10 +476,21 @@ namespace OpenUtau.Core.Editing {
             int finished = 0;
             setProgressCallback(0, phrases.Length);
             var commands = new List<SetCurveCommand>();
+            var cleared = new List<(int from, int to)>();
+            var rendered = new List<(int x, float y)>();
+            bool prefersOverride = ExpressionGraph.ExpressionGraphProgram.PrefersPitchOverride(project, project.tracks[part.trackNo]);
             for (int ph_i = phrases.Count() - 1; ph_i >= 0; ph_i--) {
                 var phrase = phrases[ph_i];
                 var result = renderer.LoadRenderedPitch(phrase);
                 if (result == null) {
+                    continue;
+                }
+                int rangeStart = cleared.Count;
+                CollectRenderedPitch(result, phrase.position - part.position, phrase.duration, cleared, rendered);
+                ClampRanges(cleared, rangeStart, phrase.position - part.position - phrase.leading, phrase.end - part.position);
+                if (prefersOverride) {
+                    finished++;
+                    setProgressCallback(finished, phrases.Length);
                     continue;
                 }
                 int? lastX = null;
@@ -516,14 +527,84 @@ namespace OpenUtau.Core.Editing {
                 setProgressCallback(finished, phrases.Length);
             }
 
+            if (cancellationToken.IsCancellationRequested) return;
             DocManager.Inst.PostOnUIThread(() => {
+                if (cancellationToken.IsCancellationRequested || !ReferenceEquals(project, docManager.Project) || !project.parts.Contains(part)) return;
+                var all = new List<UCommand>(commands);
+                if (cleared.Count > 0 && project.expressions.ContainsKey(Format.Ustx.RPIT)) {
+                    var curve = part.maskedCurves.FirstOrDefault(c => c.abbr == Format.Ustx.RPIT)?.Clone() ?? new UMaskedCurve(Format.Ustx.RPIT);
+                    foreach (var (from, to) in cleared) curve.Clear(from, to);
+                    curve.SetValues(rendered);
+                    all.Add(new ReplaceMaskedCurveCommand(part, Format.Ustx.RPIT, curve));
+                }
                 docManager.StartUndoGroup("command.batch.note", true);
-                commands.ForEach(docManager.ExecuteCmd);
+                all.ForEach(docManager.ExecuteCmd);
                 docManager.EndUndoGroup();
             });
         }
-    }
+        /// <summary>
+        /// Limits the ranges from <paramref name="startIndex"/> on to [<paramref name="min"/>, <paramref name="max"/>],
+        /// dropping those left empty. A phrase's result also covers its silent padding, which overlaps the
+        /// neighbouring phrases; clearing the pitch stored there would erase pitch the phrase does not own.
+        /// </summary>
+        internal static void ClampRanges(List<(int from, int to)> ranges, int startIndex, int min, int max) {
+            for (int i = ranges.Count - 1; i >= startIndex; i--) {
+                var (from, to) = ranges[i];
+                from = Math.Max(from, min);
+                to = Math.Min(to, max);
+                if (from >= to) {
+                    ranges.RemoveAt(i);
+                } else {
+                    ranges[i] = (from, to);
+                }
+            }
+        }
 
+        /// <summary>
+        /// A result's pitch resampled onto the masked curve grid, in absolute cents: the part-relative tick ranges it
+        /// retakes, and values on the grid between voiced frames, linear from frame to frame. Padding, unvoiced
+        /// frames and rests leave gaps.
+        /// </summary>
+        /// <param name="offset">The part-relative tick of the result's tick 0, i.e. of the phrase.</param>
+        /// <param name="limit">The last tick of the phrase, relative to it; frames after it are padding.</param>
+        internal static void CollectRenderedPitch(Render.RenderPitchResult result, int offset, int limit,
+                List<(int from, int to)> cleared, List<(int x, float y)> values) {
+            int count = Math.Min(result.tones.Length, result.ticks.Length);
+            if (count == 0) return;
+            bool Voiced(int i) => float.IsFinite(result.tones[i]) && float.IsFinite(result.ticks[i])
+                && result.tones[i] >= 0 && result.ticks[i] <= limit
+                && (result.voiced == null || (i < result.voiced.Length && result.voiced[i]));
+            foreach (var (start, end) in new[] { (0, count) }) {
+                cleared.Add((offset + (int)Math.Floor(result.ticks[start]), offset + (int)Math.Ceiling(result.ticks[end - 1])));
+                int i = start;
+                while (i < end) {
+                    if (!Voiced(i)) {
+                        i++;
+                        continue;
+                    }
+                    int last = i;
+                    while (last + 1 < end && Voiced(last + 1)) {
+                        last++;
+                    }
+                    // Grid ticks from the first voiced frame to the last, linear between the frames around each.
+                    int k = i;
+                    int first = (int)Math.Ceiling((offset + result.ticks[i]) / UMaskedCurve.interval) * UMaskedCurve.interval;
+                    for (int x = first; x <= offset + result.ticks[last]; x += UMaskedCurve.interval) {
+                        double tick = x - offset;
+                        while (k < last && result.ticks[k + 1] <= tick) {
+                            k++;
+                        }
+                        float y = k == last || result.ticks[k + 1] == result.ticks[k]
+                            ? result.tones[k]
+                            : (float)(result.tones[k] + (tick - result.ticks[k]) / (result.ticks[k + 1] - result.ticks[k])
+                                * (result.tones[k + 1] - result.tones[k]));
+                        values.Add((x, y * 100));
+                    }
+                    i = last + 1;
+                }
+            }
+        }
+    }
     public class BakePitch : BatchEdit {
         public virtual string Name => name;
         private string name;

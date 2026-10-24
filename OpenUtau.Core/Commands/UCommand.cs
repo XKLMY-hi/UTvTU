@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,6 +7,7 @@ namespace OpenUtau.Core {
         public virtual bool Silent => false;
         // Live mix edits change playback parameters, not synthesized voice data.
         public virtual bool AffectsSynthesis => true;
+        public virtual Pipeline.ImpactSet Impact => AffectsSynthesis ? Pipeline.ImpactSet.All : Pipeline.ImpactSet.None;
         public virtual ValidateOptions ValidateOptions => default;
         public abstract void Execute();
         public abstract void Unexecute();

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OpenUtau.Core.Util;
@@ -62,6 +62,8 @@ namespace OpenUtau.Core.Ustx {
         public string[] expSelectors = new string[] { Format.Ustx.DYN, Format.Ustx.PITD, Format.Ustx.CLR, Format.Ustx.ENG, Format.Ustx.VEL, Format.Ustx.VOL, Format.Ustx.ATK, Format.Ustx.DEC, Format.Ustx.GEN, Format.Ustx.BRE };
         public int expPrimary = 0;
         public int expSecondary = 1;
+        public List<ExpressionGraph.UExpressionGraph>? expressionGraphs;
+        public Dictionary<string, string>? defaultExpressionGraphs;
         public int key = 0;//Music key of the project, 0 = C, 1 = C#, 2 = D, ..., 11 = B
         public List<UTimeSignature> timeSignatures;
         public List<UTempo> tempos;
@@ -189,6 +191,8 @@ namespace OpenUtau.Core.Ustx {
             foreach (var kv in expressions) {
                 project.expressions.Add(kv.Key, kv.Value.Clone());
             }
+            project.expressionGraphs = expressionGraphs?.Select(g => g.Clone()).ToList();
+            project.defaultExpressionGraphs = defaultExpressionGraphs == null ? null : new Dictionary<string, string>(defaultExpressionGraphs);
             return project;
         }
 

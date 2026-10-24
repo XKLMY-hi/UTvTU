@@ -35,6 +35,9 @@ namespace OpenUtau.Core {
         public int rangeEndTick = 0;
 
         public TaskScheduler MainScheduler => mainScheduler;
+        long documentRevision;
+        public Pipeline.DocRevision Revision => new(Interlocked.Read(ref documentRevision));
+        internal Pipeline.PhraseSourceBuilder PhraseBuilder { get; private set; }
         public Action<Action> PostOnUIThread { get; set; }
         public Plugin[] Plugins { get; private set; }
         public PhonemizerFactory[] PhonemizerFactories { get; private set; }
@@ -46,7 +49,9 @@ namespace OpenUtau.Core {
         internal PhonemizerRunner PhonemizerRunner { get; private set; }
         public List<Type> ExternalBatchEditTypes { get; private set; } = new List<Type>();
 
-        public void Initialize(Thread mainThread, TaskScheduler mainScheduler) {
+        public void Initialize(Thread mainThread, TaskScheduler mainScheduler) => Initialize(mainThread, mainScheduler, false);
+
+        public void Initialize(Thread mainThread, TaskScheduler mainScheduler, bool asyncPhraseBuilds) {
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler((sender, args) => {
                 CrashSave();
             });
@@ -55,6 +60,8 @@ namespace OpenUtau.Core {
             this.mainThread = mainThread;
             this.mainScheduler = mainScheduler;
             PhonemizerRunner = new PhonemizerRunner(mainScheduler);
+            PhraseBuilder?.Dispose();
+            PhraseBuilder = asyncPhraseBuilds ? new Pipeline.PhraseSourceBuilder(mainScheduler) : null;
             _ = ReloadJsPhonemizersAsync();
         }
 
@@ -280,6 +287,11 @@ namespace OpenUtau.Core {
         }
 
         private void ExecuteCmdCore(UCommand cmd) {
+            if (cmd is not UNotification && cmd.AffectsSynthesis) {
+                Interlocked.Increment(ref documentRevision);
+                Pipeline.DocumentSnapshotStore.Inst.ForgetAll();
+                Pipeline.DocumentSnapshotStore.Inst.SetRevision(Revision);
+            }
             if (cmd is UNotification) {
                 if (cmd is SaveProjectNotification saveProjectNotif) {
                     if (undoGroup != null) EndUndoGroup();
@@ -288,6 +300,7 @@ namespace OpenUtau.Core {
                         savedPoint = undoQueue.LastOrDefault();
                     }
                 } else if (cmd is LoadProjectNotification notification) {
+                    Pipeline.DocumentSnapshotStore.Inst.ForgetAll();
                     undoQueue.Clear();
                     redoQueue.Clear();
                     undoGroup = null;
@@ -399,6 +412,11 @@ namespace OpenUtau.Core {
                 return;
             }
             var group = undoQueue.RemoveFromBack();
+            if (group.Commands.Any(c => c.AffectsSynthesis)) {
+                Interlocked.Increment(ref documentRevision);
+                Pipeline.DocumentSnapshotStore.Inst.ForgetAll();
+                Pipeline.DocumentSnapshotStore.Inst.SetRevision(Revision);
+            }
             for (int i = group.Commands.Count - 1; i >= 0; i--) {
                 var cmd = group.Commands[i];
                 cmd.Unexecute();
@@ -418,6 +436,11 @@ namespace OpenUtau.Core {
                 return;
             }
             var group = redoQueue.RemoveFromBack();
+            if (group.Commands.Any(c => c.AffectsSynthesis)) {
+                Interlocked.Increment(ref documentRevision);
+                Pipeline.DocumentSnapshotStore.Inst.ForgetAll();
+                Pipeline.DocumentSnapshotStore.Inst.SetRevision(Revision);
+            }
             for (var i = 0; i < group.Commands.Count; i++) {
                 var cmd = group.Commands[i];
                 cmd.Execute();

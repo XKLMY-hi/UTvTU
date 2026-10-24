@@ -57,7 +57,11 @@ namespace OpenUtau.Core.Render {
             }
         }
 
-        public static string GetExpressionGraphSlot(string renderer) => CreateRenderer(renderer)?.ExpressionGraphSlot ?? renderer;
+        static readonly ConcurrentDictionary<string, IRenderer> graphRenderers = new();
+        // Metadata only; live rendering retains its existing renderer lifecycle.
+        public static IRenderer GetOrCreate(string renderer) => string.IsNullOrEmpty(renderer)
+            ? null : graphRenderers.GetOrAdd(renderer, CreateRenderer);
+        public static string GetExpressionGraphSlot(string renderer) => GetOrCreate(renderer)?.ExpressionGraphSlot ?? renderer;
 
         public static IRenderer CreateRenderer(string renderer) {
             if (renderer == CLASSIC) {

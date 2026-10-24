@@ -15,6 +15,7 @@ using YamlDotNet.Serialization;
 
 namespace OpenUtau.Core.Ustx {
     public abstract class UPart : IUnknownYamlHolder {
+        [YamlIgnore] public Pipeline.PartId Id { get; internal set; } = Pipeline.PartId.New();
         /// <summary>W27：文件里我们没建模的键（原样保留，保存时写回）。见 <see cref="UstxYaml"/>。</summary>
         [YamlIgnore]
         public UnknownYaml? Unknown { get; set; }
@@ -48,6 +49,10 @@ namespace OpenUtau.Core.Ustx {
         public SortedSet<UNote> notes = new SortedSet<UNote>();
         [YamlMember(Order = 101)]
         public List<UCurve> curves = new List<UCurve>();
+        [YamlMember(Order = 102)] public List<UMaskedCurve> maskedCurves = new();
+        [YamlIgnore] internal long phraseGeneration;
+        [YamlIgnore] internal long phraseAppliedGeneration;
+        [YamlIgnore] internal readonly Pipeline.PhraseBuildGate phraseGate = new();
 
         [YamlIgnore] public List<UPhoneme> phonemes = new List<UPhoneme>();
         [YamlIgnore] public int phonemesRevision = 0;
@@ -309,15 +314,38 @@ namespace OpenUtau.Core.Ustx {
                     phoneme.Validate(options, project, track, this, note);
                 }
             }
-            var phrases = PhonemesUpToDate
-                ? RenderPhrase.FromPart(project, track, this).ToArray()
-                : Array.Empty<RenderPhrase>();
+            long generation = ++phraseGeneration;
+            if (!PhonemesUpToDate) {
+                lock (this) { renderPhrases.Clear(); ++renderRevision; }
+                phraseGate.MarkCompleted(generation);
+                return;
+            }
+            var source = Pipeline.PhraseSource.FromPart(project, track, this, generation);
+            if (source == null) {
+                lock (this) { renderPhrases.Clear(); ++renderRevision; }
+                phraseGate.MarkCompleted(generation);
+                return;
+            }
+            Pipeline.DocumentSnapshotStore.Inst.SetPart(this, source);
+            phraseGate.MarkPending(generation);
+            var builder = Pipeline.PhraseSourceBuilder.Current;
+            if (ReferenceEquals(project, DocManager.Inst.Project) && builder != null && builder.Push(source, this)) return;
+            ApplyPhraseSourceResult(source, source.BuildPhrases());
+        }
+
+        internal void ApplyPhraseSourceResult(Pipeline.PhraseSource source, RenderPhrase[] phrases) {
             lock (this) {
-                renderPhrases.Clear();
-                renderPhrases.AddRange(phrases);
-                ++renderRevision;
+                if (source.Generation != phraseGeneration || source.Generation <= phraseAppliedGeneration) return;
+                phraseAppliedGeneration = source.Generation;
+                renderPhrases.Clear(); renderPhrases.AddRange(phrases); ++renderRevision;
+            }
+            phraseGate.MarkCompleted(source.Generation);
+            if (Pipeline.PhraseSourceBuilder.Current != null && DocManager.Inst.Project.parts.Contains(this)) {
+                DocManager.Inst.ExecuteCmd(new PhonemizedNotification());
             }
         }
+        internal bool WaitPhraseSource(TimeSpan timeout, System.Threading.CancellationToken token = default) =>
+            phraseGate.WaitFor(System.Threading.Interlocked.Read(ref phraseGeneration), timeout, token);
 
         internal void SetPhonemizerResponse(PhonemizerResponse response) {
             lock (this) {
@@ -358,6 +386,7 @@ namespace OpenUtau.Core.Ustx {
                 position = position,
                 notes = new SortedSet<UNote>(notes.Select(note => note.Clone())),
                 curves = curves.Select(c => c.Clone()).ToList(),
+                maskedCurves = maskedCurves.Select(c => c.Clone()).ToList(),
                 Duration = Duration,
             };
         }

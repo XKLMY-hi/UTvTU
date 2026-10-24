@@ -132,7 +132,7 @@ namespace OpenUtau.Core.Render {
             // 注意：不再在此处 Flush 延迟销毁的 VST handle——裸 Flush 无法保证旧
             // AudioOutput 回调线程已退出（B1 竞态）。Flush 收敛到安全点：
             // StopPlayback / StartPlayback（Stop+drain 后）/ 渲染与导出段尾部。
-            var requests = FilterRequests(PrepareRequests(), startMs, endMs);
+            var requests = FilterRequests(PrepareRequests(newCancellation.Token), startMs, endMs);
             var trackOutputs = BuildTrackOutputs(requests, mode, faders);
             var renderOperation = renderLifetime.Acquire();
             var task = Task.Run(async () => {
@@ -183,7 +183,7 @@ namespace OpenUtau.Core.Render {
             newCancellation.Token.ThrowIfCancellationRequested();
 
             var faders = new List<Fader>();
-            var requests = FilterRequests(PrepareRequests(), startMs, endMs);
+            var requests = FilterRequests(PrepareRequests(newCancellation.Token), startMs, endMs);
             // 播放：内置三件套走实时包装（逐块跟随 UTrack.MixFx），VST 链在其上。
             var trackOutputs = BuildTrackOutputs(requests, MixFxMode.Live, faders);
 
@@ -328,7 +328,7 @@ namespace OpenUtau.Core.Render {
             var engine = new RenderEngine(project, options.StartTick, options.EndTick);
             using var lifetime = RenderCancellationLease.Replace(ref cancellation, token);
             token.ThrowIfCancellationRequested();
-            var requests = engine.PrepareRequests()
+            var requests = engine.PrepareRequests(token)
                 .Where(r => options.TrackIndices == null || options.TrackIndices.Contains(r.trackNo)).ToArray();
             var outputs = engine.BuildTrackOutputs(requests, MixFxMode.Snapshot, new List<Fader>(), options);
             // Every delivery starts with empty time-domain state; configured jobs own their VST instances.
@@ -346,7 +346,7 @@ namespace OpenUtau.Core.Render {
             var newCancellation = renderLifetime.Source;
             newCancellation.Token.ThrowIfCancellationRequested();
             var trackMixes = new List<WaveMix>();
-            var requests = PrepareRequests();
+            var requests = PrepareRequests(newCancellation.Token);
             // 遍历全部轨道——纯音频轨（UWavePart）/空轨也在列表中（null 或混入 wave part），
             // 此前只覆盖"有 voice part 的轨道"→ 分轨导出静默丢轨
             for (int i = 0; i < project.tracks.Count; ++i) {
@@ -382,7 +382,7 @@ namespace OpenUtau.Core.Render {
                 using var operation = renderOperation;
                 try {
                     await Task.Delay(200, token).ConfigureAwait(false);
-                    await RenderRequestsAsync(PrepareRequests(), newCancellation);
+                    await RenderRequestsAsync(PrepareRequests(token), newCancellation);
                 } catch (Exception e) {
                     if (!newCancellation.IsCancellationRequested) {
                         Log.Error(e, "Failed to pre-render.");
@@ -391,8 +391,19 @@ namespace OpenUtau.Core.Render {
             });
         }
 
-        private RenderPartRequest[] PrepareRequests() {
+        private RenderPartRequest[] PrepareRequests(CancellationToken token = default) {
             RenderPartRequest[] requests;
+            UVoicePart[] parts;
+            lock (project) parts = project.parts.OfType<UVoicePart>()
+                .Where(p => trackNo == -1 || p.trackNo == trackNo).ToArray();
+            // This method is called by background render/export jobs. Never hold the
+            // project lock while the worker posts its result back to the UI thread.
+            foreach (var part in parts) {
+                token.ThrowIfCancellationRequested();
+                if (!part.WaitPhraseSource(TimeSpan.FromSeconds(15), token)) {
+                    throw new TimeoutException("Timed out waiting for the latest expression graph phrase build.");
+                }
+            }
             SingerManager.Inst.ReleaseSingersNotInUse(project);
             lock (project) {
                 requests = project.parts

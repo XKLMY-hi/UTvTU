@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using YamlDotNet.Serialization;
@@ -8,6 +8,7 @@ namespace OpenUtau.Core.Ustx {
         Numerical = 0,
         Options = 1,
         Curve = 2,
+        MaskedCurve = 3,
     }
 
     /// <summary>

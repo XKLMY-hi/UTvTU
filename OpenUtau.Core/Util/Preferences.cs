@@ -301,6 +301,7 @@ namespace OpenUtau.Core.Util {
             public bool UseTrackColor = false;
             public bool ClearCacheOnQuit = false;
             public bool PreRender = true;
+            public float MergePhrasesSec = 0;
             public int NumRenderThreads = 2;
             public string DefaultRenderer = string.Empty;
             public int WorldlineR = 0;

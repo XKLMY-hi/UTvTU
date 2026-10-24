@@ -22,6 +22,10 @@ namespace OpenUtau.Core.Format {
         public const string DEC = "dec";
         public const string GEN = "gen";
         public const string GRWC = "grwc";
+        public const string CLRY = "clry";
+        public const string XSY = "xsy";
+        public const string RPIT = "rpit";
+        public const string PITO = "pito";
         public const string GENC = "genc";
         public const string BRE = "bre";
         public const string BREC = "brec";
@@ -41,6 +45,8 @@ namespace OpenUtau.Core.Format {
         public static void AddDefaultExpressions(UProject project) {
             project.RegisterExpression(new UExpressionDescriptor("dynamics (curve)", DYN, -240, 120, 0) { type = UExpressionType.Curve });
             project.RegisterExpression(new UExpressionDescriptor("pitch deviation (curve)", PITD, -1200, 1200, 0) { type = UExpressionType.Curve });
+            project.RegisterExpression(new UExpressionDescriptor("rendered pitch (masked curve)", RPIT, 2400, 10800, 6000) { type = UExpressionType.MaskedCurve });
+            project.RegisterExpression(new UExpressionDescriptor("pitch override (masked curve)", PITO, 2400, 10800, 6000) { type = UExpressionType.MaskedCurve });
             project.RegisterExpression(new UExpressionDescriptor("voice color", CLR, false, new string[0]));
             project.RegisterExpression(new UExpressionDescriptor("resampler engine", ENG, false, new string[] { "", WorldlineResampler.name }));
             project.RegisterExpression(new UExpressionDescriptor("velocity", VEL, 0, 200, 100));

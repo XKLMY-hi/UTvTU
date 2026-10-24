@@ -113,6 +113,8 @@ namespace OpenUtau.Core.Ustx {
 
         public List<UExpressionDescriptor> TrackExpressions { get; set; } = new List<UExpressionDescriptor>();
         [YamlIgnore] public UExpressionDescriptor VoiceColorExp { set; get; }
+        public string? ExpressionGraph { get; set; }
+        [YamlIgnore] public UExpressionDescriptor VoiceColor2Exp { get; set; }
         public string[] VoiceColorNames { get; set; } = new string[] { "" };
 
         public UTrack() {
