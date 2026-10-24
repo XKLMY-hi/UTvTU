@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -31,13 +31,13 @@ namespace OpenUtau.Plugin.Builtin {
             };
             this.consonants = "b,ch,d,dh,dr,dx,f,g,hh,jh,k,l,m,n,ng,p,q,r,s,sh,t,th,tr,v,w,y,z".Split(',');
             this.diphthongTails = new Dictionary<string, string>() {
-                { "ay", "ay-" }, 
-                { "ey", "ey-" }, 
-                { "oy", "oy-" }, 
-                { "aw", "aw-" }, 
+                { "ay", "ay-" },
+                { "ey", "ey-" },
+                { "oy", "oy-" },
+                { "aw", "aw-" },
                 { "ow", "ow-" }
             };
-            
+
         }
         private static string[] c_cR = Array.Empty<string>();
 
@@ -65,7 +65,7 @@ namespace OpenUtau.Plugin.Builtin {
             // SPLITS UP DR AND TR
             string[] tr = new[] { "tr" };
             string[] dr = new[] { "dr" };
-            
+
             foreach (string s in original) {
                 switch (s) {
                     case var str when dr.Contains(str) && !HasOto($"{str} {vowels}", note.tone) && !HasOto($"ay {str}", note.tone):
@@ -129,7 +129,7 @@ namespace OpenUtau.Plugin.Builtin {
                 if (!CanMakeAliasExtension(syllable)) {
                     if (HasOto($"{prevV} {v}", syllable.vowelTone) || HasOto(ValidateAlias($"{prevV} {v}"), syllable.vowelTone)) {
                         basePhoneme = $"{prevV} {v}";
-                    } 
+                    }
                     else if (diphthongSplits.ContainsKey(prevV) || diphthongTails.ContainsKey(prevV)) {
                         string cv = "";
 
@@ -138,7 +138,7 @@ namespace OpenUtau.Plugin.Builtin {
                             var vc = AliasFormat(splitOverride[0].Replace("{v}", v), "vcEx", syllable.tone, prevV);
                             cv = AliasFormat(splitOverride[1].Replace("{v}", v), "vv", syllable.vowelTone, "");
                             TryAddPhoneme(phonemes, syllable.tone, vc, ValidateAlias(vc));
-                        } 
+                        }
                         else {
                             var tail = diphthongTails[prevV]; // gets e.g., "ay-"
                             var vcSpace = $"{prevV} {tail}";
@@ -162,7 +162,7 @@ namespace OpenUtau.Plugin.Builtin {
                         } else {
                             basePhoneme = AliasFormat(v, "vv", syllable.vowelTone, "");
                         }
-                    } 
+                    }
                     else {
                         if (HasOto(v, syllable.vowelTone) || HasOto(ValidateAlias(v), syllable.vowelTone)) {
                             basePhoneme = v;
@@ -170,7 +170,7 @@ namespace OpenUtau.Plugin.Builtin {
                             basePhoneme = AliasFormat(v, "vv", syllable.vowelTone, "");
                         }
                     }
-                } 
+                }
                 else {
                     basePhoneme = null;
                 }
@@ -372,13 +372,13 @@ namespace OpenUtau.Plugin.Builtin {
             if (ending.IsEndingV) {
                 var vR = $"{v} {t}";
                 var vR2 = $"{v}{t}";
-                if (HasOto(vR, ending.tone) || HasOto(ValidateAlias(vR), ending.tone) || 
+                if (HasOto(vR, ending.tone) || HasOto(ValidateAlias(vR), ending.tone) ||
                     HasOto(vR2, ending.tone) || HasOto(ValidateAlias(vR2), ending.tone)) {
                     TryAddPhoneme(phonemes, ending.tone, AliasFormat(v, "ending", ending.tone, "", t));
                 } else if (diphthongTails.ContainsKey(prevV)) {
                     TryAddPhoneme(phonemes, ending.tone, AliasFormat($"{diphthongTails[prevV]}", "cv", ending.tone, "", t));
                 }
-            } 
+            }
             // 2. Single Consonant Ending
             else if (ending.IsEndingVCWithOneConsonant) {
                 var vc = $"{v} {cc[0]}";
@@ -410,7 +410,7 @@ namespace OpenUtau.Plugin.Builtin {
                         }
                     }
                 }
-            } 
+            }
             else {
                 int firstC = 0;
                 if (!RomajiException.Contains(cc[0])) {
@@ -645,30 +645,26 @@ namespace OpenUtau.Plugin.Builtin {
             return alias;
         }
 
-        protected override string ValidateAlias(string alias, int tone = 0) {
+        protected override string GetHardcodedFallback(string alias, int tone, HashSet<string> suppressedTokens) {
             if (string.IsNullOrEmpty(alias)) return alias;
-            // VALIDATE ALIAS DEPENDING ON METHOD
-            if (HasOto(alias, tone)) return alias;
-            // Prioritize contextual fb before yaml
+            string currentAlias = alias;
+
             string contextual = ApplyContextualFallbacks(alias, tone);
             if (contextual != alias && HasOto(contextual, tone)) {
                 return contextual;
             }
 
-            string baseResolved = base.ValidateAlias(alias, tone);
-            if (!string.IsNullOrEmpty(baseResolved) && baseResolved != alias) {
-                if (HasOto(baseResolved, tone)) {
-                    return baseResolved;
-                }
-                alias = baseResolved;
-            }
-            if (isMissingCPhonemes) {
+            if (isMissingCPhonemes && missingCphonemes != null) {
                 foreach (var fb in missingCphonemes.OrderByDescending(f => f.Key.Length)) {
-                    alias = alias.Replace(fb.Key, fb.Value);
+                    if (suppressedTokens != null && suppressedTokens.Contains(fb.Key)) continue;
+                    currentAlias = currentAlias.Replace(fb.Key, fb.Value, StringComparison.Ordinal);
                 }
-                if (HasOto(alias, tone)) return alias;
+                if (!string.Equals(currentAlias, alias, StringComparison.Ordinal) && HasOto(currentAlias, tone)) {
+                    return currentAlias;
+                }
             }
-            return alias;
+
+            return !string.Equals(currentAlias, alias, StringComparison.Ordinal) ? currentAlias : null;
         }
 
         bool PhonemeIsPresent(string alias, string phoneme) {
@@ -681,7 +677,7 @@ namespace OpenUtau.Plugin.Builtin {
 
             return alias.EndsWith(phoneme);
         }
-        
+
 
         protected override bool NoGap => true;
 

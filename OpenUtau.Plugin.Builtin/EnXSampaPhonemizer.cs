@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.IO;
@@ -186,11 +186,11 @@ namespace OpenUtau.Plugin.Builtin {
                     original[i] = replaced;
                 }
             }
-            
+
             // Splits diphthongs and affricates if not present in the bank
             string[] diphthongs = new[] { "aI", "eI", "OI", "aU", "oU", "VI", "VU", "@U", "ai", "ei", "Oi", "au", "ou", "Ou", "@u", };
             string[] affricates = new[] { "dZ", "tS" };
-            
+
             foreach (string s in original) {
                 if (diphthongs.Contains(s) && !HasOto($"- {s}", note.tone) && !HasOto(s, note.tone) && !HasOto(ValidateAlias($"- {s}"), note.tone) && !HasOto(ValidateAlias(s), note.tone)) {
                     finalProcessedPhonemes.AddRange(new string[] { s[0].ToString(), s[1] + '^'.ToString() });
@@ -219,7 +219,7 @@ namespace OpenUtau.Plugin.Builtin {
 
 
             var rv = $"- {v}";
-            
+
             // Switch between phonetic systems, depending on certain aliases in the bank
             if (HasOto($"- i:", syllable.tone) || HasOto($"i:", syllable.tone) || (!HasOto($"- 3", syllable.tone) && !HasOto($"3", syllable.tone))) {
                 isVocaSampa = true;
@@ -273,7 +273,7 @@ namespace OpenUtau.Plugin.Builtin {
                         basePhoneme = $"{prevV} {v}";
                     } else if (HasOto($"{prevV}{v}", syllable.vowelTone) || HasOto(ValidateAlias($"{prevV}{v}"), syllable.vowelTone)) {
                         basePhoneme = $"{prevV}{v}";
-                    } 
+                    }
 
                     else if (vvExceptions.ContainsKey(prevV)) {
                         var tail = vvExceptions[prevV];
@@ -316,7 +316,7 @@ namespace OpenUtau.Plugin.Builtin {
                             phonemes.Add($"{prevV} -");
                         }
                     }
-                    
+
                     // Diphthong Fallbacks
                     else if (diphthongSplits.ContainsKey(prevV) || diphthongTails.ContainsKey(prevV)) {
                         string cv = "";
@@ -325,7 +325,7 @@ namespace OpenUtau.Plugin.Builtin {
                             var vc = splitOverride[0].Replace("{v}", v);
                             cv = splitOverride[1].Replace("{v}", v);
                             TryAddPhoneme(phonemes, syllable.tone, vc, ValidateAlias(vc));
-                        } 
+                        }
                         else { // Default YAML diphthong logic
                             var tail = diphthongTails[prevV];
                             var vcSpace = $"{prevV} {tail}";
@@ -352,7 +352,7 @@ namespace OpenUtau.Plugin.Builtin {
                             phonemes.Add($"{prevV} -");
                         }
                     }
-                } 
+                }
                 else {
                     basePhoneme = null;
                 }
@@ -765,100 +765,52 @@ namespace OpenUtau.Plugin.Builtin {
             return phonemes;
         }
 
-        protected override string ValidateAlias(string alias, int tone = 0) {
-            // Validate alias depending on method
-            string baseResolved = base.ValidateAlias(alias, tone);
-            if (!string.IsNullOrEmpty(baseResolved) && baseResolved != alias) {
-                if (HasOto(baseResolved, tone)) {
-                    return baseResolved;
-                }
-                alias = baseResolved;
-            }
+        protected override string GetHardcodedFallback(string alias, int tone, HashSet<string> suppressedTokens) {
+            string candidate = alias;
 
-            if (isVocaSampa) {
-                foreach (var syllable in vocaSampa) {
-                    alias = alias.Replace(syllable.Key, syllable.Value);
+            // Helper to apply dictionary substitutions while honoring YAML suppressed tokens and strict casing
+            void ApplyDictionary(IEnumerable<KeyValuePair<string, string>> dict) {
+                if (dict == null) return;
+                foreach (var kvp in dict.OrderByDescending(f => f.Key.Length)) {
+                    if (suppressedTokens != null && suppressedTokens.Contains(kvp.Key)) continue;
+                    candidate = candidate.Replace(kvp.Key, kvp.Value, StringComparison.Ordinal);
                 }
             }
 
-            if (isSimpleDelta) {
-                foreach (var syllable in simpleDelta) {
-                    alias = alias.Replace(syllable.Key, syllable.Value);
-                }
-            }
+            if (isVocaSampa) ApplyDictionary(vocaSampa);
+            if (isSimpleDelta) ApplyDictionary(simpleDelta);
+            if (isMiniDelta) ApplyDictionary(miniDelta);
+            if (isEnPlusJa) ApplyDictionary(enPlusJa);
+            if (isTrueXSampa) ApplyDictionary(trueXSampa);
+            if (isSalemList) ApplyDictionary(salemList);
+            if (isVelarNasalFallback) ApplyDictionary(velarNasalFallback);
+            if (isTetoException) ApplyDictionary(tetoException);
+            if (isMissingCanadianRaising) ApplyDictionary(CanadianRaising);
+            if (isDarkLVowel) ApplyDictionary(darkLVowel);
 
-            if (isMiniDelta) {
-                foreach (var syllable in miniDelta) {
-                    alias = alias.Replace(syllable.Key, syllable.Value);
-                }
-            }
-
-            if (isEnPlusJa) {
-                foreach (var syllable in enPlusJa) {
-                    alias = alias.Replace(syllable.Key, syllable.Value);
-                }
-            }
-
-            if (isTrueXSampa) {
-                foreach (var syllable in trueXSampa) {
-                    alias = alias.Replace(syllable.Key, syllable.Value);
-                }
-            }
-
-            if (isSalemList) {
-                foreach (var syllable in salemList) {
-                    alias = alias.Replace(syllable.Key, syllable.Value);
-                }
-            }
-
-            if (isVelarNasalFallback) {
-                foreach (var syllable in velarNasalFallback) {
-                    alias = alias.Replace(syllable.Key, syllable.Value);
-                }
-            }
-
-            if (isTetoException) {
-                foreach (var syllable in tetoException) {
-                    alias = alias.Replace(syllable.Key, syllable.Value);
-                }
-            }
-
-            if (isMissingCanadianRaising) {
-                foreach (var syllable in CanadianRaising) {
-                    alias = alias.Replace(syllable.Key, syllable.Value);
-                }
-            }
-
-            if (isDarkLVowel) {
-                foreach (var syllable in darkLVowel) {
-                    alias = alias.Replace(syllable.Key, syllable.Value);
-                }
-            }
-
-            // Split diphthongs adjuster
-            if (alias.Contains("U^")) {
-                alias = alias.Replace("U^", "U");
-            }
-            if (alias.Contains("I^")) {
-                alias = alias.Replace("I^", "I");
-            }
-            if (alias.Contains("u^")) {
-                alias = alias.Replace("u^", "u");
-            }
-            if (alias.Contains("i^")) {
-                alias = alias.Replace("i^", "i");
-            }
+            // Split diphthongs adjuster (casing preserved)
+            candidate = candidate.Replace("U^", "U", StringComparison.Ordinal)
+                                 .Replace("I^", "I", StringComparison.Ordinal)
+                                 .Replace("u^", "u", StringComparison.Ordinal)
+                                 .Replace("i^", "i", StringComparison.Ordinal);
 
             // Other validations
-            if (!alias.Contains("@r") && !alias.Contains("3r")) {
-                foreach (var consonant1 in new[] { "r ", "r\\ ", }) {
-                    foreach (var consonant2 in consonants) {
-                        alias = alias.Replace(consonant1 + consonant2, "3 " + consonant2);
+            if (!candidate.Contains("@r", StringComparison.Ordinal) && !candidate.Contains("3r", StringComparison.Ordinal)) {
+                if (consonants != null) {
+                    foreach (var consonant1 in new[] { "r ", "r\\ " }) {
+                        foreach (var consonant2 in consonants) {
+                            candidate = candidate.Replace(consonant1 + consonant2, "3 " + consonant2, StringComparison.Ordinal);
+                        }
                     }
                 }
             }
 
-            return alias;
+            // Return candidate if changed and present in OTO; otherwise null to let the base pipeline proceed
+            if (!string.Equals(candidate, alias, StringComparison.Ordinal) && HasOto(candidate, tone)) {
+                return candidate;
+            }
+
+            return null;
         }
 
         // Endings has 50 ticks gap

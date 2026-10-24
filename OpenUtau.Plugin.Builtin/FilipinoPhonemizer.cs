@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.IO;
@@ -91,13 +91,13 @@ namespace OpenUtau.Plugin.Builtin {
                 }
                 if (hasTrailingApostrophe) {
                     fallbackSplit.Add("q");
-                    
+
                 }
                 original = fallbackSplit.ToArray();
             }
-            
+
             List<string> finalProcessedPhonemes = new List<string>();
-            
+
             foreach (string s in original) {
                 switch (s) {
                     default:
@@ -111,19 +111,5 @@ namespace OpenUtau.Plugin.Builtin {
 
         // Endings has 50 ticks gap
         protected override bool NoGap => true;
-        protected override string ValidateAlias(string alias, int tone = 0) {
-
-            // VALIDATE ALIAS DEPENDING ON METHOD
-            if (HasOto(alias, tone)) return alias;
-
-            string baseResolved = base.ValidateAlias(alias, tone);
-            if (!string.IsNullOrEmpty(baseResolved) && baseResolved != alias) {
-                if (HasOto(baseResolved, tone)) {
-                    return baseResolved;
-                }
-                alias = baseResolved;
-            }
-            return alias;
-        }
     }
 }
