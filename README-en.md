@@ -46,6 +46,9 @@ Screenshots captured on Windows, build `UTvTU-26.10.17-011138`. Click an image i
 
 - Edit notes, lyrics, pitch, portamento, vibrato and expression curves in the piano roll.
 - Use OpenUTAU's voicebank, phonemizer and synthesis workflows, including classic UTAU voicebanks, third-party resamplers and engines such as DiffSinger.
+- WORLDLINE R1.1 and built-in hifisampler, with hnsep / vocoder models supplied as dependency packages; ENUNU capability negotiation and legacy-server fallback.
+- Expression graphs map curves, phoneme parameters and pitch, with renderer defaults, track overrides, `.ougraph` import/export and RPIT / PITO masked pitch.
+- JavaScript phonemizer packages and developer tools for templates, log filtering and optional live reload.
 - Arrange vocal parts and backing audio across tracks, with undo / redo.
 - Save UTvTU projects, effect chains and plugin states as `.ustxp`; retain `.ustx` compatibility and upstream import formats such as UST, MIDI and VSQx. Synthesizer V SVP / SV2 import includes audio tracks.
 
@@ -121,6 +124,9 @@ UTvTU builds on upstream code, open standards, design resources and community kn
 | [.NET](https://github.com/dotnet/runtime) / System.* | Runtime, base libraries, JSON, encodings and packaging |
 | [NAudio](https://github.com/naudio/NAudio), [NAudio.Vorbis](https://github.com/naudio/Vorbis), [NAudio.Flac](https://github.com/BunLabs/NAudio.Flac), [NLayer](https://github.com/naudio/NLayer), [Concentus.OggFile](https://github.com/lostromb/concentus.oggfile) | Audio devices, processing and file formats |
 | [NWaves](https://github.com/ar1st0crat/NWaves) | Signal processing and analysis |
+| [FftFlat](https://github.com/sinshu/fftflat) / Nobuaki Tanaka | C# FFT and resampler signal processing |
+| [Jint](https://github.com/sebastienros/jint) / Sebastien Ros, [Acornima](https://github.com/adams85/acornima) / Adam Simon | JavaScript phonemizer interpreter and parser |
+| [hifisampler](https://github.com/openhachimi/hifisampler) and OpenUTAU port contributors | Basis of the built-in hifisampler; [Apache-2.0 license](OpenUtau.Core/Classic/Hifisampler/LICENSE) |
 | [ONNX Runtime](https://github.com/microsoft/onnxruntime) / DirectML | Model inference |
 | [DryWetMidi](https://github.com/melanchall/drywetmidi) | MIDI files |
 | [YamlDotNet](https://github.com/aaubry/YamlDotNet), [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json) | Projects and configuration |

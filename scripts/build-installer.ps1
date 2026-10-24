@@ -73,6 +73,7 @@ try {
         if (-not $crt) { throw '找不到 x64 VC CRT 可再分发目录。' }
         foreach ($dll in Get-ChildItem -LiteralPath $crt.FullName -Filter '*.dll' -File) { Copy-Item -LiteralPath $dll.FullName -Destination (Join-Path $stage $dll.Name) }
         Copy-Item -LiteralPath (Join-Path $repo 'LICENSE.txt') -Destination (Join-Path $stage 'LICENSE.txt')
+        if ((Get-FileHash -LiteralPath (Join-Path $stage 'worldline.dll')).Hash -ne (Get-FileHash -LiteralPath (Join-Path $repo 'runtimes/win-x64/native/worldline.dll')).Hash) { throw '发布的 WORLDLINE 库与当前源码对应二进制不一致。' }
         @{Version=$stamp;SourceCommit=$commit;Runtime=$Runtime} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $stage 'utvtu-build.json') -Encoding utf8
         if ((Get-FileHash -LiteralPath (Join-Path $stage 'vst_bridge.dll')).Hash -ne (Get-FileHash -LiteralPath (Join-Path $repo 'runtimes/win-x64/native/vst_bridge.dll')).Hash) { throw '发布的 VST 桥与当前源码对应二进制不一致。' }
     }

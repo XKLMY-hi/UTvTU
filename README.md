@@ -46,6 +46,9 @@
 
 - 在钢琴卷帘中编辑音符、歌词、音高、滑音、颤音和表情曲线。
 - 延续 OpenUTAU 的声库、音素化器及合成工作流，支持经典 UTAU 声库、第三方重采样器和 DiffSinger 等引擎。
+- 新增 WORLDLINE R1.1 与内置 hifisampler（所需 hnsep / 声码器模型通过依赖包提供），支持 ENUNU 服务能力协商与旧服务回退。
+- 使用表达式节点图映射曲线、音素参数与音高；支持按渲染器设默认图、轨道覆盖、`.ougraph` 导入导出，以及 RPIT / PITO 遮罩音高。
+- 支持 JavaScript 音素化器包；开发者工具提供模板创建、日志筛选与按需实时重载。
 - 在多轨编排中组织人声片段与伴奏，使用撤销 / 重做调整工程。
 - 使用 `.ustxp` 保存 UTvTU 工程、效果器链和插件状态；兼容 `.ustx`，保留上游提供的 UST、MIDI、VSQx 等导入能力，新增 Synthesizer V 的 SVP / SV2 导入（含音频轨道）。
 
@@ -121,6 +124,9 @@ UTvTU 的工作建立在上游代码、开放标准、设计资源和社区经�
 | [.NET](https://github.com/dotnet/runtime) / System.* | 应用运行时、基础类库、JSON、编码和文件封装 |
 | [NAudio](https://github.com/naudio/NAudio)、[NAudio.Vorbis](https://github.com/naudio/Vorbis)、[NAudio.Flac](https://github.com/BunLabs/NAudio.Flac)、[NLayer](https://github.com/naudio/NLayer)、[Concentus.OggFile](https://github.com/lostromb/concentus.oggfile) | 音频设备、处理与格式支持 |
 | [NWaves](https://github.com/ar1st0crat/NWaves) | 音频信号处理与分析 |
+| [FftFlat](https://github.com/sinshu/fftflat) / Nobuaki Tanaka | C# FFT 与采样器信号处理 |
+| [Jint](https://github.com/sebastienros/jint) / Sebastien Ros、[Acornima](https://github.com/adams85/acornima) / Adam Simon | JavaScript 音素化器解释与解析 |
+| [hifisampler](https://github.com/openhachimi/hifisampler) 及 OpenUTAU 移植贡献者 | 内置 hifisampler 的基础实现；[Apache-2.0 许可](OpenUtau.Core/Classic/Hifisampler/LICENSE) |
 | [ONNX Runtime](https://github.com/microsoft/onnxruntime) / DirectML | 合成模型推理 |
 | [DryWetMidi](https://github.com/melanchall/drywetmidi) | MIDI 文件处理 |
 | [YamlDotNet](https://github.com/aaubry/YamlDotNet)、[Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json) | 工程与配置序列化 |

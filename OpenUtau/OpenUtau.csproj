@@ -54,6 +54,9 @@
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
     <None Include="..\README.md" CopyToOutputDirectory="PreserveNewest" Link="README.md"/>
+    <None Include="..\licenses\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Link="Licenses/%(Filename)%(Extension)"/>
+    <None Include="..\OpenUtau.Core\Classic\Hifisampler\LICENSE" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Link="Licenses/hifisampler-LICENSE.txt"/>
+    <None Include="..\THIRD-PARTY-NOTICES.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Link="THIRD-PARTY-NOTICES.md"/>
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="OpenUtau.Test" />

@@ -2,7 +2,7 @@
 
 UTvTU（原 OpenUTAU Plus）基于 OpenUTAU，并使用下列组件与资源。主项目 [LICENSE.txt](LICENSE.txt) 保留 OpenUTAU / StAkira 的版权声明；各第三方组件的版权和许可独立保留。
 
-本文件按 2026-10-17 的工程声明、对应 NuGet 包元数据、随附许可文件和原生依赖配置整理。下表同时包含运行、构建、测试及条件引用，**不表示每个组件都包含在每一份 Windows 安装包中**。传递依赖及原生库的附加许可仍以具体发行包的原始声明为准。
+本文件按 2026-10-24 的工程声明、对应 NuGet 包元数据、随附许可文件和原生依赖配置整理。下表同时包含运行、构建、测试及条件引用，**不表示每个组件都包含在每一份 Windows 安装包中**。传递依赖及原生库的附加许可仍以具体发行包的原始声明为准。
 
 ## 直接 NuGet 引用
 
@@ -10,6 +10,9 @@ UTvTU（原 OpenUTAU Plus）基于 OpenUTAU，并使用下列组件与资源。�
 
 | 组件 | 工程声明版本 | 许可 / 声明 |
 |---|---|---|
+| [FftFlat](https://www.nuget.org/packages/FftFlat/1.0.1) | 1.0.1 | MIT；Nobuaki Tanaka |
+| [Jint](https://www.nuget.org/packages/Jint/4.17.0) | 4.17.0 | BSD-2-Clause；Sebastien Ros |
+| [Acornima](https://www.nuget.org/packages/Acornima/1.7.0)（Jint 传递依赖） | 1.7.0 | BSD-3-Clause；Adam Simon |
 | [Avalonia](https://www.nuget.org/packages/Avalonia/12.1.0) | 12.1.0 | MIT |
 | [Avalonia.Controls.ColorPicker](https://www.nuget.org/packages/Avalonia.Controls.ColorPicker/12.1.0) | 12.1.0 | MIT |
 | [Avalonia.Controls.DataGrid](https://www.nuget.org/packages/Avalonia.Controls.DataGrid/12.1.0) | 12.1.0 | MIT |
@@ -93,3 +96,5 @@ Steinberg 的名称和 VST 相关商标归相应权利人；使用 SDK 不代表
 历史版本曾使用 SukiUI，相关贡献仍在 README 鸣谢中保留；当前工程不将它列为直接运行依赖。Dotnet.Bundle 仍是工程中保留的打包工具，主要用于既有 macOS 配置；当前新增开发仍以 Windows 为目标。
 
 完整产品与社区致谢见 [README.md](README.md)。
+
+内置 hifisampler 基于 openhachimi/hifisampler 与 OpenUTAU 的 C# 移植，保留 [Apache-2.0 原始许可](OpenUtau.Core/Classic/Hifisampler/LICENSE)。模型本身另按提供方许可使用。上述新增依赖的完整许可随应用放在 `Licenses/`。

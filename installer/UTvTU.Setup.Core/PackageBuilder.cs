@@ -12,7 +12,8 @@ public static class PackageBuilder {
     public static readonly string[] RequiredFiles = {
         "OpenUtau.exe", "OpenUtau.dll", "OpenUtau.deps.json", "OpenUtau.runtimeconfig.json", "OpenUtau.Core.dll", "OpenUtau.Plugin.Builtin.dll", "UTvTU.DawUI.dll", "UTvTU.Md3.dll",
         "vst_probe.exe", "vst_probe.dll", "vst_probe.deps.json", "vst_probe.runtimeconfig.json", "vst_bridge.dll", "worldline.dll",
-        "coreclr.dll", "hostfxr.dll", "hostpolicy.dll", "System.Private.CoreLib.dll", "vcruntime140.dll", "vcruntime140_1.dll", "msvcp140.dll", "UTvTU-Uninstall.exe"
+        "coreclr.dll", "hostfxr.dll", "hostpolicy.dll", "System.Private.CoreLib.dll", "vcruntime140.dll", "vcruntime140_1.dll", "msvcp140.dll", "UTvTU-Uninstall.exe",
+        "FftFlat.dll", "Jint.dll", "Acornima.dll"
     };
     public static BuildIdentity ValidatePublished(string directory) {
         directory = SetupPaths.Full(directory); SetupPaths.RejectLinks(directory);
@@ -37,7 +38,14 @@ public static class PackageBuilder {
         }
         var exports = Exports(Path.Combine(directory, "vst_bridge.dll"));
         foreach (string name in new[] { "vst_open_editor_window_owned", "vst_setup_export", "vst_process_export" }) if (!exports.Contains(name)) throw new InvalidDataException($"VST 桥缺少接口：{name}");
+        ValidateWorldlineAbi(Path.Combine(directory, "worldline.dll"));
         return identity;
+    }
+    public static void ValidateWorldlineAbi(string path) {
+        var exports = Exports(path);
+        foreach (string name in new[] { "F0FrameCount", "F0", "DecodeMgc", "DecodeBap", "InitAnalysisConfig", "WorldAnalysisF0In", "WorldSynthesisSampleCount", "WorldSynthesis", "HnAnalysisF0In", "WorldSynthesisContinuousNoise" }) {
+            if (!exports.Contains(name)) throw new InvalidDataException($"WORLDLINE 库与当前托管代码不匹配，缺少接口：{name}");
+        }
     }
     static HashSet<string> Exports(string path) {
         using var stream = File.OpenRead(path); using var pe = new PEReader(stream);

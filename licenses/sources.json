@@ -1,0 +1,17 @@
+[
+  {
+    "file": "FftFlat-LICENSE.md",
+    "source": "https://raw.githubusercontent.com/sinshu/fftflat/fa8cd445754a2d9f7487157d0e1dc74844dbaf5e/LICENSE.md",
+    "sha256": "7978a9961a5b5a1a5b982d5039b3f6be58dad24d4093b923d73f0ce8182dd2b7"
+  },
+  {
+    "file": "Jint-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/sebastienros/jint/v4.17.0/LICENSE.txt",
+    "sha256": "7fd0f56c1bc3ac00b50e44fc9b93eeeaeb6905b62a272eb310590b68d4a5c3ff"
+  },
+  {
+    "file": "Acornima-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/adams85/acornima/v1.7.0/LICENSE",
+    "sha256": "4182d3e7ce42f69b01f35c6ed27d075d26794a3c2f0b0182aa475be6ca565bab"
+  }
+]
