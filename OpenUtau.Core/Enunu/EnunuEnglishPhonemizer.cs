@@ -1,13 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using K4os.Hash.xxHash;
 using OpenUtau.Api;
-using OpenUtau.Core.Editing;
-using OpenUtau.Core.Ustx;
 using OpenUtau.Core.G2p;
+using OpenUtau.Core.Ustx;
 using Serilog;
 
 namespace OpenUtau.Core.Enunu {
@@ -23,7 +20,7 @@ namespace OpenUtau.Core.Enunu {
             var g2ps = new List<IG2p>();
 
             // Load dictionary from plugin folder.
-            
+
             string path = Path.Combine(PluginDir, "arpasing.yaml");
             /*
             if (!File.Exists(path)) {
@@ -60,9 +57,6 @@ namespace OpenUtau.Core.Enunu {
         public override void SetSinger(USinger singer) {
             this.singer = singer as EnunuSinger;
             g2p = LoadG2p();
-            if (port == null) {
-                port = EnunuUtils.SetPortNum();
-            }
         }
 
         string[] GetSymbols(Note note) {
@@ -159,7 +153,7 @@ namespace OpenUtau.Core.Enunu {
                 }
                 enunuNotes.Add(enunuNote);
                 startIndex = endIndex;
-                
+
                 startTick = alignment.Item2;
             }
             alignments.Clear();

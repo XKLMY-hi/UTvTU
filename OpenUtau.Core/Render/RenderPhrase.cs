@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -529,7 +529,8 @@ namespace OpenUtau.Core.Render {
             }
             var phrasePhonemes = new List<UPhoneme>() { phonemes[0] };
             for (int i = 1; i < phonemes.Count; ++i) {
-                if (phonemes[i - 1].End != phonemes[i].position) {
+                if (phonemes[i - 1].End != phonemes[i].position &&
+                    !(track.RendererSettings.Renderer?.ShouldMergePhrases(project, track, phonemes[i - 1], phonemes[i]) ?? false)) {
                     phrases.Add(new RenderPhrase(project, track, part, phrasePhonemes));
                     phrasePhonemes.Clear();
                 }

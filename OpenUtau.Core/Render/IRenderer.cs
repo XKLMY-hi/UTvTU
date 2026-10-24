@@ -71,6 +71,7 @@ namespace OpenUtau.Core.Render {
         bool SupportsRealCurve { get { return false; } }
         bool SupportsExpression(UExpressionDescriptor descriptor);
         RenderResult Layout(RenderPhrase phrase);
+        bool ShouldMergePhrases(UProject project, UTrack track, UPhoneme prev, UPhoneme next) => false;
         Task<RenderResult> Render(RenderPhrase phrase, Progress progress, int trackNo, CancellationTokenSource cancellation, bool isPreRender = false);
         RenderPitchResult LoadRenderedPitch(RenderPhrase phrase);
         List<RenderRealCurveResult> LoadRenderedRealCurves(RenderPhrase phrase) { return new List<RenderRealCurveResult>(0);}
