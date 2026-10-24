@@ -1,5 +1,5 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:chrome="clr-namespace:Avalonia.Controls.Chrome;assembly=Avalonia.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:OpenUtau.App.ViewModels"
@@ -209,6 +209,7 @@
   </UserControl.Styles>
 
   <Grid ColumnDefinitions="240,*" Background="{DynamicResource md3.surface}">
+    <Border Grid.ColumnSpan="2" Height="24" VerticalAlignment="Top" Background="Transparent" chrome:WindowDecorationProperties.ElementRole="TitleBar"/>
 
     <!-- ══════════ 左：导航栏（232 / surface-container-low，与偏好设置同构） ══════════ -->
     <Border Grid.Column="0" Background="{DynamicResource md3.surface-container-low}"
@@ -216,8 +217,8 @@
       <Grid RowDefinitions="Auto,*,Auto" Margin="0,20,0,16">
 
         <!-- 品牌锁定（cap 20 = 旧版 cap 24 的 0.8333 倍，比例逐项同源；几何取 Icons.axaml 冻结键） -->
-        <StackPanel Grid.Row="0" Margin="24,0,24,20" Spacing="{DynamicResource Md3Spacing1}">
-          <Canvas Width="118.43" Height="24.00" HorizontalAlignment="Left">
+        <StackPanel Grid.Row="0" Background="Transparent" chrome:WindowDecorationProperties.ElementRole="TitleBar" Margin="24,0,24,20" Spacing="{DynamicResource Md3Spacing1}">
+          <Canvas IsHitTestVisible="False" Width="118.43" Height="24.00" HorizontalAlignment="Left">
             <Path Canvas.Left="2.18" Canvas.Top="2.18" Width="8.73" Height="19.63" Stretch="Uniform"
                   Data="{StaticResource brand-brace}" Stroke="{DynamicResource md3.primary}"
                   StrokeThickness="4.37" StrokeLineCap="Round" StrokeJoin="Round"/>
@@ -235,7 +236,7 @@
               </Path.RenderTransform>
             </Path>
           </Canvas>
-          <TextBlock Classes="caption" Text="{DynamicResource welcome.brand.tagline}"/>
+          <TextBlock Classes="caption" IsHitTestVisible="False" Text="{DynamicResource welcome.brand.tagline}"/>
         </StackPanel>
 
         <!-- 分组导航（主轴 = 共享 Button.navItem；选中态类 .selected 由 code-behind 切换） -->
@@ -333,14 +334,18 @@
     <!-- U4 HTML: 240 rail, 32 content inset, 40 search, 168 hero, 196 action cards.
          The window owns its chrome; all displayed project information comes from the existing VM. -->
     <Grid Grid.Column="1" RowDefinitions="Auto,*,Auto" Margin="32,24,32,0">
-      <Grid Margin="0,0,0,24">
-        <TextBox x:Name="SearchBox" Height="40" MinHeight="40" MaxWidth="400" HorizontalAlignment="Left"
-                 HorizontalContentAlignment="Stretch" Width="400" CornerRadius="20" Padding="40,0,12,0"
+      <Grid Margin="0,0,0,24" Background="Transparent" chrome:WindowDecorationProperties.ElementRole="TitleBar">
+        <Border Margin="{DynamicResource Md3WorkspaceCaptionInset}" Background="Transparent" chrome:WindowDecorationProperties.ElementRole="TitleBar">
+        <Grid x:Name="WelcomeSearchArea">
+        <TextBox x:Name="SearchBox" chrome:WindowDecorationProperties.ElementRole="User" Height="40" MinHeight="40" MaxWidth="400" HorizontalAlignment="Left"
+                 HorizontalContentAlignment="Stretch" Width="{Binding #WelcomeSearchArea.Bounds.Width}" CornerRadius="20" Padding="40,0,12,0"
                  Text="{Binding WelcomeSearch, Mode=TwoWay}" TextChanged="OnSearchChanged"
                  PlaceholderText="{DynamicResource welcome.search.placeholder}"/>
         <c:DawIcon Data="{StaticResource icon-search}" Width="18" Height="18" Margin="14,0,0,0"
                    HorizontalAlignment="Left" VerticalAlignment="Center" IsHitTestVisible="False"
                    Fill="{DynamicResource md3.on-surface-variant}"/>
+        </Grid>
+        </Border>
       </Grid>
       <ScrollViewer x:Name="WelcomeScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
       <StackPanel Spacing="24">

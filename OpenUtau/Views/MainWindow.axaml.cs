@@ -792,7 +792,7 @@ namespace OpenUtau.App.Views {
         /// 「分离」只在卷帘 / 混音台出场。策略全在 <see cref="ViewSwitcherPolicy.ChromeFor"/>（可单测）。
         /// </summary>
         private void SetChromeForView(ViewChrome chrome) {
-            ScreenTitle[!TextBlock.TextProperty] = new DynamicResourceExtension(chrome.TitleKey);
+            // ProjectTitle stays visible across workspace views; the selected view tab supplies context.
             TransportGroup.IsVisible = chrome.ShowTransport;
             ViewSwitcherGroup.IsVisible = chrome.ShowViewSwitcher;
             TopRightCluster.IsVisible = chrome.ShowRightCluster;

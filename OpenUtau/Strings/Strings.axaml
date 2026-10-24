@@ -1466,4 +1466,5 @@ Range {2}–{3} s · Tail {4} s
   <system:String x:Key="prefs.preview.track">Vocal track</system:String>
   <system:String x:Key="prefs.preview.note">Note</system:String>
   <system:String x:Key="prefs.preview.action">Play</system:String>
+  <system:String x:Key="window.untitled">Untitled project</system:String>
 </ResourceDictionary>

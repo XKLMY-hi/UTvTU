@@ -1,0 +1,58 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:chrome="clr-namespace:Avalonia.Controls.Chrome;assembly=Avalonia.Controls"
+                    xmlns:system="clr-namespace:System;assembly=System.Runtime">
+  <!-- Zero for ordinary windows. The opt-in window provides its own state-aware values. -->
+  <system:Double x:Key="Md3WorkspaceCaptionWidth">0</system:Double>
+  <Thickness x:Key="Md3WorkspaceCaptionInset">0</Thickness>
+  <ControlTheme x:Key="WorkspaceCaptionButtonTheme" TargetType="Button" BasedOn="{StaticResource DawButtonTheme}">
+    <Setter Property="Width" Value="32"/><Setter Property="Height" Value="32"/>
+    <Setter Property="MinWidth" Value="32"/><Setter Property="MinHeight" Value="32"/>
+    <Setter Property="Margin" Value="0"/><Setter Property="Padding" Value="0"/>
+    <Setter Property="CornerRadius" Value="8"/><Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/><Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Style Selector="^:pointerover"><Setter Property="Background" Value="{DynamicResource md3.surface-container-high}"/></Style>
+    <Style Selector="^.close:pointerover"><Setter Property="Background" Value="{DynamicResource md3.error}"/><Setter Property="Foreground" Value="{DynamicResource md3.on-error}"/></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="WorkspaceWindowDecorationsTheme" TargetType="chrome:WindowDrawnDecorations">
+    <Setter Property="DefaultTitleBarHeight" Value="0"/>
+    <Setter Property="DefaultFrameThickness" Value="1"/>
+    <Setter Property="DefaultShadowThickness" Value="0"/>
+    <Setter Property="Template">
+      <WindowDrawnDecorationsTemplate>
+        <WindowDrawnDecorationsContent>
+          <WindowDrawnDecorationsContent.Underlay>
+            <Border Name="ChromeFrame" Background="{DynamicResource md3.surface}"
+                    BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="{TemplateBinding FrameThickness}"/>
+          </WindowDrawnDecorationsContent.Underlay>
+          <WindowDrawnDecorationsContent.Overlay>
+            <Grid Name="PART_TitleBar" Width="128" Height="56" HorizontalAlignment="Right" VerticalAlignment="Top"
+                  Margin="{TemplateBinding FrameThickness}" ColumnDefinitions="32,8,32,8,32,16"
+                  Background="Transparent" chrome:WindowDecorationProperties.ElementRole="TitleBar">
+              <Button Name="PART_MinimizeButton" Theme="{StaticResource WorkspaceCaptionButtonTheme}"
+                      chrome:WindowDecorationProperties.ElementRole="MinimizeButton" ToolTip.Tip="{DynamicResource window.minimize}">
+                <Viewbox Width="16" Height="16" IsHitTestVisible="False" ><Canvas Width="13.99993896484375" Height="14"><Path Data="M2.73096 6.45313q-0.23926 0.08545-0.34522 0.3247-0.10254 0.23584-0.00683 0.46143 0.05811 0.0957 0.14013 0.18115 0.08545 0.08203 0.18457 0.12647l0.09571 0.02734 8.40136 0 0.09571-0.02734q0.09912-0.04443 0.18115-0.12647 0.08545-0.08545 0.1333-0.18799 0.05127-0.10596 0.05127-0.23242 0-0.12646-0.04102-0.23926-0.09912-0.19482-0.29394-0.29394l-0.08545-0.04102-4.22803 0q-4.22803 0-4.28271 0.02735z" Fill="{Binding $parent[Button].Foreground}"/></Canvas></Viewbox>
+              </Button>
+              <Button Name="PART_MaximizeButton" Grid.Column="2" Theme="{StaticResource WorkspaceCaptionButtonTheme}"
+                      chrome:WindowDecorationProperties.ElementRole="MaximizeButton" ToolTip.Tip="{DynamicResource window.maximize}">
+                <Grid IsHitTestVisible="False">
+                  <Viewbox Width="16" Height="16" IsHitTestVisible="False" Name="MaximizeGlyph"><Canvas Width="13.99993896484375" Height="14"><Path Data="M2.60449 1.20313q-0.50586 0.08545-0.87842 0.43749-0.36914 0.34863-0.50927 0.86475-0.02734 0.08545-0.02735 0.71436l-0.01367 3.78027 0.01367 3.78027q0 0.62891 0.02735 0.71436 0.14014 0.48877 0.46826 0.82031 0.33154 0.32813 0.82031 0.46826 0.08545 0.02734 0.71436 0.02735l3.78027 0.01367 3.78027-0.01367q0.62891 0 0.71436-0.02735 0.48877-0.14014 0.81689-0.46826 0.33154-0.33154 0.47168-0.82031 0.02734-0.08545 0.02735-0.71436l0.01367-3.78027-0.01367-3.78027q0-0.62891-0.02735-0.71436-0.12646-0.48877-0.458-0.81689-0.32813-0.33154-0.80323-0.47168l-0.14013-0.04102-4.32715 0q-4.3374 0-4.4502 0.02734z m8.70899 1.17578q0.2085 0.09912 0.30761 0.30761l0.04102 0.09912 0 8.42871-0.04102 0.09913q-0.14014 0.27685-0.43408 0.33496-0.09912 0.02734-4.18701 0.02734-4.08789 0-4.18701-0.02734-0.29395-0.05811-0.43408-0.33496l-0.04102-0.09913 0-8.42871 0.04102-0.09912q0.07178-0.14014 0.18798-0.229 0.11963-0.09229 0.25977-0.11963 0.08545 0 4.22803 0l4.15967 0 0.09912 0.04102z" Fill="{Binding $parent[Button].Foreground}"/></Canvas></Viewbox>
+                  <Path Name="RestoreGlyph" IsVisible="False" Width="12" Height="12" Data="M4 1H11V8H9 M1 4H8V11H1Z"
+                        Stroke="{Binding $parent[Button].Foreground}" StrokeThickness="1"/>
+                </Grid>
+              </Button>
+              <Button Name="PART_CloseButton" Grid.Column="4" Classes="close" Theme="{StaticResource WorkspaceCaptionButtonTheme}"
+                      chrome:WindowDecorationProperties.ElementRole="CloseButton" ToolTip.Tip="{DynamicResource window.close}">
+                <Viewbox Width="16" Height="16" IsHitTestVisible="False" ><Canvas Width="13.99993896484375" Height="14"><Path Data="M3.34619 2.93945q-0.25293 0.08545-0.37939 0.30762-0.04102 0.08545-0.04102 0.25293 0 0.16748 0.04102 0.25293 0.04443 0.08203 1.62353 1.66455l1.58252 1.58252-1.58252 1.58252q-1.5791 1.58252-1.62353 1.66797-0.04102 0.08203-0.04102 0.23584 0 0.15381 0.03418 0.23926 0.0376 0.08203 0.1333 0.18115 0.09912 0.0957 0.18115 0.1333 0.08545 0.03418 0.23926 0.03418 0.15381 0 0.23584-0.04102 0.08545-0.04443 1.66797-1.62353l1.58252-1.58252 1.58252 1.58252q1.58252 1.5791 1.66455 1.62353 0.08545 0.04102 0.23926 0.04102 0.15381 0 0.23584-0.03418 0.08545-0.0376 0.18115-0.1333 0.09912-0.09912 0.1333-0.18115 0.0376-0.08545 0.0376-0.23926 0-0.15381-0.04443-0.23584-0.04101-0.08545-1.62012-1.66797l-1.58252-1.58252 1.58252-1.58252q1.5791-1.58252 1.62012-1.66455 0.04443-0.08545 0.04443-0.25293 0-0.16748-0.04102-0.25293-0.09912-0.16748-0.28027-0.2666-0.05811-0.02734-0.09912-0.04102-0.04102-0.01367-0.15381-0.01367-0.11279 0-0.15381 0.01367-0.04101 0.01367-0.11279 0.04102-0.09912 0.05811-1.66455 1.62695l-1.56885 1.56543-2.82666-2.81299q-0.31104-0.29395-0.42041-0.37939-0.08545-0.05469-0.19824-0.05469l-0.02735 0q-0.14014 0-0.18115 0.01367z" Fill="{Binding $parent[Button].Foreground}"/></Canvas></Viewbox>
+              </Button>
+            </Grid>
+          </WindowDrawnDecorationsContent.Overlay>
+        </WindowDrawnDecorationsContent>
+      </WindowDrawnDecorationsTemplate>
+    </Setter>
+    <Style Selector="^:maximized /template/ Viewbox#MaximizeGlyph"><Setter Property="IsVisible" Value="False"/></Style>
+    <Style Selector="^:maximized /template/ Path#RestoreGlyph"><Setter Property="IsVisible" Value="True"/></Style>
+    <Style Selector="^:maximized /template/ Button#PART_MaximizeButton"><Setter Property="ToolTip.Tip" Value="{DynamicResource window.restore}"/></Style>
+    <Style Selector="^:fullscreen /template/ Grid#PART_TitleBar"><Setter Property="IsVisible" Value="False"/></Style>
+  </ControlTheme>
+</ResourceDictionary>

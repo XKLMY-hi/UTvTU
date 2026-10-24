@@ -14,10 +14,18 @@ namespace OpenUtau.App.Controls;
 /// 交还系统：标题栏、窗口按钮、边框、投影、圆角、窗口动画。
 /// </summary>
 public class WindowEx : Window {
+    /// <summary>Opt-in integrated decorations. Auxiliary and plugin windows retain their existing chrome.</summary>
+    public static readonly StyledProperty<bool> UseWorkspaceChromeProperty =
+        AvaloniaProperty.Register<WindowEx, bool>(nameof(UseWorkspaceChrome));
+    public bool UseWorkspaceChrome {
+        get => GetValue(UseWorkspaceChromeProperty);
+        set => SetValue(UseWorkspaceChromeProperty, value);
+    }
+
     /// <summary>Detached editors route auxiliary tools here without changing native window ownership.</summary>
     public Window? WorkspaceOwner { get; set; }
     public WindowEx() {
-        ApplyNativeChrome();
+        ApplyWindowChrome();
         ApplyMd3Background();
         Theming.Md3Motion.Register(this);
     }
@@ -25,15 +33,37 @@ public class WindowEx : Window {
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e) {
         base.OnApplyTemplate(e);
         // 模板套用后再断言一次（模板可能重置透明合成等属性）
-        ApplyNativeChrome();
+        ApplyWindowChrome();
         ApplyMd3Background();
+        UpdateContentMargin();
     }
 
-    /// <summary>原生窗口装饰：系统标题栏 + 系统边框。</summary>
-    private void ApplyNativeChrome() {
-        WindowDecorations = WindowDecorations.Full;                 // 系统标题栏 + 边框
-        ExtendClientAreaToDecorationsHint = false;                  // 客户区不延伸到系统标题栏
-        TransparencyLevelHint = new[] { WindowTransparencyLevel.None };  // 不再需要透明合成（无自绘圆角）
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
+        base.OnPropertyChanged(change);
+        if (change.Property == UseWorkspaceChromeProperty) ApplyWindowChrome();
+        if (change.Property == UseWorkspaceChromeProperty || change.Property == WindowStateProperty) {
+            double width = UseWorkspaceChrome && WindowState != WindowState.FullScreen ? 128 : 0;
+            Resources["Md3WorkspaceCaptionWidth"] = width;
+            Resources["Md3WorkspaceCaptionInset"] = new Thickness(0, 0, width, 0);
+        }
+        if (change.Property == WindowDecorationMarginProperty || change.Property == UseWorkspaceChromeProperty) UpdateContentMargin();
+    }
+
+    private void ApplyWindowChrome() {
+        WindowDecorations = WindowDecorations.Full;
+        ExtendClientAreaToDecorationsHint = UseWorkspaceChrome;
+        // The page's app bar IS the title bar. Only the frame gets a content inset.
+        ExtendClientAreaTitleBarHeightHint = UseWorkspaceChrome ? 0 : -1;
+        TransparencyLevelHint = new[] { WindowTransparencyLevel.None };
+        if (UseWorkspaceChrome) {
+            this[!WindowDecorationsThemeProperty] = new DynamicResourceExtension("WorkspaceWindowDecorationsTheme");
+        } else {
+            ClearValue(WindowDecorationsThemeProperty);
+        }
+    }
+
+    private void UpdateContentMargin() {
+        if (Presenter is { } presenter) presenter.Margin = UseWorkspaceChrome ? WindowDecorationMargin : default;
     }
 
     /// <summary>背景改为 MD3 颜色池：一层 md3.surface。</summary>

@@ -38,6 +38,7 @@
         <ResourceInclude Source="/Themes/Plus.Resources.axaml"/>
     <ResourceInclude Source="/Assets/Icons.axaml"/>
     <ResourceInclude Source="/Assets/WelcomeWaveform.axaml"/>
+        <ResourceInclude Source="/Themes/WorkspaceWindow.axaml"/>
       </ResourceDictionary.MergedDictionaries>
 
       </ResourceDictionary>

@@ -110,6 +110,14 @@ namespace OpenUtau.App.ViewModels {
         public string Title => !ProjectSaved
             ? $"{AppVersion}"
             : $"{(DocManager.Inst.ChangesSaved ? "" : "*")}{AppVersion} [{DocManager.Inst.Project.FilePath}]";
+        public string ProjectTitle => FormatProjectTitle(DocManager.Inst.Project.FilePath,
+            DocManager.Inst.Project.name, DocManager.Inst.ChangesSaved);
+        internal static string FormatProjectTitle(string? filePath, string? projectName, bool saved) {
+            string name = !string.IsNullOrEmpty(filePath) ? Path.GetFileNameWithoutExtension(filePath)
+                : !string.IsNullOrWhiteSpace(projectName) && projectName != "New Project" ? projectName
+                : ThemeManager.GetString("window.untitled");
+            return (saved ? "" : "* ") + name;
+        }
         public double Width => Preferences.Default.MainWindowSize.Width;
         public double Height => Preferences.Default.MainWindowSize.Height;
         public PianoRollNavigationViewModel PianoRollNavigation { get; } = new();
@@ -396,6 +404,7 @@ namespace OpenUtau.App.ViewModels {
                     DocManager.Inst.Project.Saved = false;
                     DocManager.Inst.Project.FilePath = string.Empty;
                     this.RaisePropertyChanged(nameof(Title));
+                    this.RaisePropertyChanged(nameof(ProjectTitle));
                     return;
                 } catch (Exception e) {
                     var customEx = new MessageCustomizableException("Failed to load default template", "<translate:errors.failed.load>: default template", e);
@@ -418,6 +427,7 @@ namespace OpenUtau.App.ViewModels {
                 Core.Format.Formats.LoadProject(files);
                 DocManager.Inst.ExecuteCmd(new VoiceColorRemappingNotification(-1, true));
                 this.RaisePropertyChanged(nameof(Title));
+                this.RaisePropertyChanged(nameof(ProjectTitle));
             } finally {
                 DocManager.Inst.ExecuteCmd(new LoadingNotification(typeof(MainWindow), false, "project"));
             }
@@ -439,6 +449,7 @@ namespace OpenUtau.App.ViewModels {
                 DocManager.Inst.Project.Saved = false;
                 DocManager.Inst.Project.FilePath = string.Empty;
                 this.RaisePropertyChanged(nameof(Title));
+                this.RaisePropertyChanged(nameof(ProjectTitle));
             } catch (Exception e) {
                 var customEx = new MessageCustomizableException("Failed to open template", "<translate:errors.failed.openfile>: project template", e);
                 DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(customEx));
@@ -451,6 +462,7 @@ namespace OpenUtau.App.ViewModels {
             }
             DocManager.Inst.ExecuteCmd(new SaveProjectNotification(file));
             this.RaisePropertyChanged(nameof(Title));
+            this.RaisePropertyChanged(nameof(ProjectTitle));
         }
 
         public void ImportTracks(UProject[] loadedProjects, bool importTempo){
@@ -717,6 +729,7 @@ namespace OpenUtau.App.ViewModels {
             }
             SetUndoState();
             this.RaisePropertyChanged(nameof(Title));
+            this.RaisePropertyChanged(nameof(ProjectTitle));
         }
 
         #endregion

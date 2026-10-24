@@ -1594,4 +1594,5 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="prefs.preview.track">人声轨道</system:String>
   <system:String x:Key="prefs.preview.note">音符</system:String>
   <system:String x:Key="prefs.preview.action">播放</system:String>
+  <system:String x:Key="window.untitled">未命名工程</system:String>
 </ResourceDictionary>

@@ -37,7 +37,6 @@ namespace OpenUtau.App.Views {
             base.OnPropertyChanged(change);
             if (change.Property == BoundsProperty && SearchBox != null) {
                 Classes.Set("compact", Bounds.Width < 1160);
-                SearchBox.Width = Math.Min(400, Math.Max(0, Bounds.Width - 304));
             }
         }
 

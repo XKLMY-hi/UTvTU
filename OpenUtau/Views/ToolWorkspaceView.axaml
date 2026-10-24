@@ -1,14 +1,14 @@
-<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:chrome="clr-namespace:Avalonia.Controls.Chrome;assembly=Avalonia.Controls"
              xmlns:c="clr-namespace:OpenUtau.App.Controls" x:Class="OpenUtau.App.Views.ToolWorkspaceView"
              Background="{DynamicResource md3.surface}">
   <UserControl.Styles><StyleInclude Source="/Styles/ToolWorkspace.axaml"/></UserControl.Styles>
   <Grid RowDefinitions="56,*">
-    <Border BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1" Padding="16,0">
-      <Grid ColumnDefinitions="Auto,12,*,Auto">
-        <Button Name="BackButton" Classes="toolAction" Content="{DynamicResource workspace.return}" Click="OnBack"/>
-        <TextBlock Grid.Column="2" FontSize="{DynamicResource Md3TypeTitleMedium}" FontWeight="Medium" VerticalAlignment="Center"
+    <Border Background="Transparent" chrome:WindowDecorationProperties.ElementRole="TitleBar" BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="0,0,0,1" Padding="16,0">
+      <Grid ColumnDefinitions="Auto,12,*,Auto" Margin="{DynamicResource Md3WorkspaceCaptionInset}" Background="Transparent" chrome:WindowDecorationProperties.ElementRole="TitleBar">
+        <Button Name="BackButton" chrome:WindowDecorationProperties.ElementRole="User" Classes="toolAction" Content="{DynamicResource workspace.return}" Click="OnBack"/>
+        <TextBlock IsHitTestVisible="False" Grid.Column="2" FontSize="{DynamicResource Md3TypeTitleMedium}" FontWeight="Medium" VerticalAlignment="Center"
                    Text="{DynamicResource workspace.production}"/>
-        <Button Name="PreferencesButton" Grid.Column="3" Classes="toolAction" Content="{DynamicResource menu.tools.prefs}" Click="OnPreferences"/>
+        <Button Name="PreferencesButton" chrome:WindowDecorationProperties.ElementRole="User" Grid.Column="3" Classes="toolAction" Content="{DynamicResource menu.tools.prefs}" Click="OnPreferences"/>
       </Grid>
     </Border>
     <Grid Name="WorkspaceColumns" Grid.Row="1" ColumnDefinitions="232,*">

@@ -68,6 +68,7 @@ namespace OpenUtau.Test.App {
                     "StackPanel" => new StackPanel(),
                     "Border" => new Border(),
                     "Button" => new Button(),
+                    "PlayPauseButton" => new PlayPauseButton(),
                     "ToggleButton" => new Avalonia.Controls.Primitives.ToggleButton(),
                     "TextBlock" => new TextBlock(),
                     "Menu" => new Menu(),

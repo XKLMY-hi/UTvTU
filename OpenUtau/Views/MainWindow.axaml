@@ -1,4 +1,4 @@
-<controls:WindowEx xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:vm="using:OpenUtau.App.ViewModels" xmlns:c="clr-namespace:OpenUtau.App.Controls" xmlns:controls="clr-namespace:OpenUtau.App.Controls" xmlns:views="using:OpenUtau.App.Views" xmlns:motion="using:OpenUtau.Theming" mc:Ignorable="d" d:DesignWidth="1440" d:DesignHeight="900" x:Class="OpenUtau.App.Views.MainWindow" Icon="/Assets/brand/utvtu.ico" Title="{Binding Title}" MinWidth="800" MinHeight="200" Width="{Binding Width}" Height="{Binding Height}" Focusable="True" KeyDown="OnKeyDown" PointerPressed="OnPointerPressed" Closing="WindowClosing" SizeChanged="OnWindowSizeChanged" DragDrop.AllowDrop="True">
+<controls:WindowEx xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:chrome="clr-namespace:Avalonia.Controls.Chrome;assembly=Avalonia.Controls" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:vm="using:OpenUtau.App.ViewModels" xmlns:c="clr-namespace:OpenUtau.App.Controls" xmlns:controls="clr-namespace:OpenUtau.App.Controls" xmlns:views="using:OpenUtau.App.Views" xmlns:motion="using:OpenUtau.Theming" mc:Ignorable="d" d:DesignWidth="1440" d:DesignHeight="900" x:Class="OpenUtau.App.Views.MainWindow" UseWorkspaceChrome="True" Icon="/Assets/brand/utvtu.ico" Title="{Binding Title}" MinWidth="800" MinHeight="200" Width="{Binding Width}" Height="{Binding Height}" Focusable="True" KeyDown="OnKeyDown" PointerPressed="OnPointerPressed" Closing="WindowClosing" SizeChanged="OnWindowSizeChanged" DragDrop.AllowDrop="True">
   <controls:WindowEx.Styles>
     <StyleInclude Source="/Styles/ToolWorkspace.axaml"/>
   </controls:WindowEx.Styles>
@@ -8,7 +8,7 @@
     <StyleInclude Source="/Styles/WorkspaceShell.axaml"/>
     <StyleInclude Source="/Styles/FrontendShell.axaml"/>
   </Window.Styles>
-  <!-- 窗口装饰已交还系统（原生标题栏），内容不再为自绘标题栏留白 -->
+  <!-- Integrated app bar; WindowEx reserves only the drawn frame, not an extra title row. -->
   <Border Padding="0">
     <Grid>
       <Grid Name="WorkspaceSurface">
@@ -16,8 +16,8 @@
         <Grid x:Name="MainGrid" RowDefinitions="Auto,*,32">
           <!-- Original UTvTU group hierarchy, with a second row only when groups cannot fit. -->
           <Border x:Name="ShellHeaderRow" Grid.Row="0" Classes="shellRow">
-            <c:WorkspaceHeader x:Name="WorkspaceHeader">
-              <Button AutomationProperties.Name="UTvTU" ToolTip.Tip="{DynamicResource menu.file}" x:Name="AppMenuButton" Classes="brandBtn" Click="OnAppMenuClicked">
+            <c:WorkspaceHeader x:Name="WorkspaceHeader" CaptionInset="{DynamicResource Md3WorkspaceCaptionWidth}" Background="Transparent" chrome:WindowDecorationProperties.ElementRole="TitleBar">
+              <Button AutomationProperties.Name="UTvTU" ToolTip.Tip="{DynamicResource menu.file}" x:Name="AppMenuButton" chrome:WindowDecorationProperties.ElementRole="User" Classes="brandBtn" Click="OnAppMenuClicked">
                 <Button.Flyout>
                   <MenuFlyout Placement="BottomEdgeAlignedLeft">
                     <MenuItem Header="{DynamicResource menu.file}">
@@ -117,10 +117,10 @@
                       <Path Data="{StaticResource brand-v-chevron}" Stroke="{DynamicResource md3.on-surface}" StrokeThickness="3.30" StrokeLineCap="Round" StrokeJoin="Round" Width="4.92" Height="7.68" Stretch="Uniform" Canvas.Left="25.03" Canvas.Top="5.44"/>
                     </Canvas>
                   </StackPanel>
-                  <TextBlock x:Name="ScreenTitle" Text="{DynamicResource view.workspace}" FontSize="{DynamicResource Md3TypeLabelSmall}" VerticalAlignment="Center" MaxWidth="100" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource md3.on-surface-variant}"/>
+                  <TextBlock x:Name="ScreenTitle" Text="{Binding ProjectTitle}" ToolTip.Tip="{Binding Title}" FontSize="{DynamicResource Md3TypeLabelSmall}" VerticalAlignment="Center" MaxWidth="100" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource md3.on-surface-variant}"/>
                 </StackPanel>
               </Button>
-              <StackPanel x:Name="TransportGroup" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}" VerticalAlignment="Center">
+              <StackPanel x:Name="TransportGroup" chrome:WindowDecorationProperties.ElementRole="User" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing3}" VerticalAlignment="Center">
                 <!-- 原设计：40 DIP 胶囊与 36 DIP 圆形按钮。 -->
                 <Border x:Name="TransportPill" Classes="transportPill">
                   <StackPanel Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing1}" VerticalAlignment="Center">
@@ -165,7 +165,7 @@
                   </StackPanel>
                 </Border>
               </StackPanel>
-              <StackPanel x:Name="ViewSwitcherGroup" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}" HorizontalAlignment="Left" VerticalAlignment="Center">
+              <StackPanel x:Name="ViewSwitcherGroup" chrome:WindowDecorationProperties.ElementRole="User" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}" HorizontalAlignment="Left" VerticalAlignment="Center">
                 <Border x:Name="ViewSwitcher" Classes="viewSwitch">
                   <StackPanel Orientation="Horizontal" Spacing="3">
                     <Button x:Name="ViewTabWorkspace" Classes="viewTab" Tag="workspace" Classes.selected="{Binding ViewSwitcher.ShowWorkspace}" Click="OnViewTabClicked" Content="{DynamicResource view.workspace}"/>
@@ -179,7 +179,7 @@
                   <c:DawIcon Data="{StaticResource icon-external-link}" Width="16" Height="16" Fill="{Binding $parent[Button].Foreground}"/>
                 </Button>
               </StackPanel>
-              <StackPanel x:Name="TopRightCluster" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+              <StackPanel x:Name="TopRightCluster" chrome:WindowDecorationProperties.ElementRole="User" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                 <Border Classes="shellTools">
                   <StackPanel Orientation="Horizontal" Spacing="2">
                     <Button x:Name="ShellSaveButton" Classes="topBtn" Click="OnMenuSave" AutomationProperties.Name="{DynamicResource menu.file.save}" ToolTip.Tip="{DynamicResource menu.file.save}">
