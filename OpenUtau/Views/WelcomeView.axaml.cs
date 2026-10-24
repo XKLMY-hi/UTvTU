@@ -5,6 +5,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using OpenUtau.App.ViewModels;
 using OpenUtau.App.Controls;
+using Avalonia.VisualTree;
 
 namespace OpenUtau.App.Views {
     /// <summary>
@@ -23,6 +24,8 @@ namespace OpenUtau.App.Views {
     public partial class WelcomeView : UserControl {
         /// <summary>宿主主窗口；由 MainWindow 在构造时注入。</summary>
         public MainWindow? Host { get; set; }
+        MaterialShapeKind heroKind = MaterialShapeKind.Cookie7;
+        int heroAttachment;
 
         public WelcomeView() {
             InitializeComponent();
@@ -31,6 +34,18 @@ namespace OpenUtau.App.Views {
             SingerChips.ItemsSource = singers;
             SingersSection.IsVisible = singers.Count > 0;
             ShowPage(0);   // 默认停在「最近」
+        }
+
+        protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
+            base.OnAttachedToVisualTree(e);
+            int generation = ++heroAttachment;
+            Avalonia.Threading.Dispatcher.UIThread.Post(() => {
+                if (generation == heroAttachment && this.IsAttachedToVisualTree()) HeaderShape.Kind = heroKind;
+            });
+        }
+        protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e) {
+            ++heroAttachment;
+            base.OnDetachedFromVisualTree(e);
         }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
@@ -55,6 +70,11 @@ namespace OpenUtau.App.Views {
 
         /// <summary>0 最近 / 1 新建 / 2 打开 / 3 模板。同一时刻只有一个分页可见。</summary>
         private void ShowPage(int index) {
+            heroKind = index switch {
+                0 => MaterialShapeKind.Cookie7, 1 => MaterialShapeKind.Arch,
+                2 => MaterialShapeKind.Sunny, _ => MaterialShapeKind.Square,
+            };
+            if (HeaderShape.IsAttachedToVisualTree()) HeaderShape.Kind = heroKind;
             WelcomeScroll.Offset = default;
             PageRecent.IsVisible = index == 0;
             PageNew.IsVisible = index == 1;

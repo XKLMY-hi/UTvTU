@@ -6,9 +6,13 @@ namespace OpenUtau.App.Controls {
     /// <summary>A label and an editor, in reading order. Narrow settings columns stack
     /// them without reparenting the editor or losing its bindings and focus.</summary>
     public sealed class SettingsRow : Panel {
-        const double EditorWidth = 248;
+        public static readonly StyledProperty<double> EditorWidthProperty =
+            AvaloniaProperty.Register<SettingsRow, double>(nameof(EditorWidth), 248,
+                validate: value => double.IsFinite(value) && value > 0);
+        public double EditorWidth { get => GetValue(EditorWidthProperty); set => SetValue(EditorWidthProperty, value); }
+        static SettingsRow() { AffectsMeasure<SettingsRow>(EditorWidthProperty); }
         const double Gap = 16;
-        bool IsStacked(double width) => width < 420;
+        bool IsStacked(double width) => width < EditorWidth + Gap + 156;
 
         protected override Size MeasureOverride(Size availableSize) {
             if (Children.Count != 2) return base.MeasureOverride(availableSize);

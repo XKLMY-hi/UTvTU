@@ -39,7 +39,7 @@ namespace OpenUtau.App.Views {
 
         public PreferencesView() {
             InitializeComponent();
-            VstSettingsCard.IsVisible = OperatingSystem.IsWindows();
+            VstSettingsSection.IsVisible = OperatingSystem.IsWindows();
             SettingsSearch.TextChanged += OnSettingsSearchChanged;
         }
 

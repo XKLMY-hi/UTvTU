@@ -151,6 +151,7 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public bool DetachPianoRoll { get; set; }
         [Reactive] public bool ThemeEditable { get; set; }
         public List<string> ThemeItems => ThemeManager.GetAvailableThemes();
+        public bool HasAdditionalThemes => ThemeItems.Count > 2;
         public bool IsThemeEditorOpen => Views.ThemeEditorWindow.IsOpen;
 
         /// <summary>可选强调色种子（取自设计稿「强调色」色板；色板上显示的是该种子**真实生成**的主色）。</summary>
@@ -707,6 +708,7 @@ namespace OpenUtau.App.ViewModels {
             Colors.CustomTheme.ListThemes();
             _ = OudepLoaderRegistry.LoadAllAsync();
             this.RaisePropertyChanged(nameof(ThemeItems));
+            this.RaisePropertyChanged(nameof(HasAdditionalThemes));
         }
 
         public void ToggleOnnxGpuDisplay(bool show) {

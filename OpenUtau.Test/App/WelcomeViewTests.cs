@@ -163,13 +163,15 @@ namespace OpenUtau.Test.App {
             try {
                 window.Show(); Dispatcher.UIThread.RunJobs(); window.UpdateLayout();
                 var art = view.FindControl<Canvas>("HeroArt")!;
-                Assert.Equal(width >= 1160, art.IsVisible);
+                Assert.True(art.IsVisible);
+                Assert.Equal(width >= 1160 ? 360 : 144, view.FindControl<Viewbox>("HeroIllustration")!.Bounds.Width);
                 var search = view.FindControl<TextBox>("SearchBox")!;
                 var origin = search.TranslatePoint(default, view)!.Value;
                 Assert.True(origin.X + search.Bounds.Width <= width);
                 if (art.IsVisible) {
                     var position = art.TranslatePoint(default, view)!.Value;
-                    Assert.True(position.X + art.Bounds.Width <= width);
+                    var end = art.TranslatePoint(new Point(art.Bounds.Width, art.Bounds.Height), view)!.Value;
+                    Assert.True(end.X <= width);
                     Assert.True(position.X >= 240);
                 }
             } finally { window.Close(); }

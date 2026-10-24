@@ -56,7 +56,8 @@
     <Style Selector="Button.primary TextBlock,Button.tonal TextBlock,Button.outline TextBlock">
       <Setter Property="Foreground" Value="{Binding $parent[Button].Foreground}"/>
     </Style>
-    <Style Selector=":is(UserControl).compact Canvas.heroArt"><Setter Property="IsVisible" Value="False"/></Style>
+    <Style Selector="Viewbox.heroArt"><Setter Property="Width" Value="360"/><Setter Property="Height" Value="168"/></Style>
+    <Style Selector=":is(UserControl).compact Viewbox.heroArt"><Setter Property="Width" Value="144"/><Setter Property="Height" Value="96"/></Style>
     <Style Selector=":is(UserControl).compact TextBlock.pageTitle"><Setter Property="FontSize" Value="28"/><Setter Property="LineHeight" Value="36"/></Style>
     <Style Selector=":is(UserControl).compact Button.startCard"><Setter Property="Height" Value="164"/><Setter Property="Padding" Value="16"/></Style>
     <Style Selector="Button.startCard:not(.featured)"><Setter Property="CornerRadius" Value="16"/></Style>
@@ -357,14 +358,17 @@
             <TextBlock x:Name="PageSubtitle" Classes="pageSub" MaxWidth="580" HorizontalAlignment="Left"/>
           </StackPanel>
           <!-- Filled ring contours are copied verbatim from HTML clip-paths, not traced from PNG. -->
-          <Canvas x:Name="HeroArt" Classes="heroArt" Grid.Column="1" Width="360" Height="168" IsHitTestVisible="False">
+          <Viewbox x:Name="HeroIllustration" Classes="heroArt" Grid.Column="1" IsHitTestVisible="False" Stretch="Uniform" VerticalAlignment="Center">
+          <Canvas x:Name="HeroArt" Width="360" Height="168" IsHitTestVisible="False">
             <Path Canvas.Left="186" Canvas.Top="2" Width="152" Height="152" Data="M76 0 C117.974 0 152 34.026 152 76 C152 117.974 117.974 152 76 152 C34.026 152 0 117.974 0 76 C0 34.026 34.026 0 76 0 Z M76 13.68 C41.582 13.68 13.68 41.582 13.68 76 C13.68 110.418 41.582 138.32 76 138.32 C110.418 138.32 138.32 110.418 138.32 76 C138.32 41.582 110.418 13.68 76 13.68 Z" Fill="{DynamicResource md3.primary-container}"/>
             <Path Canvas.Left="268" Canvas.Top="84" Width="68" Height="68" Data="M34 0 C52.778 0 68 15.222 68 34 C68 52.778 52.778 68 34 68 C15.222 68 0 52.778 0 34 C0 15.222 15.222 0 34 0 Z M34 4.76 C17.851 4.76 4.76 17.851 4.76 34 C4.76 50.149 17.851 63.24 34 63.24 C50.149 63.24 63.24 50.149 63.24 34 C63.24 17.851 50.149 4.76 34 4.76 Z" Fill="{DynamicResource md3.outline-variant}"/>
             <Path Canvas.Left="14" Canvas.Top="92" Width="64" Height="64" Data="M32 0 C49.673 0 64 14.327 64 32 C64 49.673 49.673 64 32 64 C14.327 64 0 49.673 0 32 C0 14.327 14.327 0 32 0 Z M32 8.32 C18.922 8.32 8.32 18.922 8.32 32 C8.32 45.078 18.922 55.68 32 55.68 C45.078 55.68 55.68 45.078 55.68 32 C55.68 18.922 45.078 8.32 32 8.32 Z" Fill="{DynamicResource md3.tertiary-container}"/>
             <Ellipse Canvas.Left="312" Canvas.Top="24" Width="24" Height="24" Fill="{DynamicResource md3.tertiary}"/>
             <Border Canvas.Left="64" Canvas.Top="36" Width="104" Height="104" CornerRadius="34"
-                    Background="{DynamicResource md3.primary}" RenderTransformOrigin="0,0">
+                    Background="Transparent" RenderTransformOrigin="0,0">
               <Border.RenderTransform><RotateTransform Angle="-4"/></Border.RenderTransform>
+              <Grid>
+              <c:MaterialMorph x:Name="HeaderShape" Kind="Circle" Width="124" Height="124" Fill="{DynamicResource md3.primary}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
               <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Border Width="4" Height="12" CornerRadius="2" Background="{DynamicResource md3.on-primary}" VerticalAlignment="Center"/>
                 <Border Width="4" Height="24" CornerRadius="2" Background="{DynamicResource md3.on-primary}" VerticalAlignment="Center"/>
@@ -372,8 +376,10 @@
                 <Border Width="4" Height="20" CornerRadius="2" Background="{DynamicResource md3.on-primary}" VerticalAlignment="Center"/>
                 <Border Width="4" Height="10" CornerRadius="2" Background="{DynamicResource md3.on-primary}" VerticalAlignment="Center"/>
               </StackPanel>
+              </Grid>
             </Border>
           </Canvas>
+          </Viewbox>
         </Grid>
       </Border>
 

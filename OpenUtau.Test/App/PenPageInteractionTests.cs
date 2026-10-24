@@ -81,7 +81,10 @@ namespace OpenUtau.Test.App {
                 var preview = view.FindControl<Border>("AppearancePreview")!;
                 ColorPool.Initialize(0xFF00897B, Md3SchemeVariant.Vibrant, !dark); Settle(window);
                 Assert.Same(preview, view.FindControl<Border>("AppearancePreview"));
-                Assert.Equal(ColorPool.Current.Color(Md3Role.SurfaceContainerLow), Assert.IsAssignableFrom<ISolidColorBrush>(preview.Background).Color);
+                Assert.Equal(0, Assert.IsAssignableFrom<ISolidColorBrush>(preview.Background).Color.A);
+                var note = preview.GetVisualDescendants().OfType<TextBlock>()
+                    .Single(t => t.Text == ThemeManager.GetString("prefs.preview.note"));
+                Assert.Equal(ColorPool.Current.Color(Md3Role.PrimaryContainer), Assert.IsAssignableFrom<ISolidColorBrush>(note.GetVisualAncestors().OfType<Border>().First().Background).Color);
                 window.Width = 800; Settle(window);
                 var first = page.Children[0]; var second = page.Children[1];
                 Assert.True(second.Bounds.Top >= first.Bounds.Bottom);

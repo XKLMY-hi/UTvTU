@@ -85,7 +85,7 @@ namespace OpenUtau.Test.App {
                 var page = view.FindControl<AdaptiveColumns>("PagePlayback")!;
                 Assert.True(page.IsVisible);
                 var left = page.Children[0]; var right = page.Children[1];
-                if (width == 800) {
+                if (page.MaximumColumns == 1 || width == 800) {
                     Assert.Equal(left.Bounds.X, right.Bounds.X);
                     Assert.True(right.Bounds.Top >= left.Bounds.Bottom + page.Spacing - 0.01);
                 } else {
