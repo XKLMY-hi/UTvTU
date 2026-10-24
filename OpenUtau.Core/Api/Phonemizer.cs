@@ -155,6 +155,8 @@ namespace OpenUtau.Api {
         public string Language { get; set; }
         internal Exception? SetUpException { get; set; }
 
+        public virtual string Id => GetType().FullName;
+
         protected double bpm;
         protected TimeAxis timeAxis;
 

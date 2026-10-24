@@ -55,6 +55,7 @@ namespace OpenUtau.Core {
             this.mainThread = mainThread;
             this.mainScheduler = mainScheduler;
             PhonemizerRunner = new PhonemizerRunner(mainScheduler);
+            _ = ReloadJsPhonemizersAsync();
         }
 
         public void SearchAllLegacyPlugins() {
@@ -118,6 +119,38 @@ namespace OpenUtau.Core {
             stopWatch.Stop();
             Log.Information($"Search all plugins: {stopWatch.Elapsed}");
         }
+        readonly SemaphoreSlim packageReloadGate = new(1, 1);
+        int packageReloadGeneration;
+        public Task ReloadJsPhonemizersAsync() {
+            int generation = Interlocked.Increment(ref packageReloadGeneration);
+            return Task.Run(async () => {
+                await packageReloadGate.WaitAsync().ConfigureAwait(false);
+                try {
+                    if (generation != Volatile.Read(ref packageReloadGeneration)) return;
+                    Js.JsPhonemizerFactory.RegisterInstalled();
+                    void Apply() {
+                        if (generation != Volatile.Read(ref packageReloadGeneration)) return;
+                        PhonemizerFactory.BuildList();
+                        bool affected = false;
+                        foreach (var track in Project.tracks) {
+                            string id = track.Phonemizer.Id.StartsWith("js:") ? track.Phonemizer.Id : track.phonemizer;
+                            if (id?.StartsWith("js:") == true && PhonemizerFactory.Get(id) is { } factory) {
+                                track.Phonemizer = factory.Create(); affected = true;
+                            }
+                        }
+                        affected |= Project.parts.OfType<UVoicePart>().Any(part => part.notes.Any(note => note.PhonemizerOverride?.StartsWith("js:") == true));
+                        if (affected) foreach (var part in Project.parts.OfType<UVoicePart>()) part.ResetOverridePhonemizers();
+                        if (affected) { Project.ValidateFull(); ExecuteCmd(new PreRenderNotification()); }
+                        Publish(new PackagesChangedNotification { PhonemizersReloaded = true });
+                    }
+                    if (PostOnUIThread != null) PostOnUIThread(Apply);
+                    else if (mainScheduler != null) _ = Task.Factory.StartNew(Apply, CancellationToken.None, TaskCreationOptions.None, mainScheduler);
+                    else Apply();
+                } catch (Exception e) { Log.Error(e, "Failed to reload JavaScript phonemizers."); }
+                finally { packageReloadGate.Release(); }
+            });
+        }
+
         private void SearchPluginInternal(string path, List<string> result) {
             if (Directory.EnumerateFiles(path, "plugin.txt", SearchOption.TopDirectoryOnly).Any()) {
                 return;
@@ -271,6 +304,9 @@ namespace OpenUtau.Core {
                     rangeEndTick = setRange.endTick;
                 } else if (cmd is SingersChangedNotification) {
                     SingerManager.Inst.SearchAllSingers();
+                } else if (cmd is PackagesChangedNotification packages && !packages.PhonemizersReloaded) {
+                    _ = ReloadJsPhonemizersAsync();
+                    return;
                 } else if (cmd is ValidateProjectNotification) {
                     Project.ValidateFull();
                 } else if (cmd is SingersRefreshedNotification || cmd is OtoChangedNotification) {

@@ -26,6 +26,7 @@ public static class OudepLoaderRegistry {
 
     public static void EnsureRegistered() {
         Register("ThemeLoader", () => new ThemeLoader());
+        Register(Core.Js.JsPhonemizerFactory.LoaderName, () => new CorePackageLoader());
     }
 
     public static async Task LoadAllAsync() {
@@ -78,3 +79,5 @@ public class ThemeLoader : IOudepLoader {
         return candidate;
     }
 }
+
+internal sealed class CorePackageLoader : IOudepLoader { public void Load(string packagePath, OudepMetadata metadata, OudepEntrypoint entrypoint) { } }

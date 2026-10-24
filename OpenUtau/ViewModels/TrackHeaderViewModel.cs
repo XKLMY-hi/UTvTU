@@ -109,7 +109,7 @@ namespace OpenUtau.App.ViewModels {
             });
             SelectPhonemizerCommand = ReactiveCommand.Create<PhonemizerFactory>(factory => {
                 if (!IsCurrent) return;
-                if (track.Phonemizer.GetType() != factory.type) {
+                if (track.Phonemizer.Id != factory.Id) {
                     using var edits = BeginTrackEdit("command.track.setting");
                     if (edits == null) return;
                     var phonemizer = factory.Create();
@@ -117,7 +117,7 @@ namespace OpenUtau.App.ViewModels {
                     if (!ExecuteTrackCommand(edits, new TrackChangePhonemizerCommand(project!, track, phonemizer))) return;
                     edits.Dispose();
                     if (!IsCurrent) return;
-                    var name = phonemizer.GetType().FullName!;
+                    var name = phonemizer.Id;
                     if (!string.IsNullOrEmpty(Singer?.Id) && phonemizer != null) {
                         Preferences.Default.SingerPhonemizers[Singer.Id] = name;
                     }
@@ -565,6 +565,11 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public void OnNext(UCommand cmd, bool isUndo) {
+            if (!disposed && cmd is PackagesChangedNotification && IsCurrent) {
+                RefreshPhonemizers();
+                this.RaisePropertyChanged(nameof(Phonemizer));
+                this.RaisePropertyChanged(nameof(PhonemizerTag));
+            }
             if (!disposed && mixEdits?.IsCurrent == true &&
                 cmd is TrackMixChangedNotification mix && mix.Tracks.Contains(track)) {
                 SyncMixState();

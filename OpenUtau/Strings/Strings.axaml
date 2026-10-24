@@ -1,7 +1,7 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:system="clr-namespace:System;assembly=mscorlib"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  
+
   <system:String x:Key="button.apply">Apply</system:String>
   <system:String x:Key="button.cancel">Cancel</system:String>
   <system:String x:Key="button.no">No</system:String>
@@ -329,7 +329,7 @@ Do you want to continue by splitting at the nearest position after current playh
   <system:String x:Key="menu.project.remaptimeaxis">Adjust Tempo (Preserve Timing)</system:String>
   <system:String x:Key="menu.tools">Tools</system:String>
   <system:String x:Key="menu.tools.clearcache">Clear Cache</system:String>
-  <system:String x:Key="menu.tools.debugwindow">Debug Window</system:String>
+  <system:String x:Key="menu.tools.debugwindow">Developer Tools</system:String>
   <system:String x:Key="menu.tools.dependency.install">Install Dependencies (.oudep)...</system:String>
   <system:String x:Key="menu.tools.mixer">Mixer</system:String>
   <system:String x:Key="menu.tools.fullscreen">Full Screen</system:String>
@@ -771,7 +771,7 @@ expected: {0}
 Actual: {1}
 The voicebank may not work on another OS.</system:String>
   <system:String x:Key="singererror.yamlnotfound">character.yaml not found.</system:String>
-  
+
   <system:String x:Key="singers.caption">Singers</system:String>
   <system:String x:Key="singers.editoto.editinsetparam">Edit In setParam</system:String>
   <system:String x:Key="singers.editoto.editinvlabeler">Edit In vLabeler</system:String>
@@ -1467,4 +1467,13 @@ Range {2}–{3} s · Tail {4} s
   <system:String x:Key="prefs.preview.note">Note</system:String>
   <system:String x:Key="prefs.preview.action">Play</system:String>
   <system:String x:Key="window.untitled">Untitled project</system:String>
+
+  <system:String x:Key="debug.filter">Filter</system:String>
+  <system:String x:Key="debug.filter.level">Lowest level shown</system:String>
+  <system:String x:Key="debug.livereload">Live Reload Packages</system:String>
+  <system:String x:Key="debug.livereload.tooltip">While this window is open, reload JavaScript phonemizers and themes when a file in the Dependencies folder changes.</system:String>
+  <system:String x:Key="debug.packages">Packages</system:String>
+  <system:String x:Key="debug.packages.createphonemizer">Create New Phonemizer...</system:String>
+  <system:String x:Key="debug.packages.createphonemizer.prompt">Package id, also its folder name in Dependencies.</system:String>
+  <system:String x:Key="debug.packages.openlocation">Open Packages Location</system:String>
 </ResourceDictionary>

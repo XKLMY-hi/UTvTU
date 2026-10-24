@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -105,6 +105,11 @@ namespace OpenUtau.App {
             }
             SetTheme();
             Log.Information("Initialized theme.");
+        }
+
+        public static async void ReloadPackages() {
+            try { await OudepLoaderRegistry.LoadAllAsync(); SetTheme(); }
+            catch (Exception e) { Log.Error(e, "Failed to reload package resources."); }
         }
 
         public static void SetTheme() {

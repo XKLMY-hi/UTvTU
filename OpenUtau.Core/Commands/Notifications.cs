@@ -1,7 +1,11 @@
-﻿using System;
+using System;
 using OpenUtau.Core.Ustx;
 
 namespace OpenUtau.Core {
+    public class PackagesChangedNotification : UNotification {
+        public bool PhonemizersReloaded { get; init; }
+    }
+
     public class UNotification : UCommand {
         public UProject project;
         public UPart part;

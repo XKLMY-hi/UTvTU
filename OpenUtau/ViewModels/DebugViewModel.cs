@@ -1,16 +1,21 @@
-﻿using System;
-using System.Collections.ObjectModel;
+using System;
+using System.Collections.Specialized;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reactive;
 using System.Text;
+using System.Threading;
 using Avalonia.Data.Converters;
+using Avalonia.Threading;
 using DynamicData.Binding;
 using OpenUtau.App.Views;
+using OpenUtau.Core;
 using OpenUtau.Core.Util;
 using ReactiveUI;
+using System.Reactive;
+using System.Reactive.Linq;
 using ReactiveUI.Fody.Helpers;
+using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
@@ -28,7 +33,8 @@ namespace OpenUtau.App.ViewModels {
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) {
             if (value is LogEvent logEvent) {
                 formater.Format(logEvent, stringWriter);
-                string message = stringWriter.GetStringBuilder().ToString();
+                // The template ends with a new line before the exception, which most events don't have.
+                string message = stringWriter.GetStringBuilder().ToString().TrimEnd();
                 stringWriter.GetStringBuilder().Clear();
                 return message;
             }
@@ -101,6 +107,12 @@ namespace OpenUtau.App.ViewModels {
             }
 
             public void Emit(LogEvent logEvent) {
+                // Events come from any thread, and the developer window shows this collection.
+                if (Avalonia.Application.Current != null && !Dispatcher.UIThread.CheckAccess()) {
+                    Dispatcher.UIThread.Post(() => Emit(logEvent));
+                    return;
+                }
+                if (LogEvents.Count >= 2000) LogEvents.RemoveAt(reverseLogOrder ? LogEvents.Count - 1 : 0);
                 if (reverseLogOrder) {
                     LogEvents.Insert(0, logEvent);
                 } else {
@@ -121,10 +133,22 @@ namespace OpenUtau.App.ViewModels {
             }
         }
 
-        [Reactive] public LogEventLevel LogEventLevel { get; set; }
-        public ObservableCollection<LogEvent> LogEvents => Sink.Inst.LogEvents;
+        /// <summary>The lowest level shown, as an index of <see cref="LogEventLevel"/>.</summary>
+        [Reactive] public int LogEventLevelIndex { get; set; }
+        /// <summary>Shows only the events whose message or error contains this, ignoring case.</summary>
+        [Reactive] public string Filter { get; set; } = string.Empty;
+        /// <summary>
+        /// Reloads the packages in the Dependencies folder when a file in it changes, while the window is open.
+        /// </summary>
+        [Reactive] public bool LiveReload { get; set; }
+        /// <summary>The events of <see cref="Sink"/> that pass the level and text filters.</summary>
+        public ObservableCollectionExtended<LogEvent> LogEvents { get; } = new ObservableCollectionExtended<LogEvent>();
         public ReactiveCommand<Unit, Unit> ReverseLogOrderCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> CopyLogCommand { get; private set; }
+
+        public void ToggleLiveReload() {
+            LiveReload = !LiveReload;
+        }
 
         public void Clear() {
             Sink.Inst.LogEvents.Clear();
@@ -133,11 +157,93 @@ namespace OpenUtau.App.ViewModels {
         public void Attach() {
             Core.Util.ProcessRunner.DebugSwitch = true;
             Sink.Inst.LevelSwitch.MinimumLevel = LogEventLevel.Verbose;
+            liveReloadSubscription = this.WhenAnyValue(x => x.LiveReload).Subscribe(SetWatching);
+            filterSubscription = this.WhenAnyValue(x => x.Filter, x => x.LogEventLevelIndex).Subscribe(_ => Refilter());
+            Sink.Inst.LogEvents.CollectionChanged += OnSinkChanged;
         }
 
         public void Detach() {
             Core.Util.ProcessRunner.DebugSwitch = false;
             Sink.Inst.LevelSwitch.MinimumLevel = LogEventLevel.Error;
+            Sink.Inst.LogEvents.CollectionChanged -= OnSinkChanged;
+            filterSubscription?.Dispose();
+            liveReloadSubscription?.Dispose();
+            SetWatching(false);
+        }
+
+        private IDisposable? filterSubscription;
+
+        bool Matches(LogEvent logEvent) {
+            if ((int)logEvent.Level < LogEventLevelIndex) {
+                return false;
+            }
+            if (string.IsNullOrEmpty(Filter)) {
+                return true;
+            }
+            return logEvent.RenderMessage().Contains(Filter, StringComparison.OrdinalIgnoreCase)
+                || (logEvent.Exception?.Message.Contains(Filter, StringComparison.OrdinalIgnoreCase) ?? false);
+        }
+
+        void Refilter() {
+            LogEvents.Load(Sink.Inst.LogEvents.Where(Matches));
+        }
+
+        void OnSinkChanged(object? sender, NotifyCollectionChangedEventArgs e) {
+            if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems?.Count == 1) {
+                // One new event, at the top or the bottom depending on the log order.
+                var logEvent = (LogEvent)e.NewItems[0]!;
+                if (Matches(logEvent)) {
+                    if (e.NewStartingIndex == 0) {
+                        LogEvents.Insert(0, logEvent);
+                    } else {
+                        LogEvents.Add(logEvent);
+                    }
+                }
+                return;
+            }
+            Refilter();
+        }
+
+        private IDisposable? liveReloadSubscription;
+        private FileSystemWatcher? watcher;
+        private Timer? reloadTimer;
+
+        void SetWatching(bool watch) {
+            watcher?.Dispose();
+            watcher = null;
+            reloadTimer?.Dispose();
+            reloadTimer = null;
+            if (!watch) {
+                return;
+            }
+            var path = PathManager.Inst.DependencyPath;
+            FileSystemWatcher w;
+            try {
+                Directory.CreateDirectory(path);
+                watcher = w = new FileSystemWatcher(path) { IncludeSubdirectories = true };
+            } catch (Exception e) {
+                Log.Error(e, "Failed to watch {Path}", path);
+                return;
+            }
+            string? changedPath = null;
+            var timer = reloadTimer = new Timer(_ => Dispatcher.UIThread.Post(() => {
+                if (watcher != w) {
+                    return;
+                }
+                Log.Information("Reloading packages after a change to {Path}", changedPath);
+                DocManager.Inst.ExecuteCmd(new PackagesChangedNotification());
+            }));
+            // Editors often save in several steps, e.g. a temp file then a rename, so reload once they settle.
+            void OnChanged(object sender, FileSystemEventArgs e) {
+                changedPath = e.FullPath;
+                timer.Change(300, Timeout.Infinite);
+            }
+            w.Changed += OnChanged;
+            w.Created += OnChanged;
+            w.Deleted += OnChanged;
+            w.Renamed += OnChanged;
+            w.EnableRaisingEvents = true;
+            Log.Information("Live reload: watching {Path}", path);
         }
     }
 }

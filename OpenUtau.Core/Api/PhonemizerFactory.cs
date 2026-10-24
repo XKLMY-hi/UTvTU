@@ -1,7 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using OpenUtau.Core;
 
 namespace OpenUtau.Api {
     public class PhonemizerFactory {
@@ -11,7 +13,13 @@ namespace OpenUtau.Api {
         public string author;
         public string language;
 
-        public Phonemizer Create() {
+        /// <summary>
+        /// Identifies the phonemizer in projects, singer configs and preferences.
+        /// Must equal <see cref="Phonemizer.Id"/> of the phonemizers it creates.
+        /// </summary>
+        public virtual string Id => type.FullName!;
+
+        public virtual Phonemizer Create() {
             var phonemizer = Activator.CreateInstance(type) as Phonemizer;
             phonemizer.Name = name;
             phonemizer.Tag = tag;
@@ -23,10 +31,8 @@ namespace OpenUtau.Api {
             ? $"[{tag}] {name}"
             : $"[{tag}] {name} (Contributed by {author})";
 
-        // 工厂缓存必须线程安全（上游 7684d706 同款修复）：BuildList/Get 会在插件扫描线程、
-        // 渲染线程与 UI 线程并发调用——普通 Dictionary 并发写会损坏内部结构（无限循环/
-        // 抛异常），并发读-写枚举也会抛 InvalidOperationException。
         private static readonly ConcurrentDictionary<Type, PhonemizerFactory> factories = new();
+        private static readonly ConcurrentDictionary<string, PhonemizerFactory> registeredFactories = new();
         private static PhonemizerFactory[] orderedFactories = [];
         public static PhonemizerFactory Get(Type type) {
             if (factories.TryGetValue(type, out var factory)) {
@@ -46,19 +52,40 @@ namespace OpenUtau.Api {
             return factories.GetOrAdd(type, factory);
         }
 
-        public static PhonemizerFactory? Get(string typeFullName) {
+        public static PhonemizerFactory? Get(string id) {
+            if (id == null) {
+                return null;
+            }
             foreach (var factory in factories.Values) {
-                if (factory.type.FullName == typeFullName) {
+                if (factory.Id == id) {
                     return factory;
                 }
             }
-            return null;
+            return registeredFactories.TryGetValue(id, out var registered) ? registered : null;
+        }
+
+        /// <summary>
+        /// Adds a factory that is not a phonemizer type, such as a script phonemizer from a package.
+        /// Call <see cref="BuildList"/> afterwards.
+        /// </summary>
+        internal static PhonemizerFactory[] GetRegistered() => registeredFactories.Values.ToArray();
+
+        public static void Register(PhonemizerFactory factory) {
+            registeredFactories[factory.Id] = factory;
+        }
+
+        /// <summary>
+        /// Removes a factory added with <see cref="Register"/>. Call <see cref="BuildList"/> afterwards.
+        /// </summary>
+        public static void Unregister(string id) {
+            registeredFactories.TryRemove(id, out _);
         }
 
         public static void BuildList() {
-            orderedFactories = factories.Values.OrderBy(f => f.tag).ToArray();
+            orderedFactories = factories.Values.Concat(registeredFactories.Values).OrderBy(f => f.tag).ToArray();
         }
 
         public static PhonemizerFactory[] GetAll() => orderedFactories;
     }
+
 }

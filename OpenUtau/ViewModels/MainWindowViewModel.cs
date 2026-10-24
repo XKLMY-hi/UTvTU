@@ -650,7 +650,7 @@ namespace OpenUtau.App.ViewModels {
         }
 
         /// <summary>
-        /// Remap the starting and ending positions of all the notes and parts in the whole project 
+        /// Remap the starting and ending positions of all the notes and parts in the whole project
         /// from the old time axis to the new time axis, without changing their absolute positions in ms.
         /// </summary>
         public void RemapTimeAxis(TimeAxis oldTimeAxis, TimeAxis newTimeAxis){
@@ -716,6 +716,7 @@ namespace OpenUtau.App.ViewModels {
 
         public void OnNext(UCommand cmd, bool isUndo) {
             if (disposed) return;
+            if (cmd is PackagesChangedNotification) App.ReloadPackages();
             if (cmd is ProgressBarNotification progressBarNotification) {
                 Dispatcher.UIThread.InvokeAsync(() => {
                     if (disposed) return;

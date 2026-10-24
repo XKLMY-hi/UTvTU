@@ -244,7 +244,7 @@
   <system:String x:Key="menu.project.remaptimeaxis">修复曲速（保持绝对时长）</system:String>
   <system:String x:Key="menu.tools">工具</system:String>
   <system:String x:Key="menu.tools.clearcache">清空缓存</system:String>
-  <system:String x:Key="menu.tools.debugwindow">调试窗口</system:String>
+  <system:String x:Key="menu.tools.debugwindow">开发者工具</system:String>
   <system:String x:Key="menu.tools.mixer">混音台</system:String>
   <system:String x:Key="menu.tools.dependency.install">安装依赖项（.oudep）...</system:String>
   <system:String x:Key="menu.tools.fullscreen">全屏</system:String>
@@ -1595,4 +1595,13 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="prefs.preview.note">音符</system:String>
   <system:String x:Key="prefs.preview.action">播放</system:String>
   <system:String x:Key="window.untitled">未命名工程</system:String>
+
+  <system:String x:Key="debug.filter">Filter</system:String>
+  <system:String x:Key="debug.filter.level">Lowest level shown</system:String>
+  <system:String x:Key="debug.livereload">Live Reload Packages</system:String>
+  <system:String x:Key="debug.livereload.tooltip">While this window is open, reload JavaScript phonemizers and themes when a file in the Dependencies folder changes.</system:String>
+  <system:String x:Key="debug.packages">Packages</system:String>
+  <system:String x:Key="debug.packages.createphonemizer">Create New Phonemizer...</system:String>
+  <system:String x:Key="debug.packages.createphonemizer.prompt">Package id, also its folder name in Dependencies.</system:String>
+  <system:String x:Key="debug.packages.openlocation">Open Packages Location</system:String>
 </ResourceDictionary>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -76,7 +76,7 @@ namespace OpenUtau.Core.Ustx {
             project.timeAxis.TickPosToBarBeat(position + noteEnd - 1, out int bar, out int beat, out int remainingTicks);
             return project.timeAxis.BarBeatToTickPos(bar + 2, 0) - position;
         }
-        
+
         public override int GetMaxPosiTick(UProject project) {
             int maxStartTick = position + (notes.FirstOrDefault()?.position ?? Duration);
             project.timeAxis.TickPosToBarBeat(maxStartTick, out int bar, out int beat, out int remainingTicks);
@@ -109,6 +109,8 @@ namespace OpenUtau.Core.Ustx {
             curves.RemoveAll(curve => curve.descriptor == null);
         }
 
+        internal void ResetOverridePhonemizers() => overridePhonemizers.Clear();
+
         public override void Validate(ValidateOptions options, UProject project, UTrack track) {
             UNote lastNote = null;
             foreach (UNote note in notes) {
@@ -134,7 +136,7 @@ namespace OpenUtau.Core.Ustx {
             if (!options.SkipPhonemizer) {
                 var noteIndexes = new List<int>();
                 var groups = new List<Phonemizer.Note[]>();
-                
+
                 var trackPhonemizers = new List<Phonemizer> { track.Phonemizer };
                 var notePhonemizerIndices = new List<int>();
 
@@ -164,7 +166,7 @@ namespace OpenUtau.Core.Ustx {
                                     overridePhonemizers[note.PhonemizerOverride] = newPhonemizer;
                                 }
                             }
-                            
+
                             if (newPhonemizer != null) {
                                 trackPhonemizers.Add(newPhonemizer);
                                 pIndex = trackPhonemizers.Count - 1;
@@ -183,11 +185,11 @@ namespace OpenUtau.Core.Ustx {
                     timestamp = DateTime.Now.ToFileTimeUtc(),
                     noteIndexes = noteIndexes.ToArray(),
                     notes = groups.ToArray(),
-                    
+
                     // NEW: Feed the runner our multi-phonemizer data instead of a single phonemizer
                     phonemizers = trackPhonemizers.ToArray(),
                     notePhonemizerIndices = notePhonemizerIndices.ToArray(),
-                    
+
                     timeAxis = project.timeAxis.Clone(),
                 };
                 notesTimestamp = request.timestamp;

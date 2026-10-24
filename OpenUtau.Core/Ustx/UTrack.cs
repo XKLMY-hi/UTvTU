@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OpenUtau.Api;
@@ -217,7 +217,7 @@ namespace OpenUtau.Core.Ustx {
 
         public void BeforeSave() {
             singer = Singer?.Id;
-            phonemizer = Phonemizer.GetType().FullName;
+            phonemizer = Phonemizer.Id;
             if (Singer != null && Singer.Found && VoiceColorExp != null && VoiceColorExp.options.Length > 0) {
                 VoiceColorNames = VoiceColorExp.options.ToArray();
             } else {
@@ -229,7 +229,7 @@ namespace OpenUtau.Core.Ustx {
             if (Phonemizer == null || !string.IsNullOrEmpty(phonemizer)) {
                 try {
                     var factory = PhonemizerFactory.Get(phonemizer);
-                    Phonemizer = factory?.Create();
+                    Phonemizer = factory?.Create() ?? (phonemizer?.StartsWith("js:") == true ? new Js.MissingScriptPhonemizer(phonemizer) : null);
                     phonemizer = null;
                 } catch (Exception e) {
                     Log.Error(e, $"Failed to load phonemizer {phonemizer}");
