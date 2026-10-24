@@ -1,0 +1,327 @@
+{
+  "status": "complete",
+  "date": "2026-10-24",
+  "workspace": "G:\\xklmy文件夹\\vibe coding\\UTvTU",
+  "branch": "plus-develop",
+  "upstream": "a9547895f93e23371949a12d34e98deb5dad0bda",
+  "productCommit": "ce877e5d03283616b4a580c22ca433f52858bb53",
+  "strategy": "Adapt upstream feature groups to the local architecture; no wholesale merge of upstream UI/audio infrastructure.",
+  "productCommits": [
+    "27f24adb",
+    "624c1d46",
+    "0aaf0fa0",
+    "b9d3156d",
+    "46fda37b",
+    "7e5afe39",
+    "48ac1208",
+    "ce877e5d"
+  ],
+  "build": {
+    "sdk": "9.0.319",
+    "target": "Windows x64",
+    "configuration": "Debug",
+    "processors": 2,
+    "msbuildNodes": 1,
+    "managedHeapLimitMiB": 768,
+    "errors": 0,
+    "mainWarnings": 3,
+    "mainSeconds": 47.95,
+    "coreWarningsAtLastFullCompile": 1181,
+    "pluginWarnings": 583,
+    "testWarnings": 153,
+    "testSeconds": 21.92,
+    "mainLog": ".dsh/upstream-integration-20261024/deliver-OpenUtau.log",
+    "testLog": ".dsh/upstream-integration-20261024/ui-confirmed-OpenUtau.Test.log",
+    "warningsNote": "Core and plugin include nullable and existing analyzer warnings; main retains its three existing AVLN3001 warnings. No claim of warning-free compilation.",
+    "setupProjects": {
+      "built": [
+        "Core",
+        "Installer",
+        "Packager",
+        "Tests"
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "configuration": "Debug",
+      "installerPayloadBuilt": false
+    }
+  },
+  "tests": {
+    "passedDistinct": 284,
+    "skippedDistinct": 1,
+    "passedAcrossSelectedRuns": 293,
+    "selectedGroups": 26,
+    "maxSelectedSeconds": 19.5,
+    "maxSelectedPeakMB": 304.0,
+    "limits": {
+      "secondsPerGroup": 30,
+      "MBPerGroup": 384,
+      "parallelCollections": false
+    }
+  },
+  "batches": [
+    {
+      "log": ".dsh/upstream-integration-20261024/test-small.log",
+      "trx": ".dsh/light-test-results/bdbafdc827874fdfb8f80027a5348599.trx",
+      "passed": 3,
+      "skipped": 0,
+      "seconds": 8.6,
+      "peakMB": 125.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-PitchToolsFinal.log",
+      "trx": ".dsh/light-test-results/0fd61cd4195b4d5eb99ab2db197431e1.trx",
+      "passed": 9,
+      "skipped": 0,
+      "seconds": 19.5,
+      "peakMB": 304.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-EnVCCVTest.log",
+      "trx": ".dsh/light-test-results/9b47ab2ac03f40beb588e7be7fa839dc.trx",
+      "passed": 11,
+      "skipped": 0,
+      "seconds": 18.6,
+      "peakMB": 121.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-WorldlineR11Test.log",
+      "trx": ".dsh/light-test-results/684bf899e2dd48579e54dc48ef3c0b0f.trx",
+      "passed": 4,
+      "skipped": 0,
+      "seconds": 9.2,
+      "peakMB": 74.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-HifiDspTest.log",
+      "trx": ".dsh/light-test-results/4d9f8b858909461f9ac0a07cf85f003c.trx",
+      "passed": 10,
+      "skipped": 0,
+      "seconds": 6.9,
+      "peakMB": 55.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-HifiFeaturesTest.log",
+      "trx": ".dsh/light-test-results/2bd8ac3995114013831201493209d43b.trx",
+      "passed": 16,
+      "skipped": 0,
+      "seconds": 13.6,
+      "peakMB": 58.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-HifiNoteTimingTest.log",
+      "trx": ".dsh/light-test-results/226a8c4e03fa4d47889812fcce150411.trx",
+      "passed": 9,
+      "skipped": 0,
+      "seconds": 10.0,
+      "peakMB": 56.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-HifiRdTensionTest.log",
+      "trx": ".dsh/light-test-results/541a7a92a58b4bb196f63d37accb2c8b.trx",
+      "passed": 3,
+      "skipped": 0,
+      "seconds": 8.4,
+      "peakMB": 55.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-HifiPostProcessTest.log",
+      "trx": ".dsh/light-test-results/a0707d5519b846f2b4c587680d9694e1.trx",
+      "passed": 3,
+      "skipped": 0,
+      "seconds": 6.6,
+      "peakMB": 56.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-GlottalRdTest.log",
+      "trx": ".dsh/light-test-results/4c719b18e84d43e79443bf538c0b22b0.trx",
+      "passed": 17,
+      "skipped": 0,
+      "seconds": 8.2,
+      "peakMB": 56.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-HnsepTest.log",
+      "trx": ".dsh/light-test-results/b0081a5a42c949499d9840079ba49986.trx",
+      "passed": 4,
+      "skipped": 0,
+      "seconds": 7.6,
+      "peakMB": 80.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-HnsepCacheTest.log",
+      "trx": ".dsh/light-test-results/177914caa5a7491bb14249563e3c6f1b.trx",
+      "passed": 3,
+      "skipped": 0,
+      "seconds": 6.3,
+      "peakMB": 55.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-TorchFileTest.log",
+      "trx": ".dsh/light-test-results/becca8a674f04ec2a47352f919806d19.trx",
+      "passed": 3,
+      "skipped": 0,
+      "seconds": 6.6,
+      "peakMB": 55.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-WorldlinePreutteranceReproTests.log",
+      "trx": ".dsh/light-test-results/a7688cca9eee4175afeea833df3937a2.trx",
+      "passed": 2,
+      "skipped": 0,
+      "seconds": 9.5,
+      "peakMB": 100.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-EnunuFinal.log",
+      "trx": ".dsh/light-test-results/fb59256d1bda4713bf41f47347ec7137.trx",
+      "passed": 14,
+      "skipped": 1,
+      "seconds": 8.0,
+      "peakMB": 63.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-SbpMigrationTests.log",
+      "trx": ".dsh/light-test-results/dc2da87af80c4b1cb75e29db0c7166f4.trx",
+      "passed": 3,
+      "skipped": 0,
+      "seconds": 6.6,
+      "peakMB": 56.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-EnglishCpVPhonemizerTest.log",
+      "trx": ".dsh/light-test-results/f2f36bc0a0574da3a87e2937b9be712f.trx",
+      "passed": 15,
+      "skipped": 0,
+      "seconds": 12.1,
+      "peakMB": 116.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-UpstreamEnglishRulesTests.log",
+      "trx": ".dsh/light-test-results/ea4a75d2ccf04297a6f4e9fafb357d99.trx",
+      "passed": 7,
+      "skipped": 0,
+      "seconds": 6.3,
+      "peakMB": 54.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-JsPhonemizerTest.log",
+      "trx": ".dsh/light-test-results/e71e4a27a69d4ad0a4e229ebde20f68d.trx",
+      "passed": 27,
+      "skipped": 0,
+      "seconds": 10.7,
+      "peakMB": 67.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-JaVcvJsTest.log",
+      "trx": ".dsh/light-test-results/36508717281c4a0eb3f1a94e19f123bc.trx",
+      "passed": 4,
+      "skipped": 0,
+      "seconds": 18.6,
+      "peakMB": 109.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-DeveloperToolsTests.log",
+      "trx": ".dsh/light-test-results/127d453aa76e4441ba71e252407f6aa3.trx",
+      "passed": 1,
+      "skipped": 0,
+      "seconds": 10.7,
+      "peakMB": 116.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-GraphFinal.log",
+      "trx": ".dsh/light-test-results/3f6bed27d943423eae1c66b5ee50bb50.trx",
+      "passed": 77,
+      "skipped": 0,
+      "seconds": 16.4,
+      "peakMB": 153.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-AudioFinal.log",
+      "trx": ".dsh/light-test-results/5c5ea3f42eca4214ac44564a41577009.trx",
+      "passed": 18,
+      "skipped": 0,
+      "seconds": 12.5,
+      "peakMB": 112.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-SetupWorldlineAbiTests.log",
+      "trx": ".dsh/setup-test-results/c3767ad147e34f4a8c19ee97b24b589b.trx",
+      "passed": 2,
+      "skipped": 0,
+      "seconds": null,
+      "peakMB": null
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-UiFinal.log",
+      "trx": ".dsh/light-test-results/0867eb029b3546c8b41eb3c79fda803b.trx",
+      "passed": 5,
+      "skipped": 0,
+      "seconds": 10.2,
+      "peakMB": 144.0
+    },
+    {
+      "log": ".dsh/upstream-integration-20261024/test-NotePropertiesFinal.log",
+      "trx": ".dsh/light-test-results/cb363a2d43ad45cab32fce17b16ff64e.trx",
+      "passed": 23,
+      "skipped": 0,
+      "seconds": 15.3,
+      "peakMB": 164.0
+    }
+  ],
+  "hashes": {
+    "OpenUtau.dll": {
+      "app": "OpenUtau/bin/Debug/net8.0-windows/OpenUtau.dll",
+      "test": "OpenUtau.Test/bin/Debug/net8.0-windows/OpenUtau.dll",
+      "sha256": "1147157f4db07c88f0202a41adf120e5c9c5932f84772559394a9cb28d6fb3b9"
+    },
+    "OpenUtau.Core.dll": {
+      "app": "OpenUtau/bin/Debug/net8.0-windows/OpenUtau.Core.dll",
+      "test": "OpenUtau.Test/bin/Debug/net8.0-windows/OpenUtau.Core.dll",
+      "sha256": "5d2fee262d26223d908dd9abeef3e0614e9ccd446b524d154500eb847bb47864"
+    },
+    "OpenUtau.Plugin.Builtin.dll": {
+      "app": "OpenUtau/bin/Debug/net8.0-windows/OpenUtau.Plugin.Builtin.dll",
+      "test": "OpenUtau.Test/bin/Debug/net8.0-windows/OpenUtau.Plugin.Builtin.dll",
+      "sha256": "c7131eee803d3383e2300d30af71b2b32ad115df052b3c0271146a2badf04e81"
+    },
+    "FftFlat.dll": {
+      "app": "OpenUtau/bin/Debug/net8.0-windows/FftFlat.dll",
+      "test": "OpenUtau.Test/bin/Debug/net8.0-windows/FftFlat.dll",
+      "sha256": "d255f52fc31bc74fe474ddac5c6948981768fd1dcaa902c54fa1520c021f5ddd"
+    },
+    "Jint.dll": {
+      "app": "OpenUtau/bin/Debug/net8.0-windows/Jint.dll",
+      "test": "OpenUtau.Test/bin/Debug/net8.0-windows/Jint.dll",
+      "sha256": "997810db3e6deb297138037b73f2b1fd6c82e6a79ecba5a86bc8a53599adaf66"
+    },
+    "Acornima.dll": {
+      "app": "OpenUtau/bin/Debug/net8.0-windows/Acornima.dll",
+      "test": "OpenUtau.Test/bin/Debug/net8.0-windows/Acornima.dll",
+      "sha256": "a11417b8542b4e55330e751fca44da5cbde1d95e79b1519c2aba59be7a7b941c"
+    },
+    "runtimes/win-x64/native/worldline.dll": {
+      "app": "OpenUtau/bin/Debug/net8.0-windows/runtimes/win-x64/native/worldline.dll",
+      "test": "OpenUtau.Test/bin/Debug/net8.0-windows/runtimes/win-x64/native/worldline.dll",
+      "sha256": "e63f495978ff43ed3b65581a02cb3cdd28074db87e5952e6594945292f10a396"
+    }
+  },
+  "appExe": "OpenUtau/bin/Debug/net8.0-windows/OpenUtau.exe",
+  "licenses": {
+    "bundledOriginalsMatched": true,
+    "provenance": "licenses/sources.json"
+  },
+  "fixedDuringIntegration": [
+    "Initial interface/signature mismatches when adapting upstream to the local renderer and Fody APIs.",
+    "Read-only migration test cleanup inherited read-only attributes; original YAML itself stayed intact.",
+    "Graph persistence test initially bypassed BeforeSave; corrected to use the product save lifecycle.",
+    "Regression check caught null editor model during preview cancellation; fixed by making pitch-target selection null-safe.",
+    "Completed masked-expression builder, per-note/paste filtering and refresh after graph import, so Apply retains imported expressions."
+  ],
+  "limits": [
+    "ENUNU live-server test intentionally skipped: no ENUNU_TEST_VOICE/server.",
+    "No real hnsep/vocoder model installation or real-voice audition, GPU/stress/full-suite validation.",
+    "No main-application launch/close or screenshots.",
+    "No release publish, installation, GitHub push or master-branch change."
+  ]
+}

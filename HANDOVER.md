@@ -1,11 +1,15 @@
-# HANDOVER — 新会话交接（2026-10-17 上游集成完成）
+# HANDOVER — 新会话交接（2026-10-24 上游核心整合完成）
 
-## 2026-10-24 上游整合已授权并进行中（优先于下方仅审查）
+## 2026-10-24 上游核心整合完成（优先于下方历史审查）
 
-- 用户明确“总之就是开始合并”，本轮整合已开始，**必须继续完成**[实施清单](.opencode/plans/upstream-integration-2026-10-24.md)剩余完整表达式图/收尾。不要停回审查或重复询问是否引入。G盘路径、plus-develop、origin已核；上游固定a9547895。未真正merge（只读merge-tree检查有大量冲突），按本地架构适配；保留UI/VST/离线音频/调度/编辑会话。
-- 已提交`27f24adb`现有功能修复，20项轻量绿；`624c1d46`WORLDLINE R1.1+hifisampler完整引擎批次，74项轻量绿（含原生连续噪声与原R/preutter两项端到端）。详见实施清单；阶段完成即commit，当前工作树干净。SDK9.0.319选择器和限资源build.ps1在`.dsh/upstream-integration-20261024/`，同目录日志记录TRX；small-fixes.py/engines.py已执行，不要重跑覆盖后续适配。
-- 标准Debug已编译至引擎阶段；尚未启动/关闭用户主程序、未截图/真实模型安装/全量压力/打包/推送/发布。**整体整合尚未完成**。后续继续构建Core→Plugin→Main→Test（BuildProjectReferences=false），每组Test-Light护栏30秒/384MiB串行不变。上游原生DLL与旧C#不兼容，当前两者已配套迁移；不要恢复旧DLL。
-- 后续已完成`0aaf0fa0`ENUNU（13离线通过/1真实服务明确跳过）、`b9d3156d`SBP+安全Yaml迁移（36绿）、`46fda37b`JS稳定ID/后台包重载/原DebugWindow升级开发者工具（32绿）。标准Debug现为JS阶段，未启动。详细实现、资源护栏、首次修正与时存见实施清单，日志同目录；当前干净。剩余节点图需完整Core/工程/渲染/界面/音高目标与上游前置适配，保护旧工具和导出，不能只复制两条界面补丁。
+- 用户明确“总之就是开始合并”。本轮已完成：[实施清单](.opencode/plans/upstream-integration-2026-10-24.md)、[验证JSON](.opencode/plans/upstream-integration-2026-10-24/validation.json)。G盘工作区/origin/plus-develop已核，上游固定`a9547895f93e23371949a12d34e98deb5dad0bda`；按本地架构适配而非整体merge，master未动。**没有剩余待实现项，不要重复导入或回到审查。**后续工作仍先核移动盘路径。
+- 产品提交：`27f24adb`小修、`624c1d46`WORLDLINE R1.1+hifisampler、`0aaf0fa0`ENUNU、`b9d3156d`SBP多语言/安全迁移、`46fda37b`Jint脚本/稳定Id/热重载开发者工具、`7e5afe39`完整节点图/后台乐句、`48ac1208`打包ABI/许可/双语文档、`ce877e5d`动态主题节点编辑器/遮罩音高/表达式全链路。均已本地提交，未推送。保留MD3、VST/共享机架、外部采样调度、缓存、离线音频和编辑会话。
+- 节点图在现有表达式工作区浮层的“表达式图”标签，轨道设置选默认/覆盖；未引入上游独立窗口。RPIT/PITO曲线支持工程/模板/导入导出；原参数页已支持MaskedCurve，图导入新增表达式后刷新避免Apply删除。保留S/正弦松开后调整确认和平滑逻辑；补充关闭手势检查发现无模型构造空引用，已修并绿。节点按MD3动态角色取色；未自截图，观感由用户实机确认。
+- 新PhraseSource单工作线程构建、按部件合并/代次拒旧、结果UI应用；仅Splash初始化时启用（测试默认内联），非当前工程内联，保持导出正确。渲染后台在项目锁外等待，可取消；失败返回空音频并完成gate。原生库/C#接口已成套迁移，**不能恢复旧worldline.dll**；打包验证新10导出并核哈希。其他平台原有二进制未动，仅Windows x64验证。
+- 26个最终验收组、293次通过、**284个不同用例通过/1项真实ENUNU服务明确跳过**，每组30秒/384MiB串行护栏不变；最大19.5秒/304MiB。真实原生R11噪声合成和旧R两项短音频端到端、离线交付18项等均绿；完整测试名/TRX见JSON。未安装真实hnsep/声码器模型、试听真实声库、GPU/全套/压力验证。
+- SDK9.0.319、2处理器/单节点/768MiB堆；主程序最后0错3既有AVLN3001警告47.95秒，测试0错153警告21.92秒；Core最后完整1181警告、插件583警告（含可空标注与既有警告）。安装器四项目Debug0错0警告，2个ABI检查绿；没有新正式安装包。
+- 标准Debug exe `OpenUtau/bin/Debug/net8.0-windows/OpenUtau.exe`已更新，**尚未启动本轮程序**。主/测试主DLL+Core+插件+三个新依赖+win-x64原生哈希均一致。Main `1147157f4db07c88f0202a41adf120e5c9c5932f84772559394a9cb28d6fb3b9`；Core `5d2fee262d26223d908dd9abeef3e0614e9ccd446b524d154500eb847bb47864`；WORLDLINE `e63f495978ff43ed3b65581a02cb3cdd28074db87e5952e6594945292f10a396`。许可原文随应用放Licenses/并验证一致。
+- 本轮未关闭用户进程、截图、打包正式载荷、推送/发布。日志/脚本`.dsh/upstream-integration-20261024/`；SDK选择器`.dsh/packaging/sdk9/`。**small-fixes.py/engines.py/enunu.py/sbp.py/js.py/graph*.py等都是已执行的非幂等导入脚本，不要重跑。**下一次用户要求启动时只核标准exe、进程身份并无参数启动。
 
 ## 2026-10-24 上游重要更新勘察（最新，仅审查）
 
