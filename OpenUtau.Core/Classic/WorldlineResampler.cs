@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using NAudio.Wave;
 using OpenUtau.Core;
 using OpenUtau.Core.Render;
@@ -8,6 +8,7 @@ using Serilog;
 namespace OpenUtau.Classic {
     internal class WorldlineResampler : IResampler {
         public const string name = "worldline";
+        public bool NoWrapperScript => true;
         public string FilePath { get; private set; }
 
         public WorldlineResampler() {

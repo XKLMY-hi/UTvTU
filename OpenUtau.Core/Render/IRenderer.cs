@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -66,6 +66,7 @@ namespace OpenUtau.Core.Render {
     /// </summary>
     public interface IRenderer {
         USingerType SingerType { get; }
+        string ExpressionGraphSlot => ToString();
         bool SupportsRenderPitch { get; }
         bool SupportsRealCurve { get { return false; } }
         bool SupportsExpression(UExpressionDescriptor descriptor);

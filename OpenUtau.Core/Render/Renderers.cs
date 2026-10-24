@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,12 +11,13 @@ namespace OpenUtau.Core.Render {
         public const string CLASSIC = "CLASSIC";
         public const string WORLDLINE_R = "WORLDLINE-R";
         public const string WORLDLINE_R2 = "WORLDLINE-R2";
+        public const string WORLDLINE_R11 = "WORLDLINE-R1.1";
         public const string ENUNU = "ENUNU";
         public const string VOGEN = "VOGEN";
         public const string DIFFSINGER = "DIFFSINGER";
         public const string VOICEVOX = "VOICEVOX";
 
-        static readonly string[] classicRenderers = new[] { WORLDLINE_R, CLASSIC };
+        static readonly string[] classicRenderers = new[] { WORLDLINE_R, WORLDLINE_R11, CLASSIC };
         static readonly string[] enunuRenderers = new[] { ENUNU };
         static readonly string[] vogenRenderers = new[] { VOGEN };
         static readonly string[] diffSingerRenderers = new[] { DIFFSINGER };
@@ -42,22 +43,27 @@ namespace OpenUtau.Core.Render {
 
         public static List<string> getRendererOptions() {
             return new List<string> {
-                "WORLDLINE-R",
+                WORLDLINE_R,
+                WORLDLINE_R11,
                 "Classic"
             };
         }
 
         public static string GetDefaultRenderer(USingerType singerType) {
-            if (Preferences.Default.DefaultRenderer == "Classic" && singerType == USingerType.Classic) {
-                return CLASSIC;
+            if (singerType == USingerType.Classic && (Preferences.Default.DefaultRenderer == "Classic" || classicRenderers.Contains(Preferences.Default.DefaultRenderer))) {
+                return Preferences.Default.DefaultRenderer == "Classic" ? CLASSIC : Preferences.Default.DefaultRenderer;
             } else {
                 return GetSupportedRenderers(singerType)[0];
             }
         }
 
+        public static string GetExpressionGraphSlot(string renderer) => CreateRenderer(renderer)?.ExpressionGraphSlot ?? renderer;
+
         public static IRenderer CreateRenderer(string renderer) {
             if (renderer == CLASSIC) {
                 return new ClassicRenderer();
+            } else if (renderer == WORLDLINE_R11) {
+                return new WorldlineRenderer(version: 11);
             } else if (renderer == WORLDLINE_R2) {
                 return new WorldlineRenderer(version: 2);
             } else if (renderer?.StartsWith(WORLDLINE_R.Substring(0, 9)) ?? false) {
@@ -108,7 +114,7 @@ namespace OpenUtau.Core.Render {
                 return ToolsManager.Inst.Resamplers;
             } else {
                 return ToolsManager.Inst.Resamplers
-                    .Where(r => !(r is WorldlineResampler))
+                    .Where(r => r.NoWrapperScript || r is ExeResampler)
                     .ToArray();
             }
         }

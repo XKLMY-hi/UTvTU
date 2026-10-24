@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -59,6 +59,21 @@ namespace OpenUtau.Core.Format {
                 provider = provider.ToStereo();
             }
             return GetSamples(provider);
+        }
+
+        public static void WriteMono16Wav(string path, float[] samples) {
+            using var writer = new WaveFileWriter(path, new WaveFormat(44100, 16, 1));
+            var pcm = new byte[8192];
+            for (int start = 0; start < samples.Length; start += pcm.Length / 2) {
+                int count = Math.Min(pcm.Length / 2, samples.Length - start);
+                for (int i = 0; i < count; i++) {
+                    float value = samples[start + i];
+                    short sample = (short)((float.IsFinite(value) ? Math.Clamp(value, -1f, 1f) : 0f) * short.MaxValue);
+                    pcm[i * 2] = (byte)sample;
+                    pcm[i * 2 + 1] = (byte)(sample >> 8);
+                }
+                writer.Write(pcm, 0, count * 2);
+            }
         }
 
         public static float[] GetSamples(ISampleProvider sampleProvider) {

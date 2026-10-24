@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,6 +21,7 @@ namespace OpenUtau.Core.Format {
         public const string ATK = "atk";
         public const string DEC = "dec";
         public const string GEN = "gen";
+        public const string GRWC = "grwc";
         public const string GENC = "genc";
         public const string BRE = "bre";
         public const string BREC = "brec";
@@ -48,6 +49,7 @@ namespace OpenUtau.Core.Format {
             project.RegisterExpression(new UExpressionDescriptor("decay", DEC, 0, 100, 0));
             project.RegisterExpression(new UExpressionDescriptor("gender", GEN, -100, 100, 0, "g"));
             project.RegisterExpression(new UExpressionDescriptor("gender (curve)", GENC, -100, 100, 0) { type = UExpressionType.Curve });
+            project.RegisterExpression(new UExpressionDescriptor("growl (curve)", GRWC, 0, 100, 0) { type = UExpressionType.Curve });
             project.RegisterExpression(new UExpressionDescriptor("breath", BRE, 0, 100, 0, "B"));
             project.RegisterExpression(new UExpressionDescriptor("breathiness (curve)", BREC, -100, 100, 0) { type = UExpressionType.Curve });
             project.RegisterExpression(new UExpressionDescriptor("lowpass", LPF, 0, 100, 0, "H"));

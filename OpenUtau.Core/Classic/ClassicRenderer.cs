@@ -27,7 +27,7 @@ namespace OpenUtau.Classic {
             Ustx.MODP,
             Ustx.ALT,
             Ustx.DIR,
-            Ustx.SHFT
+            Ustx.SHFT, Ustx.GENC, Ustx.TENC, Ustx.BREC, Ustx.VOIC, Ustx.GRWC
         };
 
         public USingerType SingerType => USingerType.Classic;
@@ -76,8 +76,8 @@ namespace OpenUtau.Classic {
                             ct.ThrowIfCancellationRequested();
                             // Recheck inside the lock: another generation may have just produced this file.
                             if (!File.Exists(item.outputFile)) {
-                                if (!(item.resampler is WorldlineResampler)) {
-                                    VoicebankFiles.Inst.CopySourceTemp(item.inputFile, item.inputTemp, item.resampler);
+                                if (!(item.resampler is WorldlineResampler or HifisamplerResampler)) {
+                                    if (item.resampler is not (WorldlineResampler or HifisamplerResampler)) VoicebankFiles.Inst.CopySourceTemp(item.inputFile, item.inputTemp, item.resampler);
                                 }
                                 if(!item.phone.direct){
                                     if (item.resampler is ExeResampler executable) {
@@ -90,8 +90,8 @@ namespace OpenUtau.Classic {
                                         throw new InvalidDataException($"{item.resampler} failed to resample \"{item.phone.phoneme}\" at {bar}:{beat}.{string.Format("{0:000}", tick)}");
                                     }
                                 }
-                                if (!(item.resampler is WorldlineResampler)) {
-                                    VoicebankFiles.Inst.CopyBackMetaFiles(item.inputFile, item.inputTemp, item.resampler);
+                                if (!(item.resampler is WorldlineResampler or HifisamplerResampler)) {
+                                    if (item.resampler is not (WorldlineResampler or HifisamplerResampler)) VoicebankFiles.Inst.CopyBackMetaFiles(item.inputFile, item.inputTemp, item.resampler);
                                 }
                             }
                             progress.Complete(1, $"Track {trackNo + 1}: {item.resampler} \"{item.phone.phoneme}\"");
@@ -126,13 +126,13 @@ namespace OpenUtau.Classic {
                 var result = Layout(phrase);
                 result.samples = ClassicRenderCache.GetOrRender(wavPath, token, () => {
                     foreach (var item in resamplerItems) {
-                        VoicebankFiles.Inst.CopySourceTemp(item.inputFile, item.inputTemp, item.resampler);
+                        if (item.resampler is not (WorldlineResampler or HifisamplerResampler)) VoicebankFiles.Inst.CopySourceTemp(item.inputFile, item.inputTemp, item.resampler);
                     }
                     var wavtool = ToolsManager.Inst.GetWavtool(phrase.wavtool);
                     var samples = wavtool.Concatenate(resamplerItems, wavPath, cancellation);
                     token.ThrowIfCancellationRequested();
                     foreach (var item in resamplerItems) {
-                        VoicebankFiles.Inst.CopyBackMetaFiles(item.inputFile, item.inputTemp, item.resampler);
+                        if (item.resampler is not (WorldlineResampler or HifisamplerResampler)) VoicebankFiles.Inst.CopyBackMetaFiles(item.inputFile, item.inputTemp, item.resampler);
                     }
                     return samples;
                 });

@@ -39,7 +39,7 @@ namespace OpenUtau.Classic {
             //so we need to call it directly from C#
             foreach(var item in resamplerItems){
                 cancellation.Token.ThrowIfCancellationRequested();
-                if(!(item.resampler is ExeResampler) && !cancellation.IsCancellationRequested && !File.Exists(item.outputFile)){
+                if(item.resampler.NoWrapperScript && !cancellation.IsCancellationRequested && !File.Exists(item.outputFile)){
                     lock (Renderers.GetCacheLock(item.outputFile)) {
                         item.resampler.DoResamplerReturnsFile(item, Log.Logger);
                     }
@@ -201,7 +201,7 @@ namespace OpenUtau.Classic {
         string ConvertIfNeeded(string path) {
             if (!OS.IsWindows()) return ConvertToWindowsPath(path);
             else return path;
-        } 
+        }
 
         string ConvertToWindowsPath (string linuxPath) {
             List<char> path = new List<char>(linuxPath.ToCharArray());

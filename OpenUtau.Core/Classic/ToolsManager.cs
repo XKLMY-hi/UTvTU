@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -40,7 +40,7 @@ namespace OpenUtau.Classic {
             string ext = Path.GetExtension(filePath).ToLower();
             if ((OS.IsWindows() || !string.IsNullOrEmpty(Preferences.Default.WinePath)) && (ext == ".exe" || ext == ".bat")) {
                 return new ExeResampler(filePath, basePath);
-            } 
+            }
             if (!OS.IsWindows() && (ext == ".sh" || string.IsNullOrEmpty(ext))) {
                 return new ExeResampler(filePath, basePath);
             }
@@ -54,7 +54,7 @@ namespace OpenUtau.Classic {
             string ext = Path.GetExtension(filePath).ToLower();
             if ((OS.IsWindows() || !string.IsNullOrEmpty(Preferences.Default.WinePath)) && (ext == ".exe" || ext == ".bat")) {
                 return new ExeWavtool(filePath, basePath);
-            } 
+            }
             if (!OS.IsWindows() && (ext == ".sh" || string.IsNullOrEmpty(ext))) {
                 return new ExeWavtool(filePath, basePath);
             }
@@ -72,6 +72,7 @@ namespace OpenUtau.Classic {
             resamplers.Clear();
             resamplersMap.Clear();
             resamplers.Add(new WorldlineResampler());
+            resamplers.Add(new HifisamplerResampler());
             // Upstream 2913eeb9: external files must not replace built-in identities.
             var builtInNames = resamplers.Select(r => r.ToString()).ToHashSet(StringComparer.OrdinalIgnoreCase);
             string basePath = PathManager.Inst.ResamplersPath;

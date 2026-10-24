@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -20,23 +19,25 @@ namespace OpenUtau.Classic {
     public class WorldlineRenderer : IRenderer {
 
         readonly int version;
+        readonly int hopSize;
         readonly double frameMs;
         byte[]? vocoderBytes;
 
-        /// <summary>按缓存文件路径串行化读写（上游 9138af6e/5d17f141 同款修复，统一用
-        /// <see cref="Renderers.GetCacheLock"/> 的进程级 per-path 锁表）。同一乐句可能被
-        /// 多个渲染任务同时认领（并行短语渲染 / 批 2 后台继续 / 导出与播放并发），而缓存
-        /// 文件按短语 hash 命名——不加锁会"读到半截文件"（samples 为空 → 重复合成）或
-        /// 读写交错（读到损坏数据）。用共享锁表还让 SharpWavtool 的缓存读取与
-        /// ClassicRenderer/resampler 的写入互斥（此前两边各用一把锁，等于没锁）。</summary>
-        static object CacheLock(string path) => Renderers.GetCacheLock(path);
-
+        /// <param name="version">
+        /// 10 (Worldline-R): WORLD synthesis, 10 ms frames. 11 (Worldline-R1.1): hnsep
+        /// features, WORLD's periodic half and continuous noise, 5 ms frames. 20
+        /// (Worldline-R2): WORLD features into the vocoder package, at its hop of 512.
+        /// </param>
         public WorldlineRenderer(int version) {
-            if (version != 1 && version != 2) {
-                throw new ArgumentException($"Unsupported WorldlineRenderer version: {version}");
-            }
+            version = version switch { 1 => 10, 2 => 20, _ => version };
+            hopSize = version switch {
+                10 => 441,
+                11 => 220,
+                20 => 512,
+                _ => throw new ArgumentException($"Unsupported WorldlineRenderer version: {version}"),
+            };
             this.version = version;
-            frameMs = version == 1 ? 10 : 512.0 * 1000.0 / 44100.0;
+            frameMs = hopSize * 1000.0 / 44100.0;
         }
 
         static readonly HashSet<string> supportedExp = new HashSet<string>(){
@@ -83,7 +84,7 @@ namespace OpenUtau.Classic {
                 phrase.AddCacheFile(wavPath);
                 string progressInfo = $"Track {trackNo + 1}: {this} {string.Join(" ", phrase.phones.Select(p => p.phoneme))}";
                 progress.Complete(0, progressInfo);
-                var cacheLock = CacheLock(wavPath);
+                var cacheLock = Renderers.GetCacheLock(wavPath);
                 lock (cacheLock) {
                     if (File.Exists(wavPath)) {
                         using (var waveStream = Wave.OpenFile(wavPath)) {
@@ -92,34 +93,35 @@ namespace OpenUtau.Classic {
                     }
                 }
                 if (result.samples == null) {
-                    var phraseSynth = new Worldline.PhraseSynthV2(44100, version == 1 ? 441 : 512, 2048);
+                    var phraseSynth = new Worldline.PhraseSynthV2(44100, hopSize, 2048, useHnsep: version == 11);
                     double posOffsetMs = phrase.positionMs - phrase.leadingMs;
                     foreach (var item in resamplerItems) {
-                        if (cancellation.IsCancellationRequested) {
-                            return result;
-                        }
                         double posMs = item.phone.positionMs - item.phone.leadingMs - (phrase.positionMs - phrase.leadingMs);
                         double skipMs = item.skipOver;
                         double lengthMs = item.phone.envelope[4].X - item.phone.envelope[0].X;
                         double fadeInMs = item.phone.envelope[1].X - item.phone.envelope[0].X;
                         double fadeOutMs = item.phone.envelope[4].X - item.phone.envelope[3].X;
-                        try {
-                            phraseSynth.AddRequest(item, posMs, skipMs, lengthMs, fadeInMs, fadeOutMs);
-                        } catch (SynthRequestError e) {
-                            if (e is CutOffExceedDurationError cee) {
-                                throw new MessageCustomizableException(
-                                    $"Failed to render\n Oto error: cutoff exceeds audio duration \n{item.phone.phoneme}",
-                                    $"<translate:errors.failed.synth.cutoffexceedduration>\n{item.phone.phoneme}",
-                                    e);
-                            }
-                            if (e is CutOffBeforeOffsetError cbe) {
-                                throw new MessageCustomizableException(
-                                    $"Failed to render\n Oto error: cutoff before offset \n{item.phone.phoneme}",
-                                    $"<translate:errors.failed.synth.cutoffbeforeoffset>\n{item.phone.phoneme}",
-                                    e);
-                            }
-                            throw e;
+                        phraseSynth.AddRequest(item, posMs, skipMs, lengthMs, fadeInMs, fadeOutMs);
+                    }
+                    try {
+                        phraseSynth.AnalyzeRequests(cancellation.Token);
+                    } catch (OperationCanceledException) {
+                        return result;
+                    } catch (SynthRequestError e) {
+                        string phoneme = e.Item?.phone.phoneme ?? string.Empty;
+                        if (e is CutOffExceedDurationError cee) {
+                            throw new MessageCustomizableException(
+                                $"Failed to render\n Oto error: cutoff exceeds audio duration \n{phoneme}",
+                                $"<translate:errors.failed.synth.cutoffexceedduration>\n{phoneme}",
+                                e);
                         }
+                        if (e is CutOffBeforeOffsetError cbe) {
+                            throw new MessageCustomizableException(
+                                $"Failed to render\n Oto error: cutoff before offset \n{phoneme}",
+                                $"<translate:errors.failed.synth.cutoffbeforeoffset>\n{phoneme}",
+                                e);
+                        }
+                        throw;
                     }
                     int frames = (int)Math.Ceiling(result.estimatedLengthMs / frameMs);
                     var f0 = SampleCurve(phrase, phrase.pitches, 0, frames, x => MusicMath.ToneToFreq(x * 0.01));
@@ -128,7 +130,9 @@ namespace OpenUtau.Classic {
                     var breathiness = SampleCurve(phrase, phrase.breathiness, 0.5, frames, x => 0.5 + 0.005 * x);
                     var voicing = SampleCurve(phrase, phrase.voicing, 1.0, frames, x => 0.01 * x);
                     phraseSynth.SetCurves(f0, gender, tension, breathiness, voicing);
-                    if (version == 1) {
+                    if (version == 11) {
+                        result.samples = phraseSynth.SynthContinuousNoise(seed: phrase.hash);
+                    } else if (version == 10) {
                         result.samples = phraseSynth.Synth();
                     } else {
                         var (totalFrames, f0Out, spEnvOut, apOut) = phraseSynth.SynthFeatures();
@@ -152,7 +156,7 @@ namespace OpenUtau.Classic {
                         using var session = Onnx.getInferenceSession(OpenUtau.Core.Classic.Data.Resources.mel, OnnxRunnerChoice.CPU);
                         using var results = session.Run(inputs);
                         var melOutput = results.First(r => r.Name == "mel").AsTensor<float>();
-                        const string vocoderPkg = "pc-nsf-hifigan";
+                        const string vocoderPkg = Hifisampler.HifiVocoder.PackageId;
                         string vocoderPath = PackageManager.Inst.GetInstalledPath(vocoderPkg) ?? "";
                         if (vocoderBytes == null) {
                             var configPath = Path.Combine(vocoderPath, "vocoder.yaml");
@@ -184,10 +188,16 @@ namespace OpenUtau.Classic {
                         }
                     }
                     AddDirects(phrase, resamplerItems, result);
-                    var source = new WaveSource(0, 0, 0, 1);
-                    source.SetSamples(result.samples);
-                    lock (cacheLock) {
-                        WaveFileWriter.CreateWaveFile16(wavPath, new ExportAdapter(source).ToMono(1, 0));
+                    if (result.samples != null) {
+                        cancellation.Token.ThrowIfCancellationRequested();
+                        // Synchronous: a detached write races a subsequent cold re-render's read.
+                        try {
+                            lock (cacheLock) {
+                                Wave.WriteMono16Wav(wavPath, result.samples);
+                            }
+                        } catch (Exception e) {
+                            Serilog.Log.Error(e, $"Failed to write cache file: {wavPath}");
+                        }
                     }
                 }
                 progress.Complete(phrase.phones.Length, progressInfo);
@@ -249,6 +259,13 @@ namespace OpenUtau.Classic {
             return new UExpressionDescriptor[] { };
         }
 
-        public override string ToString() => version == 1 ? Renderers.WORLDLINE_R : Renderers.WORLDLINE_R2;
+        // The Worldline-R variants render the same expressions, so share Worldline-R's graphs.
+        public string ExpressionGraphSlot => Renderers.WORLDLINE_R;
+
+        public override string ToString() => version switch {
+            11 => Renderers.WORLDLINE_R11,
+            20 => Renderers.WORLDLINE_R2,
+            _ => Renderers.WORLDLINE_R,
+        };
     }
 }
