@@ -1,0 +1,181 @@
+{
+  "date": "2026-10-24",
+  "reviewedLocalHead": "7a9b1b34b02ae648771726ab1db7ae216511c3c6",
+  "upstreamHead": "a9547895f93e23371949a12d34e98deb5dad0bda",
+  "scope": "补追fd8c843e以前但本地尚未实现的核心引擎工作包，不改变新增14提交统计；此清单不是已证明最小可摘取集合。",
+  "rendererHook": "Renderers.WORLDLINE_R11 + exact dispatch before prefix fallback + WorldlineRenderer version11",
+  "resamplerHook": "HifisamplerResampler:IResampler + ToolsManager.SearchResamplers + ClassicRenderer/wavtool dispatch",
+  "packages": [
+    "hnsep_240512",
+    "pc_nsf_hifigan_44.1k_hop512_128bin_2025.02"
+  ],
+  "sources": [
+    {
+      "sha": "601c58c40f63654630793e6c2c0c750fb7eef0ac",
+      "subject": "Port the worldline resampler to C#",
+      "committed": "2026-09-26T01:10:36-04:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/601c58c40f63654630793e6c2c0c750fb7eef0ac",
+      "assessment": "C#重采样移植，移除旧native Resample路径，需适配本地调用。"
+    },
+    {
+      "sha": "ba3ddd6422e631b544d0e51b82d0df79a32e6ae6",
+      "subject": "Use caller-owned buffers in worldline API",
+      "committed": "2026-09-26T01:10:36-04:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/ba3ddd6422e631b544d0e51b82d0df79a32e6ae6",
+      "assessment": "调用方输出buffer与F0/synthesis长度helper，需同步native ABI。"
+    },
+    {
+      "sha": "dcae63e0ecca30e4622c2b0838a8987eaca6796e",
+      "subject": "Analyze Worldline phrase segments in parallel",
+      "committed": "2026-09-26T20:57:14-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/dcae63e0ecca30e4622c2b0838a8987eaca6796e",
+      "assessment": "乐句分段分析并行化，与本地限并发/取消保护结合。"
+    },
+    {
+      "sha": "ea3e92f76bc5169bdb306bdaf1af7f1fc8b2d1d7",
+      "subject": "Add Worldline-R1.1 renderer",
+      "committed": "2026-09-27T16:05:04-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/ea3e92f76bc5169bdb306bdaf1af7f1fc8b2d1d7",
+      "assessment": "R1.1、Hnsep、FftFlat1.0.1、native连续噪声API和引擎分派。"
+    },
+    {
+      "sha": "04c4e61005eadbb368cc7c83104cb60665da1203",
+      "subject": "Rebuild Worldline (#2468)",
+      "committed": "2026-09-27T21:16:36-04:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/04c4e61005eadbb368cc7c83104cb60665da1203",
+      "assessment": "含新增导出的native重构建，只对Windows目标验证。"
+    },
+    {
+      "sha": "dd88522b59176b8427fd64cbdedef359a08a1ad0",
+      "subject": "Follow the ONNX runner preference in hnsep",
+      "committed": "2026-09-28T22:42:38-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/dd88522b59176b8427fd64cbdedef359a08a1ad0",
+      "assessment": "hnsep跟随ONNX runner，GPU会话串行；初版固定CPU说法已过时。"
+    },
+    {
+      "sha": "95f0ad735b7cdac85630229acab12e28df7c9d4e",
+      "subject": "Add built-in hifisampler resampler",
+      "committed": "2026-10-01T20:52:39-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/95f0ad735b7cdac85630229acab12e28df7c9d4e",
+      "assessment": "内置C#hifisampler DSP与IResampler/ToolsManager入口。"
+    },
+    {
+      "sha": "d30dc4897a0d3e6b380f47e20c0ec48a987fb0d8",
+      "subject": "Drive built-in resamplers' voice effects with curves",
+      "committed": "2026-10-01T22:34:00-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/d30dc4897a0d3e6b380f47e20c0ec48a987fb0d8",
+      "assessment": "内置重采样器声学曲线输入/采样/hash与GRWC表达式。"
+    },
+    {
+      "sha": "0c423cdeb17b8bef69e2ad2039a7abde250d4bf6",
+      "subject": "Cache hnsep separation next to the source, as hifisampler does",
+      "committed": "2026-10-01T22:57:05-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/0c423cdeb17b8bef69e2ad2039a7abde250d4bf6",
+      "assessment": "源文件旁hnsep缓存、TorchFile读写、只读声库容错。"
+    },
+    {
+      "sha": "dc69572fa4f0da4de128ce152f23a407289ef68f",
+      "subject": "Replace tension with the glottal Rd for hifisampler and Worldline-R1.1",
+      "committed": "2026-10-02T00:16:01-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/dc69572fa4f0da4de128ce152f23a407289ef68f",
+      "assessment": "glottal Rd张力替代早期实现，R1.1与hifisampler共同受影响。"
+    },
+    {
+      "sha": "ed8e5369f1ac67dc50380374d5e620b14ff6da48",
+      "subject": "Fix Worldline crash on lengthened preutterance",
+      "committed": "2026-10-03T01:20:19-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/ed8e5369f1ac67dc50380374d5e620b14ff6da48",
+      "assessment": "本地已适配延长preutter修复，迁移时保留并复核新代码。"
+    },
+    {
+      "sha": "d6519728237881e1a1f73ef8f495c1a4df4971e9",
+      "subject": "Use Worldline's auto gain for hifisampler's P flag",
+      "committed": "2026-10-03T16:23:23-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/d6519728237881e1a1f73ef8f495c1a4df4971e9",
+      "assessment": "hifisampler P采用Worldline自动增益。"
+    },
+    {
+      "sha": "e92d5e560093d1db716dae22c0ca809f9002a2d7",
+      "subject": "Add WORLDLINE-R1.1 to the default renderer preference",
+      "committed": "2026-10-08T23:24:12-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/e92d5e560093d1db716dae22c0ca809f9002a2d7",
+      "assessment": "后端落地后将R1.1接默认renderer偏好，不能仅显示名称。"
+    }
+  ],
+  "nativePeInspection": {
+    "localSourceSha256": "5e3d2e714cac24abb6ba1843f5992132757f3f7f20c9e8505a740fd2e86e763c",
+    "upstreamSourceSha256": "e63f495978ff43ed3b65581a02cb3cdd28074db87e5952e6594945292f10a396",
+    "localExports": [
+      "DecodeBap",
+      "DecodeMgc",
+      "F0",
+      "InitAnalysisConfig",
+      "PhraseSynthAddRequest",
+      "PhraseSynthDelete",
+      "PhraseSynthNew",
+      "PhraseSynthSetCurves",
+      "PhraseSynthSynth",
+      "Resample",
+      "WorldAnalysis",
+      "WorldAnalysisF0In",
+      "WorldSynthesis",
+      "ou_audio_device_start",
+      "ou_audio_device_stop",
+      "ou_audio_get_error_message",
+      "ou_free_audio_device",
+      "ou_free_audio_device_infos",
+      "ou_get_audio_device_api",
+      "ou_get_audio_device_infos",
+      "ou_get_audio_device_name",
+      "ou_init_audio_device",
+      "ou_init_audio_device_auto"
+    ],
+    "upstreamExports": [
+      "DecodeBap",
+      "DecodeMgc",
+      "F0",
+      "F0FrameCount",
+      "HnAnalysisF0In",
+      "InitAnalysisConfig",
+      "WorldAnalysisF0In",
+      "WorldSynthesis",
+      "WorldSynthesisContinuousNoise",
+      "WorldSynthesisSampleCount",
+      "ou_audio_device_start",
+      "ou_audio_device_stop",
+      "ou_audio_get_error_message",
+      "ou_free_audio_device",
+      "ou_free_audio_device_infos",
+      "ou_get_audio_device_api",
+      "ou_get_audio_device_infos",
+      "ou_get_audio_device_name",
+      "ou_init_audio_device",
+      "ou_init_audio_device_auto"
+    ],
+    "method": "Static PE export-name parsing only; DLLs were not loaded or executed; names do not establish parameter ABI compatibility.",
+    "addedExports": [
+      "F0FrameCount",
+      "HnAnalysisF0In",
+      "WorldSynthesisContinuousNoise",
+      "WorldSynthesisSampleCount"
+    ],
+    "removedExports": [
+      "PhraseSynthAddRequest",
+      "PhraseSynthDelete",
+      "PhraseSynthNew",
+      "PhraseSynthSetCurves",
+      "PhraseSynthSynth",
+      "Resample",
+      "WorldAnalysis"
+    ]
+  },
+  "verification": {
+    "sourceReview": true,
+    "staticPeExportParsing": true,
+    "nativeDllLoaded": false,
+    "buildRun": false,
+    "testsRun": false,
+    "modelsInstalled": false,
+    "productChanged": false
+  }
+}

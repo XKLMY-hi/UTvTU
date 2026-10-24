@@ -2,6 +2,8 @@
 
 ## 2026-10-24 上游重要更新勘察（最新，仅审查）
 
+- **用户后续补充的引擎重点已补查**：WORLDLINE R1.1 `ea3e92f7`、内置hifisampler `95f0ad73`及C#移植/native ABI/hnsep/Rd/曲线/缓存/自动增益前置，见同一报告新增引擎节与[补充JSON](.opencode/plans/upstream-review-2026-10-24/engines.json)。它们早于fd8同步点，不计入新增14条，但本地确实尚未实现；建议小修后优先推进该引擎工作包。上一轮缺后端而略过e92默认选项，不等于引擎无引入价值。
+- **切勿只换DLL/加选项**：本地CreateRenderer前缀兜底把WORLDLINE-R1.1映射为旧R1；native PE静态核查发现上游新库移除Resample/WorldAnalysis/PhraseSynth*，而本地仍声明这些PInvoke；ba3ddd64还改了同名API参数。须C#interop/采样实现与win-x64 DLL成套迁移。hifisampler挂CLASSIC的IResampler/ToolsManager入口，R1.1挂renderer入口；Hnsep与声码器包使用现有资源中心/缺包异常，保留本地ONNX与取消锁。尚未实现/安装模型/替换DLL/运行测试。
 - 用户要求立刻勘察。已核G盘路径、plus-develop、origin/upstream；起点`b30909d6`工作树干净。fetch后上游`fd8c843e`→`a9547895f93e23371949a12d34e98deb5dad0bda`，新增14提交/70文件/+3786/-1023，GitHub compare复核一致。[完整审查](.opencode/plans/upstream-review-2026-10-24.md)、[逐项清单](.opencode/plans/upstream-review-2026-10-24/commits.json)。仅勘察，尚未收到本轮引入指令；源码/DLL/分支未变，未merge/cherry-pick、构建/测试、启动/截图、打包/推送。
 - 大项：`2b68b1da`Jint4.17 JS音素器+`f402f075`开发者热重载，必须完整适配稳定Id、工程保存/轨道切换/音符覆盖/包通知，本地仍依赖GetType身份；后台扫描/实例生命周期需保留现有线程与代次，不把10秒脚本加载压UI。脚本限制为进程内每调用，非工程总预算。
 - ENUNU `9303e64e/af55b9ed/a9547895`：服务2能力协商/pitch→acoustic_f0、旧服务回退、model子目录table/hed和未知歌词、半拍内合句+UST补R+位置哈希；本地IRenderer/FromPart缺ShouldMergePhrases接口，要适配更早`f32e4ab5`。上游300秒同步等待和端口缓存/重连TODO仍在，不宣称解决大工程卡顿。

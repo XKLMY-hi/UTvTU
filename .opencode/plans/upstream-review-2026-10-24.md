@@ -73,7 +73,43 @@
 4. JavaScript音素器、稳定ID、包生命周期、开发者工具作为一个完整里程碑；不把半接线的脚本入口交付给用户。
 5. 表达式节点图完整前置与此次编辑增强另立完整里程碑，保留现有界面与工程向后兼容；不会用两条增量假装已支持图求值。
 
-这是建议顺序，不代表用户已经要求执行本轮引入。用户当前要求的勘察已完成。
+这是初轮建议；用户随后指出的WORLDLINE R1.1与hifisampler应按下节调整优先级。用户当前要求的勘察已完成，尚未执行本轮引入。
+
+## 补充：WORLDLINE R1.1与内置hifisampler（用户指出后重点补查）
+
+初轮只沿上次同步点后的14条追查，漏将这组更早但本地未实现的核心引擎列入重点。此前把`e92d5e56`默认设置项因“缺后端”排除，只能说明当时未接后端，不能据此把整组能力长期排除。**建议把这个引擎工作包放在第一批小修之后，优先于ENUNU/JS/节点图完整工作包推进。**
+
+主要来源与逐项确认见[引擎补充清单与原生导出记录](upstream-review-2026-10-24/engines.json)。这些都已在`fd8c843e`祖先中，不能把新增14条的计数改成包含它们。
+
+### 两个不同层级的接入入口
+
+- [WORLDLINE R1.1，ea3e92f7](https://github.com/openutau/OpenUtau/commit/ea3e92f76bc5169bdb306bdaf1af7f1fc8b2d1d7)：WorldlineRenderer新增独立version11（旧R为10、R2为20），约5ms分析帧，hnsep谐波分离、WORLD周期成分与连续噪声合成。`Renderers.WORLDLINE_R11`注册后出现在经典声库的渲染器列表；`e92d5e56`补默认渲染器偏好。依赖`hnsep_240512`包。
+- [内置hifisampler，95f0ad73](https://github.com/openutau/OpenUtau/commit/95f0ad735b7cdac85630229acab12e28df7c9d4e)：已经是`openhachimi/hifisampler`后端的C#移植与DSP实现，通过`HifisamplerResampler : IResampler`、`ToolsManager.SearchResamplers`挂入**CLASSIC采样器列表**，稳定名称`hifisampler`参与缓存身份。源log-mel拉伸/循环后用pc-nsf-hifigan发声，支持hnsep相关处理。声码器包为`pc_nsf_hifigan_44.1k_hop512_128bin_2025.02`，对应的hnsep特征处理还需分离模型；不能将它归为VST、音素器或只显示占位入口。
+
+两者共用部分分析能力，但不是“R1.1就是hifisampler”；一个是整句renderer，另一个是Classic逐音素resampler。上游原始hifisampler提交对应Apache2.0许可与来源注释，落地时同步鸣谢/随附许可与模型各自声明。
+
+### 确认的本地缺口
+
+1. 本地Renderers只有R/R2，WorldlineRenderer仅接受version1/2；`CreateRenderer`用`StartsWith(WORLDLINE_R.Substring(0,9))`兜底，因此传入`WORLDLINE-R1.1`会静默创建旧R1。必须在前缀判断前精确分派R1.1，保留旧工程名称兼容与独立缓存版本。
+2. 本地没有HifisamplerResampler、Hifisampler目录、Hnsep/HnsepCache、Rd分析与TorchFile缓存读写。IResampler也没有上游`NoWrapperScript`能力标记。需确保Classic/SharpWavtool/外置wavtool均不会把内置采样器虚拟FilePath当exe运行，原始音频路径不误换临时副本；保留Windows大小写不敏感的内置名称保护。
+3. `d30dc489`给ResamplerItem增加张力、气声、发声、性别、growl曲线采样，并将实际输入写入hash。注册入口之外还要接参数、缓存与GRWC表达式；否则曲线界面可编辑却不会正确作用，或复用旧缓存。
+4. `dc69572f`把早期tension处理换为glottal Rd；`0c423cde`增加与hifisampler互通的源文件旁`_hnsep`缓存；`d6519728`统一P自动增益。应采用完成这些修正后的实现，不能仅取最早95f版本。`dd88522b`已将hnsep从初版固定CPU改为遵循ONNX runner并串行保护GPU；本地还须适配已有DML→会话锁顺序及生命周期。
+5. 现有资源中心已能处理结构化MissingPackageException，可接hnsep与声码器精确安装入口；不新增另一套下载/安装宿主。本轮没有真实安装或运行模型。
+
+### 原生ABI配套是必要前置
+
+已使用纯Python解析仓库win-x64 DLL的PE导出表，**未加载/执行DLL**。本地SHA256为`5e3d2e714cac24abb6ba1843f5992132757f3f7f20c9e8505a740fd2e86e763c`，上游为`e63f495978ff43ed3b65581a02cb3cdd28074db87e5952e6594945292f10a396`。
+
+- 新增`F0FrameCount`、`HnAnalysisF0In`、`WorldSynthesisContinuousNoise`、`WorldSynthesisSampleCount`。
+- 移除`Resample`、`WorldAnalysis`与五项`PhraseSynth*`；本地Worldline.cs仍声明这些旧P/Invoke。
+- `601c58c4`已将旧native resampler移至C#；`ba3ddd64`改为调用方持有输出buffer，部分同名API参数ABI也变化。因此**不能直接换新DLL，也不能让新C#调用旧DLL**。需要配套迁移interop、C#重采样实现和Windows native库，验证各调用者（含Vogen/ENUNU的WORLD入口）并同步打包检查。导出名相同本身不证明ABI兼容。
+- `04c4e610`提供了带R1.1导出的上游重构建产物；本项目Windows唯一验证目标，无需扩大其他平台投入。
+
+### 更新后的实施划分
+
+先做现有小修；随后按“C#/native ABI配套→共享hnsep/缓存/Rd与会话保护→R1.1与hifisampler真实注册→曲线/参数hash→资源中心缺包与发布检查”推进。表达式图槽位是上游的附带接线，本地尚无图系统，两个引擎本身不必等待整套图编辑器落地。
+
+可先沿用上游DSP/时间映射/增益/Rd/缓存的小型夹具，补本地分派与旧工程、无模型错误、取消和并发缓存检查；真实听感和模型耗时另行实机验收。既有`ed8e5369`延长preutter修复已被本地适配，不覆盖为旧版。本轮只完成源码/PE静态勘察，未做这些实施与运行验证。
 
 ## 审查边界
 
