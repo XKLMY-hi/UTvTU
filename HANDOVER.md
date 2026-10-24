@@ -1,5 +1,14 @@
 # HANDOVER — 新会话交接（2026-10-17 上游集成完成）
 
+## 2026-10-24 上游重要更新勘察（最新，仅审查）
+
+- 用户要求立刻勘察。已核G盘路径、plus-develop、origin/upstream；起点`b30909d6`工作树干净。fetch后上游`fd8c843e`→`a9547895f93e23371949a12d34e98deb5dad0bda`，新增14提交/70文件/+3786/-1023，GitHub compare复核一致。[完整审查](.opencode/plans/upstream-review-2026-10-24.md)、[逐项清单](.opencode/plans/upstream-review-2026-10-24/commits.json)。仅勘察，尚未收到本轮引入指令；源码/DLL/分支未变，未merge/cherry-pick、构建/测试、启动/截图、打包/推送。
+- 大项：`2b68b1da`Jint4.17 JS音素器+`f402f075`开发者热重载，必须完整适配稳定Id、工程保存/轨道切换/音符覆盖/包通知，本地仍依赖GetType身份；后台扫描/实例生命周期需保留现有线程与代次，不把10秒脚本加载压UI。脚本限制为进程内每调用，非工程总预算。
+- ENUNU `9303e64e/af55b9ed/a9547895`：服务2能力协商/pitch→acoustic_f0、旧服务回退、model子目录table/hed和未知歌词、半拍内合句+UST补R+位置哈希；本地IRenderer/FromPart缺ShouldMergePhrases接口，要适配更早`f32e4ab5`。上游300秒同步等待和端口缓存/重连TODO仍在，不宣称解决大工程卡顿。
+- SBP `6164df40`：大小写/父音符属性/边界/YAML优先级/多语言。发现迁移失败返回false后仍备份并模板覆盖原YAML，实施时须改为失败保留+验证后替换，补临时目录回归，不照搬。最新表达式图`fca90ceb/1f2eb8a4`仅交互增强；本地缺整个图基础，已追8项早期前置（求值/音素/音高/编辑器/RPIT-PITO/导入导出等），建议独立完整工作包，保护刚修复的音高手势和本地后台构建。
+- 小修优先：空subbanks色映射越界`27ecf957`（本地NewColors[0]仍无保护）；完整滑音预设`010d4b12`（本地仅长度/起点）；VCCV别名`7aa1b1ab`；Shift曲线条件`33302b3d`；轨头数字`bc194b6f`（本地已有MinWidth/Padding，缺SelectAll/捕获修正）。`0eae08c5`取消后截断缓存的风险本地已有批处理前/进程返回后Throw与token保护，可补提前退出，不算完全缺失。
+- 14条独立只读apply --check，仅`7aa1b1ab/af55b9ed`文本通过，其余需适配；不代表构建/运行或累加可合并。原补丁/脚本`.dsh/upstream-review-20261024/`。tip标签`0.1.577.2-alpha`，`0.1.576`停在bc194b6f，不称全部已正式发布。
+
 ## 2026-10-24 偏好设置去卡片与欢迎动态图形恢复（最新）
 
 - 用户要求设置页按设计稿舍弃卡片、恢复欢迎动态图形。产品提交 `8af2a1b4`，本地未推送；[实现与验收](.opencode/plans/preferences-flat-2026-10-24.md)、[验证JSON](.opencode/plans/preferences-flat-2026-10-24/validation.json)。G盘路径/plus-develop/origin已核，后续仍须每轮核路径。

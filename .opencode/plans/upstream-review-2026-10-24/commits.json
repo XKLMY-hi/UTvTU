@@ -1,0 +1,356 @@
+{
+  "date": "2026-10-24",
+  "localHead": "b30909d67918aeff91aa8f65e7b09198b09ea18b",
+  "branch": "plus-develop",
+  "previousReviewedUpstream": "fd8c843e323262a57f3da2d86fbb740369216dc3",
+  "upstreamHead": "a9547895f93e23371949a12d34e98deb5dad0bda",
+  "commits": [
+    {
+      "sha": "fca90ceb18c422bd9330d4c96d998e91d9fb4d64",
+      "subject": "Expression graph: zoom, multi-select and copy/paste",
+      "committed": "2026-10-17T23:52:05-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/fca90ceb18c422bd9330d4c96d998e91d9fb4d64",
+      "files": [
+        "OpenUtau.Core/ExpressionGraph/ExpressionGraphCommands.cs",
+        "OpenUtau.Test/Core/ExpressionGraph/ExpressionGraphTest.cs",
+        "OpenUtau/Controls/ExpressionGraphCanvas.cs",
+        "OpenUtau/Controls/ExpressionGraphEditor.axaml.cs",
+        "OpenUtau/Strings/Strings.axaml"
+      ],
+      "textApplyCheck": false,
+      "applyErrors": [
+        "error: OpenUtau.Core/ExpressionGraph/ExpressionGraphCommands.cs: No such file or directory",
+        "error: OpenUtau.Test/Core/ExpressionGraph/ExpressionGraphTest.cs: No such file or directory",
+        "error: OpenUtau/Controls/ExpressionGraphCanvas.cs: No such file or directory",
+        "error: OpenUtau/Controls/ExpressionGraphEditor.axaml.cs: No such file or directory",
+        "error: patch failed: OpenUtau/Strings/Strings.axaml:297",
+        "error: OpenUtau/Strings/Strings.axaml: patch does not apply"
+      ],
+      "recommendation": "feature-prerequisites",
+      "localAssessment": "表达式图缩放/多选/复制粘贴；本地缺完整图基础，追溯求值、工程、命令与音高分层前置。"
+    },
+    {
+      "sha": "1f2eb8a486c2b961d26e6aa73514bc30ec9d229f",
+      "subject": "Expression graph: add a help panel listing the gestures",
+      "committed": "2026-10-17T23:52:05-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/1f2eb8a486c2b961d26e6aa73514bc30ec9d229f",
+      "files": [
+        "OpenUtau/Controls/ExpressionGraphEditor.axaml",
+        "OpenUtau/Strings/Strings.axaml"
+      ],
+      "textApplyCheck": false,
+      "applyErrors": [
+        "error: OpenUtau/Controls/ExpressionGraphEditor.axaml: No such file or directory",
+        "error: patch failed: OpenUtau/Strings/Strings.axaml:307",
+        "error: OpenUtau/Strings/Strings.axaml: patch does not apply"
+      ],
+      "recommendation": "feature-prerequisites",
+      "localAssessment": "图编辑器手势帮助；与完整表达式图工作包适配。"
+    },
+    {
+      "sha": "6164df40b14823d6855568a94f881fdd8d299c0d",
+      "subject": "[SBP] Fix Case-Sensitivity Issue, Implement GetHardcodedFallbacks, Changes to Dictionary Overrides (#2428)",
+      "committed": "2026-10-17T23:56:54-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/6164df40b14823d6855568a94f881fdd8d299c0d",
+      "files": [
+        "OpenUtau.Core/Api/Phonemizer.cs",
+        "OpenUtau.Plugin.Builtin/ArpasingPlusPhonemizer.cs",
+        "OpenUtau.Plugin.Builtin/EnXSampaPhonemizer.cs",
+        "OpenUtau.Plugin.Builtin/EnglishCpVPhonemizer.cs",
+        "OpenUtau.Plugin.Builtin/FilipinoPhonemizer.cs",
+        "OpenUtau.Plugin.Builtin/GermanVCCVPhonemizer.cs",
+        "OpenUtau.Plugin.Builtin/SpanishMakkusanPhonemizer.cs",
+        "OpenUtau.Plugin.Builtin/SpanishSyllableBasedPhonemizer.cs",
+        "OpenUtau.Plugin.Builtin/SpanishVCCVPhonemizer.cs",
+        "OpenUtau.Plugin.Builtin/SyllableBasedPhonemizer.cs"
+      ],
+      "textApplyCheck": false,
+      "applyErrors": [
+        "error: patch failed: OpenUtau.Plugin.Builtin/EnXSampaPhonemizer.cs:765",
+        "error: OpenUtau.Plugin.Builtin/EnXSampaPhonemizer.cs: patch does not apply"
+      ],
+      "recommendation": "adapt-with-data-preservation",
+      "localAssessment": "SBP公共层及多语言规则更新；修正迁移失败后仍覆盖用户YAML的路径，补精简回归。"
+    },
+    {
+      "sha": "7aa1b1ab2b70b0a58f4a754f9b6c8b15652cc8d9",
+      "subject": "till slowly fix (#2534)",
+      "committed": "2026-10-17T23:58:15-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/7aa1b1ab2b70b0a58f4a754f9b6c8b15652cc8d9",
+      "files": [
+        "OpenUtau.Plugin.Builtin/EnglishVCCVPhonemizer.cs"
+      ],
+      "textApplyCheck": true,
+      "applyErrors": [],
+      "recommendation": "recommended-small-fix",
+      "localAssessment": "英语VCCV别名优先级；文本补丁可应用，未运行验证。"
+    },
+    {
+      "sha": "27ecf9571ca2ff94a495a6a5d7882ac7d900fbf4",
+      "subject": "Fix voice color remap crash when a DiffSinger voicebank has no subbanks (#2537)",
+      "committed": "2026-10-18T03:33:57-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/27ecf9571ca2ff94a495a6a5d7882ac7d900fbf4",
+      "files": [
+        "OpenUtau/ViewModels/VoiceColorMappingViewModel.cs",
+        "OpenUtau/Views/MainWindow.axaml.cs"
+      ],
+      "textApplyCheck": false,
+      "applyErrors": [
+        "error: patch failed: OpenUtau/Views/MainWindow.axaml.cs:1979",
+        "error: OpenUtau/Views/MainWindow.axaml.cs: patch does not apply"
+      ],
+      "recommendation": "recommended-crash-fix",
+      "localAssessment": "本地NewColors[0]无空集合检查，优先修复空subbanks音色映射越界。"
+    },
+    {
+      "sha": "010d4b12b839e68e94fad585d9ae89d28bbd3c57",
+      "subject": "note properties: reset pitch to portamento preset",
+      "committed": "2026-10-18T15:21:04-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/010d4b12b839e68e94fad585d9ae89d28bbd3c57",
+      "files": [
+        "OpenUtau.Test/App/PortamentoPresetTest.cs",
+        "OpenUtau/ViewModels/NotePropertiesViewModel.cs"
+      ],
+      "textApplyCheck": false,
+      "applyErrors": [
+        "error: patch failed: OpenUtau/ViewModels/NotePropertiesViewModel.cs:93",
+        "error: OpenUtau/ViewModels/NotePropertiesViewModel.cs: patch does not apply"
+      ],
+      "recommendation": "adapt-existing-edit-session",
+      "localAssessment": "本地滑音预设只应用/保存长度起点；适配完整点克隆和既有撤销会话。"
+    },
+    {
+      "sha": "0eae08c56b2e9b1b6be6308de06721840d286729",
+      "subject": "fix: stop external wavtools from caching a cut-short phrase",
+      "committed": "2026-10-18T16:54:03-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/0eae08c56b2e9b1b6be6308de06721840d286729",
+      "files": [
+        "OpenUtau.Core/Classic/ExeWavtool.cs"
+      ],
+      "textApplyCheck": false,
+      "applyErrors": [
+        "error: patch failed: OpenUtau.Core/Classic/ExeWavtool.cs:36",
+        "error: OpenUtau.Core/Classic/ExeWavtool.cs: patch does not apply"
+      ],
+      "recommendation": "partly-covered-locally",
+      "localAssessment": "本地批处理前/进程返回后已有取消异常与进程token，可补循环提前退出，未复现截断。"
+    },
+    {
+      "sha": "bc194b6fe4897427a73066390b286e11205fd10f",
+      "subject": "fix: put the track volume and pan editors on their digits",
+      "committed": "2026-10-18T17:36:52-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/bc194b6fe4897427a73066390b286e11205fd10f",
+      "files": [
+        "OpenUtau.UiTest/TrackHeaderVolumePanTest.cs",
+        "OpenUtau/Controls/TrackHeader.axaml",
+        "OpenUtau/Controls/TrackHeader.axaml.cs"
+      ],
+      "textApplyCheck": false,
+      "applyErrors": [
+        "error: patch failed: OpenUtau/Controls/TrackHeader.axaml:205",
+        "error: OpenUtau/Controls/TrackHeader.axaml: patch does not apply",
+        "error: patch failed: OpenUtau/Controls/TrackHeader.axaml.cs:246",
+        "error: OpenUtau/Controls/TrackHeader.axaml.cs: patch does not apply"
+      ],
+      "recommendation": "partly-covered-adapt-ui",
+      "localAssessment": "MinWidth0/Padding0已有；补文本定位、SelectAll与Capture行为，保留MD3和混音会话。"
+    },
+    {
+      "sha": "2b68b1da94800b37a4f890621796e70d9e078a17",
+      "subject": "Add sandboxed JavaScript phonemizers using Jint",
+      "committed": "2026-10-20T21:52:08-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/2b68b1da94800b37a4f890621796e70d9e078a17",
+      "files": [
+        "OpenUtau.Core/Api/Phonemizer.cs",
+        "OpenUtau.Core/Api/PhonemizerFactory.cs",
+        "OpenUtau.Core/Commands/Notifications.cs",
+        "OpenUtau.Core/DocManager.cs",
+        "OpenUtau.Core/Js/JsPhonemizer.cs",
+        "OpenUtau.Core/Js/JsPhonemizerFactory.cs",
+        "OpenUtau.Core/Js/JsSandbox.cs",
+        "OpenUtau.Core/Js/Template/jsconfig.json",
+        "OpenUtau.Core/Js/Template/main.js",
+        "OpenUtau.Core/Js/Template/openutau.d.ts",
+        "OpenUtau.Core/Js/Template/oudep.yaml",
+        "OpenUtau.Core/OpenUtau.Core.csproj",
+        "OpenUtau.Core/PackageManager.cs",
+        "OpenUtau.Core/Ustx/UPart.cs",
+        "OpenUtau.Core/Ustx/UTrack.cs",
+        "OpenUtau.Test/Files/ja_vcv_js/ja_vcv.js",
+        "OpenUtau.Test/Files/ja_vcv_js/jsconfig.json",
+        "OpenUtau.Test/Files/ja_vcv_js/oudep.yaml",
+        "OpenUtau.Test/Plugins/JaVcvJsTest.cs",
+        "OpenUtau.Test/Plugins/JsPhonemizerTest.cs",
+        "OpenUtau/App.axaml.cs",
+        "OpenUtau/ThemeLoader.cs",
+        "OpenUtau/ViewModels/MainWindowViewModel.cs",
+        "OpenUtau/ViewModels/NotePropertiesViewModel.cs",
+        "OpenUtau/ViewModels/SingersViewModel.cs",
+        "OpenUtau/ViewModels/TrackHeaderViewModel.cs"
+      ],
+      "textApplyCheck": false,
+      "applyErrors": [
+        "error: patch failed: OpenUtau.Core/Api/PhonemizerFactory.cs:26",
+        "error: OpenUtau.Core/Api/PhonemizerFactory.cs: patch does not apply",
+        "error: patch failed: OpenUtau.Core/DocManager.cs:326",
+        "error: OpenUtau.Core/DocManager.cs: patch does not apply",
+        "error: patch failed: OpenUtau.Core/OpenUtau.Core.csproj:15",
+        "error: OpenUtau.Core/OpenUtau.Core.csproj: patch does not apply",
+        "error: patch failed: OpenUtau.Core/Ustx/UPart.cs:109",
+        "error: OpenUtau.Core/Ustx/UPart.cs: patch does not apply",
+        "error: patch failed: OpenUtau/ViewModels/MainWindowViewModel.cs:500",
+        "error: OpenUtau/ViewModels/MainWindowViewModel.cs: patch does not apply",
+        "error: patch failed: OpenUtau/ViewModels/NotePropertiesViewModel.cs:45",
+        "error: OpenUtau/ViewModels/NotePropertiesViewModel.cs: patch does not apply",
+        "error: patch failed: OpenUtau/ViewModels/TrackHeaderViewModel.cs:81",
+        "error: OpenUtau/ViewModels/TrackHeaderViewModel.cs: patch does not apply"
+      ],
+      "recommendation": "feature-end-to-end",
+      "localAssessment": "Jint脚本音素器、持久ID、包扫描/重载/轨道与音符覆盖需整组适配。"
+    },
+    {
+      "sha": "f402f0756c6fb1bf71ccd669c1f90275acbee177",
+      "subject": "Turn the debug window into a developer window",
+      "committed": "2026-10-20T21:52:08-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/f402f0756c6fb1bf71ccd669c1f90275acbee177",
+      "files": [
+        "OpenUtau/Program.cs",
+        "OpenUtau/Strings/Strings.axaml",
+        "OpenUtau/ViewModels/DebugViewModel.cs",
+        "OpenUtau/ViewModels/DeveloperViewModel.cs",
+        "OpenUtau/Views/DebugWindow.axaml",
+        "OpenUtau/Views/DebugWindow.axaml.cs",
+        "OpenUtau/Views/DeveloperWindow.axaml",
+        "OpenUtau/Views/DeveloperWindow.axaml.cs",
+        "OpenUtau/Views/MainWindow.axaml",
+        "OpenUtau/Views/MainWindow.axaml.cs"
+      ],
+      "textApplyCheck": false,
+      "applyErrors": [
+        "error: patch failed: OpenUtau/Strings/Strings.axaml:163",
+        "error: OpenUtau/Strings/Strings.axaml: patch does not apply",
+        "error: patch failed: OpenUtau/ViewModels/DebugViewModel.cs:1",
+        "error: OpenUtau/ViewModels/DebugViewModel.cs: patch does not apply",
+        "error: patch failed: OpenUtau/Views/DebugWindow.axaml:1",
+        "error: OpenUtau/Views/DebugWindow.axaml: patch does not apply",
+        "error: patch failed: OpenUtau/Views/DebugWindow.axaml.cs:1",
+        "error: OpenUtau/Views/DebugWindow.axaml.cs: patch does not apply",
+        "error: patch failed: OpenUtau/Views/MainWindow.axaml:79",
+        "error: OpenUtau/Views/MainWindow.axaml: patch does not apply",
+        "error: patch failed: OpenUtau/Views/MainWindow.axaml.cs:805",
+        "error: OpenUtau/Views/MainWindow.axaml.cs: patch does not apply"
+      ],
+      "recommendation": "feature-dependent",
+      "localAssessment": "开发者日志、创建模板与热重载；依赖JS包接口，适配本地Fody/MD3/UI线程。"
+    },
+    {
+      "sha": "9303e64e36e3395ffb7e66ecd4d9d781caffd233",
+      "subject": "Large-scale refactoring of the ENUNU server (#2548)",
+      "committed": "2026-10-21T00:22:29-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/9303e64e36e3395ffb7e66ecd4d9d781caffd233",
+      "files": [
+        "OpenUtau.Core/Enunu/EnunuClient.cs",
+        "OpenUtau.Core/Enunu/EnunuConfig.cs",
+        "OpenUtau.Core/Enunu/EnunuConnection.cs",
+        "OpenUtau.Core/Enunu/EnunuEnglishPhonemizer.cs",
+        "OpenUtau.Core/Enunu/EnunuPhonemizer.cs",
+        "OpenUtau.Core/Enunu/EnunuRenderer.cs",
+        "OpenUtau.Core/Enunu/EnunuUtils.cs",
+        "OpenUtau.Test/Core/Enunu/EnunuConnectionTest.cs"
+      ],
+      "textApplyCheck": false,
+      "applyErrors": [
+        "error: patch failed: OpenUtau.Core/Enunu/EnunuClient.cs:5",
+        "error: OpenUtau.Core/Enunu/EnunuClient.cs: patch does not apply",
+        "error: patch failed: OpenUtau.Core/Enunu/EnunuRenderer.cs:83",
+        "error: OpenUtau.Core/Enunu/EnunuRenderer.cs: patch does not apply"
+      ],
+      "recommendation": "recommended-engine-adaptation",
+      "localAssessment": "ENUNUServer2能力探测与pitch/acoustic_f0，保留旧服务、后台取消、缓存与voiced掩码。"
+    },
+    {
+      "sha": "af55b9ed3eebe41bc29ec18f459622d51c1015ae",
+      "subject": "Refactoring of ENUNU's lyric loading process (#2544)",
+      "committed": "2026-10-21T00:23:31-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/af55b9ed3eebe41bc29ec18f459622d51c1015ae",
+      "files": [
+        "OpenUtau.Core/Enunu/EnunuConfig.cs",
+        "OpenUtau.Core/Enunu/EnunuPhonemizer.cs",
+        "OpenUtau.Core/Enunu/EnunuSinger.cs",
+        "OpenUtau.Test/Core/Enunu/EnunuConfigTest.cs"
+      ],
+      "textApplyCheck": true,
+      "applyErrors": [],
+      "recommendation": "recommended-engine-fix",
+      "localAssessment": "ENUNU model目录table/hed路径和未知歌词处理；文本可应用但未验证。"
+    },
+    {
+      "sha": "33302b3d7cecf9ae830d4229639e06788f717b3c",
+      "subject": "Organize the behavior and tooltip descriptions (#2525)",
+      "committed": "2026-10-21T00:32:44-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/33302b3d7cecf9ae830d4229639e06788f717b3c",
+      "files": [
+        "OpenUtau/Controls/PianoRoll.axaml.cs",
+        "OpenUtau/Strings/Strings.axaml",
+        "OpenUtau/Views/NoteEditStates.cs"
+      ],
+      "textApplyCheck": false,
+      "applyErrors": [
+        "error: patch failed: OpenUtau/Controls/PianoRoll.axaml.cs:1247",
+        "error: OpenUtau/Controls/PianoRoll.axaml.cs: patch does not apply"
+      ],
+      "recommendation": "adapt-piano-gestures",
+      "localAssessment": "Shift直线/非曲线表达式条件修正；保留本地音高手势捕获/确认修复。"
+    },
+    {
+      "sha": "a9547895f93e23371949a12d34e98deb5dad0bda",
+      "subject": "ENUNU: merge phrases across rests shorter than half a beat (#2545)",
+      "committed": "2026-10-21T20:03:11-07:00",
+      "url": "https://github.com/openutau/OpenUtau/commit/a9547895f93e23371949a12d34e98deb5dad0bda",
+      "files": [
+        "OpenUtau.Core/Enunu/EnunuRenderer.cs",
+        "OpenUtau.Test/Core/Enunu/EnunuPhraseMergeTest.cs"
+      ],
+      "textApplyCheck": false,
+      "applyErrors": [
+        "error: patch failed: OpenUtau.Core/Enunu/EnunuRenderer.cs:16",
+        "error: OpenUtau.Core/Enunu/EnunuRenderer.cs: patch does not apply"
+      ],
+      "recommendation": "feature-prerequisites",
+      "localAssessment": "ENUNU半拍内合句+UST休止+位置哈希，需适配本地缺失的ShouldMergePhrases调用接口。"
+    }
+  ],
+  "diffStat": "70 files changed, 3786 insertions(+), 1023 deletions(-)",
+  "note": "Read-only review. apply --check is against the unchanged local tree independently per commit, not integration/build/runtime verification.",
+  "earlierPrerequisites": {
+    "enunuPhraseMerge": [
+      "f32e4ab5"
+    ],
+    "expressionGraph": [
+      "4a3a5362",
+      "4d38507b",
+      "378dc0ea",
+      "8da8bb24",
+      "5700f9e6",
+      "608a321d",
+      "b4c84add",
+      "29e1681a"
+    ]
+  },
+  "githubCompareVerified": {
+    "ahead": 14,
+    "behind": 0,
+    "base": "fd8c843e323262a57f3da2d86fbb740369216dc3",
+    "url": "https://github.com/openutau/OpenUtau/compare/fd8c843e323262a57f3da2d86fbb740369216dc3...a9547895f93e23371949a12d34e98deb5dad0bda"
+  },
+  "validation": {
+    "textChecksPassed": 2,
+    "textChecksNeedAdaptation": 12,
+    "buildRun": false,
+    "testsRun": false,
+    "sourceChanged": false,
+    "binariesChanged": false,
+    "merged": false,
+    "pushed": false
+  }
+}
