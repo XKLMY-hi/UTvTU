@@ -748,6 +748,7 @@ namespace OpenUtau.App.Views {
         private Point firstPoint;
         private Point lastPoint;
         private UExpressionDescriptor? descriptor;
+        public bool IsCurve => descriptor?.type == UExpressionType.Curve;
         private UTrack track;
         private double startValue = 0;
         private bool shiftWasHeld = false;

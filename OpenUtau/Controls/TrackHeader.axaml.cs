@@ -313,7 +313,6 @@ namespace OpenUtau.App.Controls {
                 ActivateVolumeOrPanTextBox(
                     VolumeTextBox, string.Format("{0:0.0}", ViewModel.Volume));
                 args.Handled = true;
-                args.Pointer.Capture(sender as IInputElement);
             }
         }
         void PanPointerPressed(object sender, PointerPressedEventArgs args) {
@@ -348,6 +347,7 @@ namespace OpenUtau.App.Controls {
             textBox.IsEnabled = true;
             textBox.IsVisible = true;
             textBox.Focus();
+            textBox.SelectAll();
         }
         private void FinishVolumeOrPanInput(object sender, bool commit) {
             if (sender == VolumeTextBox) {

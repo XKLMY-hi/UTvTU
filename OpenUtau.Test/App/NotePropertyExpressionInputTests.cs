@@ -523,7 +523,7 @@ namespace OpenUtau.Test.App {
                 combo.SetCurrentValue(ComboBox.SelectedItemProperty, preset);
                 Assert.Equal(-30f, first.pitch.data.First().X, 3);
                 Assert.Equal(140f, first.pitch.data.Last().X - first.pitch.data.First().X, 3);
-                Assert.True(DocManager.Inst.ActiveUndoGroup!.Commands.Count >= 2);
+                Assert.Single(DocManager.Inst.ActiveUndoGroup!.Commands);
                 combo.IsDropDownOpen = false;
                 Assert.Null(DocManager.Inst.ActiveUndoGroup);
                 DocManager.Inst.Undo();

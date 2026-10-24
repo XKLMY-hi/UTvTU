@@ -38,6 +38,7 @@ namespace OpenUtau.Classic {
             //The builtin worldline resampler can't be called from bat script,
             //so we need to call it directly from C#
             foreach(var item in resamplerItems){
+                cancellation.Token.ThrowIfCancellationRequested();
                 if(!(item.resampler is ExeResampler) && !cancellation.IsCancellationRequested && !File.Exists(item.outputFile)){
                     lock (Renderers.GetCacheLock(item.outputFile)) {
                         item.resampler.DoResamplerReturnsFile(item, Log.Logger);

@@ -109,8 +109,7 @@ namespace OpenUtau.App.ViewModels {
                     .WhereNotNull()
                     .Subscribe(portamentoPreset => {
                         ApplyDiscreteInput(nameof(ApplyPortamentoPreset), edit => {
-                            edit.ApplyParameter("PortamentoLength", portamentoPreset.PortamentoLength);
-                            edit.ApplyParameter("PortamentoStart", portamentoPreset.PortamentoStart);
+                            edit.ApplyParameter("PortamentoPreset", portamentoPreset);
                         });
                     }).DisposeWith(subscriptions);
                 this.WhenAnyValue(vm => vm.ApplyVibratoPreset)
@@ -595,6 +594,12 @@ namespace OpenUtau.App.ViewModels {
                             }
                         }
                     }
+                } else if (tag == "PortamentoPreset" && obj is NotePresets.PortamentoPreset preset) {
+                    PortamentoStart = preset.PortamentoStart;
+                    PortamentoLength = preset.PortamentoLength;
+                    foreach (var note in selectedNotes) {
+                        ExecuteEditCommand(new SetPitchPointsCommand(Part, note, CreatePitchFromPreset(preset)));
+                    }
                 } else if (tag == "PitchCurveShape") {
                     if (obj != null && (obj is int value || int.TryParse(obj.ToString(), out value)) && Enum.IsDefined(typeof(PitchPointShape), value)) {
                         ExecuteEditCommand(new SetPitchPointShapeCommand(Part, selectedNotes, (PitchPointShape)value));
@@ -803,7 +808,7 @@ namespace OpenUtau.App.ViewModels {
 
             internal bool ApplyParameter(string tag, object? input) {
                 if (!IsCurrent || owner.IsRefreshingInputs || NoteLoading) return false;
-                if (tag != "Lyric" && tag != "Tone" && tag != "PhonemizerOverride" && input != null &&
+                if (tag != "Lyric" && tag != "Tone" && tag != "PhonemizerOverride" && tag != "PortamentoPreset" && input != null &&
                     !string.IsNullOrWhiteSpace(input.ToString()) &&
                     (!float.TryParse(input.ToString(), out var number) || !float.IsFinite(number))) return false;
                 var previous = owner.activeInput;
@@ -835,12 +840,26 @@ namespace OpenUtau.App.ViewModels {
         internal void RefreshInputs() { if (!disposed) OnSelectNotes(resetSelectionMetadata: false); }
 
         // presets
+        public static UPitch CreatePitchFromPreset(NotePresets.PortamentoPreset preset) {
+            var pitch = new UPitch();
+            if (preset.PitchPoints?.Count >= 2) {
+                foreach (var point in preset.PitchPoints) pitch.AddPoint(point.Clone());
+            } else {
+                var shape = NotePresets.Default.DefaultPitchShape;
+                pitch.AddPoint(new PitchPoint(preset.PortamentoStart, 0, shape));
+                pitch.AddPoint(new PitchPoint(preset.PortamentoStart + preset.PortamentoLength, 0, shape));
+            }
+            return pitch;
+        }
         public void SavePortamentoPreset(string name) {
             if (disposed) return;
             if (string.IsNullOrEmpty(name)) {
                 return;
             }
-            NotePresets.Default.PortamentoPresets.Add(new NotePresets.PortamentoPreset(name, (int)PortamentoLength, (int)PortamentoStart));
+            var note = selectedNotes.FirstOrDefault();
+            NotePresets.Default.PortamentoPresets.Add(note?.pitch.data.Count > 2
+                ? new NotePresets.PortamentoPreset(name, note.pitch.data)
+                : new NotePresets.PortamentoPreset(name, (int)PortamentoLength, (int)PortamentoStart));
             NotePresets.Save();
             PortamentoPresets = new ObservableCollection<NotePresets.PortamentoPreset>(NotePresets.Default.PortamentoPresets);
         }
