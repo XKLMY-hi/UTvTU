@@ -2,9 +2,10 @@
 
 ## 2026-10-24 上游整合已授权并进行中（优先于下方仅审查）
 
-- 用户明确“总之就是开始合并”，本轮整合已开始，**必须继续完成**[实施清单](.opencode/plans/upstream-integration-2026-10-24.md)剩余ENUNU/SBP/JS与开发者工具/完整表达式图/收尾。不要停回审查或重复询问是否引入。G盘路径、plus-develop、origin已核；上游固定a9547895。未真正merge（只读merge-tree检查有大量冲突），按本地架构适配；保留UI/VST/离线音频/调度/编辑会话。
+- 用户明确“总之就是开始合并”，本轮整合已开始，**必须继续完成**[实施清单](.opencode/plans/upstream-integration-2026-10-24.md)剩余完整表达式图/收尾。不要停回审查或重复询问是否引入。G盘路径、plus-develop、origin已核；上游固定a9547895。未真正merge（只读merge-tree检查有大量冲突），按本地架构适配；保留UI/VST/离线音频/调度/编辑会话。
 - 已提交`27f24adb`现有功能修复，20项轻量绿；`624c1d46`WORLDLINE R1.1+hifisampler完整引擎批次，74项轻量绿（含原生连续噪声与原R/preutter两项端到端）。详见实施清单；阶段完成即commit，当前工作树干净。SDK9.0.319选择器和限资源build.ps1在`.dsh/upstream-integration-20261024/`，同目录日志记录TRX；small-fixes.py/engines.py已执行，不要重跑覆盖后续适配。
 - 标准Debug已编译至引擎阶段；尚未启动/关闭用户主程序、未截图/真实模型安装/全量压力/打包/推送/发布。**整体整合尚未完成**。后续继续构建Core→Plugin→Main→Test（BuildProjectReferences=false），每组Test-Light护栏30秒/384MiB串行不变。上游原生DLL与旧C#不兼容，当前两者已配套迁移；不要恢复旧DLL。
+- 后续已完成`0aaf0fa0`ENUNU（13离线通过/1真实服务明确跳过）、`b9d3156d`SBP+安全Yaml迁移（36绿）、`46fda37b`JS稳定ID/后台包重载/原DebugWindow升级开发者工具（32绿）。标准Debug现为JS阶段，未启动。详细实现、资源护栏、首次修正与时存见实施清单，日志同目录；当前干净。剩余节点图需完整Core/工程/渲染/界面/音高目标与上游前置适配，保护旧工具和导出，不能只复制两条界面补丁。
 
 ## 2026-10-24 上游重要更新勘察（最新，仅审查）
 
