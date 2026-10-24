@@ -1,0 +1,125 @@
+{
+  "date": "2026-10-24",
+  "productCommit": "0779dcf8f7729ac59b10c5ca47827384f7cb0572",
+  "baseCommit": "c97c4959e5f2eb7680e8a0cbcc0be5e1f26eb14e",
+  "branch": "plus-develop",
+  "source": {
+    "OpenUtau/Views/WelcomeView.axaml": {
+      "preservedBindingNames": 15,
+      "preservedHandlers": 17
+    },
+    "OpenUtau/Views/PreferencesView.axaml": {
+      "preservedBindingNames": 87,
+      "preservedHandlers": 23
+    },
+    "sourceHtmlSha256": "5a214c75291461ee201a38b6aaf22ee62c5e7275b635003c2e6c877b051a0b53",
+    "verbatimRingPaths": 3,
+    "newResourceKeysPaired": true
+  },
+  "sdk": "9.0.319",
+  "build": {
+    "main": {
+      "errors": 0,
+      "existingWarnings": 3,
+      "seconds": 46.3
+    },
+    "test": {
+      "errors": 0,
+      "existingWarnings": 152,
+      "seconds": 22.16
+    },
+    "projectReferencesRebuilt": false
+  },
+  "guards": {
+    "secondsPerGroup": 30,
+    "memoryMiBPerGroup": 384,
+    "serial": true
+  },
+  "testGroups": [
+    {
+      "name": "welcome",
+      "passed": 21,
+      "elapsedSeconds": 13.5,
+      "peakRunnerMiB": 163.0,
+      "trx": "80e13b86e6594bc48418f0ab7607d081.trx",
+      "cases": [
+        "OpenUtau.Test.App.WelcomeViewTests.MainWindow_HostsWelcomeView_HiddenByDefault",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_HeroAdaptsWithoutCoveringText(width: 800, height: 660)",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_Nav_ActivatesOnSpaceAndEnter",
+        "OpenUtau.Test.App.WelcomeViewTests.AllDynamicResourceKeys_Resolve",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_FocusRings_DeclareNoLayoutShift",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_AllEntriesAreButtons_NotClickableBorders",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_EmptyStates_UseDistinctKeysAndBindings",
+        "OpenUtau.Test.App.WelcomeViewTests.FilterRecent_MatchesNameOrDirectory_IgnoringCase_EmptyQueryKeepsAll",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_MatchesDesignGeometry",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_UsesDeclarativeTransitions",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_HeroAdaptsWithoutCoveringText(width: 1000, height: 660)",
+        "OpenUtau.Test.App.WelcomeViewTests.TextKeys_ComeFromStringResources",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_HeroArt_UsesSourceGeometryAndRemainsDecorative",
+        "OpenUtau.Test.App.WelcomeViewTests.IconKeys_Resolve",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_TabOrder_FollowsReadingOrder",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_NewStringKeys_ExistInBothLanguages",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_HeroAdaptsWithoutCoveringText(width: 1440, height: 900)",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_RecentRows_NotSubjectToGlobalListBoxItemStyle",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_UsesNoLegacyColorKeys",
+        "OpenUtau.Test.App.WelcomeViewTests.ColorKeys_ComeFromMd3Pool_Only",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_Instantiates"
+      ]
+    },
+    {
+      "name": "preferences",
+      "passed": 6,
+      "elapsedSeconds": 8.4,
+      "peakRunnerMiB": 151.0,
+      "trx": "c231f2afc99a48edb7089cb901696b40.trx",
+      "cases": [
+        "OpenUtau.Test.App.PreferencesViewTests.PreferencesView_HasEightNavItems",
+        "OpenUtau.Test.App.PreferencesViewTests.PreferencesView_Instantiates_WithNavSwitching",
+        "OpenUtau.Test.App.PreferencesViewTests.PreferencesView_UsesDesignGeometry",
+        "OpenUtau.Test.App.PreferencesViewTests.PreferencesView_AllResourceKeys_Resolve",
+        "OpenUtau.Test.App.PreferencesViewTests.PreferencesView_ColorsOnlyFromPool",
+        "OpenUtau.Test.App.PreferencesViewTests.AccentSwatches_ShowGeneratedPrimary_AndTrackSelection"
+      ]
+    },
+    {
+      "name": "interactions",
+      "passed": 6,
+      "elapsedSeconds": 12.4,
+      "peakRunnerMiB": 155.0,
+      "trx": "88dc472a3b41469897963757ce5d82e7.trx",
+      "cases": [
+        "OpenUtau.Test.App.PenPageInteractionTests.WelcomeSearch_ReturnsToRecent_AndKeepsKeyboardNavigationAvailable",
+        "OpenUtau.Test.App.PenPageInteractionTests.AppearanceSelection_UsesReadableRolePairs_AndPreviewUpdatesInPlace(dark: True)",
+        "OpenUtau.Test.App.PenPageInteractionTests.SettingsRow_ReflowsTheSameEditor_WithoutLosingText(width: 340)",
+        "OpenUtau.Test.App.PenPageInteractionTests.SettingsRow_ReflowsTheSameEditor_WithoutLosingText(width: 520)",
+        "OpenUtau.Test.App.PenPageInteractionTests.SettingsSearch_FindsRealLabels_HandlesNoResults_AndRestoresNavigation",
+        "OpenUtau.Test.App.PenPageInteractionTests.AppearanceSelection_UsesReadableRolePairs_AndPreviewUpdatesInPlace(dark: False)"
+      ]
+    },
+    {
+      "name": "layout",
+      "passed": 6,
+      "elapsedSeconds": 13.4,
+      "peakRunnerMiB": 165.0,
+      "trx": "679c5e5a73b84fe09c3750211edaf02a.trx",
+      "cases": [
+        "OpenUtau.Test.App.WorkspacePageLayoutTests.Preferences_CategoriesRemainReadable_AndReflowWithoutRecreatingControls(width: 800, height: 660)",
+        "OpenUtau.Test.App.WorkspacePageLayoutTests.Welcome_QuickActionsAndSearchFit_AndNavigationUsesTheSamePresentation(width: 1440, height: 900)",
+        "OpenUtau.Test.App.WorkspacePageLayoutTests.SelectedPageTitlesFollowResourceChanges_WithoutRecreatingTheView(preferences: False)",
+        "OpenUtau.Test.App.WorkspacePageLayoutTests.Preferences_CategoriesRemainReadable_AndReflowWithoutRecreatingControls(width: 1440, height: 900)",
+        "OpenUtau.Test.App.WorkspacePageLayoutTests.Welcome_QuickActionsAndSearchFit_AndNavigationUsesTheSamePresentation(width: 800, height: 660)",
+        "OpenUtau.Test.App.WorkspacePageLayoutTests.SelectedPageTitlesFollowResourceChanges_WithoutRecreatingTheView(preferences: True)"
+      ]
+    }
+  ],
+  "assemblySha256": {
+    "OpenUtau.dll": "18ff90085517e1e936d6503284cc6358a0000d280fd2b35ee883589684db02da",
+    "OpenUtau.Core.dll": "de88349c2bcea4b636c75593019f1ad9868af04962d7fd2f367b26a7ea9ed59d"
+  },
+  "verificationLimits": [
+    "Headless control geometry, colors, resources and interactions only",
+    "No self screenshots or native GUI launch",
+    "No audio stress, full test suite, packaging or release"
+  ],
+  "totalPassed": 39
+}
