@@ -33,6 +33,18 @@ namespace OpenUtau.App.Views {
             ShowPage(0);   // 默认停在「最近」
         }
 
+        protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
+            base.OnPropertyChanged(change);
+            if (change.Property == BoundsProperty && SearchBox != null) {
+                Classes.Set("compact", Bounds.Width < 1160);
+                SearchBox.Width = Math.Min(400, Math.Max(0, Bounds.Width - 304));
+            }
+        }
+
+        void OnSearchChanged(object? sender, TextChangedEventArgs e) {
+            if (!string.IsNullOrEmpty(SearchBox.Text) && !PageRecent.IsVisible) ShowPage(0);
+        }
+
         private MainWindowViewModel? ViewModel => DataContext as MainWindowViewModel;
 
         // ── 左栏导航：切换右栏分页（标题/副标随页更新；选中态 = .selected 药丸） ──
@@ -44,12 +56,7 @@ namespace OpenUtau.App.Views {
 
         /// <summary>0 最近 / 1 新建 / 2 打开 / 3 模板。同一时刻只有一个分页可见。</summary>
         private void ShowPage(int index) {
-            HeaderShape.Kind = index switch {
-                0 => MaterialShapeKind.Cookie7,
-                1 => MaterialShapeKind.Arch,
-                2 => MaterialShapeKind.Sunny,
-                _ => MaterialShapeKind.Square,
-            };
+            WelcomeScroll.Offset = default;
             PageRecent.IsVisible = index == 0;
             PageNew.IsVisible = index == 1;
             PageOpen.IsVisible = index == 2;
@@ -61,7 +68,7 @@ namespace OpenUtau.App.Views {
             SetSelected(NavTemplates, index == 3);
 
             var (titleKey, subtitleKey) = index switch {
-                0 => ("welcome.recent", "welcome.greeting.sub"),
+                0 => ("welcome.hero.title", "welcome.hero.subtitle"),
                 1 => ("welcome.new", "welcome.new.description"),
                 2 => ("welcome.open", "welcome.open.description"),
                 _ => ("welcome.template", "welcome.template.description"),

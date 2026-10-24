@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.LogicalTree;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Platform.Storage;
@@ -39,6 +40,7 @@ namespace OpenUtau.App.Views {
         public PreferencesView() {
             InitializeComponent();
             VstSettingsCard.IsVisible = OperatingSystem.IsWindows();
+            SettingsSearch.TextChanged += OnSettingsSearchChanged;
         }
 
         /// <summary>挂载即开始监听插件库变更（另一侧改了扫描路径时同步过来）。</summary>
@@ -103,8 +105,14 @@ namespace OpenUtau.App.Views {
         private Window? HostWindow => Host as Window;
 
         /// <summary>打开时定位到音频页（稿子的默认页）。</summary>
-        public void ShowDefaultPage() => ShowPage("audio", NavAudio);
-        public void ShowShortcuts() => ShowPage("shortcuts", NavShortcuts);
+        public void ShowDefaultPage() {
+            SettingsSearch.Text = "";
+            ShowPage("audio", NavAudio);
+        }
+        public void ShowShortcuts() {
+            SettingsSearch.Text = "";
+            ShowPage("shortcuts", NavShortcuts);
+        }
 
         private void OnNavClicked(object? sender, RoutedEventArgs e) {
             if (sender is Button button) {
@@ -115,24 +123,6 @@ namespace OpenUtau.App.Views {
         private void ShowPage(string tag, Button selected) {
             SettingsScroll.Offset = default;
             PageDescription[!TextBlock.TextProperty] = new DynamicResourceExtension("prefs.description." + tag);
-            SettingsShape.Kind = tag switch {
-                "audio" or "editor" => MaterialShapeKind.Arch,
-                "appearance" or "about" => MaterialShapeKind.Cookie7,
-                "playback" or "midi" => MaterialShapeKind.Sunny,
-                _ => MaterialShapeKind.Square,
-            };
-            SettingsIcon[!DawIcon.DataProperty] = new DynamicResourceExtension(tag switch {
-                "audio" => "icon-volume-x",
-                "playback" => "icon-play",
-                "library" => "icon-book-open",
-                "appearance" => "icon-palette",
-                "editor" => "icon-pencil",
-                "general" => "icon-sliders",
-                "midi" => "icon-music",
-                "about" => "icon-info",
-                "shortcuts" => "icon-list",
-                _ => "icon-settings",
-            });
             // The page heading describes the selected configuration area, rather
             // than repeating the generic screen caption for every category.
             PageHeading[!TextBlock.TextProperty] = new DynamicResourceExtension(tag switch {
@@ -159,6 +149,36 @@ namespace OpenUtau.App.Views {
             if (tag == "shortcuts" && PageShortcuts.Content == null) PageShortcuts.Content = new ShortcutOverviewWindow { Width = double.NaN };
             foreach (Button nav in new[] { NavAudio, NavLibrary, NavPlayback, NavAppearance, NavEditor, NavMidi, NavGeneral, NavShortcuts, NavAbout }) {
                 nav.Classes.Set("selected", nav == selected);
+            }
+        }
+
+        // Search the existing localized labels, rather than maintaining a second list
+        // of settings. A match opens its category; the complete category remains editable.
+        private void OnSettingsSearchChanged(object? sender, TextChangedEventArgs e) {
+            string[] terms = (SettingsSearch.Text ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            var categories = new (Button Nav, Control Page)[] {
+                (NavAudio, PageAudio), (NavLibrary, PageLibrary), (NavPlayback, PagePlayback),
+                (NavAppearance, PageAppearance), (NavEditor, PageEditor), (NavMidi, PageMidi),
+                (NavGeneral, PageGeneral), (NavShortcuts, PageShortcuts), (NavAbout, PageAbout),
+            };
+            Button? firstMatch = null;
+            Button? selectedMatch = null;
+            foreach (var (nav, page) in categories) {
+                string labels = string.Join(" ", nav.GetLogicalDescendants().OfType<TextBlock>()
+                    .Concat(page.GetLogicalDescendants().OfType<TextBlock>()).Select(t => t.Text));
+                nav.IsVisible = terms.All(term => labels.Contains(term, StringComparison.CurrentCultureIgnoreCase));
+                if (nav.IsVisible) {
+                    firstMatch ??= nav;
+                    if (nav.Classes.Contains("selected")) selectedMatch = nav;
+                }
+            }
+            SettingsNoResults.IsVisible = firstMatch == null;
+            SettingsHeader.IsVisible = firstMatch != null;
+            if (firstMatch == null) {
+                foreach (var (_, page) in categories) page.IsVisible = false;
+            } else if (selectedMatch == null || !categories.Any(c => c.Page.IsVisible)) {
+                var target = selectedMatch ?? firstMatch;
+                ShowPage(target.Tag as string ?? "audio", target);
             }
         }
 

@@ -25,7 +25,7 @@ namespace OpenUtau.Test.App {
     ///
     /// 三类断言：
     /// 1) **令牌与资源**：颜色只走 MD3 颜色池、文案键可解析、图标键可解析（原有契约，保留）；
-    /// 2) **设计几何**：导航 232、字号阶梯、紧凑卡片、波形 32、拖放条 32（保留原版形状语言）；
+    /// 2) **设计几何**：导航 240、HTML 原生环形插画、主次卡片、最近工程与拖放入口；
     /// 3) **键盘可达**（本轮修掉的缺陷）：入口**全是 Button**（不再有 `Border.PointerPressed`）、
     ///    Tab 序 = 阅读序、Space/Enter 能激活、焦点环声明存在且不产生布局位移。
     /// </summary>
@@ -68,27 +68,27 @@ namespace OpenUtau.Test.App {
         [AvaloniaFact]
         public void WelcomeView_MatchesDesignGeometry() {
             string xaml = ReadXaml("WelcomeView.axaml");
-            // 分栏：232 左导航（与 PreferencesView 同构）+ 自适应内容
+            // 分栏：240 左导航 + 自适应内容（U4 HTML）
             // （W50 用户裁决「这套方案肯定要重设计的，不然和主界面的MD3不搭」⇒ 旧 432 品牌栏版作废）
-            Assert.Contains("ColumnDefinitions=\"232,*\"", xaml);
+            Assert.Contains("ColumnDefinitions=\"240,*\"", xaml);
             Assert.Contains("md3.surface-container-low", xaml);
             Assert.Contains("md3.primary-container", xaml);
             Assert.Contains("md3.on-primary-container", xaml);
-            Assert.Contains("Kind=\"Cookie7\"", xaml);
+            Assert.Contains("x:Name=\"HeroArt\"", xaml);
             Assert.Contains("Kind=\"Sunny\"", xaml);
             Assert.Contains("Kind=\"Square\"", xaml);
             // 密度字号阶梯（主界面基准：标题 28 / 空态 16 / 副标 14 / 正文 13 / 分组 12 / 次要 11.5 / 徽标 11）
-            foreach (string role in new[] { "DisplaySmall", "TitleMedium", "BodyMedium", "BodySmall", "LabelSmall" }) {
+            foreach (string role in new[] { "TitleMedium", "BodyMedium", "BodySmall", "LabelSmall" }) {
                 Assert.Contains("{DynamicResource Md3Type" + role + "}", xaml);
             }
-            // 关键尺寸：最近行 56 / 格式徽标 24 / 音源 chip 28 / 模板卡 240×72 / 空态图标容器 56 / 波形带 64
-            Assert.Contains("<Setter Property=\"Height\" Value=\"56\"/>", xaml);
+            // 关键尺寸：最近行 56 / 格式徽标 24 / 音源 chip 28 / 模板卡 240×64 / 空态图标 72 / 插画 360×168
+            Assert.Contains("<Setter Property=\"Height\" Value=\"64\"/>", xaml);
             Assert.Contains("<Setter Property=\"Height\" Value=\"24\"/>", xaml);
             Assert.Contains("<Setter Property=\"Height\" Value=\"28\"/>", xaml);
             Assert.Contains("<Setter Property=\"Height\" Value=\"64\"/>", xaml);
             Assert.Contains("<Setter Property=\"Width\" Value=\"240\"/>", xaml);
             Assert.Contains("<Setter Property=\"Width\" Value=\"72\"/>", xaml);
-            Assert.Contains($"Height=\"{WelcomeArt.WaveBandHeight.ToString(System.Globalization.CultureInfo.InvariantCulture)}\"", xaml);
+            Assert.Contains("Height=\"168\"", xaml);
             // 导航项走**应用级共享** `Button.navItem`（Md3Controls.axaml）——本页不得再本地定义一套（防两页漂移）
             Assert.Contains("Classes=\"navItem", xaml);
             Assert.DoesNotContain("<Style Selector=\"Button.navItem\">", xaml);
@@ -99,9 +99,9 @@ namespace OpenUtau.Test.App {
             // 按钮走现成主题变体（`Md3ButtonTheme` 的 .primary / .outline），页面不自造按钮几何
             Assert.Contains("Classes=\"primary\"", xaml);
             Assert.Contains("Classes=\"tonal\"", xaml);
-            // 波形仍是生成器产物的真实包络（几何来源 + 缩放口径不许回退）
-            Assert.Contains("welcome-waveform", xaml);
-            Assert.Contains("Stretch=\"Fill\"", xaml);
+            // U4 插画直接采用 HTML 路径与变换；音频包络资产由独立防漂移测试保留
+            Assert.Contains("Classes=\"heroArt\"", xaml);
+            Assert.Contains("RenderTransformOrigin=\"0,0\"", xaml);
             Assert.DoesNotContain("Classes=\"waveBar\"", xaml);
             // Avalonia 12：占位符只能用 PlaceholderText（Watermark 已废弃，会出 AVLN5001）
             Assert.Contains("PlaceholderText=", xaml);
@@ -133,19 +133,17 @@ namespace OpenUtau.Test.App {
         }
 
         [AvaloniaFact]
-        public void WelcomeView_Waveform_IsTheGeneratedEnvelope() {
-            // 波形是**真实一小节演唱**的响度几何（生成器产物，经 `Assets/WelcomeWaveform.axaml` 逐字进入应用）。
-            // W50 起它是**页头右侧的装饰带**（固定高 64）⇒ 除几何特征外，还断"固定高与低强调度"。
+        public void WelcomeView_HeroArt_UsesSourceGeometryAndRemainsDecorative() {
             InView(view => {
-                var wave = view.GetVisualDescendants().OfType<ShapePath>().First(p => p.Name == "WaveformBars");
-                Assert.NotNull(wave.Data);                  // 资源键 welcome-waveform 必须解析到
-                var bounds = wave.Data!.Bounds;
-                Assert.Equal(1000.0, bounds.Width, 0);      // 生成器 viewBox 宽（逐字引用）
-                Assert.InRange(bounds.Height, 100.0, 240.0); // 有真实幅度（双极性）
-                Assert.Equal(Stretch.Fill, wave.Stretch);
-                Assert.NotNull(wave.Fill);
-                Assert.Equal(WelcomeArt.WaveBandHeight, wave.Bounds.Height, 1);
-                Assert.Equal(0.12, wave.Opacity, 3);
+                var art = view.FindControl<Canvas>("HeroArt")!;
+                Assert.False(art.IsHitTestVisible);
+                Assert.Equal(360, art.Bounds.Width);
+                Assert.Equal(168, art.Bounds.Height);
+                var rings = art.Children.OfType<ShapePath>().ToArray();
+                Assert.Equal(3, rings.Length);
+                Assert.Equal(152, rings[0].Data!.Bounds.Width);
+                var bars = art.GetVisualDescendants().OfType<Border>().Where(b => b.Width == 4).ToArray();
+                Assert.Equal(new double[] { 12, 24, 36, 20, 10 }, bars.Select(b => b.Height));
             });
         }
 
@@ -155,95 +153,26 @@ namespace OpenUtau.Test.App {
         /// 右栏**同一时刻只有一个分页可见**（默认最近），且 `.selected` 只挂在当前页那一项上。
         /// </summary>
         [AvaloniaTheory]
-        [InlineData(1226.0, 699.0)]
+        [InlineData(800.0, 660.0)]
         [InlineData(1000.0, 660.0)]
-        public void WelcomeView_NavItems_RenderAndSinglePageIsVisible(double width, double height) {
+        [InlineData(1440.0, 900.0)]
+        public void WelcomeView_HeroAdaptsWithoutCoveringText(double width, double height) {
             UsePool();
             var view = new WelcomeView();
             var window = new Window { Width = width, Height = height, Content = view };
-            window.Show();
             try {
-                Dispatcher.UIThread.RunJobs();
-                var navs = Buttons(view).Where(b => HasClass(b, "navItem")).ToList();
-                Assert.Equal(6, navs.Count);   // 最近/新建/打开/模板 + 偏好设置/包管理器
-                for (int i = 0; i < navs.Count; i++) {
-                    Assert.True(navs[i].IsVisible, $"{width}x{height}: 第 {i + 1} 个导航项不可见");
-                    Assert.True(navs[i].Bounds.Width > 0 && navs[i].Bounds.Height == 40,
-                        $"{width}x{height}: 第 {i + 1} 个导航项被夹扁（{navs[i].Bounds.Width}x{navs[i].Bounds.Height}）");
+                window.Show(); Dispatcher.UIThread.RunJobs(); window.UpdateLayout();
+                var art = view.FindControl<Canvas>("HeroArt")!;
+                Assert.Equal(width >= 1160, art.IsVisible);
+                var search = view.FindControl<TextBox>("SearchBox")!;
+                var origin = search.TranslatePoint(default, view)!.Value;
+                Assert.True(origin.X + search.Bounds.Width <= width);
+                if (art.IsVisible) {
+                    var position = art.TranslatePoint(default, view)!.Value;
+                    Assert.True(position.X + art.Bounds.Width <= width);
+                    Assert.True(position.X >= 240);
                 }
-                var pages = view.GetVisualDescendants().OfType<Control>()
-                    .Where(c => c.Name is "PageRecent" or "PageNew" or "PageOpen" or "PageTemplates")
-                    .ToList();
-                Assert.Equal(4, pages.Count);
-                Assert.Single(pages.Where(p => p.IsVisible));
-                Assert.Equal("PageRecent", pages.First(p => p.IsVisible).Name);
-                Assert.Single(navs.Where(n => HasClass(n, "selected")));
-                Assert.True(HasClass(navs[0], "selected"), "默认页应是「最近」");
-            } finally {
-                window.Close();
-            }
-        }
-
-        /// <summary>
-        /// W50（MD3 重建）：波形从"左栏中段弹性大图（132…200）"改成**右栏页头右侧的装饰带**。
-        /// 契约：高度恒为 `WelcomeArt.WaveBandHeight`（±1 —— 常量与 XAML 不许分叉）、
-        /// `Stretch=Fill`（时基→宽 / 幅度→高）、低强调（Opacity 0.2）、几何仍是生成器产物
-        /// （资源键 `welcome-waveform`）、且落在**右栏**（x ≥ 232 左栏宽）。
-        /// 三个窗口尺寸下都不被压扁：装饰带不参与弹性布局，版面让给信息。
-        /// </summary>
-        [AvaloniaTheory]
-        [InlineData(1226.0, 699.0)]
-        [InlineData(1000.0, 660.0)]
-        [InlineData(1226.0, 900.0)]
-        public void WelcomeView_WaveformBand_IsFixedHeaderDecoration(double width, double height) {
-            UsePool();
-            var view = new WelcomeView();
-            var window = new Window { Width = width, Height = height, Content = view };
-            window.Show();
-            try {
-                Dispatcher.UIThread.RunJobs();
-                var wave = view.GetVisualDescendants().OfType<ShapePath>().First(p => p.Name == "WaveformBars");
-                Assert.NotNull(wave.Data);                  // 资源键 welcome-waveform 必须解析到
-                Assert.Equal(WelcomeArt.WaveBandHeight, wave.Bounds.Height, 1);
-                Assert.Equal(Stretch.Fill, wave.Stretch);
-                Assert.Equal(0.12, wave.Opacity, 3);
-                Assert.NotNull(wave.Fill);
-                var origin = wave.TranslatePoint(new Point(0, 0), view);
-                Assert.NotNull(origin);
-                Assert.True(origin!.Value.X >= 232,
-                    $"{width}x{height}: 波形带应落在右栏（x={origin.Value.X:F1}）");
-            } finally {
-                window.Close();
-            }
-        }
-
-        /// <summary>
-        /// Expressive 样板的波形与几何共用固定 168 DIP 单元；宽窄窗均不能溢出。
-        /// 断言：宽窄窗口的插图单元等宽，且带子完全落在视图内。
-        /// </summary>
-        [AvaloniaFact]
-        public void WelcomeView_WaveformBand_FixedArtCellNeverOverflows() {
-            double BandWidthAt(double w, double h) {
-                UsePool();
-                var view = new WelcomeView();
-                var window = new Window { Width = w, Height = h, Content = view };
-                try {
-                    window.Show();
-                    Dispatcher.UIThread.RunJobs();
-                    var wave = view.GetVisualDescendants().OfType<ShapePath>().First(p => p.Name == "WaveformBars");
-                    var origin = wave.TranslatePoint(new Point(0, 0), view);
-                    Assert.NotNull(origin);
-                    Assert.True(origin!.Value.X + wave.Bounds.Width <= view.Bounds.Width + 0.5,
-                        $"{w}x{h}: 波形带溢出（x={origin.Value.X:F1} + w={wave.Bounds.Width:F1} > view={view.Bounds.Width:F1}）");
-                    return wave.Bounds.Width;
-                } finally {
-                    window.Close();
-                }
-            }
-            double narrow = BandWidthAt(1000, 660);
-            double wide = BandWidthAt(1400, 900);
-            Assert.Equal(narrow, wide);
-            Assert.True(narrow > 100, $"窄窗下不应压到不可辨（{narrow:F1}）");
+            } finally { window.Close(); }
         }
 
         /// <summary>
@@ -433,11 +362,8 @@ namespace OpenUtau.Test.App {
         public void WelcomeView_Instantiates() {
             InView(view => {
                 Assert.Null(view.Host);   // 宿主由 MainWindow 注入
-                // 波形几何由资源字典喂（W38：真实包络，非手画柱）—— 未解析则 Data 为 null
-                var waveform = view.GetVisualDescendants().OfType<ShapePath>()
-                    .FirstOrDefault(p => p.Name == "WaveformBars");
-                Assert.NotNull(waveform);
-                Assert.NotNull(waveform!.Data);
+                Assert.NotNull(view.FindControl<Canvas>("HeroArt"));
+                Assert.NotNull(view.FindControl<TextBox>("SearchBox"));
             });
         }
 
@@ -493,7 +419,7 @@ namespace OpenUtau.Test.App {
             var md3ColorKeys = new HashSet<string>(Enum.GetValues<Md3Role>().Select(ColorPool.ColorKey));
             // **非颜色**资源键白名单：本页只有波形几何（W38）。
             // 它们不参与配色 ⇒ 不要求属于颜色池；新增时必须**显式登记**，防止"顺手引个外来颜色键"混进来。
-            var nonColorResourceKeys = new HashSet<string>(StringComparer.Ordinal) { "welcome-waveform" };
+            var nonColorResourceKeys = new HashSet<string>(StringComparer.Ordinal);
             var foreign = new List<string>();
             foreach (string key in KeysOf(ReadXaml("WelcomeView.axaml"), "DynamicResource")) {
                 if (md3Keys.Contains(key) || md3ColorKeys.Contains(key) || nonColorResourceKeys.Contains(key)) {

@@ -33,16 +33,17 @@ namespace OpenUtau.Test.App {
         [AvaloniaFact]
         public void PreferencesView_UsesDesignGeometry() {
             string xaml = ReadXaml();
-            Assert.Contains("ColumnDefinitions=\"232,*\"", xaml);   // 左导航 232
-            Assert.Contains("Margin=\"24\"", xaml);                 // 内容内边距 24
+            Assert.Contains("ColumnDefinitions=\"280,*\"", xaml);   // 左导航 232
+            Assert.Contains("Margin=\"32,24\"", xaml);                 // 内容内边距 24
             Assert.Contains("FontSize=\"{DynamicResource Md3TypeDisplaySmall}\"", xaml);
-            Assert.Contains("<Setter Property=\"CornerRadius\" Value=\"{DynamicResource Md3ShapeExtraLarge}\"/>", xaml);
+            Assert.Contains("<Setter Property=\"CornerRadius\" Value=\"16\"/>", xaml);
             Assert.Contains("<Setter Property=\"Height\" Value=\"{DynamicResource Md3WorkspaceControlHeight}\"/>", xaml);
             // 分段控件 = 圆角胶囊容器 + 选中项 secondary-container + ✓
             Assert.Contains("Selector=\"Border.segmented\"", xaml);
             Assert.Contains("WorkspaceSegmentTheme", xaml);
             Assert.Contains("<c:AdaptiveColumns x:Name=\"PagePlayback\"", xaml);
-            Assert.DoesNotContain("RowDefinitions=\"56,*\"", xaml);
+            Assert.Contains("RowDefinitions=\"56,*\"", xaml); // U4 settings app bar
+            Assert.Contains("x:Name=\"SettingsSearch\"", xaml);
             Assert.Contains("md3.secondary-container", File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Styles", "WorkspacePages.axaml")));
             // 色板：36 圆 + 选中打勾
             Assert.Contains("Selector=\"Button.swatch\"", xaml);

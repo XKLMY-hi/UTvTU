@@ -1581,4 +1581,17 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="singerpicker.active">使用中</system:String>
   <system:String x:Key="singerpicker.ignored">已忽略</system:String>
   <system:String x:Key="pianoroll.pitch.confirmhint">移动调整 · 单击 / Enter 确认 · 右键 / Esc 取消</system:String>
+  <system:String x:Key="welcome.hero.eyebrow">人声制作工作站 · 本地创作</system:String>
+  <system:String x:Key="welcome.hero.title">从一个念头，&#10;到一首完整的歌。</system:String>
+  <system:String x:Key="welcome.hero.subtitle">开始新的人声工程，雕琢每一句演唱，从歌声编辑、混音到最终交付。</system:String>
+  <system:String x:Key="prefs.search.placeholder">搜索设置…</system:String>
+  <system:String x:Key="prefs.search.empty">没有匹配的设置，请尝试其他关键词。</system:String>
+  <system:String x:Key="prefs.section.theme">主题</system:String>
+  <system:String x:Key="prefs.section.colors">颜色</system:String>
+  <system:String x:Key="prefs.section.motion">动效</system:String>
+  <system:String x:Key="prefs.preview.title">外观预览</system:String>
+  <system:String x:Key="prefs.preview.description">实时预览当前主题与动态配色。</system:String>
+  <system:String x:Key="prefs.preview.track">人声轨道</system:String>
+  <system:String x:Key="prefs.preview.note">音符</system:String>
+  <system:String x:Key="prefs.preview.action">播放</system:String>
 </ResourceDictionary>

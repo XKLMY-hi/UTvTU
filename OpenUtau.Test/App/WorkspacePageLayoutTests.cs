@@ -132,20 +132,20 @@ namespace OpenUtau.Test.App {
                 NavPresentation(view);
                 var search = view.FindControl<TextBox>("SearchBox")!;
                 Assert.Equal(40, search.Bounds.Height);
-                var actions = view.FindControl<StackPanel>("RecentActions")!;
+                var actions = view.FindControl<Grid>("RecentActions")!;
                 var newButton = view.FindControl<Button>("QuickNew")!;
                 var openButton = view.FindControl<Button>("QuickOpen")!;
                 Assert.True(newButton.Bounds.Width > 0 && openButton.Bounds.Width > 0);
                 Assert.True(openButton.Bounds.Right <= actions.Bounds.Width + 0.01);
-                var actionsBottom = actions.TranslatePoint(new Point(0, actions.Bounds.Height), view)!.Value.Y;
-                var searchTop = search.TranslatePoint(default, view)!.Value.Y;
-                Assert.True(actionsBottom <= searchTop);
+                var actionsTop = actions.TranslatePoint(default, view)!.Value.Y;
+                var searchBottom = search.TranslatePoint(new Point(0, search.Bounds.Height), view)!.Value.Y;
+                Assert.True(searchBottom <= actionsTop);
                 Activate(view.FindControl<Button>("NavNew")!); Settle(window);
                 Assert.False(view.FindControl<Grid>("PageRecent")!.IsVisible);
                 Assert.True(view.FindControl<StackPanel>("PageNew")!.IsVisible);
                 Activate(view.FindControl<Button>("NavRecent")!); Settle(window);
                 Assert.True(view.FindControl<Grid>("PageRecent")!.IsVisible);
-                Assert.Equal(ThemeManager.GetString("welcome.recent"), view.FindControl<TextBlock>("PageTitle")!.Text);
+                Assert.Equal(ThemeManager.GetString("welcome.hero.title"), view.FindControl<TextBlock>("PageTitle")!.Text);
             } finally { window.Close(); }
         }
     }

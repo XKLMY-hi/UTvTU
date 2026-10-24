@@ -1453,4 +1453,17 @@ Range {2}–{3} s · Tail {4} s
   <system:String x:Key="singerpicker.active">Active</system:String>
   <system:String x:Key="singerpicker.ignored">Ignored</system:String>
   <system:String x:Key="pianoroll.pitch.confirmhint">Move to adjust · Click / Enter to apply · Right-click / Esc to cancel</system:String>
+  <system:String x:Key="welcome.hero.eyebrow">VOCAL WORKSTATION · CREATE LOCALLY</system:String>
+  <system:String x:Key="welcome.hero.title">From an idea,&#10;to a finished song.</system:String>
+  <system:String x:Key="welcome.hero.subtitle">Start a vocal project, shape a performance, and bring it through mixing to delivery.</system:String>
+  <system:String x:Key="prefs.search.placeholder">Search settings…</system:String>
+  <system:String x:Key="prefs.search.empty">No matching settings. Try another keyword.</system:String>
+  <system:String x:Key="prefs.section.theme">Theme</system:String>
+  <system:String x:Key="prefs.section.colors">Color</system:String>
+  <system:String x:Key="prefs.section.motion">Motion</system:String>
+  <system:String x:Key="prefs.preview.title">Appearance preview</system:String>
+  <system:String x:Key="prefs.preview.description">A live sample of your theme and color roles.</system:String>
+  <system:String x:Key="prefs.preview.track">Vocal track</system:String>
+  <system:String x:Key="prefs.preview.note">Note</system:String>
+  <system:String x:Key="prefs.preview.action">Play</system:String>
 </ResourceDictionary>
