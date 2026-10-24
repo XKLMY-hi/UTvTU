@@ -1,0 +1,200 @@
+{
+  "date": "2026-10-24",
+  "productCommit": "972c86a6c92d7764fa83e9d0991a3e7d0b25d4a8",
+  "baseCommit": "34804e7a",
+  "branch": "plus-develop",
+  "sdk": "9.0.319",
+  "sourceCheck": {
+    "mainClosingHandlerUnchanged": true,
+    "sourceHtmlSha256": "5a214c75291461ee201a38b6aaf22ee62c5e7275b635003c2e6c877b051a0b53",
+    "verbatimCaptionSvgIcons": 3,
+    "opaqueOnly": true,
+    "captionNativeParts": [
+      "PART_MinimizeButton",
+      "PART_MaximizeButton",
+      "PART_CloseButton"
+    ],
+    "rootClosingHandler": "WindowClosing"
+  },
+  "guards": {
+    "secondsPerGroup": 30,
+    "memoryMiBPerGroup": 384,
+    "serial": true
+  },
+  "testGroups": [
+    {
+      "name": "chrome",
+      "passed": 11,
+      "seconds": 19.7,
+      "peakRunnerMiB": 183.0,
+      "trx": "0bdbc835c8614a3b8a83a1536f0941f2.trx",
+      "cases": [
+        "OpenUtau.Test.App.WorkspaceWindowChromeTests.ActualWorkspaceHeader_WithLongProjectTitleKeepsButtonsClearOfCaptionArea(width: 1440)",
+        "OpenUtau.Test.App.WorkspaceWindowChromeTests.WindowStateChanges_RetainContentAndReleaseFullscreenInset",
+        "OpenUtau.Test.App.WorkspaceWindowChromeTests.PageSearchFields_StayClearOfCaptionButtons(width: 800)",
+        "OpenUtau.Test.App.WorkspaceWindowChromeTests.ActualWorkspaceHeader_WithLongProjectTitleKeepsButtonsClearOfCaptionArea(width: 800)",
+        "OpenUtau.Test.App.WorkspaceWindowChromeTests.HeaderGroups_ReflowAroundCaptionAreaWithoutReparenting(width: 800)",
+        "OpenUtau.Test.App.WorkspaceWindowChromeTests.PageSearchFields_StayClearOfCaptionButtons(width: 1440)",
+        "OpenUtau.Test.App.WorkspaceWindowChromeTests.HeaderGroups_ReflowAroundCaptionAreaWithoutReparenting(width: 1440)",
+        "OpenUtau.Test.App.WorkspaceWindowChromeTests.ProjectTitle_UsesFileNameAndUnsavedMarker",
+        "OpenUtau.Test.App.WorkspaceWindowChromeTests.ActualWorkspaceHeader_WithLongProjectTitleKeepsButtonsClearOfCaptionArea(width: 1800)",
+        "OpenUtau.Test.App.WorkspaceWindowChromeTests.HeaderGroups_ReflowAroundCaptionAreaWithoutReparenting(width: 1000)",
+        "OpenUtau.Test.App.WorkspaceWindowChromeTests.OptInIsScoped_AndOnlyInsetsTheFrame"
+      ]
+    },
+    {
+      "name": "shell",
+      "passed": 10,
+      "seconds": 15.3,
+      "peakRunnerMiB": 178.0,
+      "trx": "53773092a6a14349bd77975c0766c382.trx",
+      "cases": [
+        "OpenUtau.Test.App.WorkspaceShellLayoutTests.ActualLibraryTabs_ShareAvailablePanelWidth(width: 220)",
+        "OpenUtau.Test.App.WorkspaceShellLayoutTests.KeyboardFocus_DoesNotExpandButtons_AndDisabledPianoHintHasEnabledParent",
+        "OpenUtau.Test.App.WorkspaceShellLayoutTests.ActualLibraryTabs_ShareAvailablePanelWidth(width: 180)",
+        "OpenUtau.Test.App.WorkspaceShellLayoutTests.ActualShellRows_ArrangeWithoutControlOverlap(width: 1200, height: 800)",
+        "OpenUtau.Test.App.WorkspaceShellLayoutTests.ActualShellRows_ArrangeWithoutControlOverlap(width: 960, height: 600)",
+        "OpenUtau.Test.App.WorkspaceShellLayoutTests.ActualLibraryTabs_ShareAvailablePanelWidth(width: 272)",
+        "OpenUtau.Test.App.WorkspaceShellLayoutTests.ActualShellRows_ArrangeWithoutControlOverlap(width: 1800, height: 900)",
+        "OpenUtau.Test.App.WorkspaceShellLayoutTests.ActualShellRows_ArrangeWithoutControlOverlap(width: 800, height: 600)",
+        "OpenUtau.Test.App.WorkspaceShellLayoutTests.ActualShellRows_ArrangeWithoutControlOverlap(width: 1440, height: 900)",
+        "OpenUtau.Test.App.WorkspaceShellLayoutTests.ResizingHeader_KeepsGroupIdentity_AndUsesOriginalShapes"
+      ]
+    },
+    {
+      "name": "welcome",
+      "passed": 21,
+      "seconds": 14.5,
+      "peakRunnerMiB": 141.0,
+      "trx": "ac350b60fba34cf7adf0a39d0d4b7204.trx",
+      "cases": [
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_HeroArt_UsesSourceGeometryAndRemainsDecorative",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_HeroAdaptsWithoutCoveringText(width: 1440, height: 900)",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_RecentRows_NotSubjectToGlobalListBoxItemStyle",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_Instantiates",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_MatchesDesignGeometry",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_NewStringKeys_ExistInBothLanguages",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_UsesDeclarativeTransitions",
+        "OpenUtau.Test.App.WelcomeViewTests.TextKeys_ComeFromStringResources",
+        "OpenUtau.Test.App.WelcomeViewTests.MainWindow_HostsWelcomeView_HiddenByDefault",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_HeroAdaptsWithoutCoveringText(width: 800, height: 660)",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_TabOrder_FollowsReadingOrder",
+        "OpenUtau.Test.App.WelcomeViewTests.FilterRecent_MatchesNameOrDirectory_IgnoringCase_EmptyQueryKeepsAll",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_HeroAdaptsWithoutCoveringText(width: 1000, height: 660)",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_EmptyStates_UseDistinctKeysAndBindings",
+        "OpenUtau.Test.App.WelcomeViewTests.ColorKeys_ComeFromMd3Pool_Only",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_Nav_ActivatesOnSpaceAndEnter",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_AllEntriesAreButtons_NotClickableBorders",
+        "OpenUtau.Test.App.WelcomeViewTests.AllDynamicResourceKeys_Resolve",
+        "OpenUtau.Test.App.WelcomeViewTests.IconKeys_Resolve",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_FocusRings_DeclareNoLayoutShift",
+        "OpenUtau.Test.App.WelcomeViewTests.WelcomeView_UsesNoLegacyColorKeys"
+      ]
+    },
+    {
+      "name": "preferences",
+      "passed": 6,
+      "seconds": 9.2,
+      "peakRunnerMiB": 156.0,
+      "trx": "b35d340ed06a4fb093defbae7740654c.trx",
+      "cases": [
+        "OpenUtau.Test.App.PreferencesViewTests.PreferencesView_AllResourceKeys_Resolve",
+        "OpenUtau.Test.App.PreferencesViewTests.PreferencesView_ColorsOnlyFromPool",
+        "OpenUtau.Test.App.PreferencesViewTests.PreferencesView_UsesDesignGeometry",
+        "OpenUtau.Test.App.PreferencesViewTests.PreferencesView_Instantiates_WithNavSwitching",
+        "OpenUtau.Test.App.PreferencesViewTests.PreferencesView_HasEightNavItems",
+        "OpenUtau.Test.App.PreferencesViewTests.AccentSwatches_ShowGeneratedPrimary_AndTrackSelection"
+      ]
+    },
+    {
+      "name": "interactions",
+      "passed": 6,
+      "seconds": 13.5,
+      "peakRunnerMiB": 154.0,
+      "trx": "422179b738de4a4c808c8ad0809cfcf0.trx",
+      "cases": [
+        "OpenUtau.Test.App.PenPageInteractionTests.WelcomeSearch_ReturnsToRecent_AndKeepsKeyboardNavigationAvailable",
+        "OpenUtau.Test.App.PenPageInteractionTests.SettingsRow_ReflowsTheSameEditor_WithoutLosingText(width: 520)",
+        "OpenUtau.Test.App.PenPageInteractionTests.SettingsRow_ReflowsTheSameEditor_WithoutLosingText(width: 340)",
+        "OpenUtau.Test.App.PenPageInteractionTests.AppearanceSelection_UsesReadableRolePairs_AndPreviewUpdatesInPlace(dark: False)",
+        "OpenUtau.Test.App.PenPageInteractionTests.SettingsSearch_FindsRealLabels_HandlesNoResults_AndRestoresNavigation",
+        "OpenUtau.Test.App.PenPageInteractionTests.AppearanceSelection_UsesReadableRolePairs_AndPreviewUpdatesInPlace(dark: True)"
+      ]
+    },
+    {
+      "name": "layout",
+      "passed": 6,
+      "seconds": 15.7,
+      "peakRunnerMiB": 156.0,
+      "trx": "4f363a000603412683d1ea9b338fae6c.trx",
+      "cases": [
+        "OpenUtau.Test.App.WorkspacePageLayoutTests.Preferences_CategoriesRemainReadable_AndReflowWithoutRecreatingControls(width: 1440, height: 900)",
+        "OpenUtau.Test.App.WorkspacePageLayoutTests.Welcome_QuickActionsAndSearchFit_AndNavigationUsesTheSamePresentation(width: 1440, height: 900)",
+        "OpenUtau.Test.App.WorkspacePageLayoutTests.SelectedPageTitlesFollowResourceChanges_WithoutRecreatingTheView(preferences: True)",
+        "OpenUtau.Test.App.WorkspacePageLayoutTests.Welcome_QuickActionsAndSearchFit_AndNavigationUsesTheSamePresentation(width: 800, height: 660)",
+        "OpenUtau.Test.App.WorkspacePageLayoutTests.SelectedPageTitlesFollowResourceChanges_WithoutRecreatingTheView(preferences: False)",
+        "OpenUtau.Test.App.WorkspacePageLayoutTests.Preferences_CategoriesRemainReadable_AndReflowWithoutRecreatingControls(width: 800, height: 660)"
+      ]
+    },
+    {
+      "name": "contracts",
+      "passed": 2,
+      "seconds": 8.8,
+      "peakRunnerMiB": 106.0,
+      "trx": "ae6cbcfe75944d418512915f9c8d627a.trx",
+      "cases": [
+        "OpenUtau.Test.App.ThemeContractTests.WindowEx_NativeChrome_Contract",
+        "OpenUtau.Test.App.ViewSwitcherTests.Chrome_WiringExistsInWindow"
+      ]
+    }
+  ],
+  "assemblySha256": {
+    "OpenUtau.dll": "5146d9cb99b85dae41aeef6cf5dc9628d8bb08dde7be1990a6b4da5b522bfec9",
+    "OpenUtau.Core.dll": "de88349c2bcea4b636c75593019f1ad9868af04962d7fd2f367b26a7ea9ed59d"
+  },
+  "headlessPassed": 62,
+  "nativeProbe": {
+    "success": true,
+    "evidence": {
+      "maxHit": 9,
+      "minHit": 8,
+      "closeHit": 20,
+      "dragHit": 2,
+      "searchHit": 1,
+      "resizeHit": 10,
+      "systemMenu": true,
+      "captionSize": 32,
+      "pageCaptionAlignment": true,
+      "frameDrawnAboveClient": true,
+      "restoreGlyph": true,
+      "dynamicColorThemes": 2,
+      "minimizeRestoreCycles": 3,
+      "fullscreenRestore": true,
+      "closeCancellation": true,
+      "renderScaling": 1
+    },
+    "error": null,
+    "seconds": 4.61,
+    "peakRunnerMiB": 134.0,
+    "sourceSha256": "7c0f76eef859f940d12fb7f59a6c09ebeb482b8de27b37475dbb433b122bd96d",
+    "scope": "Isolated WindowEx using actual compiled application themes, Win32 software renderer and a private data directory; no project/audio or screenshots."
+  },
+  "buildMain": {
+    "errors": 0,
+    "existingWarnings": 3,
+    "elapsed": "00:00:38.47",
+    "projectReferencesRebuilt": false
+  },
+  "buildTest": {
+    "errors": 0,
+    "existingWarnings": 152,
+    "elapsed": "00:00:19.84",
+    "projectReferencesRebuilt": false
+  },
+  "limits": [
+    "No visual screenshots or self-iteration",
+    "Native probe measured RenderScaling=1 only; no multi-monitor DPI validation",
+    "No playback, prerender load, GPU stress or full-suite run",
+    "No workspace main-program launch, user process closure, packaging, push or release"
+  ]
+}
