@@ -23,10 +23,13 @@
       <WindowDrawnDecorationsTemplate>
         <WindowDrawnDecorationsContent>
           <WindowDrawnDecorationsContent.Underlay>
-            <Border Name="ChromeFrame" Background="{DynamicResource md3.surface}"
-                    BorderBrush="{DynamicResource md3.outline-variant}" BorderThickness="{TemplateBinding FrameThickness}"/>
+            <Border Background="{DynamicResource md3.surface}"/>
           </WindowDrawnDecorationsContent.Underlay>
           <WindowDrawnDecorationsContent.Overlay>
+            <Grid>
+            <!-- Draw above the opaque Window background; never intercept client input. -->
+            <Border Name="ChromeFrame" BorderBrush="{DynamicResource md3.outline-variant}"
+                    BorderThickness="1" IsHitTestVisible="False"/>
             <Grid Name="PART_TitleBar" Width="128" Height="{DynamicResource Md3WorkspaceCaptionHeight}" HorizontalAlignment="Right" VerticalAlignment="Top"
                   Margin="{TemplateBinding FrameThickness}" ColumnDefinitions="32,8,32,8,32,16"
                   Background="Transparent" chrome:WindowDecorationProperties.ElementRole="TitleBar">
@@ -47,6 +50,7 @@
                 <Viewbox Width="16" Height="16" IsHitTestVisible="False" ><Canvas Width="13.99993896484375" Height="14"><Path Data="M3.34619 2.93945q-0.25293 0.08545-0.37939 0.30762-0.04102 0.08545-0.04102 0.25293 0 0.16748 0.04102 0.25293 0.04443 0.08203 1.62353 1.66455l1.58252 1.58252-1.58252 1.58252q-1.5791 1.58252-1.62353 1.66797-0.04102 0.08203-0.04102 0.23584 0 0.15381 0.03418 0.23926 0.0376 0.08203 0.1333 0.18115 0.09912 0.0957 0.18115 0.1333 0.08545 0.03418 0.23926 0.03418 0.15381 0 0.23584-0.04102 0.08545-0.04443 1.66797-1.62353l1.58252-1.58252 1.58252 1.58252q1.58252 1.5791 1.66455 1.62353 0.08545 0.04102 0.23926 0.04102 0.15381 0 0.23584-0.03418 0.08545-0.0376 0.18115-0.1333 0.09912-0.09912 0.1333-0.18115 0.0376-0.08545 0.0376-0.23926 0-0.15381-0.04443-0.23584-0.04101-0.08545-1.62012-1.66797l-1.58252-1.58252 1.58252-1.58252q1.5791-1.58252 1.62012-1.66455 0.04443-0.08545 0.04443-0.25293 0-0.16748-0.04102-0.25293-0.09912-0.16748-0.28027-0.2666-0.05811-0.02734-0.09912-0.04102-0.04102-0.01367-0.15381-0.01367-0.11279 0-0.15381 0.01367-0.04101 0.01367-0.11279 0.04102-0.09912 0.05811-1.66455 1.62695l-1.56885 1.56543-2.82666-2.81299q-0.31104-0.29395-0.42041-0.37939-0.08545-0.05469-0.19824-0.05469l-0.02735 0q-0.14014 0-0.18115 0.01367z" Fill="{Binding $parent[Button].Foreground}"/></Canvas></Viewbox>
               </Button>
             </Grid>
+            </Grid>
           </WindowDrawnDecorationsContent.Overlay>
         </WindowDrawnDecorationsContent>
       </WindowDrawnDecorationsTemplate>
@@ -55,5 +59,7 @@
     <Style Selector="^:maximized /template/ Path#RestoreGlyph"><Setter Property="IsVisible" Value="True"/></Style>
     <Style Selector="^:maximized /template/ Button#PART_MaximizeButton"><Setter Property="ToolTip.Tip" Value="{DynamicResource window.restore}"/></Style>
     <Style Selector="^:fullscreen /template/ Grid#PART_TitleBar"><Setter Property="IsVisible" Value="False"/></Style>
+    <Style Selector="^:maximized /template/ Border#ChromeFrame"><Setter Property="IsVisible" Value="False"/></Style>
+    <Style Selector="^:fullscreen /template/ Border#ChromeFrame"><Setter Property="IsVisible" Value="False"/></Style>
   </ControlTheme>
 </ResourceDictionary>
