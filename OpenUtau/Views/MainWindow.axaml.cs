@@ -792,12 +792,20 @@ namespace OpenUtau.App.Views {
         /// 「分离」只在卷帘 / 混音台出场。策略全在 <see cref="ViewSwitcherPolicy.ChromeFor"/>（可单测）。
         /// </summary>
         private void SetChromeForView(ViewChrome chrome) {
+            UpdateCaptionHeight();
             // ProjectTitle stays visible across workspace views; the selected view tab supplies context.
             TransportGroup.IsVisible = chrome.ShowTransport;
             ViewSwitcherGroup.IsVisible = chrome.ShowViewSwitcher;
             TopRightCluster.IsVisible = chrome.ShowRightCluster;
             ViewSwitcher.IsVisible = chrome.ShowViewSwitcher;
             DetachViewButton.IsVisible = chrome.ShowDetachButton;
+        }
+
+        private void UpdateCaptionHeight() {
+            // Welcome's 24 DIP top inset puts its 40 DIP search field at center Y=44.
+            // Other pages use a 56 DIP app bar with center Y=28.
+            Resources["Md3WorkspaceCaptionHeight"] = WelcomeHost.IsVisible &&
+                !PreferencesHost.IsVisible && !ToolWorkspaceHost.IsVisible ? 88d : 56d;
         }
 
         // ── S5 视图切换（工作台 / 钢琴卷帘 / 混音台）────────────────────────

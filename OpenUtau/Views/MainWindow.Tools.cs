@@ -72,6 +72,7 @@ public partial class MainWindow : IWorkspaceToolHost {
         EnsureToolPages();
         toolPages!.ShowPage(page);
         ToolWorkspaceHost.IsVisible = true;
+        UpdateCaptionHeight();
         ToolWorkspaceHost.Focus();
     }
     public void ShowRenderWorkspace() {
