@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -1152,7 +1152,7 @@ namespace OpenUtau.App.ViewModels {
                 return true;
             }
             if (track.TryGetExpDescriptor(Project, expKey, out var descriptor)) {
-                return track.RendererSettings.Renderer.SupportsExpression(descriptor);
+                return descriptor.type == UExpressionType.MaskedCurve || track.RendererSettings.Renderer.SupportsExpression(descriptor);
             }
             if (expKey == track.VoiceColorExp.abbr) {
                 return track.RendererSettings.Renderer.SupportsExpression(track.VoiceColorExp);

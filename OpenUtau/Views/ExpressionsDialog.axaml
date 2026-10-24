@@ -5,6 +5,8 @@
   <controls:WorkspaceToolView.Styles>
     <StyleInclude Source="/Controls/PianoRollStyles.axaml"/>
   </controls:WorkspaceToolView.Styles>
+  <TabControl Margin="8" Name="ExpressionPages">
+    <TabItem Header="{DynamicResource exps.caption}">
   <DockPanel LastChildFill="True">
     <Border>
       <Grid RowDefinitions="Auto,*,Auto" Margin="16" RowSpacing="12">
@@ -38,6 +40,7 @@
                   <ComboBoxItem Content="{DynamicResource exps.type.numerical}"/>
                   <ComboBoxItem Content="{DynamicResource exps.type.options}"/>
                   <ComboBoxItem Content="{DynamicResource exps.type.curve}"/>
+                  <ComboBoxItem Content="{DynamicResource exps.type.maskedcurve}"/>
                 </ComboBox>
               </StackPanel>
               <StackPanel IsVisible="{Binding Expression.IsOptions}" Spacing="5">
@@ -110,4 +113,9 @@
       </Grid>
     </Border>
   </DockPanel>
+    </TabItem>
+    <TabItem Header="{DynamicResource expressiongraph.tab}">
+      <controls:ExpressionGraphEditor Name="GraphEditor"/>
+    </TabItem>
+  </TabControl>
 </controls:WorkspaceToolView>

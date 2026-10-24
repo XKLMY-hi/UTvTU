@@ -35,7 +35,7 @@ namespace OpenUtau.App.Views {
                 Log.Information("Initializing OpenUtau.");
                 ToolsManager.Inst.Initialize();
                 SingerManager.Inst.Initialize();
-                DocManager.Inst.Initialize(mainThread, mainScheduler);
+                DocManager.Inst.Initialize(mainThread, mainScheduler, asyncPhraseBuilds: true);
                 DocManager.Inst.PostOnUIThread = action => Avalonia.Threading.Dispatcher.UIThread.Post(action);
                 Log.Information("Initialized OpenUtau.");
                 InitAudio();

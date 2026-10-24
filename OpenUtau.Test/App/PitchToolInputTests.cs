@@ -162,6 +162,56 @@ public class PitchToolInputTests : IDisposable {
             Assert.Null(DocManager.Inst.ActiveUndoGroup);
         } finally { window.Content = null; roll.Dispose(); vm.Dispose(); window.Close(); }
     }
+    void PreferPitchOverride() {
+        project.tracks[0].RendererSettings.renderer = OpenUtau.Core.Render.Renderers.CLASSIC;
+        project.expressionGraphs = new() { OpenUtau.Core.ExpressionGraph.ExpressionGraphEdits.CreateDefault("g", "Graph", OpenUtau.Core.Render.Renderers.CLASSIC) };
+        project.defaultExpressionGraphs = new() { [OpenUtau.Core.Render.Renderers.CLASSIC] = "g" };
+    }
+
+    [AvaloniaTheory]
+    [InlineData(7)]
+    [InlineData(8)]
+    public void GraphPitchCurvesKeepTheConfirmationGestureAndUseAbsoluteMaskedPitch(int tool) {
+        PreferPitchOverride();
+        var (vm, roll, window, canvas) = Open(tool);
+        try {
+            Point At(int tick, double tone) => canvas.TranslatePoint(vm.NotesViewModel.TickToneToPoint(tick, tone), window)!.Value;
+            var start = At(400, 60); var end = At(800, 62);
+            window.MouseDown(start, MouseButton.Left); window.MouseMove(end); window.MouseUp(end, MouseButton.Left); Pump(window);
+            Assert.True(Assert.IsType<PitchCurveState>(State(roll)).IsInAdjustingPhase);
+            Assert.Empty(part.maskedCurves);
+            roll.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.Enter });
+            Pump(window);
+            var curve = Assert.Single(part.maskedCurves);
+            Assert.Equal("pito", curve.abbr);
+            Assert.All(curve.runs.SelectMany(r => r.ys), y => Assert.InRange(y, 5900, 6300));
+            Assert.Empty(part.curves);
+            DocManager.Inst.Undo(); Assert.Empty(part.maskedCurves);
+            DocManager.Inst.Redo(); Assert.Single(part.maskedCurves);
+        } finally { window.Content = null; roll.Dispose(); vm.Dispose(); window.Close(); }
+    }
+
+    [AvaloniaFact]
+    public void GraphOverrideSmoothingKeepsGapsAndCanBeUndone() {
+        PreferPitchOverride();
+        var curve = new UMaskedCurve("pito");
+        curve.SetValues(new[] { (590, 6000f), (595, 6000f), (600, 7000f), (605, 6000f), (610, 6000f), (800, 6500f) });
+        part.maskedCurves.Add(curve);
+        using var vm = new PianoRollViewModel();
+        vm.NotesViewModel.Part = part; vm.NotesViewModel.TickWidth = .5; vm.NotesViewModel.TrackHeight = 20;
+        var state = new SmoothenPitchState(new Border(), vm, new Tip());
+        var pointer = new Pointer(Pointer.GetNextFreeId(), PointerType.Mouse, true);
+        var point = vm.NotesViewModel.TickToneToPoint(600, 60);
+        try {
+            state.Begin(pointer, point); state.Update(pointer, point); state.End(pointer, point);
+            Assert.True(curve.TrySample(600, out float value)); Assert.InRange(value, 6001, 6999);
+            Assert.False(curve.TrySample(700, out _));
+            Assert.True(curve.TrySample(800, out float outside)); Assert.Equal(6500f, outside);
+            DocManager.Inst.Undo();
+            Assert.True(part.maskedCurves[0].TrySample(600, out float original)); Assert.Equal(7000f, original);
+        } finally { state.Cancel(); }
+    }
+
     public void Dispose() {
         if (DocManager.Inst.ActiveUndoGroup != null) DocManager.Inst.EndUndoGroup();
         DocManager.Inst.ExecuteCmd(new LoadProjectNotification(previous));

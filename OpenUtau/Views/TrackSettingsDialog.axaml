@@ -21,6 +21,8 @@
             </WrapPanel>
           </StackPanel>
         </controls:AdaptiveColumns>
+        <TextBlock Text="{DynamicResource tracks.expressiongraph}"/>
+        <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Graphs}" SelectedItem="{Binding Graph}"/>
       </StackPanel>
     </ScrollViewer>
     <Button Name="ApplyButton" Grid.Row="1" Classes="toolAction primary toolAction" MinWidth="80" Margin="0,12,0,0" HorizontalAlignment="Right" Content="{DynamicResource button.ok}" Click="OnOkClicked"/>
