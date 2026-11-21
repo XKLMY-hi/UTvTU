@@ -24,6 +24,22 @@ namespace OpenUtau.Core.DiffSinger {
                 {Format.Ustx.TENC, (x, y) => x + y / 20},
             };
 
+        /// <summary>
+        /// Applies the user delta to a predicted variance curve and clamps it to the
+        /// range the acoustic model expects. Shared by the renderer and the .ds export
+        /// so the exported conditioning matches what is actually fed to the model.
+        /// </summary>
+        public static float ApplyVarianceDelta(string abbr, float predicted, float user) {
+            float value = VarianceDeltaFunctions[abbr](predicted, user);
+            if (abbr == ENE || abbr == Format.Ustx.BREC || abbr == Format.Ustx.VOIC) {
+                return Math.Clamp(value, -96f, 0f);
+            }
+            if (abbr == Format.Ustx.TENC) {
+                return Math.Clamp(value, -10f, 10f);
+            }
+            return value;
+        }
+
         public static float GetHeadMs(double frameMs) {
             return (float)(frameMs * headFrames);
         }
@@ -78,21 +94,42 @@ namespace OpenUtau.Core.DiffSinger {
             if (phrase.phones.Length == 0) {
                 throw new InvalidDataException("DiffSinger word mode requires at least one phoneme.");
             }
-            if (phDur.Length != phrase.phones.Length + 2) {
+            var segments = new List<(string Phoneme, double DurationMs, int PhoneIndex)>(phrase.phones.Length + 2) {
+                ("SP", 0, -1),
+            };
+            for (int i = 0; i < phrase.phones.Length; ++i) {
+                segments.Add((phrase.phones[i].phoneme, phrase.phones[i].durationMs, i));
+            }
+            segments.Add(("SP", 0, -1));
+            return WordDivAndDur(segments, phDur, isVowel);
+        }
+
+        internal static (Int64[] wordDiv, Int64[] wordDur) WordDivAndDur(
+            IReadOnlyList<(string Phoneme, double DurationMs, int PhoneIndex)> segments,
+            int[] phDur, Func<string, bool> isVowel) {
+            if (segments.Count == 0) {
+                throw new InvalidDataException("DiffSinger word mode requires at least one phoneme.");
+            }
+            if (phDur.Length != segments.Count) {
                 throw new InvalidDataException(
-                    $"DiffSinger word mode duration length mismatch: {phDur.Length} durations for {phrase.phones.Length + 2} padded tokens.");
+                    $"DiffSinger word mode duration length mismatch: {phDur.Length} durations for {segments.Count} padded tokens.");
             }
 
-            var vowelIds = Enumerable.Range(0, phrase.phones.Length)
-                .Where(i => isVowel(phrase.phones[i].phoneme))
+            var vowelIds = Enumerable.Range(0, segments.Count)
+                .Where(i => segments[i].PhoneIndex >= 0 && isVowel(segments[i].Phoneme))
                 .ToArray();
             if (vowelIds.Length == 0) {
-                vowelIds = new int[] { phrase.phones.Length - 1 };
+                vowelIds = new int[] { segments.Count - 2 };
             }
 
+            // Vowel indexes are in segment space (phones shifted by +1 for
+            // the head "SP"), hence no +1 on the first word. The tail SP is its own
+            // word in the .ds format, so do not merge it into the last vowel group.
+            int tailIndex = segments.Count - 1;
             var wordDiv = vowelIds.Zip(vowelIds.Skip(1), (a, b) => (Int64)(b - a))
-                .Prepend(vowelIds[0] + 1)
-                .Append(phrase.phones.Length - vowelIds[^1] + 1)
+                .Prepend((Int64)vowelIds[0])
+                .Append((Int64)(tailIndex - vowelIds[^1]))
+                .Append(1L)
                 .ToArray();
 
             if (wordDiv.Any(d => d <= 0)) {

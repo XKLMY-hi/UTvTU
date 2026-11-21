@@ -604,7 +604,11 @@ namespace OpenUtau.Core.Render {
             engine.PreRenderProject(ref preRenderCancellation);
         }
 
-        private static CancellationTokenSource preRenderCancellation = new CancellationTokenSource();
+        /// <summary>协作取消进行中的后台预渲染，返回是否取消了一个活跃任务。</summary>
+        public static bool CancelPreRender() =>
+            RenderCancellationLease.TryRetire(ref preRenderCancellation);
+
+        private static CancellationTokenSource preRenderCancellation = null;
 
         /// <summary>播放渲染：同步建链 → 等批 1 完成即返回 master。null = 被新周期取消。</summary>
         public static Tuple<MasterAdapter, List<Fader>>? RenderProject(

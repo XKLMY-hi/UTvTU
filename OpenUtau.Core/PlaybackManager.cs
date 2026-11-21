@@ -546,6 +546,8 @@ namespace OpenUtau.Core {
             faders = null;
             // 安全点：输出已停 + 回调已 drain，可释放延迟销毁的 VST handle
             Vst.VstPluginManager.Inst.TryFlushAllPendingDispose();
+            // A pass deferred while playback was active/paused has nothing to protect any more.
+            RunDeferredPreRender();
         }
 
         public void PausePlayback() {
@@ -846,9 +848,72 @@ namespace OpenUtau.Core {
             });
         }
 
+        // Interactive ONNX edits share the render lane's session (and DirectML) lock, so a
+        // pre-render pass in flight makes them wait one audio phrase render per phrase.
+        readonly object preRenderGate = new object();
+        int preRenderHolders;
+        bool preRenderDeferred;
+
+        /// <summary>
+        /// Keeps the background pre-render off the ONNX locks until the token is disposed:
+        /// the pass in flight is cancelled and a fresh one is scheduled on release.
+        /// </summary>
+        public IDisposable HoldPreRender() {
+            lock (preRenderGate) {
+                preRenderHolders++;
+                if (!PlayingMaster && !OutputActive && !IsRecording && RenderEngine.CancelPreRender()) {
+                    preRenderDeferred = true;
+                }
+            }
+            return new PreRenderHold(this);
+        }
+
+        void ReleasePreRender() {
+            lock (preRenderGate) {
+                if (preRenderHolders > 0) {
+                    preRenderHolders--;
+                }
+            }
+            RunDeferredPreRender();
+        }
+
+        void RunDeferredPreRender() {
+            lock (preRenderGate) {
+                if (preRenderHolders > 0 || !preRenderDeferred || OutputActive || PlayingMaster || IsRecording) {
+                    return;
+                }
+                preRenderDeferred = false;
+            }
+            if (Preferences.Default.PreRender) {
+                SchedulePreRender();
+            }
+        }
+
+        sealed class PreRenderHold : IDisposable {
+            PlaybackManager? owner;
+
+            public PreRenderHold(PlaybackManager owner) {
+                this.owner = owner;
+            }
+
+            public void Dispose() {
+                Interlocked.Exchange(ref owner, null)?.ReleasePreRender();
+            }
+        }
+
         void SchedulePreRender() {
-            Log.Information("SchedulePreRender");
-            RenderEngine.PreRender(DocManager.Inst.Project);
+            lock (preRenderGate) {
+                if (preRenderHolders > 0) {
+                    preRenderDeferred = true;
+                    return;
+                }
+                if (OutputActive || PlayingMaster || IsRecording) {
+                    preRenderDeferred = true;
+                    return;
+                }
+                Log.Information("SchedulePreRender");
+                RenderEngine.PreRender(DocManager.Inst.Project);
+            }
         }
 
         #region ICmdSubscriber

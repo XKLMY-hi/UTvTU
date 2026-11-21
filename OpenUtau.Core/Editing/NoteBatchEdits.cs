@@ -456,6 +456,9 @@ namespace OpenUtau.Core.Editing {
         public void RunAsync(
             UProject project, UVoicePart part, List<UNote> selectedNotes, DocManager docManager,
             Action<int, int> setProgressCallback, CancellationToken cancellationToken) {
+            // The pre-render pass holds the same ONNX locks for whole audio phrases, which
+            // would cost one audio render per phrase of this edit.
+            using var preRenderHold = PlaybackManager.Inst.HoldPreRender();
             var renderer = project.tracks[part.trackNo].RendererSettings.Renderer;
             if (renderer == null || !renderer.SupportsRenderPitch) {
                 var e = new MessageCustomizableException(
@@ -469,13 +472,17 @@ namespace OpenUtau.Core.Editing {
             var positions = notes.Select(n => n.position + part.position).ToHashSet();
             var phrases = part.renderPhrases.Where(phrase => phrase.notes.Any(n => positions.Contains(phrase.position + n.position))).ToArray();
             float minPitD = -1200;
+            UExpressionDescriptor? pitdDescriptor = null;
             if (project.expressions.TryGetValue(Format.Ustx.PITD, out var descriptor)) {
                 minPitD = descriptor.min;
+                pitdDescriptor = descriptor;
             }
 
             int finished = 0;
             setProgressCallback(0, phrases.Length);
-            var commands = new List<SetCurveCommand>();
+            // Points, not commands: one command per point meant a publish, a snapshot
+            // invalidation and a validate merge each, tens of thousands of times.
+            var points = new List<(int x, int y, int lastX, int lastY)>();
             var cleared = new List<(int from, int to)>();
             var rendered = new List<(int x, float y)>();
             bool prefersOverride = ExpressionGraph.ExpressionGraphProgram.PrefersPitchOverride(project, project.tracks[part.trackNo]);
@@ -495,7 +502,7 @@ namespace OpenUtau.Core.Editing {
                 }
                 int? lastX = null;
                 int? lastY = null;
-                // TODO: Optimize interpolation and command.
+                // TODO: Optimize interpolation.
                 if (cancellationToken.IsCancellationRequested) break;
                 // Take the first negative tick before start and the first tick after end for each segment;
                 // Reverse traversal, so that when the score slices are too close, priority is given to covering the consonant pitch of the next segment, reducing the impact on vowels.
@@ -517,8 +524,7 @@ namespace OpenUtau.Core.Editing {
                     lastX ??= x;
                     lastY ??= y;
                     if (y > minPitD) {
-                        commands.Add(new SetCurveCommand(
-                            project, part, Format.Ustx.PITD, x, y, lastX.Value, lastY.Value));
+                        points.Add((x, y, lastX.Value, lastY.Value));
                     }
                     lastX = x;
                     lastY = y;
@@ -527,10 +533,26 @@ namespace OpenUtau.Core.Editing {
                 setProgressCallback(finished, phrases.Length);
             }
 
-            if (cancellationToken.IsCancellationRequested) return;
+            if (cancellationToken.IsCancellationRequested || (points.Count == 0 && cleared.Count == 0)) return;
             DocManager.Inst.PostOnUIThread(() => {
                 if (cancellationToken.IsCancellationRequested || !ReferenceEquals(project, docManager.Project) || !project.parts.Contains(part)) return;
-                var all = new List<UCommand>(commands);
+                var all = new List<UCommand>();
+                if (points.Count > 0 && pitdDescriptor != null) {
+                    // Same curve as one command per point, but one undo step and one publish.
+                    // part.curves is only touched here, on the UI thread.
+                    var curve = part.curves.FirstOrDefault(c => c.abbr == Format.Ustx.PITD);
+                    var oldXs = curve?.xs.ToArray();
+                    var oldYs = curve?.ys.ToArray();
+                    var edited = curve?.Clone() ?? new UCurve(pitdDescriptor);
+                    foreach (var (x, y, lastX, lastY) in points) {
+                        edited.Set(x,
+                            (int)Math.Clamp(y, pitdDescriptor.min, pitdDescriptor.max),
+                            lastX,
+                            (int)Math.Clamp(lastY, pitdDescriptor.min, pitdDescriptor.max));
+                    }
+                    all.Add(new MergedSetCurveCommand(project, part, Format.Ustx.PITD,
+                        oldXs, oldYs, edited.xs.ToArray(), edited.ys.ToArray()));
+                }
                 if (cleared.Count > 0 && project.expressions.ContainsKey(Format.Ustx.RPIT)) {
                     var curve = part.maskedCurves.FirstOrDefault(c => c.abbr == Format.Ustx.RPIT)?.Clone() ?? new UMaskedCurve(Format.Ustx.RPIT);
                     foreach (var (from, to) in cleared) curve.Clear(from, to);
@@ -873,6 +895,9 @@ namespace OpenUtau.Core.Editing {
                 return;
             }
 
+            // Same reason as LoadRenderedPitch: the variance runs need the locks the
+            // pre-render pass holds for whole audio phrases.
+            using var preRenderHold = PlaybackManager.Inst.HoldPreRender();
             int finished = 0;
             setProgressCallback(0, part.renderPhrases.Count);
             var curveDict = new Dictionary<string, UCurve?>();

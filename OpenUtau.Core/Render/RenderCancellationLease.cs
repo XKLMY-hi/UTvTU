@@ -29,6 +29,12 @@ namespace OpenUtau.Core.Render {
         public static void Retire(ref CancellationTokenSource slot) =>
             RetireSource(Interlocked.Exchange(ref slot, null));
 
+        public static bool TryRetire(ref CancellationTokenSource slot) {
+            var previous = Interlocked.Exchange(ref slot, null);
+            RetireSource(previous);
+            return previous != null;
+        }
+
         static void RetireSource(CancellationTokenSource previous) {
             if (previous != null) {
                 try {
