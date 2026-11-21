@@ -953,6 +953,11 @@
                   <ComboBox Classes="selectField" ItemsSource="{Binding DefaultRendererOptions}" SelectedItem="{Binding DefaultRenderer}"/>
                 </c:SettingsRow>
                 <Border Classes="rowSeparator"/>
+                <Grid Classes="settingRow" ColumnDefinitions="*,Auto">
+                  <TextBlock Grid.Column="0" Classes="fieldLabel" VerticalAlignment="Center" Text="{DynamicResource prefs.general.sinewhennosinger}"/>
+                  <ToggleSwitch Grid.Column="1" IsChecked="{Binding PlaySineWhenNoSinger}"/>
+                </Grid>
+                <Border Classes="rowSeparator"/>
                 <c:SettingsRow EditorWidth="300">
                   <TextBlock Classes="fieldLabel" Text="{DynamicResource prefs.otoeditor.select}"/>
                   <Border Classes="segmented">

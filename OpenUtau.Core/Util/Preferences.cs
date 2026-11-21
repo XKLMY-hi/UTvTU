@@ -346,6 +346,7 @@ namespace OpenUtau.Core.Util {
             public bool ShowPlaybackNoteBounce = false;
             public EditTool EditTool = new EditTool();
             public bool PlayTone = true;
+            public bool PlaySineWhenNoSinger = true;
             public bool ShowVibrato = true;
             public bool ShowPitch = true;
             public bool ShowFinalPitch = true;

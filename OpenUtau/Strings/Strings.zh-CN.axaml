@@ -1004,6 +1004,7 @@ Syntax: prefix,suffix</system:String>-->
        Preferences keys
        ============================================================ -->
   <system:String x:Key="prefs.general">通用</system:String>
+  <system:String x:Key="prefs.general.sinewhennosinger">未选择歌手时播放正弦波提示音</system:String>
   <system:String x:Key="prefs.paths.singer">歌手路径</system:String>
   <system:String x:Key="prefs.playback.autoscrollmode.off">关</system:String>
   <system:String x:Key="prefs.playback.systemdefault">使用系统默认设备</system:String>
