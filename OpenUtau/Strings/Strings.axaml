@@ -241,6 +241,7 @@ Do you want to continue by splitting at the nearest position after current playh
   <system:String x:Key="languages.en">English</system:String>
   <system:String x:Key="languages.es">Spanish</system:String>
   <system:String x:Key="languages.fil">Filipino</system:String>
+  <system:String x:Key="languages.fi">Finnish</system:String>
   <system:String x:Key="languages.fr">French</system:String>
   <system:String x:Key="languages.invariant">Not translating</system:String>
   <system:String x:Key="languages.it">Italian</system:String>
@@ -251,6 +252,7 @@ Do you want to continue by splitting at the nearest position after current playh
   <system:String x:Key="languages.ru">Russian</system:String>
   <system:String x:Key="languages.th">Thai</system:String>
   <system:String x:Key="languages.tr">Turkish</system:String>
+  <system:String x:Key="languages.uk">Ukrainian</system:String>
   <system:String x:Key="languages.vi">Vietnamese</system:String>
   <system:String x:Key="languages.zh">Chinese</system:String>
   <system:String x:Key="languages.zh-yue">Cantonese</system:String>

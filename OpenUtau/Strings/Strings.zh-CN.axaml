@@ -159,6 +159,7 @@
   <system:String x:Key="languages.en">英语</system:String>
   <system:String x:Key="languages.es">西班牙语</system:String>
   <!--<system:String x:Key="languages.fil">Filipino</system:String>-->
+  <system:String x:Key="languages.fi">芬兰语</system:String>
   <system:String x:Key="languages.fr">法语</system:String>
   <system:String x:Key="languages.invariant">不翻译</system:String>
   <system:String x:Key="languages.it">意大利语</system:String>
@@ -169,6 +170,7 @@
   <system:String x:Key="languages.ru">俄语</system:String>
   <system:String x:Key="languages.th">泰语</system:String>
   <system:String x:Key="languages.tr">土耳其语</system:String>
+  <system:String x:Key="languages.uk">乌克兰语</system:String>
   <system:String x:Key="languages.vi">越南语</system:String>
   <system:String x:Key="languages.zh">中文</system:String>
   <system:String x:Key="languages.zh-yue">中文（粤语）</system:String>

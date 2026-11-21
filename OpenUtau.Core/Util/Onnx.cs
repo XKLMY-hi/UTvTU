@@ -69,8 +69,9 @@ namespace OpenUtau.Core {
             var ortDevices = env.GetEpDevices();
 
             return ortDevices
-                .Where(device => device.EpName.ToLower().Contains("dml"))
+                .Where(device => device.EpName.Contains("dml", StringComparison.OrdinalIgnoreCase))
                 .Select((device, index) => new { index, device })
+                .Where(x => !WindowsGpuDetector.IsIndirectDisplayAdapter(x.device.HardwareDevice.Metadata.Entries))
                 .ToDictionary(x => x.index, x => x.device);
         }
 
@@ -103,11 +104,8 @@ namespace OpenUtau.Core {
                 }};
             }
             List<GpuInfo> gpuList = new List<GpuInfo>();
-            var env = OrtEnv.Instance();
-            var ortDevices = env.GetEpDevices();
-
-            var i = 0;
-            foreach (var device in ortDevices.Where(device => device.EpName.ToLower().Contains("dml"))) {
+            foreach (var entry in devices) {
+                var device = entry.Value;
                 var description = "";
                 foreach (var item in device.HardwareDevice.Metadata.Entries) {
                     if (item.Key.ToLower() == "description") {
@@ -118,9 +116,8 @@ namespace OpenUtau.Core {
                 if (string.IsNullOrEmpty(description)) { // fallback
                     description = $"{device.EpName} {device.HardwareDevice.Vendor} ({device.HardwareDevice.Type})";
                 }
-                devices[i] = device;
                 gpuList.Add(new GpuInfo {
-                    deviceId = i++,
+                    deviceId = entry.Key,
                     description = description
                 });
             }
@@ -146,12 +143,15 @@ namespace OpenUtau.Core {
                 case "DirectML":
                     options.EnableMemoryPattern = false;
                     options.ExecutionMode = ExecutionMode.ORT_SEQUENTIAL;
-                    var d = devices[Preferences.Default.OnnxGpu];
-                    options.AppendExecutionProvider(
-                        OrtEnv.Instance(),
-                        new List<OrtEpDevice> { d },
-                        new Dictionary<string, string> { }
-                     );
+                    if (devices.Count > 0) {
+                        var d = devices.TryGetValue(Preferences.Default.OnnxGpu, out var selected)
+                            ? selected : devices.Values.First();
+                        options.AppendExecutionProvider(
+                            OrtEnv.Instance(),
+                            new List<OrtEpDevice> { d },
+                            new Dictionary<string, string> { }
+                         );
+                    }
                     break;
                 case "CoreML":
                     // Note: MLProgram format has stricter validation and may fail with complex DiffSinger models
