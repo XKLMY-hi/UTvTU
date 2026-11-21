@@ -476,6 +476,7 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="prefs.appearance.theme.dark">暗</system:String>
   <system:String x:Key="prefs.appearance.theme.light">亮</system:String>
   <system:String x:Key="prefs.appearance.trackcolor">在界面上使用音轨颜色</system:String>
+  <system:String x:Key="prefs.appearance.renderbackground">在轨道片段背景中显示渲染进度</system:String>
   <system:String x:Key="prefs.cache">缓存</system:String>
   <system:String x:Key="prefs.cache.clearonquit">退出时清空缓存</system:String>
   <system:String x:Key="prefs.cache.diffsingertensorcache">DiffSinger 张量缓存</system:String>

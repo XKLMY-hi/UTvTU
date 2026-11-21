@@ -442,6 +442,11 @@ namespace OpenUtau.Core.Render {
             if (requests.Length == 0 || cancellation.IsCancellationRequested) {
                 return;
             }
+            foreach (var req in requests) {
+                if (req.phrases.Length > 0) {
+                    RenderNotificationPublisher.Queue(project, cancellation.Token, new RebuildPhraseBlocksNotification(req.part));
+                }
+            }
             var tuples = requests
                 .SelectMany(req => req.phrases
                     .Zip(req.sources, (phrase, source) => Tuple.Create(phrase, source, req)))
@@ -505,6 +510,7 @@ namespace OpenUtau.Core.Render {
                 }
                 source.SetSamples(samples);
                 RenderResultPublisher.Queue(project, request, token);
+                RenderNotificationPublisher.Queue(project, token, new PhraseRenderStateNotification(request.part, phrase, true));
             } catch (OperationCanceledException) when (token.IsCancellationRequested) {
                 // Cancellation is an expected render lifecycle outcome.
             } finally {
@@ -522,6 +528,11 @@ namespace OpenUtau.Core.Render {
             RenderCancellationLease renderLifetime) {
             if (requests.Length == 0 || cancellation.IsCancellationRequested) {
                 return;
+            }
+            foreach (var req in requests) {
+                if (req.phrases.Length > 0) {
+                    RenderNotificationPublisher.Queue(project, cancellation.Token, new RebuildPhraseBlocksNotification(req.part));
+                }
             }
             var allTuples = requests
                 .SelectMany(req => req.phrases

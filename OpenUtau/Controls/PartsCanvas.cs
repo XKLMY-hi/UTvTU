@@ -8,6 +8,7 @@ using Avalonia;
 using Avalonia.Controls;
 using OpenUtau.App.ViewModels;
 using OpenUtau.Core;
+using OpenUtau.Core.Render;
 using OpenUtau.Core.Ustx;
 using ReactiveUI;
 
@@ -27,6 +28,8 @@ namespace OpenUtau.App.Controls {
             TickOffset = tickOffset;
         }
     }
+
+    public class PartRenderBackgroundChangedEvent { }
 
     class PartsCanvas : Canvas, ICmdSubscriber {
         protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
@@ -184,6 +187,10 @@ namespace OpenUtau.App.Controls {
                 .Subscribe(_ => {
                     foreach (var control in partControls.Values) control.InvalidateVisual();
                 });
+            MessageBus.Current.Listen<PartRenderBackgroundChangedEvent>()
+                .Subscribe(_ => {
+                    foreach (var control in partControls.Values) control.InvalidateVisual();
+                });
         }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
@@ -237,6 +244,46 @@ namespace OpenUtau.App.Controls {
             control.Dispose();
             partControls.Remove(part);
             Children.Remove(control);
+        }
+
+        public void HandlePhraseRenderStateEvent(UVoicePart part, int startTick, int endTick, bool rendered) {
+            if (partControls.TryGetValue(part, out var control)) {
+                control.UpdateRenderStatus(startTick, endTick, rendered);
+            }
+        }
+
+        public void HandlePhraseRenderStateEvent(UVoicePart part, RenderPhrase phrase, bool rendered) {
+            if (partControls.TryGetValue(part, out var control)) {
+                control.UpdateRenderStatus(phrase, rendered);
+            }
+        }
+
+        public void HandleRebuildPhraseBlocksEvent(UVoicePart part) {
+            if (partControls.TryGetValue(part, out var control)) {
+                if (control.RebuildPhraseBlocks(part)) {
+                    control.InvalidateVisual();
+                }
+            }
+        }
+
+        public void SetAllRenderPhrases(bool state) {
+            foreach (var control in partControls.Values) {
+                control.SetAllBlocks(state);
+            }
+        }
+
+        public void SetAllRenderPhrases(UTrack track, bool state) {
+            foreach (var (part, control) in partControls) {
+                if (part.trackNo == track.TrackNo) {
+                    control.SetAllBlocks(state);
+                }
+            }
+        }
+
+        public void SetAllRenderPhrases(UVoicePart voicePart, bool state) {
+            if (partControls.TryGetValue(voicePart, out var control)) {
+                control.SetAllBlocks(state);
+            }
         }
 
         void InvalidatePartViewport() {

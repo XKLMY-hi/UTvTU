@@ -271,7 +271,7 @@ namespace OpenUtau.Core {
         /// </summary>
         public void ExecuteCmd(UCommand cmd) {
             if (mainThread != Thread.CurrentThread) {
-                if (!(cmd is ProgressBarNotification)) {
+                if (!(cmd is ProgressBarNotification or PhraseRenderStateNotification or RebuildPhraseBlocksNotification)) {
                     Log.Warning($"{cmd} not on main thread");
                 }
                 if (PostOnUIThread != null) {

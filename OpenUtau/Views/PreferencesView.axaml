@@ -786,6 +786,11 @@
                 </Grid>
                 <Border Classes="rowSeparator"/>
                 <Grid Classes="settingRow" ColumnDefinitions="*,Auto">
+                  <TextBlock Grid.Column="0" Classes="fieldLabel" VerticalAlignment="Center" Text="{DynamicResource prefs.appearance.renderbackground}"/>
+                  <ToggleSwitch Grid.Column="1" IsChecked="{Binding RenderStatusInTrackBar}"/>
+                </Grid>
+                <Border Classes="rowSeparator"/>
+                <Grid Classes="settingRow" ColumnDefinitions="*,Auto">
                   <TextBlock Grid.Column="0" Classes="fieldLabel" VerticalAlignment="Center" Text="{DynamicResource prefs.appearance.showportrait}"/>
                   <ToggleSwitch Grid.Column="1" IsChecked="{Binding ShowPortrait}"/>
                 </Grid>

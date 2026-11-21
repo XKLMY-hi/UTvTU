@@ -120,6 +120,7 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public bool SkipRenderingMutedTracks { get; set; }
         [Reactive] public bool ClearCacheOnQuit { get; set; }
         [Reactive] public bool PlaySineWhenNoSinger { get; set; }
+        [Reactive] public bool RenderStatusInTrackBar { get; set; }
         public List<string> OnnxRunnerOptions { get; set; }
         [Reactive] public string OnnxRunner { get; set; }
         public List<GpuInfo> OnnxGpuOptions { get; set; }
@@ -313,6 +314,7 @@ namespace OpenUtau.App.ViewModels {
                 DefaultSnapCurve = Preferences.Default.DefaultSnapCurve;
                 ClearCacheOnQuit = Preferences.Default.ClearCacheOnQuit;
                 PlaySineWhenNoSinger = Preferences.Default.PlaySineWhenNoSinger;
+                RenderStatusInTrackBar = Preferences.Default.RenderStatusInTrackBar;
 
                 MessageBus.Current.Listen<ThemeEditorStateChangedEvent>()
                     .Subscribe(_ => this.RaisePropertyChanged(nameof(IsThemeEditorOpen))).DisposeWith(subscriptions);
@@ -565,6 +567,13 @@ namespace OpenUtau.App.ViewModels {
                         DocManager.Inst.ExecuteCmd(new ValidateProjectNotification());
                         DocManager.Inst.ExecuteCmd(new PreRenderNotification());
                         MessageBus.Current.SendMessage(new TracksRefreshEvent());
+                    }).DisposeWith(subscriptions);
+                this.WhenAnyValue(vm => vm.RenderStatusInTrackBar)
+                    .Skip(1)
+                    .Subscribe(showStatus => {
+                        Preferences.Default.RenderStatusInTrackBar = showStatus;
+                        Preferences.Save();
+                        MessageBus.Current.SendMessage(new Controls.PartRenderBackgroundChangedEvent());
                     }).DisposeWith(subscriptions);
                 this.WhenAnyValue(vm => vm.ClearCacheOnQuit)
                     .Skip(1)

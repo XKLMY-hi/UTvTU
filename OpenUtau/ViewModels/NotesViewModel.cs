@@ -1054,6 +1054,7 @@ namespace OpenUtau.App.ViewModels {
                 var phrases = Part.renderPhrases.Where(phrase => selectedNotes.Any(note => phrase.notes.Any(rnote => rnote.position == Part.position + note.position - phrase.position && rnote.duration == note.duration)));
                 foreach (var phrase in phrases) {
                     phrase.DeleteCacheFiles();
+                    DocManager.Inst.ExecuteCmd(new PhraseRenderStateNotification(Part, phrase, false));
                 }
                 DocManager.Inst.ExecuteCmd(new ProgressBarNotification(0, ThemeManager.GetString("progress.cachecleared")));
             }

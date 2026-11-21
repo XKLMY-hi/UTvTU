@@ -11,7 +11,9 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using NWaves.Signals;
+using OpenUtau.Core.Render;
 using OpenUtau.Core.Ustx;
+using OpenUtau.Core.Util;
 using ReactiveUI;
 using Serilog;
 
@@ -143,6 +145,7 @@ namespace OpenUtau.App.Controls {
         private List<IDisposable> unbinds = new List<IDisposable>();
         private WriteableBitmap? bitmap;
         private int[] bitmapData;
+        private (RenderPhrase phrase, bool rendered)[] phraseBlocks = [];
 
         public PartControl(UPart part, PartsCanvas canvas) {
             this.part = part;
@@ -233,7 +236,26 @@ namespace OpenUtau.App.Controls {
             var outline = new Pen(colors.Edge, 2);
             double radius = Math.Min(8, Math.Min(clip.Width, clip.Height) / 2);
             using var clipState = context.PushClip(new RoundedRect(clip, radius));
-            context.DrawRectangle(colors.Body, null, clip);
+            if (Preferences.Default.RenderStatusInTrackBar && part is UVoicePart { notes.Count: > 0 }) {
+                using (context.PushOpacity(0.55)) {
+                    context.DrawRectangle(colors.Body, null, clip);
+                }
+                double prevRight = clip.Left;
+                for (int i = 0; i < phraseBlocks.Length; i++) {
+                    var (phrase, rendered) = phraseBlocks[i];
+                    double startX = i == 0 ? clip.Left : prevRight;
+                    double endX = i == phraseBlocks.Length - 1
+                        ? clip.Right
+                        : Math.Clamp((phrase.end - part.position) * tickWidth, startX, clip.Right);
+                    prevRight = endX;
+                    if (rendered && endX > startX) {
+                        var blockRect = new Rect(startX, clip.Top, Math.Min(clip.Right - startX, endX - startX + 0.5), clip.Height);
+                        context.DrawRectangle(colors.Body, null, blockRect);
+                    }
+                }
+            } else {
+                context.DrawRectangle(colors.Body, null, clip);
+            }
 
             // Title and preview share one tonal surface; their reserved spaces stay separate.
             double visibleLeft = Math.Max(9, -Canvas.GetLeft(this) + 9);
@@ -504,6 +526,75 @@ namespace OpenUtau.App.Controls {
             for (var y = y1; y <= y2; ++y) {
                 data[x + width * y] = rgba;
             }
+        }
+
+        internal int PhraseBlockCount => phraseBlocks.Length;
+        internal bool IsPhraseBlockRendered(int index) => phraseBlocks[index].rendered;
+
+        public void UpdateRenderStatus(int startTick, int endTick, bool rendered) {
+            if (startTick > endTick) {
+                Log.Error("StartTick cannot be greater than EndTick in UpdateRenderStatus, update ignored.");
+                return;
+            }
+            bool triggerRender = false;
+            for (var index = 0; index < phraseBlocks.Length; index++) {
+                var phraseBlock = phraseBlocks[index];
+                if (phraseBlock.phrase.end <= startTick || endTick <= phraseBlock.phrase.position) continue;
+                if (phraseBlock.rendered == rendered) continue;
+                phraseBlocks[index] = phraseBlock with { rendered = rendered };
+                triggerRender = true;
+            }
+            if (triggerRender) InvalidateVisual();
+        }
+
+        public void UpdateRenderStatus(RenderPhrase phrase, bool rendered) {
+            for (var i = 0; i < phraseBlocks.Length; i++) {
+                var phraseBlock = phraseBlocks[i];
+                if (phraseBlock.phrase.Equals(phrase)) {
+                    if (phraseBlock.rendered == rendered) return;
+                    phraseBlocks[i] = phraseBlock with { rendered = rendered };
+                    InvalidateVisual();
+                    return;
+                }
+            }
+        }
+
+        public bool RebuildPhraseBlocks(UVoicePart voicePart) {
+            List<(RenderPhrase phrase, bool rendered)> newPhraseBlocks = [];
+            List<RenderPhrase> renderedPhrases = (
+                from phraseBlock
+                in phraseBlocks
+                where phraseBlock.rendered
+                select phraseBlock.phrase)
+                .ToList();
+
+            foreach (var partPhrase in voicePart.renderPhrases) {
+                bool rendered = false;
+                foreach (var renderedPhrase in renderedPhrases) {
+                    if (partPhrase.hash == renderedPhrase.hash) {
+                        rendered = true;
+                        break;
+                    }
+                }
+                newPhraseBlocks.Add((partPhrase, rendered));
+            }
+
+            bool requiresVisualUpdate = newPhraseBlocks.Count != phraseBlocks.Length;
+            if (!requiresVisualUpdate) {
+                for (int i = 0; i < phraseBlocks.Length; i++) {
+                    if (phraseBlocks[i].rendered != newPhraseBlocks[i].rendered) {
+                        requiresVisualUpdate = true;
+                        break;
+                    }
+                }
+            }
+
+            phraseBlocks = newPhraseBlocks.ToArray();
+            return requiresVisualUpdate;
+        }
+
+        public void SetAllBlocks(bool state) {
+            UpdateRenderStatus(part.position, part.End, state);
         }
 
         public void Report(int value) {
