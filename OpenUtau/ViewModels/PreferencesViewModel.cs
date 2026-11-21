@@ -121,6 +121,13 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public bool ClearCacheOnQuit { get; set; }
         [Reactive] public bool PlaySineWhenNoSinger { get; set; }
         [Reactive] public bool RenderStatusInTrackBar { get; set; }
+        [Reactive] public string UiFontPath { get; set; } = string.Empty;
+        [Reactive] public string UiFontFamily { get; set; } = string.Empty;
+        [Reactive] public bool UseUiFontForNotes { get; set; }
+        public List<string> UiFontFamilies { get; private set; } = new();
+        public string UiFontPathDisplay => string.IsNullOrWhiteSpace(UiFontPath)
+            ? ThemeManager.GetString("prefs.appearance.customfont.none")
+            : UiFontPath;
         public List<string> OnnxRunnerOptions { get; set; }
         [Reactive] public string OnnxRunner { get; set; }
         public List<GpuInfo> OnnxGpuOptions { get; set; }
@@ -315,6 +322,10 @@ namespace OpenUtau.App.ViewModels {
                 ClearCacheOnQuit = Preferences.Default.ClearCacheOnQuit;
                 PlaySineWhenNoSinger = Preferences.Default.PlaySineWhenNoSinger;
                 RenderStatusInTrackBar = Preferences.Default.RenderStatusInTrackBar;
+                UiFontPath = Preferences.Default.UiFontPath;
+                UiFontFamily = Preferences.Default.UiFontFamily;
+                UseUiFontForNotes = Preferences.Default.UseUiFontForNotes;
+                RefreshUiFontFamilies();
 
                 MessageBus.Current.Listen<ThemeEditorStateChangedEvent>()
                     .Subscribe(_ => this.RaisePropertyChanged(nameof(IsThemeEditorOpen))).DisposeWith(subscriptions);
@@ -575,6 +586,30 @@ namespace OpenUtau.App.ViewModels {
                         Preferences.Save();
                         MessageBus.Current.SendMessage(new Controls.PartRenderBackgroundChangedEvent());
                     }).DisposeWith(subscriptions);
+                this.WhenAnyValue(vm => vm.UiFontPath)
+                    .Skip(1)
+                    .Subscribe(path => {
+                        Preferences.Default.UiFontPath = UiFontManager.IsSupportedFontPath(path) ? path : string.Empty;
+                        Preferences.Save();
+                        UiFontManager.Apply();
+                        RefreshUiFontFamilies();
+                        this.RaisePropertyChanged(nameof(UiFontPathDisplay));
+                    }).DisposeWith(subscriptions);
+                this.WhenAnyValue(vm => vm.UiFontFamily)
+                    .Skip(1)
+                    .Subscribe(family => {
+                        Preferences.Default.UiFontFamily = family?.Trim() ?? string.Empty;
+                        Preferences.Save();
+                        UiFontManager.Apply();
+                    }).DisposeWith(subscriptions);
+                this.WhenAnyValue(vm => vm.UseUiFontForNotes)
+                    .Skip(1)
+                    .Subscribe(useUiFont => {
+                        Preferences.Default.UseUiFontForNotes = useUiFont;
+                        Preferences.Save();
+                        Controls.TextLayoutCache.Clear();
+                        MessageBus.Current.SendMessage(new NotesRefreshEvent());
+                    }).DisposeWith(subscriptions);
                 this.WhenAnyValue(vm => vm.ClearCacheOnQuit)
                     .Skip(1)
                     .Subscribe(index => {
@@ -721,6 +756,27 @@ namespace OpenUtau.App.ViewModels {
             Preferences.Save();
             ToolsManager.Inst.Initialize();
             this.RaisePropertyChanged(nameof(WinePath));
+        }
+
+        public void SetUiFontPath(string path) {
+            if (IsDisposed) return;
+            UiFontPath = path;
+            UiFontFamily = UiFontManager.GetSuggestedFamilyName(path);
+        }
+
+        public void ResetUiFont() {
+            if (IsDisposed) return;
+            UiFontPath = string.Empty;
+            UiFontFamily = string.Empty;
+        }
+
+        private void RefreshUiFontFamilies() {
+            UiFontFamilies = UiFontManager.GetAvailableFontFamilies();
+            if (!string.IsNullOrWhiteSpace(UiFontFamily)
+                && !UiFontFamilies.Contains(UiFontFamily, StringComparer.OrdinalIgnoreCase)) {
+                UiFontFamilies.Insert(0, UiFontFamily);
+            }
+            this.RaisePropertyChanged(nameof(UiFontFamilies));
         }
 
         public void RefreshThemes() {

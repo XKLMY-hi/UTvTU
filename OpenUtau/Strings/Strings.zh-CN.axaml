@@ -473,6 +473,11 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="prefs.appearance.detachpianoroll">在单独窗口中显示钢琴窗</system:String>
   <system:String x:Key="prefs.appearance.sortorder">歌手名称显示语言</system:String>
   <system:String x:Key="prefs.appearance.theme">主题</system:String>
+  <system:String x:Key="prefs.appearance.customfont">界面字体</system:String>
+  <system:String x:Key="prefs.appearance.customfont.none">默认（HarmonyOS Sans）</system:String>
+  <system:String x:Key="prefs.appearance.customfont.family">字体族</system:String>
+  <system:String x:Key="prefs.appearance.customfont.select">选择 TrueType 或 OpenType 字体文件</system:String>
+  <system:String x:Key="prefs.appearance.customfont.notes">在音符与音素文字中使用界面字体</system:String>
   <system:String x:Key="prefs.appearance.theme.dark">暗</system:String>
   <system:String x:Key="prefs.appearance.theme.light">亮</system:String>
   <system:String x:Key="prefs.appearance.trackcolor">在界面上使用音轨颜色</system:String>

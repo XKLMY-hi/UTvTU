@@ -312,6 +312,20 @@ namespace OpenUtau.App.Views {
 
         private void OnResetSetParamPath(object? sender, RoutedEventArgs e) => ViewModel!.SetSetParamPath(string.Empty);
 
+        private void OnResetUiFont(object? sender, RoutedEventArgs e) => ViewModel?.ResetUiFont();
+
+        private async void OnSelectUiFont(object? sender, RoutedEventArgs e) {
+            if (HostWindow == null) {
+                return;
+            }
+            var session = ViewModel;
+            var path = await FilePicker.OpenFile(HostWindow, "prefs.appearance.customfont.select", FilePicker.FontFiles);
+            if (!ReferenceEquals(session, ViewModel) || session?.IsDisposed != false) return;
+            if (!string.IsNullOrEmpty(path) && UiFontManager.IsSupportedFontPath(path)) {
+                ViewModel!.SetUiFontPath(path!);
+            }
+        }
+
         private void OnResetWinePath(object? sender, RoutedEventArgs e) => ViewModel!.SetWinePath(string.Empty);
 
         private async void OnSelectVLabelerPath(object? sender, RoutedEventArgs e) {

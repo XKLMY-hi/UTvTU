@@ -49,6 +49,9 @@
   <Style Selector="FlyoutPresenter">
     <Setter Property="FontFamily" Value="{DynamicResource PlusFontFamily}"/>
   </Style>
+  <Style Selector="Menu, MenuItem, ComboBox, ComboBoxItem">
+    <Setter Property="FontFamily" Value="{DynamicResource PlusFontFamily}"/>
+  </Style>
   <Style Selector="Menu">
     <Setter Property="Height" Value="24"/>
   </Style>

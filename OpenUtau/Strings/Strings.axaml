@@ -637,6 +637,11 @@ Warning: this option removes custom presets.</system:String>
   <system:String x:Key="prefs.appearance.detachpianoroll">Show piano roll in separate window</system:String>
   <system:String x:Key="prefs.appearance.sortorder">Singer name display language</system:String>
   <system:String x:Key="prefs.appearance.theme">Theme</system:String>
+  <system:String x:Key="prefs.appearance.customfont">UI font</system:String>
+  <system:String x:Key="prefs.appearance.customfont.none">Default (HarmonyOS Sans)</system:String>
+  <system:String x:Key="prefs.appearance.customfont.family">Font family</system:String>
+  <system:String x:Key="prefs.appearance.customfont.select">Select a TrueType or OpenType font</system:String>
+  <system:String x:Key="prefs.appearance.customfont.notes">Use UI font for note text</system:String>
   <system:String x:Key="prefs.appearance.theme.dark">Dark</system:String>
   <system:String x:Key="prefs.appearance.theme.light">Light</system:String>
   <system:String x:Key="prefs.appearance.customtheme.edit.title">Edit Custom Theme</system:String>

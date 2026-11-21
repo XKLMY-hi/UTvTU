@@ -851,6 +851,33 @@
                 <TextBlock Classes="helpText" Text="{DynamicResource prefs.note.restart}"/>
               </StackPanel>
             </Border>
+            <Border Classes="settingsSection">
+              <StackPanel Spacing="0">
+                <TextBlock Classes="sectionTitle" Text="{DynamicResource prefs.appearance.customfont}"/>
+                <Border Classes="folderRow">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Grid.Column="0" Spacing="{DynamicResource Md3Spacing1}" VerticalAlignment="Center">
+                      <TextBlock Classes="fieldLabel" Foreground="{DynamicResource md3.on-surface}" Text="{DynamicResource prefs.appearance.customfont}"/>
+                      <TextBlock FontSize="{DynamicResource Md3TypeLabelSmall}" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource md3.on-surface-variant}" Text="{Binding UiFontPathDisplay}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="{DynamicResource Md3Spacing2}" VerticalAlignment="Center">
+                      <Button Classes="outlinePill" Content="{DynamicResource button.reset}" Click="OnResetUiFont"/>
+                      <Button Classes="outlinePill" Content="{DynamicResource button.select}" Click="OnSelectUiFont"/>
+                    </StackPanel>
+                  </Grid>
+                </Border>
+                <c:SettingsRow>
+                  <TextBlock Classes="fieldLabel" Text="{DynamicResource prefs.appearance.customfont.family}"/>
+                  <ComboBox Classes="selectField" ItemsSource="{Binding UiFontFamilies}" SelectedItem="{Binding UiFontFamily}"/>
+                </c:SettingsRow>
+                <Border Classes="rowSeparator"/>
+                <Grid Classes="settingRow" ColumnDefinitions="*,Auto">
+                  <TextBlock Grid.Column="0" Classes="fieldLabel" VerticalAlignment="Center" Text="{DynamicResource prefs.appearance.customfont.notes}"/>
+                  <ToggleSwitch Grid.Column="1" IsChecked="{Binding UseUiFontForNotes}"/>
+                </Grid>
+                <Border Classes="rowSeparator"/>
+              </StackPanel>
+            </Border>
           </StackPanel>
         </c:AdaptiveColumns>
 

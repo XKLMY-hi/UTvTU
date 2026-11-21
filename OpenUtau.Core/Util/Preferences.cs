@@ -292,6 +292,9 @@ namespace OpenUtau.Core.Util {
             /// <summary>减少界面动效（MD3 动效令牌全部归零；偏好页的开关待偏好页重做时加）。</summary>
             public bool ReduceMotion = false;
             public string ThemeName = "Dark";
+            public string UiFontPath = string.Empty;
+            public string UiFontFamily = string.Empty;
+            public bool UseUiFontForNotes = true;
             /// <summary>MD3 颜色池种子（决定整应用强调色阶；见决定文档 D4。默认 = M3 基线紫）。</summary>
             public uint ThemeSeed = 0xFF6750A4;
             public string ThemeColorSource = "Custom";
