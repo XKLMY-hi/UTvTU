@@ -20,14 +20,16 @@ namespace OpenUtau.Test.App;
 public class SingerPickerTests {
     sealed class Singer : USinger {
         readonly string id;
+        readonly USingerType singerType;
         static int nextLocation;
-        public Singer(string id, bool exists = true) {
-            this.id = id; found = exists;
+        public Singer(string id, bool exists = true, USingerType singerType = USingerType.Classic) {
+            this.id = id; this.singerType = singerType; found = exists;
             Location = "voice/" + id + "/" + System.Threading.Interlocked.Increment(ref nextLocation);
         }
         public override string Id => id;
         public override string Name => "テト " + id;
         public override string Location { get; }
+        public override USingerType SingerType => singerType;
         public override Dictionary<string, string> LocalizedNames => new() { ["en"] = "Teto " + id };
         public override IList<string> SearchTerms => new[] { "Kasane", "重音" };
         public int Loads;
@@ -107,6 +109,37 @@ public class SingerPickerTests {
             vm.Open(); vm.Dispose();
             var before = vm.Rows;
             vm.OnNext(new SingersChangedNotification(), false); Dispatcher.UIThread.RunJobs(); Assert.Same(before, vm.Rows);
+        } finally { window.Close(); }
+    }
+
+    [AvaloniaFact]
+    public void TypeFiltersAndClearSingerWorkInMd3Picker() {
+        var classic = new Singer("c1", true, USingerType.Classic);
+        var ds = new Singer("d1", true, USingerType.DiffSinger);
+        using var singleTypeVm = new SingerPickerViewModel(null, () => new[] { classic }, new List<string>(), new List<string>(), () => { });
+        Assert.False(singleTypeVm.HasTypeFilters);
+        Assert.False(singleTypeVm.CanClearSinger);
+
+        using var vm = new SingerPickerViewModel(classic, () => new[] { classic, ds }, new List<string>(), new List<string>(), () => { });
+        Assert.True(vm.HasTypeFilters);
+        Assert.True(vm.CanClearSinger);
+        Assert.Equal(3, vm.TypeFilters.Count); // All + Classic + DiffSinger
+        vm.SetTypeFilter(USingerType.DiffSinger);
+        Assert.Same(ds, Assert.Single(vm.Rows).Singer);
+        vm.SetTypeFilter(USingerType.DiffSinger); // toggling active filter returns to All
+        Assert.Equal(2, vm.Rows.Count);
+
+        var picker = new SingerPicker { DataContext = vm, Width = 360, Height = 420 };
+        var window = new WindowEx { Content = picker, Width = 400, Height = 460 };
+        int clearCalls = 0;
+        picker.ClearRequested += () => clearCalls++;
+        try {
+            window.Show(); Dispatcher.UIThread.RunJobs();
+            var clearBtn = picker.FindControl<Button>("ClearSingerButton");
+            Assert.NotNull(clearBtn);
+            Assert.True(clearBtn!.IsVisible);
+            clearBtn.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Assert.Equal(1, clearCalls);
         } finally { window.Close(); }
     }
 }

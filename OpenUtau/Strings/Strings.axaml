@@ -68,6 +68,7 @@
   <system:String x:Key="context.note.clearcache">Clear cache of phrase</system:String>
   <system:String x:Key="context.note.copy">Copy note</system:String>
   <system:String x:Key="context.note.delete">Delete note</system:String>
+  <system:String x:Key="context.note.merge">Merge notes</system:String>
   <system:String x:Key="context.note.pasteparameters">Select and paste parameters</system:String>
   <system:String x:Key="context.part.delete">Delete part</system:String>
   <system:String x:Key="context.part.gotofile">View file location</system:String>
@@ -539,6 +540,7 @@ Warning: this option removes custom presets.</system:String>
     Left click to select</system:String>
   <system:String x:Key="pianoroll.tool.curve.pen">Pen Tool
     Left click to draw
+    Hold Shift + Left click to draw (draw horizontal line)
     Right click to reset</system:String>
   <system:String x:Key="pianoroll.tool.curve.line">Line Tool
     Left click to draw (draw straight line)
@@ -892,6 +894,10 @@ General
   <system:String x:Key="tracks.remove">Remove</system:String>
   <system:String x:Key="tracks.rename">Rename track</system:String>
   <system:String x:Key="tracks.selectrenderer">Select Renderer</system:String>
+  <system:String x:Key="tracks.filtertype.all">All</system:String>
+  <system:String x:Key="tracks.filtertype.all.tip">Show all singer types</system:String>
+  <system:String x:Key="tracks.filtertype.only">Show only {0} singers</system:String>
+  <system:String x:Key="tracks.clearsinger">Remove singer</system:String>
   <system:String x:Key="tracks.selectsinger">Select Singer</system:String>
   <system:String x:Key="tracks.singerdefault">(Singer default) </system:String>
   <system:String x:Key="tracks.solo">Solo</system:String>

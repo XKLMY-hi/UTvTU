@@ -97,6 +97,15 @@ namespace OpenUtau.App.Views {
                 valueTip.ShowValueTip();
             }
         }
+        protected bool BeginGestureWithoutCapture(Point point) {
+            ownerPart = vm?.NotesViewModel?.Part;
+            gesture = new DocumentEditGesture(DocManager.Inst.Project, commandNameKey);
+            startPoint = point;
+            if (ShowValueTip) {
+                valueTip.ShowValueTip();
+            }
+            return CanEditGesture;
+        }
         public virtual void End(IPointer pointer, Point point) {
             Cancel();
         }
@@ -505,8 +514,40 @@ namespace OpenUtau.App.Views {
         }
 
         public override void Begin(IPointer pointer, Point point) {
-            var notesVm = vm.NotesViewModel;
             base.Begin(pointer, point);
+            BeginSplit(point);
+        }
+
+        public override void Update(IPointer pointer, Point point) {
+            UpdateSplit(point);
+        }
+
+        /// <summary>
+        /// Starts a keyboard-driven split. Returns false if nothing could be split
+        /// (e.g. the note is too short), in which case no new note was created.
+        /// </summary>
+        public bool BeginKeyboardSplit(Point point) {
+            if (!BeginGestureWithoutCapture(point)) {
+                Cancel();
+                return false;
+            }
+            BeginSplit(point);
+            UpdateSplit(point);
+            return newNote != null;
+        }
+
+        /// <summary>Moves the cut of an ongoing keyboard split to the given point.</summary>
+        public void MoveKeyboardSplit(Point point) {
+            UpdateSplit(point);
+        }
+
+        /// <summary>Ends the keyboard split by closing its edit gesture.</summary>
+        public void EndKeyboardSplit() {
+            Cancel();
+        }
+
+        private void BeginSplit(Point point) {
+            var notesVm = vm.NotesViewModel;
             if (!CanEditGesture) { Cancel(); return; }
             var project = DocManager.Inst.Project;
             var part = notesVm.Part;
@@ -530,7 +571,7 @@ namespace OpenUtau.App.Views {
             ExecuteCmd(new ChangeNoteLyricCommand(part, newNote, NotePresets.Default.SplittedLyric));
         }
 
-        public override void Update(IPointer pointer, Point point) {
+        private void UpdateSplit(Point point) {
             if (!CanEditGesture) { Cancel(); return; }
             var project = DocManager.Inst.Project;
             var notesVm = vm.NotesViewModel;
@@ -748,7 +789,6 @@ namespace OpenUtau.App.Views {
         private Point firstPoint;
         private Point lastPoint;
         private UExpressionDescriptor? descriptor;
-        public bool IsCurve => descriptor?.type is UExpressionType.Curve or UExpressionType.MaskedCurve;
         private UTrack track;
         private double startValue = 0;
         private bool shiftWasHeld = false;

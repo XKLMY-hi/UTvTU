@@ -2,14 +2,44 @@
              xmlns:c="using:OpenUtau.App.Controls" xmlns:vm="using:OpenUtau.App.ViewModels"
              x:Class="OpenUtau.App.Controls.SingerPicker" x:DataType="vm:SingerPickerViewModel"
              MinWidth="240" MaxWidth="400" ClipToBounds="True">
+  <UserControl.Styles>
+    <Style Selector="Button.typeFilterChip">
+      <Setter Property="Height" Value="26"/>
+      <Setter Property="MinHeight" Value="26"/>
+      <Setter Property="Padding" Value="10,0"/>
+      <Setter Property="Margin" Value="0,0,4,4"/>
+      <Setter Property="CornerRadius" Value="13"/>
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="Background" Value="{DynamicResource md3.surface-container-highest}"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-surface-variant}"/>
+    </Style>
+    <Style Selector="Button.typeFilterChip.selected">
+      <Setter Property="Background" Value="{DynamicResource md3.secondary-container}"/>
+      <Setter Property="Foreground" Value="{DynamicResource md3.on-secondary-container}"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+  </UserControl.Styles>
   <Border Background="{DynamicResource md3.surface-container-high}" CornerRadius="20" Padding="12">
-    <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="8">
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="8">
       <StackPanel Spacing="4">
         <TextBlock Text="{DynamicResource tracks.selectsinger}" FontWeight="SemiBold" FontSize="16"/>
         <TextBlock Text="{Binding CurrentName}" IsVisible="{Binding HasCurrent}" TextTrimming="CharacterEllipsis" FontSize="12"/>
       </StackPanel>
       <TextBox Name="SearchBox" Grid.Row="1" Text="{Binding Search, Mode=TwoWay}" PlaceholderText="{DynamicResource singerpicker.search}"/>
-      <Grid Grid.Row="2" MinHeight="64">
+      <ItemsControl Name="TypeFilterBar" Grid.Row="2" ItemsSource="{Binding TypeFilters}" IsVisible="{Binding HasTypeFilters}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate><WrapPanel Orientation="Horizontal"/></ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:SingerTypeFilterOption">
+            <Button Classes="typeFilterChip" Classes.selected="{Binding IsSelected}"
+                    Theme="{StaticResource DawTextButtonTheme}"
+                    Content="{Binding Label}" ToolTip.Tip="{Binding ToolTip}"
+                    Click="TypeFilterClicked"/>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <Grid Grid.Row="3" MinHeight="64">
         <ListBox Name="SingerList" ItemsSource="{Binding Rows}" SelectedItem="{Binding Selected, Mode=TwoWay}"
                  Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" AutoScrollToSelectedItem="True">
           <ListBox.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel/></ItemsPanelTemplate></ListBox.ItemsPanel>
@@ -33,8 +63,14 @@
         </ListBox>
         <TextBlock IsVisible="{Binding IsEmpty}" Text="{DynamicResource singerpicker.empty}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
       </Grid>
-      <Button Grid.Row="3" Theme="{StaticResource DawTextButtonTheme}" HorizontalAlignment="Stretch"
-              Content="{DynamicResource singerpicker.manage}" Click="ManageClicked"/>
+      <Grid Grid.Row="4" ColumnDefinitions="*,Auto" ColumnSpacing="6">
+        <Button Grid.Column="0" Theme="{StaticResource DawTextButtonTheme}" HorizontalAlignment="Stretch"
+                Content="{DynamicResource singerpicker.manage}" Click="ManageClicked"/>
+        <Button Name="ClearSingerButton" Grid.Column="1" Theme="{StaticResource DawTextButtonTheme}"
+                IsVisible="{Binding CanClearSinger}"
+                Content="{DynamicResource tracks.clearsinger}" ToolTip.Tip="{DynamicResource tracks.clearsinger}"
+                Click="ClearClicked"/>
+      </Grid>
     </Grid>
   </Border>
 </UserControl>

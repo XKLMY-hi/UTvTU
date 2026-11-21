@@ -41,6 +41,10 @@ namespace OpenUtau.App.Controls {
         private NoteEditState? editState;
         private Window? inputWindow;
         private Point valueTipPointerPosition;
+        private Control? lastNotesCanvas;
+        private Point lastNotesCanvasPoint;
+        private NoteSplitEditState? keyboardSplitState;
+        private bool splitKeyHeld;
         private bool shouldOpenNotesContextMenu;
 
         private bool isSelectingRange;
@@ -133,6 +137,7 @@ namespace OpenUtau.App.Controls {
         public void CancelActiveInput() {
             FinishNoteEdit();
             FinishKeyboardPlay();
+            ReleaseSplitKey();
             isSelectingRange = false;
             var pointer = timelinePointer;
             var control = timelineControl;
@@ -439,6 +444,8 @@ namespace OpenUtau.App.Controls {
             });
 
             AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
+            AddHandler(KeyUpEvent, OnKeyUp, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
+            AddHandler(LostFocusEvent, (s, e) => ReleaseSplitKey());
 
             this.WhenAnyValue(x => x.ViewModel!.PlaybackViewModel!.PlayPosTick)
                 .Subscribe(tick => {
@@ -765,6 +772,43 @@ namespace OpenUtau.App.Controls {
             dialog.ShowDialog(RootWindow);
         }
 
+        private bool SplitNoteUnderPointer() {
+            if (splitKeyHeld) {
+                return true;
+            }
+            splitKeyHeld = true;
+            var notesVm = ViewModel.NotesViewModel;
+            if (editState != null || notesVm.Part == null
+                || lastNotesCanvas == null || !lastNotesCanvas.IsPointerOver) {
+                return false;
+            }
+            var hit = notesVm.HitTest.HitTestNote(lastNotesCanvasPoint);
+            if (!hit.hitBody || hit.note == null) {
+                return false;
+            }
+            notesVm.DeselectNotes();
+            var state = new NoteSplitEditState(lastNotesCanvas, ViewModel, this, hit.note);
+            if (state.BeginKeyboardSplit(lastNotesCanvasPoint)) {
+                keyboardSplitState = state;
+            } else {
+                state.EndKeyboardSplit();
+            }
+            return true;
+        }
+
+        private void EndKeyboardSplit() {
+            if (keyboardSplitState == null) {
+                return;
+            }
+            keyboardSplitState.EndKeyboardSplit();
+            keyboardSplitState = null;
+        }
+
+        private void ReleaseSplitKey() {
+            splitKeyHeld = false;
+            EndKeyboardSplit();
+        }
+
         private void OnPianoRollFocus(object sender, FocusChangedEventArgs e) {
             var input = e.Source as InputElement;
             if (input is TextBox or ComboBox or ComboBoxItem) {
@@ -905,6 +949,10 @@ namespace OpenUtau.App.Controls {
         }
 
         public void NotesCanvasPointerPressed(object sender, PointerPressedEventArgs args) {
+            if (keyboardSplitState != null) {
+                args.Handled = true;
+                return;
+            }
             LyricBox?.EndEdit();
             if (ViewModel.NotesViewModel.Part == null) {
                 return;
@@ -1152,6 +1200,13 @@ namespace OpenUtau.App.Controls {
                             CommandParameter = hitInfo,
                             InputGesture = new KeyGesture(Key.Delete),
                         });
+                        if (ViewModel.NotesViewModel.Selection.Count > 1) {
+                            ViewModel.NotesContextMenuItems.Add(new MenuItemViewModel() {
+                                Header = ThemeManager.GetString("context.note.merge"),
+                                Command = ReactiveCommand.Create(() => ViewModel.NotesViewModel.MergeSelectedNotes()),
+                                InputGesture = new KeyGesture(Key.U, KeyModifiers.Control),
+                            });
+                        }
                         ViewModel.NotesContextMenuItems.Add(new MenuItemViewModel() {
                             Header = ThemeManager.GetString("context.note.pasteparameters"),
                             Command = ReactiveCommand.Create(() => ViewModel.NotesViewModel.PasteSelectedParams(RootWindow)),
@@ -1205,9 +1260,15 @@ namespace OpenUtau.App.Controls {
         public void NotesCanvasPointerMoved(object sender, PointerEventArgs args) {
             var control = (Control)sender;
             var point = args.GetCurrentPoint(control);
+            lastNotesCanvas = control;
+            lastNotesCanvasPoint = point.Position;
             args.Handled = true;
             if (ValueTipCanvas != null) {
                 valueTipPointerPosition = args.GetCurrentPoint(ValueTipCanvas!).Position;
+            }
+            if (keyboardSplitState != null) {
+                keyboardSplitState.MoveKeyboardSplit(point.Position);
+                return;
             }
             if (editState != null) {
                 editState.altShiftHeld = args.KeyModifiers == (KeyModifiers.Alt | KeyModifiers.Shift);
@@ -1440,8 +1501,9 @@ namespace OpenUtau.App.Controls {
                 valueTipPointerPosition = args.GetCurrentPoint(ValueTipCanvas!).Position;
             }
             if (editState != null) {
+                // Allow straight lines to be drawn by holding down the Shift key, like in illustration software
                 editState.ctrlShiftHeld = args.KeyModifiers != KeyModifiers.Shift && ViewModel.CurveViewModel.CurveTool == CurveTools.CurveLineTool;
-                editState.shiftHeld = args.KeyModifiers == KeyModifiers.Shift && (ViewModel.CurveViewModel.CurveTool == CurveTools.CurveLineTool || (editState is ExpSetValueState exp && !exp.IsCurve));
+                editState.shiftHeld = args.KeyModifiers == KeyModifiers.Shift && (ViewModel.CurveViewModel.CurveTool == CurveTools.CurveLineTool || ViewModel.CurveViewModel.CurveTool == CurveTools.CurvePenTool);
                 editState.Update(point.Pointer, point.Position);
                 if (editState == null) return;
             } else {
@@ -1697,6 +1759,12 @@ namespace OpenUtau.App.Controls {
         }
 
         #endregion
+
+        void OnKeyUp(object? sender, KeyEventArgs args) {
+            if (args.Key == Key.S) {
+                ReleaseSplitKey();
+            }
+        }
 
         void OnKeyDown(object? sender, KeyEventArgs args) {
             var notesVm = ViewModel.NotesViewModel;
@@ -2205,6 +2273,9 @@ namespace OpenUtau.App.Controls {
                         using var edits = new OpenUtau.App.Editing.TrackMixEditSession(track);
                         edits.SetSolo(!track.Solo);
                         return true;
+                    }
+                    if (isNone) {
+                        return SplitNoteUnderPointer();
                     }
                     break;
                 case Key.M:

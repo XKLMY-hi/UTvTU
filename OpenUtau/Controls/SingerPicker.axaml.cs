@@ -12,6 +12,7 @@ namespace OpenUtau.App.Controls;
 
 public partial class SingerPicker : UserControl {
     public event Action<USinger>? Chosen;
+    public event Action? ClearRequested;
     public event Action? CloseRequested;
     public event Action? ManageRequested;
     SingerPickerViewModel? Model => DataContext as SingerPickerViewModel;
@@ -43,5 +44,10 @@ public partial class SingerPicker : UserControl {
         if ((sender as Control)?.DataContext is SingerPickerRow row) Model?.ToggleFavorite(row);
         e.Handled = true;
     }
+    void TypeFilterClicked(object? sender, RoutedEventArgs e) {
+        if ((sender as Control)?.DataContext is SingerTypeFilterOption option) Model?.SetTypeFilter(option.Type);
+        e.Handled = true;
+    }
+    void ClearClicked(object? sender, RoutedEventArgs e) { ClearRequested?.Invoke(); e.Handled = true; }
     void ManageClicked(object? sender, RoutedEventArgs e) { ManageRequested?.Invoke(); e.Handled = true; }
 }

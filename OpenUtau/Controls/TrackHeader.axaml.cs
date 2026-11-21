@@ -212,6 +212,10 @@ namespace OpenUtau.App.Controls {
                     try { ViewModel?.SelectSingerCommand.Execute(singer).Subscribe(); }
                     finally { flyout.Hide(); }
                 };
+                picker.ClearRequested += () => {
+                    try { ViewModel?.SelectSingerCommand.Execute(null!).Subscribe(); }
+                    finally { flyout.Hide(); }
+                };
                 picker.CloseRequested += flyout.Hide;
                 picker.ManageRequested += () => {
                     flyout.Hide();
