@@ -1,6 +1,14 @@
-# HANDOVER — 新会话交接（2026-10-24 上游核心整合完成）
+# HANDOVER — 新会话交接（2026-11-21 上游增量整合完成）
 
-## 2026-10-24 上游核心整合完成（优先于下方历史审查）
+## 2026-11-21 上游 34 提交审查与 20 项适用更新全部整合完成（最新，优先于下方）
+
+- 用户明确授权“都加上都加上”。上游从 `a9547895`（`0.1.577.2-alpha`）拉取至 **`08222cb7c48c4ab47faa34a6efc34e2c00898a1e`**（`0.1.577.11-alpha`），34 项提交中 **20 项适用更新已按 UTvTU 架构全部适配落地**，14 项非 Windows / 本地已重构替代 / Crowdin 全量覆盖项跳过。[完整实施与验收](.opencode/plans/upstream-integration-2026-11-21.md)。G 盘工作区、`plus-develop`、`origin` 与 `upstream` 均已核实，`master` 未动；**当前共领先 `origin/plus-develop` 28 个本地提交（含本轮 6 产品 + 1 文档），均尚未推送**。
+- 产品提交：`8d7b7fc5` DirectML 虚拟显卡过滤 + MusicXML 修复 + 西语 VCCV + VoicebankPublisher + 芬兰/乌克兰语音素器；`5e836d63` DiffSinger 词时长/尾 SP/方差截断 + 预渲染挂起 `HoldPreRender` 与单条 `MergedSetCurveCommand` 批量写音高；`15397e81` 无歌手轨道正弦波回退 `SineRenderer` 与设置开关；`fba4a305` 钢琴卷帘 `S` 键悬停分割/右键合并音符/曲线笔 `Shift` 水平线 + MD3 `SingerPicker` 类型筛选与移除歌手；`b1a68ead` 轨道片段乐句级渲染进度条（MD3 半透明底色+已渲染块、高 DPI 缝隙修复、设置开关）；`6bd7c3fa` 自定义 UI 字体 `UiFontManager`（接入 `PlusFontFamily`，保留 HarmonyOS Sans SC 默认与字形回退链）。
+- 构建环境更新：本机 SDK 9 已升至 **9.0.321**，`.dsh/packaging/sdk9/global.json` 已同步更新并完成依赖还原；构建脚本与日志在 `.dsh/upstream-integration-20261121/`。最终 4 项目全量构建全部 0 错（Main 3 既有 AVLN3001 警告，Core 1201 警告，Plugin 583 警告，Test 153 警告）；主程序与测试输出的 `OpenUtau.dll`（`A9D07AEF…`）、`OpenUtau.Core.dll`（`6756DA95…`）、`OpenUtau.Plugin.Builtin.dll`（`418C06CD…`）SHA256 完全一致。
+- 回归验收：**71 项不同轻量用例全绿**（核心 35 项 + UI/应用 36 项，覆盖新增的 `WindowsGpuDetectorTest`、`DiffSingerWordDivTest`、`DiffSingerVarianceDeltaTest`、`PitchWriteEquivalenceTest`、`SineFallbackTest`、`PartRenderProgressTests`、`UiFontManagerTests` 及既有 `MusicXMLTest`/`RenderCancellationLeaseTests`/`PartRedrawScopeTests`/`PreferencesViewTests`/`PreferencesFormAndWelcomeMotionTests`/`SingerPickerTests`/`PitchToolInputTests`/`WorkspacePageLayoutTests`）。
+- 标准 Debug exe `OpenUtau/bin/Debug/net8.0-windows/OpenUtau.exe` 已更新，**尚未启动本轮程序**；未自截图、未做真实声库/GPU 压力测试、未重打正式安装器、未推送 GitHub。下一步建议：用户实机启动验收新功能与观感 → 推送 `plus-develop` 备份 → 按需打包发版。
+
+## 2026-10-24 上游核心整合完成（历史记录）
 
 - 用户明确“总之就是开始合并”。本轮已完成：[实施清单](.opencode/plans/upstream-integration-2026-10-24.md)、[验证JSON](.opencode/plans/upstream-integration-2026-10-24/validation.json)。G盘工作区/origin/plus-develop已核，上游固定`a9547895f93e23371949a12d34e98deb5dad0bda`；按本地架构适配而非整体merge，master未动。**没有剩余待实现项，不要重复导入或回到审查。**后续工作仍先核移动盘路径。
 - 产品提交：`27f24adb`小修、`624c1d46`WORLDLINE R1.1+hifisampler、`0aaf0fa0`ENUNU、`b9d3156d`SBP多语言/安全迁移、`46fda37b`Jint脚本/稳定Id/热重载开发者工具、`7e5afe39`完整节点图/后台乐句、`48ac1208`打包ABI/许可/双语文档、`ce877e5d`动态主题节点编辑器/遮罩音高/表达式全链路。均已本地提交，未推送。保留MD3、VST/共享机架、外部采样调度、缓存、离线音频和编辑会话。
